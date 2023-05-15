@@ -13,8 +13,6 @@ end
 
 server_ip = "192.168.56.10"
 server_hostname = "server.k3s.internal"
-load_balancer_additional_ports = "{\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"lumberjack\\\", \\\"port\\\": 5044, \\\"targetPort\\\": 5044, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"tcpjson\\\", \\\"port\\\": 5045, \\\"targetPort\\\": 5045, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"sftp\\\", \\\"port\\\": 8022, \\\"targetPort\\\": 8022, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"appProtocol\\\": \\\"tcp\\\", \\\"name\\\": \\\"opensearch\\\", \\\"port\\\": 9200, \\\"targetPort\\\": 9200, \\\"protocol\\\": \\\"TCP\\\"}"
-deployment_additional_ports = "{\\\"name\\\": \\\"lumberjack\\\", \\\"containerPort\\\": 5044, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"tcpjson\\\", \\\"containerPort\\\": 5045, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"sftp\\\", \\\"containerPort\\\": 8022, \\\"protocol\\\": \\\"TCP\\\"}, {\\\"name\\\": \\\"opensearch\\\", \\\"containerPort\\\": 9200, \\\"protocol\\\": \\\"TCP\\\"}"
 
 agents = { "agent1" => "192.168.56.11",
            "agent2" => "192.168.56.12" }
@@ -113,14 +111,11 @@ server_script_1 = <<-SHELL
     curl -sfL https://get.k3s.io | sh -
     echo "Waiting for k3s to start..."
     sleep 30
-    curl -sSL -o /tmp/deploy_nginx.yaml https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml
-    yq -i '( select(.kind == "Deployment").spec.template.spec.containers[].args[] | select(contains("/nginx-ingress-controller")) | parent ) += ["--enable-ssl-passthrough", "--tcp-services-configmap=ingress-nginx/tcp-services"]' /tmp/deploy_nginx.yaml
-    yq -i "( select(.kind == \\"Deployment\\").spec.template.spec.containers[].args[] | select(contains(\\"/nginx-ingress-controller\\")) | parent | parent | .ports ) += [#{deployment_additional_ports}]" /tmp/deploy_nginx.yaml
-    yq -i "( select(.kind == \\"Service\\" and .spec.type == \\"LoadBalancer\\").spec.ports ) += [#{load_balancer_additional_ports}]" /tmp/deploy_nginx.yaml
-    kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f /tmp/deploy_nginx.yaml
+    bash /tmp/deploy_ingress_nginx.sh -s -t -k /etc/rancher/k3s/k3s.yaml
     until [ -f /var/lib/rancher/k3s/server/token ] && [ -f /etc/rancher/k3s/k3s.yaml ]; do sleep 5; done
     cp -v /var/lib/rancher/k3s/server/token /vagrant_shared
     cp -v /etc/rancher/k3s/k3s.yaml /vagrant_shared
+    rm -f /tmp/deploy_ingress_nginx.sh
   SHELL
 
 agent_script_1 = <<-SHELL
@@ -168,6 +163,7 @@ Vagrant.configure("2") do |config|
     server.vm.provision "shell", inline: server_script_0
     server.vm.provision "shell", inline: common_script_0
     server.vm.provision :reload
+    server.vm.provision "file", source: "./deploy_ingress_nginx.sh", destination: "/tmp/deploy_ingress_nginx.sh"
     server.vm.provision "shell", inline: server_script_1
   end
 

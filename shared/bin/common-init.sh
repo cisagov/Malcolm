@@ -105,6 +105,7 @@ function FixPermissions() {
       echo "$USER_TO_FIX" >> /etc/at.allow
     fi
     chmod 644 /etc/cron.allow /etc/at.allow
+    loginctl enable-linger "$USER_TO_FIX" 2>/dev/null || true
   fi
 }
 

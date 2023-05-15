@@ -47,7 +47,7 @@ spec:
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:23.05.0
+        image: ghcr.io/idaholab/malcolm/logstash-oss:23.05.1
         imagePullPolicy: Always
         stdin: false
         tty: true
