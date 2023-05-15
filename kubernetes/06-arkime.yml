@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/mmguero-dev/malcolm/arkime:development
+        image: ghcr.io/idaholab/malcolm/arkime:23.05.1
         imagePullPolicy: Always
         stdin: false
         tty: true
