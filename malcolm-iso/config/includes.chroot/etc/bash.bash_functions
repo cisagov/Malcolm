@@ -551,7 +551,7 @@ function malcolmmonitor () {
       split-window -v \; \
       split-window -v \; \
       select-pane -t 1 \; \
-      send-keys '~/Malcolm/scripts/logs' C-m \; \
+      send-keys 'pushd ~/Malcolm >/dev/null 2>&1; ~/Malcolm/scripts/logs; popd >/dev/null 2>&1' C-m \; \
       select-pane -t 2 \; \
       send-keys "docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'" C-m \; \
       select-pane -t 3 \; \
