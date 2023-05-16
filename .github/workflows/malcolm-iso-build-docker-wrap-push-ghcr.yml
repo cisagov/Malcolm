@@ -9,6 +9,7 @@ on:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
       - '!shared/bin/configure-capture.py'
+      - '!shared/bin/zeek*'
       - '.trigger_iso_workflow_build'
       - '.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:

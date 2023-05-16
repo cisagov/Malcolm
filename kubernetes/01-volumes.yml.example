@@ -226,7 +226,7 @@ spec:
     storage: 500Gi
   volumeMode: Filesystem
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs
   mountOptions:
@@ -249,7 +249,7 @@ metadata:
 spec:
   storageClassName: nfs
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:
@@ -269,7 +269,7 @@ spec:
     storage: 500Gi
   volumeMode: Filesystem
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: nfs
   mountOptions:
@@ -292,7 +292,7 @@ metadata:
 spec:
   storageClassName: nfs
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Restart Malcolm
-Exec=tilix -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/control.py --restart"
+Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/scripts/control.py --restart"
 Comment=Restart Malcolm
 Terminal=false
 Type=Application

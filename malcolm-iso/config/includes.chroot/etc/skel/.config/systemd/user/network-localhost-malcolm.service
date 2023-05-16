@@ -1,0 +1,12 @@
+[Unit]
+AssertPathExists=%h/Malcolm/filebeat/certs/client.key
+After=network.target
+
+[Service]
+ExecStart=/opt/fluent-bit/bin/fluent-bit -R /etc/fluent-bit/parsers.conf -i exec -p Parser=json -p Command=/usr/local/bin/netdev-json.sh -p Interval_Sec=30 -o tcp://localhost:5045 -p tls=on -p tls.verify=off -p tls.ca_file=%h/Malcolm/filebeat/certs/ca.crt -p tls.crt_file=%h/Malcolm/filebeat/certs/client.crt -p tls.key_file=%h/Malcolm/filebeat/certs/client.key -p format=json_lines -F nest -p Operation=nest -p Nested_under=network -p WildCard='*' -m '*' -F record_modifier -p 'Record=module network' -m '*' -f 1
+Restart=on-failure
+PrivateTmp=false
+NoNewPrivileges=false
+
+[Install]
+WantedBy=default.target
