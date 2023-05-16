@@ -223,6 +223,30 @@ function h() { if [ -z "$1" ]; then history; else history | grep -i "$@"; fi; }
 ########################################################################
 function fname() { find . -iname "*$@*"; }
 
+function findupes() {
+  find . -not -empty -type f -printf "%s\n" 2>/dev/null | \
+    sort -rn | \
+    uniq -d | \
+    xargs -I{} -n1 find -type f -size {}c -print0 | \
+    xargs -0 md5sum | \
+    sort | \
+    uniq -w32 --all-repeated=separate
+}
+
+function sfind() {
+  if [ "$1" ]; then
+    FIND_FOLDER="$1"
+  else
+    FIND_FOLDER="$(pwd)"
+  fi
+  if [ "$2" ]; then
+    FIND_PATTERN="$2"
+  else
+    FIND_PATTERN="*"
+  fi
+  find "$FIND_FOLDER" -type f -iname "$FIND_PATTERN" -print0 | xargs -r -0 ls -la | awk '{system("numfmt -z --to=iec-i --suffix=B --padding=7 "$5) ; out=""; for(i=9;i<=NF;i++){out=out" "$i}; print " KB\t"out}' | sort -h
+}
+
 ########################################################################
 # examine running processes
 ########################################################################
@@ -291,7 +315,36 @@ function arps()
 
 function portping()
 {
-  python <<<"import socket; socket.setdefaulttimeout(1); socket.socket().connect(('$1', $2))" 2> /dev/null && echo OPEN || echo CLOSED;
+  CONN_TIMEOUT=5
+  if [[ -n "$BASH_VERSION" ]] && [[ $LINUX ]]; then
+    # use /dev/tcp
+    timeout $CONN_TIMEOUT bash -c "cat /dev/null > /dev/tcp/$1/$2" && echo OPEN || echo CLOSED
+  elif command -v python3 >/dev/null 2>&1; then
+    # use python socket library
+    python3 <<<"import socket; socket.setdefaulttimeout($CONN_TIMEOUT); socket.socket().connect(('$1', $2))" 2> /dev/null && echo OPEN || echo CLOSED
+  elif command -v socat >/dev/null 2>&1; then
+    # use socat
+    socat /dev/null TCP4:"$1":"$2",connect-timeout="$CONN_TIMEOUT" >/dev/null 2>&1 && echo OPEN || echo CLOSED
+  elif command -v nc >/dev/null 2>&1; then
+    # use some flavor of netcat
+    if ( nc -h 2>&1 | grep -q 'to somewhere' ); then
+      # traditional
+      ( timeout $((CONN_TIMEOUT+1)) bash -c "cat /dev/null | nc -v -w "$CONN_TIMEOUT" "$1" "$2" 2>&1" || true ) | grep -q 'open$' && echo OPEN || echo CLOSED
+    elif ( nc 2>&1 | grep -q '46CDdFhklNnrStUuvZz' ); then
+      # openbsd
+      timeout $((CONN_TIMEOUT+1)) bash -c "cat /dev/null | nc -w "$CONN_TIMEOUT" "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+    elif ( nc --help 2>&1 | grep -q 'Ncat' ); then
+      # ncat
+      timeout $CONN_TIMEOUT bash -c "cat /dev/null | nc -v --send-only "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+    else
+      echo UNKNOWN
+    fi
+  elif command -v telnet >/dev/null 2>&1; then
+    # use telnet
+    timeout $CONN_TIMEOUT bash -c "echo -e '\x1dclose\x0d' | telnet "$1" "$2" >/dev/null 2>&1" && echo OPEN || echo CLOSED
+  else
+    echo UNKNOWN
+  fi
 }
 
 ########################################################################
@@ -443,7 +496,7 @@ alias dis="docker images | tail -n +2 | cols 1 2 | sed \"s/ /:/\""
 alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
 
 # a slimmed-down stats
-alias dstats="docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}'"
+alias dstats="docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'"
 
 # Execute in existing interactive container, e.g., $dex base /bin/bash
 alias dex="docker exec -i -t"
@@ -498,16 +551,16 @@ function malcolmmonitor () {
       split-window -v \; \
       split-window -v \; \
       select-pane -t 1 \; \
-      send-keys '~/Malcolm/scripts/logs' C-m \; \
+      send-keys 'pushd ~/Malcolm >/dev/null 2>&1; ~/Malcolm/scripts/logs; popd >/dev/null 2>&1' C-m \; \
       select-pane -t 2 \; \
-      send-keys 'dstats' C-m \; \
+      send-keys "docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'" C-m \; \
       select-pane -t 3 \; \
-      send-keys 'while true; do clear; df -h ~/Malcolm/; sleep 60; done' C-m \; \
+      send-keys 'while true; do clear; df -h ~/Malcolm/ | tail -n +2; sleep 60; done' C-m \; \
       select-pane -t 4 \; \
       send-keys 'top' C-m \; \
       split-window -v \; \
       select-pane -t 5 \; \
-      send-keys 'while true; do clear; free -m | head -n 2; sleep 60; done' C-m \; \
+      send-keys 'while true; do clear; free -m | grep ^Mem: | cut -d" " -f2- | sed "s/[[:space:]]\+/,/g" | sed "s/^,//" ; sleep 60; done' C-m \; \
       select-pane -t 6 \; \
       send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker-compose exec -u $(id -u) api curl -sSL 'http://localhost:5000/mapi/agg/event.dataset?from=1970' | python3 -m json.tool | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' | head -n $(( (MAX_HEIGHT / 2) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
       select-pane -t 7 \; \
@@ -519,14 +572,15 @@ function malcolmmonitor () {
       send-keys "while true; do clear; find ~/Malcolm/zeek-logs/extract_files -type f | sed 's@.*/@@' | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -n $(( (MAX_HEIGHT / 3) - 1 )) ; sleep 60; done" C-m \; \
       select-pane -t 9 \; \
       resize-pane -R $(( ($MAX_WIDTH / 2) - 30 )) \; \
+      select-pane -t 1 \; \
+      resize-pane -D 999 \; \
+      resize-pane -U 24 \; \
       select-pane -t 3 \; \
-      resize-pane -D $(( ($MAX_HEIGHT / 4) - 4 )) \; \
+      resize-pane -D 999 \; \
+      resize-pane -U 1 \; \
       select-pane -t 5 \; \
-      resize-pane -D $(( ($MAX_HEIGHT / 4) - 4 )) \; \
-      select-pane -t 7 \; \
-      resize-pane -U $(( ($MAX_HEIGHT / 8) - 4 )) \; \
-      select-pane -t 8 \; \
-      resize-pane -U $(( ($MAX_HEIGHT / 8) - 1 )) \; \
-      select-pane -t 4 \;
+      resize-pane -D 999 \; \
+      resize-pane -U 1 \;
   fi
 }
+

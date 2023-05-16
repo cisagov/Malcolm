@@ -3,6 +3,10 @@
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
+import sys
+
+sys.dont_write_bytecode = True
+
 import argparse
 import errno
 import fileinput
@@ -18,7 +22,6 @@ import shutil
 import signal
 import stat
 import string
-import sys
 import tarfile
 import time
 
@@ -395,17 +398,19 @@ def status():
         else:
             eprint("Failed to display Malcolm status\n")
             eprint("\n".join(out))
-            exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         try:
             PrintNodeStatus()
             print()
+        except Exception as e:
+            if args.debug:
+                eprint(f'Error getting node status: {e}')
+        try:
             PrintPodStatus(namespace=args.namespace)
             print()
         except Exception as e:
             eprint(f'Error getting {args.namespace} status: {e}')
-            exit(-1)
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
