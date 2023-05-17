@@ -1,17 +1,25 @@
 # <a name="KubernetesEKS"></a>Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)
 
+* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
+    - [Prerequisites](#Prerequisites)
+    - [Procedure](#Procedure)
+
 This document outlines the process of setting up a cluster on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services](https://aws.amazon.com/) in preparation for [**Deploying Malcolm with Kubernetes**](kubernetes.md).
 
 This is a work-in-progress document that is still a bit rough around the edges. You'll need to replace things like `cluster-name` and `us-east-1` with the values that are appliable to your cluster. Any feedback is welcome in the [relevant issue](https://github.com/idaholab/Malcolm/issues/194) on GitHub.
 
-## Prerequisites
+## <a name="Prerequisites"></a> Prerequisites
 
 * [aws cli](https://aws.amazon.com/cli/) with functioning access to your AWS infrastructure
 * [eksctl](https://eksctl.io/)
 
-## Procedure
+## <a name="Procedure"></a> Procedure
 
-1. Create a [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:) with subnets in 2 or more availability zones
+1. Create a [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:)
+    * subnets in at least 2 availability zones
+    * tag private subnets with `kubernetes.io/role/internal-elb`: `1`
+    * tag public subnets with `kubernetes.io/role/elb`: `1`
+    * enable "auto-assign public IP address" for public subnets
 1. Create a [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
 1. Create an [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
 1. Generate a kubeconfig file to use with Malcolm's control scripts (`malcolmeks.yaml` is used in this example)
@@ -19,15 +27,22 @@ This is a work-in-progress document that is still a bit rough around the edges. 
     aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
     ```
 1. Create a [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
+    * `c4.4xlarge` seems to be a good instance type for Malcolm
+    * set nodes to run on your VPC's public subnets
 1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
     ```bash
     kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
     ```
-1. Deploy ingress-nginx as described [here](kubernetes.md#Ingress). [This script (`deploy_ingress_nginx.sh`)]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) may be helpful in doing so. To [provide external access](https://repost.aws/knowledge-center/eks-access-kubernetes-services) to services in the EKS cluster, pass `-a -e` to `deploy_ingress_nginx.sh`
 1. Associate IAM OIDC provider with cluster
     ```bash
     eksctl utils associate-iam-oidc-provider --region=us-east-1 --cluster=cluster-name --approve
     ```
+1. Deploy the AWS Load Ballancer Controller add-on
+    * See [**Ingress Controllers**](kubernetes.md#Ingress) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
+    * [`99-ingress-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-alb.yml.example) is an example ingress manifest for Malcolm using the ALB controller
+    * [How do I set up the AWS Load Balancer Controller on an Amazon EKS cluster...?](https://repost.aws/knowledge-center/eks-alb-ingress-controller-fargate)
+    * [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
+    * [Application load balancing on Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html)
 1. [deploy Amazon EFS CSI driver](https://docs.aws.amazon.com/eks/latest/userguide/efs-csi.html)
     * review **Prerequisites**
     * follow steps for **Create an IAM policy and role**
@@ -257,7 +272,7 @@ This is a work-in-progress document that is still a bit rough around the edges. 
       storageClassName: efs-sc
       csi:
         driver: efs.csi.aws.com
-        volumeHandle: fs-02997421cdc55b8e4::fsap-runtime-logs
+        volumeHandle: fs-FILESYSTEMID::fsap-runtime-logs
 
     ---
     apiVersion: v1

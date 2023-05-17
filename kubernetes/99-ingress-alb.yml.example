@@ -1,0 +1,54 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: malcolm-ingress-https
+  namespace: malcolm
+  annotations:
+    alb.ingress.kubernetes.io/group.name: "malcolm-ingress-group"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/ip-address-type: "ipv4"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-proxy
+            port:
+              number: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: malcolm-ingress-opensearch
+  namespace: malcolm
+  annotations:
+    alb.ingress.kubernetes.io/group.name: "malcolm-ingress-group"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/ip-address-type: "ipv4"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 9200}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "9200"
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-proxy
+            port:
+              number: 9200
