@@ -16,21 +16,21 @@ This is a work-in-progress document that is still a bit rough around the edges. 
 
 ## <a name="Procedure"></a> Procedure
 
-1. Create a [VPC](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:)
+1. Create a [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
     * subnets in at least 2 availability zones
     * tag private subnets with `kubernetes.io/role/internal-elb`: `1`
     * tag public subnets with `kubernetes.io/role/elb`: `1`
     * enable "auto-assign public IP address" for public subnets
-1. Create a [security group](https://us-east-1.console.aws.amazon.com/vpc/home?region=us-east-1#SecurityGroups:) for VPC
-1. Create an [EKS cluster](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters)
+1. Create a [security group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for the VPC
+1. Create an [Elastic Kubernetes Service (EKS) cluster](https://docs.aws.amazon.com/eks/latest/userguide/clusters.html)
 1. Generate a kubeconfig file to use with Malcolm's control scripts (`malcolmeks.yaml` is used in this example)
     ```bash
     aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
     ```
-1. Create a [node group](https://us-east-1.console.aws.amazon.com/eks/home?region=us-east-1#/clusters/cluster-name/add-node-group)
-    * `c4.4xlarge` seems to be a good instance type for Malcolm
-    * set nodes to run on your VPC's public subnets
-1. [Deploy](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) `metrics-server`
+1. Create a [node group](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
+    * `c4.4xlarge` seems to be a good instance type for Malcolm, but your needs may vary (see [recommended system requirements](system-requirements.md#SystemRequirements) for Malcolm)
+    * set the nodes to run on your VPC's public subnets
+1. [Deploy `metrics-server`](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) 
     ```bash
     kubectl --kubeconfig=malcolmeks.yaml apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
     ```
@@ -40,7 +40,7 @@ This is a work-in-progress document that is still a bit rough around the edges. 
     ```
 1. Deploy the AWS Load Ballancer Controller add-on
     * See [**Ingress Controllers**](kubernetes.md#Ingress) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
-    * [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) is an example ingress manifest for Malcolm using the ALB controller
+    * [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) is an example ingress manifest for Malcolm using the ALB controller
     * You **must** set `type: LoadBalancer` for the `nginx-proxy` service in [`98-nginx-proxy.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/98-nginx-proxy.yml)
     * [How do I set up the AWS Load Balancer Controller on an Amazon EKS cluster...?](https://repost.aws/knowledge-center/eks-alb-ingress-controller-fargate)
     * [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
@@ -50,8 +50,8 @@ This is a work-in-progress document that is still a bit rough around the edges. 
     * follow steps for **Create an IAM policy and role**
     * follow steps for **Install the Amazon EFS driver**
     * follow steps for **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
-1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html) for initializing the directory structure on the EFS filesystem (this can be a very small instance, e.g., t2.micro). Make sure when configuring this instance you give configure to the EFS file system in the storage configuration.
-1. SSH to instance and initialize NFS subdirectories
+1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html) for initializing the directory structure on the EFS filesystem (this can be a very small instance, e.g., `t2.micro`). Make sure when configuring this instance to give access to the EFS file system in the storage configuration.
+1. SSH to the EC2 instance and initialize NFS subdirectories
     - set up malcolm subdirectory
       ```bash
       sudo touch /mnt/efs/fs1/test-file.txt
@@ -113,7 +113,7 @@ This is a work-in-progress document that is still a bit rough around the edges. 
 
 1. Create manifest for persistent volumes and volume claims from the EFS file system ID and access point IDs
     * See [**PersistentVolumeClaim Definitions**](kubernetes.md#PVC) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
-    * [`01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example) is an example manifest you can use as a starting point. Copy `01-volumes-aws-efs.yml.example` to `01-volumes.yml` and replace `fs-FILESYSTEMID` with the EFS file system and each `fsap-…` value with the corresponding access point ID from the previous step.
+    * [`kubernetes/01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example) is an example manifest you can use as a starting point. Copy `01-volumes-aws-efs.yml.example` to `01-volumes.yml` and replace `fs-FILESYSTEMID` with the EFS file system and each `fsap-…` value with the corresponding access point ID from the previous step.
 1. Finish [configuring](kubernetes.md#Config) and [start](kubernetes.md#Running) Malcolm as described in [**Deploying Malcolm with Kubernetes**](kubernetes.md)
 
 ## <a name="AWSAttribution"></a> Attribution
