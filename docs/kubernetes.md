@@ -1,4 +1,4 @@
-K8s# <a name="Kubernetes"></a>Deploying Malcolm with Kubernetes
+# <a name="Kubernetes"></a>Deploying Malcolm with Kubernetes
 
 * [Deploying Malcolm with Kubernetes](#Kubernetes)
     - [System](#System)
