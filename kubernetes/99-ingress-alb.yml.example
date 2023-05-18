@@ -10,13 +10,18 @@ metadata:
     alb.ingress.kubernetes.io/target-type: "ip"
     alb.ingress.kubernetes.io/ip-address-type: "ipv4"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: "443"
     alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
     alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region-code:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
 spec:
   ingressClassName: alb
   rules:
-  - http:
+  - host: "malcolm.example.org"
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -37,13 +42,18 @@ metadata:
     alb.ingress.kubernetes.io/target-type: "ip"
     alb.ingress.kubernetes.io/ip-address-type: "ipv4"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 9200}]'
-    alb.ingress.kubernetes.io/ssl-redirect: "9200"
     alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
     alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region-code:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "180"
 spec:
   ingressClassName: alb
   rules:
-  - http:
+  - host: "malcolm.example.org"
+    http:
       paths:
       - path: /
         pathType: Prefix

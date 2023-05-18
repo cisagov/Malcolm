@@ -363,4 +363,4 @@ This is a work-in-progress document that is still a bit rough around the edges. 
           storage: 500Gi
       volumeName: opensearch-backup-volume
     ```
-1. Finish [configuring](kubernetes.md#Config) and [configuring](kubernetes.md#Running) Malcolm as described in [**Deploying Malcolm with Kubernetes**](kubernetes.md)
+1. Finish [configuring](kubernetes.md#Config) and [start](kubernetes.md#Running) Malcolm as described in [**Deploying Malcolm with Kubernetes**](kubernetes.md)
