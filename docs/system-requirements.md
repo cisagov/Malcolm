@@ -1,6 +1,6 @@
 # <a name="SystemRequirements"></a>Recommended system requirements
 
-Malcolm runs on top of [Docker](https://www.docker.com/) which runs on recent releases of Linux, Apple macOS and Microsoft Windows 10.
+Malcolm runs on top of [Docker](https://www.docker.com/) which runs on recent releases of Linux, Apple [macOS](host-config-macos.md#HostSystemConfigMac) and [Microsoft Windows](host-config-windows.md#HostSystemConfigWindows) 10 and up. Malcolm can also be deployed in the cloud [with Kubernetes](kubernetes.md#Kubernetes).
 
 To quote the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/guide/current/hardware.html), "If there is one resource that you will run out of first, it will likely be memory." The same is true for Malcolm: you will want at least 16 gigabytes of RAM to run Malcolm comfortably. For processing large volumes of traffic, I'd recommend at a bare minimum a dedicated server with 16 cores and 16 gigabytes of RAM. Malcolm can run on less, but more is better. You're going to want as much hard drive space as possible, of course, as the amount of PCAP data you're able to analyze and store will be limited by your hard drive.
 
