@@ -23,7 +23,7 @@
 There exist a variety of ingress controllers for Kubernetes suitable for different Kubernetes providers and environments. A few sample manifests for ingress controllers can be found in Malcolm's [`kubernetes`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) directory, prefixed with `99-ingress-…`:
 
 * [`99-ingress-nginx.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) - an example ingress manifest for Malcolm using the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). The Ingress-NGINX controller has been used internally on self-hosted Kubernetes clusters during Malcolm's development and testing.
-* [`99-ingress-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). You may likely wish to use ALB to deploy Malcolm on Amazon Elastic Kubernetes Service (EKS).
+* [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). You may likely wish to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS).
 
 Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` files to `99-ingress.yml` as a starting point to define your ingress or define your own ingress manifest file and save it as `99-ingress.yml`.
 
@@ -239,7 +239,7 @@ Malcolm requires persistent [storage](https://kubernetes.io/docs/concepts/storag
 * `suricata-claim` - storage for Suricata logs
 * `zeek-claim` - storage for Zeek logs and files extracted by Zeek
 
-An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined in the [kubernetes/01-volumes.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes.yml.example) manifest file. Before [running](#Running) Malcolm, copy the `01-volumes.yml.example` file to `01-volumes.yml` and modify (or replace) its contents to define your PersistentVolumeClaim objects.
+An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined using NFS can be found in the [kubernetes/01-volumes-nfs.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-nfs.yml.example) manifest file. Before [running](#Running) Malcolm, copy the `01-volumes-nfs.yml.example` file to `01-volumes.yml` and modify (or replace) its contents to define your PersistentVolumeClaim objects.
 
 If you attempt to start Malcolm without these PersistentVolumeClaims defined in a YAML file in Malcolm's `./kubernetes/` directory, you'll get an error like this:
 
@@ -469,11 +469,11 @@ Transfer self-signed client certificates to a remote log forwarder? (y/N): n
 
 ```
 
-Next, copy `./kubernetes/01-volumes.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.
+Next, copy `./kubernetes/01-volumes-nfs.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.
 
 ```
-$ cp -v ./kubernetes/01-volumes.yml.example ./kubernetes/01-volumes.yml
-'./kubernetes/01-volumes.yml.example' -> './kubernetes/01-volumes.yml'
+$ cp -v ./kubernetes/01-volumes-nfs.yml.example ./kubernetes/01-volumes.yml
+'./kubernetes/01-volumes-nfs.yml.example' -> './kubernetes/01-volumes.yml'
 
 $ vi ./kubernetes/01-volumes.yml
 …
