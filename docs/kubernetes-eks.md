@@ -9,10 +9,13 @@ This document outlines the process of setting up a cluster on [Amazon Elastic Ku
 
 This is a work-in-progress document that is still a bit rough around the edges. You'll need to replace things like `cluster-name` and `us-east-1` with the values that are appliable to your cluster. Any feedback is welcome in the [relevant issue](https://github.com/idaholab/Malcolm/issues/194) on GitHub.
 
+This document assumes you have good working knowledge of Amazon Web Services (AWS) and Amazon Elastic Kubernetes Service (EKS). Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
+) and the [EKS Workshop](https://www.eksworkshop.com/).
+
 ## <a name="Prerequisites"></a> Prerequisites
 
-* [aws cli](https://aws.amazon.com/cli/) with functioning access to your AWS infrastructure
-* [eksctl](https://eksctl.io/)
+* [aws cli](https://aws.amazon.com/cli/) - the AWS Command Line Interface with functioning access to your AWS infrastructure
+* [eksctl](https://eksctl.io/) - the official CLI for Amazon EKS
 
 ## <a name="Procedure"></a> Procedure
 

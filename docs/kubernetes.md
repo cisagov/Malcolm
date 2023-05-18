@@ -1,4 +1,4 @@
-# <a name="Kubernetes"></a>Deploying Malcolm with Kubernetes
+K8s# <a name="Kubernetes"></a>Deploying Malcolm with Kubernetes
 
 * [Deploying Malcolm with Kubernetes](#Kubernetes)
     - [System](#System)
@@ -15,6 +15,8 @@
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
 * [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
+
+This document assumes you have good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
 ## <a name="System"></a> System
 
