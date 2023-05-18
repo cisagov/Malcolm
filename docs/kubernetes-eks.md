@@ -44,7 +44,7 @@ This document assumes you have good working knowledge of Amazon Web Services (AW
 1. Deploy the AWS Load Ballancer Controller add-on
     * See [**Ingress Controllers**](kubernetes.md#Ingress) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
     * [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) is an example ingress manifest for Malcolm using the ALB controller for HTTP(S) requests and the NLB controller for TCP connections to Logstash and Filebeat
-    * You **must** set `type: LoadBalancer` for the `nginx-proxy` service in [`98-nginx-proxy.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/98-nginx-proxy.yml)
+    * You must set `type: LoadBalancer` for the `nginx-proxy` service in [`98-nginx-proxy.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/98-nginx-proxy.yml), the `filebeat` service in [`12-filebeat.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/12-filebeat.yml) and the the `logstash` service in [`13-logstash.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/13-logstash.yml)
     * [How do I set up the AWS Load Balancer Controller on an Amazon EKS cluster...?](https://repost.aws/knowledge-center/eks-alb-ingress-controller-fargate)
     * [Installing the AWS Load Balancer Controller add-on](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
     * [Application load balancing on Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html)
