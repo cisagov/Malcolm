@@ -68,6 +68,21 @@ spec:
             name: pcap-monitor-pcap-volume
           - mountPath: "/zeek"
             name: pcap-monitor-zeek-volume
+      initContainers:
+      - name: pcap-monitor-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed,upload"
+        volumeMounts:
+          - name: pcap-monitor-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: pcap-monitor-var-local-catrust-volume
           configMap:

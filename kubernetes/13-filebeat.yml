@@ -81,6 +81,21 @@ spec:
           - name: filebeat-nginx-runtime-logs-volume
             mountPath: /nginx
             subPath: "nginx"
+      initContainers:
+      - name: filebeat-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/runtime-logs:nginx"
+        volumeMounts:
+          - name: filebeat-nginx-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
       volumes:
         - name: filebeat-var-local-catrust-volume
           configMap:
@@ -99,5 +114,4 @@ spec:
             claimName: suricata-claim
         - name: filebeat-nginx-runtime-logs-volume
           persistentVolumeClaim:
-            readOnly: true
             claimName: runtime-logs-claim

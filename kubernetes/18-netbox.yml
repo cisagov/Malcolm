@@ -88,6 +88,21 @@ spec:
           - mountPath: /opt/netbox/netbox/media
             name: netbox-media-volume
             subPath: netbox/media
+      initContainers:
+      - name: netbox-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:netbox/media"
+        volumeMounts:
+          - name: netbox-media-volume
+            mountPath: "/data/config"
       volumes:
         - name: netbox-var-local-catrust-volume
           configMap:

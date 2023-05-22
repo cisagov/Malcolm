@@ -81,6 +81,23 @@ spec:
           - name: arkime-runtime-logs-volume
             mountPath: /opt/arkime/logs
             subPath: "arkime"
+      initContainers:
+      - name: arkime-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed;/data/runtime-logs:arkime"
+        volumeMounts:
+          - name: arkime-pcap-volume
+            mountPath: "/data/pcap"
+          - name: arkime-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:

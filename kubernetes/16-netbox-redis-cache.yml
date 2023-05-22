@@ -34,8 +34,15 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
-        command: ["sh"]
-        args: ["-c", "redis-server --requirepass $(REDIS_PASSWORD)"]
+        command: ["/sbin/tini"]
+        args: ["--",
+               "/usr/local/bin/docker-uid-gid-setup.sh",
+               "/usr/local/bin/service_check_passthrough.sh",
+               "-s",
+               "netbox",
+               "sh",
+               "-c",
+               "redis-server --requirepass $(REDIS_PASSWORD)"]
         ports:
           - name: redis
             protocol: TCP

@@ -67,6 +67,23 @@ spec:
           - name: opensearch-config-persist-volume
             mountPath: /usr/share/opensearch/config/persist
             subPath: "opensearch"
+      initContainers:
+      - name: opensearch-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:opensearch;/data/opensearch:nodes"
+        volumeMounts:
+          - name: opensearch-data-volume
+            mountPath: "/data/opensearch"
+          - name: opensearch-config-persist-volume
+            mountPath: "/data/config"
       volumes:
         - name: opensearch-var-local-catrust-volume
           configMap:

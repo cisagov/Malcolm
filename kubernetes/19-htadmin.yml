@@ -61,6 +61,21 @@ spec:
           - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
+      initContainers:
+      - name: htadmin-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:auth,htadmin"
+        volumeMounts:
+          - name: htadmin-config-volume
+            mountPath: "/data/config"
       volumes:
         - name: htadmin-var-local-catrust-volume
           configMap:

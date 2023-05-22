@@ -54,55 +54,6 @@ This document assumes you have good working knowledge of Amazon Web Services (AW
     * follow steps for **Create an IAM policy and role**
     * follow steps for **Install the Amazon EFS driver**
     * follow steps for **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
-1. [Create and launch an EC2 instance](https://docs.aws.amazon.com/efs/latest/ug/gs-step-one-create-ec2-resources.html) for initializing the directory structure on the EFS filesystem (this can be a very small instance, e.g., `t2.micro`). Make sure when configuring this instance to give access to the EFS file system in the storage configuration.
-1. SSH to the EC2 instance and initialize NFS subdirectories
-    - set up malcolm subdirectory
-      ```bash
-      sudo touch /mnt/efs/fs1/test-file.txt
-      sudo mkdir -p /mnt/efs/fs1/malcolm
-      sudo chown 1000:1000 /mnt/efs/fs1/malcolm
-      ```
-    - `/mnt/efs/fs1/malcolm/init_storage.sh`
-      ```bash
-      #!/bin/bash
-
-      if [ -z "$BASH_VERSION" ]; then
-        echo "Wrong interpreter, please run \"$0\" with bash"
-        exit 1
-      fi
-
-      ENCODING="utf-8"
-
-      RUN_PATH="$(pwd)"
-      [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
-      [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
-      if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
-        echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME"
-        exit 1
-      fi
-      SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
-      pushd "$SCRIPT_PATH" >/dev/null 2>&1
-
-      rm -rf ./opensearch/* ./opensearch-backup/* ./pcap/* ./suricata-logs/* ./zeek-logs/* ./config/netbox/* ./config/zeek/* ./runtime-logs/*
-      mkdir -vp ./config/auth ./config/htadmin ./config/opensearch ./config/logstash ./config/netbox/media ./config/netbox/postgres ./config/netbox/redis ./config/zeek/intel/MISP ./config/zeek/intel/STIX ./opensearch ./opensearch-backup ./pcap/upload ./pcap/processed ./suricata-logs ./zeek-logs/current ./zeek-logs/upload ./zeek-logs/extract_files ./runtime-logs/arkime ./runtime-logs/nginx
-
-      popd >/dev/null 2>&1
-      ```
-      ```bash
-      /mnt/efs/fs1/malcolm/init_storage.sh
-      mkdir: created directory './config/netbox/media'
-      mkdir: created directory './config/netbox/postgres'
-      mkdir: created directory './config/netbox/redis'
-      mkdir: created directory './config/zeek/intel'
-      mkdir: created directory './config/zeek/intel/MISP'
-      mkdir: created directory './config/zeek/intel/STIX'
-      mkdir: created directory './pcap/upload'
-      mkdir: created directory './pcap/processed'
-      mkdir: created directory './zeek-logs/current'
-      mkdir: created directory './zeek-logs/upload'
-      mkdir: created directory './zeek-logs/extract_files'
-      mkdir: created directory './runtime-logs'
-      ```
 1. Set up [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html), and note the **Access point ID**s to put in your YAML in the next step
 
     | name              | mountpoint                 | access point ID        | 

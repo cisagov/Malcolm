@@ -73,6 +73,21 @@ spec:
           - mountPath: "/var/www/upload/server/php/chroot/files"
             name: upload-pcap-volume
             subPath: "upload"
+      initContainers:
+      - name: upload-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:upload"
+        volumeMounts:
+          - name: upload-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: upload-var-local-catrust-volume
           configMap:

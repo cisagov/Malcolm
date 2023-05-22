@@ -111,6 +111,21 @@ spec:
           - name: logstash-config-persist-volume
             mountPath: /usr/share/logstash/config/persist
             subPath: "logstash"
+      initContainers:
+      - name: logstash-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:logstash"
+        volumeMounts:
+          - name: logstash-config-persist-volume
+            mountPath: "/data/config"
       volumes:
         - name: logstash-var-local-catrust-volume
           configMap:

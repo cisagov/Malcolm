@@ -44,6 +44,21 @@ spec:
           - mountPath: "/pcap"
             name: capture-pcap-volume
             subPath: "upload"
+      initContainers:
+      - name: pcap-capture-dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed,upload"
+        volumeMounts:
+          - name: capture-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: capture-var-local-catrust-volume
           configMap:

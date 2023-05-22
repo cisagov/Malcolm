@@ -34,8 +34,16 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
-        command: ["gunicorn"]
-        args: ["--bind", "0:5000", "manage:app"]
+        command: ["/usr/bin/tini"]
+        args: ["--",
+               "/usr/local/bin/docker-uid-gid-setup.sh",
+               "/usr/local/bin/service_check_passthrough.sh",
+               "-s",
+               "api",
+               "gunicorn",
+               "--bind",
+               "0:5000",
+               "manage:app"]
         ports:
           - name: http
             protocol: TCP
