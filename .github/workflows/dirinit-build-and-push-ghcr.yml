@@ -7,7 +7,7 @@ on:
       - development
     paths:
       - 'Dockerfiles/dirinit.Dockerfile'
-      - 'shared/bin/shared/bin/docker-uid-gid-setup.sh'
+      - 'shared/bin/docker-uid-gid-setup.sh'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
