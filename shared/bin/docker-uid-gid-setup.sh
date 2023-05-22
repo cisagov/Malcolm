@@ -88,7 +88,6 @@ fi
 #   For the entry: /data/zeek-logs:current,upload,extract_files/quarantined,extract_files/preserved
 #   If /data/zeek-logs exists, will mkdir -p /data/zeek-logs /data/zeek-logs/upload /data/zeek-logs/extract_files/quarantined /data/zeek-logs/extract_files/preserved
 if [[ -n ${PUSER_MKDIR} ]]; then
-  set -x
   IFS=';' read -ra ENTITIES <<< "${PUSER_MKDIR}"
   for ENTITY in "${ENTITIES[@]}"; do
     REQ_DIR="$(echo "${ENTITY}" | cut -d: -f1)"
@@ -96,12 +95,11 @@ if [[ -n ${PUSER_MKDIR} ]]; then
       IFS=',' read -ra MKDIR_DIRS <<< "$(echo "${ENTITY}" | cut -d: -f2-)"
       for NEW_DIR in "${MKDIR_DIRS[@]}"; do
         [[ ! -d "${REQ_DIR}"/"${NEW_DIR}" ]] && \
-          mkdir -v -p "${REQ_DIR}"/"${NEW_DIR}" 2>/dev/null && \
-          ( ( [[ -n ${PUID} ]] && chown -v -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -v -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
+          mkdir -p "${REQ_DIR}"/"${NEW_DIR}" 2>/dev/null && \
+          ( ( [[ -n ${PUID} ]] && chown -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
       done
     fi
   done
-  set +x
 fi
 
 # if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them too
