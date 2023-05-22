@@ -56,15 +56,15 @@ This document assumes you have good working knowledge of Amazon Web Services (AW
     * follow steps for **Create an Amazon [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html)**
 1. Set up [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html), and note the **Access point ID**s to put in your YAML in the next step
 
-    | name              | mountpoint                 | access point ID        | 
-    | ----------------- | -------------------------- | ---------------------- |
-    | config            | /malcolm/config            | fsap-config            |
-    | opensearch        | /malcolm/opensearch        | fsap-opensearch        |
-    | opensearch-backup | /malcolm/opensearch-backup | fsap-opensearch-backup |
-    | pcap              | /malcolm/pcap              | fsap-pcap              |
-    | runtime-logs      | /malcolm/runtime-logs      | fsap-runtime-logs      |
-    | suricata-logs     | /malcolm/suricata-logs     | fsap-suricata-logs     |
-    | zeek-logs         | /malcolm/zeek-logs         | fsap-zeek-logs         |
+    | name              | mountpoint                 | access point ID | 
+    | ----------------- | -------------------------- | ----------------|
+    | config            | /malcolm/config            | fsap-…          |
+    | opensearch        | /malcolm/opensearch        | fsap-…          |
+    | opensearch-backup | /malcolm/opensearch-backup | fsap-…          |
+    | pcap              | /malcolm/pcap              | fsap-…          |
+    | runtime-logs      | /malcolm/runtime-logs      | fsap-…          |
+    | suricata-logs     | /malcolm/suricata-logs     | fsap-…          |
+    | zeek-logs         | /malcolm/zeek-logs         | fsap-…          |
 
 1. Create manifest for persistent volumes and volume claims from the EFS file system ID and access point IDs
     * See [**PersistentVolumeClaim Definitions**](kubernetes.md#PVC) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
