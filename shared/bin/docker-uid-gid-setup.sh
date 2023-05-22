@@ -88,6 +88,7 @@ fi
 #   For the entry: /data/zeek-logs:current,upload,extract_files/quarantined,extract_files/preserved
 #   If /data/zeek-logs exists, will mkdir -p /data/zeek-logs /data/zeek-logs/upload /data/zeek-logs/extract_files/quarantined /data/zeek-logs/extract_files/preserved
 if [[ -n ${PUSER_MKDIR} ]]; then
+  set -x
   IFS=';' read -ra ENTITIES <<< "${PUSER_MKDIR}"
   for ENTITY in "${ENTITIES[@]}"; do
     REQ_DIR="$(echo "${ENTITY}" | cut -d: -f1)"
@@ -100,6 +101,7 @@ if [[ -n ${PUSER_MKDIR} ]]; then
       done
     fi
   done
+  set +x
 fi
 
 # if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them too
