@@ -95,8 +95,8 @@ if [[ -n ${PUSER_MKDIR} ]]; then
       IFS=',' read -ra MKDIR_DIRS <<< "$(echo "${ENTITY}" | cut -d: -f2-)"
       for NEW_DIR in "${MKDIR_DIRS[@]}"; do
         [[ ! -d "${REQ_DIR}"/"${NEW_DIR}" ]] && \
-          mkdir -p "${REQ_DIR}"/"${NEW_DIR}" 2>/dev/null && \
-          ( ( [[ -n ${PUID} ]] && chown -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
+          mkdir -v -p "${REQ_DIR}"/"${NEW_DIR}" 2>/dev/null && \
+          ( ( [[ -n ${PUID} ]] && chown -v -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -v -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
       done
     fi
   done
