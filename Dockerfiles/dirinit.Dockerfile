@@ -35,7 +35,7 @@ WORKDIR /home/${PUSER}
 ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
-            "/bin/sleep", "infinity"]
+            "true"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
