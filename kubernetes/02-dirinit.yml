@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dirinit-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: dirinit-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: dirinit-deployment
+    spec:
+      containers:
+      - name: dirinit-container
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: dirinit-env
+        livenessProbe:
+          exec:
+            command:
+            - pidof
+            - sleep
+          initialDelaySeconds: 60
+          periodSeconds: 300
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: "/data/config"
+            name: dirinit-config-volume
+          - mountPath: "/data/opensearch"
+            name: dirinit-opensearch-volume
+          - mountPath: "/data/opensearch-backup"
+            name: dirinit-opensearch-backup-volume
+          - mountPath: "/data/pcap"
+            name: dirinit-pcap-volume
+          - mountPath: "/data/runtime-logs"
+            name: dirinit-runtime-logs-volume
+          - mountPath: "/data/zeek-logs"
+            name: dirinit-zeek-logs-volume
+          - mountPath: "/data/suricata-logs"
+            name: dirinit-suricata-logs-volume
+      volumes:
+        - name: dirinit-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim
+        - name: dirinit-opensearch-volume
+          persistentVolumeClaim:
+            claimName: opensearch-claim
+        - name: dirinit-opensearch-backup-volume
+          persistentVolumeClaim:
+            claimName: opensearch-backup-claim
+        - name: dirinit-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim
+        - name: dirinit-runtime-logs-volume
+          persistentVolumeClaim:
+            claimName: runtime-logs-claim
+        - name: dirinit-zeek-logs-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: dirinit-suricata-logs-volume
+          persistentVolumeClaim:
+            claimName: suricata-claim
