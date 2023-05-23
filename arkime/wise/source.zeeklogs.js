@@ -2168,7 +2168,8 @@ class MalcolmSource extends WISESource {
 
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_proto", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
+    this.api.addValueAction("malcolm_websearch_proto_v", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
+    this.api.addFieldAction("malcolm_websearch_proto_f", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
 
     // add right-click for searching IANA for services
     var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
@@ -2220,13 +2221,13 @@ class MalcolmSource extends WISESource {
     // add rick-click for opening malcolm agg api
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
-    this.api.addValueAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
-    this.api.addValueAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
-    this.api.addValueAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
-    this.api.addValueAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
-    this.api.addValueAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
-    this.api.addValueAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
-    this.api.addValueAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
+    this.api.addFieldAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
+    this.api.addFieldAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
+    this.api.addFieldAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
+    this.api.addFieldAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
+    this.api.addFieldAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
+    this.api.addFieldAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
+    this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
