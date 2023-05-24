@@ -672,6 +672,7 @@ LOG_IGNORE_REGEX = re.compile(
   | branding.*config\s+is\s+not\s+found\s+or\s+invalid
   | but\s+there\s+are\s+no\s+living\s+connections
   | Connecting\s+to\s+backoff
+  | Cleaning\s+registries\s+for\s+queue:
   | curl.+localhost.+GET\s+/api/status\s+200
   | DEPRECATION
   | descheduling\s+job\s*id
