@@ -5,7 +5,8 @@
 ###################################################################################
 # for setting up a Malcolm demo instance on an Amazon Linux 2 instance from scratch
 #
-# so far I have had the best luck on c4.4xlarge (16 CPU, 30 GB RAM)
+# so far I have had the best luck on c4.4xlarge (16 CPU, 30 GB RAM) and
+# t3a.2xlarge (8 CPU, 32 GB RAM)
 #
 
 ###################################################################################

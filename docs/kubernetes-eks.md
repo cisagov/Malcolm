@@ -31,7 +31,7 @@ This document assumes you have good working knowledge of Amazon Web Services (AW
     aws eks update-kubeconfig --region us-east-1 --name cluster-name --kubeconfig malcolmeks.yaml
     ```
 1. Create a [node group](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html)
-    * `c4.4xlarge` seems to be a good instance type for Malcolm, but your needs may vary (see [recommended system requirements](system-requirements.md#SystemRequirements) for Malcolm)
+    * Both `c4.4xlarge` and `t3a.2xlarge` seem to be good instance types for Malcolm, but your needs may vary (see [recommended system requirements](system-requirements.md#SystemRequirements) for Malcolm)
     * set the nodes to run on your VPC's public subnets
 1. [Deploy `metrics-server`](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html) 
     ```bash
