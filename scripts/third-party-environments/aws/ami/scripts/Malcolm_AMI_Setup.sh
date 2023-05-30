@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+
 # Configure Amazon Linux 2 and install Malcolm
 
 ###############################################################################
