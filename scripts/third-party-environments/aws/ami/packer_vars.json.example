@@ -4,6 +4,7 @@
   "instance_type": "t3a.2xlarge",
   "malcolm_tag": "v23.05.1",
   "malcolm_repo": "idaholab/Malcolm",
+  "malcolm_uid": "1000",
   "ssh_username": "ec2-user",
   "vpc_region": "us-east-1",
   "vpc_tag_name_filter": "",

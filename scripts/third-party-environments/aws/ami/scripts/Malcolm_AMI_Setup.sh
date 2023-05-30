@@ -29,9 +29,9 @@ fi
 # -t tag      (Malcolm tag, e.g., v23.05.1)
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
-MALCOLM_REPO=cisagov/Malcolm
-MALCOLM_TAG=v23.05.1
-[[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)"
+MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
+MALCOLM_TAG=${MALCOLM_TAG:-v23.05.1}
+[[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
     v)
@@ -73,10 +73,6 @@ MALCOLM_URL="https://codeload.github.com/$MALCOLM_REPO/tar.gz/$MALCOLM_TAG"
 # InstallEssentialPackages
 function InstallEssentialPackages {
 
-    # install the package(s) from amazon-linux-extras
-    $SUDO_CMD amazon-linux-extras install -y \
-        python3.8
-
     # install the package(s) from yum
     $SUDO_CMD yum install -y \
         curl \
@@ -85,14 +81,20 @@ function InstallEssentialPackages {
         make \
         openssl
 
-    $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
-    $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
 }
 
 ################################################################################
-# InstallPipPackages - install specific python packages
-function InstallPipPackages {
+# InstallPythonPackages - install specific python packages
+function InstallPythonPackages {
     [[ $EUID -eq 0 ]] && USERFLAG="" || USERFLAG="--user"
+
+    # install the package(s) from amazon-linux-extras
+    $SUDO_CMD amazon-linux-extras install -y \
+        python3.8
+
+    $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
+    $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
+
     $SUDO_CMD /usr/bin/python3.8 -m pip install $USERFLAG -U \
         python-dotenv \
         pythondialog \
@@ -212,8 +214,8 @@ function InstallMalcolm {
 ################################################################################
 # "main"
 
-InstallEssentialPackages
-InstallPipPackages
-InstallDocker
 SystemConfig
+InstallEssentialPackages
+InstallDocker
 InstallMalcolm
+InstallPythonPackages

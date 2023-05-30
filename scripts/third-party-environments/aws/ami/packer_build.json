@@ -7,8 +7,9 @@
     "ssh_username": "${ssh_username}",
     "vpc_tag_name_filter": "${vpc_tag_name_filter}",
     "vpc_subnet_tag_name_filter": "${vpc_subnet_tag_name_filter}",
-    "vpc_security_group_tag_name_filter": "${vpc_security_group_tag_name_filter}"
-
+    "malcolm_repo": "${malcolm_repo}",
+    "malcolm_tag": "${malcolm_tag}",
+    "malcolm_uid": "${malcolm_uid}"
   },
     "builders": [
     {
@@ -53,6 +54,11 @@
   "provisioners": [
     {
      "type": "shell",
+     "environment_vars": [
+       "MALCOLM_REPO={{user `malcolm_repo`}}",
+       "MALCOLM_TAG={{user `malcolm_tag`}}",
+       "MALCOLM_UID={{user `malcolm_uid`}}"
+     ],
      "execute_command": "echo 'packer' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
      "script": "./scripts/Malcolm_AMI_Setup.sh"
   }
