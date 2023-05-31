@@ -71,9 +71,9 @@ The files referenced in this section can be found in [scripts/third-party-enviro
         "Images": [
             {
                 "Architecture": "x86_64",
-                "CreationDate": "2023-05-30T21:14:20.000Z",
+                "CreationDate": "2023-05-31T17:07:42.000Z",
                 "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-                "ImageLocation": "xxxxxxxxxxxx/malcolm-amzn2_v1-2023-05-30T21-12-22Z",
+                "ImageLocation": "xxxxxxxxxxxx/malcolm-v23.05.1-2023-05-31T16-58-00Z",
                 "ImageType": "machine",
                 "Public": false,
                 "OwnerId": "xxxxxxxxxxxx",
@@ -86,7 +86,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                         "Ebs": {
                             "DeleteOnTermination": true,
                             "SnapshotId": "snap-xxxxxxxxxxxxxxxxx",
-                            "VolumeSize": 8,
+                            "VolumeSize": 20,
                             "VolumeType": "gp2",
                             "Encrypted": false
                         }
@@ -94,10 +94,20 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                 ],
                 "EnaSupport": true,
                 "Hypervisor": "xen",
-                "Name": "malcolm-amzn2_v1-2023-05-30T21-12-22Z",
+                "Name": "malcolm-v23.05.1-2023-05-31T16-58-00Z",
                 "RootDeviceName": "/dev/xvda",
                 "RootDeviceType": "ebs",
                 "SriovNetSupport": "simple",
+                "Tags": [
+                    {
+                        "Key": "Malcolm",
+                        "Value": "idaholab/Malcolm/v23.05.1"
+                    },
+                    {
+                        "Key": "source_ami_name",
+                        "Value": "amzn2-ami-kernel-5.10-hvm-2.0.20230515.0-x86_64-gp2"
+                    }
+                ],
                 "VirtualizationType": "hvm"
             }
         ]
