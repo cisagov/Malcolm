@@ -68,7 +68,7 @@
         "source_ami_name": "{{ .SourceAMIName }}",
         "Malcolm": "{{user `malcolm_repo`}}/{{user `malcolm_tag`}}"
       },
-      "ami_name": "malcolm-amzn2_v1-{{isotime | clean_resource_name}}"
+      "ami_name": "malcolm-{{user `malcolm_tag`}}-{{isotime | clean_resource_name}}"
     }
   ],
   "provisioners": [
