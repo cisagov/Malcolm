@@ -103,6 +103,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
     - [Deployment Example](kubernetes.md#Example)
     - [Future Enhancements](kubernetes.md#Future)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
+* [Deploying Malcolm in Other Third-Party Environments](third-party-envs.md#ThirdPartyEnv)
 * [Hardening](hardening.md#Hardening)
     - [Compliance Exceptions](hardening.md#ComplianceExceptions)
 * [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)

@@ -1,15 +1,16 @@
-# <a name="AWSAMI"></a>Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
+# <a name="ThirdPartyEnv"></a>Deploying Malcolm in Other Third-Party Environments
 
-* [Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)](#AWSAMI)
-    - [Prerequisites](#Prerequisites)
-    - [Procedure](#Procedure)
-* [Attribution](#AWSAttribution)
+* [Deploying Malcolm in Other Third-Party Environments](#ThirdPartyEnv)
+    - [Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)](#AWSAMI)
+        + [Prerequisites](#AWSAMIPrerequisites)
+        + [Procedure](#AWSAMIProcedure)
+        + [Attribution](#AWSAttribution)
 
-This document outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI.
+## <a name="AWSAMI"></a>Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
 
-This document assumes you have good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
+This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI. This section assumes you have good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
 
-## <a name="Prerequisites"></a> Prerequisites
+### <a name="AWSAMIPrerequisites"></a> Prerequisites
 
 * [packer](https://www.packer.io/)
     - the packer command-line tool ([download](https://developer.hashicorp.com/packer/downloads))
@@ -20,7 +21,9 @@ This document assumes you have good working knowledge of [Amazon Web Services (A
 * ensure the AWS account you are using for packer has minimal required permissions
     - [Amazon AMI builder](https://developer.hashicorp.com/packer/plugins/builders/amazon)
 
-## <a name="Procedure"></a> Procedure
+### <a name="AWSAMIProcedure"></a> Procedure
+
+The files referenced in this section can be found in [scripts/third-party-environments/aws/ami]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-environments/aws/ami).
 
 1. Copy `packer_vars.json.example` to `packer_vars.json`
     ```bash
@@ -107,6 +110,6 @@ This document assumes you have good working knowledge of [Amazon Web Services (A
 1. Run `~/Malcolm/scripts/auth_setup` to set up authentication for Malcolm
 1. Run `~/Malcolm/scripts/start` to start Malcolm
 
-## <a name="AWSAttribution"></a> Attribution
+### <a name="AWSAttribution"></a> Attribution
 
 Amazon Web Services, AWS, the Powered by AWS logo, and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation. 
