@@ -74,6 +74,7 @@ MALCOLM_URL="https://codeload.github.com/$MALCOLM_REPO/tar.gz/$MALCOLM_TAG"
 ###################################################################################
 # InstallEssentialPackages
 function InstallEssentialPackages {
+    echo "Installing essential packages..." >&2
 
     # install the package(s) from yum
     $SUDO_CMD yum install -y \
@@ -88,6 +89,8 @@ function InstallEssentialPackages {
 ################################################################################
 # InstallPythonPackages - install specific python packages
 function InstallPythonPackages {
+    echo "Installing Python 3.8 and pip packages..." >&2
+
     [[ $EUID -eq 0 ]] && USERFLAG="" || USERFLAG="--user"
 
     # install the package(s) from amazon-linux-extras
@@ -108,11 +111,11 @@ function InstallPythonPackages {
 ################################################################################
 # InstallDocker - install Docker and enable it as a service, and install docker-compose
 function InstallDocker {
+    echo "Installing Docker and docker-compose..." >&2
 
     # install docker, if needed
     if ! command -v docker >/dev/null 2>&1 ; then
 
-        InstallEssentialPackages
         $SUDO_CMD amazon-linux-extras install -y docker
 
         $SUDO_CMD systemctl enable docker
@@ -131,7 +134,7 @@ function InstallDocker {
     # install docker-compose, if needed
     if ! command -v docker-compose >/dev/null 2>&1 ; then
         echo "Installing Docker Compose via curl to /usr/bin..." >&2
-        InstallEssentialPackages
+
         $SUDO_CMD curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
         $SUDO_CMD chmod 755 /usr/bin/docker-compose
         if ! /usr/bin/docker-compose version >/dev/null 2>&1 ; then
@@ -147,6 +150,7 @@ function InstallDocker {
 ################################################################################
 # SystemConfig - configure sysctl parameters, kernel parameters, and limits
 function SystemConfig {
+    echo "Configuring system settings..." >&2
 
     if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
 
@@ -201,12 +205,19 @@ EOT
 ################################################################################
 # InstallMalcolm - clone and configure Malcolm and grab some sample PCAP
 function InstallMalcolm {
+    echo "Downloading and unpacking Malcolm..." >&2
+
     pushd "$MALCOLM_USER_HOME" >/dev/null 2>&1
     mkdir -p ./Malcolm
     curl -fsSL "$MALCOLM_URL" | tar xzf - -C ./Malcolm --strip-components 1
     if [[ -s ./Malcolm/docker-compose-standalone.yml ]]; then
         pushd ./Malcolm >/dev/null 2>&1
         mv docker-compose-standalone.yml docker-compose.yml
+        for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
+        echo "Pulling Docker images..." >&2
+        docker-compose pull >/dev/null 2>&1
+        rm -f ./config/*.env
+        docker images
         popd >/dev/null 2>&1
     fi
     chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP ./Malcolm
@@ -218,6 +229,6 @@ function InstallMalcolm {
 
 SystemConfig
 InstallEssentialPackages
+InstallPythonPackages
 InstallDocker
 InstallMalcolm
-InstallPythonPackages

@@ -1,7 +1,7 @@
 {
   "aws_access_key": "XXXXXXXXXXXXXXXXXXXX",
   "aws_secret_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  "instance_type": "t3a.2xlarge",
+  "instance_type": "t2.micro",
   "malcolm_tag": "v23.05.1",
   "malcolm_repo": "idaholab/Malcolm",
   "malcolm_uid": "1000",

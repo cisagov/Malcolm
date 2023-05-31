@@ -27,7 +27,7 @@ This document assumes you have good working knowledge of [Amazon Web Services (A
     $ cp ./packer_vars.json.example ./packer_vars.json
     ```
 1. Edit `packer_vars.json` 
-    * set `aws_access_key`, `aws_secret_key`, `instance_type`, `vpc_region`, and other variables as needed
+    * set `aws_access_key`, `aws_secret_key`, `vpc_region`, and other variables as needed
 1. Validate the packer configuration
     ```bash
     $ packer validate packer_build.json
