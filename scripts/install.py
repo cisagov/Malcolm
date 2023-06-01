@@ -921,6 +921,17 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=netboxEnabled,
         )
+        netboxLogstashAutoPopulate = (
+            netboxEnabled
+            and InstallerYesOrNo(
+                'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
+                default=False,
+            )
+            and InstallerYesOrNo(
+                "Autopopulating NetBox's inventory is not recommended. Are you sure?",
+                default=False,
+            )
+        )
         netboxSiteName = (
             InstallerAskForString(
                 'Specify default NetBox site name',
@@ -1089,6 +1100,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_NETBOX_ENRICHMENT',
                 TrueOrFalseNoQuote(netboxLogstashEnrich),
+            ),
+            # populate the NetBox inventory based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LOGSTASH_NETBOX_AUTO_POPULATE',
+                TrueOrFalseNoQuote(netboxLogstashAutoPopulate),
             ),
             # logstash pipeline workers
             EnvValue(

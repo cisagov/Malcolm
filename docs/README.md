@@ -84,10 +84,11 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
     - [Asset Interaction Analysis](asset-interaction-analysis.md#AssetInteractionAnalysis)
         + [Enriching network traffic metadata via NetBox lookups](asset-interaction-analysis.md#NetBoxEnrichment)
         + [Compare and highlight discrepancies between NetBox inventory and observed network traffic](asset-interaction-analysis.md#NetBoxCompare)
-        + [Compare NetBox inventory with database of known vulnerabilities](asset-interaction-analysis.md#NetBoxVuln)
         + Populating the NetBox inventory
+            * [Manually](asset-interaction-analysis.md#NetBoxPopManual)
             * [Via passively-gathered network traffic metadata](asset-interaction-analysis.md#NetBoxPopPassive)
             * [Via active discovery](asset-interaction-analysis.md#NetBoxPopActive)
+        + [Compare NetBox inventory with database of known vulnerabilities](asset-interaction-analysis.md#NetBoxVuln)
         + [Backup and restore](asset-interaction-analysis.md#NetBoxBackup)
     - [CyberChef](cyberchef.md#CyberChef)
     - [API](api.md#API)

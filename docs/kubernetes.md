@@ -424,6 +424,8 @@ Should Malcolm run and maintain an instance of NetBox, an infrastructure resourc
 
 Should Malcolm enrich network traffic using NetBox? (Y/n): y
 
+Should Malcolm automatically populate NetBox inventory based on observed network traffic? (/N): n
+
 Specify default NetBox site name: Malcolm
 
 Enable dark mode for OpenSearch Dashboards? (Y/n): y

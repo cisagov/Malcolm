@@ -65,6 +65,18 @@ def register(params)
   end
   @verbose = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_verbose_str.to_s.downcase)
 
+  # autopopulate - either specified directly or read from ENV via autopopulate_env
+  #   false - do not autopopulate netbox inventory when uninventoried devices are observed
+  #   true - autopopulate netbox inventory when uninventoried devices are observed (not recommended)
+  #
+  # For now this is only done for devices/virtual machines, not for services or network segments.
+  _autopopulate_str = params["autopopulate"]
+  _autopopulate_env = params["autopopulate_env"]
+  if _autopopulate_str.nil? and !_autopopulate_env.nil?
+    _autopopulate_str = ENV[_autopopulate_env]
+  end
+  @autopopulate = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_str.to_s.downcase)
+
   # connection URL for netbox
   @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
   @netbox_url_suffix = "/netbox/api"

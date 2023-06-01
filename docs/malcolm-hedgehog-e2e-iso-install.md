@@ -242,6 +242,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Answer **Y** if you would like to use [NetBox](https://netbox.dev/), a suite for modeling and documenting modern networks, to maintain an inventory of your network assets.    
 * Should Malcolm enrich network traffic using NetBox?
     - Answer **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs your NetBox asset inventory.
+* Should Malcolm automatically populate NetBox inventory based on observed network traffic?
+    - Answer **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
 * Specify default NetBox site name
     - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges, of course. This default site name will be used as a query parameter for these enrichment lookups.
 * Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?

@@ -2,10 +2,11 @@
 
 * [Enriching network traffic metadata via NetBox lookups](#NetBoxEnrichment)
 * [Compare and highlight discrepancies between NetBox inventory and observed network traffic](#NetBoxCompare)
-* [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
 * Populating the NetBox inventory
+    - [Manually](#NetBoxPopManual)
     - [Via passively-gathered network traffic metadata](#NetBoxPopPassive)
     - [Via active discovery](#NetBoxPopActive)
+* [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
 * [Backup and restore](#NetBoxBackup)
 
 Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/netbox/](https://localhost/netbox/) if you are connecting locally.
@@ -67,19 +68,43 @@ These uninventoried devices and services are highlighted in two dashboards:
 
 This feature was implemented as described in [idaholab/Malcolm#133](https://github.com/idaholab/Malcolm/issues/133).
 
-## <a name="NetBoxVuln"></a>Compare NetBox inventory with database of known vulnerabilities
+## <a name="NetBoxPopManual"></a>Populate NetBox inventory manually
 
-See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
+While the initial effort of populating NetBox's network segment and device inventory manually is high, it is the preferred method to ensure creation of an accurate model of the intended network design.
+
+The [Populating Data](https://docs.netbox.dev/en/stable/getting-started/populating-data/) section of the [NetBox documentation](https://docs.netbox.dev/en/stable/) outlines mechanisms available to populate data in NetBox, including manual object creation, bulk import, scripting and the NetBox REST API.
+
+The following elements of the NetBox data model are used by Malcolm for Asset Interaction Analysis.
+
+* Network segments
+    - [Virtual Routing and Forwarding (VRF)](https://docs.netbox.dev/en/stable/models/ipam/vrf/)
+    - [Prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)
+* Network Hosts
+    - [Devices](https://docs.netbox.dev/en/stable/models/dcim/device/)
+        + [Device Types](https://docs.netbox.dev/en/stable/models/dcim/devicetype/)
+        + [Device Roles](https://docs.netbox.dev/en/stable/models/dcim/devicerole/)
+        + [Manufacturers](https://docs.netbox.dev/en/stable/models/dcim/manufacturer/)
+    - [Virtual Machines](https://docs.netbox.dev/en/stable/models/virtualization/virtualmachine/)
+    - [IP Addresses](https://docs.netbox.dev/en/stable/models/ipam/ipaddress/)
+        + Can be assigned to devices and virtual machines
+* Other
+    - [Sites](https://docs.netbox.dev/en/stable/models/dcim/site/)
 
 ## <a name="NetBoxPopPassive"></a>Populate NetBox inventory via passively-gathered network traffic metadata
 
-The purpose of an asset management system is to document the intended state of a network: were Malcolm to actively and agressively populate NetBox with the live network state, a network configuration fault could result in an incorrect documented configuration. The Malcolm development team is investigating what data, if any, should automatically flow to NetBox based on traffic observed (enabled via the `NETBOX_CRON` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars)), and what NetBox inventory data could be used, if any, to enrich Malcolm's network traffic metadata. Well-considered suggestions in this area are welcome.
+If the `LOGSTASH_NETBOX_AUTO_POPULATE` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, [uninventoried](#NetBoxCompare) devices observed in known network segments will be automatically created in the NetBox inventory based on the information available.
 
-See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135).
+However, careful consideration should be made before enabling this feature: the purpose of an asset management system is to document the intended state of a network: with Malcolm configured to populate NetBox with the live network state, a network misconfiguration fault could result in an **incorrect documented configuration**.
+
+See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
 
 ## <a name="NetBoxPopActive"></a>Populate NetBox inventory via active discovery
 
 See [idaholab/Malcolm#136](https://github.com/idaholab/Malcolm/issues/136).
+
+## <a name="NetBoxVuln"></a>Compare NetBox inventory with database of known vulnerabilities
+
+See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
 
 ## <a name="NetBoxBackup"></a>Backup and Restore
 
