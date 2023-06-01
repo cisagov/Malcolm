@@ -65,18 +65,6 @@ def register(params)
   end
   @verbose = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_verbose_str.to_s.downcase)
 
-  # autopopulate - either specified directly or read from ENV via autopopulate_env
-  #   false - do not autopopulate netbox inventory when uninventoried devices are observed
-  #   true - autopopulate netbox inventory when uninventoried devices are observed (not recommended)
-  #
-  # For now this is only done for devices/virtual machines, not for services or network segments.
-  _autopopulate_str = params["autopopulate"]
-  _autopopulate_env = params["autopopulate_env"]
-  if _autopopulate_str.nil? and !_autopopulate_env.nil?
-    _autopopulate_str = ENV[_autopopulate_env]
-  end
-  @autopopulate = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_str.to_s.downcase)
-
   # connection URL for netbox
   @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
   @netbox_url_suffix = "/netbox/api"
@@ -91,6 +79,28 @@ def register(params)
 
   # hash of lookup types (from @lookup_type), each of which contains the respective looked-up values
   @cache_hash = LruRedux::ThreadSafeCache.new(params.fetch("lookup_cache_size", 512))
+
+  # these are used for autopopulation only, not lookup/enrichment
+
+  # autopopulate - either specified directly or read from ENV via autopopulate_env
+  #   false - do not autopopulate netbox inventory when uninventoried devices are observed
+  #   true - autopopulate netbox inventory when uninventoried devices are observed (not recommended)
+  #
+  # For now this is only done for devices/virtual machines, not for services or network segments.
+  _autopopulate_str = params["autopopulate"]
+  _autopopulate_env = params["autopopulate_env"]
+  if _autopopulate_str.nil? and !_autopopulate_env.nil?
+    _autopopulate_str = ENV[_autopopulate_env]
+  end
+  @autopopulate = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_str.to_s.downcase)
+
+  # fields for device autopopulation
+  @source_hostname = params["source_hostname"]
+  @source_oui = params["source_oui"]
+  @source_segment = params["source_segment"]
+
+  # end of autopopulation arguments
+
 end
 
 def filter(event)
@@ -108,6 +118,10 @@ def filter(event)
   _lookup_type = @lookup_type
   _lookup_site = @lookup_site
   _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
+  _autopopulate = @autopopulate
+  _autopopulate_hostname = @autopopulate ? @source_hostname : nil
+  _autopopulate_oui = @autopopulate ? @source_oui : nil
+  _autopopulate_segment = @autopopulate ? @source_segment : nil
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
@@ -208,6 +222,9 @@ def filter(event)
                       break unless (_tmp_ip_addresses.length() >= _page_size)
                     else
                       break
+                    end
+                    if _autopopulate and (_query[:offset] == 0)
+                      # TODO: no results found, autopopulate enabled
                     end
                   end
                 rescue Faraday::Error
