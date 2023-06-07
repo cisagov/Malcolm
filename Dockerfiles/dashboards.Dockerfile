@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.7.0"
+ARG OPENSEARCH_VERSION="2.8.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.7.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -68,7 +68,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.7.0
+FROM opensearchproject/opensearch-dashboards:2.8.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -124,10 +124,10 @@ RUN yum upgrade -y && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.6\.0/2\.7\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.6\.0/2\.7\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
