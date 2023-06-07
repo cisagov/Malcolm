@@ -27,6 +27,9 @@ USER root
 RUN amazon-linux-extras install -y epel && \
     yum upgrade -y && \
     yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
+    amazon-linux-extras install -y python3.8 && \
+        ln -s -r -f /usr/bin/python3.8 /usr/bin/python3 && \
+        ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3 && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \
