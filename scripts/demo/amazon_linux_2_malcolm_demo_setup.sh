@@ -303,7 +303,7 @@ function InstallCommonPackages {
 
       # cmake
       if ! type cmake >/dev/null 2>&1; then
-        CMAKE_VERSION=3.22.2
+        CMAKE_VERSION=3.26.4
         curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
         tar xvf cmake-"${CMAKE_VERSION}".tar.gz
         pushd cmake-"${CMAKE_VERSION}" >/dev/null 2>&1
