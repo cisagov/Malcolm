@@ -229,16 +229,49 @@ function InstallMalcolm {
           "$MALCOLM_USER_HOME"/.bash_functions \
           "$MALCOLM_USER_HOME"/.vimrc \
           "$MALCOLM_USER_HOME"/.tmux.conf
-    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_aliases \
-             "$MALCOLM_USER_HOME"/.bash_aliases
-    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_functions \
-             "$MALCOLM_USER_HOME"/.bash_functions
-    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.bashrc \
-             "$MALCOLM_USER_HOME"/.bashrc
-    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.tmux.conf \
-             "$MALCOLM_USER_HOME"/.tmux.conf
-    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.vimrc \
-             "$MALCOLM_USER_HOME"/.vimrc
+    cp "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_aliases \
+       "$MALCOLM_USER_HOME"/.bash_aliases
+    cp "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_functions \
+       "$MALCOLM_USER_HOME"/.bash_functions
+    cp "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.bashrc \
+       "$MALCOLM_USER_HOME"/.bashrc
+    cp "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.tmux.conf \
+       "$MALCOLM_USER_HOME"/.tmux.conf
+    cp "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.vimrc \
+       "$MALCOLM_USER_HOME"/.vimrc
+
+    cat << 'EOF' >> "$MALCOLM_USER_HOME"/.bashrc
+
+# Configure Malcolm on first login
+if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
+    pushd ~/Malcolm >/dev/null 2>&1
+    ./scripts/configure
+    ./scripts/auth_setup
+    popd >/dev/null 2>&1
+    clear
+    cat << 'EOT'
+
+To start, stop, restart, etc. Malcolm:
+  Use the control scripts in the "~/Malcolm/scripts/" directory:
+   - start         (start Malcolm)
+   - stop          (stop Malcolm)
+   - restart       (restart Malcolm)
+   - logs          (monitor Malcolm logs)
+   - wipe          (stop Malcolm and clear its database)
+   - auth_setup    (change authentication-related settings)
+
+A minute or so after starting Malcolm, the following services will be accessible:
+  - Arkime: https://<IP or hostname>/
+  - OpenSearch Dashboards: https://<IP or hostname>/dashboards/
+  - PCAP upload (web): https://<IP or hostname>/upload/
+  - NetBox: https://<IP or hostname>/netbox/
+  - Account management: https://<IP or hostname>/auth/
+  - Documentation: https://<IP or hostname>/readme/
+
+EOT
+fi
+EOF
+
     chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP \
              "$MALCOLM_USER_HOME"/.bashrc \
              "$MALCOLM_USER_HOME"/.bash_aliases \
