@@ -220,8 +220,33 @@ function InstallMalcolm {
         docker images
         popd >/dev/null 2>&1
     fi
-    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP ./Malcolm
     popd >/dev/null 2>&1
+    mkdir -p "$MALCOLM_USER_HOME"/.local/bin \
+             "$MALCOLM_USER_HOME"/.config
+    rm -f "$MALCOLM_USER_HOME"/.bashrc \
+          "$MALCOLM_USER_HOME"/.bash_aliases \
+          "$MALCOLM_USER_HOME"/.bash_functions \
+          "$MALCOLM_USER_HOME"/.vimrc \
+          "$MALCOLM_USER_HOME"/.tmux.conf
+    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_aliases \
+             "$MALCOLM_USER_HOME"/.bash_aliases
+    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_functions \
+             "$MALCOLM_USER_HOME"/.bash_functions
+    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.bashrc \
+             "$MALCOLM_USER_HOME"/.bashrc
+    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.tmux.conf \
+             "$MALCOLM_USER_HOME"/.tmux.conf
+    ln -s -r "$MALCOLM_USER_HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.vimrc \
+             "$MALCOLM_USER_HOME"/.vimrc
+    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP \
+             "$MALCOLM_USER_HOME"/.bashrc \
+             "$MALCOLM_USER_HOME"/.bash_aliases \
+             "$MALCOLM_USER_HOME"/.bash_functions \
+             "$MALCOLM_USER_HOME"/.vimrc \
+             "$MALCOLM_USER_HOME"/.tmux.conf \
+             "$MALCOLM_USER_HOME"/.local/bin \
+             "$MALCOLM_USER_HOME"/.config \
+             "$MALCOLM_USER_HOME"/Malcolm
 }
 
 ################################################################################
