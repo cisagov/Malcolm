@@ -252,10 +252,10 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   # wipe and/or restart the database as requested
   if [[ "$WIPE" == "true" ]]; then
     ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE" || true
-    ./scripts/start $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    ./scripts/start --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
     START_PID=$!
   elif [[ "$RESTART" == "true" ]]; then
-    ./scripts/restart $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    ./scripts/restart --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
     START_PID=$!
   else
     START_PID=
@@ -320,7 +320,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         # get the total number of session records in the database
         NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
                           curl -sSL "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
-                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
+                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
                           awk '{s+=$1} END {print s}') 2>/dev/null )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
           [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
