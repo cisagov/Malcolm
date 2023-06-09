@@ -272,15 +272,7 @@ EOT
 fi
 EOF
 
-    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP \
-             "$MALCOLM_USER_HOME"/.bashrc \
-             "$MALCOLM_USER_HOME"/.bash_aliases \
-             "$MALCOLM_USER_HOME"/.bash_functions \
-             "$MALCOLM_USER_HOME"/.vimrc \
-             "$MALCOLM_USER_HOME"/.tmux.conf \
-             "$MALCOLM_USER_HOME"/.local/bin \
-             "$MALCOLM_USER_HOME"/.config \
-             "$MALCOLM_USER_HOME"/Malcolm
+    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP "$MALCOLM_USER_HOME"
 }
 
 ################################################################################
