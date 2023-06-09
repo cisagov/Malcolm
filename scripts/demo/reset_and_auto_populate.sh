@@ -357,7 +357,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
-      $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
+      $(grep -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
       docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
@@ -370,7 +370,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor zeek pcap-capture freq; do
+    for CONTAINER in htadmin filebeat logstash upload pcap-monitor zeek zeek-live suricata suricata-live pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5
