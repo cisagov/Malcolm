@@ -665,6 +665,7 @@ LOG_IGNORE_REGEX = re.compile(
   | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
   | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
   | /_ns_/nstest\.html
+  | /proc/net/tcp6:\s+no\s+such\s+file\s+or\s+directory
   | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
   | \b(d|es)?stats\.json
   | \b1.+GET\s+/\s+.+401.+curl
