@@ -2209,25 +2209,12 @@ class MalcolmSource extends WISESource {
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
     var filterUrl = "idark2dash/filter?start=%ISOSTART%&stop=%ISOSTOP%&field=%DBFIELD%&value=%TEXT%";
-
-    this.api.addValueAction("malcolm_dashboards_cat_ip", { name: filterLabel, url: filterUrl, category: "ip" });
-    this.api.addValueAction("malcolm_dashboards_cat_port", { name: filterLabel, url: filterUrl, category: "port" });
-    this.api.addValueAction("malcolm_dashboards_cat_country", { name: filterLabel, url: filterUrl, category: "country" });
-    this.api.addValueAction("malcolm_dashboards_cat_host", { name: filterLabel, url: filterUrl, category: "host" });
-    this.api.addValueAction("malcolm_dashboards_cat_md5", { name: filterLabel, url: filterUrl, category: "md5" });
-    this.api.addValueAction("malcolm_dashboards_cat_user", { name: filterLabel, url: filterUrl, category: "user" });
-    this.api.addValueAction("malcolm_dashboards_fields_zeek", { name: filterLabel, url: filterUrl, fields: allFieldsStr });
+    this.api.addValueAction("malcolm_dashboards_fields_zeek", { name: filterLabel, url: filterUrl, all: true });
 
     // add rick-click for opening malcolm agg api
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
-    this.api.addFieldAction("malcolm_mapi_cat_ip", { name: apiLabel, url: apiURL, category: "ip" });
-    this.api.addFieldAction("malcolm_mapi_cat_port", { name: apiLabel, url: apiURL, category: "port" });
-    this.api.addFieldAction("malcolm_mapi_cat_country", { name: apiLabel, url: apiURL, category: "country" });
-    this.api.addFieldAction("malcolm_mapi_cat_host", { name: apiLabel, url: apiURL, category: "host" });
-    this.api.addFieldAction("malcolm_mapi_cat_md5", { name: apiLabel, url: apiURL, category: "md5" });
-    this.api.addFieldAction("malcolm_mapi_cat_user", { name: apiLabel, url: apiURL, category: "user" });
-    this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, fields: allFieldsStr });
+    this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, all: true });
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
