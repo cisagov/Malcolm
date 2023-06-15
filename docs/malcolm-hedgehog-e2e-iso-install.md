@@ -42,7 +42,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 ## <a name="ISOBurning"></a> "Burning" the Installation ISOs to USB Flash Drive
 
-Various methods can be used to write the contents of an installer ISO image to a USB flash drive. One simple free and open source application for doing so [Etcher](https://www.balena.io/etcher), which can be used on Windows, macOS and Linux platforms.
+Various methods can be used to write the contents of an installer ISO image to a USB flash drive. One simple free and open-source application for doing so [Etcher](https://www.balena.io/etcher), which can be used on Windows, macOS and Linux platforms.
 
 Alternatively, specific instructions may be provided by your operating system (e.g., [Arch Linux](https://wiki.archlinux.org/title/USB_flash_installation_medium), [Debian Linux](https://www.debian.org/releases/stable/amd64/ch04s03.en.html), [Ubuntu Linux](https://ubuntu.com/tutorials/create-a-usb-stick-on-ubuntu#1-overview)). 
 
