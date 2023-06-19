@@ -68,7 +68,7 @@ For smaller networks, use at home by network security enthusiasts, or in the fie
             * [Screenshots](dashboards.md#PrebuiltVisualizationsGallery)
         + [Building your own visualizations and dashboards](dashboards.md#BuildDashboard)
             * [Screenshots](dashboards.md#NewVisualizationsGallery)
-* [Search Queries in Arkime and OpenSearch](queries-cheat-sheet.md#SearchCheatSheet)
+* [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
     - [OpenSearch index management](index-management.md#IndexManagement)

@@ -24,7 +24,7 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use OpenSearch Dashboards time range controls in the upper right-hand corner|Use OpenSearch Dashboards time range controls in the upper right-hand corner|
 
-When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
+When building complex queries, users are strongly recommended to enclose search terms and expressions in parentheses to control order of operations.
 
 As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying OpenSearch schema. A complete list of these fields can be found in the Arkime help (accessible at **https://localhost/help#fields** if connecting locally).
 
