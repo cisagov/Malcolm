@@ -223,7 +223,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
         + `none`: preserve no extracted files
 * Expose web interface for downloading preserved files?
-    - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at `https://<Malcolm host or IP address>/extracted-files/`. Beware that Zeek-extracted files may contain malware.
+    - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
 * Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)
     - If a password is specified here, Zeek-extracted files downloaded as described under the previous question will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
 * Scan extracted files with ClamAV?
@@ -612,7 +612,7 @@ zeek:zeekctl                     RUNNING   pid 6502, uptime 0:03:17
 
 The easiest way to verify that network traffic is being captured by the sensor and forwarded to Malcolm is through Malcolm's Arkime [Sessions](arkime.md#ArkimeSessions) interface.
 
-If you are logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If you're connecting from another browser, connect to `https://<Malcolm host or IP address>`.
+If you are logged into the Malcolm [desktop environment](#MalcolmDesktop), click the Arkime icon (**🦉**) in the top panel. If you're connecting from another browser, connect to **https://<Malcolm host or IP address>**.
 
 As Malcolm is using [self-signed TLS certificates](authsetup.md#TLSCerts), you will likely have to confirm an exception in your browser to allow the self-signed certificates to proceed. Enter the credentials you specified when you [configured authentication](#MalcolmAuthSetup).
 

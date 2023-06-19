@@ -11,7 +11,7 @@
 
 While Arkime provides very nice visualizations, especially for network traffic, [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) (an open source general-purpose data visualization tool for OpenSearch) can be used to create custom visualizations (tables, charts, graphs, dashboards, etc.) using the same data.
 
-The OpenSearch Dashboards container can be accessed at [https://localhost/dashboards/](https://localhost/dashboards/) if you are connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's OpenSearch Dashboards configuration.
+The OpenSearch Dashboards container can be accessed at **https://localhost/dashboards/** if connecting locally. Several preconfigured dashboards for Zeek logs are included in Malcolm's OpenSearch Dashboards configuration.
 
 OpenSearch Dashboards has several components for data searching and visualization:
 

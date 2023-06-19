@@ -27,7 +27,7 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
 
 # <a name="AuthBasicAccountManagement"></a>Local account management
 
-[`auth_setup`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page at [https://localhost/auth](https://localhost/auth/) if you are connecting locally)
+[`auth_setup`](#AuthSetup) is used to define the username and password for the administrator account. Once Malcolm is running, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page at **https://localhost/auth** if connecting locally)
 
 Malcolm user accounts can be used to access the [interfaces](quickstart.md#UserInterfaceURLs) of all of its [components](components.md#Components), including Arkime. Arkime uses its own internal database of user accounts, so when a Malcolm user account logs in to Arkime for the first time Malcolm creates a corresponding Arkime user account automatically. This being the case, it is *not* recommended to use the Arkime **Users** settings page or change the password via the **Password** form under the Arkime **Settings** page, as those settings would not be consistently used across Malcolm.
 

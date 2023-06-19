@@ -9,7 +9,7 @@
 * [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
 * [Backup and restore](#NetBoxBackup)
 
-Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at [https://localhost/netbox/](https://localhost/netbox/) if you are connecting locally.
+Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at **https://localhost/netbox/** if connecting locally.
 
 The design of a potentially deeper integration between Malcolm and Netbox is a [work in progress](https://github.com/idaholab/Malcolm/issues/131).
 

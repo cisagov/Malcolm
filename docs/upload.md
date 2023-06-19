@@ -4,7 +4,7 @@
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 
-Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at [https://localhost/upload/](https://localhost/upload/) if connecting locally.
+Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at **https://localhost/upload/** if connecting locally.
 
 ![Capture File and Log Archive Upload](./images/screenshots/malcolm_upload.png)
 
