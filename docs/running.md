@@ -14,7 +14,7 @@
 ```
 $ ./scripts/start
 ```
-This will create the containers' virtual network and instantiate them, then leave them running in the background. The Malcolm containers may take a several minutes to start up completely. To follow the debug output for an already-running Malcolm instance, run:
+This will create the containers' virtual network and instantiate them, then leave them running in the background. The Malcolm containers may take several minutes to start up completely. To follow the debug output for an already-running Malcolm instance, run:
 ```
 $ ./scripts/logs
 ```
@@ -22,9 +22,9 @@ You can also use `docker stats` to monitor the resource utilization of running c
 
 ## <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
-You can run `./scripts/stop` to stop the docker containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in docker volumes, doing these operations will not result in loss of data. 
+You can run `./scripts/stop` to stop the Docker containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in Docker volumes, performing these operations will not result in loss of data.
 
-Malcolm can be configured to be automatically restarted when the Docker system daemon restart (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
+Malcolm can be configured to automatically restart when the Docker system daemon restarts (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
 
 ## <a name="Wipe"></a>Clearing Malcolm's data
 
@@ -32,7 +32,7 @@ Run `./scripts/wipe` to stop the Malcolm instance and wipe its OpenSearch databa
 
 ## <a name="ReadOnlyUI"></a>Temporary read-only interface
 
-To temporarily set the Malcolm user interaces into a read-only configuration, run the following commands from the Malcolm installation directory.
+To temporarily set the Malcolm user interfaces into read-only configuration, run the following commands from the Malcolm installation directory.
 
 First, to configure [Nginx](https://nginx.org/) to disable access to the upload and other interfaces for changing Malcolm settings, and to deny HTTP methods other than `GET` and `POST`:
 
@@ -46,6 +46,6 @@ Second, to set the existing OpenSearch data store to read-only:
 docker-compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
 ```
 
-These commands must be re-run every time you restart Malcolm.
+These commands must be re-run every time Malcolm is restarted.
 
-Note that after you run these commands you may see an increase of error messages in the Malcolm containers' output as various background processes will fail due to the read-only nature of the indices. Additionally, some features such as Arkime's [Hunt](arkime.md#ArkimeHunt) and [building your own visualizations and dashboards](dashboards.md#BuildDashboard) in OpenSearch Dashboards will not function correctly in read-only mode.
+Note: after running these commands there may be an increase of error messages in the Malcolm containers' output as various background processes will fail due to the read-only nature of the indices. Additionally, some features such as Arkime's [Hunt](arkime.md#ArkimeHunt) and [building your own visualizations and dashboards](dashboards.md#BuildDashboard) in OpenSearch Dashboards will not function correctly in read-only mode.
