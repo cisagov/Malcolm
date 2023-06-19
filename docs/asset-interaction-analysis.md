@@ -17,7 +17,7 @@ Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbo
 
 ## <a name="NetBoxEnrichment"></a>Enriching network traffic metadata via NetBox lookups
 
-As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBOX_ENRICHMENT` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`) the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/).
+As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBOX_ENRICHMENT` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`), the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/) for more information.
 
 * `destination.…`
     - `destination.device.cluster` (`/virtualization/clusters/`) (for [Virtual Machine](https://demo.netbox.dev/static/docs/coe-functionality/virtualization/) device types)
@@ -48,7 +48,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
 
 For Malcolm's purposes, both physical devices and virtualized hosts will be stored as described above: the `device_type` field can be used to distinguish between them.
 
-NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges, of course. The value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used as a query parameter for these enrichment lookups.
+NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges. The value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used as a query parameter for these enrichment lookups.
 
 This feature was implemented as described in [idaholab/Malcolm#132](https://github.com/idaholab/Malcolm/issues/132).
 
@@ -62,7 +62,7 @@ These uninventoried devices and services are highlighted in two dashboards:
 
 ![Zeek Known Summary](./images/screenshots/dashboards_known_summary.png)
 
-* **Asset Interaction Analysis** - this dashboard contains a lot of the same information from the **Zeek Known Summary** dashboard, but it is from a traffic standpoint rather than just an "observed" standpoint. The **Uninventoried Internal Source IPs**, **Uninventoried Internal Destination IPs** and **Uninventoried Internal Assets - Logs** tables highlight communications involving devices that weren't found when searched via the NetBox API.
+* **Asset Interaction Analysis** - this dashboard contains much of the same information from the **Zeek Known Summary** dashboard, but it is from a traffic standpoint rather than just an "observed" standpoint. The **Uninventoried Internal Source IPs**, **Uninventoried Internal Destination IPs** and **Uninventoried Internal Assets - Logs** tables highlight communications involving devices not found when searched via the NetBox API.
 
 ![Asset Interaction Analysis](./images/screenshots/dashboards_asset_interaction_analysis.png)
 
