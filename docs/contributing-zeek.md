@@ -8,7 +8,7 @@ Other changes to Zeek's behavior could be made by modifying [local.zeek]({{ site
 
 ## <a name="ZeekPackage"></a>Adding a new Zeek package
 
-The easiest way to add a new Zeek package to Malcolm is to add the git URL of that package to the `ZKG_GITHUB_URLS` array in [zeek_install_plugins.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/zeek_install_plugins.sh) script and then [rebuilding](development.md#Build) the `zeek` Docker image. This will cause your package to be installed (via the [`zkg`](https://docs.zeek.org/projects/package-manager/en/stable/zkg.html) command-line tool). See [Parsing new Zeek logs](contributing-logstash.md#LogstashZeek) on how to process any new `.log` files if your package generates them.
+The easiest way to add a new Zeek package to Malcolm is to add the git URL of that package to the `ZKG_GITHUB_URLS` array in [zeek_install_plugins.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/zeek_install_plugins.sh) script and then [rebuilding](development.md#Build) the `zeek` Docker image. This will cause the package to be installed (via the [`zkg`](https://docs.zeek.org/projects/package-manager/en/stable/zkg.html) command-line tool). See [Parsing new Zeek logs](contributing-logstash.md#LogstashZeek) on how to process any new `.log` files if the package generates them.
 
 ## <a name="ContributingZeekIntel"></a>Zeek Intelligence Framework
 
