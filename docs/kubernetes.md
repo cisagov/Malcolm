@@ -9,14 +9,14 @@
     - [OpenSearch Instances](#OpenSearchInstances)
     - [PersistentVolumeClaim Definitions](#PVC)
 * [Running Malcolm](#Running)
-* [Deployment Example](#Example)
+* [Deployment Example](#Example)n
 * [Future Enhancements](#Future)
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
 * [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
 
-This document assumes you have good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
+This document assumes good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
 ## <a name="System"></a> System
 
@@ -25,9 +25,9 @@ This document assumes you have good working knowledge of Kubernetes (K8s). The c
 There exist a variety of ingress controllers for Kubernetes suitable for different Kubernetes providers and environments. A few sample manifests for ingress controllers can be found in Malcolm's [`kubernetes`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) directory, prefixed with `99-ingress-…`:
 
 * [`kubernetes/99-ingress-nginx.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) - an example ingress manifest for Malcolm using the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). The Ingress-NGINX controller has been used internally on self-hosted Kubernetes clusters during Malcolm's development and testing.
-* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). You may likely wish to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS).
+* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). Users likely will prefer to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS).
 
-Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` files to `99-ingress.yml` as a starting point to define your ingress or define your own ingress manifest file and save it as `99-ingress.yml`.
+Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` files to `99-ingress.yml` as a starting point to define the ingress or define a custom manifest file and save it as `99-ingress.yml`.
 
 #### <a name="IngressNGINX"></a> Ingress-NGINX Controller
 
@@ -35,7 +35,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
 
 * To [forward](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) logs from a remote instance of [Hedgehog Linux](hedgehog.md):
     - See ["Exposing TCP and UDP services"](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) in the Ingress-NGINX documentation.
-    - You must configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
+    - Configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
         ```
         apiVersion: apps/v1
         kind: Deployment
@@ -64,7 +64,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
         …
         ```
 
-    - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
+    - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
         ```
         ---
         apiVersion: v1
@@ -108,7 +108,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
           type: LoadBalancer
         ```
 
-    - You must add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
+    - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
         ```
         apiVersion: apps/v1
         kind: Deployment
@@ -146,7 +146,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
         ```
 
 * To use [SSL Passthrough](https://kubernetes.github.io/ingress-nginx/user-guide/tls/) to have the Kubernetes gateway use Malcolm's TLS certificates rather than its own:
-    - You must configure the controller to start up with the `--enable-ssl-passthrough` flag.
+    - Configure the controller to start up with the `--enable-ssl-passthrough` flag:
         ```
         apiVersion: apps/v1
         kind: Deployment
@@ -175,7 +175,7 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
         …
         ```
 
-    - You must modify Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) to specify the `host:` value and use [host-based routing](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/):
+    - Modify Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) to specify the `host:` value and use [host-based routing](https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/):
 
         ```
         …
@@ -196,9 +196,9 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
 
 ### <a name="Limits"></a> Kubernetes Provider Settings
 
-OpenSearch has some [important settings](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/#important-settings) that must be present on its underlying Linux system. How this settings are configured depends largely on the underlying host(s) running Kubernetes, how Kubernetes is installed or the cloud provider on which it is running. Consult your operating system or cloud provider documentation for how to configure these settings.
+OpenSearch has some [important settings](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/#important-settings) that must be present on its underlying Linux system. How these settings are configured depends largely on the underlying host(s) running Kubernetes, and how Kubernetes is installed or the cloud provider on which it is running. Consult the operating system or cloud provider documentation for how to configure these settings.
 
-Settings which likely need to be changed in the underlying host running Kubernetes include:
+Settings that likely need to be changed in the underlying host running Kubernetes include:
 
 * System settings (e.g., in `/etc/sysctl.conf`)
         ```
@@ -221,13 +221,13 @@ Settings which likely need to be changed in the underlying host running Kubernet
 
 The steps to configure and tune Malcolm for a Kubernetes deployment are [very similar](malcolm-config.md#ConfigAndTuning) to those for a Docker-based deployment. Both methods use [environment variable files](malcolm-config.md#MalcolmConfigEnvVars) for Malcolm's runtime configuration.
 
-Malcolm's configuration and runtime scripts (e.g., `./scripts/configure`, `./scripts/auth_setup`, `./scripts/start`, etc.) are used for both Docker- and Kubernetes-based deployments. To indicate to these scripts that you're working with Kubernetes rather than `docker-compose`, provide the script with the [kubeconfig file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) used to communicate with the API server of the Kubernetes cluster (e.g., `./scripts/configure -f k3s.yaml` or `./scripts/start -f kubeconfig.yaml`, etc.). The scripts will detect whether the YAML file specified is a kubeconfig file or a Docker compose file and act accordingly.
+Malcolm's configuration and runtime scripts (e.g., `./scripts/configure`, `./scripts/auth_setup`, `./scripts/start`, etc.) are used for both Docker- and Kubernetes-based deployments. In order to indicate to these scripts that Kubernetes is being used rather than `docker-compose`, users can provide the script with the [kubeconfig file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) used to communicate with the API server of the Kubernetes cluster (e.g., `./scripts/configure -f k3s.yaml` or `./scripts/start -f kubeconfig.yaml`, etc.). The scripts will detect whether the YAML file specified is a kubeconfig file or a Docker compose file and act accordingly.
 
-Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**. You'll also need to run [`./scripts/auth_setup`](authsetup.md#AuthSetup) to configure authentication.
+Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**. Users will need to run [`./scripts/auth_setup`](authsetup.md#AuthSetup) to configure authentication.
 
 ### <a name="OpenSearchInstances"></a> OpenSearch Instances
 
-While Malcolm can manage its own single-node OpenSearch instance as part of its Kubernetes deployment, it's likely you'll want to use an existing multi-node OpenSearch cluster hosted on Kubernetes or some other provider (see, for example, ["Setup OpenSearch multi-node cluster on Kubernetes using Helm Charts"](https://opensearch.org/blog/setup-multinode-cluster-kubernetes/) on the OpenSearch blog and ["OpenSearch Kubernetes Operator"](https://opensearch.org/docs/latest/tools/k8s-operator/) in the OpenSearch documentation). Review Malcolm's documentation on [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) to configure your Malcolm deployment to use an OpenSearch cluster.
+While Malcolm can manage its own single-node OpenSearch instance as part of its Kubernetes deployment, users may want to use an existing multi-node OpenSearch cluster hosted on Kubernetes or some other provider (see, for example, ["Setup OpenSearch multi-node cluster on Kubernetes using Helm Charts"](https://opensearch.org/blog/setup-multinode-cluster-kubernetes/) on the OpenSearch blog and ["OpenSearch Kubernetes Operator"](https://opensearch.org/docs/latest/tools/k8s-operator/) in the OpenSearch documentation). Review Malcolm's documentation on [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) to configure a Malcolm deployment to use an OpenSearch cluster.
 
 ### <a name="PVC"></a> PersistentVolumeClaim Definitions
 
@@ -241,9 +241,9 @@ Malcolm requires persistent [storage](https://kubernetes.io/docs/concepts/storag
 * `suricata-claim` - storage for Suricata logs
 * `zeek-claim` - storage for Zeek logs and files extracted by Zeek
 
-An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined using NFS can be found in the [kubernetes/01-volumes-nfs.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-nfs.yml.example) manifest file. Before [running](#Running) Malcolm, copy the `01-volumes-nfs.yml.example` file to `01-volumes.yml` and modify (or replace) its contents to define your PersistentVolumeClaim objects.
+An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined using NFS can be found in the [kubernetes/01-volumes-nfs.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-nfs.yml.example) manifest file. Before [running](#Running) Malcolm, copy the `01-volumes-nfs.yml.example` file to `01-volumes.yml` and modify (or replace) its contents to define the PersistentVolumeClaim objects.
 
-If you attempt to start Malcolm without these PersistentVolumeClaims defined in a YAML file in Malcolm's `./kubernetes/` directory, you'll get an error like this:
+Attempting to start Malcolm without these PersistentVolumeClaims defined in a YAML file in Malcolm's `./kubernetes/` directory will result in an error like this:
 
 ```
 $ ./scripts/start -f /path/to/kubeconfig.yml
@@ -252,7 +252,7 @@ Exception: Storage objects required by Malcolm are not defined in /home/user/Mal
 
 ## <a name="Running"></a> Running Malcolm
 
-After you've [configured](#Config) Malcolm, use the `./scripts/start` script to create the Malcolm Kubernetes deployment, providing your kubeconfig file with the `-f`/`--file` argument:
+After [configuring](#Config) Malcolm, use the `./scripts/start` script to create the Malcolm Kubernetes deployment, providing the kubeconfig file with the `-f`/`--file` argument:
 
 ```
 $ ./scripts/start -f /path/to/kubeconfig.yml
@@ -264,7 +264,7 @@ The Kubernetes resources under the `malcolm` namespace (its pods, storage volume
 * creating [ConfigMap objects](https://kubernetes.io/docs/concepts/configuration/configmap/) and [Secret objects](https://kubernetes.io/docs/concepts/configuration/secret/) from other configuration files stored locally below the Malcolm directory
 * deploying the objects defined in the [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) in `./kubernetes`
 
-After a few moments you can check the status of the deployment:
+After a few moments, users can check the status of the deployment:
 
 ```
 $ ./scripts/status -f /path/to/kubeconfig.yml
@@ -304,7 +304,7 @@ Malcolm's control scripts require the [official Python 3 client library for Kube
 
 # <a name="Example"></a> Deployment Example
 
-Here's a basic step-by-step example illustrating how to deploy Malcolm with Kubernetes. For the sake of simplicity, this example uses vagrant (see [kubernetes/vagrant/Vagrantfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile)) to create a virtualized Kubernetes cluster with one control plane node and two worker nodes. It assumes you've downloaded and extracted the [release tarball]({{ site.github.repository_url }}/releases) or used `./scripts/malcolm_appliance_packager.sh` to package up the files needed to run Malcolm.
+Here is a basic step-by-step example illustrating how to deploy Malcolm with Kubernetes. For the sake of simplicity, this example uses Vagrant (see [kubernetes/vagrant/Vagrantfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile)) to create a virtualized Kubernetes cluster with one control plane node and two worker nodes. It assumes users have downloaded and extracted the [release tarball]({{ site.github.repository_url }}/releases) or used `./scripts/malcolm_appliance_packager.sh` to package up the files needed to run Malcolm.
 
 ```
 $ ls -l
@@ -332,7 +332,7 @@ drwxr-xr-x 7 user user     85 Apr 24 14:35 zeek-logs
 -rw-r--r-- 1 user user  3,453 Apr 24 14:35 README.md
 ```
 
-Even before starting Malcolm, we can use the `status` script to make sure we're communicating with the Kubernetes cluster:
+Even before starting Malcolm, the `status` script can verify communication with the Kubernetes cluster:
 
 ```
 $ ./scripts/status -f /path/to/kubeconfig.yaml
@@ -611,4 +611,4 @@ For now, the Malcolm services running in Kubernetes are configured with `replica
 
 ## <a name="FutureHelmChart"></a> Helm Chart
 
-For now, Malcolm's Kubernetes deployment is managed via vanilla [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/). We need to [look into](https://github.com/idaholab/Malcolm/issues/187) what a Malcolm Helm chart would look like and how it would fit in with the [deployment scripts](https://github.com/idaholab/Malcolm/issues/172) for [configuring](#Config) and [running](#Running) Malcolm, if at all.
+For now, Malcolm's Kubernetes deployment is managed via standard [Kubernetes manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/). The Malcolm developers need to [look into](https://github.com/idaholab/Malcolm/issues/187) what a Malcolm Helm chart would look like and how it would fit in with the [deployment scripts](https://github.com/idaholab/Malcolm/issues/172) for [configuring](#Config) and [running](#Running) Malcolm, if at all.
