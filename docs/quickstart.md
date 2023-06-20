@@ -12,7 +12,7 @@ For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linu
 
 ### Source code
 
-The files required to build and run Malcolm are available on its [GitHub page]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}). Malcolm's source code is released under the terms of a permissive open source software license (see [`License.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt)  for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}). Malcolm's source-code is released under the terms of a permissive open-source software license (see [`License.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt)  for the terms of its release).
 
 ### Building Malcolm from scratch
 
@@ -50,7 +50,7 @@ Pulling upload            ... done
 Pulling zeek              ... done
 ```
 
-You can then observe that the images have been retrieved by running `docker images`:
+You can then observe the images have been retrieved by running `docker images`:
 ```
 $ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
@@ -86,7 +86,7 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 
 ## <a name="UserInterfaceURLs"></a>User interface
 
-A few minutes after starting Malcolm (probably 5 or so for Logstash to be completely up, depending on the system), the following services will be accessible:
+A few minutes after starting Malcolm (probably 5 or so for Logstash to be completely loaded, depending on the system), the following services will be accessible:
 
 * [Arkime](https://arkime.com/): **https://localhost**
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/): **https://localhost/dashboards/**
