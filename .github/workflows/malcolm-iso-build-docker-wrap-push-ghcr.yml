@@ -114,6 +114,19 @@ jobs:
           sudo chmod 644 ./malcolm-*.*
           popd
       -
+        name: Run Trivy vulnerability scanner
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './malcolm-iso'
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          hide-progress: true
+          ignore-unfixed: true
+          exit-code: '0'
+      -
         name: ghcr.io login
         uses: docker/login-action@v2
         with:

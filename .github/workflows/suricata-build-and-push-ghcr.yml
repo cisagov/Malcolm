@@ -66,3 +66,16 @@ jobs:
           file: ./Dockerfiles/suricata.Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/suricata:${{ steps.extract_branch.outputs.branch }}
+      -
+        name: Run Trivy vulnerability scanner
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          image-ref: ghcr.io/${{ github.repository_owner }}/malcolm/suricata:${{ steps.extract_branch.outputs.branch }}
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          hide-progress: true
+          ignore-unfixed: true
+          exit-code: '0'
