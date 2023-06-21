@@ -72,8 +72,9 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'image'
+          scanners: 'vuln'
           image-ref: ghcr.io/${{ github.repository_owner }}/malcolm/file-monitor:${{ steps.extract_branch.outputs.branch }}
-          format: 'table'
+          format: 'json'
           severity: 'HIGH,CRITICAL'
           vuln-type: 'os,library'
           hide-progress: true

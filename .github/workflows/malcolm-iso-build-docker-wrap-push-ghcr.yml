@@ -120,7 +120,7 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: './malcolm-iso'
-          format: 'table'
+          format: 'json'
           severity: 'HIGH,CRITICAL'
           vuln-type: 'os,library'
           hide-progress: true

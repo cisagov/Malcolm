@@ -110,7 +110,7 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: './sensor-iso'
-          format: 'table'
+          format: 'json'
           severity: 'HIGH,CRITICAL'
           vuln-type: 'os,library'
           hide-progress: true
