@@ -110,6 +110,15 @@ def register(params)
     @default_manuf = nil
   end
 
+  if File.exist?(params.fetch("vm_oui_map_path", "/etc/vm_macs.yaml").to_s) then
+    @vm_namesarray = Set.new
+    YAML.safe_load(File.read(params["vm_oui_map_path"])).each do |mac|
+      @vm_namesarray.add(mac['name'].to_s.downcase)
+    end
+  else
+    @vm_namesarray = Set["pcs computer systems gmbh", "proxmox server solutions gmbh", "vmware, inc.", "xensource, inc."]
+  end
+
   @default_dtype = params["default_dtype"]
   _default_dtype_env = params["default_dtype_env"]
   if @default_dtype.nil? and !_default_dtype_env.nil?
@@ -128,6 +137,7 @@ def register(params)
     @default_drole = nil
   end
 
+  # threshold for fuzzy string matching (for manufacturer, etc.)
   _autopopulate_fuzzy_threshold_str = params["autopopulate_fuzzy_threshold"]
   _autopopulate_fuzzy_threshold_str_env = params["autopopulate_fuzzy_threshold_env"]
   if _autopopulate_fuzzy_threshold_str.nil? and !_autopopulate_fuzzy_threshold_str_env.nil?
@@ -138,6 +148,14 @@ def register(params)
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
   end
+
+  # if the manufacturer is not found, should we create one or use @default_manuf?
+  _autopopulate_create_manuf_str = params["autopopulate_create_manuf"]
+  _autopopulate_create_manuf_env = params["autopopulate_create_manuf_env"]
+  if _autopopulate_create_manuf_str.nil? and !_autopopulate_create_manuf_env.nil?
+    _autopopulate_create_manuf_str = ENV[_autopopulate_create_manuf_env]
+  end
+  @autopopulate_create_manuf = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_manuf_str.to_s.downcase)
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = LruRedux::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048))
@@ -169,6 +187,7 @@ def filter(event)
   _autopopulate_default_drole = @default_drole
   _autopopulate_default_dtype = @default_dtype
   _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
+  _autopopulate_create_manuf = @autopopulate_create_manuf
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
@@ -215,7 +234,7 @@ def filter(event)
 
               #################################################################################
               when :ip_device
-                # retrieve the list IP addresses where address matches the search key, limited to "assigned" addresses.
+                # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
                 # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
                 # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
                 # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
@@ -268,31 +287,81 @@ def filter(event)
                       _query[:offset] += _tmp_ip_addresses.length()
                       break unless (_tmp_ip_addresses.length() >= _page_size)
                     else
+                      # weird/bad response, bail
                       break
                     end
-
-                    if _autopopulate and (_query[:offset] == 0)
-                      # TODO: no results found, autopopulate enabled
-
-                      # match/look up manufacturer based on OUI
-                      if !_autopopulate_oui.nil? && !_autopopulate_oui&.empty? then
-                        _autopopulate_manuf = @manuf_hash.getset(_autopopulate_oui) {
-                          _manuf = Hash.new
-                          # TODO: compare manufacturers vs. input and get closest match
-                          _manuf
-                        }
-                      else
-                        # no OUI specified, set default ("unspecified") manufacturer
-                        _autopopulate_manuf = { :name => _autopopulate_default_manuf,
-                                                :match => 1.0 }
-                      end
-
-                    end
-
-                  end
+                  end # while true
                 rescue Faraday::Error
                   # give up aka do nothing
                 end
+
+                if _autopopulate and (_query[:offset] == 0)
+                  # no results found, autopopulate enabled, let's create an entry for this device
+
+                  # match/look up manufacturer based on OUI
+                  _autopopulate_manuf = nil
+                  if !_autopopulate_oui.nil? && !_autopopulate_oui&.empty? then
+
+                    # does it look like a VM or a regular device?
+                    if @vm_namesarray.include?(_autopopulate_oui) then
+                      # looks like this is probably a virtual machine
+                      _autopopulate_manuf = { :name => _autopopulate_oui,
+                                              :match => 1.0,
+                                              :vm => true }
+
+                    else
+                      # looks like this is not a virtual machine (or we can't tell) so assume its' a regular device
+                      _autopopulate_manuf = @manuf_hash.getset(_autopopulate_oui) {
+                        _fuzzy_matcher = FuzzyStringMatch::JaroWinkler.create( :native )
+                        _manufs = Array.new
+                        # fetch the manufacturers to do the comparison. this is a lot of work
+                        # and not terribly fast but once the hash it populated it shouldn't happen too often
+                        _query = {:offset => 0, :limit => _page_size}
+                        begin
+                          while true do
+                            if (_manufs_response = _nb.get('dcim/manufacturers/', _query).body) and _manufs_response.is_a?(Hash) then
+                              _tmp_manufs = _manufs_response.fetch(:results, [])
+                              _tmp_manufs.each do |_manuf|
+                                _tmp_name = _manuf.fetch(:name, _manuf.fetch(:display, nil))
+                                _manufs << { :name => _tmp_name,
+                                             :id => _manuf.fetch(:id, nil),
+                                             :url => _manuf.fetch(:url, nil),
+                                             :match => _fuzzy_matcher.getDistance(_tmp_name.to_s.downcase, _autopopulate_oui.to_s.downcase),
+                                             :vm => false
+                                           }
+                              end
+                              _query[:offset] += _tmp_manufs.length()
+                              break unless (_tmp_manufs.length() >= _page_size)
+                            else
+                              break
+                            end
+                          end
+                        rescue Faraday::Error
+                          # give up aka do nothing
+                        end
+                        # return the manuf with the highest match
+                        !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
+                      }
+                    end # virtual machine vs. regular device
+                  end # _autopopulate_oui specified
+
+                  if !_autopopulate_manuf.is_a?(Hash) then
+                    # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
+                    _autopopulate_manuf = { :name => _autopopulate_default_manuf,
+                                            :match => 0.0,
+                                            :vm => false }
+                  end
+
+                  if _autopopulate_manuf[:vm] then
+                    # todo: handle VM
+                  else
+                    # a regular non-vm device
+                    if () and ()
+
+                  end # virtual machine vs. regular device
+
+                end # _autopopulate turned on and no results found
+
                 _devices = collect_values(crush(_devices))
                 _devices.fetch(:service, [])&.flatten!&.uniq!
                 _devices
@@ -312,6 +381,10 @@ def filter(event)
   event.set("#{@target}", _result) unless _result.nil? || _result&.empty?
 
   [event]
+end
+
+def mac_string_to_integer(string)
+  string.tr('.:-','').to_i(16)
 end
 
 def collect_values(hashes)
