@@ -15,6 +15,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "logstash"
 ENV PGROUP "logstash"
+ENV PUSER_CHOWN "/usr/share/logstash/vendor"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_RLIMIT_UNLOCK true
 
@@ -107,8 +108,6 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
         /usr/share/logstash/malcolm-patterns \
         /usr/share/logstash/malcolm-ruby \
         /logstash-persistent-queue && \
-    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
-    chown --silent -R root:root /usr/share/logstash/vendor/* && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Retrieving JA3 fingerprint lists..." && \

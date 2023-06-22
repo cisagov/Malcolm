@@ -71,7 +71,15 @@ fi # check for CONFIG_MAP_DIR and rsync
 
 set +e
 
-# change user/group ownership of any files/directories belonging to the original IDs
+# if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them first
+if [[ -n ${PUSER_CHOWN} ]]; then
+  IFS=';' read -ra ENTITIES <<< "${PUSER_CHOWN}"
+  for ENTITY in "${ENTITIES[@]}"; do
+    chown -R ${PUSER}:${PGROUP} "${ENTITY}" 2>/dev/null
+  done
+fi
+
+# change user/group ownership of any other files/directories belonging to the original IDs
 if [[ -n ${PUID} ]] && [[ "${PUID}" != "${DEFAULT_UID}" ]]; then
   find / -path /sys -prune -o -path /proc -prune -o -user ${DEFAULT_UID} -exec chown -f ${PUID} "{}" \; 2>/dev/null
 fi
@@ -99,14 +107,6 @@ if [[ -n ${PUSER_MKDIR} ]]; then
           ( ( [[ -n ${PUID} ]] && chown -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
       done
     fi
-  done
-fi
-
-# if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them too
-if [[ -n ${PUSER_CHOWN} ]]; then
-  IFS=';' read -ra ENTITIES <<< "${PUSER_CHOWN}"
-  for ENTITY in "${ENTITIES[@]}"; do
-    chown -R ${PUSER}:${PGROUP} "${ENTITY}" 2>/dev/null
   done
 fi
 
