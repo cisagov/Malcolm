@@ -110,8 +110,8 @@ jobs:
           pushd ./malcolm-iso
           mkdir -p ./shared
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
-          sudo /usr/bin/env bash ./build.sh -d "$DEST_IMAGES_TGZ"
-          rm -rf ./shared/
+          sudo /usr/bin/env bash ./build.sh -r -d "$DEST_IMAGES_TGZ"
+          rm -rf ./shared/ "$DEST_IMAGES_TGZ"
           sudo chmod 644 ./malcolm-*.*
           popd
       -

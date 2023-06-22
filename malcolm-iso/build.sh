@@ -8,9 +8,11 @@ IMAGE_DISTRIBUTION=bullseye
 BUILD_ERROR_CODE=1
 
 DOCKER_IMAGES_TGZ=""
-while getopts d: opts; do
+DOCKER_IMAGES_TGZ_RM=0
+while getopts rd: opts; do
    case ${opts} in
       d) DOCKER_IMAGES_TGZ=${OPTARG} ;;
+      r) DOCKER_IMAGES_TGZ_RM=1 ;;
    esac
 done
 
@@ -158,6 +160,7 @@ if [ -d "$WORKDIR" ]; then
   if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
     cp "$DOCKER_IMAGES_TGZ" ./config/includes.chroot/malcolm_images.tar.gz
     chown root:root ./config/includes.chroot/malcolm_images.tar.gz
+    [[ "$DOCKER_IMAGES_TGZ_RM" == "1" ]] && rm -f "$DOCKER_IMAGES_TGZ"
   fi
 
   # write out some version stuff specific to this installation version
