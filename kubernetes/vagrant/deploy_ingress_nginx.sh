@@ -24,7 +24,7 @@ AWS_EXPOSE_ANNOTATIONS=(
     "{\"service.beta.kubernetes.io/aws-load-balancer-nlb-target-type\":\"instance\"}"
     "{\"service.beta.kubernetes.io/aws-load-balancer-scheme\":\"internet-facing\"}"
 )
-INGRESS_NGINX_CONTROLLER_VERSION=1.7.0
+INGRESS_NGINX_CONTROLLER_VERSION=1.8.0
 KUBECONFIG=
 WORKDIR=
 DRY_RUN=none
