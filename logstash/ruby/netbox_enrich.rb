@@ -352,13 +352,12 @@ def filter(event)
                                             :vm => false }
                   end
 
-                  if _autopopulate_manuf[:vm] then
-                    # todo: handle VM
-                  else
-                    # a regular non-vm device
-                    if () and ()
+                  # if _autopopulate_manuf[:vm] then
+                  #   # todo: handle VM
+                  # else
+                  #   # a regular non-vm device
 
-                  end # virtual machine vs. regular device
+                  # end # virtual machine vs. regular device
 
                 end # _autopopulate turned on and no results found
 
