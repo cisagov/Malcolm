@@ -110,9 +110,10 @@ def register(params)
     @default_manuf = nil
   end
 
-  if File.exist?(params.fetch("vm_oui_map_path", "/etc/vm_macs.yaml").to_s) then
+  _vm_oui_map_path = params.fetch("vm_oui_map_path", "/etc/vm_macs.yaml")
+  if File.exist?(_vm_oui_map_path) then
     @vm_namesarray = Set.new
-    YAML.safe_load(File.read(params["vm_oui_map_path"])).each do |mac|
+    YAML.safe_load(File.read(_vm_oui_map_path)).each do |mac|
       @vm_namesarray.add(mac['name'].to_s.downcase)
     end
   else
