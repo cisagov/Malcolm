@@ -15,7 +15,6 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "logstash"
 ENV PGROUP "logstash"
-ENV PUSER_CHOWN "/usr/share/logstash/vendor"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_RLIMIT_UNLOCK true
 
@@ -101,12 +100,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
              /usr/share/logstash/config/bootstrap \
              /usr/share/logstash/config/persist && \
     chown --silent -R ${PUSER}:root \
-        /usr/share/logstash/config/logstash*.yml \
-        /usr/share/logstash/config/bootstrap \
-        /usr/share/logstash/config/persist \
-        /usr/share/logstash/malcolm-pipelines \
-        /usr/share/logstash/malcolm-patterns \
-        /usr/share/logstash/malcolm-ruby \
+        /usr/share/logstash \
         /logstash-persistent-queue && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \

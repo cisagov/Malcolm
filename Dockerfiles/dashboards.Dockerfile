@@ -88,7 +88,6 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "opensearch-dashboards"
 ENV PGROUP "opensearch-dashboards"
-ENV PUSER_CHOWN "/usr/share/opensearch-dashboards"
 ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
@@ -135,6 +134,7 @@ RUN yum upgrade -y && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
+    chown --silent -R ${PUSER}:${PGROUP} /usr/share/opensearch-dashboards && \
     chmod +x /usr/bin/tini && \
     yum clean all && \
     rm -rf /var/cache/yum

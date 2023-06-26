@@ -20,7 +20,6 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "boxer"
 ENV PGROUP "boxer"
-ENV PUSER_CHOWN "/etc/netbox;/opt/unit;/opt/netbox"
 ENV PUSER_PRIV_DROP true
 
 ENV SUPERCRONIC_VERSION "0.2.25"
@@ -63,6 +62,7 @@ RUN apt-get -q update && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
+    chown -R $PUSER:root /etc/netbox /opt/unit /opt/netbox && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
         curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \

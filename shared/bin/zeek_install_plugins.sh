@@ -9,8 +9,8 @@ fi
 
 ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
 
-# going to clone under /usr/local/src
-SRC_BASE_DIR="/usr/local/src"
+# going to clone under /usr/local/src/zeek
+SRC_BASE_DIR="/usr/local/src/zeek"
 mkdir -p "$SRC_BASE_DIR"
 
 #
@@ -129,3 +129,5 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
 done
 
 find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
+
+rm -rf "$SRC_BASE_DIR"
