@@ -128,6 +128,7 @@ cpu Interval_NSec:
 cpu PID:  
 Enter Malcolm host or IP address (172.16.0.20): 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: cpu
 Add "module" value: cpu
@@ -196,6 +197,7 @@ random Interval_Sec:  30
 random Internal_NSec:  
 Enter Malcolm host or IP address (127.0.0.1): 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: random
 Add "module" value: random
@@ -247,6 +249,7 @@ winevtlog Render_Event_As_XML:
 winevtlog Use_ANSI:
 Enter Malcolm host or IP address: 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field (winevtlog): winevtlog
 Add "module" value (winevtlog): winevtlog
