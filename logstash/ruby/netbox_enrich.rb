@@ -8,6 +8,7 @@ def register(params)
   require 'fuzzystringmatch'
   require 'json'
   require 'lru_redux'
+  require 'stringex_lite'
 
   # global enable/disable for this plugin based on environment variable(s)
   @netbox_enabled = (not [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["NETBOX_DISABLED"].to_s.downcase)) &&
@@ -161,6 +162,12 @@ def register(params)
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = LruRedux::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048))
 
+  # case-insensitive hash of device role names to IDs
+  @drole_hash = LruRedux::ThreadSafeCache.new(params.fetch("drole_cache_size", 128))
+
+  # case-insensitive hash of site names to IDs
+  @site_hash = LruRedux::ThreadSafeCache.new(params.fetch("site_cache_size", 128))
+
   # end of autopopulation arguments
 
 end
@@ -187,6 +194,7 @@ def filter(event)
   _autopopulate_default_manuf = @default_manuf
   _autopopulate_default_drole = @default_drole
   _autopopulate_default_dtype = @default_dtype
+  _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site&.empty?) ? "default" : @lookup_site
   _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
   _autopopulate_create_manuf = @autopopulate_create_manuf
   _result = @cache_hash.getset(_lookup_type){
@@ -308,7 +316,8 @@ def filter(event)
                       # looks like this is probably a virtual machine
                       _autopopulate_manuf = { :name => _autopopulate_oui,
                                               :match => 1.0,
-                                              :vm => true }
+                                              :vm => true,
+                                              :id => nil }
 
                     else
                       # looks like this is not a virtual machine (or we can't tell) so assume its' a regular device
@@ -350,15 +359,140 @@ def filter(event)
                     # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
                     _autopopulate_manuf = { :name => _autopopulate_default_manuf,
                                             :match => 0.0,
-                                            :vm => false }
+                                            :vm => false,
+                                            :id => nil}
                   end
 
-                  # if _autopopulate_manuf[:vm] then
-                  #   # todo: handle VM
-                  # else
-                  #   # a regular non-vm device
+                  # make sure the site and device role exists
 
-                  # end # virtual machine vs. regular device
+                  _autopopulate_site = @site_hash.getset(_autopopulate_default_site) {
+                    begin
+                      _site = nil
+
+                      # look it up first
+                      _query = {:offset => 0, :limit => 1, :name => _autopopulate_default_site}
+                      if (_sites_response = _nb.get('dcim/sites/', _query).body) and
+                         _sites_response.is_a?(Hash) and
+                         (_tmp_sites = _sites_response.fetch(:results, [])) and
+                         (_tmp_sites.length() > 0) then
+                         _site = _tmp_sites.first
+                      end
+
+                      if _site.nil? then
+                        # the device site is not found, create it
+                        _site_data = {:name => _autopopulate_default_site, :slug => _autopopulate_default_site.to_url, :status => "active" }
+                        if (_site_create_response = _nb.post('dcim/sites/', _site_data).body) and
+                           _site_create_response.is_a?(Hash) then
+                           _site = _site_create_response
+                        end
+                      end
+
+                    rescue Faraday::Error
+                      # give up aka do nothing
+                    end
+                    _site
+                  }
+
+                  _autopopulate_drole = @drole_hash.getset(_autopopulate_default_drole) {
+                    begin
+                      _drole = nil
+
+                      # look it up first
+                      _query = {:offset => 0, :limit => 1, :name => _autopopulate_default_drole}
+                      if (_droles_response = _nb.get('dcim/device_roles/', _query).body) and
+                         _droles_response.is_a?(Hash) and
+                         (_tmp_droles = _droles_response.fetch(:results, [])) and
+                         (_tmp_droles.length() > 0) then
+                         _drole = _tmp_droles.first
+                      end
+
+                      if _drole.nil? then
+                        # the device role is not found, create it
+                        _drole_data = {:name => _autopopulate_default_drole, :slug => _autopopulate_default_drole.to_url, :color => "d3d3d3" }
+                        if (_drole_create_response = _nb.post('dcim/device_roles/', _drole_data).body) and
+                           _drole_create_response.is_a?(Hash) then
+                           _drole = _drole_create_response
+                        end
+                      end
+
+                    rescue Faraday::Error
+                      # give up aka do nothing
+                    end
+                    _drole
+                  }
+
+                  # we should have found or created the autopopulate device role and site
+                  if !_autopopulate_site.fetch(:id, nil)&.nonzero? and
+                     !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+
+                    if _autopopulate_manuf[:vm] then
+                      # todo: handle VM
+                      nil
+
+                    else
+                      # a regular non-vm device
+
+                      if !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+                        # the manufacturer was default (not found) so look it up first
+                        _query = {:offset => 0, :limit => 1, :name => _autopopulate_manuf[:name]}
+                        if (_manufs_response = _nb.get('dcim/manufacturers/', _query).body) and
+                           _manufs_response.is_a?(Hash) and
+                           (_tmp_manufs = _manufs_response.fetch(:results, [])) and
+                           (_tmp_manufs.length() > 0) then
+                           _autopopulate_manuf[:id] = _tmp_manufs.first.fetch(:id, nil)
+                        end
+                      end
+
+                      if !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+                        # the manufacturer is still not found, create it
+                        _manuf_data = {:name => _autopopulate_manuf[:name], :slug => _autopopulate_manuf[:name].to_url}
+                        if (_manuf_create_response = _nb.post('dcim/ip-manufacturers/', _manuf_data).body) and
+                           _manuf_create_response.is_a?(Hash) then
+                           _autopopulate_manuf[:id] = _manuf_create_response.fetch(:id, nil)
+                           _autopopulate_manuf[:match] = 1.0
+                        end
+                      end
+
+                      # at this point we *must* have the manufacturer ID
+                      _autopopulate_dtype = nil
+                      if !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+
+                        # make sure the desired device type also exists, look it up first
+                        _query = {:offset => 0, :limit => 1, :manufacturer_id => _autopopulate_manuf[:id], :model => _autopopulate_default_dtype }
+                        if (_dtypes_response = _nb.get('dcim/device_types/', _query).body) and
+                           _dtypes_response.is_a?(Hash) and
+                           (_tmp_dtypes = _dtypes_response.fetch(:results, [])) and
+                           (_tmp_dtypes.length() > 0) then
+                           _autopopulate_dtype = _tmp_dtypes.first
+                        end
+
+                        if _autopopulate_dtype.nil? then
+                          # the device type is not found, create it
+                          _dtype_data = {:manufacturer => _autopopulate_manuf[:id], :model => _autopopulate_default_dtype, :slug => _autopopulate_default_dtype.to_url}
+                          if (_dtype_create_response = _nb.post('dcim/device_types/', _dtype_data).body) and
+                             _dtype_create_response.is_a?(Hash) then
+                             _autopopulate_dtype = _dtype_create_response
+                          end
+                        end
+
+                        # # now we must also have the device type ID
+                        if !_autopopulate_dtype&.fetch(:id, nil)&.nonzero? then
+
+                          # create the device
+                          _device_name = "#{_key} (#{_autopopulate_manuf[:name]})"
+                          _device_data = {:name => _device_name, :device_type => _autopopulate_dtype[:id], :device_role => _autopopulate_drole[:id], :site => _autopopulate_site[:id], :status => "inventory" }
+                          if (_dtype_create_response = _nb.post('dcim/devices/', _device_data).body) and
+                             _dtype_create_response.is_a?(Hash) then
+                             _autopopulate_dtype = _dtype_create_response
+                          end
+
+                        end # _autopopulate_dtype[:id] is valid
+
+                      end # _autopopulate_manuf[:id] is valid
+
+                    end # virtual machine vs. regular device
+
+                  end # _autopopulate_drole[:id] is valid
 
                 end # _autopopulate turned on and no results found
 
