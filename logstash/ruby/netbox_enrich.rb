@@ -247,44 +247,21 @@ def filter(event)
               end
               _nb_headers = { 'Content-Type': 'application/json' }
 
-              case _lookup_type
-              #################################################################################
-              when :ip_vrf
-                # retrieve the list VRFs containing IP address prefixes containing the search key
-                _vrfs = Array.new
-                _query = {:contains => _key, :offset => 0, :limit => _page_size}
-                _query[:site_n] = _lookup_site unless _lookup_site.nil? || _lookup_site&.empty?
-                begin
-                  while true do
-                    if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) &&
-                       _prefixes_response.is_a?(Hash)
-                    then
-                      _tmp_prefixes = _prefixes_response.fetch(:results, [])
-                      _tmp_prefixes.each do |p|
-                        if (_vrf = p.fetch(:vrf, nil))
-                          # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
-                          # if _verbose, include entire object as :details
-                          _vrfs << { :name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
-                                     :id => _vrf.fetch(:id, nil),
-                                     :site => ((_site = p.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
-                                     :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
-                                     :url => p.fetch(:url, _vrf.fetch(:url, nil)),
-                                     :details => _verbose ? _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }}) : nil }
-                        end
-                      end
-                      _query[:offset] += _tmp_prefixes.length()
-                      break unless (_tmp_prefixes.length() >= _page_size)
-                    else
-                      break
-                    end
-                  end
-                rescue Faraday::Error
-                  # give up aka do nothing
-                end
-                collect_values(crush(_vrfs))
+              _lookup_result = nil
+              _autopopulate_device = nil
+              _autopopulate_drole = nil
+              _autopopulate_dtype = nil
+              _autopopulate_interface = nil
+              _autopopulate_manuf = nil
+              _autopopulate_site = nil
+              _vrfs = nil
+              _devices = nil
 
+              # handle :ip_device first, because if we're doing autopopulate we're also going to use
+              # some of the logic from :ip_vrf
+
+              if (_lookup_type == :ip_device)
               #################################################################################
-              when :ip_device
                 # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
                 # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
                 # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
@@ -353,12 +330,6 @@ def filter(event)
                 if _autopopulate && (_query[:offset] == 0)
 
                   # no results found, autopopulate enabled, let's create an entry for this device
-                  _autopopulate_device = nil
-                  _autopopulate_drole = nil
-                  _autopopulate_dtype = nil
-                  _autopopulate_interface = nil
-                  _autopopulate_manuf = nil
-                  _autopopulate_site = nil
 
                   # match/look up manufacturer based on OUI
                   if !_autopopulate_oui.nil? && !_autopopulate_oui&.empty?
@@ -559,22 +530,6 @@ def filter(event)
 
                         end # _autopopulate_manuf[:id] is valid
 
-                        if !_autopopulate_device.nil? && _autopopulate_device&.fetch(:id, nil)&.nonzero?
-                          # device has been created, we need to create an interface for it
-                          _interface_data = {:device => _autopopulate_device[:id],
-                                             :name => "GigabitEthernet0/0/0",
-                                             :type => "1000base-t" }
-                          if !_autopopulate_mac.nil? && !_autopopulate_mac&.empty?
-                            _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
-                          end
-                          if (_interface_create_reponse = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
-                             _interface_create_reponse.is_a?(Hash) &&
-                             _interface_create_reponse.has_key?(:id)
-                          then
-                             _autopopulate_interface = _interface_create_reponse
-                          end
-                        end # check if device was created and has ID
-
                       end # virtual machine vs. regular device
 
                     end # site and drole are valid
@@ -601,13 +556,70 @@ def filter(event)
 
                 _devices = collect_values(crush(_devices))
                 _devices.fetch(:service, [])&.flatten!&.uniq!
-                _devices
+                _lookup_result = _devices
+              end # _lookup_type == :ip_device
 
+              # this || is because we are going to need to do the VRF lookup if we're autopopulating
+              # as well as if we're specifically requested to do that enrichment
+
+              if (_lookup_type == :ip_vrf) || !_autopopulate_device.nil?
               #################################################################################
-              # case _lookup_type fallthrough
-              else
-                nil
-              end
+                # retrieve the list VRFs containing IP address prefixes containing the search key
+                _vrfs = Array.new
+                _query = {:contains => _key, :offset => 0, :limit => _page_size}
+                _query[:site_n] = _lookup_site unless _lookup_site.nil? || _lookup_site&.empty?
+                begin
+                  while true do
+                    if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) &&
+                       _prefixes_response.is_a?(Hash)
+                    then
+                      _tmp_prefixes = _prefixes_response.fetch(:results, [])
+                      _tmp_prefixes.each do |p|
+                        if (_vrf = p.fetch(:vrf, nil))
+                          # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
+                          # if _verbose, include entire object as :details
+                          _vrfs << { :name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
+                                     :id => _vrf.fetch(:id, nil),
+                                     :site => ((_site = p.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                     :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
+                                     :url => p.fetch(:url, _vrf.fetch(:url, nil)),
+                                     :details => _verbose ? _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }}) : nil }
+                        end
+                      end
+                      _query[:offset] += _tmp_prefixes.length()
+                      break unless (_tmp_prefixes.length() >= _page_size)
+                    else
+                      break
+                    end
+                  end
+                rescue Faraday::Error
+                  # give up aka do nothing
+                end
+                _vrfs = collect_values(crush(_vrfs))
+                _lookup_result = _vrfs unless (_lookup_type != :ip_vrf)
+              end # _lookup_type == :ip_vrf
+
+              if !_autopopulate_device.nil? && _autopopulate_device&.fetch(:id, nil)&.nonzero?
+                # device has been created, we need to create an interface for it
+                _interface_data = {:device => _autopopulate_device[:id],
+                                   :name => "GigabitEthernet0/0/0",
+                                   :type => "1000base-t" }
+                if !_autopopulate_mac.nil? && !_autopopulate_mac&.empty?
+                  _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
+                end
+                if !_vrfs.nil? && !_vrfs&.empty?
+                  _interface_data[:vrf] = _vrfs.first.fetch(:id, nil)
+                end
+                if (_interface_create_reponse = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
+                   _interface_create_reponse.is_a?(Hash) &&
+                   _interface_create_reponse.has_key?(:id)
+                then
+                   _autopopulate_interface = _interface_create_reponse
+                end
+              end # check if device was created and has ID
+
+              # yield return value for cache_hash getset
+              _lookup_result
             }
 
   if !_result.nil? && _result.key?(:url) && !_result[:url]&.empty?
