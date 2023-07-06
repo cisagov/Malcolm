@@ -188,7 +188,7 @@ end
 
 def filter(event)
   _key = event.get("#{@source}")
-  if (not @netbox_enabled) || @lookup_type.nil? || @lookup_type&.empty? || _key.nil? || _key&.empty?
+  if (not @netbox_enabled) || @lookup_type.nil? || @lookup_type.empty? || _key.nil? || _key.empty?
     return [event]
   end
 
@@ -608,7 +608,7 @@ def filter(event)
                   _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
                 end
                 if !_vrfs.nil? && !_vrfs&.empty?
-                  _interface_data[:vrf] = _vrfs.first.fetch(:id, nil)
+                  _interface_data[:vrf] = _vrfs.fetch(:id, []).first
                 end
                 if (_interface_create_reponse = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
                    _interface_create_reponse.is_a?(Hash) &&
