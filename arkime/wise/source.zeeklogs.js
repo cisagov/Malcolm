@@ -11,7 +11,7 @@ const WISESource = require('./wiseSource.js');
 //   (https://github.com/idaholab/Malcolm/tree/main/logstash/pipelines)
 //
 // Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
-// see https://raw.githubusercontent.com/idaholab/Malcolm/main/License.txt
+// see https://raw.githubusercontent.com/idaholab/Malcolm/main/LICENSE.txt
 //////////////////////////////////////////////////////////////////////////////////
 
 class MalcolmSource extends WISESource {

@@ -1,10 +1,14 @@
-Software License Agreement
+This project contains code from the Idaho National Laboratory's Malcolm Project
 
-For more information, please see DHS_TOU.pdf.
+https://github.com/idaholab/Malcolm
+
+See LICENSE.txt for license terms.
 
 Malcolm is Copyright (c) 2023 Battelle Energy Alliance, LLC, and is developed
 and released through the cooperation of the Cybersecurity and Infrastructure
 Security Agency of the U.S. Department of Homeland Security. All rights reserved.
+
+ALL RIGHTS RESERVED
 
 A U.S. Government contractor developed MALCOLM for the Cybersecurity and
 Infrastructure Security Agency of the U.S. Department of Homeland Security
@@ -18,25 +22,16 @@ distribute copies to the public, including by electronic means, and perform
 publicly and display publicly MALCOLM, in any manner, including by electronic
 means, and for any purpose whatsoever.
 
-
-https://github.com/idaholab/Malcolm
-
-
-Copyright 2023 Battelle Energy Alliance, LLC
-
-
-ALL RIGHTS RESERVED
-
-
 These data were produced by Office of Nuclear Energy of the U.S. Department of
-Energy under Contract No. DE-AC07-05ID14517 with
-the Department of Energy. The Government is granted for itself, and
-others acting on its behalf, a paid-up, a nonexclusive, irrevocable
-worldwide license in this data to reproduce, distribute copies to the
-public, prepare derivative works, perform publicly and display
-publicly, and to permit others to do so. NEITHER THE UNITED STATES NOR
-THE UNITED STATES DEPARTMENT OF ENERGY, NOR ANY OF THEIR EMPLOYEES,
-MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LEGAL LIABILITY
-OR RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS, OR USEFULNESS OF ANY
-DATA, APPARATUS, PRODUCT, OR PROCESS DISCLOSED, OR REPRESENTS THAT ITS
-USE WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
+Energy under Contract No. DE-AC07-05ID14517 with the Department of Energy. The
+Government is granted for itself, and others acting on its behalf, a paid-up, a
+nonexclusive, irrevocable worldwide license in this data to reproduce, distribute
+copies to the public, prepare derivative works, perform publicly and display publicly,
+and to permit others to do so. NEITHER THE UNITED STATES NOR THE UNITED STATES
+DEPARTMENT OF ENERGY, NOR ANY OF THEIR EMPLOYEES, MAKES ANY WARRANTY, EXPRESS OR
+IMPLIED, OR ASSUMES ANY LEGAL LIABILITY OR RESPONSIBILITY FOR THE ACCURACY,
+COMPLETENESS, OR USEFULNESS OF ANY DATA, APPARATUS, PRODUCT, OR PROCESS DISCLOSED,
+OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
+
+
+Contact the authors: malcolm@inl.gov
