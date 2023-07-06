@@ -27,7 +27,7 @@ def register(params)
   if @lookup_site.nil? && !_lookup_site_env.nil?
     @lookup_site = ENV[_lookup_site_env]
   end
-  if !@lookup_site.nil? && @lookup_site.empty? then
+  if !@lookup_site.nil? && @lookup_site.empty?
     @lookup_site = nil
   end
 
@@ -99,6 +99,7 @@ def register(params)
   # fields for device autopopulation
   @source_hostname = params["source_hostname"]
   @source_oui = params["source_oui"]
+  @source_mac = params["source_mac"]
   @source_segment = params["source_segment"]
 
   # default manufacturer, device role and device type if not specified, either specified directly or read from ENVs
@@ -107,12 +108,25 @@ def register(params)
   if @default_manuf.nil? && !_default_manuf_env.nil?
     @default_manuf = ENV[_default_manuf_env]
   end
-  if !@default_manuf.nil? && @default_manuf.empty? then
+  if !@default_manuf.nil? && @default_manuf.empty?
     @default_manuf = nil
   end
 
+  _vendor_oui_map_path = params.fetch("vendor_oui_map_path", "/etc/vendor_macs.yaml")
+  if File.exist?(_vendor_oui_map_path)
+    @macarray = Array.new
+    YAML.safe_load(File.read(_vendor_oui_map_path)).each do |mac|
+      @macarray.push([mac_string_to_integer(mac['low']), mac_string_to_integer(mac['high']), mac['name']])
+    end
+    # Array.bsearch only works on a sorted array
+    @macarray.sort_by! { |k| [k[0], k[1]]}
+  else
+    @macarray = nil
+  end
+  @macregex = Regexp.new(/\A([0-9a-fA-F]{2}[-:.]){5}([0-9a-fA-F]{2})\z/)
+
   _vm_oui_map_path = params.fetch("vm_oui_map_path", "/etc/vm_macs.yaml")
-  if File.exist?(_vm_oui_map_path) then
+  if File.exist?(_vm_oui_map_path)
     @vm_namesarray = Set.new
     YAML.safe_load(File.read(_vm_oui_map_path)).each do |mac|
       @vm_namesarray.add(mac['name'].to_s.downcase)
@@ -126,7 +140,7 @@ def register(params)
   if @default_dtype.nil? && !_default_dtype_env.nil?
     @default_dtype = ENV[_default_dtype_env]
   end
-  if !@default_dtype.nil? && @default_dtype.empty? then
+  if !@default_dtype.nil? && @default_dtype.empty?
     @default_dtype = nil
   end
 
@@ -135,7 +149,7 @@ def register(params)
   if @default_drole.nil? && !_default_drole_env.nil?
     @default_drole = ENV[_default_drole_env]
   end
-  if !@default_drole.nil? && @default_drole.empty? then
+  if !@default_drole.nil? && @default_drole.empty?
     @default_drole = nil
   end
 
@@ -145,7 +159,7 @@ def register(params)
   if _autopopulate_fuzzy_threshold_str.nil? && !_autopopulate_fuzzy_threshold_str_env.nil?
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
-  if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty? then
+  if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
     @autopopulate_fuzzy_threshold = 0.75
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
@@ -188,15 +202,40 @@ def filter(event)
   _lookup_site = @lookup_site
   _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
   _autopopulate = @autopopulate
-  _autopopulate_hostname = event.get("#{@source_hostname}")
-  _autopopulate_oui = event.get("#{@source_oui}")
-  _autopopulate_segment = event.get("#{@source_segment}")
   _autopopulate_default_manuf = (@default_manuf.nil? || @default_manuf&.empty?) ? "Unspecified" : @default_manuf
   _autopopulate_default_drole = (@default_drole.nil? || @default_drole&.empty?) ? "Unspecified" : @default_drole
   _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype&.empty?) ? "Unspecified" : @default_dtype
   _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site&.empty?) ? "default" : @lookup_site
   _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
   _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui&.empty?
+  _autopopulate_hostname = event.get("#{@source_hostname}")
+  _autopopulate_mac = event.get("#{@source_mac}")
+  _autopopulate_oui = event.get("#{@source_oui}")
+  if (!_autopopulate_mac.nil? && !_autopopulate_mac&.empty?) &&
+     (_autopopulate_oui.nil? || _autopopulate_oui&.empty?)
+  then
+    # MAC is set but OUI is not, do a quick lookup
+    case _autopopulate_mac
+    when String
+      if @macregex.match?(_autopopulate_mac)
+        _macint = mac_string_to_integer(_autopopulate_mac)
+        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+        _autopopulate_oui = _vendor[2] unless _vendor.nil?
+      end # _autopopulate_mac matches @macregex
+    when Array
+      _autopopulate_mac.each do |_addr|
+        if @macregex.match?(_addr)
+          _macint = mac_string_to_integer(_addr)
+          _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+          if !_vendor.nil?
+            _autopopulate_oui = _vendor[2]
+            break
+          end # !_vendor.nil?
+        end # _addr matches @macregex
+      end # _autopopulate_mac.each do
+    end # case statement _autopopulate_mac String vs. Array
+  end # MAC is populated but OUI is not
+
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
             }.getset(_key){
@@ -217,7 +256,9 @@ def filter(event)
                 _query[:site_n] = _lookup_site unless _lookup_site.nil? || _lookup_site&.empty?
                 begin
                   while true do
-                    if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) && _prefixes_response.is_a?(Hash) then
+                    if (_prefixes_response = _nb.get('ipam/prefixes/', _query).body) &&
+                       _prefixes_response.is_a?(Hash)
+                    then
                       _tmp_prefixes = _prefixes_response.fetch(:results, [])
                       _tmp_prefixes.each do |p|
                         if (_vrf = p.fetch(:vrf, nil))
@@ -252,7 +293,9 @@ def filter(event)
                 _query = {:address => _key, :offset => 0, :limit => _page_size}
                 begin
                   while true do
-                    if (_ip_addresses_response = _nb.get('ipam/ip-addresses/', _query).body) && _ip_addresses_response.is_a?(Hash) then
+                    if (_ip_addresses_response = _nb.get('ipam/ip-addresses/', _query).body) &&
+                       _ip_addresses_response.is_a?(Hash)
+                    then
                       _tmp_ip_addresses = _ip_addresses_response.fetch(:results, [])
                       _tmp_ip_addresses.each do |i|
                         _is_device = nil
@@ -265,11 +308,13 @@ def filter(event)
                           _device_site = ((_site = _device.fetch(:site, nil)) && _site&.key?(:name)) ? _site[:name] : _site&.fetch(:display, nil)
                           next unless (_device_site.to_s.downcase == _lookup_site.to_s.downcase) || _lookup_site.nil? || _lookup_site&.empty? || _device_site.nil? || _device_site&.empty?
                           # look up service if requested (based on device/vm found and service port)
-                          if (_lookup_service_port > 0) then
+                          if (_lookup_service_port > 0)
                             _services = Array.new
                             _service_query = { (_is_device ? :device_id : :virtual_machine_id) => _device_id, :port => _lookup_service_port, :offset => 0, :limit => _page_size }
                             while true do
-                              if (_services_response = _nb.get('ipam/services/', _service_query).body) && _services_response.is_a?(Hash) then
+                              if (_services_response = _nb.get('ipam/services/', _service_query).body) &&
+                                 _services_response.is_a?(Hash)
+                              then
                                 _tmp_services = _services_response.fetch(:results, [])
                                 _services.unshift(*_tmp_services) unless _tmp_services.nil? || _tmp_services&.empty?
                                 _service_query[:offset] += _tmp_services.length()
@@ -306,14 +351,20 @@ def filter(event)
                 end
 
                 if _autopopulate && (_query[:offset] == 0)
+
                   # no results found, autopopulate enabled, let's create an entry for this device
+                  _autopopulate_device = nil
+                  _autopopulate_drole = nil
+                  _autopopulate_dtype = nil
+                  _autopopulate_interface = nil
+                  _autopopulate_manuf = nil
+                  _autopopulate_site = nil
 
                   # match/look up manufacturer based on OUI
-                  _autopopulate_manuf = nil
-                  if !_autopopulate_oui.nil? && !_autopopulate_oui&.empty? then
+                  if !_autopopulate_oui.nil? && !_autopopulate_oui&.empty?
 
                     # does it look like a VM or a regular device?
-                    if @vm_namesarray.include?(_autopopulate_oui) then
+                    if @vm_namesarray.include?(_autopopulate_oui)
                       # looks like this is probably a virtual machine
                       _autopopulate_manuf = { :name => _autopopulate_oui,
                                               :match => 1.0,
@@ -330,7 +381,9 @@ def filter(event)
                         _query = {:offset => 0, :limit => _page_size}
                         begin
                           while true do
-                            if (_manufs_response = _nb.get('dcim/manufacturers/', _query).body) && _manufs_response.is_a?(Hash) then
+                            if (_manufs_response = _nb.get('dcim/manufacturers/', _query).body) &&
+                               _manufs_response.is_a?(Hash)
+                            then
                               _tmp_manufs = _manufs_response.fetch(:results, [])
                               _tmp_manufs.each do |_manuf|
                                 _tmp_name = _manuf.fetch(:name, _manuf.fetch(:display, nil))
@@ -356,7 +409,7 @@ def filter(event)
                     end # virtual machine vs. regular device
                   end # _autopopulate_oui specified
 
-                  if !_autopopulate_manuf.is_a?(Hash) then
+                  if !_autopopulate_manuf.is_a?(Hash)
                     # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
                     _autopopulate_manuf = { :name => _autopopulate_create_manuf ? _autopopulate_oui : _autopopulate_default_manuf,
                                             :match => 0.0,
@@ -375,15 +428,18 @@ def filter(event)
                       if (_sites_response = _nb.get('dcim/sites/', _query).body) &&
                          _sites_response.is_a?(Hash) &&
                          (_tmp_sites = _sites_response.fetch(:results, [])) &&
-                         (_tmp_sites.length() > 0) then
+                         (_tmp_sites.length() > 0)
+                      then
                          _site = _tmp_sites.first
                       end
 
-                      if _site.nil? then
+                      if _site.nil?
                         # the device site is not found, create it
                         _site_data = {:name => _autopopulate_default_site, :slug => _autopopulate_default_site.to_url, :status => "active" }
                         if (_site_create_response = _nb.post('dcim/sites/', _site_data.to_json, _nb_headers).body) &&
-                           _site_create_response.is_a?(Hash) then
+                           _site_create_response.is_a?(Hash) &&
+                           _site_create_response.has_key?(:id)
+                        then
                            _site = _site_create_response
                         end
                       end
@@ -403,15 +459,18 @@ def filter(event)
                       if (_droles_response = _nb.get('dcim/device-roles/', _query).body) &&
                          _droles_response.is_a?(Hash) &&
                          (_tmp_droles = _droles_response.fetch(:results, [])) &&
-                         (_tmp_droles.length() > 0) then
+                         (_tmp_droles.length() > 0)
+                      then
                          _drole = _tmp_droles.first
                       end
 
-                      if _drole.nil? then
+                      if _drole.nil?
                         # the device role is not found, create it
                         _drole_data = {:name => _autopopulate_default_drole, :slug => _autopopulate_default_drole.to_url, :color => "d3d3d3" }
                         if (_drole_create_response = _nb.post('dcim/device-roles/', _drole_data.to_json, _nb_headers).body) &&
-                           _drole_create_response.is_a?(Hash) then
+                           _drole_create_response.is_a?(Hash) &&
+                           _drole_create_response.has_key?(:id)
+                        then
                            _drole = _drole_create_response
                         end
                       end
@@ -425,73 +484,96 @@ def filter(event)
                   # we should have found or created the autopopulate device role and site
                   begin
                     if _autopopulate_site&.fetch(:id, nil)&.nonzero? &&
-                       _autopopulate_drole&.fetch(:id, nil)&.nonzero? then
+                       _autopopulate_drole&.fetch(:id, nil)&.nonzero?
+                    then
 
-                      if _autopopulate_manuf[:vm] then
+                      if _autopopulate_manuf[:vm]
                         # todo: handle VM
                         nil
 
                       else
                         # a regular non-vm device
 
-                        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+                        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
                           # the manufacturer was default (not found) so look it up first
                           _query = {:offset => 0, :limit => 1, :name => _autopopulate_manuf[:name]}
                           if (_manufs_response = _nb.get('dcim/manufacturers/', _query).body) &&
                              _manufs_response.is_a?(Hash) &&
                              (_tmp_manufs = _manufs_response.fetch(:results, [])) &&
-                             (_tmp_manufs.length() > 0) then
+                             (_tmp_manufs.length() > 0)
+                          then
                              _autopopulate_manuf[:id] = _tmp_manufs.first.fetch(:id, nil)
                              _autopopulate_manuf[:match] = 1.0
                           end
                         end
 
-                        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+                        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
                           # the manufacturer is still not found, create it
                           _manuf_data = {:name => _autopopulate_manuf[:name], :slug => _autopopulate_manuf[:name].to_url}
                           if (_manuf_create_response = _nb.post('dcim/manufacturers/', _manuf_data.to_json, _nb_headers).body) &&
-                             _manuf_create_response.is_a?(Hash) then
+                             _manuf_create_response.is_a?(Hash)
+                          then
                              _autopopulate_manuf[:id] = _manuf_create_response.fetch(:id, nil)
                              _autopopulate_manuf[:match] = 1.0
                           end
                         end
 
                         # at this point we *must* have the manufacturer ID
-                        _autopopulate_dtype = nil
-                        if _autopopulate_manuf.fetch(:id, nil)&.nonzero? then
+                        if _autopopulate_manuf.fetch(:id, nil)&.nonzero?
 
                           # make sure the desired device type also exists, look it up first
                           _query = {:offset => 0, :limit => 1, :manufacturer_id => _autopopulate_manuf[:id], :model => _autopopulate_default_dtype }
                           if (_dtypes_response = _nb.get('dcim/device-types/', _query).body) &&
                              _dtypes_response.is_a?(Hash) &&
                              (_tmp_dtypes = _dtypes_response.fetch(:results, [])) &&
-                             (_tmp_dtypes.length() > 0) then
+                             (_tmp_dtypes.length() > 0)
+                          then
                              _autopopulate_dtype = _tmp_dtypes.first
                           end
 
-                          if _autopopulate_dtype.nil? then
+                          if _autopopulate_dtype.nil?
                             # the device type is not found, create it
                             _dtype_data = {:manufacturer => _autopopulate_manuf[:id], :model => _autopopulate_default_dtype, :slug => _autopopulate_default_dtype.to_url}
                             if (_dtype_create_response = _nb.post('dcim/device-types/', _dtype_data.to_json, _nb_headers).body) &&
-                               _dtype_create_response.is_a?(Hash) then
+                               _dtype_create_response.is_a?(Hash) &&
+                               _dtype_create_response.has_key?(:id)
+                            then
                                _autopopulate_dtype = _dtype_create_response
                             end
                           end
 
                           # # now we must also have the device type ID
-                          if _autopopulate_dtype&.fetch(:id, nil)&.nonzero? then
+                          if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
 
                             # create the device
                             _device_name = "#{_key} (#{_autopopulate_manuf[:name]})"
                             _device_data = {:name => _device_name, :device_type => _autopopulate_dtype[:id], :device_role => _autopopulate_drole[:id], :site => _autopopulate_site[:id], :status => "inventory" }
-                            if (_dtype_create_response = _nb.post('dcim/devices/', _device_data.to_json, _nb_headers).body) &&
-                               _dtype_create_response.is_a?(Hash) then
-                               _autopopulate_dtype = _dtype_create_response
+                            if (_device_create_response = _nb.post('dcim/devices/', _device_data.to_json, _nb_headers).body) &&
+                               _device_create_response.is_a?(Hash) &&
+                               _device_create_response.has_key?(:id)
+                            then
+                               _autopopulate_device = _device_create_response
                             end
 
                           end # _autopopulate_dtype[:id] is valid
 
                         end # _autopopulate_manuf[:id] is valid
+
+                        if !_autopopulate_device.nil? && _autopopulate_device&.fetch(:id, nil)&.nonzero?
+                          # device has been created, we need to create an interface for it
+                          _interface_data = {:device => _autopopulate_device[:id],
+                                             :name => "GigabitEthernet0/0/0",
+                                             :type => "1000base-t" }
+                          if !_autopopulate_mac.nil? && !_autopopulate_mac&.empty?
+                            _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
+                          end
+                          if (_interface_create = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
+                             _interface_create_reponse.is_a?(Hash) &&
+                             _interface_create_reponse.has_key?(:id)
+                          then
+                             _autopopulate_interface = _interface_create_reponse
+                          end
+                        end # check if device was created and has ID
 
                       end # virtual machine vs. regular device
 
@@ -501,6 +583,20 @@ def filter(event)
                     # give up aka do nothing
                   end
 
+                  if !_autopopulate_device.nil?
+                    # we created a device, so send it back out as the result for the event as well
+                    _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
+                                  :id => _autopopulate_device&.fetch(:id, nil),
+                                  :url => _autopopulate_device&.fetch(:url, nil),
+                                  :service => nil,
+                                  :site => _autopopulate_site&.fetch(:name, nil),
+                                  :role => _autopopulate_drole&.fetch(:name, nil),
+                                  :cluster => ((_cluster = _autopopulate_device&.fetch(:cluster, nil)) && _cluster&.key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
+                                  :device_type => _autopopulate_dtype&.fetch(:name, nil),
+                                  :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
+                                  :details => _verbose ? _autopopulate_device : nil }
+                  end # _autopopulate_device was not nil (i.e., we autocreated a device)
+
                 end # _autopopulate turned on and no results found
 
                 _devices = collect_values(crush(_devices))
@@ -508,14 +604,18 @@ def filter(event)
                 _devices
 
               #################################################################################
+              # case _lookup_type fallthrough
               else
                 nil
               end
             }
 
-  if !_result.nil? && _result.key?(:url) && !_result[:url]&.empty? then
+  if !_result.nil? && _result.key?(:url) && !_result[:url]&.empty?
     _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
-    if (_lookup_type == :ip_device) && (!_result.key?(:device_type) || _result[:device_type]&.empty?) && _result[:url].any? { |u| u.include? "virtual-machines" } then
+    if (_lookup_type == :ip_device) &&
+       (!_result.key?(:device_type) || _result[:device_type]&.empty?) &&
+       _result[:url].any? { |u| u.include? "virtual-machines" }
+    then
       _result[:device_type] = [ "Virtual Machine" ]
     end
   end
