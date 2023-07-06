@@ -668,7 +668,11 @@ def filter(event)
                 then
                    _autopopulate_ip = _ip_create_reponse
                 end
-              end # check if interface was created and has IP
+              end # check if interface was created and has ID
+
+              if !_autopopulate_ip.nil? && _autopopulate_ip.fetch(:id, nil)&.nonzero?
+                # TODO: set IP address as primary for device
+              end # check if IP was created and has ID
 
               # yield return value for cache_hash getset
               _lookup_result
