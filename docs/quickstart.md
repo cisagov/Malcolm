@@ -12,7 +12,7 @@ For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linu
 
 ### Source code
 
-The files required to build and run Malcolm are available on its [GitHub page]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}). Malcolm's source code is released under the terms of a permissive open source software license (see [`License.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/License.txt)  for the terms of its release).
+The files required to build and run Malcolm are available on its [GitHub page]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}). Malcolm's source-code is released under the terms of the Apache License, Version 2.0 (see [`LICENSE.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/LICENSE.txt) and [`NOTICE.txt`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/NOTICE.txt) for the terms of its release).
 
 ### Building Malcolm from scratch
 
