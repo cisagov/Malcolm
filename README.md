@@ -23,11 +23,11 @@ See the [**Malcolm documentation**](docs/README.md).
 
 You can help steer Malcolm's development by sharing your ideas and feedback. Please take a few minutes to complete [this survey ↪](https://forms.gle/JYt9QwA5C4SYX8My6) (hosted on Google Forms) so we can understand the members of the Malcolm community and their use cases for this tool.
 
-## <a name="Footer"></a>Copyright
+## <a name="Footer"></a>Copyright and License
 
 Malcolm is Copyright 2023 Battelle Energy Alliance, LLC, and is developed and released through the cooperation of the [Cybersecurity and Infrastructure Security Agency](https://www.cisa.gov/) of the [U.S. Department of Homeland Security](https://www.dhs.gov/).
 
-See `LICENSE.txt` for the terms of its release.
+Malcolm is licensed under the Apache License, version 2.0. See `LICENSE.txt` for the terms of its release.
 
 ## <a name="Contact"></a>Contact information of author(s):
 
