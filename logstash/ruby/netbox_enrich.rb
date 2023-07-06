@@ -567,7 +567,7 @@ def filter(event)
                           if !_autopopulate_mac.nil? && !_autopopulate_mac&.empty?
                             _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
                           end
-                          if (_interface_create = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
+                          if (_interface_create_reponse = _nb.post('dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
                              _interface_create_reponse.is_a?(Hash) &&
                              _interface_create_reponse.has_key?(:id)
                           then
