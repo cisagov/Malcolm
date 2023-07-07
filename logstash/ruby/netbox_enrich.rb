@@ -491,7 +491,6 @@ def filter(event)
                         _device_name = _autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{_key}" : "#{_autopopulate_hostname} @ #{_key}"
                         _device_data = { :name => _device_name,
                                          :site => _autopopulate_site[:id],
-                                         :device_role => _autopopulate_drole[:id],
                                          :status => "staged" }
                         if (_device_create_response = _nb.post('virtualization/virtual-machines/', _device_data.to_json, _nb_headers).body) &&
                            _device_create_response.is_a?(Hash) &&
