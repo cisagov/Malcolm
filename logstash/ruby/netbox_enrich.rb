@@ -351,7 +351,7 @@ def filter(event)
                   if !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
 
                     # does it look like a VM or a regular device?
-                    if @vm_namesarray.include?(_autopopulate_oui)
+                    if @vm_namesarray.include?(_autopopulate_oui.downcase)
                       # looks like this is probably a virtual machine
                       _autopopulate_manuf = { :name => _autopopulate_oui,
                                               :match => 1.0,
@@ -487,8 +487,18 @@ def filter(event)
                     then
 
                       if _autopopulate_manuf[:vm]
-                        # todo: handle VM
-                        nil
+                        # a virtual machine
+                        _device_name = _autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{_key}" : "#{_autopopulate_hostname} @ #{_key}"
+                        _device_data = { :name => _device_name,
+                                         :site => _autopopulate_site[:id],
+                                         :device_role => _autopopulate_drole[:id],
+                                         :status => "staged" }
+                        if (_device_create_response = _nb.post('virtualization/virtual-machines/', _device_data.to_json, _nb_headers).body) &&
+                           _device_create_response.is_a?(Hash) &&
+                           _device_create_response.has_key?(:id)
+                        then
+                           _autopopulate_device = _device_create_response
+                        end
 
                       else
                         # a regular non-vm device
@@ -558,7 +568,7 @@ def filter(event)
                                              :device_type => _autopopulate_dtype[:id],
                                              :device_role => _autopopulate_drole[:id],
                                              :site => _autopopulate_site[:id],
-                                             :status => "inventory" }
+                                             :status => "staged" }
                             if (_device_create_response = _nb.post('dcim/devices/', _device_data.to_json, _nb_headers).body) &&
                                _device_create_response.is_a?(Hash) &&
                                _device_create_response.has_key?(:id)
@@ -584,10 +594,8 @@ def filter(event)
                     _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
                                   :id => _autopopulate_device&.fetch(:id, nil),
                                   :url => _autopopulate_device&.fetch(:url, nil),
-                                  :service => nil,
                                   :site => _autopopulate_site&.fetch(:name, nil),
                                   :role => _autopopulate_drole&.fetch(:name, nil),
-                                  :cluster => ((_cluster = _autopopulate_device&.fetch(:cluster, nil)) && _cluster&.has_key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                                   :device_type => _autopopulate_dtype&.fetch(:name, nil),
                                   :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
                                   :details => _verbose ? _autopopulate_device : nil }
@@ -647,7 +655,7 @@ def filter(event)
                 # device has been created, we need to create an interface for it
                 _interface_data = { _autopopulate_manuf[:vm] ? :virtual_machine : :device => _autopopulate_device[:id],
                                     :name => "e0",
-                                    :type => "1000base-t" }
+                                    :type => "other" }
                 if !_autopopulate_mac.nil? && !_autopopulate_mac.empty?
                   _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
                 end
