@@ -92,7 +92,7 @@ The following elements of the NetBox data model are used by Malcolm for Asset In
 
 ## <a name="NetBoxPopPassive"></a>Populate NetBox inventory via passively-gathered network traffic metadata
 
-If the `LOGSTASH_NETBOX_AUTO_POPULATE` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, [uninventoried](#NetBoxCompare) devices observed in known network segments will be automatically created in the NetBox inventory based on the information available.
+If the `LOGSTASH_NETBOX_AUTO_POPULATE` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, [uninventoried](#NetBoxCompare) devices observed in known network segments will be automatically created in the NetBox inventory based on the information available. This value is set to `true` by answering **Y** to "Should Malcolm automatically populate NetBox inventory based on observed network traffic?" during [configuration](malcolm-config.md#ConfigAndTuning).
 
 However, careful consideration should be made before enabling this feature: the purpose of an asset management system is to document the intended state of a network: with Malcolm configured to populate NetBox with the live network state, a network misconfiguration fault could result in an **incorrect documented configuration**.
 
