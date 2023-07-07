@@ -216,30 +216,6 @@ def filter(event)
   _autopopulate_hostname = event.get("#{@source_hostname}")
   _autopopulate_mac = event.get("#{@source_mac}")
   _autopopulate_oui = event.get("#{@source_oui}")
-  if (!_autopopulate_mac.nil? && !_autopopulate_mac.empty?) &&
-     (_autopopulate_oui.nil? || _autopopulate_oui.empty?)
-  then
-    # MAC is set but OUI is not, do a quick lookup
-    case _autopopulate_mac
-    when String
-      if @macregex.match?(_autopopulate_mac)
-        _macint = mac_string_to_integer(_autopopulate_mac)
-        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
-        _autopopulate_oui = _vendor[2] unless _vendor.nil?
-      end # _autopopulate_mac matches @macregex
-    when Array
-      _autopopulate_mac.each do |_addr|
-        if @macregex.match?(_addr)
-          _macint = mac_string_to_integer(_addr)
-          _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
-          if !_vendor.nil?
-            _autopopulate_oui = _vendor[2]
-            break
-          end # !_vendor.nil?
-        end # _addr matches @macregex
-      end # _autopopulate_mac.each do
-    end # case statement _autopopulate_mac String vs. Array
-  end # MAC is populated but OUI is not
 
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
@@ -345,6 +321,31 @@ def filter(event)
 
                   # no results found, autopopulate enabled, private-space IP address...
                   # let's create an entry for this device
+
+                  # if MAC is set but OUI is not, do a quick lookup
+                  if (!_autopopulate_mac.nil? && !_autopopulate_mac.empty?) &&
+                     (_autopopulate_oui.nil? || _autopopulate_oui.empty?)
+                  then
+                    case _autopopulate_mac
+                    when String
+                      if @macregex.match?(_autopopulate_mac)
+                        _macint = mac_string_to_integer(_autopopulate_mac)
+                        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+                        _autopopulate_oui = _vendor[2] unless _vendor.nil?
+                      end # _autopopulate_mac matches @macregex
+                    when Array
+                      _autopopulate_mac.each do |_addr|
+                        if @macregex.match?(_addr)
+                          _macint = mac_string_to_integer(_addr)
+                          _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+                          if !_vendor.nil?
+                            _autopopulate_oui = _vendor[2]
+                            break
+                          end # !_vendor.nil?
+                        end # _addr matches @macregex
+                      end # _autopopulate_mac.each do
+                    end # case statement _autopopulate_mac String vs. Array
+                  end # MAC is populated but OUI is not
 
                   # match/look up manufacturer based on OUI
                   if !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
@@ -645,7 +646,7 @@ def filter(event)
               if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero?
                 # device has been created, we need to create an interface for it
                 _interface_data = { _autopopulate_manuf[:vm] ? :virtual_machine : :device => _autopopulate_device[:id],
-                                    :name => "GigabitEthernet0/0/0",
+                                    :name => "e0",
                                     :type => "1000base-t" }
                 if !_autopopulate_mac.nil? && !_autopopulate_mac.empty?
                   _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
