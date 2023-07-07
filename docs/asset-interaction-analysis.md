@@ -98,6 +98,8 @@ However, careful consideration should be made before enabling this feature: the 
 
 Devices created using this autopopulate method will have their `status` field set to `staged`. It is recommended that users periodically review automatically-created devices for correctness and to fill in known details that couldn't be determined from network traffic. For example, the `manufacturer` field for automatically-created devices will be set based on the organizational unique identifier (OUI) determined from the first three bytes of the observed MAC address, which may not be accurate if the device's traffic was observed across a router. If possible, observed hostnames will be used in the naming of the automatically-created devices, falling back to the device manufacturer otherwise (e.g., `MYHOSTNAME @ 10.10.0.123` vs. `Schweitzer Engineering @ 10.10.0.123`).
 
+Since device autocreation is based on IP address, information about network segments (including [virtual routing and forwarding (VRF)](https://docs.netbox.dev/en/stable/models/ipam/vrf/) and [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated.
+
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
 
 ## <a name="NetBoxPopActive"></a>Populate NetBox inventory via active discovery
