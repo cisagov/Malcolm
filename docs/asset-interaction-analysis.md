@@ -100,6 +100,8 @@ Devices created using this autopopulate method will have their `status` field se
 
 Since device autocreation is based on IP address, information about network segments (including [virtual routing and forwarding (VRF)](https://docs.netbox.dev/en/stable/models/ipam/vrf/) and [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated.
 
+Although network devices can be automatically created using this method, [services](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
+
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
 
 ## <a name="NetBoxPopActive"></a>Populate NetBox inventory via active discovery
