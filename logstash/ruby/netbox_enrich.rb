@@ -196,6 +196,7 @@ def filter(event)
     return [event]
   end
 
+  _key_ip = IPAddr.new(_key) rescue nil
   _url = @netbox_url
   _url_base = @netbox_url_base
   _url_suffix = @netbox_url_suffix
@@ -261,6 +262,7 @@ def filter(event)
               _autopopulate_site = nil
               _vrfs = nil
               _devices = nil
+              _exception_error = false
 
               # handle :ip_device first, because if we're doing autopopulate we're also going to use
               # some of the logic from :ip_vrf
@@ -330,14 +332,16 @@ def filter(event)
                       break unless (_tmp_ip_addresses.length() >= _page_size)
                     else
                       # weird/bad response, bail
+                      _exception_error = true
                       break
                     end
                   end # while true
                 rescue Faraday::Error
                   # give up aka do nothing
+                  _exception_error = true
                 end
 
-                if _autopopulate && (_query[:offset] == 0)
+                if _autopopulate && (_query[:offset] == 0) && !_exception_error
 
                   # no results found, autopopulate enabled, let's create an entry for this device
 
@@ -384,6 +388,7 @@ def filter(event)
                           end
                         rescue Faraday::Error
                           # give up aka do nothing
+                          _exception_error = true
                         end
                         # return the manuf with the highest match
                         !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
@@ -432,6 +437,7 @@ def filter(event)
 
                     rescue Faraday::Error
                       # give up aka do nothing
+                      _exception_error = true
                     end
                     _site
                   }
@@ -467,6 +473,7 @@ def filter(event)
 
                     rescue Faraday::Error
                       # give up aka do nothing
+                      _exception_error = true
                     end
                     _drole
                   }
@@ -544,7 +551,7 @@ def filter(event)
                           if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
 
                             # create the device
-                            _device_name = "#{_key} (#{_autopopulate_manuf[:name]})"
+                            _device_name = _autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{_key}" : "#{_autopopulate_hostname} @ #{_key}"
                             _device_data = { :name => _device_name,
                                              :device_type => _autopopulate_dtype[:id],
                                              :device_role => _autopopulate_drole[:id],
@@ -567,6 +574,7 @@ def filter(event)
 
                   rescue Faraday::Error
                     # give up aka do nothing
+                    _exception_error = true
                   end
 
                   if !_autopopulate_device.nil?
@@ -627,6 +635,7 @@ def filter(event)
                   end
                 rescue Faraday::Error
                   # give up aka do nothing
+                  _exception_error = true
                 end
                 _vrfs = collect_values(crush(_vrfs))
                 _lookup_result = _vrfs unless (_lookup_type != :ip_vrf)
@@ -649,30 +658,38 @@ def filter(event)
                 then
                    _autopopulate_interface = _interface_create_reponse
                 end
+
+                if !_autopopulate_interface.nil? && _autopopulate_interface.fetch(:id, nil)&.nonzero?
+                  # interface has been created, we need to create an IP address for it
+                  _ip_data = { :address => "#{_key}/#{_key_ip&.prefix()}",
+                               :assigned_object_type => _autopopulate_manuf[:vm] ? "virtualization.vminterface" : "dcim.interface",
+                               :assigned_object_id => _autopopulate_interface[:id],
+                               :status => "active" }
+                  if (_vrf = _autopopulate_interface.fetch(:vrf, nil)) &&
+                     (_vrf.has_key?(:id))
+                  then
+                    _ip_data[:vrf] = _vrf[:id]
+                  end
+                  if (_ip_create_reponse = _nb.post('ipam/ip-addresses/', _ip_data.to_json, _nb_headers).body) &&
+                     _ip_create_reponse.is_a?(Hash) &&
+                     _ip_create_reponse.has_key?(:id)
+                  then
+                     _autopopulate_ip = _ip_create_reponse
+                  end
+                end # check if interface was created and has ID
+
+                if !_autopopulate_ip.nil? && _autopopulate_ip.fetch(:id, nil)&.nonzero?
+                  # IP address was created, need to associate it as the primary IP for the device
+                  _primary_ip_data = { _key_ip&.ipv6? ? :primary_ip6 : :primary_ip4 => _autopopulate_ip[:id] }
+                  if (_ip_primary_reponse = _nb.patch("#{_autopopulate_manuf[:vm] ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_autopopulate_device[:id]}/", _primary_ip_data.to_json, _nb_headers).body) &&
+                     _ip_primary_reponse.is_a?(Hash) &&
+                     _ip_primary_reponse.has_key?(:id)
+                  then
+                     _autopopulate_device = _ip_create_reponse
+                  end
+                end # check if the IP address was created and has an ID
+
               end # check if device was created and has ID
-
-              if !_autopopulate_interface.nil? && _autopopulate_interface.fetch(:id, nil)&.nonzero?
-                # interface has been created, we need to create an IP address for it
-                _ip_data = { :address => "#{_key}/#{(IPAddr.new(_key) rescue nil)&.prefix()}",
-                             :assigned_object_type => _autopopulate_manuf[:vm] ? "virtualization.vminterface" : "dcim.interface",
-                             :assigned_object_id => _autopopulate_interface[:id],
-                             :status => "active" }
-                if (_vrf = _autopopulate_interface.fetch(:vrf, nil)) &&
-                   (_vrf.has_key?(:id))
-                then
-                  _ip_data[:vrf] = _vrf[:id]
-                end
-                if (_ip_create_reponse = _nb.post('ipam/ip-addresses/', _ip_data.to_json, _nb_headers).body) &&
-                   _ip_create_reponse.is_a?(Hash) &&
-                   _ip_create_reponse.has_key?(:id)
-                then
-                   _autopopulate_ip = _ip_create_reponse
-                end
-              end # check if interface was created and has ID
-
-              if !_autopopulate_ip.nil? && _autopopulate_ip.fetch(:id, nil)&.nonzero?
-                # TODO: set IP address as primary for device
-              end # check if IP was created and has ID
 
               # yield return value for cache_hash getset
               _lookup_result
