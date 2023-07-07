@@ -66,15 +66,15 @@ RUN apt-get -q update && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
+COPY --chmod=644 pcap-monitor/supervisord.conf /etc/supervisord.conf
+COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
+COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
+COPY --chmod=755 pcap-monitor/scripts/watch-pcap-uploads-folder.py /usr/local/bin/
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/pcap_watcher.py /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD pcap-monitor/supervisord.conf /etc/supervisord.conf
-ADD pcap-monitor/scripts/ /usr/local/bin/
-ADD shared/bin/pcap_watcher.py /usr/local/bin/
-ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD shared/bin/watch_common.py /usr/local/bin/
-ADD scripts/malcolm_utils.py /usr/local/bin/
 
 EXPOSE 30441
 

@@ -15,6 +15,7 @@ import logging
 import magic
 import os
 import pathlib
+import re
 import shutil
 import signal
 import sys
@@ -58,7 +59,8 @@ def file_processor(pathname, **kwargs):
             fileType = magic.from_file(pathname)
 
             if os.path.isdir(pcapDir) and (
-                (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng')) or ('pcap-ng' in fileType)
+                (fileMime in ('application/vnd.tcpdump.pcap', 'application/x-pcapng'))
+                or re.search(r'pcap-?ng', fileType, re.IGNORECASE)
             ):
                 # a pcap file to be processed by dropping it into pcapDir
                 logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {pcapDir}")
