@@ -341,9 +341,10 @@ def filter(event)
                   _exception_error = true
                 end
 
-                if _autopopulate && (_query[:offset] == 0) && !_exception_error
+                if _autopopulate && (_query[:offset] == 0) && !_exception_error && _key_ip&.private?
 
-                  # no results found, autopopulate enabled, let's create an entry for this device
+                  # no results found, autopopulate enabled, private-space IP address...
+                  # let's create an entry for this device
 
                   # match/look up manufacturer based on OUI
                   if !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
