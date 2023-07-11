@@ -72,6 +72,7 @@ RUN apt-get -q update && \
       chmod 644 /etc/unit/nginx-unit.json && \
     tr -cd '\11\12\15\40-\176' < /opt/netbox/netbox/netbox/configuration.py > /opt/netbox/netbox/netbox/configuration_ascii.py && \
       mv /opt/netbox/netbox/netbox/configuration_ascii.py /opt/netbox/netbox/netbox/configuration.py && \
+    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" /opt/netbox/netbox/netbox/settings.py && \
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' /opt/netbox/launch-netbox.sh
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -80,7 +81,6 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/*-defaults.json /etc/
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 EXPOSE 9001
 

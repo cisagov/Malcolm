@@ -90,8 +90,6 @@ freq:
 netbox:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./netbox/config/configuration:/etc/netbox/config:ro
-    - ./netbox/config/reports:/etc/netbox/reports:ro
-    - ./netbox/config/scripts:/etc/netbox/scripts:ro
     - ./netbox/media:/opt/netbox/netbox/media:rw
     - ./net-map.json:/usr/local/share/net-map.json:ro
 netbox-postgres:
