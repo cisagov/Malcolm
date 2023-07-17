@@ -69,12 +69,14 @@ jobs:
                virt-what \
                xorriso \
                xz-utils
-            git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
-            cd /tmp/live-build
-            dpkg-buildpackage -b -uc -us
-            cd /tmp
-            sudo dpkg -i /tmp/live-build*.deb
-            rm -rf /tmp/live-build
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet
+          git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
+          cd /tmp/live-build
+          dpkg-buildpackage -b -uc -us
+          cd /tmp
+          sudo dpkg -i /tmp/live-build*.deb
+          rm -rf /tmp/live-build
       -
         name: Checkout
         uses: actions/checkout@v3
@@ -104,7 +106,7 @@ jobs:
               docker rmi "$REPO_IMAGE"
           done
           DEST_IMAGES_TXZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.xz
-          docker save "${IMAGES[@]}" | xz --best > "$DEST_IMAGES_TXZ"
+          docker save "${IMAGES[@]}" | xz --fast > "$DEST_IMAGES_TXZ"
           for IMAGE in "${IMAGES[@]}"; do
             docker rmi "$IMAGE"
           done
