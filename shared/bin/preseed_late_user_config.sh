@@ -212,6 +212,6 @@ else
   SSH_PASSWORD_AUTH = "no"
 fi
 
-sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/ssh_config 2>/dev/null || true
+sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/sshd_config 2>/dev/null || true
 
 echo "malcolm/ssh_password_auth=$RET" >> /tmp/malcolm.answer
