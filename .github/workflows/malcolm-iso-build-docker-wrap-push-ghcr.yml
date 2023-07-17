@@ -67,7 +67,8 @@ jobs:
                software-properties-common \
                squashfs-tools \
                virt-what \
-               xorriso
+               xorriso \
+               xz-utils
             git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
             cd /tmp/live-build
             dpkg-buildpackage -b -uc -us
@@ -102,16 +103,16 @@ jobs:
               docker tag "$REPO_IMAGE" "$IMAGE" && \
               docker rmi "$REPO_IMAGE"
           done
-          DEST_IMAGES_TGZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.gz
-          docker save "${IMAGES[@]}" | gzip --best > "$DEST_IMAGES_TGZ"
+          DEST_IMAGES_TXZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.xz
+          docker save "${IMAGES[@]}" | xz --best > "$DEST_IMAGES_TXZ"
           for IMAGE in "${IMAGES[@]}"; do
             docker rmi "$IMAGE"
           done
           pushd ./malcolm-iso
           mkdir -p ./shared
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
-          sudo /usr/bin/env bash ./build.sh -r -d "$DEST_IMAGES_TGZ"
-          rm -rf ./shared/ "$DEST_IMAGES_TGZ"
+          sudo /usr/bin/env bash ./build.sh -r -d "$DEST_IMAGES_TXZ"
+          rm -rf ./shared/ "$DEST_IMAGES_TXZ"
           sudo chmod 644 ./malcolm-*.*
           popd
       -

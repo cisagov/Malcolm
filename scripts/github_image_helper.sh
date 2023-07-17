@@ -136,9 +136,9 @@ function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
     if [[ -e malcolm.iso ]]; then
       xorriso -osirrox on -indev malcolm.iso -extract /live/filesystem.squashfs filesystem.squashfs
       if [[ -e filesystem.squashfs ]]; then
-        unsquashfs filesystem.squashfs -f malcolm_images.tar.gz
-        if [[ -e squashfs-root/malcolm_images.tar.gz ]]; then
-          docker load -i squashfs-root/malcolm_images.tar.gz
+        unsquashfs filesystem.squashfs -f malcolm_images.tar.xz
+        if [[ -e squashfs-root/malcolm_images.tar.xz ]]; then
+          docker load -i squashfs-root/malcolm_images.tar.xz
         else
           echo "Failed to images tarball" 2>&1
         fi
