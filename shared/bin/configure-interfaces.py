@@ -87,7 +87,7 @@ class Constants:
     MSG_SET_HOSTNAME_SUCCESS = 'Set sensor hostname successfully!\n\n'
     MSG_CONFIG_SSH_SUCCESS = 'SSH authentication configured successfully!\n\n'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
-    MSG_SSH_PASSWORD_AUTH = 'Enable SSH Password Authentication?'
+    MSG_SSH_PASSWORD_AUTH = 'Allow SSH password authentication?'
     MSG_SELECT_INTERFACE = 'Select interface to configure'
     MSG_SELECT_BLINK_INTERFACE = 'Select capture interface to identify'
     MSG_BLINK_INTERFACE = '{} will blink for {} seconds'
@@ -189,7 +189,12 @@ def main():
     except Exception:
         pass
     if installation == Constants.DEV_SENSOR:
-        modeChoices = [Constants.MSG_CONFIG_INTERFACE, Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC, Constants.MSG_CONFIG_SSH]
+        modeChoices = [
+            Constants.MSG_CONFIG_INTERFACE,
+            Constants.MSG_CONFIG_HOST,
+            Constants.MSG_CONFIG_TIME_SYNC,
+            Constants.MSG_CONFIG_SSH,
+        ]
     elif installation == Constants.DEV_AGGREGATOR:
         modeChoices = [Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC, Constants.MSG_CONFIG_SSH]
     else:
@@ -406,8 +411,14 @@ def main():
 
             elif config_mode == Constants.MSG_CONFIG_SSH[0]:
                 # configure SSH authentication options
-                code = d.yesno(Constants.MSG_CONFIG_SSH_SUCCESS)
-                if (code == Dialog.OK):
+                code = d.yesno(
+                    Constants.MSG_SSH_PASSWORD_AUTH,
+                    # "Human sacrifice! Dogs and cats living together! Mass hysteria!"
+                    # (yes == No because I want "No" to be the default)
+                    yes_label="No",
+                    no_label="Yes",
+                )
+                if code == Dialog.CANCEL:
                     password_re = re.compile(r'^\s*#*\s*PasswordAuthentication\s+(yes|no)')
                     with fileinput.FileInput(Constants.SSHD_CONFIG_FILE, inplace=True, backup='.bak') as file:
                         for line in file:
@@ -415,7 +426,13 @@ def main():
                                 line = "PasswordAuthentication yes"
                             print(line)
                     # restart the ssh process
-                    run_subprocess('/bin/systemctl restart ssh')
+                    ecode, start_output = run_subprocess('/bin/systemctl restart ssh', stderr=True)
+                    if ecode == 0:
+                        code = d.msgbox(text=f"{Constants.MSG_CONFIG_SSH_SUCCESS}")
+                    else:
+                        code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format('\n'.join(start_output)))
+                else:
+                    raise CancelledError
 
             else:
                 # interface IP address configuration #################################################################################################
