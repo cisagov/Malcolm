@@ -347,7 +347,7 @@ jobs:
           done
           DEST_IMAGES_TXZ=$(pwd)/malcolm_"$(date +%Y.%m.%d_%H:%M:%S)"_${{ steps.extract_commit_sha.outputs.sha }}_images.tar.xz
           echo "Saving Malcolm Docker images to \"$DEST_IMAGES_TXZ\""
-          docker save "${IMAGES[@]}" | xz --fast > "$DEST_IMAGES_TXZ"
+          docker save "${IMAGES[@]}" | xz -1 > "$DEST_IMAGES_TXZ"
           for IMAGE in "${IMAGES[@]}"; do
             docker rmi "$IMAGE"
           done

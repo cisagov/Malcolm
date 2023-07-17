@@ -148,7 +148,7 @@ if mkdir "$DESTDIR"; then
     echo "This might take a few minutes..."
     DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.xz"
     IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
-    docker save "${IMAGES[@]}" | xz --fast > "$DESTNAMEIMAGES"
+    docker save "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
     echo "Packaged Malcolm docker images to \"$DESTNAMEIMAGES\""
     echo ""
   fi
