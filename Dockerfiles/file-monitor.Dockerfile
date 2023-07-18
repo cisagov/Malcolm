@@ -81,7 +81,7 @@ ENV YARA_VERSION "4.3.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV CAPA_VERSION "5.1.0"
+ENV CAPA_VERSION "6.0.0"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
@@ -204,13 +204,13 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
+COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
+COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
+COPY --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
+COPY --chmod=755 file-monitor/*update.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD shared/bin/zeek_carve*.py /usr/local/bin/
-ADD shared/bin/watch_common.py /usr/local/bin/
-ADD scripts/malcolm_utils.py /usr/local/bin/
-ADD file-monitor/supervisord.conf /etc/supervisord.conf
-ADD file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
-ADD file-monitor/*update.sh /usr/local/bin/
 
 USER ${PUSER}
 
