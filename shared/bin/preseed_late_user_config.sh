@@ -207,9 +207,9 @@ db_go
 db_get malcolm/ssh_password_auth
 
 if [ "$RET" = true ]; then
-  SSH_PASSWORD_AUTH = "yes"
+  SSH_PASSWORD_AUTH="yes"
 else
-  SSH_PASSWORD_AUTH = "no"
+  SSH_PASSWORD_AUTH="no"
 fi
 
 sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/sshd_config 2>/dev/null || true

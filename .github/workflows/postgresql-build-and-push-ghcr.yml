@@ -11,6 +11,7 @@ on:
       - '!shared/bin/agg-init.sh'
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
+      - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
       - '!shared/bin/zeek*'
