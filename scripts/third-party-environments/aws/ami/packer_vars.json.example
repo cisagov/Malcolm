@@ -1,0 +1,13 @@
+{
+  "aws_access_key": "XXXXXXXXXXXXXXXXXXXX",
+  "aws_secret_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "instance_type": "t2.micro",
+  "malcolm_tag": "v23.05.1",
+  "malcolm_repo": "idaholab/Malcolm",
+  "malcolm_uid": "1000",
+  "ssh_username": "ec2-user",
+  "vpc_region": "us-east-1",
+  "vpc_tag_name_filter": "",
+  "vpc_subnet_tag_name_filter": "",
+  "vpc_security_group_tag_name_filter": ""
+}

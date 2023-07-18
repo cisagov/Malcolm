@@ -15,7 +15,7 @@
         "zeek.bacnet_discovery.range_high": { "type": "integer" },
         "zeek.bacnet_discovery.range_low": { "type": "integer" },
         "zeek.bacnet_discovery.vendor": { "type": "keyword" },
-        "zeek.bacnet_property.array_index": { "type": "integer" },
+        "zeek.bacnet_property.array_index": { "type": "long" },
         "zeek.bacnet_property.instance_number": { "type": "long" },
         "zeek.bacnet_property.object_type": { "type": "keyword" },
         "zeek.bacnet_property.pdu_service": { "type": "keyword" },

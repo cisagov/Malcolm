@@ -5,6 +5,8 @@ metadata:
   name: filebeat
   namespace: malcolm
 spec:
+  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
+  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 5045
@@ -31,7 +33,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.05.1
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -79,6 +81,21 @@ spec:
           - name: filebeat-nginx-runtime-logs-volume
             mountPath: /nginx
             subPath: "nginx"
+      initContainers:
+      - name: filebeat-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/runtime-logs:nginx"
+        volumeMounts:
+          - name: filebeat-nginx-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
       volumes:
         - name: filebeat-var-local-catrust-volume
           configMap:
@@ -97,5 +114,4 @@ spec:
             claimName: suricata-claim
         - name: filebeat-nginx-runtime-logs-volume
           persistentVolumeClaim:
-            readOnly: true
             claimName: runtime-logs-claim

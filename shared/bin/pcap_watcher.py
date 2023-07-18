@@ -16,6 +16,7 @@ import logging
 import magic
 import os
 import pathlib
+import re
 import signal
 import sys
 import time
@@ -189,7 +190,7 @@ class EventWatcher:
             # get the file size, in bytes to compare against sane values
             fileSize = os.path.getsize(pathname)
             if (args.minBytes <= fileSize <= args.maxBytes) and (
-                (fileMime in PCAP_MIME_TYPES) or ('pcap-ng' in fileType)
+                (fileMime in PCAP_MIME_TYPES) or re.search(r'pcap-?ng', fileType, re.IGNORECASE)
             ):
                 relativePath = remove_prefix(pathname, os.path.join(args.baseDir, ''))
 

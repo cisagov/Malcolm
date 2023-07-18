@@ -389,7 +389,7 @@ def PodExec(
     stdout=True,
     stderr=True,
     stdin=None,
-    timeout=60,
+    timeout=180,
     maxPodsToExec=1,
 ):
     results = {}
@@ -408,7 +408,6 @@ def PodExec(
                     )
                     if resp.status.phase != 'Pending':
                         break
-
                 resp = kubeImported.stream.stream(
                     client.connect_get_namespaced_pod_exec,
                     podName,
@@ -422,11 +421,13 @@ def PodExec(
                 )
                 rawOutput = StringIO('')
                 rawErrput = StringIO('')
-                stdinRemaining = list(get_iterable(stdin)) if (stdin is not None) else []
+                stdinRemaining = (
+                    list(chain(*[i.split('\n') for i in list(get_iterable(stdin))])) if (stdin is not None) else []
+                )
                 counter = 0
                 while resp.is_open() and (counter <= timeout):
-                    resp.update(timeout=1)
-                    counter += 1
+                    resp.update(timeout=0 if stdinRemaining else 1)
+                    counter += 0 if stdinRemaining else 1
                     if stdout and resp.peek_stdout():
                         rawOutput.write(resp.read_stdout())
                     if stderr and resp.peek_stderr():

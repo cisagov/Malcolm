@@ -56,11 +56,14 @@ class Constants:
     TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -b -l -s'
     TIME_SYNC_NTP_CONFIG = '/etc/ntp.conf'
 
+    SSHD_CONFIG_FILE = "/etc/ssh/sshd_config"
+
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
     MSG_CONFIG_HOST = ('Hostname', 'Configure sensor hostname')
     MSG_CONFIG_INTERFACE = ('Interface', 'Configure an interface\'s IP address')
     MSG_CONFIG_TIME_SYNC = ('Time Sync', 'Configure time synchronization')
+    MSG_CONFIG_SSH = ('SSH Authentication', 'Configure SSH authentication')
     MSG_CONFIG_STATIC_TITLE = 'Provide the values for static IP configuration'
     MSG_ERR_ROOT_REQUIRED = 'Elevated privileges required, run as root'
     MSG_ERR_BAD_HOST = 'Invalid host or port'
@@ -82,7 +85,9 @@ class Constants:
     MSG_TESTING_CONNECTION_FAILURE = "Connection error: could not connect to {}:{}"
     MSG_SET_HOSTNAME_CURRENT = 'Current sensor identification information\n\n'
     MSG_SET_HOSTNAME_SUCCESS = 'Set sensor hostname successfully!\n\n'
+    MSG_CONFIG_SSH_SUCCESS = 'SSH authentication configured successfully!\n\n'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
+    MSG_SSH_PASSWORD_AUTH = 'Allow SSH password authentication?'
     MSG_SELECT_INTERFACE = 'Select interface to configure'
     MSG_SELECT_BLINK_INTERFACE = 'Select capture interface to identify'
     MSG_BLINK_INTERFACE = '{} will blink for {} seconds'
@@ -184,9 +189,14 @@ def main():
     except Exception:
         pass
     if installation == Constants.DEV_SENSOR:
-        modeChoices = [Constants.MSG_CONFIG_INTERFACE, Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC]
+        modeChoices = [
+            Constants.MSG_CONFIG_INTERFACE,
+            Constants.MSG_CONFIG_HOST,
+            Constants.MSG_CONFIG_TIME_SYNC,
+            Constants.MSG_CONFIG_SSH,
+        ]
     elif installation == Constants.DEV_AGGREGATOR:
-        modeChoices = [Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC]
+        modeChoices = [Constants.MSG_CONFIG_HOST, Constants.MSG_CONFIG_TIME_SYNC, Constants.MSG_CONFIG_SSH]
     else:
         print(Constants.MSG_ERR_DEV_INVALID)
         sys.exit(1)
@@ -396,6 +406,31 @@ def main():
                     else:
                         code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format('\n'.join(start_output)))
 
+                else:
+                    raise CancelledError
+
+            elif config_mode == Constants.MSG_CONFIG_SSH[0]:
+                # configure SSH authentication options
+                code = d.yesno(
+                    Constants.MSG_SSH_PASSWORD_AUTH,
+                    # "Human sacrifice! Dogs and cats living together! Mass hysteria!"
+                    # (yes == No because I want "No" to be the default)
+                    yes_label="No",
+                    no_label="Yes",
+                )
+                if code == Dialog.OK or code == Dialog.CANCEL:
+                    password_re = re.compile(r'^\s*#*\s*PasswordAuthentication\s+(yes|no)')
+                    with fileinput.FileInput(Constants.SSHD_CONFIG_FILE, inplace=True, backup='.bak') as file:
+                        for line in file:
+                            if password_re.match(line):
+                                line = f"PasswordAuthentication {'yes' if code == Dialog.CANCEL else 'no'}"
+                            print(line)
+                    # restart the ssh process
+                    ecode, start_output = run_subprocess('/bin/systemctl restart ssh', stderr=True)
+                    if ecode == 0:
+                        code = d.msgbox(text=f"{Constants.MSG_CONFIG_SSH_SUCCESS}")
+                    else:
+                        code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format('\n'.join(start_output)))
                 else:
                     raise CancelledError
 

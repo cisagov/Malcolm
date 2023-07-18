@@ -645,7 +645,7 @@ def netboxRestore(backupFileName=None):
                 err = 1
                 results = []
             if err != 0:
-                raise Exception('Error creating new NetBox database')
+                raise Exception(f'Error creating new NetBox database: {results}')
 
             # load the backed-up psql dump
             with gzip.open(backupFileName, 'rt') as f:
@@ -661,7 +661,7 @@ def netboxRestore(backupFileName=None):
                     err = 1
                     results = []
             if (err != 0) or (len(results) == 0):
-                raise Exception('Error loading NetBox database')
+                raise Exception(f'Error loading NetBox database: {results}')
 
             # migrations if needed
             if podsResults := PodExec(
@@ -669,14 +669,13 @@ def netboxRestore(backupFileName=None):
                 namespace=args.namespace,
                 command=['/opt/netbox/netbox/manage.py', 'migrate'],
             ):
-                eprint(podsResults)
                 err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                 results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
             else:
                 err = 1
                 results = []
             if (err != 0) or (len(results) == 0):
-                raise Exception('Error performing NetBox migration')
+                raise Exception(f'Error performing NetBox migration: {results}')
 
             # TODO: can't restore netbox/media directory via kubernetes at the moment
 

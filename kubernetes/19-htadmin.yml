@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: htadmin-container
-        image: ghcr.io/idaholab/malcolm/htadmin:23.05.1
+        image: ghcr.io/idaholab/malcolm/htadmin:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,6 +61,21 @@ spec:
           - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
+      initContainers:
+      - name: htadmin-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:auth,htadmin"
+        volumeMounts:
+          - name: htadmin-config-volume
+            mountPath: "/data/config"
       volumes:
         - name: htadmin-var-local-catrust-volume
           configMap:

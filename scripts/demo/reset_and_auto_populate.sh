@@ -252,10 +252,10 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   # wipe and/or restart the database as requested
   if [[ "$WIPE" == "true" ]]; then
     ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE" || true
-    ./scripts/start $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    ./scripts/start --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
     START_PID=$!
   elif [[ "$RESTART" == "true" ]]; then
-    ./scripts/restart $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
+    ./scripts/restart --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
     START_PID=$!
   else
     START_PID=
@@ -320,7 +320,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         # get the total number of session records in the database
         NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
                           curl -sSL "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
-                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count] | join ("")' | \
+                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
                           awk '{s+=$1} END {print s}') 2>/dev/null )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
           [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
@@ -357,7 +357,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
-      $(grep -q -P "NGINX_BASIC_AUTH\s*:\s*'no_authentication'" "$MALCOLM_FILE" && echo guest); do
+      $(grep -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
       docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
@@ -370,7 +370,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     sleep 5
     docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
-    for CONTAINER in filebeat logstash upload pcap-monitor zeek pcap-capture freq; do
+    for CONTAINER in htadmin filebeat logstash upload pcap-monitor zeek zeek-live suricata suricata-live pcap-capture freq; do
       docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5

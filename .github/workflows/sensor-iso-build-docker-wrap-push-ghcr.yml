@@ -20,6 +20,7 @@ jobs:
       actions: write
       packages: write
       contents: read
+      security-events: write
     defaults:
       run:
         shell: bash
@@ -103,7 +104,26 @@ jobs:
           rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md
           sudo chmod 644 ./hedgehog-*.*
           popd
-
+      -
+        name: Run Trivy vulnerability scanner
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './sensor-iso'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          hide-progress: true
+          ignore-unfixed: true
+          exit-code: '0'
+      -
+        name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
       -
         name: ghcr.io login
         uses: docker/login-action@v2

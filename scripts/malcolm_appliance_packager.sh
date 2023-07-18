@@ -130,7 +130,7 @@ if mkdir "$DESTDIR"; then
   ln -s ./install.py configure
   popd  >/dev/null 2>&1
   pushd .. >/dev/null 2>&1
-  DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
+  DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.xz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
@@ -146,9 +146,9 @@ if mkdir "$DESTDIR"; then
   CONFIRMATION=${CONFIRMATION:-N}
   if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
     echo "This might take a few minutes..."
-    DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.gz"
+    DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.xz"
     IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
-    docker save "${IMAGES[@]}" | gzip > "$DESTNAMEIMAGES"
+    docker save "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
     echo "Packaged Malcolm docker images to \"$DESTNAMEIMAGES\""
     echo ""
   fi

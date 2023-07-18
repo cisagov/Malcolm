@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: pcap-monitor-container
-        image: ghcr.io/idaholab/malcolm/pcap-monitor:23.05.1
+        image: ghcr.io/idaholab/malcolm/pcap-monitor:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -68,6 +68,21 @@ spec:
             name: pcap-monitor-pcap-volume
           - mountPath: "/zeek"
             name: pcap-monitor-zeek-volume
+      initContainers:
+      - name: pcap-monitor-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed,upload"
+        volumeMounts:
+          - name: pcap-monitor-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: pcap-monitor-var-local-catrust-volume
           configMap:

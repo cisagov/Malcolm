@@ -9,7 +9,7 @@
 ###############################################################################
 
 $fluent_bit_version = '2.1'
-$fluent_bit_full_version = '2.1.2'
+$fluent_bit_full_version = '2.1.6'
 
 ###############################################################################
 # select an item from a menu provided in an array
@@ -213,6 +213,11 @@ $malcolm_port = Read-Host -Prompt 'Enter Malcolm Filebeat TCP port (5045)'
 if ([string]::IsNullOrWhiteSpace($malcolm_port)) {
     $malcolm_port = '5045'
 }
+$agent_name_default = &"hostname" 2>&1
+$agent_name = Read-Host -Prompt 'Enter agent hostname ($agent_name_default)'
+if ([string]::IsNullOrWhiteSpace($agent_name)) {
+    $agent_name = $agent_name_default
+}
 $message_format = Read-Host -Prompt 'Enter fluent-bit output format (json_lines)'
 if ([string]::IsNullOrWhiteSpace($message_format)) {
     $message_format = 'json_lines'
@@ -338,6 +343,23 @@ if (-Not ([string]::IsNullOrWhiteSpace($message_module))) {
     $fluentbit_config += "    Match    *"
     $fluentbit_config += ""
 }
+
+if (-Not ([string]::IsNullOrWhiteSpace($agent_name))) {
+    $fluentbit_config += "[FILTER]"
+    $fluentbit_config += "    Name    modify"
+    $fluentbit_config += "    Match    *"
+    $fluentbit_config += "    Add    host.name ${agent_name}"
+    $fluentbit_config += ""
+    $fluentbit_config += "[FILTER]"
+    $fluentbit_config += "    Name    nest"
+    $fluentbit_config += "    Match    *"
+    $fluentbit_config += "    Operation    nest"
+    $fluentbit_config += "    Wildcard    host.*"
+    $fluentbit_config += "    Nested_under    host"
+    $fluentbit_config += "    Remove_prefix    host."
+    $fluentbit_config += ""
+}
+
 
 # write configuration out to file for fluent-bit.exe to read upon execution
 $fluentbit_config_path = "${input_chosen}_${malcolm_ip}_${now_unix_secs}.cfg"

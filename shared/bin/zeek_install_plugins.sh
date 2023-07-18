@@ -9,10 +9,6 @@ fi
 
 ZEEK_DIR=${ZEEK_DIR:-/opt/zeek}
 
-# going to clone under /usr/local/src
-SRC_BASE_DIR="/usr/local/src"
-mkdir -p "$SRC_BASE_DIR"
-
 #
 # get_latest_github_tagged_release
 #
@@ -31,12 +27,12 @@ function get_latest_github_tagged_release() {
 }
 
 #
-# clone_github_repo
+# zkg_install_github_repo
 #
-# clone the latest GitHub release tag if available (else, master/HEAD) under $SRC_BASE_DIR
+# zkg install the latest GitHub release tag if available (else, master/HEAD)
 # release tag/branch can be overriden by specifying the branch name with after the URL delimited by a |
 #
-function clone_github_repo() {
+function zkg_install_github_repo() {
   URL_PARAM="$1"
   URL_BRANCH_DELIM='|'
   URL_BRANCH_DELIM_COUNT="$(awk -F"${URL_BRANCH_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
@@ -53,14 +49,11 @@ function clone_github_repo() {
     else
       REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
     fi
-    SRC_DIR="$SRC_BASE_DIR"/"$(echo "$REPO_URL" | sed 's|.*/||')"
-    rm -rf "$SRC_DIR"
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      git -c core.askpass=true clone --depth=1 --single-branch --branch "$REPO_LATEST_RELEASE" --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      zkg install --nodeps --force --skiptests --version "$REPO_LATEST_RELEASE" "$REPO_URL"
     else
-      git -c core.askpass=true clone --depth=1 --single-branch --recursive --shallow-submodules "$REPO_URL" "$SRC_DIR" >/dev/null 2>&1
+      zkg install --nodeps --force --skiptests "$REPO_URL"
     fi
-    [ $? -eq 0 ] && echo "$SRC_DIR" || echo "cloning \"$REPO_URL\" failed" >&2
   fi
 }
 
@@ -124,8 +117,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-zip"
 )
 for i in ${ZKG_GITHUB_URLS[@]}; do
-  SRC_DIR="$(clone_github_repo "$i")"
-  [[ -d "$SRC_DIR" ]] && zkg install --nodeps --force --skiptests "$SRC_DIR"
+  zkg_install_github_repo "$i"
 done
 
 find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
