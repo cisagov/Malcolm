@@ -2794,7 +2794,7 @@ def main():
 
     if (malcolmFile and os.path.isfile(malcolmFile)) and (not imageFile or not os.path.isfile(imageFile)):
         # if we've figured out the malcolm tarball, the _images tarball should match it
-        imageFile = malcolmFile.replace('.tar.gz', '_images.tar.gz')
+        imageFile = malcolmFile.replace('.tar.gz', '_images.tar.xz')
         if not os.path.isfile(imageFile):
             imageFile = None
 

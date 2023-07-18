@@ -7,12 +7,12 @@ IMAGE_DISTRIBUTION=bullseye
 
 BUILD_ERROR_CODE=1
 
-DOCKER_IMAGES_TGZ=""
-DOCKER_IMAGES_TGZ_RM=0
+DOCKER_IMAGES_TXZ=""
+DOCKER_IMAGES_TXZ_RM=0
 while getopts rd: opts; do
    case ${opts} in
-      d) DOCKER_IMAGES_TGZ=${OPTARG} ;;
-      r) DOCKER_IMAGES_TGZ_RM=1 ;;
+      d) DOCKER_IMAGES_TXZ=${OPTARG} ;;
+      r) DOCKER_IMAGES_TXZ_RM=1 ;;
    esac
 done
 
@@ -21,8 +21,8 @@ if [ "$(id -u)" != "0" ]; then
    exit $BUILD_ERROR_CODE
 fi
 
-if [[ -n "$DOCKER_IMAGES_TGZ" ]] && [[ ! -r "$DOCKER_IMAGES_TGZ" ]]; then
-  echo "\"$DOCKER_IMAGES_TGZ\" was specified but does not exist or cannot be accessed" 1>&2
+if [[ -n "$DOCKER_IMAGES_TXZ" ]] && [[ ! -r "$DOCKER_IMAGES_TXZ" ]]; then
+  echo "\"$DOCKER_IMAGES_TXZ\" was specified but does not exist or cannot be accessed" 1>&2
   exit $BUILD_ERROR_CODE
 fi
 
@@ -157,10 +157,10 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # if there are prebuilt malcolm images to load into the ISO, provide them
-  if [[ -r "$DOCKER_IMAGES_TGZ" ]]; then
-    cp "$DOCKER_IMAGES_TGZ" ./config/includes.chroot/malcolm_images.tar.gz
-    chown root:root ./config/includes.chroot/malcolm_images.tar.gz
-    [[ "$DOCKER_IMAGES_TGZ_RM" == "1" ]] && rm -f "$DOCKER_IMAGES_TGZ"
+  if [[ -r "$DOCKER_IMAGES_TXZ" ]]; then
+    cp "$DOCKER_IMAGES_TXZ" ./config/includes.chroot/malcolm_images.tar.xz
+    chown root:root ./config/includes.chroot/malcolm_images.tar.xz
+    [[ "$DOCKER_IMAGES_TXZ_RM" == "1" ]] && rm -f "$DOCKER_IMAGES_TXZ"
   fi
 
   # write out some version stuff specific to this installation version
