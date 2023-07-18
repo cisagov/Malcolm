@@ -418,12 +418,12 @@ def main():
                     yes_label="No",
                     no_label="Yes",
                 )
-                if code == Dialog.CANCEL:
+                if code == Dialog.OK or code == Dialog.CANCEL:
                     password_re = re.compile(r'^\s*#*\s*PasswordAuthentication\s+(yes|no)')
                     with fileinput.FileInput(Constants.SSHD_CONFIG_FILE, inplace=True, backup='.bak') as file:
                         for line in file:
                             if password_re.match(line):
-                                line = "PasswordAuthentication yes"
+                                line = f"PasswordAuthentication {'yes' if code == Dialog.CANCEL else 'no'}"
                             print(line)
                     # restart the ssh process
                     ecode, start_output = run_subprocess('/bin/systemctl restart ssh', stderr=True)
