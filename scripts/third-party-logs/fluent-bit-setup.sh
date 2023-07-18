@@ -199,6 +199,7 @@ function GetMalcolmConnInfo() {
   IP=
   PORT=
   FORMAT=
+  AGENT_NAME=
   NEST=
   MODULE=
   CA=
@@ -208,12 +209,15 @@ function GetMalcolmConnInfo() {
   command -v ip >/dev/null 2>&1 && SUGGESTED_IP=$(ip route get 255.255.255.255 2>/dev/null | grep -Po '(?<=src )(\d{1,3}.){4}' | $SED "s/ //g") || SUGGESTED_IP='127.0.0.1'
   SUGGESTED_PORT=5045
   SUGGESTED_FORMAT=json_lines
+  SUGGESTED_AGENT_NAME="$(hostname)"
 
   while [[ -z "$IP" ]] || \
         [[ -z "$PORT" ]] || \
+        [[ -z "$AGENT_NAME=" ]] || \
         [[ -z "$FORMAT" ]]; do
     IP="$(_GetString "Enter Malcolm host or IP address ($SUGGESTED_IP):" "$SUGGESTED_IP")"
     PORT="$(_GetString "Enter Malcolm Filebeat TCP port ($SUGGESTED_PORT):" "$SUGGESTED_PORT")"
+    AGENT_NAME="$(_GetString "Enter agent hostname ($SUGGESTED_AGENT_NAME):" "$SUGGESTED_AGENT_NAME")"
     FORMAT="$(_GetString "Enter fluent-bit output format ($SUGGESTED_FORMAT):" "$SUGGESTED_FORMAT")"
     NEST="$(_GetString "Nest values under field:")"
     MODULE="$(_GetString "Add \"module\" value:")"
@@ -288,6 +292,27 @@ function GetMalcolmConnInfo() {
     FLUENTBIT_ARGS+=( -m )
     FLUENTBIT_ARGS+=( "'*'" )
   fi
+  if [[ -n "$AGENT_NAME" ]]; then
+    FLUENTBIT_ARGS+=( -F )
+    FLUENTBIT_ARGS+=( modify )
+    FLUENTBIT_ARGS+=( -p )
+    FLUENTBIT_ARGS+=( "'Add=host.name $AGENT_NAME'" )
+    FLUENTBIT_ARGS+=( -m )
+    FLUENTBIT_ARGS+=( "'*'" )
+    FLUENTBIT_ARGS+=( -F )
+    FLUENTBIT_ARGS+=( nest )
+    FLUENTBIT_ARGS+=( -p )
+    FLUENTBIT_ARGS+=( Operation=nest )
+    FLUENTBIT_ARGS+=( -p )
+    FLUENTBIT_ARGS+=( "'Wildcard=host.*'" )
+    FLUENTBIT_ARGS+=( -p )
+    FLUENTBIT_ARGS+=( "Nested_under=host" )
+    FLUENTBIT_ARGS+=( -p )
+    FLUENTBIT_ARGS+=( "Remove_prefix=host." )
+    FLUENTBIT_ARGS+=( -m )
+    FLUENTBIT_ARGS+=( "'*'" )
+  fi
+
   FLUENTBIT_ARGS+=( -f )
   FLUENTBIT_ARGS+=( 1 )
 

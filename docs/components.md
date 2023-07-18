@@ -2,20 +2,20 @@
 
 Malcolm leverages the following excellent open source tools, among others.
 
-* [Arkime](https://arkime.com/) (formerly Moloch) - for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime itself consists of two parts:
-    * [capture](https://github.com/arkime/arkime/tree/master/capture) - a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into OpenSearch
+* [Arkime](https://arkime.com/) (formerly Moloch) – for PCAP file processing, browsing, searching, analysis, and carving/exporting; Arkime consists of two parts:
+    * [capture](https://github.com/arkime/arkime/tree/master/capture) – a tool for traffic capture, as well as offline PCAP parsing and metadata insertion into OpenSearch
     * [viewer](https://github.com/arkime/arkime/tree/master/viewer) - a browser-based interface for data visualization
 * [OpenSearch](https://opensearch.org/) - a search and analytics engine for indexing and querying network traffic session metadata 
-* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org/index.html) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands in the same way it natively understands PCAP data
-* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime viewer
-* [Zeek](https://www.zeek.org/index.html) - a network analysis framework and IDS
+* [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat) - for ingesting and parsing [Zeek](https://www.zeek.org) [Log Files](https://docs.zeek.org/en/stable/script-reference/log-files.html) and ingesting them into OpenSearch in a format that Arkime understands in the same way it natively understands PCAP data
+* [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) - for creating additional ad-hoc visualizations and dashboards beyond that provided by Arkime viewer
+* [Zeek](https://www.zeek.org) - a network analysis framework and IDS
 * [Suricata](https://suricata.io/) - an IDS and threat detection engine
 * [Yara](https://github.com/VirusTotal/yara) - a tool used to identify and classify malware samples
 * [Capa](https://github.com/fireeye/capa) - a tool for detecting capabilities in executable files
 * [ClamAV](https://www.clamav.net/) - an antivirus engine for scanning files extracted by Zeek
-* [CyberChef](https://github.com/gchq/CyberChef) - a "swiss-army knife" data conversion tool 
+* [CyberChef](https://github.com/gchq/CyberChef) - a "Swiss Army Knife" data conversion tool 
 * [jQuery File Upload](https://github.com/blueimp/jQuery-File-Upload) - for uploading PCAP files and Zeek logs for processing
-* [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and to coordinate communication between its various components
+* [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) - for simple, reproducible deployment of the Malcolm appliance across environments and coordination of communication between its various components
 * [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks
 * [PostgreSQL](https://www.postgresql.org/) - a relational database for persisting NetBox's data
 * [Redis](https://redis.io/) - an in-memory data store for caching NetBox session information

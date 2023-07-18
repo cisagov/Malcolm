@@ -921,6 +921,17 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=netboxEnabled,
         )
+        netboxLogstashAutoPopulate = (
+            netboxEnabled
+            and InstallerYesOrNo(
+                'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
+                default=False,
+            )
+            and InstallerYesOrNo(
+                "Autopopulating NetBox's inventory is not recommended. Are you sure?",
+                default=False,
+            )
+        )
         netboxSiteName = (
             InstallerAskForString(
                 'Specify default NetBox site name',
@@ -1089,6 +1100,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_NETBOX_ENRICHMENT',
                 TrueOrFalseNoQuote(netboxLogstashEnrich),
+            ),
+            # populate the NetBox inventory based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'logstash.env'),
+                'LOGSTASH_NETBOX_AUTO_POPULATE',
+                TrueOrFalseNoQuote(netboxLogstashAutoPopulate),
             ),
             # logstash pipeline workers
             EnvValue(
@@ -1876,9 +1893,9 @@ class LinuxInstaller(Installer):
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
         if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
-            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog'])
+            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog', 'xz-utils'])
         elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog'])
+            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog', 'xz'])
 
         # on Linux this script requires root, or sudo, unless we're in local configuration-only mode
         if os.getuid() == 0:
@@ -2325,11 +2342,14 @@ class LinuxInstaller(Installer):
                     'impish',
                     'jammy',
                     'kinetic',
+                    'lunar',
+                    'mantic',
                     'stretch',
                     'buster',
                     'bookworm',
                     'bullseye',
                     'sid',
+                    'trixie',
                     'fedora',
                 ],
                 '/etc/security/limits.d/limits.conf',
@@ -2777,7 +2797,7 @@ def main():
 
     if (malcolmFile and os.path.isfile(malcolmFile)) and (not imageFile or not os.path.isfile(imageFile)):
         # if we've figured out the malcolm tarball, the _images tarball should match it
-        imageFile = malcolmFile.replace('.tar.gz', '_images.tar.gz')
+        imageFile = malcolmFile.replace('.tar.gz', '_images.tar.xz')
         if not os.path.isfile(imageFile):
             imageFile = None
 

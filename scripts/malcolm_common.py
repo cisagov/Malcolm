@@ -665,6 +665,7 @@ LOG_IGNORE_REGEX = re.compile(
   | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
   | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
   | /_ns_/nstest\.html
+  | /proc/net/tcp6:\s+no\s+such\s+file\s+or\s+directory
   | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
   | \b(d|es)?stats\.json
   | \b1.+GET\s+/\s+.+401.+curl
@@ -672,6 +673,7 @@ LOG_IGNORE_REGEX = re.compile(
   | branding.*config\s+is\s+not\s+found\s+or\s+invalid
   | but\s+there\s+are\s+no\s+living\s+connections
   | Connecting\s+to\s+backoff
+  | Cleaning\s+registries\s+for\s+queue:
   | curl.+localhost.+GET\s+/api/status\s+200
   | DEPRECATION
   | descheduling\s+job\s*id
@@ -680,6 +682,7 @@ LOG_IGNORE_REGEX = re.compile(
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp\s+stats\s+from\s+/proc
   | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+  | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | loaded\s+config\s+'/etc/netbox/config/
   | "netbox"\s+application\s+started
   | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b

@@ -1,0 +1,100 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: malcolm-ingress-https
+  namespace: malcolm
+  annotations:
+    alb.ingress.kubernetes.io/group.name: "malcolm-ingress-group"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/ip-address-type: "ipv4"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region-code:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "malcolm.example.org"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-proxy
+            port:
+              number: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: malcolm-ingress-opensearch
+  namespace: malcolm
+  annotations:
+    alb.ingress.kubernetes.io/group.name: "malcolm-ingress-group"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-type: "ip"
+    alb.ingress.kubernetes.io/ip-address-type: "ipv4"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 9200}]'
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/auth-on-unauthenticated-request: "allow"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:region-code:111111111111:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    alb.ingress.kubernetes.io/ssl-policy: "ELBSecurityPolicy-TLS13-1-2-2021-06"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTPS"
+    alb.ingress.kubernetes.io/healthcheck-port: "8443"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "180"
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "malcolm.example.org"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-proxy
+            port:
+              number: 9200
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: malcolm-nlb-logstash
+  namespace: malcolm
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+spec:
+  type: LoadBalancer
+  selector:
+    name: logstash-deployment
+  ports:
+    - port: 5044
+      targetPort: 5044
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: malcolm-nlb-tcp-json
+  namespace: malcolm
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+spec:
+  type: LoadBalancer
+  selector:
+    name: filebeat-deployment
+  ports:
+    - port: 5045
+      targetPort: 5045
+      protocol: TCP

@@ -15,11 +15,11 @@ After installing Docker, because Malcolm should be run as a non-root user, add y
 $ sudo usermod -aG docker yourusername
 ```
 
-Following this, either reboot or log out then log back in.
+Following this, either reboot or log out, then log back in.
 
-Docker starts automatically on DEB-based distributions. On RPM-based distributions, you need to start it manually or enable it using the appropriate `systemctl` or `service` command(s).
+Docker starts automatically on DEB-based distributions. On RPM-based distributions, users must start Docker manually or enable it using the appropriate `systemctl` or `service` command(s).
 
-You can test docker by running `docker info`, or (assuming you have internet access), `docker run --rm hello-world`.
+You can test Docker by running `docker info`, or (assuming you have internet access), `docker run --rm hello-world`.
 
 ## Installing docker-compose
 
@@ -27,7 +27,7 @@ Please follow [this link](https://docs.docker.com/compose/install/) on docker.co
 
 ## Operating system configuration
 
-The host system (ie., the one running Docker) will need to be configured for the [best possible OpenSearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
+The host system (i.e., the one running Docker) must be configured for the [best possible OpenSearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
 
 * Append the following lines to `/etc/sysctl.conf`:
 
@@ -77,7 +77,7 @@ DefaultLimitNOFILE=65535:65535
 DefaultLimitMEMLOCK=infinity
 ```
 
-* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, you could add this line to `/etc/rc.local` (replacing `/dev/sda` with your disk block descriptor):
+* Change the readahead value for the disk where the OpenSearch data will be stored. There are a few ways to do this. For example, users could add this line to `/etc/rc.local` (replacing `/dev/sda` with their disk block descriptor):
 
 ```
 # change disk read-adhead value (# of blocks)
@@ -88,4 +88,4 @@ blockdev --setra 512 /dev/sda
 
 * If you are planning on using very large data sets, consider formatting the drive containing the `opensearch` volume as XFS.
 
-After making all of these changes, do a reboot for good measure!
+After making allthese changes, do a reboot for good measure!

@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.7.0"
+ARG OPENSEARCH_VERSION="2.8.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.7.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -27,6 +27,9 @@ USER root
 RUN amazon-linux-extras install -y epel && \
     yum upgrade -y && \
     yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
+    amazon-linux-extras install -y python3.8 && \
+        ln -s -r -f /usr/bin/python3.8 /usr/bin/python3 && \
+        ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3 && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \
@@ -68,7 +71,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.7.0
+FROM opensearchproject/opensearch-dashboards:2.8.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -90,7 +93,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.7.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
@@ -125,15 +128,13 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
         # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.6\.0/2\.7\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.6\.0/2\.7\.0/g" opensearch-dashboards/transformVis/package.json && \
+        # sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        # sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/package.json && \
         # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
-    chown --silent -R root:root /usr/share/opensearch-dashboards/plugins/* \
-                                /usr/share/opensearch-dashboards/node_modules/* \
-                                /usr/share/opensearch-dashboards/src/* && \
+    chown --silent -R ${PUSER}:${PGROUP} /usr/share/opensearch-dashboards && \
     chmod +x /usr/bin/tini && \
     yum clean all && \
     rm -rf /var/cache/yum

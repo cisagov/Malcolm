@@ -13,14 +13,14 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_VER=5.2.1-0
+ZEEK_VER=5.2.2-0
 ZEEK_LTS=
 ZEEK_DIR="/opt/zeek"
 export PATH="${ZEEK_DIR}"/bin:$PATH
 
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
-BEATS_VER="8.7.1"
+BEATS_VER="8.8.2"
 BEATS_OSS="-oss"
 BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
 BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
@@ -64,16 +64,16 @@ mkdir -p /tmp/zeek-packages "${CCACHE_DIR}"
 cd /tmp/zeek-packages
 if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
 curl -sSL --remote-name-all \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
-  "https://download.opensuse.org/repositories/security:/zeek/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
+  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
 dpkg -i ./*.deb
 
 # plugins
