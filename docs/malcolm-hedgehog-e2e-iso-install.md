@@ -112,6 +112,7 @@ At the end of the installation process, you will be prompted with a few self-exp
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
 * **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+* **Allow SSH password authentication?** *(Caution: password authentication is less secure than public/private key pairs)*
 
 Following these prompts, the installer will reboot and the Malcolm base operating system will boot.
 
@@ -324,6 +325,7 @@ At the end of the installation process, you will be prompted with a few self-exp
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
 * **Display the [Standard Mandatory DoD Notice and Consent Banner](https://www.stigviewer.com/stig/application_security_and_development/2018-12-24/finding/V-69349)?** *(only applies when installed on U.S. government information systems)*
+* **Allow SSH password authentication?** *(Caution: password authentication is less secure than public/private key pairs)*
 
 Following these prompts, the installer will reboot and Hedgehog Linux will boot into [kiosk mode](hedgehog-boot.md#HedgehogKioskMode).
 
