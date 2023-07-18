@@ -289,6 +289,7 @@ function InstallCommonPackages {
       openssl-devel
       tmux
       zlib-devel
+      xz
     )
     # install the packages from yum
     for i in ${PACKAGE_LIST[@]}; do

@@ -1893,9 +1893,9 @@ class LinuxInstaller(Installer):
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
         if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
-            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog'])
+            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog', 'xz-utils'])
         elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog'])
+            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog', 'xz'])
 
         # on Linux this script requires root, or sudo, unless we're in local configuration-only mode
         if os.getuid() == 0:
@@ -2342,11 +2342,14 @@ class LinuxInstaller(Installer):
                     'impish',
                     'jammy',
                     'kinetic',
+                    'lunar',
+                    'mantic',
                     'stretch',
                     'buster',
                     'bookworm',
                     'bullseye',
                     'sid',
+                    'trixie',
                     'fedora',
                 ],
                 '/etc/security/limits.d/limits.conf',

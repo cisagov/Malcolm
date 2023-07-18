@@ -83,7 +83,8 @@ function InstallEssentialPackages {
         httpd-tools \
         make \
         openssl \
-        tmux
+        tmux \
+        xz
 
 }
 
