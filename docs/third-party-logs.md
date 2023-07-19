@@ -1,6 +1,6 @@
 # Forwarding Third-Party Logs to Malcolm
 
-Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) for data storage, search and visualization, and [Logstash](https://www.elastic.co/logstash/) for log processing. Because these tools are data agnostic, Malcolm can be configured to accept various host logs and other third-party logs sent from log forwaders such as [Fluent Bit](https://fluentbit.io/) and [Beats](https://www.elastic.co/beats/). Some examples of the types of logs these forwarders might send include:
+Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) for data storage and search and visualization, and [Logstash](https://www.elastic.co/logstash/) for log processing. Because these tools are data agnostic, Malcolm can be configured to accept various host logs and other third-party logs sent from log forwaders such as [Fluent Bit](https://fluentbit.io/) and [Beats](https://www.elastic.co/beats/). Some examples of the types of logs these forwarders might send include:
 
 * System resource utilization metrics (CPU, memory, disk, network, etc.)
 * System temperatures
@@ -12,7 +12,7 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 * Messages in the form of MQTT control packets
 * many more...
 
-The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek and Suricata. Please refer to the [Malcolm Contributor Guide](contributing-guide.md) for information on integrating a new network traffic analysis provider.
+The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek, and Suricata. Please refer to the [Malcolm Contributor Guide](contributing-guide.md) for information on integrating a new network traffic analysis provider.
 
 <a name="ThirdPartyLogsTableOfContents"></a>
 * [Configuring Malcolm](#Malcolm)
@@ -49,18 +49,18 @@ Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcol
 
 The variables corresponding to these questions can be found in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars):
 
-* `FILEBEAT_TCP_LISTEN` - whether or not to expose a [Filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: you may need to adjust your firewall accordingly)
+* `FILEBEAT_TCP_LISTEN` - whether or not to expose a [Filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: users may need to adjust firewall accordingly)
 * `FILEBEAT_TCP_LOG_FORMAT` - log format expected for logs sent to the Filebeat TCP input listener (`json` or `raw`)
 * `FILEBEAT_TCP_PARSE_SOURCE_FIELD` - source field name to parse (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the Filebeat TCP input listener
 * `FILEBEAT_TCP_PARSE_TARGET_FIELD` - target field name to store decoded JSON fields (when `FILEBEAT_TCP_LOG_FORMAT` is `json`) for logs sent to the Filebeat TCP input listener
 * `FILEBEAT_TCP_PARSE_DROP_FIELD` - name of field to drop (if it exists) in logs sent to the Filebeat TCP input listener
 * `FILEBEAT_TCP_TAG` - tag to append to events sent to the Filebeat TCP input listener
 
-These variables' values will depend on your forwarder and the format of the data it sends. Note that unless you are creating your own [Logstash pipeline](contributing-logstash.md#LogstashNewSource), you probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline.
+These variables' values will depend on the forwarder and the format of the data it sends. Note that unless creating a custom [Logstash pipeline](contributing-logstash.md#LogstashNewSource), users probably want to choose the default `_malcolm_beats` for `FILEBEAT_TCP_TAG` in order for logs to be picked up and ingested through Malcolm's `beats` pipeline.
 
 ### <a name="MalcolmTLS"></a>Secure communication
 
-In order to maintain the integrity and confidentiality of your data, Malcolm's default (set via the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars)) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which your forwarder is running and used when defining its settings for connecting to Malcolm.
+In order to maintain the integrity and confidentiality of data, Malcolm's default (set via the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars)) is to require connections from external forwarders to be encrypted using TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which the forwarder is running and used when defining its settings for connecting to Malcolm.
 
 ## <a name="FluentBit"></a>Fluent Bit
 
@@ -128,6 +128,7 @@ cpu Interval_NSec:
 cpu PID:  
 Enter Malcolm host or IP address (172.16.0.20): 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: cpu
 Add "module" value: cpu
@@ -196,6 +197,7 @@ random Interval_Sec:  30
 random Internal_NSec:  
 Enter Malcolm host or IP address (127.0.0.1): 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field: random
 Add "module" value: random
@@ -247,6 +249,7 @@ winevtlog Render_Event_As_XML:
 winevtlog Use_ANSI:
 Enter Malcolm host or IP address: 172.16.0.20
 Enter Malcolm Filebeat TCP port (5045): 5045
+Enter agent hostname (hostname): hostname
 Enter fluent-bit output format (json_lines): json_lines
 Nest values under field (winevtlog): winevtlog
 Add "module" value (winevtlog): winevtlog
@@ -274,11 +277,11 @@ Running  fluentbit_winev... fluentbit_winevtlog
 
 ## <a name="Beats"></a>Beats
 
-Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on your system.
+Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on a host system.
 
 In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
 
-Your Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
+The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
 
 
 ```yml
@@ -301,13 +304,13 @@ output.logstash:
   ssl.verification_mode: "none"
 ```
 
-The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless you are creating your own [Logstash pipeline](contributing-logstash.md#LogstashNewSource), you probably want to use `_malcolm_beats` in order for your logs to be picked up and ingested through Malcolm's `beats` pipeline. This parts should apply regardless of the specific Beats forwarder you're using (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
+The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless creating a custom [Logstash pipeline](contributing-logstash.md#LogstashNewSource), users probably want to use `_malcolm_beats` in order for logs to be picked up and ingested through Malcolm's `beats` pipeline. This applies regardless of the specific Beats forwarder being used (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
 
-Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
+Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform, and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
 
 ## <a name="Data"></a>Data Format and Visualization
 
-Because Malcolm could receive logs or metrics from virtually any provider, Malcolm most likely does not have prebuilt dashboards and visualizations for your third-party logs. Luckily, [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) provides visualization tools that can be used with whatever data is stored in Malcolm's OpenSearch document store. Here are some resources to help you get started understanding OpenSearch Dashboards and building custom visualizations for your data:
+Because Malcolm could receive logs or metrics from virtually any provider, Malcolm most likely does not have prebuilt dashboards and visualizations for third-party logs. Luckily, [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) provides visualization tools that can be used with whatever data is stored in Malcolm's OpenSearch document store. Here are some resources covering OpenSearch Dashboards and building custom visualizations:
 
 * [OpenSearch Dashboards](dashboards.md) in the Malcolm documentation
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/) documentation
@@ -315,13 +318,13 @@ Because Malcolm could receive logs or metrics from virtually any provider, Malco
     - [Discover](https://www.elastic.co/guide/en/kibana/7.10/discover.html)
     - [Searching Your Data](https://www.elastic.co/guide/en/kibana/7.10/search.html)
     - [Kibana Dashboards](https://www.elastic.co/guide/en/kibana/7.10/dashboard.html)
-    - [TimeLine](https://www.elastic.co/guide/en/kibana/7.12/timelion.html)
+    - [TimeLion](https://www.elastic.co/guide/en/kibana/7.12/timelion.html)
 * [Search Queries in Arkime and OpenSearch](queries-cheat-sheet.md#SearchCheatSheet)
 
 ## <a name="Indices"></a>Document Indices
 
-Third-party logs ingested into Malcolm as outlined in this document will be indexed into the `malcolm_beats_*` index pattern (unless you've created your own [Logstash pipeline](contributing-logstash.md#LogstashNewSource)), which can be selected in the OpenSearch Dashboards' Discover view or when specifying the log source for a new visualization. 
+Third-party logs ingested into Malcolm as outlined in this document will be indexed into the `malcolm_beats_*` index pattern (unless a user has created their own [Logstash pipeline](contributing-logstash.md#LogstashNewSource)), which can be selected in the OpenSearch Dashboards' Discover view or when specifying the log source for a new visualization.
 
-Because these documents are indexed by OpenSearch dynamically as they are ingested by Logstash, their component fields will not show up as searchable in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from your visualizations you may wish to do it manually.
+Because these documents are indexed by OpenSearch dynamically as they are ingested by Logstash, their component fields will not show up as searchable in OpenSearch Dashboards visualizations until its copy of the field list is refreshed. Malcolm periodically refreshes this list, but if fields are missing from visualizations, users may wish to do it manually.
 
-After Malcolm ingests your data (or, more specifically, after it has ingested a new log type it has not seen before) you may manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the index pattern (`malcolm_beats_*`) and clicking the reload **🗘** button near the upper-right of the window.
+Once Malcolm has ingested a new log type it has not seen before, users can manually refresh OpenSearch Dashboards's field list by clicking **Management** → **Index Patterns**, then selecting the index pattern (`malcolm_beats_*`) and clicking the reload **🗘** button near the upper-right of the window.

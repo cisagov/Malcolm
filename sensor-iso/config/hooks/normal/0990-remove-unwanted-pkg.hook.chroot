@@ -18,11 +18,13 @@ apt-get -y --purge remove \
   firmware-netronome \
   firmware-qcom-soc \
   gdb \
+  gdebi* \
   gnome-accessibility-themes \
   libasound2-plugins \
   libx264* \
   libx265* \
   lintian \
+  nvidia* \
   network-manager* \
   pavucontrol \
   poppler-data \

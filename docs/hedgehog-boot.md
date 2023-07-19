@@ -6,7 +6,7 @@ Each time the sensor boots, a grub boot menu will be shown briefly, after which 
 
 ![Kiosk mode sensor menu: resource statistics](./images/hedgehog/images/kiosk_mode_sensor_menu.png)
 
-The sensor automatically logs in as the sensor user account and runs in **kiosk mode**, which is intended to show an at-a-glance view of the its resource utilization. Clicking the **☰** icon in allows you to switch between the resource statistics view and the services view.
+The sensor automatically logs in as the sensor user account and runs in **kiosk mode**, which is intended to show an at-a-glance view of system resource utilization. Clicking the **☰** icon allows users to switch between the resource statistics view and the services view.
 
 ![Kiosk mode sensor menu: services](./images/hedgehog/images/kiosk_mode_services_menu.png)
 

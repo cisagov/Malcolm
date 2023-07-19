@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-offline-container
-        image: ghcr.io/idaholab/malcolm/suricata:23.05.1
+        image: ghcr.io/idaholab/malcolm/suricata:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -59,6 +59,21 @@ spec:
             name: suricata-offline-suricata-logs-volume
           - mountPath: "/opt/suricata/rules/configmap"
             name: suricata-offline-custom-rules-volume
+      initContainers:
+      - name: suricata-offline-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed"
+        volumeMounts:
+          - name: suricata-offline-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: suricata-offline-var-local-catrust-volume
           configMap:

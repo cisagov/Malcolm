@@ -2,7 +2,7 @@
 
 `GET` or `POST` - /mapi/document
 
-Executes an OpenSearch [query](https://opensearch.org/docs/latest/opensearch/bucket-agg/) query for the matching documents across all of Malcolm's indexed network traffic metadata.
+Executes an OpenSearch [query](https://opensearch.org/docs/latest/opensearch/bucket-agg/) for the matching documents across all of Malcolm's indexed network traffic metadata.
 
 Parameters:
 

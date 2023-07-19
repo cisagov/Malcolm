@@ -335,7 +335,7 @@ def LoadFileIfJson(fileHandle):
 #    'insecure': ''
 #   }
 def ParseCurlFile(curlCfgFileName):
-    result = defaultdict(lambda: None)
+    result = defaultdict(lambda: '')
     if os.path.isfile(curlCfgFileName):
         itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
         with open(curlCfgFileName, 'r') as f:

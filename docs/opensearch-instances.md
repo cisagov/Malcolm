@@ -3,13 +3,13 @@
 * [OpenSearch instances](#OpenSearchInstance)
     - [Authentication and authorization for remote OpenSearch clusters](#OpenSearchAuth)
 
-Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. OpenSearch can also run as a [cluster](https://opensearch.org/docs/latest/opensearch/cluster/) with instances distributed across multiple nodes with dedicated [roles](https://opensearch.org/docs/latest/opensearch/cluster/#nodes) like cluster manager, data node, ingest node, etc.
+Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. OpenSearch can also run as a [cluster](https://opensearch.org/docs/latest/opensearch/cluster/) with instances distributed across multiple nodes with dedicated [roles](https://opensearch.org/docs/latest/opensearch/cluster/#nodes) such as cluster manager, data node, ingest node, etc.
 
 As the permutations of OpenSearch cluster configurations are numerous, it is beyond Malcolm's scope to set up multi-node clusters. However, Malcolm can be configured to use a remote OpenSearch cluster rather than its own internal instance.
 
-The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance or a remote OpenSearch instance as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) can help you configure these options.
+The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance or a remote OpenSearch instance as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) can help users configure these options.
 
-For example, to use the default standalone configuration, answer `Y` when prompted `Should Malcolm use and maintain its own OpenSearch instance?`.
+For example, to use the default standalone configuration, answer `Y` when prompted `Should Malcolm use and maintain its own OpenSearch instance?`
 
 Or, to use a remote OpenSearch cluster:
 
@@ -25,7 +25,7 @@ You must run auth_setup after install.py to store OpenSearch connection credenti
 …
 ```
 
-Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can be configured additionally forward logs to a secondary remote OpenSearch instance. The `OPENSEARCH_SECONDARY_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control this behavior. Configuration of a remote secondary OpenSearch instance is similar to that of a remote primary OpenSearch instance:
+Whether the primary OpenSearch instance is a locally maintained single-node instance or is a remote cluster, Malcolm can additionally be configured to forward logs to a secondary remote OpenSearch instance. The `OPENSEARCH_SECONDARY_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control this behavior. Configuration of a remote secondary OpenSearch instance is similar to that of a remote primary OpenSearch instance:
 
 
 ```
@@ -42,7 +42,7 @@ You must run auth_setup after install.py to store OpenSearch connection credenti
 
 ## <a name="OpenSearchAuth"></a>Authentication and authorization for remote OpenSearch clusters
 
-In addition to setting the environment variables in [`opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) as described above, you must provide Malcolm with credentials for it to be able to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind mounted into the Docker containers which need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
+In addition to setting the environment variables in [`opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) as described above, users must provide Malcolm with credentials for it to communicate with remote OpenSearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary OpenSearch connections, respectively, and are bind-mounted into the Docker containers that need to communicate with OpenSearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
 
 ```
 $ ./scripts/auth_setup 
@@ -80,6 +80,6 @@ $ ls -la .opensearch.*.curlrc
 -rw------- 1 user user 35 Aug 22 14:18 .opensearch.secondary.curlrc
 ```
 
-One caveat with Malcolm using a remote OpenSearch cluster as its primary document store is that the accounts used to access Malcolm's [web interfaces](quickstart.md#UserInterfaceURLs), particularly [OpenSearch Dashboards](dashboards.md#Dashboards), are in some instance passed directly through to OpenSearch itself. For this reason, both Malcolm and the remote primary OpenSearch instance must have the same account information. The easiest way to accomplish this is to use an Active Directory/LDAP server that both [Malcolm](authsetup.md#AuthLDAP) and [OpenSearch](https://opensearch.org/docs/latest/security-plugin/configuration/ldap/) use as a common authentication backend.
+One caveat with Malcolm using a remote OpenSearch cluster as its primary document store is that the accounts used to access Malcolm's [web interfaces](quickstart.md#UserInterfaceURLs), particularly [OpenSearch Dashboards](dashboards.md#Dashboards), are passed directly through to OpenSearch itself. For this reason, both Malcolm and the remote primary OpenSearch instance must have the same account information. The easiest way to accomplish this is to use an Active Directory/LDAP server that both [Malcolm](authsetup.md#AuthLDAP) and [OpenSearch](https://opensearch.org/docs/latest/security-plugin/configuration/ldap/) use as a common authentication backend.
 
 See the OpenSearch documentation on [access control](https://opensearch.org/docs/latest/security-plugin/access-control/index/) for more information.

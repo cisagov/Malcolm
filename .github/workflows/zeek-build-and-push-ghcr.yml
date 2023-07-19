@@ -12,6 +12,7 @@ on:
       - '!shared/bin/agg-init.sh'
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
+      - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
       - '.trigger_workflow_build'
@@ -25,6 +26,7 @@ jobs:
       actions: write
       packages: write
       contents: read
+      security-events: write
     steps:
       -
         name: Cancel previous run in progress
@@ -65,3 +67,24 @@ jobs:
           file: ./Dockerfiles/zeek.Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/zeek:${{ steps.extract_branch.outputs.branch }}
+      -
+        name: Run Trivy vulnerability scanner
+        id: trivy-scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'image'
+          scanners: 'vuln'
+          image-ref: ghcr.io/${{ github.repository_owner }}/malcolm/zeek:${{ steps.extract_branch.outputs.branch }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          hide-progress: true
+          ignore-unfixed: true
+          exit-code: '0'
+      -
+        name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'

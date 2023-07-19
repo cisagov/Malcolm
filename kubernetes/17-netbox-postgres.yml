@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:23.05.1
+        image: ghcr.io/idaholab/malcolm/postgresql:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -72,6 +72,21 @@ spec:
           - mountPath: /var/lib/postgresql/data
             name: netbox-postgres-volume
             subPath: netbox/postgres
+      initContainers:
+      - name: netbox-postgres-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:netbox/postgres"
+        volumeMounts:
+          - name: netbox-postgres-volume
+            mountPath: "/data/config"
       volumes:
         - name: netbox-postgres-var-local-catrust-volume
           configMap:

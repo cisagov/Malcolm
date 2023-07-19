@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:23.05.1
+        image: ghcr.io/idaholab/malcolm/arkime:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -81,6 +81,23 @@ spec:
           - name: arkime-runtime-logs-volume
             mountPath: /opt/arkime/logs
             subPath: "arkime"
+      initContainers:
+      - name: arkime-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed;/data/runtime-logs:arkime"
+        volumeMounts:
+          - name: arkime-pcap-volume
+            mountPath: "/data/pcap"
+          - name: arkime-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+
 #
 # This script takes as input the filenames of one or more .zeek scripts which
 # contain records (see https://docs.zeek.org/en/master/script-reference/types.html#type-record).

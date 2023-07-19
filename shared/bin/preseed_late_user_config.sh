@@ -52,6 +52,16 @@ Description:
 Template: malcolm/disable_ipv6_title
 Type: text
 Description: IPv6
+
+Template: malcolm/ssh_password_auth
+Type: boolean
+Default: false
+Description:
+ Allow SSH password authentication?
+
+Template: malcolm/ssh_password_auth_title
+Type: text
+Description: SSH Password Authentication
 !EOF!
 
 # load template
@@ -185,3 +195,23 @@ else
 fi
 
 echo "malcolm/dod_banner=$RET" >> /tmp/malcolm.answer
+
+# set title
+db_settitle malcolm/ssh_password_auth_title
+
+# prompt
+db_input critical malcolm/ssh_password_auth
+db_go
+
+# get answer to $RET
+db_get malcolm/ssh_password_auth
+
+if [ "$RET" = true ]; then
+  SSH_PASSWORD_AUTH="yes"
+else
+  SSH_PASSWORD_AUTH="no"
+fi
+
+sed -i "s/^[[:space:]]*#*[[:space:]]*PasswordAuthentication[[:space:]][[:space:]]*[[:alpha:]][[:alpha:]]*[[:space:]]*$/PasswordAuthentication $SSH_PASSWORD_AUTH/g" /etc/ssh/sshd_config 2>/dev/null || true
+
+echo "malcolm/ssh_password_auth=$RET" >> /tmp/malcolm.answer

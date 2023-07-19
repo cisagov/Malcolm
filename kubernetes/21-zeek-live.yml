@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:23.05.1
+        image: ghcr.io/idaholab/malcolm/zeek:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -49,7 +49,39 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: zeek-live-var-local-catrust-volume
+          - mountPath: "/zeek/extract_files"
+            name: zeek-live-zeek-volume
+            subPath: "extract_files"
+          - mountPath: "/zeek/upload"
+            name: zeek-live-zeek-volume
+            subPath: "upload"
+          - mountPath: "/opt/zeek/share/zeek/site/intel"
+            name: zeek-live-zeek-intel
+            subPath: "zeek/intel"
+      initContainers:
+      - name: zeek-live-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:zeek/intel/MISP,zeek/intel/STIX;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
+        volumeMounts:
+          - name: zeek-live-zeek-intel
+            mountPath: "/data/config"
+          - name: zeek-live-zeek-volume
+            mountPath: "/data/zeek-logs"
       volumes:
         - name: zeek-live-var-local-catrust-volume
           configMap:
             name: var-local-catrust
+        - name: zeek-live-zeek-volume
+          persistentVolumeClaim:
+            claimName: zeek-claim
+        - name: zeek-live-zeek-intel
+          persistentVolumeClaim:
+            claimName: config-claim

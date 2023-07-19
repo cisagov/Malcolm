@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:23.05.1
+        image: ghcr.io/idaholab/malcolm/zeek:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -66,6 +66,25 @@ spec:
           - mountPath: "/opt/zeek/share/zeek/site/intel"
             name: zeek-offline-zeek-intel
             subPath: "zeek/intel"
+      initContainers:
+      - name: zeek-offline-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:zeek/intel/MISP,zeek/intel/STIX;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
+        volumeMounts:
+          - name: zeek-offline-zeek-intel
+            mountPath: "/data/config"
+          - name: zeek-offline-pcap-volume
+            mountPath: "/data/pcap"
+          - name: zeek-offline-zeek-volume
+            mountPath: "/data/zeek-logs"
       volumes:
         - name: zeek-offline-var-local-catrust-volume
           configMap:

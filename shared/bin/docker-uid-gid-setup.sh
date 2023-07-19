@@ -71,7 +71,15 @@ fi # check for CONFIG_MAP_DIR and rsync
 
 set +e
 
-# change user/group ownership of any files/directories belonging to the original IDs
+# if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them first
+if [[ -n ${PUSER_CHOWN} ]]; then
+  IFS=';' read -ra ENTITIES <<< "${PUSER_CHOWN}"
+  for ENTITY in "${ENTITIES[@]}"; do
+    chown -R ${PUSER}:${PGROUP} "${ENTITY}" 2>/dev/null
+  done
+fi
+
+# change user/group ownership of any other files/directories belonging to the original IDs
 if [[ -n ${PUID} ]] && [[ "${PUID}" != "${DEFAULT_UID}" ]]; then
   find / -path /sys -prune -o -path /proc -prune -o -user ${DEFAULT_UID} -exec chown -f ${PUID} "{}" \; 2>/dev/null
 fi
@@ -79,11 +87,26 @@ if [[ -n ${PGID} ]] && [[ "${PGID}" != "${DEFAULT_GID}" ]]; then
   find / -path /sys -prune -o -path /proc -prune -o -group ${DEFAULT_GID} -exec chown -f :${PGID} "{}" \; 2>/dev/null
 fi
 
-# if there are semicolon-separated PUSER_CHOWN entries explicitly specified, chown them too
-if [[ -n ${PUSER_CHOWN} ]]; then
-  IFS=';' read -ra ENTITIES <<< "${PUSER_CHOWN}"
+# If there are subdirectories that need to be created that are explicitly specified, make them here. format of $PUSER_MKDIR is:
+#   required_path:subdirectory_to_mkdir,subdirectory_to_mkdir,subdirectory_to_mkdir
+# Multiple entries can be separated by semicolon
+# Ownership of these directories will be set to PUID/PGID
+#
+# e.g.,
+#   For the entry: /data/zeek-logs:current,upload,extract_files/quarantined,extract_files/preserved
+#   If /data/zeek-logs exists, will mkdir -p /data/zeek-logs /data/zeek-logs/upload /data/zeek-logs/extract_files/quarantined /data/zeek-logs/extract_files/preserved
+if [[ -n ${PUSER_MKDIR} ]]; then
+  IFS=';' read -ra ENTITIES <<< "${PUSER_MKDIR}"
   for ENTITY in "${ENTITIES[@]}"; do
-    chown -R ${PUSER}:${PGROUP} "${ENTITY}" 2>/dev/null
+    REQ_DIR="$(echo "${ENTITY}" | cut -d: -f1)"
+    if [[ -n ${REQ_DIR} ]] && [[ -d "${REQ_DIR}" ]]; then
+      IFS=',' read -ra MKDIR_DIRS <<< "$(echo "${ENTITY}" | cut -d: -f2-)"
+      for NEW_DIR in "${MKDIR_DIRS[@]}"; do
+        [[ ! -d "${REQ_DIR}"/"${NEW_DIR}" ]] && \
+          mkdir -p "${REQ_DIR}"/"${NEW_DIR}" 2>/dev/null && \
+          ( ( [[ -n ${PUID} ]] && chown -R -f ${PUID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) ; ( [[ -n ${PGID} ]] && chown -R -f :${PGID} "${REQ_DIR}$(echo /"${NEW_DIR}" | awk -F/ '{print FS $2}')" 2>/dev/null ) )
+      done
+    fi
   done
 fi
 

@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:latest
+FROM netboxcommunity/netbox:v3.5.4
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -22,17 +22,17 @@ ENV PUSER "boxer"
 ENV PGROUP "boxer"
 ENV PUSER_PRIV_DROP true
 
-ENV SUPERCRONIC_VERSION "0.2.24"
+ENV SUPERCRONIC_VERSION "0.2.25"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "6817299e04457e5d6ec4809c72ee13a43e95ba41"
+ENV SUPERCRONIC_SHA1SUM "642f4f5a2b67f3400b5ea71ff24f18c0a7d77d49"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_PATH="/opt/netbox-devicetype-library"
 ARG NETBOX_DEFAULT_SITE=Malcolm
-ARG NETBOX_CRON=false
+ARG NETBOX_CRON=true
 
 ENV BASE_PATH netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
@@ -62,9 +62,7 @@ RUN apt-get -q update && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
-    chown -R $PUSER:$PGROUP /etc/netbox /opt/unit /opt/netbox && \
-    # trying to see if things still work if these are owned by root (to avoid a costly chown on container startup)
-    chown --silent -R root:root /opt/netbox/venv/* && \
+    chown -R $PUSER:root /etc/netbox /opt/unit /opt/netbox && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
         curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p /opt/netbox/netbox/$BASE_PATH && \
@@ -74,6 +72,7 @@ RUN apt-get -q update && \
       chmod 644 /etc/unit/nginx-unit.json && \
     tr -cd '\11\12\15\40-\176' < /opt/netbox/netbox/netbox/configuration.py > /opt/netbox/netbox/netbox/configuration_ascii.py && \
       mv /opt/netbox/netbox/netbox/configuration_ascii.py /opt/netbox/netbox/netbox/configuration.py && \
+    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" /opt/netbox/netbox/netbox/settings.py && \
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' /opt/netbox/launch-netbox.sh
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -82,7 +81,6 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/*-defaults.json /etc/
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 EXPOSE 9001
 

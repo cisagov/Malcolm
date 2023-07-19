@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:23.05.1
+        image: ghcr.io/idaholab/malcolm/netbox:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -88,6 +88,21 @@ spec:
           - mountPath: /opt/netbox/netbox/media
             name: netbox-media-volume
             subPath: netbox/media
+      initContainers:
+      - name: netbox-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:netbox/media"
+        volumeMounts:
+          - name: netbox-media-volume
+            mountPath: "/data/config"
       volumes:
         - name: netbox-var-local-catrust-volume
           configMap:

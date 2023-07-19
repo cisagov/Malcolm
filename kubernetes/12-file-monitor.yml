@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: file-monitor-container
-        image: ghcr.io/idaholab/malcolm/file-monitor:23.05.1
+        image: ghcr.io/idaholab/malcolm/file-monitor:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -79,6 +79,21 @@ spec:
             subPath: "current"
           - mountPath: "/yara-rules/custom/configmap"
             name: file-monitor-yara-rules-custom-volume
+      initContainers:
+      - name: file-monitor-live-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/zeek-logs:extract_files/preserved,extract_files/quarantine"
+        volumeMounts:
+          - name: file-monitor-zeek-volume
+            mountPath: "/data/zeek-logs"
       volumes:
         - name: file-monitor-var-local-catrust-volume
           configMap:
