@@ -350,6 +350,8 @@ def filter(event)
                   # match/look up manufacturer based on OUI
                   if !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
 
+                    _autopopulate_oui = _autopopulate_oui.first() unless !_autopopulate_oui.is_a?(Array)
+
                     # does it look like a VM or a regular device?
                     if @vm_namesarray.include?(_autopopulate_oui.downcase)
                       # looks like this is probably a virtual machine
