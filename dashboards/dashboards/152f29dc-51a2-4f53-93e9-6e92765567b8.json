@@ -390,7 +390,7 @@
       "version": "WzE0NCwxXQ==",
       "attributes": {
         "title": "Modbus - Writes",
-        "visState": "{\"title\":\"Modbus - Writes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
+        "visState": "{\"title\":\"Modbus - Writes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "Modbus write register and write coil overview from modbus_detailed.log",
         "version": 1,
@@ -450,7 +450,7 @@
       "version": "WzE0NSwxXQ==",
       "attributes": {
         "title": "Modbus - Reads",
-        "visState": "{\"title\":\"Modbus - Reads\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":5,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
+        "visState": "{\"title\":\"Modbus - Reads\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":5,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "Modbus read holding registers, input registers, discrete inputs, and coils overview from modbus_detailed.log",
         "version": 1,
@@ -517,7 +517,7 @@
           "destination.ip",
           "event.action",
           "zeek.modbus_detailed.network_direction",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "zeek.modbus_detailed.address",
           "zeek.modbus_detailed.quantity",
           "zeek.modbus_detailed.values"
@@ -561,7 +561,7 @@
           "destination.ip",
           "zeek.modbus_detailed.network_direction",
           "event.action",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "zeek.modbus_detailed.address",
           "zeek.modbus_mask_write_register.and_mask",
           "zeek.modbus_mask_write_register.or_mask"
@@ -605,7 +605,7 @@
           "destination.ip",
           "zeek.modbus_detailed.network_direction",
           "event.action",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "zeek.modbus_read_write_multiple_registers.write_start_address",
           "zeek.modbus_read_write_multiple_registers.write_registers",
           "zeek.modbus_read_write_multiple_registers.read_start_address",
@@ -692,7 +692,7 @@
           "event.action",
           "event.result",
           "zeek.modbus_detailed.network_direction",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "event.id"
         ],
         "sort": [],
