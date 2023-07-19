@@ -1,4 +1,5 @@
 "bacnet": ["ot", "network"]
+"bacnet_device_control": ["ot", "network"]
 "bacnet_discovery": ["ot", "network"]
 "bacnet_property": ["ot", "network"]
 "bsap": ["ot", "network"]

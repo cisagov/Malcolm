@@ -4,7 +4,7 @@ FROM debian:11-slim AS build
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "v4.3.1"
+ENV ARKIME_VERSION "v4.3.2"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -180,17 +180,17 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
 # add configuration and scripts
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/opensearch_status.sh /opt
+COPY --chmod=755 shared/bin/pcap_processor.py /opt/
+COPY --chmod=644 shared/bin/pcap_utils.py /opt/
+COPY --chmod=644 scripts/malcolm_utils.py /opt/
+COPY --chmod=644 shared/bin/watch_common.py /opt/
+COPY --chmod=644 arkime/supervisord.conf /etc/supervisord.conf
 ADD arkime/scripts /opt/
-ADD shared/bin/pcap_processor.py /opt/
-ADD shared/bin/pcap_utils.py /opt/
-ADD scripts/malcolm_utils.py /opt/
-ADD shared/bin/watch_common.py /opt/
-ADD shared/bin/opensearch_status.sh /opt/
-ADD shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD arkime/etc $ARKIME_DIR/etc/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
-ADD arkime/supervisord.conf /etc/supervisord.conf
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 # MaxMind now requires a (free) license key to download the free versions of
 # their GeoIP databases. This should be provided as a build argument.
@@ -211,7 +211,7 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIME_DIR $PUSER && \
       usermod -a -G tty $PUSER && \
-    chmod 755 /opt/*.sh && \
+    chmod 755 /opt/*.sh /usr/local/bin/*.sh && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIME_DIR/bin/arkime_update_geo.sh && \
     mv $ARKIME_DIR/etc/config.ini $ARKIME_DIR/etc/config.orig.ini && \

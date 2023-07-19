@@ -2,42 +2,52 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dashboards
+  name: api
   namespace: malcolm
 spec:
   ports:
-    - port: 5601
+    - port: 5000
       protocol: TCP
       name: http
   selector:
-    name: dashboards-deployment
+    name: api-deployment
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dashboards-deployment
+  name: api-deployment
   namespace: malcolm
 spec:
   selector:
     matchLabels:
-      name: dashboards-deployment
+      name: api-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        name: dashboards-deployment
+        name: api-deployment
     spec:
       containers:
-      - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:23.05.1
+      - name: api-container
+        image: ghcr.io/idaholab/malcolm/api:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        command: ["/usr/bin/tini"]
+        args: ["--",
+               "/usr/local/bin/docker-uid-gid-setup.sh",
+               "/usr/local/bin/service_check_passthrough.sh",
+               "-s",
+               "api",
+               "gunicorn",
+               "--bind",
+               "0:5000",
+               "manage:app"]
         ports:
           - name: http
             protocol: TCP
-            containerPort: 5601
+            containerPort: 5000
         envFrom:
           - configMapRef:
               name: process-env
@@ -47,26 +57,26 @@ spec:
               name: opensearch-env
         env:
           - name: VIRTUAL_HOST
-            value: "dashboards.malcolm.local"
+            value: "api.malcolm.local"
         livenessProbe:
           httpGet:
-            path: /dashboards/api/status
-            port: 5601
+            path: /mapi/ping
+            port: 5000
             scheme: HTTP
-          initialDelaySeconds: 210
+          initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15
           successThreshold: 1
           failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: dashboards-var-local-catrust-volume
+            name: api-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
-            name: dashboards-opensearch-curlrc-secret-volume
+            name: api-opensearch-curlrc-secret-volume
       volumes:
-        - name: dashboards-var-local-catrust-volume
+        - name: api-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: dashboards-opensearch-curlrc-secret-volume
+        - name: api-opensearch-curlrc-secret-volume
           secret:
             secretName: opensearch-curlrc

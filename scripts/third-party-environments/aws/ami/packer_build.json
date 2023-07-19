@@ -1,0 +1,86 @@
+{
+  "variables": {
+    "aws_access_key": "${aws_access_key}",
+    "aws_secret_key": "${aws_secret_key}",
+    "vpc_region": "${vpc_region}",
+    "instance_type": "${instance_type}",
+    "ssh_username": "${ssh_username}",
+    "vpc_tag_name_filter": "${vpc_tag_name_filter}",
+    "vpc_subnet_tag_name_filter": "${vpc_subnet_tag_name_filter}",
+    "malcolm_repo": "${malcolm_repo}",
+    "malcolm_tag": "${malcolm_tag}",
+    "malcolm_uid": "${malcolm_uid}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "region": "{{user `vpc_region`}}",
+      "vpc_filter": {
+        "filters": {
+          "tag:Name": "{{user `vpc_tag_name_filter`}}",
+          "isDefault": "false"
+        }
+      },
+      "subnet_filter": {
+        "filters": {
+          "tag:Name": "{{user `vpc_subnet_tag_name_filter`}}"
+        }
+      },
+      "associate_public_ip_address": true,
+      "security_group_filter": {
+        "filters": {
+          "tag:Name": "{{user `vpc_security_group_tag_name_filter`}}"
+        }
+      },
+      "source_ami_filter": {
+        "filters": {
+          "architecture": "x86_64",
+          "virtualization-type": "hvm",
+          "name": "amzn2-ami-kernel-5.10-hvm-*-x86_64-gp2",
+          "root-device-type": "ebs"
+        },
+        "owners": [
+          "amazon"
+        ],
+        "most_recent": true
+      },
+      "instance_type": "{{user `instance_type`}}",
+      "aws_polling": {
+        "delay_seconds" : 60,
+        "max_attempts" : 60
+      },
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/xvda",
+          "volume_type": "gp2",
+          "volume_size": 20,
+          "delete_on_termination": true
+        }
+      ],
+      "ssh_username": "{{user `ssh_username`}}",
+      "tags": {
+        "source_ami_name": "{{ .SourceAMIName }}",
+        "Malcolm": "{{user `malcolm_repo`}}/{{user `malcolm_tag`}}"
+      },
+      "run_tags": {
+        "source_ami_name": "{{ .SourceAMIName }}",
+        "Malcolm": "{{user `malcolm_repo`}}/{{user `malcolm_tag`}}"
+      },
+      "ami_name": "malcolm-{{user `malcolm_tag`}}-{{isotime | clean_resource_name}}"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "environment_vars": [
+        "MALCOLM_REPO={{user `malcolm_repo`}}",
+        "MALCOLM_TAG={{user `malcolm_tag`}}",
+        "MALCOLM_UID={{user `malcolm_uid`}}"
+      ],
+      "execute_command": "echo 'packer' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "script": "./scripts/Malcolm_AMI_Setup.sh"
+    }
+  ]
+}

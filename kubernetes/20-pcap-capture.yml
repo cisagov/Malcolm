@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: pcap-capture-container
-        image: ghcr.io/idaholab/malcolm/pcap-capture:23.05.1
+        image: ghcr.io/idaholab/malcolm/pcap-capture:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -44,6 +44,21 @@ spec:
           - mountPath: "/pcap"
             name: capture-pcap-volume
             subPath: "upload"
+      initContainers:
+      - name: pcap-capture-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:processed,upload"
+        volumeMounts:
+          - name: capture-pcap-volume
+            mountPath: "/data/pcap"
       volumes:
         - name: capture-var-local-catrust-volume
           configMap:

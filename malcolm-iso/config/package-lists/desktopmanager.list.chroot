@@ -8,7 +8,6 @@ gvfs-backends
 libnotify-bin
 light-locker
 mousepad
-mupdf
 network-manager-gnome
 notify-osd
 seahorse
@@ -21,7 +20,6 @@ x11-apps
 x11-session-utils
 x11-xfs-utils
 x11-xserver-utils
-xdiskusage
 xfce4
 xfce4-battery-plugin
 xfce4-clipman-plugin

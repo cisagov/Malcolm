@@ -5,6 +5,8 @@ metadata:
   name: nginx-proxy
   namespace: malcolm
 spec:
+  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
+  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 443
@@ -37,7 +39,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/idaholab/malcolm/nginx-proxy:23.05.1
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -91,6 +93,23 @@ spec:
         - name: nginx-runtime-logs-volume
           mountPath: /var/log/nginx
           subPath: "nginx"
+      initContainers:
+      - name: nginx-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:auth;/data/runtime-logs:nginx"
+        volumeMounts:
+          - name: nginx-etc-auth-volume
+            mountPath: "/data/config"
+          - name: nginx-runtime-logs-volume
+            mountPath: "/data/runtime-logs"
       volumes:
       - name: nginx-etc-nginx-volume
         configMap:

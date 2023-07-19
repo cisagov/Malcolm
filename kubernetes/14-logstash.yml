@@ -5,6 +5,8 @@ metadata:
   name: logstash
   namespace: malcolm
 spec:
+  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
+  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 5044
@@ -47,7 +49,7 @@ spec:
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:23.05.1
+        image: ghcr.io/idaholab/malcolm/logstash-oss:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -109,6 +111,21 @@ spec:
           - name: logstash-config-persist-volume
             mountPath: /usr/share/logstash/config/persist
             subPath: "logstash"
+      initContainers:
+      - name: logstash-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:logstash"
+        volumeMounts:
+          - name: logstash-config-persist-volume
+            mountPath: "/data/config"
       volumes:
         - name: logstash-var-local-catrust-volume
           configMap:

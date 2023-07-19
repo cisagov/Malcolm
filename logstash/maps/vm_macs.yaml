@@ -1,0 +1,21 @@
+- high: 00:05:69:ff:ff:ff
+  low: 00:05:69:00:00:00
+  name: VMware, Inc.
+- high: 00:0c:29:ff:ff:ff
+  low: 00:0c:29:00:00:00
+  name: VMware, Inc.
+- high: 00:16:3e:ff:ff:ff
+  low: 00:16:3e:00:00:00
+  name: Xensource, Inc.
+- high: 00:1c:14:ff:ff:ff
+  low: 00:1c:14:00:00:00
+  name: VMware, Inc.
+- high: 00:50:56:ff:ff:ff
+  low: 00:50:56:00:00:00
+  name: VMware, Inc.
+- high: 08:00:27:ff:ff:ff
+  low: 08:00:27:00:00:00
+  name: PCS Computer Systems GmbH
+- high: bc:24:11:ff:ff:ff
+  low: bc:24:11:00:00:00
+  name: Proxmox Server Solutions GmbH

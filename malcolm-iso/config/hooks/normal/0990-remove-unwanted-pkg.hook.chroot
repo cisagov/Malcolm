@@ -7,6 +7,8 @@ apt-get -y --purge remove build-essential $(dpkg --get-selections | grep -v dein
 apt-get -y --purge remove bluez-firmware \
                           cracklib-runtime \
                           docker-scan-plugin \
+                          docker-buildx-plugin \
+                          gdebi* \
                           gdb \
                           firmware-netronome \
                           firmware-qcom-soc \
@@ -14,6 +16,7 @@ apt-get -y --purge remove bluez-firmware \
                           libasound2-plugins \
                           libx264* \
                           libx265* \
+                          nvidia* \
                           pavucontrol \
                           poppler-data \
                           pulseaudio \

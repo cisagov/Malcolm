@@ -6,7 +6,7 @@ LABEL maintainer="malcolm@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "4.3.1"
+ENV ARKIME_VERSION "4.3.2"
 ENV ARKIME_DIR "/opt/arkime"
 
 RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \

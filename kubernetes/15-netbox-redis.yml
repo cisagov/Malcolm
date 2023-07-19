@@ -30,12 +30,19 @@ spec:
     spec:
       containers:
       - name: netbox-redis-container
-        image: ghcr.io/idaholab/malcolm/redis:23.05.1
+        image: ghcr.io/idaholab/malcolm/redis:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
-        command: ["sh"]
-        args: ["-c", "redis-server --appendonly yes --requirepass $(REDIS_PASSWORD)"]
+        command: ["/sbin/tini"]
+        args: ["--",
+               "/usr/local/bin/docker-uid-gid-setup.sh",
+               "/usr/local/bin/service_check_passthrough.sh",
+               "-s",
+               "netbox",
+               "sh",
+               "-c",
+               "redis-server --appendonly yes --requirepass $(REDIS_PASSWORD)"]
         ports:
           - name: redis
             protocol: TCP
@@ -74,6 +81,21 @@ spec:
           - mountPath: /data
             name: netbox-redis-volume
             subPath: netbox/redis
+      initContainers:
+      - name: netbox-redis-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:netbox/redis"
+        volumeMounts:
+          - name: netbox-redis-volume
+            mountPath: "/data/config"
       volumes:
         - name: netbox-redis-var-local-catrust-volume
           configMap:

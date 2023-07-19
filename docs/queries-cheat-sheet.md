@@ -1,6 +1,6 @@
 # <a name="SearchCheatSheet"></a>Search Queries in Arkime and OpenSearch Dashboards
 
-OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Dashboards Query Language (DQL)](https://opensearch.org/docs/1.2/dashboards/dql/), both of which are somewhat different than Arkime's query syntax (see the help at [https://localhost/help#search](https://localhost/help#search) if you are connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
+OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) syntax and [Dashboards Query Language (DQL)](https://opensearch.org/docs/1.2/dashboards/dql/), both of which are somewhat different than Arkime's query syntax (see the help at **https://localhost/help#search** if connecting locally). The Arkime interface is for searching and visualizing both Arkime sessions and Zeek logs. The prebuilt dashboards in the OpenSearch Dashboards interface are for searching and visualizing Zeek logs, but will not include Arkime sessions. Here are some common patterns used in building search query strings for Arkime and OpenSearch Dashboards, respectively. See the links provided for further documentation.
 
 | | [Arkime Search String](https://localhost/help#search) | [OpenSearch Dashboards Search String (Lucene)](https://www.elastic.co/guide/en/kibana/current/lucene-query.html) | [OpenSearch Dashboards Search String (DQL)](https://www.elastic.co/guide/en/kibana/current/kuery-query.html)|
 |---|:---:|:---:|:---:|
@@ -24,9 +24,9 @@ OpenSearch Dashboards supports two query syntaxes: the legacy [Lucene](https://w
 | IP CIDR Subnets |`ip.src == 172.16.0.0/12`|`source.ip:"172.16.0.0/12"`|`source.ip:"172.16.0.0/12"`|
 | Search time frame |Use Arkime time bounding controls under the search bar|Use OpenSearch Dashboards time range controls in the upper right-hand corner|Use OpenSearch Dashboards time range controls in the upper right-hand corner|
 
-When building complex queries, it is **strongly recommended** that you enclose search terms and expressions in parentheses to control order of operations.
+When building complex queries, users are strongly recommended to enclose search terms and expressions in parentheses to control order of operations.
 
-As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying OpenSearch schema. A complete list of these fields can be found in the Arkime help (accessible at [https://localhost/help#fields](https://localhost/help#fields) if you are connecting locally).
+As Zeek logs are ingested, Malcolm parses and normalizes the logs' fields to match Arkime's underlying OpenSearch schema. A complete list of these fields can be found in the Arkime help (accessible at **https://localhost/help#fields** if connecting locally).
 
 Whenever possible, Zeek fields are mapped to existing corresponding Arkime fields: for example, the `orig_h` field in Zeek is mapped to Arkime's `source.ip` field. The original Zeek fields are also left intact. To complicate the issue, the Arkime interface uses its own aliases to reference those fields: the source IP field is referenced as `ip.src` (Arkime's alias) in Arkime and `source.ip` or `source.ip` in OpenSearch Dashboards.
 

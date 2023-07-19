@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: opensearch-container
-        image: ghcr.io/idaholab/malcolm/opensearch:23.05.1
+        image: ghcr.io/idaholab/malcolm/opensearch:23.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -67,6 +67,23 @@ spec:
           - name: opensearch-config-persist-volume
             mountPath: /usr/share/opensearch/config/persist
             subPath: "opensearch"
+      initContainers:
+      - name: opensearch-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/config:opensearch;/data/opensearch:nodes"
+        volumeMounts:
+          - name: opensearch-data-volume
+            mountPath: "/data/opensearch"
+          - name: opensearch-config-persist-volume
+            mountPath: "/data/config"
       volumes:
         - name: opensearch-var-local-catrust-volume
           configMap:
