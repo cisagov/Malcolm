@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: htadmin-container
-        image: ghcr.io/idaholab/malcolm/htadmin:23.07.0
+        image: ghcr.io/idaholab/malcolm/htadmin:23.07.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -63,7 +63,7 @@ spec:
             subPath: "htadmin"
       initContainers:
       - name: htadmin-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
         imagePullPolicy: Always
         stdin: false
         tty: true
