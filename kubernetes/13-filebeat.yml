@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.07.0
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:23.07.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -83,7 +83,7 @@ spec:
             subPath: "nginx"
       initContainers:
       - name: filebeat-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -1,5 +1,5 @@
 {
-  "version": "2.4.1",
+  "version": "2.8.0",
   "objects": [
     {
       "id": "152f29dc-51a2-4f53-93e9-6e92765567b8",
@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T19:35:53.613Z",
-      "version": "WzkyNCwxXQ==",
+      "updated_at": "2023-07-19T23:38:35.641Z",
+      "version": "Wzk0OSwxXQ==",
       "attributes": {
         "title": "Modbus",
         "hits": 0,
         "description": "Dashboard for the Modbus Protocol",
-        "panelsJSON": "[{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":17,\"y\":59,\"w\":31,\"h\":37,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":32,\"y\":23,\"w\":8,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":40,\"y\":23,\"w\":8,\"h\":18,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":8,\"y\":23,\"w\":11,\"h\":18,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":11,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{\"legendOpen\":true,\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":23,\"i\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\"},\"panelIndex\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":23,\"i\":\"218010cf-a0d9-4864-815b-f562bb67949d\"},\"panelIndex\":\"218010cf-a0d9-4864-815b-f562bb67949d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":19,\"y\":23,\"w\":13,\"h\":18,\"i\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\"},\"panelIndex\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":41,\"w\":17,\"h\":18,\"i\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\"},\"panelIndex\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_9\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":34,\"y\":41,\"w\":14,\"h\":18,\"i\":\"a3049ec4-3c48-4a43-9899-99c018670773\"},\"panelIndex\":\"a3049ec4-3c48-4a43-9899-99c018670773\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":17,\"y\":41,\"w\":17,\"h\":18,\"i\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\"},\"panelIndex\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":59,\"w\":17,\"h\":37,\"i\":\"f8941a7d-be4b-4782-b72b-808645d02139\"},\"panelIndex\":\"f8941a7d-be4b-4782-b72b-808645d02139\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":96,\"w\":48,\"h\":19,\"i\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\"},\"panelIndex\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\",\"embeddableConfig\":{\"sort\":[[\"firstPacket\",\"asc\"]]},\"panelRefName\":\"panel_13\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":115,\"w\":48,\"h\":15,\"i\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\"},\"panelIndex\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.4.1\",\"gridData\":{\"x\":0,\"y\":130,\"w\":48,\"h\":15,\"i\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\"},\"panelIndex\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"}]",
+        "panelsJSON": "[{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":84,\"w\":48,\"h\":18,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":23,\"w\":8,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":40,\"y\":23,\"w\":8,\"h\":18,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":23,\"w\":11,\"h\":18,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":11,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{\"legendOpen\":true,\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":23,\"i\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\"},\"panelIndex\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":23,\"i\":\"218010cf-a0d9-4864-815b-f562bb67949d\"},\"panelIndex\":\"218010cf-a0d9-4864-815b-f562bb67949d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":23,\"w\":13,\"h\":18,\"i\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\"},\"panelIndex\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":41,\"w\":16,\"h\":26,\"i\":\"f8941a7d-be4b-4782-b72b-808645d02139\"},\"panelIndex\":\"f8941a7d-be4b-4782-b72b-808645d02139\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":16,\"y\":41,\"w\":16,\"h\":43,\"i\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\"},\"panelIndex\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":41,\"w\":16,\"h\":43,\"i\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\"},\"panelIndex\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":5,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":67,\"w\":16,\"h\":17,\"i\":\"a3049ec4-3c48-4a43-9899-99c018670773\"},\"panelIndex\":\"a3049ec4-3c48-4a43-9899-99c018670773\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":102,\"w\":48,\"h\":23,\"i\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\"},\"panelIndex\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\",\"embeddableConfig\":{\"sort\":[[\"firstPacket\",\"asc\"]]},\"panelRefName\":\"panel_13\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":125,\"w\":48,\"h\":15,\"i\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\"},\"panelIndex\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":140,\"w\":48,\"h\":15,\"i\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\"},\"panelIndex\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -70,22 +70,22 @@
         {
           "name": "panel_9",
           "type": "visualization",
-          "id": "94118e70-e3d1-11ea-8def-e34cb979819b"
+          "id": "a8851d60-5684-11eb-a702-bff6ecd13bea"
         },
         {
           "name": "panel_10",
           "type": "visualization",
-          "id": "2e57bd40-969c-11ed-9401-1597262e95e8"
+          "id": "d0dc3070-e3d2-11ea-8def-e34cb979819b"
         },
         {
           "name": "panel_11",
           "type": "visualization",
-          "id": "d0dc3070-e3d2-11ea-8def-e34cb979819b"
+          "id": "94118e70-e3d1-11ea-8def-e34cb979819b"
         },
         {
           "name": "panel_12",
           "type": "visualization",
-          "id": "a8851d60-5684-11eb-a702-bff6ecd13bea"
+          "id": "2e57bd40-969c-11ed-9401-1597262e95e8"
         },
         {
           "name": "panel_13",
@@ -113,8 +113,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:59:16.992Z",
-      "version": "WzgxOSwxXQ==",
+      "updated_at": "2023-07-19T23:21:19.884Z",
+      "version": "Wzg1NywxXQ==",
       "attributes": {
         "title": "Network Logs",
         "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](/dashboards/app/dashboards#/view/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](/dashboards/app/dashboards#/view/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](/dashboards/app/dashboards#/view/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](/dashboards/app/dashboards#/view/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](/dashboards/app/dashboards#/view/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](/dashboards/app/dashboards#/view/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](/dashboards/app/dashboards#/view/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](/dashboards/app/dashboards#/view/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Known Summary](/dashboards/app/dashboards#/view/89d1cc50-974c-11ed-bb6b-3fb06c879b11)  \\n[Zeek Intelligence](/dashboards/app/dashboards#/view/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](/dashboards/app/dashboards#/view/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](/dashboards/app/dashboards#/view/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](/dashboards/app/dashboards#/view/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](/dashboards/app/dashboards#/view/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[Asset Interaction Analysis](/dashboards/app/dashboards#/view/677ee170-809e-11ed-8d5b-07069f823b6f)  \\n[↪ NetBox](/netbox/)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](/dashboards/app/dashboards#/view/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](/dashboards/app/dashboards#/view/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](/dashboards/app/dashboards#/view/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](/dashboards/app/dashboards#/view/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](/dashboards/app/dashboards#/view/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](/dashboards/app/dashboards#/view/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](/dashboards/app/dashboards#/view/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](/dashboards/app/dashboards#/view/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](/dashboards/app/dashboards#/view/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](/dashboards/app/dashboards#/view/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](/dashboards/app/dashboards#/view/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](/dashboards/app/dashboards#/view/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](/dashboards/app/dashboards#/view/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](/dashboards/app/dashboards#/view/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](/dashboards/app/dashboards#/view/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](/dashboards/app/dashboards#/view/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](/dashboards/app/dashboards#/view/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](/dashboards/app/dashboards#/view/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](/dashboards/app/dashboards#/view/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](/dashboards/app/dashboards#/view/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](/dashboards/app/dashboards#/view/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](/dashboards/app/dashboards#/view/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](/dashboards/app/dashboards#/view/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](/dashboards/app/dashboards#/view/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](/dashboards/app/dashboards#/view/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](/dashboards/app/dashboards#/view/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](/dashboards/app/dashboards#/view/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](/dashboards/app/dashboards#/view/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](/dashboards/app/dashboards#/view/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](/dashboards/app/dashboards#/view/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](/dashboards/app/dashboards#/view/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](/dashboards/app/dashboards#/view/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](/dashboards/app/dashboards#/view/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](/dashboards/app/dashboards#/view/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](/dashboards/app/dashboards#/view/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](/dashboards/app/dashboards#/view/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](/dashboards/app/dashboards#/view/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](/dashboards/app/dashboards#/view/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](/dashboards/app/dashboards#/view/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](/dashboards/app/dashboards#/view/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](/dashboards/app/dashboards#/view/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](/dashboards/app/dashboards#/view/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Synchrophasor](/dashboards/app/dashboards#/view/2cc56240-e460-11ed-a9d5-9f591c284cb4)   ●   [Best Guess](/dashboards/app/dashboards#/view/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -136,8 +136,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzEzNSwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzNCwxXQ==",
       "attributes": {
         "title": "Modbus - Logs",
         "description": "",
@@ -146,8 +146,11 @@
           "source.ip",
           "destination.ip",
           "destination.port",
+          "zeek.modbus.network_direction",
           "event.action",
           "event.result",
+          "zeek.modbus.unit_id",
+          "zeek.modbus.trans_id",
           "event.id"
         ],
         "sort": [
@@ -178,8 +181,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzEzNiwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzNSwxXQ==",
       "attributes": {
         "title": "Modbus - Source IP",
         "visState": "{\"title\":\"Modbus - Source IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"}}]}",
@@ -208,8 +211,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzEzNywxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzNiwxXQ==",
       "attributes": {
         "title": "Modbus - Destination IP",
         "visState": "{\"title\":\"Modbus - Destination IP\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Destination Port\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"}}]}",
@@ -238,8 +241,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzEzOCwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzNywxXQ==",
       "attributes": {
         "title": "Modbus - Observed Clients and Servers",
         "visState": "{\"title\":\"Modbus - Observed Clients and Servers\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Times Observed\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.known_modbus.device_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Device Type\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP Address\"}}]}",
@@ -268,8 +271,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzEzOSwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzOCwxXQ==",
       "attributes": {
         "title": "Modbus - Observed Client/Server Ratio",
         "visState": "{\"title\":\"Modbus - Observed Client/Server Ratio\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"dimensions\":{\"metric\":{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"},\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Modbus Role\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"zeek.known_modbus.device_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Modbus Role\"}}]}",
@@ -298,8 +301,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE0MCwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzEzOSwxXQ==",
       "attributes": {
         "title": "Modbus - Log Count",
         "visState": "{\"title\":\"Modbus - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":36}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{\"customLabel\":\"Log Count\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
@@ -327,8 +330,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE0MSwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE0MCwxXQ==",
       "attributes": {
         "title": "Modbus - Logs Over Time",
         "visState": "{\"title\":\"Modbus - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:33:54.363Z\",\"max\":\"2021-01-14T16:33:54.363Z\"}},\"label\":\"firstPacket per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-50y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
@@ -356,8 +359,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T19:13:28.522Z",
-      "version": "WzkyMCwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE0MSwxXQ==",
       "attributes": {
         "title": "Modbus - Functions and Exceptions",
         "visState": "{\"title\":\"Modbus - Functions and Exceptions\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Function\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Exception\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
@@ -381,21 +384,81 @@
       }
     },
     {
+      "id": "a8851d60-5684-11eb-a702-bff6ecd13bea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE0NSwxXQ==",
+      "attributes": {
+        "title": "Modbus Detailed - Request and Response",
+        "visState": "{\"title\":\"Modbus Detailed - Request and Response\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"zeek.modbus.network_direction: Descending\",\"aggType\":\"terms\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Function\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.modbus.network_direction\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "1cfb4e10-e0b7-11ea-8a49-0d5868b09681"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "d0dc3070-e3d2-11ea-8def-e34cb979819b",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-07-19T23:36:30.972Z",
+      "version": "Wzk0NywxXQ==",
+      "attributes": {
+        "title": "Modbus - Reads",
+        "visState": "{\"title\":\"Modbus - Reads\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.modbus.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":30,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":5,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "description": "Modbus read holding registers, input registers, discrete inputs, and coils overview from modbus_detailed.log",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.modbus.network_direction:(\\\"response\\\") AND event.action:(\\\"READ_DISCRETE_INPUTS\\\" OR \\\"READ_COILS\\\" OR \\\"READ_HOLDING_REGISTERS\\\" OR \\\"READ_INPUT_REGISTERS\\\")\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "1cfb4e10-e0b7-11ea-8a49-0d5868b09681"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
       "id": "94118e70-e3d1-11ea-8def-e34cb979819b",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE0NCwxXQ==",
+      "updated_at": "2023-07-19T23:37:28.218Z",
+      "version": "Wzk0OCwxXQ==",
       "attributes": {
         "title": "Modbus - Writes",
-        "visState": "{\"title\":\"Modbus - Writes\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Address\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
+        "visState": "{\"title\":\"Modbus - Writes\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.modbus.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.modbus_detailed.address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Address\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":30,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":3,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
         "description": "Modbus write register and write coil overview from modbus_detailed.log",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.modbus_detailed.network_direction:(\\\"request\\\")\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.modbus.network_direction:(\\\"request\\\")\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -416,8 +479,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T19:34:40.130Z",
-      "version": "WzkyMywxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE0MywxXQ==",
       "attributes": {
         "title": "Modbus - Transport",
         "visState": "{\"title\":\"Modbus - Transport\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Type\"},\"schema\":\"segment\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Transport\"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
@@ -441,72 +504,12 @@
       }
     },
     {
-      "id": "d0dc3070-e3d2-11ea-8def-e34cb979819b",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE0NSwxXQ==",
-      "attributes": {
-        "title": "Modbus - Reads",
-        "visState": "{\"title\":\"Modbus - Reads\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":5,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Values\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Function\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.unit_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Unit ID\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.modbus_detailed.values\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":false,\"otherBucketLabel\":\"-\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Values\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "Modbus read holding registers, input registers, discrete inputs, and coils overview from modbus_detailed.log",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.modbus_detailed.network_direction:(\\\"response\\\") AND event.action:(\\\"READ_DISCRETE_INPUTS\\\" OR \\\"READ_COILS\\\" OR \\\"READ_HOLDING_REGISTERS\\\" OR \\\"READ_INPUT_REGISTERS\\\")\",\"language\":\"lucene\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "1cfb4e10-e0b7-11ea-8a49-0d5868b09681"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
-      "id": "a8851d60-5684-11eb-a702-bff6ecd13bea",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE0MywxXQ==",
-      "attributes": {
-        "title": "Modbus Detailed - Request and Response",
-        "visState": "{\"title\":\"Modbus Detailed - Request and Response\",\"type\":\"horizontal_bar\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":200},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":75,\"filter\":true,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"zeek.modbus_detailed.network_direction: Descending\",\"aggType\":\"terms\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Function\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"zeek.modbus_detailed.network_direction\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"}}]}",
-        "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "1cfb4e10-e0b7-11ea-8a49-0d5868b09681"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
       "id": "1cfb4e10-e0b7-11ea-8a49-0d5868b09681",
       "type": "search",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
+      "updated_at": "2023-07-19T23:20:16.971Z",
       "version": "WzE0NiwxXQ==",
       "attributes": {
         "title": "Modbus - Detailed",
@@ -516,8 +519,8 @@
           "source.ip",
           "destination.ip",
           "event.action",
-          "zeek.modbus_detailed.network_direction",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.network_direction",
+          "zeek.modbus.unit_id",
           "zeek.modbus_detailed.address",
           "zeek.modbus_detailed.quantity",
           "zeek.modbus_detailed.values"
@@ -550,7 +553,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
+      "updated_at": "2023-07-19T23:20:16.971Z",
       "version": "WzE0NywxXQ==",
       "attributes": {
         "title": "Modbus - Mask Write",
@@ -559,9 +562,9 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "zeek.modbus_detailed.network_direction",
+          "zeek.modbus.network_direction",
           "event.action",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "zeek.modbus_detailed.address",
           "zeek.modbus_mask_write_register.and_mask",
           "zeek.modbus_mask_write_register.or_mask"
@@ -594,7 +597,7 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
+      "updated_at": "2023-07-19T23:20:16.971Z",
       "version": "WzE0OCwxXQ==",
       "attributes": {
         "title": "Modbus - Read Write Multiple",
@@ -603,9 +606,9 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "zeek.modbus_detailed.network_direction",
+          "zeek.modbus.network_direction",
           "event.action",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.unit_id",
           "zeek.modbus_read_write_multiple_registers.write_start_address",
           "zeek.modbus_read_write_multiple_registers.write_registers",
           "zeek.modbus_read_write_multiple_registers.read_start_address",
@@ -639,8 +642,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:58:16.339Z",
-      "version": "WzE1MCwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE0OSwxXQ==",
       "attributes": {
         "title": "Modbus - Known Clients and Servers Logs",
         "description": "",
@@ -678,8 +681,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T19:08:34.085Z",
-      "version": "WzkxOSwxXQ==",
+      "updated_at": "2023-07-19T23:20:16.971Z",
+      "version": "WzE1MCwxXQ==",
       "attributes": {
         "title": "Modbus - All Logs",
         "description": "",
@@ -691,8 +694,8 @@
           "destination.port",
           "event.action",
           "event.result",
-          "zeek.modbus_detailed.network_direction",
-          "zeek.modbus_detailed.unit_id",
+          "zeek.modbus.network_direction",
+          "zeek.modbus.unit_id",
           "event.id"
         ],
         "sort": [],
@@ -718,8 +721,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2023-01-17T18:59:13.942Z",
-      "version": "Wzc5NCwxXQ==",
+      "updated_at": "2023-07-19T23:21:16.791Z",
+      "version": "WzgzMiwxXQ==",
       "attributes": {
         "title": "Connections - Logs",
         "description": "",
