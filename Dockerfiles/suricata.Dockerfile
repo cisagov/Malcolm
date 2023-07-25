@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -49,11 +49,11 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list && \
+RUN sed -i "s/bookworm main/bookworm main contrib non-free/g" /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y -t bullseye-backports --no-install-recommends \
+    apt-get install -q -y -t bookworm-backports --no-install-recommends \
         libhtp2 \
         suricata \
         suricata-update && \
