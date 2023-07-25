@@ -200,6 +200,14 @@ def main():
         help="Manufacturers to create",
     )
     parser.add_argument(
+        '--manufacturers',
+        dest='manufacturersFileName',
+        type=str,
+        default=None,
+        required=False,
+        help="Filename of JSON file containing default manufacturers (see also -m/--manufacturer)",
+    )
+    parser.add_argument(
         '-r',
         '--device-role',
         dest='deviceRoles',
@@ -383,10 +391,33 @@ def main():
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manufacturerName}\": {nbe}")
 
-        manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
-        logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing manufacturers: {e}")
+
+    try:
+        # load manufacturers-default.json from file
+        manufacturersJson = None
+        if args.manufacturersFileName is not None and os.path.isfile(args.manufacturersFileName):
+            with open(args.manufacturersFileName) as f:
+                manufacturersJson = json.load(f)
+        if manufacturersJson is not None and "manufacturers" in manufacturersJson:
+            for manuf in [m for m in manufacturersJson["manufacturers"] if "name" in m]:
+                manufDef = {
+                    "name": manuf["name"],
+                    "slug": slugify(manuf["name"]),
+                }
+                if ("description" in manuf) and manuf["description"]:
+                    manufDef["description"] = manuf["description"]
+                try:
+                    nb.dcim.manufacturers.create(manufDef)
+                except pynetbox.RequestError as nbe:
+                    logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manuf["name"]}\": {nbe}")
+
+        manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
+
+    except Exception as e:
+        logging.error(f"{type(e).__name__} processing manufacturers JSON \"{args.manufacturersFileName}\": {e}")
 
     # ###### DEVICE ROLES ##########################################################################################
     try:

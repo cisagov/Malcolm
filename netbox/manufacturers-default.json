@@ -1,0 +1,48 @@
+{
+  "manufacturers": [
+    {
+      "name": "ABB",
+      "description": ""
+    },
+    {
+      "name": "Accenture",
+      "description": ""
+    },
+    {
+      "name": "Emerson Electric",
+      "description": ""
+    },
+    {
+      "name": "General Electric",
+      "description": ""
+    },
+    {
+      "name": "Hitachi",
+      "description": ""
+    },
+    {
+      "name": "Honeywell",
+      "description": ""
+    },
+    {
+      "name": "Mitsubishi",
+      "description": ""
+    },
+    {
+      "name": "Oracle",
+      "description": ""
+    },
+    {
+      "name": "Schneider Electric",
+      "description": ""
+    },
+    {
+      "name": "Yokogawa Electric",
+      "description": ""
+    },
+    {
+      "name": "Unspecified",
+      "description": ""
+    }
+  ]
+}
