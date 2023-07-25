@@ -203,7 +203,7 @@ if [ -d "$WORKDIR" ]; then
     --apt-secure true \
     --apt-source-archives false \
     --architectures amd64 \
-    --archive-areas 'main contrib non-free' \
+    --archive-areas 'main contrib non-free non-free-firmware' \
     --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
@@ -221,7 +221,7 @@ if [ -d "$WORKDIR" ]; then
     --linux-flavours "amd64:amd64" \
     --linux-packages "linux-image linux-headers" \
     --memtest none \
-    --parent-archive-areas 'main contrib non-free' \
+    --parent-archive-areas 'main contrib non-free non-free-firmware' \
     --parent-debian-installer-distribution $IMAGE_DISTRIBUTION \
     --parent-distribution $IMAGE_DISTRIBUTION \
     --security true \
