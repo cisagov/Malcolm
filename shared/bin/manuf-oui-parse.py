@@ -17,7 +17,7 @@ try:
 except ImportError:
     import yaml
 
-DEFAULT_MANUF_URL = "https://gitlab.com/wireshark/wireshark/raw/master/manuf"
+DEFAULT_MANUF_URL = "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
 padded_mac_low = '00:00:00:00:00:00'
 padded_mac_high = 'FF:FF:FF:FF:FF:FF'
 mac_pattern = re.compile(r"[-:\.]")

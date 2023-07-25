@@ -49,14 +49,9 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-RUN sed -i "s/bookworm main/bookworm main contrib non-free/g" /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list && \
+RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y -t bookworm-backports --no-install-recommends \
-        libhtp2 \
-        suricata \
-        suricata-update && \
     apt-get install -q -y --no-install-recommends \
         bc \
         curl \
@@ -72,6 +67,7 @@ RUN sed -i "s/bookworm main/bookworm main contrib non-free/g" /etc/apt/sources.l
         libevent-pthreads-2.1-7 \
         libgeoip1 \
         libhiredis0.14 \
+        libhtp2 \
         libhtp2 \
         libhyperscan5 \
         libjansson4 \
@@ -98,10 +94,12 @@ RUN sed -i "s/bookworm main/bookworm main contrib non-free/g" /etc/apt/sources.l
         python3-zmq \
         rsync \
         supervisor \
-        vim-tiny \
+        suricata \
+        suricata-update \
         tini \
+        vim-tiny \
         zlib1g && \
-    pip3 install --no-cache-dir watchdog && \
+    python3 -m pip install --break-system-packages --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \

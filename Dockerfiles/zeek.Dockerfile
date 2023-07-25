@@ -109,7 +109,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       tini \
       vim-tiny \
       zlib1g-dev && \
-    pip3 install --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \

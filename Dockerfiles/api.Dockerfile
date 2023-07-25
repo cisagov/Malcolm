@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED 1
 RUN    apt-get update -q \
     && apt-get -y -q upgrade \
     && apt-get install -y gcc \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install flake8
+    && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
+    && python3 -m pip install --break-system-packages --no-cache-dir flake8
 
 COPY ./api /usr/src/app/
 COPY scripts/malcolm_utils.py /usr/src/app/

@@ -48,7 +48,7 @@ RUN apt-get -q update && \
       rsync \
       supervisor \
       tini && \
-    /opt/netbox/venv/bin/python -m pip install psycopg2 pynetbox python-slugify randomcolor && \
+    /opt/netbox/venv/bin/python -m pip install --break-system-packages --no-cache-dir psycopg2 pynetbox python-slugify randomcolor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
