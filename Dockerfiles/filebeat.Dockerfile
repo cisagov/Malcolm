@@ -93,7 +93,7 @@ RUN apt-get -q update && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip --break-system-packages --no-cache-dir install patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
+    python3 -m pip install --break-system-packages --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
