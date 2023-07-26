@@ -15,6 +15,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   MAIN_USER="$(id -nu 1000)"
   if [[ -n $MAIN_USER ]]; then
 
+    # setup initial user's home directory if it hasn't been done
+    InjectSkeleton "$MAIN_USER"
+
     # fix some permisions to make sure things belong to the right person
     FixPermissions "$MAIN_USER"
 
