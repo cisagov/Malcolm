@@ -148,23 +148,20 @@ Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
 
 Perform string randomness scoring on some fields? (Y/n): y
 
-Expose OpenSearch port to external hosts? (y/N): n
-
-Expose Logstash port to external hosts? (y/N): n
-
-Expose Filebeat TCP port to external hosts? (y/N): y
-
-Use default field values for Filebeat TCP listener? (Y/n): y
-
-Expose SFTP server (for PCAP upload) to external hosts? (y/N): n
+1: no
+2: yes
+3: customize
+Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder? (no): 1
 
 Enable file extraction with Zeek? (y/N): y
+
 1: none
 2: known
 3: mapped
 4: all
 5: interesting
 Select file extraction behavior (none): 5
+
 1: quarantined
 2: all
 3: none
