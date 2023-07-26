@@ -16,6 +16,7 @@ apt-get -y --purge remove \
   bluez-firmware \
   cracklib-runtime \
   firmware-netronome \
+  firmware-nvidia* \
   firmware-qcom-soc \
   gdb \
   gdebi* \

@@ -11,6 +11,7 @@ apt-get -y --purge remove bluez-firmware \
                           gdebi* \
                           gdb \
                           firmware-netronome \
+                          firmware-nvidia* \
                           firmware-qcom-soc \
                           gnome-accessibility-themes \
                           libasound2-plugins \
