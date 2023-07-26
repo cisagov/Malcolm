@@ -15,6 +15,7 @@ libmagic-dev
 libmagic1
 libmaxminddb-dev
 libmaxminddb0
+libnl-3-dev
 libpcap-dev
 libpcap0.8
 libsodium-dev
