@@ -115,17 +115,18 @@ function BadTelemetry() {
     echo >> /etc/hosts
     echo '127.0.0.1 _googlecast._tcp.local' >> /etc/hosts
     echo '127.0.0.1 accounts.google.com' >> /etc/hosts
+    echo '127.0.0.1 census.netbox.dev' >> /etc/hosts
     echo '127.0.0.1 clients.l.google.com' >> /etc/hosts
+    echo '127.0.0.1 connectivitycheck.gstatic.com' >> /etc/hosts
+    echo '127.0.0.1 detectportal.firefox.com' >> /etc/hosts
+    echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
     echo '127.0.0.1 fonts.googleapis.com' >> /etc/hosts
+    echo '127.0.0.1 incoming.telemetry.mozilla.org' >> /etc/hosts
+    echo '127.0.0.1 prod.detectportal.prod.cloudops.mozgcp.net' >> /etc/hosts
     echo '127.0.0.1 safebrowsing-cache.google.com' >> /etc/hosts
     echo '127.0.0.1 safebrowsing.clients.google.com' >> /etc/hosts
     echo '127.0.0.1 update.googleapis.com' >> /etc/hosts
     echo '127.0.0.1 www.google-analytics.com' >> /etc/hosts
     echo '127.0.0.1 www.gstatic.com' >> /etc/hosts
-    echo '127.0.0.1 connectivitycheck.gstatic.com' >> /etc/hosts
-    echo '127.0.0.1 incoming.telemetry.mozilla.org' >> /etc/hosts
-    echo '127.0.0.1 detectportal.firefox.com' >> /etc/hosts
-    echo '127.0.0.1 prod.detectportal.prod.cloudops.mozgcp.net' >> /etc/hosts
-    echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
   fi
 }
