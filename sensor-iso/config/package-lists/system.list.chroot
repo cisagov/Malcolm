@@ -61,7 +61,6 @@ gvfs-backends
 gvfs-daemons
 gvfs-fuse
 gzip
-hddtemp
 hdparm
 hfsplus
 hfsprogs
@@ -72,7 +71,7 @@ javascript-common
 jq
 less
 libatomic1
-libffi7
+libffi8
 libgtk2.0-bin
 libjson-perl
 libkrb5-3

@@ -20,7 +20,7 @@ libpcap0.8
 libsodium-dev
 libsodium23
 libssl-dev
-libssl1.1
+libssl3
 libtcmalloc-minimal4
 locales-all
 make

@@ -130,7 +130,7 @@ if mkdir "$DESTDIR"; then
   ln -s ./install.py configure
   popd  >/dev/null 2>&1
   pushd .. >/dev/null 2>&1
-  DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.xz"
+  DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
   cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"

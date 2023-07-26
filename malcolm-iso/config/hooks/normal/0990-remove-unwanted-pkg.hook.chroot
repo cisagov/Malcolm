@@ -32,7 +32,6 @@ dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
 # disable automatic/initial running of some services (but don't abort if we fail)
 systemctl disable ctrl-alt-del.target || true
-systemctl disable hddtemp.service || true
 systemctl disable apt-daily.service || true
 systemctl disable apt-daily.timer || true
 systemctl disable apt-daily-upgrade.timer || true
