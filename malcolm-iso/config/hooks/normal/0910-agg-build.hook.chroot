@@ -106,14 +106,11 @@ chown root:root ./croc
 
 # step
 RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
-RELEASE_FILE_REGEX="_linux_.+amd64\\\.tar\\\.gz$"
+RELEASE_FILE_REGEX="step-cli.*amd64\\\.deb$"
 cd /tmp
-mkdir -p ./step
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./step --strip-components 1
-mv ./step/bin/step /usr/local/bin/step
-chmod 755 /usr/local/bin/step
-chown root:root /usr/local/bin/step
-rm -rf /tmp/step*
+curl -o ./step_amd64.deb "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')"
+dpkg -i /tmp/step_amd64.deb
+rm -rf /tmp/step_amd64.deb
 ###
 
 # stern
