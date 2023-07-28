@@ -104,6 +104,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Deployment Example](kubernetes.md#Example)
     - [Future Enhancements](kubernetes.md#Future)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
+    - [Deploying Malcolm on Microsoft Azure Kubernetes Service (AKS)](kubernetes-azure.md#KubernetesAzure)
 * [Deploying Malcolm in Other Third-Party Environments](third-party-envs.md#ThirdPartyEnv)
 * [Hardening](hardening.md#Hardening)
     - [Compliance Exceptions](hardening.md#ComplianceExceptions)
