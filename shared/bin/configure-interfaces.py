@@ -52,8 +52,8 @@ class Constants:
     TIME_SYNC_NTP = 'ntp'
     TIME_SYNC_HTPDATE = 'htpdate'
     TIME_SYNC_HTPDATE_CRON = '/etc/cron.d/htpdate'
-    TIME_SYNC_HTPDATE_TEST_COMMAND = '/usr/sbin/htpdate -4 -a -b -d'
-    TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -b -l -s'
+    TIME_SYNC_HTPDATE_TEST_COMMAND = '/usr/sbin/htpdate -4 -a -d'
+    TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -l -s'
     TIME_SYNC_NTP_CONFIG = '/etc/ntp.conf'
 
     SSHD_CONFIG_FILE = "/etc/ssh/sshd_config"
