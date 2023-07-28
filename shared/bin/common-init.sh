@@ -50,8 +50,10 @@ function InjectSkeleton() {
   if [ -n "$1" ]; then
     USER_TO_FIX="$1"
     USER_HOME="$(getent passwd "$USER_TO_FIX" | cut -d: -f6)"
-    if [ -d "$USER_HOME" ] && [ -d /etc/skel ] && [ ! -d "$USER_HOME"/.config ]; then
+    if [ -d "$USER_HOME" ] && [ -d /etc/skel ] && [ ! -f "$USER_HOME"/.config/skel.synced ]; then
       rsync -a --ignore-existing --chown="$(id -u "$USER_TO_FIX"):$(id -g "$USER_TO_FIX")" /etc/skel/ "$USER_HOME"/
+      date -Iseconds > "$USER_HOME"/.config/skel.synced
+      chown $(id -u "$USER_TO_FIX"):$(id -g "$USER_TO_FIX") "$USER_HOME"/.config/skel.synced
     fi
   fi
 }
