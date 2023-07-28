@@ -33,6 +33,7 @@ RUN apt-get -q update && \
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
+        libpcre3 \
         libssl-dev \
         libtool \
         libwww-perl \
