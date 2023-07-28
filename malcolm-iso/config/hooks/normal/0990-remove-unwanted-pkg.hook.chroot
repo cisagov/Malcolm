@@ -16,7 +16,6 @@ apt-get -y --purge remove bluez-firmware \
                           gnome-accessibility-themes \
                           libasound2-plugins \
                           libx264* \
-                          libx265* \
                           nvidia* \
                           pavucontrol \
                           poppler-data \
