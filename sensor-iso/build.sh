@@ -5,6 +5,13 @@ IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
+ZEEK_DISTRO=Debian_12
+ZEEK_VER=5.2.2-0
+ZEEK_LTS=
+
+BEATS_VER="8.9.0"
+BEATS_OSS="-oss"
+
 BUILD_ERROR_CODE=1
 
 if [ "$(id -u)" != "0" ]; then
@@ -94,8 +101,6 @@ if [ -d "$WORKDIR" ]; then
     echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
   done
 
-  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
-
   # copy the interface code into place for the resultant image
   mkdir -p ./config/includes.chroot/opt
   rsync -a "$SCRIPT_PATH/interface/" ./config/includes.chroot/opt/sensor/
@@ -140,11 +145,33 @@ if [ -d "$WORKDIR" ]; then
   ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   find "$SCRIPT_PATH/docs/images/hedgehog/logo/font/" -type f -name "*.ttf" -exec cp "{}" ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ \;
 
-  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/shared/aide/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/shared/aide:/build aide-build:latest -o /build
-  cp "$SCRIPT_PATH/shared/aide"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv "$SCRIPT_PATH/shared/aide"/*.deb ./config/packages.chroot/
+  # download deb files to be installed during installation
+  pushd ./config/packages.chroot/ >/dev/null 2>&1
+
+  # zeek
+  if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
+  curl -sSL --remote-name-all \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
+
+  # filebeat
+  BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
+  BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
+  for BEAT in filebeat; do
+    BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
+    BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
+    curl -f -L -o "$BEATS_DEB" "$BEATS_URL"
+  done
+
+  popd >/dev/null 2>&1
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
@@ -168,8 +195,11 @@ if [ -d "$WORKDIR" ]; then
   rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
   bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+
+  # save these extra debs off into hedgehog_install_artifacts
+  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
