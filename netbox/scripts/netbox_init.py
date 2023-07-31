@@ -411,7 +411,7 @@ def main():
                 try:
                     nb.dcim.manufacturers.create(manufDef)
                 except pynetbox.RequestError as nbe:
-                    logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manuf["name"]}\": {nbe}")
+                    logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manuf['name']}\": {nbe}")
 
         manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
         logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
