@@ -162,15 +162,6 @@ if [ -d "$WORKDIR" ]; then
     "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
     "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
 
-  # filebeat
-  BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
-  BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
-  for BEAT in filebeat; do
-    BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
-    BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-    curl -f -L -o "$BEATS_DEB" "$BEATS_URL"
-  done
-
   popd >/dev/null 2>&1
 
   # clone and build yara .deb package in its own clean environment (rather than in hooks/)
