@@ -1,6 +1,5 @@
 bison
 ccache
-checkinstall
 cmake
 gcc
 g++

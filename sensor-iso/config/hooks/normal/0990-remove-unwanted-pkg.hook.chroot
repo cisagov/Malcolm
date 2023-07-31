@@ -4,7 +4,6 @@
 
 # remove development packages not necessary for building dynamic Zeek plugins
 apt-get -y --purge remove \
-  checkinstall \
   gdb \
   libc6-dbg \
   ninja-build \

@@ -18,32 +18,14 @@ export PATH="${ZEEK_DIR}"/bin:$PATH
 
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
-NETSNIFF_RELEASE_URL="https://api.github.com/repos/netsniff-ng/netsniff-ng/releases/latest"
 CAPA_RELEASE_URL="https://api.github.com/repos/fireeye/capa/releases/latest"
 YQ_RELEASE_URL="https://api.github.com/repos/mikefarah/yq/releases/latest"
 SUPERCRONIC_RELEASE_URL="https://api.github.com/repos/aptible/supercronic/releases/latest"
 CROC_RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
-YARA_RELEASE_URL="https://api.github.com/repos/VirusTotal/yara/releases/latest"
 YARA_RULES_SRC_DIR="/opt/yara-rules-src"
 YARA_RULES_DIR="/opt/yara-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
-
-# Install netsniff-ng
-cd /tmp
-mkdir ./netsniff-ng
-NETSNIFF_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./netsniff-ng --strip-components 1
-cd ./netsniff-ng
-./configure --prefix=/usr --disable-geoip
-make netsniff-ng
-# make netsniff-ng_install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
-cp *.deb /opt/hedgehog_install_artifacts/
-
-cd /tmp
-rm -Rf ./netsniff-ng
-##
 
 # Download and install spicy and 3rd-party zeek plugins
 mkdir -p "${CCACHE_DIR}"
@@ -177,20 +159,7 @@ tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"
 mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
-# yara
-cd /tmp
-mkdir ./yara
-YARA_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./yara --strip-components 1
-cd ./yara
-./bootstrap.sh
-./configure --prefix=/usr --with-crypto --enable-magic --enable-cuckoo --enable-dotnet
-make
-#make install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VER" --pkgarch="amd64" --pkgsource="$YARA_URL"
-cp *.deb /opt/hedgehog_install_artifacts/
-cd /tmp
-rm -rf /yara
+# update yara rules
 
 mkdir -p "${YARA_RULES_DIR}"/custom "${YARA_RULES_SRC_DIR}"
 /usr/local/bin/yara_rules_setup.sh -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}"
