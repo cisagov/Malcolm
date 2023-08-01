@@ -33,7 +33,7 @@ RUN apt-get -q update && \
         libkrb5-dev \
         libmaxminddb-dev \
         libpcap0.8-dev \
-        libpcre3 \
+        libpcre3-dev \
         libssl-dev \
         libtool \
         libwww-perl \
@@ -50,7 +50,7 @@ RUN apt-get -q update && \
         swig \
         wget \
         zlib1g-dev && \
-  python3 -m pip install --break-system-packages --no-cache-dir beautifulsoup4 && \
+  python3 -m pip install --break-system-packages --no-cache-dir beautifulsoup4 meson && \
   cd /opt && \
     git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
@@ -149,6 +149,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       libkrb5-3 \
       libmaxminddb0 \
       libpcap0.8 \
+      libpcre3 \
       libssl3 \
       libtool \
       libwww-perl \
@@ -164,9 +165,9 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       rsync \
       sudo \
       supervisor \
+      tini \
       vim-tiny \
       wget \
-      tini \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
     python3 -m pip install --break-system-packages --no-cache-dir beautifulsoup4 pyzmq watchdog && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \

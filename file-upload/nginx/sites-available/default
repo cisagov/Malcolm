@@ -22,7 +22,7 @@ server {
         fastcgi_send_timeout 300s;
         fastcgi_busy_buffers_size 384k;
         fastcgi_request_buffering off;
-        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
     }
 
     location ~ /\.ht {
