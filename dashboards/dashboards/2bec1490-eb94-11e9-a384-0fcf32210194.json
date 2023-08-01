@@ -435,7 +435,6 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "network.is_orig",
           "zeek.bacnet.bvlc_function",
           "zeek.bacnet.pdu_type",
           "zeek.bacnet.pdu_service",
@@ -478,7 +477,6 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "network.is_orig",
           "zeek.bacnet_property.pdu_service",
           "zeek.bacnet_property.object_type",
           "zeek.bacnet.instance_number",
@@ -522,7 +520,6 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "network.is_orig",
           "zeek.bacnet_discovery.pdu_service",
           "zeek.bacnet_discovery.object_type",
           "zeek.bacnet.instance_number",
