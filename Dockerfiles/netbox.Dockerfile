@@ -28,34 +28,43 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV YQ_VERSION "4.33.3"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+
 ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_PATH="/opt/netbox-devicetype-library"
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=true
+ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
 
 ENV BASE_PATH netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
+ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      git \
       jq \
       procps \
       psmisc \
       rsync \
       supervisor \
       tini && \
-    /opt/netbox/venv/bin/python -m pip install --break-system-packages --no-cache-dir psycopg2 pynetbox python-slugify randomcolor && \
+    /opt/netbox/venv/bin/python -m pip install --break-system-packages --no-cache-dir 'git+https://github.com/mmguero-dev/netbox-initializers' psycopg2 pynetbox python-slugify randomcolor && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
       touch "${SUPERCRONIC_CRONTAB}" && \
-    apt-get -q -y autoremove && \
+    curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
+        chmod 755 /usr/bin/yq && \
+    apt-get -q -y --purge remove git && \
+      apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \
@@ -80,7 +89,7 @@ COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 netbox/*-defaults.json /etc/
+COPY --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
 
 EXPOSE 9001
 

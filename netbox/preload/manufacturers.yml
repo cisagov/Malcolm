@@ -1,0 +1,22 @@
+- name: ABB
+  slug: abb
+- name: Accenture
+  slug: accenture
+- name: Emerson Electric
+  slug: emerson-electric
+- name: General Electric
+  slug: general-electric
+- name: Hitachi
+  slug: hitachi
+- name: Honeywell
+  slug: honeywell
+- name: Mitsubishi
+  slug: mitsubishi
+- name: Oracle
+  slug: oracle
+- name: Schneider Electric
+  slug: schneider-electric
+- name: Yokogawa Electric
+  slug: yokogawa-electric
+- name: Unspecified
+  slug: unspecified

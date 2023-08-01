@@ -1,0 +1,282 @@
+- name: Access point
+  slug: access-point
+  color: 87e5da
+  vm_role: true
+- name: Application server
+  slug: application-server
+  color: 57d7e0
+  vm_role: true
+- name: Authentication server
+  slug: authentication-server
+  color: ff7a89
+  vm_role: true
+- name: BAS
+  slug: bas
+  description: Building automation
+  color: c37fe8
+  vm_role: true
+- name: BMS
+  slug: bms
+  description: Building management
+  color: ff6519
+  vm_role: true
+- name: Bridge
+  slug: bridge
+  color: dfffa5
+  vm_role: true
+- name: CNC
+  slug: cnc
+  description: Computer numerical control
+  color: 0aaf28
+  vm_role: true
+- name: Camera
+  slug: camera
+  color: adffda
+  vm_role: true
+- name: Cloud server
+  slug: cloud-server
+  color: 75ef5d
+  vm_role: true
+- name: Collaboration server
+  slug: collaboration-server
+  color: 8b4adb
+  vm_role: true
+- name: DCS
+  slug: dcs
+  description: Distributed control system
+  color: 2f7ad6
+  vm_role: true
+- name: DHCP server
+  slug: dhcp-server
+  description: Dynamic host communication protocol server
+  color: 9d28cc
+  vm_role: true
+- name: DNS server
+  slug: dns-server
+  description: Domain name system server
+  color: 17d3c0
+  vm_role: true
+- name: Database server
+  slug: database-server
+  color: 9ca8f4
+  vm_role: true
+- name: Domain controller
+  slug: domain-controller
+  color: f945b4
+  vm_role: true
+- name: EACS
+  slug: eacs
+  description: Electronic access control
+  color: f24dc9
+  vm_role: true
+- name: Fax
+  slug: fax
+  color: 89f497
+  vm_role: true
+- name: File server
+  slug: file-server
+  color: 82ef7f
+  vm_role: true
+- name: Firewall
+  slug: firewall
+  color: e4ccff
+  vm_role: true
+- name: Gateway
+  slug: gateway
+  color: 9ea6e5
+  vm_role: true
+- name: Gateway
+  slug: gateway
+  color: bb4ce8
+  vm_role: true
+- name: HMI
+  slug: hmi
+  description: Human machine interface
+  color: eda484
+  vm_role: true
+- name: HVAC
+  slug: hvac
+  description: Heating, ventilation and air conditioning
+  color: 6cd89b
+  vm_role: true
+- name: Historian
+  slug: historian
+  color: 0971f9
+  vm_role: true
+- name: Hub
+  slug: hub
+  color: bb93e2
+  vm_role: true
+- name: Hypervisor
+  slug: hypervisor
+  color: a7f99f
+  vm_role: true
+- name: IDS
+  slug: ids
+  description: Intrusion detection system
+  color: acfca1
+  vm_role: true
+- name: IIoT
+  slug: iiot
+  description: Industrial internet of things device
+  color: b50a3b
+  vm_role: true
+- name: IPS
+  slug: ips
+  description: Intrusion prevention system
+  color: dd80b0
+  vm_role: true
+- name: IoT
+  slug: iot
+  description: Internet of things device
+  color: a4d86c
+  vm_role: true
+- name: KVM
+  slug: kvm
+  description: Keyboard, video and mouse switch
+  color: be9bf7
+  vm_role: true
+- name: Kiosk
+  slug: kiosk
+  color: e22522
+  vm_role: true
+- name: Lighting
+  slug: lighting
+  description: Lighting controls
+  color: ea8604
+  vm_role: true
+- name: Load balancer
+  slug: load-balancer
+  color: 17d68d
+  vm_role: true
+- name: MES
+  slug: mes
+  description: Manufacturing execution system
+  color: a82327
+  vm_role: true
+- name: Mail server
+  slug: mail-server
+  color: 9ab52f
+  vm_role: true
+- name: Media server
+  slug: media-server
+  color: ef88ef
+  vm_role: true
+- name: Modem
+  slug: modem
+  color: c41924
+  vm_role: true
+- name: NAS
+  slug: nas
+  description: Network attached storage
+  color: 7ef7d5
+  vm_role: true
+- name: NTP server
+  slug: ntp-server
+  description: Network time protocol server
+  color: 8abdd8
+  vm_role: true
+- name: Network sensor
+  slug: network-sensor
+  color: aefcbd
+  vm_role: true
+- name: PLC
+  slug: plc
+  description: Programmable logic controller
+  color: ead27c
+  vm_role: true
+- name: PLM
+  slug: plm
+  description: Product lifecycle management system
+  color: 5996c1
+  vm_role: true
+- name: Photocopier
+  slug: photocopier
+  color: ccb2f4
+  vm_role: true
+- name: Physical sensor
+  slug: physical-sensor
+  color: fcedb8
+  vm_role: true
+- name: Print server
+  slug: print-server
+  color: f966f7
+  vm_role: true
+- name: Printer
+  slug: printer
+  color: d13ec7
+  vm_role: true
+- name: Proxy server
+  slug: proxy-server
+  color: b42ef2
+  vm_role: true
+- name: RTU
+  slug: rtu
+  description: Remote terminal unit
+  color: e817b0
+  vm_role: true
+- name: Real-time communication server
+  slug: real-time-communication-server
+  color: 38c4b8
+  vm_role: true
+- name: Repeater
+  slug: repeater
+  color: de50e0
+  vm_role: true
+- name: Router
+  slug: router
+  color: e5929d
+  vm_role: true
+- name: SCADA
+  slug: scada
+  description: Supervisory control and data acquisition
+  color: fc11b6
+  vm_role: true
+- name: SIEM
+  slug: siem
+  description: Security information and event management
+  color: 48c97c
+  vm_role: true
+- name: Safety automation system
+  slug: safety-automation-system
+  color: 387f02
+  vm_role: true
+- name: Scanner
+  slug: scanner
+  color: 9f97db
+  vm_role: true
+- name: Server
+  slug: server
+  color: 2b8aad
+  vm_role: true
+- name: Switch
+  slug: switch
+  color: 32c949
+  vm_role: true
+- name: Telephony
+  slug: telephony
+  color: ed477e
+  vm_role: true
+- name: VCS
+  slug: vcs
+  description: Version control system
+  color: 9abaf9
+  vm_role: true
+- name: VFD
+  slug: vfd
+  description: Variable frequency drive
+  color: b9e224
+  vm_role: true
+- name: VPN server
+  slug: vpn-server
+  description: Virtual private network server
+  color: 931504
+  vm_role: true
+- name: Web server
+  slug: web-server
+  color: e285bd
+  vm_role: true
+- name: Workstation
+  slug: workstation
+  color: afa1f4
+  vm_role: true
