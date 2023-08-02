@@ -67,10 +67,10 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
-  mkdir $VERBOSE -p "$DESTDIR/netbox/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"
+  mkdir $VERBOSE -p "$DESTDIR/netbox/preload/"
   mkdir $VERBOSE -p "$DESTDIR/nginx/ca-trust/"
   mkdir $VERBOSE -p "$DESTDIR/nginx/certs/"
   mkdir $VERBOSE -p "$DESTDIR/opensearch-backup/"
@@ -103,6 +103,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
+  cp $VERBOSE ./netbox/preload/*.yml "$DESTDIR/netbox/preload/"
 
   unset CONFIRMATION
   echo ""

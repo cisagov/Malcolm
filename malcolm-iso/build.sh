@@ -102,6 +102,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/redis/"
+  mkdir -p "$MALCOLM_DEST_DIR/netbox/preload/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/ca-trust/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/kubernetes/"
@@ -146,6 +147,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
+  cp ./netbox/preload/*.yml "$MALCOLM_DEST_DIR/netbox/preload/"
 
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
