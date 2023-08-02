@@ -45,17 +45,22 @@ ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
 ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 
+ADD netbox/patch/* /tmp/netbox-patches/
+
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       git \
       jq \
+      patch \
       procps \
       psmisc \
       rsync \
       supervisor \
       tini && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-cache-dir 'git+https://github.com/mmguero-dev/netbox-initializers' psycopg2 pynetbox python-slugify randomcolor && \
+    cd "${NETBOX_PATH}" && \
+      bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSLO "${SUPERCRONIC_URL}" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "${SUPERCRONIC}" && \
@@ -64,7 +69,7 @@ RUN apt-get -q update && \
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove git && \
+    apt-get -q -y --purge remove patch git && \
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -74,7 +79,7 @@ RUN apt-get -q update && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
-        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
+        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
