@@ -89,6 +89,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
             * [Via passively-gathered network traffic metadata](asset-interaction-analysis.md#NetBoxPopPassive)
             * [Via active discovery](asset-interaction-analysis.md#NetBoxPopActive)
         + [Compare NetBox inventory with database of known vulnerabilities](asset-interaction-analysis.md#NetBoxVuln)
+        + [Preloading NetBox inventory](asset-interaction-analysis.md#NetBoxPreload)
         + [Backup and restore](asset-interaction-analysis.md#NetBoxBackup)
     - [CyberChef](cyberchef.md#CyberChef)
     - [API](api.md#API)
