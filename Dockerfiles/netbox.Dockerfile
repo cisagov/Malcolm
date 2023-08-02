@@ -38,6 +38,7 @@ ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=true
 ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
 
+ENV NETBOX_PATH /opt/netbox
 ENV BASE_PATH netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
@@ -54,11 +55,11 @@ RUN apt-get -q update && \
       rsync \
       supervisor \
       tini && \
-    /opt/netbox/venv/bin/python -m pip install --break-system-packages --no-cache-dir 'git+https://github.com/mmguero-dev/netbox-initializers' psycopg2 pynetbox python-slugify randomcolor && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-cache-dir 'git+https://github.com/mmguero-dev/netbox-initializers' psycopg2 pynetbox python-slugify randomcolor && \
+    curl -fsSLO "${SUPERCRONIC_URL}" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+      chmod +x "${SUPERCRONIC}" && \
+      mv "${SUPERCRONIC}" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
@@ -71,23 +72,24 @@ RUN apt-get -q update && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
-    chown -R $PUSER:root /etc/netbox /opt/unit /opt/netbox && \
+    chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
-        curl -sSL "$NETBOX_DEVICETYPE_LIBRARY_URL" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
-    mkdir -p /opt/netbox/netbox/$BASE_PATH && \
-      mv /opt/netbox/netbox/static /opt/netbox/netbox/$BASE_PATH/static && \
+        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzvf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
+    mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
+      mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
       mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \
       chmod 644 /etc/unit/nginx-unit.json && \
-    tr -cd '\11\12\15\40-\176' < /opt/netbox/netbox/netbox/configuration.py > /opt/netbox/netbox/netbox/configuration_ascii.py && \
-      mv /opt/netbox/netbox/netbox/configuration_ascii.py /opt/netbox/netbox/netbox/configuration.py && \
-    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" /opt/netbox/netbox/netbox/settings.py && \
-    sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' /opt/netbox/launch-netbox.sh
+    tr -cd '\11\12\15\40-\176' < "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration.py" > "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration_ascii.py" && \
+      mv "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration_ascii.py" "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration.py" && \
+    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" "${NETBOX_PATH}/netbox/${BASE_PATH}/settings.py" && \
+    sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' "${NETBOX_PATH}/launch-netbox.sh"
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 netbox/scripts/* /usr/local/bin/
+COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
 

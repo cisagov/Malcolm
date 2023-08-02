@@ -14,6 +14,7 @@ import randomcolor
 import re
 import sys
 import time
+import malcolm_utils
 
 from collections.abc import Iterable
 from datetime import datetime
@@ -157,7 +158,6 @@ def main():
         help="Site(s) to create",
     )
     parser.add_argument(
-        '-n',
         '--net-map',
         dest='netMapFileName',
         type=str,
@@ -212,13 +212,31 @@ def main():
         help="Device types(s) to create",
     )
     parser.add_argument(
+        '-n',
+        '--netbox',
+        dest='netboxDir',
+        type=str,
+        default=os.getenv('NETBOX_PATH', '/opt/netbox'),
+        required=False,
+        help="NetBox installation directory",
+    )
+    parser.add_argument(
         '-l',
         '--library',
         dest='libraryDir',
         type=str,
-        default=None,
+        default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_PATH', '/opt/netbox-devicetype-library'),
         required=False,
         help="Directory containing NetBox device type library",
+    )
+    parser.add_argument(
+        '-p',
+        '--preload',
+        dest='preloadDir',
+        type=str,
+        default=os.getenv('NETBOX_PRELOAD_PATH', '/opt/netbox-preload'),
+        required=False,
+        help="Directory containing netbox-initializers files to preload",
     )
     try:
         parser.error = parser.exit
@@ -367,6 +385,8 @@ def main():
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing manufacturer \"{manufacturerName}\": {nbe}")
 
+        manufacturers = {x.name: x for x in nb.dcim.manufacturers.all()}
+        logging.debug(f"Manufacturers (after): { {k:v.id for k, v in manufacturers.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing manufacturers: {e}")
 
@@ -389,6 +409,8 @@ def main():
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
 
+        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing device roles: {e}")
 
@@ -409,7 +431,7 @@ def main():
                     },
                 )
             except pynetbox.RequestError as nbe:
-                logging.warning(f"{type(nbe).__model__} processing device type \"{deviceTypeModel}\": {nbe}")
+                logging.warning(f"{type(nbe).__name__} processing device type \"{deviceTypeModel}\": {nbe}")
 
         deviceTypes = {x.model: x for x in nb.dcim.device_types.all()}
         logging.debug(f"Device types (after): { {k:v.id for k, v in deviceTypes.items()} }")
@@ -614,13 +636,38 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing net map JSON \"{args.netMapFileName}\": {e}")
 
-    # ###### Library ###############################################################################################
-    try:
-        counter = import_library(nb, args.libraryDir)
-        logging.debug(f"import library results: { counter }")
+    # ###### Netbox-Initializers ###################################################################################
+    netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
+    manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
+    if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
+        try:
+            with malcolm_utils.pushd(os.path.dirname(manageScript)):
+                retcode, output = malcolm_utils.run_process(
+                    [
+                        netboxVenvPy,
+                        os.path.basename(manageScript),
+                        "load_initializer_data",
+                        "--path",
+                        args.preloadDir,
+                    ],
+                    logger=logging,
+                )
+                if retcode == 0:
+                    logging.debug(f"netbox-initializers: {retcode} {output}")
+                else:
+                    logging.error(f"Error processing netbox-initializers: {retcode} {output}")
 
-    except Exception as e:
-        logging.error(f"{type(e).__name__} processing library: {e}")
+        except Exception as e:
+            logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")
+
+    # ###### Library ###############################################################################################
+    if os.path.isdir(args.libraryDir):
+        try:
+            counter = import_library(nb, args.libraryDir)
+            logging.debug(f"import library results: { counter }")
+
+        except Exception as e:
+            logging.error(f"{type(e).__name__} processing library: {e}")
 
 
 ###################################################################################################
