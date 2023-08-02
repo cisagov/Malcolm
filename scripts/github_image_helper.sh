@@ -181,7 +181,7 @@ for i in "${!FUNCTIONS[@]}"; do
   printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}"
 done
 echo -n "Operation:"
-read USER_FUNCTION_IDX
+[[ -n "${1-}" ]] && USER_FUNCTION_IDX="$1" || read USER_FUNCTION_IDX
 
 if (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
   # execute one function, à la carte
