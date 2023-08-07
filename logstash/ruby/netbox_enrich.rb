@@ -164,7 +164,7 @@ def register(params)
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
   if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
-    @autopopulate_fuzzy_threshold = 0.75
+    @autopopulate_fuzzy_threshold = 0.80
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
   end
