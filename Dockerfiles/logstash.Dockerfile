@@ -1,4 +1,4 @@
-FROM opensearchproject/logstash-oss-with-opensearch-output-plugin:8.6.1
+FROM docker.elastic.co/logstash/logstash-oss:8.9.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -66,13 +66,14 @@ RUN set -x && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
                                        logstash-filter-grok logstash-filter-geoip logstash-filter-uuid \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                                        logstash-filter-fingerprint logstash-filter-useragent \
-                                       logstash-input-beats logstash-output-elasticsearch && \
+                                       logstash-input-beats logstash-output-elasticsearch logstash-output-opensearch && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
         apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
