@@ -43,15 +43,30 @@
         .button_rounded {
             border-radius: 12px;
         }
+        .panel-title {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            text-align: center;
+        }
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .imgcenter {
+            width: 50%;
+        }
     </style>
 </head>
 <body>
+    <img class="center imgcenter" src="upload/Malcolm_banner.png" alt="%SITE_NAME%">
+    <h1 class="panel-title">Network Traffic Artifact Upload</h1>
+
     <form id="commit_files" action="server/php/submit.php" method="post" enctype="multipart/form-data">
 
         <input type="text" name="tags"/>
         <br>
         <input type="file" name="filepond[]" multiple>
-        <button type="submit" class="button button_rounded">Commit</button>
+        <button type="submit" class="button button_rounded">Commit Uploaded Files</button>
 
     </form>
 
@@ -114,6 +129,7 @@
                 tag_limit: 16,
                 wrap: true,
                 add_on_blur: true,
+                placeholder: 'User-defined tags',
                 link: function(name) {
                     return false;
                 },
