@@ -287,6 +287,7 @@ def ProcessFileEventWorker(workerArgs):
 def WatchAndProcessDirectory(
     directories,
     polling,
+    recursive,
     fileProcessor,
     fileProcessorKwargs,
     assumeClosedSec,
@@ -301,7 +302,7 @@ def WatchAndProcessDirectory(
     )
     for directory in directories:
         loggerToUse.info(f"🗐\tScheduling {directory}")
-        observer.schedule(handler, directory, recursive=True)
+        observer.schedule(handler, directory, recursive=recursive)
 
     observer.start()
     try:
