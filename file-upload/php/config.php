@@ -4,9 +4,9 @@
 const ENTRY_FIELD = array('filepond');
 
 // where to write files to
-const UPLOAD_DIR = __DIR__ . '/upload';
-const TRANSFER_DIR = __DIR__ . '/upload/tmp';
-const VARIANTS_DIR = __DIR__ . '/upload/variants';
+const UPLOAD_DIR = __DIR__ . '/files';
+const TRANSFER_DIR = __DIR__ . '/files/tmp';
+const VARIANTS_DIR = __DIR__ . '/files/variants';
 
 // name to use for the file metadata object
 const METADATA_FILENAME = '.metadata';
