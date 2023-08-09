@@ -7,14 +7,10 @@ server {
     client_body_buffer_size 4M;
 
     root /var/www/upload;
-    index index.php index.html index.htm;
+    index index.php index.html;
+    autoindex off;
 
-    location ^~ /server/php/files {
-        deny all;
-        return 404;
-    }
-
-    location ~ \.php$ {
+    location ~ (\.php|/server/php/)$ {
         include snippets/fastcgi-php.conf;
         fastcgi_buffers 16 64k;
         fastcgi_buffer_size 256k;
