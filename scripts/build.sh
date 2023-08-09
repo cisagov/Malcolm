@@ -93,7 +93,7 @@ fi
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
-  "/var/www/upload/js/jquery.fileupload.js;file-upload"
+  "/var/www/upload/filepond/dist/filepond.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
   "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
