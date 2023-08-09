@@ -41,7 +41,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Stopping and restarting Malcolm](running.md#StopAndRestart)
     - [Clearing Malcolm's data](running.md#Wipe)
     - [Temporary read-only interface](running.md#ReadOnlyUI)
-* [Capture file and log archive upload](upload.md#Upload)
+* [Network traffic artifact upload](upload.md#Upload)
     - [Tagging](upload.md#Tagging)
     - [Processing uploaded PCAPs with Zeek and Suricata](upload.md#UploadPCAPProcessors)
 * [Live analysis](live-analysis.md#LiveAnalysis)

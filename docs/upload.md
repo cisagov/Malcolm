@@ -1,12 +1,12 @@
-# <a name="Upload"></a>Capture file and log archive upload
+# <a name="Upload"></a>Network traffic artifact upload
 
-* [Capture file and log archive upload](#Upload)
+* [Network traffic artifact upload](#Upload)
     - [Tagging](#Tagging)
     - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
 
 Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at **https://localhost/upload/** if connecting locally.
 
-![Capture File and Log Archive Upload](./images/screenshots/malcolm_upload.png)
+![Network traffic artifact upload](./images/screenshots/malcolm_upload.png)
 
 Additionally, there is a writable `files` directory on an SFTP server served on port 8022 (e.g., `sftp://USERNAME@localhost:8022/files/` if connecting locally).
 
