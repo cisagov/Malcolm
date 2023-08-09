@@ -467,7 +467,6 @@ services:
       - ./config/process.env
       - ./config/ssl.env
       - ./config/auth.env
-      - ./config/upload.env
     environment:
       VIRTUAL_HOST : 'upload.malcolm.local'
     depends_on:
