@@ -95,7 +95,7 @@ COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
 ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
 ADD file-upload/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
-ADD file-upload/*.php /var/www/upload/server/php/
+ADD file-upload/php/*.php /var/www/upload/server/php/
 ADD file-upload/site/index.html /var/www/upload/index.html
 ADD file-upload/sshd_config /tmp/sshd_config
 ADD file-upload/supervisord.conf /supervisord.conf
