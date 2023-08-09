@@ -46,6 +46,9 @@ ENV PHP_VERSION $PHP_VERSION
 ARG FILEPOND_SERVER_BRANCH=master
 ENV FILEPOND_SERVER_BRANCH $FILEPOND_SERVER_BRANCH
 
+ARG STALE_UPLOAD_DELETE_MIN=360
+ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
+
 ENV SUPERCRONIC_VERSION "0.2.26"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
@@ -108,7 +111,8 @@ RUN mkdir -p /run/php \
   perl -i -pl -e 's/^#?(\s*PermitRootLogin\s+)[\w\-]+$/$1no/i;' \
               -e 's/^#?(\s*PasswordAuthentication\s+)\w+$/$1no/i' /etc/ssh/sshd_config && \
   cat /tmp/sshd_config >>/etc/ssh/sshd_config && \
-  touch ${SUPERCRONIC_CRONTAB} && \
+  echo "0/10 * * * * find /var/www/upload/server/php/chroot/files -mindepth 3 -type f -mmin +\$STALE_UPLOAD_DELETE_MIN -delete" > ${SUPERCRONIC_CRONTAB} && \
+  echo "5 * * * * find /var/www/upload/server/php/chroot/files -mindepth 2 -type d -empty -mmin +\$STALE_UPLOAD_DELETE_MIN -delete" >> ${SUPERCRONIC_CRONTAB} && \
   chmod 775 /var/www/upload/server/php/chroot/files && \
   chmod 755 /var \
             /var/www \
