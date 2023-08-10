@@ -426,7 +426,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/var/www/upload/server/php/chroot/files
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost"]
+      test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
       interval: 30s
       timeout: 15s
       retries: 3
