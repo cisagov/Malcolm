@@ -109,7 +109,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
-  mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/tmp/"
+  mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/tmp/spool/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/variants/"
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata-logs/live/"

@@ -82,7 +82,7 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:upload/tmp,upload/variants"
+            value: "/data/pcap:upload/tmp/spool,upload/variants"
         volumeMounts:
           - name: upload-pcap-volume
             mountPath: "/data/pcap"

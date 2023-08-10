@@ -17,9 +17,11 @@ if ! getent passwd "$MALCOLM_USERNAME" >/dev/null; then
   useradd -g $PGROUP -d /var/www/upload/server/php/chroot -s /sbin/nologin "$MALCOLM_USERNAME"
   usermod --password "$(echo -n "$MALCOLM_PASSWORD" | base64 -d)" "$MALCOLM_USERNAME"
   chown :$PGROUP /var/www/upload/server/php/chroot/files
-  chown :$PGROUP /var/www/upload/server/php/chroot/files/{tmp,variants} || true
+  chown :$PGROUP /var/www/upload/server/php/chroot/files/{tmp,variants} 2>/dev/null || true
+  chown :$PGROUP /var/www/upload/server/php/chroot/files/tmp/spool 2>/dev/null || true
   chmod 775 /var/www/upload/server/php/chroot/files
-  chmod 775 /var/www/upload/server/php/chroot/files/{tmp,variants} || true
+  chmod 775 /var/www/upload/server/php/chroot/files/{tmp,variants} 2>/dev/null || true
+  chmod 775 /var/www/upload/server/php/chroot/files/tmp/spool 2>/dev/null || true
 
 else
   echo "skipping one-time setup tasks" 1>&2
