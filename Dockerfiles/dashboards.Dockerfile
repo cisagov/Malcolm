@@ -93,7 +93,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.9.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
@@ -127,10 +127,10 @@ RUN yum upgrade -y && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
-        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        sed -i "s/2\.8\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        sed -i "s/2\.8\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
-        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
+        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
