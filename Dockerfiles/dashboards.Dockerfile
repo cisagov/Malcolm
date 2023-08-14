@@ -14,10 +14,10 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.9.0"
+ARG OPENSEARCH_VERSION="2.8.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.9.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
@@ -71,7 +71,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.9.0
+FROM opensearchproject/opensearch-dashboards:2.8.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -93,7 +93,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.9.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL="true"
