@@ -7,6 +7,7 @@
     - [Via passively-gathered network traffic metadata](#NetBoxPopPassive)
     - [Via active discovery](#NetBoxPopActive)
 * [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
+* [Preloading NetBox inventory](#NetBoxPreload)
 * [Backup and restore](#NetBoxBackup)
 
 Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at **https://localhost/netbox/** if connecting locally.
@@ -111,6 +112,12 @@ See [idaholab/Malcolm#136](https://github.com/idaholab/Malcolm/issues/136).
 ## <a name="NetBoxVuln"></a>Compare NetBox inventory with database of known vulnerabilities
 
 See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
+
+## <a name="NetBoxPreload"></a>Preloading NetBox inventory
+
+YML files in [`./netbox/preload`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/netbox/preload/) under the Malcolm installation directory will be preloaded upon startup using the third-party [netbox-initializers](https://github.com/tobiasge/netbox-initializers) plugin. Examples illustrating the format of these YML files can be found at its [GitHub repository](https://github.com/tobiasge/netbox-initializers/tree/main/src/netbox_initializers/initializers/yaml).
+
+[workflow files]
 
 ## <a name="NetBoxBackup"></a>Backup and Restore
 

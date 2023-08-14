@@ -1,5 +1,3 @@
 open-vm-tools-desktop
 qemu-guest-agent
 virt-what
-virtualbox-guest-utils
-virtualbox-guest-x11

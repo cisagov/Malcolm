@@ -189,26 +189,28 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. Users probably want to answer **Y** to this question.
 * **Perform string randomness scoring on some fields?**
     - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to answer **Y** to this question.
-* **Expose OpenSearch port to external hosts?**
-    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
-* **Expose Logstash port to external hosts?**
-    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
-* **Expose Filebeat TCP port to external hosts?**
-    - Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
-* **Use default field values for Filebeat TCP listener?**
-    - Answer **Y** to use the defaults and skip the next five questions about the Filebeat TCP listener.
-* **Select log format for messages sent to Filebeat TCP listener**
-    - Possible choices include `json` and `raw`; users probably want to choose `json`.
-* **Source field to parse for messages sent to Filebeat TCP listener**
-    - The default choice (and the one Hedgehog Linux will be sending) is `message`.
-* **Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener**
-    - The default choice (and the one that corresponds to Malcolm's dashboards built for the resource utilization metrics sent by Hedgehog Linux) is `miscbeat`.
-* **Field to drop from events sent to Filebeat TCP listener**
-    - Users most likely want this to be the default, `message`, to match the field name specified above.
-* **Tag to apply to messages sent to Filebeat TCP listener**
-    - The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
-* **Expose SFTP server (for PCAP upload) to external hosts?**
-    - Users should answer **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
+* **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?**
+    - Answer **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following several questions in this list. Answer **customize** to proceed to answer the following related questions individually.
+    - **Expose OpenSearch port to external hosts?**
+        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
+    - **Expose Logstash port to external hosts?**
+        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
+    - **Expose Filebeat TCP port to external hosts?**
+        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
+    - **Use default field values for Filebeat TCP listener?**
+        + Answer **Y** to use the defaults and skip the next five questions about the Filebeat TCP listener.
+    - **Select log format for messages sent to Filebeat TCP listener**
+        + Possible choices include `json` and `raw`; users probably want to choose `json`.
+    - **Source field to parse for messages sent to Filebeat TCP listener**
+        + The default choice (and the one Hedgehog Linux will be sending) is `message`.
+    - **Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener**
+        + The default choice (and the one that corresponds to Malcolm's dashboards built for the resource utilization metrics sent by Hedgehog Linux) is `miscbeat`.
+    - **Field to drop from events sent to Filebeat TCP listener**
+        + Users most likely want this to be the default, `message`, to match the field name specified above.
+    - **Tag to apply to messages sent to Filebeat TCP listener**
+        + The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
+    - **Expose SFTP server (for PCAP upload) to external hosts?**
+        + Users should answer **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
 * **Enable file extraction with Zeek?**
     - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
 * **Select file extraction behavior**

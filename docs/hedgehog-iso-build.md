@@ -5,7 +5,7 @@ Official downloads of the Hedgehog Linux installer ISO are not provided: however
 * [Vagrant](https://www.vagrantup.com/)
     - [`vagrant-reload`](https://github.com/aidanns/vagrant-reload) plugin
     - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
-    - [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box
+    - [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box
 
 The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
 
@@ -13,7 +13,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
     - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
-    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-11`](https://app.vagrantup.com/bento/boxes/debian-11) Vagrant box to `libvirt` format
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box to `libvirt` format
 
 To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm]({{ site.github.repository_url }}/) working copy and run:
 
@@ -29,7 +29,7 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-23.07.1.iso"
+Finished, created "/sensor-build/hedgehog-23.08.0.iso"
 …
 ```
 

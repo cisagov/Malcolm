@@ -13,7 +13,6 @@ localepurge localepurge/none_selected boolean false
 EOF
 debconf-set-selections < /tmp/localepurge.preseed
 rm -f /tmp/localepurge.preseed
-apt-get -y install localepurge
 dpkg-reconfigure --frontend=noninteractive localepurge
 sed -i "s/^\(USE_DPKG\)/#\1/" /etc/locale.nopurge
 sed -i "s/^\(NEEDSCONFIGFIRST\)/#\1/" /etc/locale.nopurge

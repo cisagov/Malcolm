@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -28,10 +28,10 @@ ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.25"
+ENV SUPERCRONIC_VERSION "0.2.26"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "642f4f5a2b67f3400b5ea71ff24f18c0a7d77d49"
+ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.33.3"
@@ -49,14 +49,9 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
-    echo "deb http://deb.debian.org/debian bullseye-backports main" >> /etc/apt/sources.list && \
+RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y -t bullseye-backports --no-install-recommends \
-        libhtp2 \
-        suricata \
-        suricata-update && \
     apt-get install -q -y --no-install-recommends \
         bc \
         curl \
@@ -72,6 +67,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         libevent-pthreads-2.1-7 \
         libgeoip1 \
         libhiredis0.14 \
+        libhtp2 \
         libhtp2 \
         libhyperscan5 \
         libjansson4 \
@@ -98,10 +94,12 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         python3-zmq \
         rsync \
         supervisor \
-        vim-tiny \
+        suricata \
+        suricata-update \
         tini \
+        vim-tiny \
         zlib1g && \
-    pip3 install --no-cache-dir watchdog && \
+    python3 -m pip install --break-system-packages --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \

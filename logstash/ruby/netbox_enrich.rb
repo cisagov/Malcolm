@@ -9,6 +9,7 @@ def register(params)
   require 'ipaddr'
   require 'json'
   require 'lru_redux'
+  require 'psych'
   require 'stringex_lite'
 
   # global enable/disable for this plugin based on environment variable(s)
@@ -116,7 +117,7 @@ def register(params)
   _vendor_oui_map_path = params.fetch("vendor_oui_map_path", "/etc/vendor_macs.yaml")
   if File.exist?(_vendor_oui_map_path)
     @macarray = Array.new
-    YAML.safe_load(File.read(_vendor_oui_map_path)).each do |mac|
+    psych_load_yaml(_vendor_oui_map_path).each do |mac|
       @macarray.push([mac_string_to_integer(mac['low']), mac_string_to_integer(mac['high']), mac['name']])
     end
     # Array.bsearch only works on a sorted array
@@ -129,7 +130,7 @@ def register(params)
   _vm_oui_map_path = params.fetch("vm_oui_map_path", "/etc/vm_macs.yaml")
   if File.exist?(_vm_oui_map_path)
     @vm_namesarray = Set.new
-    YAML.safe_load(File.read(_vm_oui_map_path)).each do |mac|
+    psych_load_yaml(_vm_oui_map_path).each do |mac|
       @vm_namesarray.add(mac['name'].to_s.downcase)
     end
   else
@@ -164,7 +165,7 @@ def register(params)
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
   if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
-    @autopopulate_fuzzy_threshold = 0.75
+    @autopopulate_fuzzy_threshold = 0.80
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
   end
@@ -722,6 +723,18 @@ end
 
 def mac_string_to_integer(string)
   string.tr('.:-','').to_i(16)
+end
+
+def psych_load_yaml(filename)
+  parser = Psych::Parser.new(Psych::TreeBuilder.new)
+  parser.code_point_limit = 64*1024*1024
+  parser.parse(IO.read(filename, :mode => 'r:bom|utf-8'))
+  yaml_obj = Psych::Visitors::ToRuby.create().accept(parser.handler.root)
+  if yaml_obj.is_a?(Array) && (yaml_obj.length() == 1)
+    yaml_obj.first
+  else
+    yaml_obj
+  end
 end
 
 def collect_values(hashes)

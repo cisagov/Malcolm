@@ -1,1 +1,4 @@
+filebeat
 fluent-bit
+suricata
+suricata-update

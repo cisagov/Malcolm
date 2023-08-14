@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -91,15 +91,15 @@ ENV EXTRACTED_FILE_HTTP_SERVER_ENCRYPT $EXTRACTED_FILE_HTTP_SERVER_ENCRYPT
 ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENV SUPERCRONIC_VERSION "0.2.25"
+ENV SUPERCRONIC_VERSION "0.2.26"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "642f4f5a2b67f3400b5ea71ff24f18c0a7d77d49"
+ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
 
-RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.list && \
+RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
@@ -112,13 +112,13 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       gcc \
       git \
       jq \
-      libclamunrar9 \
+      libclamunrar11 \
       libjansson-dev \
       libjansson4 \
       libmagic-dev \
       libmagic1 \
       libssl-dev \
-      libssl1.1 \
+      libssl3 \
       libtool \
       make \
       pkg-config \
@@ -135,7 +135,7 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
       python3-requests \
       python3-zmq \
       rsync && \
-    pip3 install clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
+    python3 -m pip install --break-system-packages --no-cache-dir clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -167,9 +167,9 @@ RUN sed -i "s/bullseye main/bullseye main contrib non-free/g" /etc/apt/sources.l
         automake \
         build-essential \
         gcc \
-        gcc-8 \
+        gcc-12 \
         libc6-dev \
-        libgcc-8-dev \
+        libgcc-12-dev \
         libjansson-dev \
         libmagic-dev \
         libssl-dev \

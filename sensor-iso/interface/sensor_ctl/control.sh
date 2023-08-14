@@ -12,8 +12,12 @@ CONTROL_VARS_FILE="control_vars.conf"
 CONTROL_COMMAND="$(basename "${BASH_SOURCE[0]}")"
 
 if [[ ($# -eq 0) || (($# -eq 1) && ("$1" = "all")) ]]; then
-  # no arguments, defaults to all managed processes
-  CONTROL_PROCESS="all"
+  if [[ "$CONTROL_COMMAND" = "shutdown" ]]; then
+    CONTROL_PROCESS=()
+  else
+    # no arguments, defaults to all managed processes
+    CONTROL_PROCESS="all"
+  fi
 else
   # eg., tcpdump, zeek
   CONTROL_PROCESS="$@"

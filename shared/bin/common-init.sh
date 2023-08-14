@@ -44,6 +44,20 @@ function CleanDefaultAccounts() {
   chmod 600 "/etc/crontab" "/etc/group-" "/etc/gshadow-" "/etc/passwd-" "/etc/shadow-" >/dev/null 2>&1 || true
   chmod 700 "/etc/cron.hourly" "/etc/cron.daily" "/etc/cron.weekly" "/etc/cron.monthly" "/etc/cron.d" >/dev/null 2>&1 || true
 }
+
+# setup initially-created user's directory based on /etc/skel
+function InjectSkeleton() {
+  if [ -n "$1" ]; then
+    USER_TO_FIX="$1"
+    USER_HOME="$(getent passwd "$USER_TO_FIX" | cut -d: -f6)"
+    if [ -d "$USER_HOME" ] && [ -d /etc/skel ] && [ ! -f "$USER_HOME"/.config/skel.synced ]; then
+      rsync -a --ignore-existing --chown="$(id -u "$USER_TO_FIX"):$(id -g "$USER_TO_FIX")" /etc/skel/ "$USER_HOME"/
+      date -Iseconds > "$USER_HOME"/.config/skel.synced
+      chown $(id -u "$USER_TO_FIX"):$(id -g "$USER_TO_FIX") "$USER_HOME"/.config/skel.synced
+    fi
+  fi
+}
+
 # if the network configuration files for the interfaces haven't been set to come up on boot, configure that
 function InitializeSensorNetworking() {
   unset NEED_NETWORKING_RESTART
@@ -96,8 +110,9 @@ function InitializeAggregatorNetworking() {
 function FixPermissions() {
   if [ -n "$1" ]; then
     USER_TO_FIX="$1"
-    [ -d /home/"$USER_TO_FIX" ] && find /home/"$USER_TO_FIX" \( -type d -o -type f \) -exec chmod o-rwx "{}" \;
-    [ -d /home/"$USER_TO_FIX" ] && find /home/"$USER_TO_FIX" -type f -name ".*" -exec chmod g-wx "{}" \;
+    USER_HOME="$(getent passwd "$USER_TO_FIX" | cut -d: -f6)"
+    [ -d "$USER_HOME" ] && find "$USER_HOME" \( -type d -o -type f \) -exec chmod o-rwx "{}" \;
+    [ -d "$USER_HOME" ] && find "$USER_HOME" -type f -name ".*" -exec chmod g-wx "{}" \;
     if [ ! -f /etc/cron.allow ] || ! grep -q "$USER_TO_FIX" /etc/cron.allow; then
       echo "$USER_TO_FIX" >> /etc/cron.allow
     fi
@@ -115,17 +130,18 @@ function BadTelemetry() {
     echo >> /etc/hosts
     echo '127.0.0.1 _googlecast._tcp.local' >> /etc/hosts
     echo '127.0.0.1 accounts.google.com' >> /etc/hosts
+    echo '127.0.0.1 census.netbox.dev' >> /etc/hosts
     echo '127.0.0.1 clients.l.google.com' >> /etc/hosts
+    echo '127.0.0.1 connectivitycheck.gstatic.com' >> /etc/hosts
+    echo '127.0.0.1 detectportal.firefox.com' >> /etc/hosts
+    echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
     echo '127.0.0.1 fonts.googleapis.com' >> /etc/hosts
+    echo '127.0.0.1 incoming.telemetry.mozilla.org' >> /etc/hosts
+    echo '127.0.0.1 prod.detectportal.prod.cloudops.mozgcp.net' >> /etc/hosts
     echo '127.0.0.1 safebrowsing-cache.google.com' >> /etc/hosts
     echo '127.0.0.1 safebrowsing.clients.google.com' >> /etc/hosts
     echo '127.0.0.1 update.googleapis.com' >> /etc/hosts
     echo '127.0.0.1 www.google-analytics.com' >> /etc/hosts
     echo '127.0.0.1 www.gstatic.com' >> /etc/hosts
-    echo '127.0.0.1 connectivitycheck.gstatic.com' >> /etc/hosts
-    echo '127.0.0.1 incoming.telemetry.mozilla.org' >> /etc/hosts
-    echo '127.0.0.1 detectportal.firefox.com' >> /etc/hosts
-    echo '127.0.0.1 prod.detectportal.prod.cloudops.mozgcp.net' >> /etc/hosts
-    echo '127.0.0.1 detectportal.prod.mozaws.net' >> /etc/hosts
   fi
 }

@@ -3,11 +3,13 @@ def concurrency
 end
 
 def register(params)
+  require 'psych'
+
   @source = params["source"]
   @target = params["target"]
   if File.exist?(params["map_path"])
     @macarray = Array.new
-    YAML.safe_load(File.read(params["map_path"])).each do |mac|
+    psych_load_yaml(params["map_path"]).each do |mac|
       @macarray.push([mac_string_to_integer(mac['low']), mac_string_to_integer(mac['high']), mac['name']])
     end
     # Array.bsearch only works on a sorted array
@@ -55,6 +57,18 @@ end
 
 def mac_string_to_integer(string)
   string.tr('.:-','').to_i(16)
+end
+
+def psych_load_yaml(filename)
+  parser = Psych::Parser.new(Psych::TreeBuilder.new)
+  parser.code_point_limit = 64*1024*1024
+  parser.parse(IO.read(filename, :mode => 'r:bom|utf-8'))
+  yaml_obj = Psych::Visitors::ToRuby.create().accept(parser.handler.root)
+  if yaml_obj.is_a?(Array) && (yaml_obj.length() == 1)
+    yaml_obj.first
+  else
+    yaml_obj
+  end
 end
 
 ###############################################################################
