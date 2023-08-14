@@ -1,4 +1,6 @@
 accountsservice
+aide
+aide-common
 apache2-utils
 apparmor
 apparmor-profiles
@@ -35,7 +37,6 @@ dosfstools
 ebtables
 efibootmgr
 eject
-fasttrack-archive-keyring
 fatresize
 file
 findutils
@@ -64,7 +65,6 @@ gvfs-backends
 gvfs-daemons
 gvfs-fuse
 gzip
-hddtemp
 hdparm
 hfsplus
 hfsprogs
@@ -86,7 +86,7 @@ libpcre2-16-0
 libpcre2-32-0
 libpcre2-8-0
 libssl-dev
-libssl1.1
+libssl3
 libykpers-1-1
 libyubikey0
 lm-sensors

@@ -14,6 +14,7 @@ import randomcolor
 import re
 import sys
 import time
+import malcolm_utils
 
 from collections.abc import Iterable
 from datetime import datetime
@@ -157,21 +158,12 @@ def main():
         help="Site(s) to create",
     )
     parser.add_argument(
-        '-n',
         '--net-map',
         dest='netMapFileName',
         type=str,
         default=None,
         required=False,
         help="Filename of JSON file containing network subnet/host name mapping",
-    )
-    parser.add_argument(
-        '--service-templates',
-        dest='serviceTemplateFileName',
-        type=str,
-        default=None,
-        required=False,
-        help="Filename of JSON file containing default service template definitions",
     )
     parser.add_argument(
         '--default-group',
@@ -210,14 +202,6 @@ def main():
         help="Device role(s) to create (see also --device-roles)",
     )
     parser.add_argument(
-        '--device-roles',
-        dest='deviceRolesFileName',
-        type=str,
-        default=None,
-        required=False,
-        help="Filename of JSON file containing default device role definitions (see also -r/--device-role)",
-    )
-    parser.add_argument(
         '-y',
         '--device-type',
         dest='deviceTypes',
@@ -228,13 +212,31 @@ def main():
         help="Device types(s) to create",
     )
     parser.add_argument(
+        '-n',
+        '--netbox',
+        dest='netboxDir',
+        type=str,
+        default=os.getenv('NETBOX_PATH', '/opt/netbox'),
+        required=False,
+        help="NetBox installation directory",
+    )
+    parser.add_argument(
         '-l',
         '--library',
         dest='libraryDir',
         type=str,
-        default=None,
+        default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_PATH', '/opt/netbox-devicetype-library'),
         required=False,
         help="Directory containing NetBox device type library",
+    )
+    parser.add_argument(
+        '-p',
+        '--preload',
+        dest='preloadDir',
+        type=str,
+        default=os.getenv('NETBOX_PRELOAD_PATH', '/opt/netbox-preload'),
+        required=False,
+        help="Directory containing netbox-initializers files to preload",
     )
     try:
         parser.error = parser.exit
@@ -407,35 +409,10 @@ def main():
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
 
-    except Exception as e:
-        logging.error(f"{type(e).__name__} processing device roles: {e}")
-
-    try:
-        # load device-roles-defaults.json from file
-        deviceRolesJson = None
-        if args.deviceRolesFileName is not None and os.path.isfile(args.deviceRolesFileName):
-            with open(args.deviceRolesFileName) as f:
-                deviceRolesJson = json.load(f)
-        if deviceRolesJson is not None and "device-roles" in deviceRolesJson:
-            for role in [r for r in deviceRolesJson["device-roles"] if "name" in r]:
-                roleDef = {
-                    "name": role["name"],
-                    "slug": slugify(role["name"]),
-                    "vm_role": True,
-                    "color": randColor.generate()[0][1:],
-                }
-                if ("description" in role) and role["description"]:
-                    roleDef["description"] = role["description"]
-                try:
-                    nb.dcim.device_roles.create(roleDef)
-                except pynetbox.RequestError as nbe:
-                    logging.warning(f"{type(nbe).__name__} processing device role \"{role['name']}\": {nbe}")
-
         deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
         logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
-
     except Exception as e:
-        logging.error(f"{type(e).__name__} processing device roles JSON \"{args.deviceRolesFileName}\": {e}")
+        logging.error(f"{type(e).__name__} processing device roles: {e}")
 
     # ###### DEVICE TYPES ##########################################################################################
     try:
@@ -454,7 +431,7 @@ def main():
                     },
                 )
             except pynetbox.RequestError as nbe:
-                logging.warning(f"{type(nbe).__model__} processing device type \"{deviceTypeModel}\": {nbe}")
+                logging.warning(f"{type(nbe).__name__} processing device type \"{deviceTypeModel}\": {nbe}")
 
         deviceTypes = {x.model: x for x in nb.dcim.device_types.all()}
         logging.debug(f"Device types (after): { {k:v.id for k, v in deviceTypes.items()} }")
@@ -482,47 +459,6 @@ def main():
         logging.debug(f"sites (after): { {k:v.id for k, v in sites.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing sites: {e}")
-
-    # ###### Service templates #####################################################################################
-    try:
-        # load service-template-defaults.json from file
-        serviceTemplatesJson = None
-        if args.serviceTemplateFileName is not None and os.path.isfile(args.serviceTemplateFileName):
-            with open(args.serviceTemplateFileName) as f:
-                serviceTemplatesJson = json.load(f)
-        if serviceTemplatesJson is not None and "service-templates" in serviceTemplatesJson:
-            for srv in serviceTemplatesJson["service-templates"]:
-                if (
-                    ("name" in srv)
-                    and (srv["name"])
-                    and ("protocols" in srv)
-                    and (len(srv["protocols"]) > 0)
-                    and ("ports" in srv)
-                    and (len(srv["ports"]) > 0)
-                ):
-                    for prot in srv["protocols"]:
-                        srvName = f"{srv['name']} ({prot.upper()})" if (len(srv["protocols"]) > 1) else srv["name"]
-                        portInts = [p for p in srv["ports"] if isinstance(p, int)]
-                        for portRange in [
-                            r.split('-') for r in srv["ports"] if isinstance(r, str) and re.match(r'^\d+-\d+$', r)
-                        ]:
-                            portInts = portInts + list(range(int(portRange[0]), int(portRange[1]) + 1))
-                        srvTempl = {
-                            "name": srvName,
-                            "protocol": prot.lower(),
-                            "ports": list(set(portInts)),
-                        }
-                        if ("description" in srv) and srv["description"]:
-                            srvTempl["description"] = srv["description"]
-                        try:
-                            nb.ipam.service_templates.create(
-                                srvTempl,
-                            )
-                        except pynetbox.RequestError as nbe:
-                            logging.warning(f"{type(nbe).__name__} processing service template \"{srvName}\": {nbe}")
-
-    except Exception as e:
-        logging.error(f"{type(e).__name__} processing service templates JSON \"{args.serviceTemplateFileName}\": {e}")
 
     # ###### Net Map ###############################################################################################
     try:
@@ -700,13 +636,38 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing net map JSON \"{args.netMapFileName}\": {e}")
 
-    # ###### Library ###############################################################################################
-    try:
-        counter = import_library(nb, args.libraryDir)
-        logging.debug(f"import library results: { counter }")
+    # ###### Netbox-Initializers ###################################################################################
+    netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
+    manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
+    if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
+        try:
+            with malcolm_utils.pushd(os.path.dirname(manageScript)):
+                retcode, output = malcolm_utils.run_process(
+                    [
+                        netboxVenvPy,
+                        os.path.basename(manageScript),
+                        "load_initializer_data",
+                        "--path",
+                        args.preloadDir,
+                    ],
+                    logger=logging,
+                )
+                if retcode == 0:
+                    logging.debug(f"netbox-initializers: {retcode} {output}")
+                else:
+                    logging.error(f"Error processing netbox-initializers: {retcode} {output}")
 
-    except Exception as e:
-        logging.error(f"{type(e).__name__} processing library: {e}")
+        except Exception as e:
+            logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")
+
+    # ###### Library ###############################################################################################
+    if os.path.isdir(args.libraryDir):
+        try:
+            counter = import_library(nb, args.libraryDir)
+            logging.debug(f"import library results: { counter }")
+
+        except Exception as e:
+            logging.error(f"{type(e).__name__} processing library: {e}")
 
 
 ###################################################################################################

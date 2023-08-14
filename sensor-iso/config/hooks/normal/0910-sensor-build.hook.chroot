@@ -13,70 +13,24 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_VER=5.2.2-0
-ZEEK_LTS=
 ZEEK_DIR="/opt/zeek"
 export PATH="${ZEEK_DIR}"/bin:$PATH
 
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
-BEATS_VER="8.8.2"
-BEATS_OSS="-oss"
-BEATS_DEB_URL_TEMPLATE_REPLACER="XXXXX"
-BEATS_DEB_URL_TEMPLATE="https://artifacts.elastic.co/downloads/beats/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEATS_DEB_URL_TEMPLATE_REPLACER$BEATS_OSS-$BEATS_VER-amd64.deb"
-
-NETSNIFF_RELEASE_URL="https://api.github.com/repos/netsniff-ng/netsniff-ng/releases/latest"
 CAPA_RELEASE_URL="https://api.github.com/repos/fireeye/capa/releases/latest"
 YQ_RELEASE_URL="https://api.github.com/repos/mikefarah/yq/releases/latest"
 SUPERCRONIC_RELEASE_URL="https://api.github.com/repos/aptible/supercronic/releases/latest"
 CROC_RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
-STEP_RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
-YARA_RELEASE_URL="https://api.github.com/repos/VirusTotal/yara/releases/latest"
 YARA_RULES_SRC_DIR="/opt/yara-rules-src"
 YARA_RULES_DIR="/opt/yara-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
-apt-get -qqy update
+# Download and install spicy and 3rd-party zeek plugins
+mkdir -p "${CCACHE_DIR}"
 
-# an arkime .deb is built and installed in a different context
-
-# Install netsniff-ng
-cd /tmp
-mkdir ./netsniff-ng
-NETSNIFF_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$NETSNIFF_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./netsniff-ng --strip-components 1
-cd ./netsniff-ng
-./configure --prefix=/usr --disable-geoip
-make netsniff-ng
-# make netsniff-ng_install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="netsniff-ng" --pkgversion="$NETSNIFF_VER" --pkgarch="amd64" --pkgsource="$NETSNIFF_URL" make netsniff-ng_install
-cp *.deb /opt/hedgehog_install_artifacts/
-
-cd /tmp
-rm -Rf ./netsniff-ng
-##
-
-# Download and install zeek, spicy and 3rd-party zeek plugins
-mkdir -p /tmp/zeek-packages "${CCACHE_DIR}"
-
-# zeek
-cd /tmp/zeek-packages
-if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
-curl -sSL --remote-name-all \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
-  "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
-dpkg -i ./*.deb
-
-# plugins
+# zeek plugins
 cd /tmp
 zkg autoconfig --force
 bash /usr/local/bin/zeek_install_plugins.sh
@@ -107,12 +61,11 @@ touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 # cleanup
 cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /tmp/zeek-packages /opt/hedgehog_install_artifacts/
+mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
-# aide itself was built from github master branch (for JSON output)
-apt-get install --no-install-recommends -y -q aide-common
+# tweak some stuff for aide
 chmod a-x /etc/cron.daily/aide
 chattr +i /etc/cron.daily/aide
 mkdir -p /etc/aide/aide.conf.d /var/lib/aide
@@ -198,9 +151,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 EOF
 ###
 
-# suricata
-apt-get install -t bullseye-backports --no-install-recommends -y -q suricata suricata-update
-
+# update suricata rules
 /usr/bin/suricata-update -v -D /var/lib/suricata --etopen
 
 cd "${SURICATA_RULES_DIR}"/..
@@ -208,20 +159,7 @@ tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"
 mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
-# yara
-cd /tmp
-mkdir ./yara
-YARA_VER="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tag_name' | tr -d '"' | sed 's/^v//')"
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YARA_RELEASE_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./yara --strip-components 1
-cd ./yara
-./bootstrap.sh
-./configure --prefix=/usr --with-crypto --enable-magic --enable-cuckoo --enable-dotnet
-make
-#make install
-checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="yara" --pkgversion="$YARA_VER" --pkgarch="amd64" --pkgsource="$YARA_URL"
-cp *.deb /opt/hedgehog_install_artifacts/
-cd /tmp
-rm -rf /yara
+# update yara rules
 
 mkdir -p "${YARA_RULES_DIR}"/custom "${YARA_RULES_SRC_DIR}"
 /usr/local/bin/yara_rules_setup.sh -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}"
@@ -265,31 +203,8 @@ mv ./croc /usr/local/bin/croc
 chmod 755 /usr/local/bin/croc
 ###
 
-# step
-cd /tmp
-mkdir -p ./step
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$STEP_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("_linux_.+amd64\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar xzf - -C ./step --strip-components 1
-mv ./step/bin/step /usr/local/bin/step
-chmod 755 /usr/local/bin/step
-rm -rf /tmp/step*
-###
-
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings
-
-###
-
-# install filebeat
-for BEAT in filebeat; do
-  BEATS_URL="$(echo "$BEATS_DEB_URL_TEMPLATE" | sed "s/$BEATS_DEB_URL_TEMPLATE_REPLACER/$BEAT/g")"
-  BEATS_DEB="$BEAT-$BEATS_VER-amd64.deb"
-  pushd /tmp && \
-    curl -f -L -o "$BEATS_DEB" "$BEATS_URL" && \
-    dpkg -i "$BEATS_DEB" && \
-    cp "$BEATS_DEB" /opt/hedgehog_install_artifacts/ && \
-    rm -rf "$BEATS_DEB" && \
-    popd
-done
 
 ###
 

@@ -3,7 +3,14 @@
 IMAGE_NAME=hedgehog
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bullseye
+IMAGE_DISTRIBUTION=bookworm
+
+ZEEK_DISTRO=Debian_12
+ZEEK_VER=5.2.2-0
+ZEEK_LTS=
+
+BEATS_VER="8.9.0"
+BEATS_OSS="-oss"
 
 BUILD_ERROR_CODE=1
 
@@ -56,12 +63,6 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
-  # if fasttrack.debian.net is down, use mirror.linux.pizza instead
-  FASTTRACK_MIRROR=$(( curl -fsSL -o /dev/null "https://fasttrack.debian.net/debian-fasttrack/" 2>/dev/null && echo "fasttrack.debian.net" ) || ( curl -fsSL -o /dev/null "https://mirror.linux.pizza/debian-fasttrack/" 2>/dev/null && echo "mirror.linux.pizza" ))
-  if [[ -n "$FASTTRACK_MIRROR" ]] && [[ "$FASTTRACK_MIRROR" != "fasttrack.debian.net" ]]; then
-    sed -i "s/fasttrack.debian.net/$FASTTRACK_MIRROR/g" ./config/archives/fasttrack.list.*
-  fi
-
   if [[ -f "$SCRIPT_PATH/shared/version.txt" ]]; then
     SHARED_IMAGE_VERSION="$(cat "$SCRIPT_PATH/shared/version.txt" | head -n 1)"
     [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
@@ -80,7 +81,7 @@ if [ -d "$WORKDIR" ]; then
     echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
     echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
     echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo -n "pip3 install --system --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+    echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
     while read LINE; do
       echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
     done <"$SCRIPT_PATH/interface/requirements.txt"
@@ -99,8 +100,6 @@ if [ -d "$WORKDIR" ]; then
              linux-headers-amd64; do
     echo "$PKG" >> ./config/package-lists/firmwares.list.chroot
   done
-
-  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
 
   # copy the interface code into place for the resultant image
   mkdir -p ./config/includes.chroot/opt
@@ -146,11 +145,29 @@ if [ -d "$WORKDIR" ]; then
   ln -r -s ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   find "$SCRIPT_PATH/docs/images/hedgehog/logo/font/" -type f -name "*.ttf" -exec cp "{}" ./config/includes.chroot/usr/share/fonts/truetype/ubuntu/ \;
 
-  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/shared/aide/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/shared/aide:/build aide-build:latest -o /build
-  cp "$SCRIPT_PATH/shared/aide"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-  mv "$SCRIPT_PATH/shared/aide"/*.deb ./config/packages.chroot/
+  # download deb files to be installed during installation
+  pushd ./config/packages.chroot/ >/dev/null 2>&1
+
+  # zeek
+  if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
+  curl -sSL --remote-name-all \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
+    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
+
+  popd >/dev/null 2>&1
+
+  # clone and build yara .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/yara/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/yara:/build yara-build:latest -o /build
+  mv "$SCRIPT_PATH/yara"/*.deb ./config/packages.chroot/
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
@@ -167,15 +184,18 @@ if [ -d "$WORKDIR" ]; then
     fi
   fi
   curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-  curl -s -S -L -o oui.txt "https://raw.githubusercontent.com/wireshark/wireshark/master/manuf"
+  curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
   rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
   bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  cp "$SCRIPT_PATH/arkime"/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+
+  # save these extra debs off into hedgehog_install_artifacts
+  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
@@ -187,8 +207,8 @@ if [ -d "$WORKDIR" ]; then
     --apt-secure true \
     --apt-source-archives false \
     --architectures amd64 \
-    --archive-areas 'main contrib non-free' \
-    --backports true \
+    --archive-areas 'main contrib non-free non-free-firmware' \
+    --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-live "boot=live components username=sensor nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
@@ -196,7 +216,7 @@ if [ -d "$WORKDIR" ]; then
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \
     --debian-installer-gui false \
-    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,jq,openssl --no-merged-usr" \
     --distribution $IMAGE_DISTRIBUTION \
     --image-name "$IMAGE_NAME" \
     --iso-application "$IMAGE_NAME" \
@@ -205,7 +225,7 @@ if [ -d "$WORKDIR" ]; then
     --linux-flavours "amd64:amd64" \
     --linux-packages "linux-image linux-headers" \
     --memtest none \
-    --parent-archive-areas 'main contrib non-free' \
+    --parent-archive-areas 'main contrib non-free non-free-firmware' \
     --parent-debian-installer-distribution $IMAGE_DISTRIBUTION \
     --parent-distribution $IMAGE_DISTRIBUTION \
     --security true \

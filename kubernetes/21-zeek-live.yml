@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:23.07.1
+        image: ghcr.io/idaholab/malcolm/zeek:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -60,7 +60,7 @@ spec:
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

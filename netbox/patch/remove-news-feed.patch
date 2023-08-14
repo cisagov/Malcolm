@@ -1,0 +1,21 @@
+diff -Naur a/netbox/extras/constants.py b/netbox/extras/constants.py
+--- a/netbox/extras/constants.py	2023-08-02 10:43:07.996021664 -0600
++++ b/netbox/extras/constants.py	2023-08-02 10:47:21.220034275 -0600
+@@ -76,17 +76,6 @@
+         }
+     },
+     {
+-        'widget': 'extras.RSSFeedWidget',
+-        'width': 4,
+-        'height': 4,
+-        'title': 'NetBox News',
+-        'config': {
+-            'feed_url': 'http://netbox.dev/rss/',
+-            'max_entries': 10,
+-            'cache_timeout': 14400,
+-        }
+-    },
+-    {
+         'widget': 'extras.ObjectCountsWidget',
+         'width': 4,
+         'height': 3,

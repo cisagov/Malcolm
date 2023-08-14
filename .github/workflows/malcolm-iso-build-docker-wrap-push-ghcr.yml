@@ -70,12 +70,12 @@ jobs:
                virt-what \
                xorriso \
                xz-utils
-          git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20210407' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
+          git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules --branch='debian/1%20230131' 'https://salsa.debian.org/live-team/live-build.git' /tmp/live-build
           cd /tmp/live-build
           dpkg-buildpackage -b -uc -us
           cd /tmp
           sudo dpkg -i /tmp/live-build*.deb
-          rm -rf /tmp/live-build
+          sudo rm -rf /tmp/live-build /tmp/live-build*.deb
       -
         name: Checkout
         uses: actions/checkout@v3
@@ -92,7 +92,7 @@ jobs:
       -
         name: Extract Malcolm version
         shell: bash
-        run: echo "mversion=$(grep -P "^\s+image:\s*malcolm" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
+        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
         id: extract_malcolm_version
       -
         name: Build image

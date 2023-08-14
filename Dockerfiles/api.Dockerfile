@@ -1,4 +1,4 @@
-FROM python:3-slim-bullseye as builder
+FROM python:3-slim-bookworm as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -8,8 +8,8 @@ ENV PYTHONUNBUFFERED 1
 RUN    apt-get update -q \
     && apt-get -y -q upgrade \
     && apt-get install -y gcc \
-    && python3 -m pip install --upgrade pip \
-    && python3 -m pip install flake8
+    && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
+    && python3 -m pip install --break-system-packages --no-cache-dir flake8
 
 COPY ./api /usr/src/app/
 COPY scripts/malcolm_utils.py /usr/src/app/
@@ -18,7 +18,7 @@ WORKDIR /usr/src/app
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
     && flake8 --ignore=E203,E501,F401,W503
 
-FROM python:3-slim-bullseye
+FROM python:3-slim-bookworm
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -79,7 +79,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
-    && apt-get -y -q --no-install-recommends install curl netcat rsync tini \
+    && apt-get -y -q --no-install-recommends install curl netcat-openbsd rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
     && groupadd --gid ${DEFAULT_GID} ${PGROUP} \
