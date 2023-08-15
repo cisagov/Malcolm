@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -40,7 +40,7 @@ RUN apt-get -q update && \
       python3-pip \
       rsync \
       tini && \
-    pip3 install supervisor six && \
+    pip3 install --break-system-packages supervisor six && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \

@@ -1,4 +1,6 @@
 accountsservice
+aide
+aide-common
 apparmor
 apparmor-profiles
 apparmor-utils
@@ -34,7 +36,6 @@ dosfstools
 ebtables
 efibootmgr
 eject
-fasttrack-archive-keyring
 fatresize
 file
 findutils
@@ -62,7 +63,6 @@ gvfs-backends
 gvfs-daemons
 gvfs-fuse
 gzip
-hddtemp
 hdparm
 hfsplus
 hfsprogs
@@ -73,7 +73,7 @@ javascript-common
 jq
 less
 libatomic1
-libffi7
+libffi8
 libgtk2.0-bin
 libjson-perl
 libkrb5-3
@@ -86,6 +86,7 @@ libpam-pwquality
 libpcre2-16-0
 libpcre2-32-0
 libpcre2-8-0
+libpcre3
 libtool
 libtsan0
 libubsan1

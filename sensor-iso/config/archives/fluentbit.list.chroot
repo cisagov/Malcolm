@@ -1,1 +1,1 @@
-deb https://packages.fluentbit.io/debian/bullseye bullseye main
+deb https://packages.fluentbit.io/debian/bookworm bookworm main

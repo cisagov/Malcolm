@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.8.2
+FROM docker.elastic.co/beats/filebeat-oss:8.9.0
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -59,10 +59,10 @@ ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
 
-ENV SUPERCRONIC_VERSION "0.2.25"
+ENV SUPERCRONIC_VERSION "0.2.26"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "642f4f5a2b67f3400b5ea71ff24f18c0a7d77d49"
+ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV TINI_VERSION v0.19.0
@@ -93,7 +93,7 @@ RUN apt-get -q update && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
+    python3 -m pip install --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -37,10 +37,10 @@ ARG ZEEK_VERSION=5.2.2-0
 ENV ZEEK_LTS $ZEEK_LTS
 ENV ZEEK_VERSION $ZEEK_VERSION
 
-ENV SUPERCRONIC_VERSION "0.2.25"
+ENV SUPERCRONIC_VERSION "0.2.26"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "642f4f5a2b67f3400b5ea71ff24f18c0a7d77d49"
+ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for build
@@ -109,21 +109,21 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       tini \
       vim-tiny \
       zlib1g-dev && \
-    pip3 install --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
     mkdir -p /tmp/zeek-packages && \
       cd /tmp/zeek-packages && \
       if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS && \
       curl -sSL --remote-name-all \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
-        "https://download.zeek.org/binary-packages/Debian_11/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/zeek${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VERSION}_amd64.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/all/zeek${ZEEK_LTS}-client_${ZEEK_VERSION}_all.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VERSION}_all.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/all/zeek${ZEEK_LTS}-btest_${ZEEK_VERSION}_all.deb" \
+        "https://download.zeek.org/binary-packages/Debian_12/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VERSION}_all.deb" && \
       dpkg -i ./*.deb && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \

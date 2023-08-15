@@ -751,7 +751,8 @@ class Installer(object):
                 indexDirFull,
                 indexSnapshotDirFull,
                 os.path.join(pcapDirFull, 'processed'),
-                os.path.join(pcapDirFull, 'upload'),
+                os.path.join(pcapDirFull, os.path.join('upload', os.path.join('tmp', 'spool'))),
+                os.path.join(pcapDirFull, os.path.join('upload', 'variants')),
                 os.path.join(suricataLogDirFull, 'live'),
                 os.path.join(zeekLogDirFull, 'current'),
                 os.path.join(zeekLogDirFull, 'live'),
@@ -809,16 +810,36 @@ class Installer(object):
         autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
         autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
 
+        openPortsSelection = 'unset'
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
-                'Expose OpenSearch port to external hosts?', default=expose_opensearch_default
-            )
-            logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=expose_logstash_default)
-            filebeatTcpOpen = InstallerYesOrNo(
-                'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
-            )
+            openPortsOptions = ('no', 'yes', 'customize')
+            while openPortsSelection not in [x[0] for x in openPortsOptions]:
+                openPortsSelection = InstallerChooseOne(
+                    'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
+                    choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
+                )[0]
+            if openPortsSelection == 'n':
+                opensearchOpen = False
+                logstashOpen = False
+                filebeatTcpOpen = False
+            elif openPortsSelection == 'y':
+                opensearchOpen = True
+                logstashOpen = True
+                filebeatTcpOpen = True
+            else:
+                openPortsSelection = 'c'
+                opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
+                    'Expose OpenSearch port to external hosts?', default=expose_opensearch_default
+                )
+                logstashOpen = InstallerYesOrNo(
+                    'Expose Logstash port to external hosts?', default=expose_logstash_default
+                )
+                filebeatTcpOpen = InstallerYesOrNo(
+                    'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
+                )
         else:
             opensearchOpen = not opensearchPrimaryRemote
+            openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
 
@@ -827,8 +848,10 @@ class Installer(object):
         filebeatTcpTargetField = 'miscbeat'
         filebeatTcpDropField = filebeatTcpSourceField
         filebeatTcpTag = '_malcolm_beats'
-        if filebeatTcpOpen and not InstallerYesOrNo(
-            'Use default field values for Filebeat TCP listener?', default=True
+        if (
+            filebeatTcpOpen
+            and (openPortsSelection == 'c')
+            and not InstallerYesOrNo('Use default field values for Filebeat TCP listener?', default=True)
         ):
             allowedFilebeatTcpFormats = ('json', 'raw')
             filebeatTcpFormat = 'unset'
@@ -855,8 +878,10 @@ class Installer(object):
                 default=filebeatTcpTag,
             )
 
-        sftpOpen = (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE) and InstallerYesOrNo(
-            'Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default
+        sftpOpen = (
+            (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and (openPortsSelection == 'c')
+            and InstallerYesOrNo('Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default)
         )
 
         # input file extraction parameters
@@ -1141,12 +1166,6 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_REDIS_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
-            ),
-            # enable/disable netbox (redis cache)
-            EnvValue(
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_REDIS_CACHE_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)

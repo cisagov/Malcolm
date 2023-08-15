@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:23.07.1
+        image: ghcr.io/idaholab/malcolm/netbox:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -81,16 +81,14 @@ spec:
             name: netbox-netmap-json-volume
           - mountPath: /etc/netbox/config/configmap
             name: netbox-config-volume
-          - mountPath: /etc/netbox/reports/configmap
-            name: netbox-reports-volume
-          - mountPath: /etc/netbox/scripts/configmap
-            name: netbox-scripts-volume
+          - mountPath: /opt/netbox-preload/configmap
+            name: netbox-preload-volume
           - mountPath: /opt/netbox/netbox/media
             name: netbox-media-volume
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -113,12 +111,9 @@ spec:
         - name: netbox-config-volume
           configMap:
             name: netbox-config
-        - name: netbox-reports-volume
+        - name: netbox-preload-volume
           configMap:
-            name: netbox-reports
-        - name: netbox-scripts-volume
-          configMap:
-            name: netbox-scripts
+            name: netbox-preload
         - name: netbox-media-volume
           persistentVolumeClaim:
             claimName: config-claim

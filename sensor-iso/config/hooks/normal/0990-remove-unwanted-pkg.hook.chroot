@@ -4,10 +4,10 @@
 
 # remove development packages not necessary for building dynamic Zeek plugins
 apt-get -y --purge remove \
-  checkinstall \
   gdb \
   libc6-dbg \
   ninja-build \
+  sparse \
   $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc6|libcrypt|libdbus|libffi|libfl|libgcc|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libtirpc|libxml|libyaml|libz|linux-libc|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
 
@@ -16,13 +16,13 @@ apt-get -y --purge remove \
   bluez-firmware \
   cracklib-runtime \
   firmware-netronome \
+  firmware-nvidia* \
   firmware-qcom-soc \
   gdb \
   gdebi* \
   gnome-accessibility-themes \
   libasound2-plugins \
   libx264* \
-  libx265* \
   lintian \
   nvidia* \
   network-manager* \
@@ -44,7 +44,6 @@ dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 # disable automatic running of some services (but don't abort if we fail)
 systemctl disable supervisor.service || true
 systemctl disable ctrl-alt-del.target || true
-systemctl disable hddtemp.service || true
 systemctl disable apt-daily.service || true
 systemctl disable apt-daily.timer || true
 systemctl disable apt-daily-upgrade.timer || true

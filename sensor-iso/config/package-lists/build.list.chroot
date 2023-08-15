@@ -1,6 +1,5 @@
 bison
 ccache
-checkinstall
 cmake
 gcc
 g++
@@ -15,12 +14,13 @@ libmagic-dev
 libmagic1
 libmaxminddb-dev
 libmaxminddb0
+libnl-3-dev
 libpcap-dev
 libpcap0.8
 libsodium-dev
 libsodium23
 libssl-dev
-libssl1.1
+libssl3
 libtcmalloc-minimal4
 locales-all
 make

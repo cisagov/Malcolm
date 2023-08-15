@@ -7,6 +7,7 @@
 # prompt whether or not to lock screen for the GUI session on inactivity
 # prompt whether to use U.S. DoD login banner (https://www.stigviewer.com/stig/general_purpose_operating_system_srg/2015-06-26/finding/V-56585)
 # prompt for disabling IPV6 or not
+# prompt for enabling SSH password authentication
 
 # this is a debconf-compatible script
 . /usr/share/debconf/confmodule

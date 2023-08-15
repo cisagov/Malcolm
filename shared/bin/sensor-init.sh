@@ -119,8 +119,13 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # if the network configuration files for the interfaces haven't been set to come up on boot, configure that now.
   InitializeSensorNetworking
 
-  # fix some permisions to make sure things belong to the right person
-  [[ -n $MAIN_USER ]] && FixPermissions "$MAIN_USER"
+  if [[ -n $MAIN_USER ]]; then
+    # setup initial user's home directory if it hasn't been done
+    InjectSkeleton "$MAIN_USER"
+
+    # fix some permisions to make sure things belong to the right person
+    FixPermissions "$MAIN_USER"
+  fi
 
   # block some call-homes
   BadTelemetry

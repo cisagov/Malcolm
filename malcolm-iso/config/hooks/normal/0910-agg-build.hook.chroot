@@ -1,9 +1,6 @@
 #!/bin/bash
 
-apt-get -qqy update
-
-# aide itself was built from github master branch (for JSON output)
-apt-get install --no-install-recommends -y -q aide-common
+# tweak some stuff for aide
 chmod a-x /etc/cron.daily/aide
 chattr +i /etc/cron.daily/aide
 mkdir -p /etc/aide/aide.conf.d /var/lib/aide
@@ -102,18 +99,6 @@ cd /usr/local/bin
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxvf - croc
 chmod 755 ./croc
 chown root:root ./croc
-###
-
-# step
-RELEASE_URL="https://api.github.com/repos/smallstep/cli/releases/latest"
-RELEASE_FILE_REGEX="_linux_.+amd64\\\.tar\\\.gz$"
-cd /tmp
-mkdir -p ./step
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar xzf - -C ./step --strip-components 1
-mv ./step/bin/step /usr/local/bin/step
-chmod 755 /usr/local/bin/step
-chown root:root /usr/local/bin/step
-rm -rf /tmp/step*
 ###
 
 # stern

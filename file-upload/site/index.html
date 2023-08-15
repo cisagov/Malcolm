@@ -1,0 +1,181 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    <link href="upload/filepond/dist/filepond.css" rel="stylesheet">
+    <link href="upload/@jcubic/tagger/tagger.css" rel="stylesheet">
+    <style>
+        .tagger > ul > li:not(.tagger-new) > :first-child {
+            background: #369763 !important;
+            border: 1px none #369763 !important;
+            border-radius: 12px !important;
+        }
+        .tagger > ul > li:not(.tagger-new) > span,
+        .tagger > ul > li:not(.tagger-new) > a > span {
+            color: white !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !important;
+        }
+        .tagger > ul > li:not(.tagger-new) a,
+        .tagger > ul > li:not(.tagger-new) a:visited {
+            color: white !important;
+        }
+        .tagger {
+            border-radius: 12px !important;
+        }
+        .tagger + .tagger {
+            margin-top: 10px;
+        }
+        .button {
+          background-color: #369763;
+          border: none;
+          color: white;
+          padding: 10px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 14px;
+          margin: 4px 2px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol' !important;
+        }
+        .button_rounded {
+            border-radius: 12px;
+        }
+        .panel-title {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            text-align: center;
+        }
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .imgcenter {
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <img class="center imgcenter" src="upload/Malcolm_banner.png" alt="%SITE_NAME%">
+    <h1 class="panel-title">Network Traffic Artifact Upload</h1>
+
+    <form id="commit_files" action="server/php/submit.php" method="post" enctype="multipart/form-data">
+
+        <input type="text" name="tags"/>
+        <br>
+        <button type="submit" id="commit_button" class="button button_rounded">Commit Uploaded Files</button>
+        <input type="file" name="filepond[]" multiple>
+
+    </form>
+
+    <script src="upload/@jcubic/tagger/tagger.js"></script>
+    <script src="upload/filepond/dist/filepond.js"></script>
+    <script src="upload/filepond-plugin-file-rename/dist/filepond-plugin-file-rename.js"></script>
+    <script src="upload/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.js"></script>
+    <script src="upload/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+    <script src="upload/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
+
+    <script>
+
+        window.addEventListener("DOMContentLoaded", function () {
+
+            const form_button = document.getElementById("commit_button");
+            form_button.disabled = true;
+            form_button.style.backgroundColor = '#cccccc';
+            form_button.style.color = '#666666';
+
+            FilePond.registerPlugin(
+                FilePondPluginFileMetadata,
+                FilePondPluginFileRename,
+                FilePondPluginFileValidateSize,
+                FilePondPluginFileValidateType
+            );
+
+            FilePond.setOptions({
+                maxFileSize: '50000MB',
+                server: 'server/php/',
+                allowPaste: false,
+                allowRemove: true,
+                allowRevert: true,
+                allowFileMetadata: true,
+                credits: false,
+                acceptedFileTypes: [
+                    'application/gzip',
+                    'application/octet-stream',
+                    'application/vnd.tcpdump.pcap',
+                    'application/x-7z-compressed',
+                    'application/x-bzip2',
+                    'application/x-cpio',
+                    'application/x-gzip',
+                    'application/x-lzip',
+                    'application/x-lzma',
+                    'application/x-pcapng',
+                    'application/x-rar-compressed',
+                    'application/x-tar',
+                    'application/x-xz',
+                    'application/zip'
+                ],
+            });
+
+            // Turn a file input into a file pond
+            var pond = FilePond.create(document.querySelector('input[name="filepond[]"]'));
+
+            // Turn a text input into a tags field
+            var tagme = tagger(document.querySelector('input[name="tags"]'), {
+                allow_duplicates: false,
+                allow_spaces: true,
+                completion: {
+                    list: [],
+                    delay: 400,
+                    min_length: 2
+                },
+                tag_limit: 16,
+                wrap: true,
+                add_on_blur: true,
+                placeholder: 'User-defined tags',
+                link: function(name) {
+                    return false;
+                },
+                filter: (name) => name,
+            });
+
+            const form = document.getElementById("commit_files");
+            form.addEventListener("submit", setFileTags);
+            function setFileTags(e) {
+                const files = pond.getFiles();
+                valid = ((files) && (files.length > 0) && (!form_button.disabled));
+                if (!valid) {
+                    e.preventDefault();
+                }
+                return valid;
+            }
+
+            pond.on('addfilestart', (file) => {
+                form_button.disabled = true;
+                form_button.style.backgroundColor = '#cccccc';
+                form_button.style.color = '#666666';
+            });
+            pond.on('processfiles', () => {
+                form_button.disabled = false;
+                form_button.style.backgroundColor = '#369763';
+                form_button.style.color = '#ffffff';
+            });
+            function checkSubmitEnabler() {
+                const files = pond.getFiles();
+                const isLoading = files.filter(x=>x.status !== 5).length !== 0;
+                if ((files.length > 0) && (!isLoading)) {
+                    form_button.disabled = false;
+                    form_button.style.backgroundColor = '#369763';
+                    form_button.style.color = '#ffffff';
+                }
+            }
+            setInterval(checkSubmitEnabler, 5000);
+
+
+        })
+    </script>
+
+</body>
+</html>

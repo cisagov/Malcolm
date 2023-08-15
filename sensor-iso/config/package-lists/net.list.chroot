@@ -13,6 +13,7 @@ libpcap0.8
 libssh2-1
 macchanger
 netcat-openbsd
+netsniff-ng
 ntp
 openssh-client
 openssh-server

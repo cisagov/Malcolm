@@ -359,7 +359,6 @@
           "source.port",
           "destination.ip",
           "destination.port",
-          "network.is_orig",
           "event.action",
           "event.result",
           "zeek.s7comm.pdu_reference",
@@ -400,7 +399,6 @@
           "source.port",
           "destination.ip",
           "destination.port",
-          "network.is_orig",
           "event.action",
           "event.result",
           "zeek.uid"
