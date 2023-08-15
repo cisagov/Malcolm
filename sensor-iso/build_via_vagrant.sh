@@ -88,7 +88,7 @@ cp -r "$SCRIPT_PATH"/../shared \
 cp "$SCRIPT_PATH"/../scripts/documentation_build.sh "$SCRIPT_PATH"/docs/
 cp "$SCRIPT_PATH"/../scripts/malcolm_utils.py "$SCRIPT_PATH"/shared/bin/
 
-YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 [[ -n $YML_IMAGE_VERSION ]] && echo "$YML_IMAGE_VERSION" > "$SCRIPT_PATH"/shared/version.txt
 [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]] && echo "$MAXMIND_GEOIP_DB_LICENSE_KEY" > "$SCRIPT_PATH"/shared/maxmind_license.txt
 [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot

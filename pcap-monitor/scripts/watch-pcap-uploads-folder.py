@@ -116,6 +116,17 @@ def main():
         required=False,
     )
     parser.add_argument(
+        '--recursive',
+        dest='recursiveAll',
+        help="Monitor all directories underneath --directory",
+        metavar='true|false',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        required=False,
+    )
+    parser.add_argument(
         '-p',
         '--polling',
         dest='polling',
@@ -244,6 +255,7 @@ def main():
     watch_common.WatchAndProcessDirectory(
         watchDirs,
         args.polling,
+        args.recursiveAll,
         file_processor,
         {
             "logger": logging,

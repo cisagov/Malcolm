@@ -677,6 +677,7 @@ LOG_IGNORE_REGEX = re.compile(
   | curl.+localhost.+GET\s+/api/status\s+200
   | DEPRECATION
   | descheduling\s+job\s*id
+  | (relation|SELECT)\s+"django_content_type"
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for

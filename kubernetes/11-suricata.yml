@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-offline-container
-        image: ghcr.io/idaholab/malcolm/suricata:23.07.1
+        image: ghcr.io/idaholab/malcolm/suricata:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,7 +61,7 @@ spec:
             name: suricata-offline-custom-rules-volume
       initContainers:
       - name: suricata-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

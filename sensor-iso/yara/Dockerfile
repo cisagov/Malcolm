@@ -1,4 +1,4 @@
-FROM debian:11-slim
+FROM debian:12-slim
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -8,26 +8,21 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -q update && \
     apt-get install -q -y --no-install-recommends \
-      autoconf \
-      autoconf-archive \
       automake \
-      autotools-dev \
-      binutils \
       bison \
-      build-essential \
       ca-certificates \
       checkinstall \
+      curl \
       flex \
-      git \
-      libmhash-dev \
-      libpcre2-dev \
+      gcc \
+      libjansson-dev \
+      libmagic-dev \
+      libssl-dev \
       libtool \
-      m4 \
       make \
-      pkg-config \
-      zlib1g-dev && \
+      pkg-config && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD build-aide-deb.sh /usr/local/bin/
+ADD build-yara-deb.sh /usr/local/bin/
 
-ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-aide-deb.sh"]
+ENTRYPOINT ["/bin/bash", "/usr/local/bin/build-yara-deb.sh"]

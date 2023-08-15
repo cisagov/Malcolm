@@ -1,0 +1,274 @@
+- name: FTP
+  protocol: TCP
+  ports:
+    - 20
+    - 21
+- name: SSH
+  protocol: TCP
+  ports:
+    - 22
+- name: Telnet
+  protocol: TCP
+  ports:
+    - 23
+- name: SMTP
+  protocol: TCP
+  ports:
+    - 25
+    - 2525
+- name: DNS (UDP)
+  protocol: UDP
+  ports:
+    - 53
+    - 853
+    - 5353
+- name: DNS (TCP)
+  protocol: TCP
+  ports:
+    - 53
+    - 853
+    - 5353
+- name: DHCP
+  protocol: UDP
+  ports:
+    - 67
+    - 68
+    - 546
+    - 547
+- name: HTTP
+  protocol: TCP
+  ports:
+    - 80
+    - 8000
+    - 8080
+- name: COTP and S7comm
+  protocol: TCP
+  ports:
+    - 102
+- name: POP3
+  protocol: TCP
+  ports:
+    - 110
+- name: SFTP
+  protocol: TCP
+  ports:
+    - 115
+- name: NTP
+  protocol: TCP
+  ports:
+    - 123
+- name: Microsoft-DS (UDP)
+  protocol: UDP
+  ports:
+    - 135
+    - 137
+    - 138
+    - 445
+    - 3702
+- name: Microsoft-DS (TCP)
+  protocol: TCP
+  ports:
+    - 135
+    - 139
+    - 445
+    - 5357
+    - 5358
+- name: NetBIOS (TCP)
+  protocol: TCP
+  ports:
+    - 137
+    - 138
+    - 139
+- name: NetBIOS (UDP)
+  protocol: UDP
+  ports:
+    - 137
+    - 138
+    - 139
+- name: IMAP
+  protocol: TCP
+  ports:
+    - 143
+- name: SNMP
+  protocol: UDP
+  ports:
+    - 161
+    - 162
+- name: LDAP (UDP)
+  protocol: UDP
+  ports:
+    - 389
+    - 3268
+- name: LDAP (TCP)
+  protocol: TCP
+  ports:
+    - 389
+    - 3268
+- name: HTTPS
+  protocol: TCP
+  ports:
+    - 443
+    - 8443
+- name: SMTP SSL/TLS
+  protocol: TCP
+  ports:
+    - 465
+    - 587
+- name: IPSec (UDP)
+  protocol: UDP
+  ports:
+    - 500
+    - 4500
+- name: IPSec (TCP)
+  protocol: TCP
+  ports:
+    - 500
+    - 4500
+- name: Modbus (UDP)
+  protocol: UDP
+  ports:
+    - 502
+- name: Modbus (TCP)
+  protocol: TCP
+  ports:
+    - 502
+    - 802
+- name: Syslog (UDP)
+  protocol: UDP
+  ports:
+    - 514
+    - 601
+- name: Syslog (TCP)
+  protocol: TCP
+  ports:
+    - 514
+    - 601
+- name: LPD
+  protocol: TCP
+  ports:
+    - 515
+- name: IPP and CUPS (UDP)
+  protocol: UDP
+  ports:
+    - 631
+- name: IPP and CUPS (TCP)
+  protocol: TCP
+  ports:
+    - 631
+- name: LDAP SSL/TLS (UDP)
+  protocol: UDP
+  ports:
+    - 636
+    - 3269
+- name: LDAP SSL/TLS (TCP)
+  protocol: TCP
+  ports:
+    - 636
+    - 3269
+- name: rsync
+  protocol: TCP
+  ports:
+    - 873
+- name: FTP SSL/TLS
+  protocol: TCP
+  ports:
+    - 989
+    - 990
+- name: Telnet SSL/TLS
+  protocol: TCP
+  ports:
+    - 992
+- name: IMAP SSL/TLS
+  protocol: TCP
+  ports:
+    - 993
+- name: POP3 SSL/TLS
+  protocol: TCP
+  ports:
+    - 995
+- name: OpenVPN (UDP)
+  protocol: UDP
+  ports:
+    - 1194
+- name: OpenVPN (TCP)
+  protocol: TCP
+  ports:
+    - 1194
+- name: MSSQL
+  protocol: TCP
+  ports:
+    - 1433
+    - 1434
+    - 5022
+- name: Tabular Data Stream
+  protocol: TCP
+  ports:
+    - 1443
+- name: CIP and EtherNet/IP (UDP)
+  protocol: UDP
+  ports:
+    - 2222
+    - 44818
+- name: CIP and EtherNet/IP (TCP)
+  protocol: TCP
+  ports:
+    - 2222
+    - 44818
+- name: MySQL
+  protocol: TCP
+  ports:
+    - 3306
+- name: RDP
+  protocol: TCP
+  ports:
+    - 3389
+- name: LLMNR (UDP)
+  protocol: UDP
+  ports:
+    - 5355
+- name: LLMNR (TCP)
+  protocol: TCP
+  ports:
+    - 5355
+- name: PostgreSQL
+  protocol: TCP
+  ports:
+    - 5432
+- name: VNC
+  protocol: TCP
+  ports:
+    - 5800
+    - 5900
+    - 5901
+    - 5902
+    - 5903
+    - 5904
+    - 5905
+    - 5906
+    - 5907
+    - 5908
+    - 5909
+    - 5910
+    - 6000
+- name: AppSocket and JetDirect
+  protocol: TCP
+  ports:
+    - 9100
+    - 9101
+    - 9102
+- name: Git
+  protocol: TCP
+  ports:
+    - 9418
+- name: BACnet (UDP)
+  protocol: UDP
+  ports:
+    - 47808
+- name: BACnet (TCP)
+  protocol: TCP
+  ports:
+    - 47808
+- name: WireGuard
+  protocol: UDP
+  ports:
+    - 51820

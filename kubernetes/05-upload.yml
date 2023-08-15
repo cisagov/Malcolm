@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: upload-container
-        image: ghcr.io/idaholab/malcolm/file-upload:23.07.1
+        image: ghcr.io/idaholab/malcolm/file-upload:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -52,8 +52,6 @@ spec:
               name: ssl-env
           - secretRef:
               name: auth-env
-          - configMapRef:
-              name: upload-env
         env:
           - name: VIRTUAL_HOST
             value: "upload.malcolm.local"
@@ -75,7 +73,7 @@ spec:
             subPath: "upload"
       initContainers:
       - name: upload-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.07.1
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -84,7 +82,7 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:upload"
+            value: "/data/pcap:upload/tmp/spool,upload/variants"
         volumeMounts:
           - name: upload-pcap-volume
             mountPath: "/data/pcap"

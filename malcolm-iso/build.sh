@@ -3,7 +3,7 @@
 IMAGE_NAME=malcolm
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bullseye
+IMAGE_DISTRIBUTION=bookworm
 
 BUILD_ERROR_CODE=1
 
@@ -70,14 +70,8 @@ if [ -d "$WORKDIR" ]; then
 
   chown -R root:root *
 
-  # if fasttrack.debian.net is down, use mirror.linux.pizza instead
-  FASTTRACK_MIRROR=$(( curl -fsSL -o /dev/null "https://fasttrack.debian.net/debian-fasttrack/" 2>/dev/null && echo "fasttrack.debian.net" ) || ( curl -fsSL -o /dev/null "https://mirror.linux.pizza/debian-fasttrack/" 2>/dev/null && echo "mirror.linux.pizza" ))
-  if [[ -n "$FASTTRACK_MIRROR" ]] && [[ "$FASTTRACK_MIRROR" != "fasttrack.debian.net" ]]; then
-    sed -i "s/fasttrack.debian.net/$FASTTRACK_MIRROR/g" ./config/archives/fasttrack.list.*
-  fi
-
   # configure installation options
-  YML_IMAGE_VERSION="$(grep -P "^\s+image:\s*malcolm" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+  YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Malcolm $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -108,25 +102,27 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/redis/"
+  mkdir -p "$MALCOLM_DEST_DIR/netbox/preload/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/ca-trust/"
   mkdir -p "$MALCOLM_DEST_DIR/nginx/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/kubernetes/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
-  mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/"
+  mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/tmp/spool/"
+  mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/variants/"
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
-  mkdir -p "$MALCOLM_DEST_DIR/suricata-logs/live"
+  mkdir -p "$MALCOLM_DEST_DIR/suricata-logs/live/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/yara/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/current/"
-  mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/preserved"
-  mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/quarantine"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/preserved/"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/quarantine/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/live/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/processed/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
-  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP"
-  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP/"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX/"
   cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
@@ -152,6 +148,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
+  cp ./netbox/preload/*.yml "$MALCOLM_DEST_DIR/netbox/preload/"
 
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
@@ -177,11 +174,6 @@ if [ -d "$WORKDIR" ]; then
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
-
-  # clone and build aide .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/../shared/aide/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/../shared/aide:/build aide-build:latest -o /build
-  mv "$SCRIPT_PATH/../shared/aide"/*.deb ./config/packages.chroot/
 
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
@@ -209,8 +201,8 @@ if [ -d "$WORKDIR" ]; then
     --apt-secure true \
     --apt-source-archives false \
     --architectures amd64 \
-    --archive-areas 'main contrib non-free' \
-    --backports true \
+    --archive-areas 'main contrib non-free non-free-firmware' \
+    --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-live "boot=live components username=analyst nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
@@ -218,7 +210,7 @@ if [ -d "$WORKDIR" ]; then
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \
     --debian-installer-gui false \
-    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,fasttrack-archive-keyring,jq,openssl --no-merged-usr" \
+    --debootstrap-options "--include=apt-transport-https,bc,ca-certificates,gnupg,debian-archive-keyring,jq,openssl --no-merged-usr" \
     --distribution $IMAGE_DISTRIBUTION \
     --image-name "$IMAGE_NAME" \
     --iso-application "$IMAGE_NAME" \
@@ -227,7 +219,7 @@ if [ -d "$WORKDIR" ]; then
     --linux-flavours "amd64:amd64" \
     --linux-packages "linux-image linux-headers" \
     --memtest none \
-    --parent-archive-areas 'main contrib non-free' \
+    --parent-archive-areas 'main contrib non-free non-free-firmware' \
     --parent-debian-installer-distribution $IMAGE_DISTRIBUTION \
     --parent-distribution $IMAGE_DISTRIBUTION \
     --security true \

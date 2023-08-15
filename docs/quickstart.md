@@ -54,25 +54,25 @@ You can then observe the images have been retrieved by running `docker images`:
 ```
 $ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/api                                   23.07.1           xxxxxxxxxxxx   3 days ago   158MB
-ghcr.io/idaholab/malcolm/arkime                                23.07.1           xxxxxxxxxxxx   3 days ago   816MB
-ghcr.io/idaholab/malcolm/dashboards                            23.07.1           xxxxxxxxxxxx   3 days ago   1.02GB
-ghcr.io/idaholab/malcolm/dashboards-helper                     23.07.1           xxxxxxxxxxxx   3 days ago   184MB
-ghcr.io/idaholab/malcolm/file-monitor                          23.07.1           xxxxxxxxxxxx   3 days ago   588MB
-ghcr.io/idaholab/malcolm/file-upload                           23.07.1           xxxxxxxxxxxx   3 days ago   259MB
-ghcr.io/idaholab/malcolm/filebeat-oss                          23.07.1           xxxxxxxxxxxx   3 days ago   624MB
-ghcr.io/idaholab/malcolm/freq                                  23.07.1           xxxxxxxxxxxx   3 days ago   132MB
-ghcr.io/idaholab/malcolm/htadmin                               23.07.1           xxxxxxxxxxxx   3 days ago   242MB
-ghcr.io/idaholab/malcolm/logstash-oss                          23.07.1           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/netbox                                23.07.1           xxxxxxxxxxxx   3 days ago   1.01GB
-ghcr.io/idaholab/malcolm/nginx-proxy                           23.07.1           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/opensearch                            23.07.1           xxxxxxxxxxxx   3 days ago   1.17GB
-ghcr.io/idaholab/malcolm/pcap-capture                          23.07.1           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/pcap-monitor                          23.07.1           xxxxxxxxxxxx   3 days ago   213MB
-ghcr.io/idaholab/malcolm/postgresql                            23.07.1           xxxxxxxxxxxx   3 days ago   268MB
-ghcr.io/idaholab/malcolm/redis                                 23.07.1           xxxxxxxxxxxx   3 days ago   34.2MB
-ghcr.io/idaholab/malcolm/suricata                              23.07.1           xxxxxxxxxxxx   3 days ago   278MB
-ghcr.io/idaholab/malcolm/zeek                                  23.07.1           xxxxxxxxxxxx   3 days ago   1GB
+ghcr.io/idaholab/malcolm/api                                   23.08.0           xxxxxxxxxxxx   3 days ago   158MB
+ghcr.io/idaholab/malcolm/arkime                                23.08.0           xxxxxxxxxxxx   3 days ago   816MB
+ghcr.io/idaholab/malcolm/dashboards                            23.08.0           xxxxxxxxxxxx   3 days ago   1.02GB
+ghcr.io/idaholab/malcolm/dashboards-helper                     23.08.0           xxxxxxxxxxxx   3 days ago   184MB
+ghcr.io/idaholab/malcolm/file-monitor                          23.08.0           xxxxxxxxxxxx   3 days ago   588MB
+ghcr.io/idaholab/malcolm/file-upload                           23.08.0           xxxxxxxxxxxx   3 days ago   259MB
+ghcr.io/idaholab/malcolm/filebeat-oss                          23.08.0           xxxxxxxxxxxx   3 days ago   624MB
+ghcr.io/idaholab/malcolm/freq                                  23.08.0           xxxxxxxxxxxx   3 days ago   132MB
+ghcr.io/idaholab/malcolm/htadmin                               23.08.0           xxxxxxxxxxxx   3 days ago   242MB
+ghcr.io/idaholab/malcolm/logstash-oss                          23.08.0           xxxxxxxxxxxx   3 days ago   1.35GB
+ghcr.io/idaholab/malcolm/netbox                                23.08.0           xxxxxxxxxxxx   3 days ago   1.01GB
+ghcr.io/idaholab/malcolm/nginx-proxy                           23.08.0           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/opensearch                            23.08.0           xxxxxxxxxxxx   3 days ago   1.17GB
+ghcr.io/idaholab/malcolm/pcap-capture                          23.08.0           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/pcap-monitor                          23.08.0           xxxxxxxxxxxx   3 days ago   213MB
+ghcr.io/idaholab/malcolm/postgresql                            23.08.0           xxxxxxxxxxxx   3 days ago   268MB
+ghcr.io/idaholab/malcolm/redis                                 23.08.0           xxxxxxxxxxxx   3 days ago   34.2MB
+ghcr.io/idaholab/malcolm/suricata                              23.08.0           xxxxxxxxxxxx   3 days ago   278MB
+ghcr.io/idaholab/malcolm/zeek                                  23.08.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 ### Import from pre-packaged tarballs
@@ -90,7 +90,7 @@ A few minutes after starting Malcolm (probably 5 or so for Logstash to be comple
 
 * [Arkime](https://arkime.com/): **https://localhost**
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/): **https://localhost/dashboards/**
-* [Capture File and Log Archive Upload (Web)](upload.md#Upload): **https://localhost/upload/**
-* [Capture File and Log Archive Upload (SFTP)](upload.md#Upload): `sftp://<username>@127.0.0.1:8022/files`
+* [Network Traffic Artifact Upload (Web)](upload.md#Upload): **https://localhost/upload/**
+* [Network Traffic Artifact Upload (SFTP)](upload.md#Upload): `sftp://<username>@127.0.0.1:8022/files`
 * [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis): **https://localhost/netbox/**
 * [Account Management](authsetup.md#AuthBasicAccountManagement): **https://localhost/auth/**

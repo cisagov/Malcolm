@@ -132,19 +132,13 @@ MALCOLM_CONFIGMAPS = {
     'netbox-config': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'configuration')),
+            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'config')),
         },
     ],
-    'netbox-reports': [
+    'netbox-preload': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'reports')),
-        },
-    ],
-    'netbox-scripts': [
-        {
-            'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('netbox', 'config'), 'scripts')),
+            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'preload')),
         },
     ],
     'htadmin-config': [

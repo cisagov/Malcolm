@@ -128,8 +128,8 @@ RUN yum upgrade -y && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
         # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.7\.0/2\.8\.0/g" opensearch-dashboards/transformVis/package.json && \
+        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
         # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \

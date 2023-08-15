@@ -1,4 +1,4 @@
-FROM postgres:14-alpine
+FROM postgres:15-alpine
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -44,7 +44,7 @@ ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
-            "-s", "netbox"]
+            "-s", "netbox-postgres"]
 
 CMD ["/usr/bin/docker-entrypoint.sh", "postgres"]
 
