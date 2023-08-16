@@ -681,7 +681,7 @@ LOG_IGNORE_REGEX = re.compile(
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
-  | failed\s+to\s+get\s+tcp\s+stats\s+from\s+/proc
+  | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
   | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | loaded\s+config\s+'/etc/netbox/config/

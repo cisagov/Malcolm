@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: opensearch-container
-        image: ghcr.io/idaholab/malcolm/opensearch:23.08.0
+        image: ghcr.io/idaholab/malcolm/opensearch:23.08.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -69,7 +69,7 @@ spec:
             subPath: "opensearch"
       initContainers:
       - name: opensearch-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.1
         imagePullPolicy: Always
         stdin: false
         tty: true
