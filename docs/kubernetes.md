@@ -67,7 +67,6 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
 
     - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
         ```
-        ---
         apiVersion: v1
         kind: Service
         metadata:
