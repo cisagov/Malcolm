@@ -144,6 +144,9 @@ sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 # disable default fluentbit configuration
 systemctl disable fluent-bit || true
 
+# logrotate doesn't need to worry about arkime as we're running it under supervisord
+rm -f /etc/logrotate.d/arkime
+
 # add fluentbit logfmt parser
 cat << 'EOF' >> /etc/fluent-bit/parsers.conf
 
