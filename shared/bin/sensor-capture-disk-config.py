@@ -19,7 +19,7 @@ import fileinput
 from collections import defaultdict
 from fstab import Fstab
 
-from malcolm_utils import remove_prefix, str2bool, sizeof_fmt, run_process, eprint
+from malcolm_utils import remove_prefix, str2bool, sizeof_fmt, run_subprocess, eprint
 
 MINIMUM_CAPTURE_DEVICE_BYTES = 100 * 1024 * 1024 * 1024  # 100GiB
 CAPTURE_MOUNT_ROOT_PATH = "/capture"
@@ -199,22 +199,22 @@ def main():
         if (not args.interactive) or YesOrNo('Unmount any mounted capture path(s)?'):
             if debug:
                 eprint("Attempting unmount of capture path(s)...")
-            run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR)}")
-            run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
-            run_process(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
+            run_subprocess(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR)}")
+            run_subprocess(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
+            run_subprocess(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
             # also luksClose any luks volumes devices we might have set up
             for cryptDev in [
                 remove_prefix(x, '/dev/mapper/') for x in glob.glob(f"/dev/mapper/{CAPTURE_CRYPT_DEV_PREFIX}*")
             ]:
                 if debug:
                     eprint(f"Running crypsetup luksClose on {cryptDev}...")
-                _, cryptOut = run_process(
+                _, cryptOut = run_subprocess(
                     f"/sbin/cryptsetup --verbose luksClose {cryptDev}", stdout=True, stderr=True, timeout=300
                 )
                 if debug:
                     for line in cryptOut:
                         eprint(f"\t{line}")
-            _, reloadOut = run_process("systemctl daemon-reload")
+            _, reloadOut = run_subprocess("systemctl daemon-reload")
 
     # check existing mounts, if the capture path(s) are already mounted, then abort
     with open('/proc/mounts', 'r') as f:
@@ -238,7 +238,7 @@ def main():
     if debug:
         eprint("Block devices:")
     for device in GetInternalDevices():
-        ecode, deviceTree = run_process(
+        ecode, deviceTree = run_subprocess(
             f'/bin/lsblk -o name,uuid,mountpoint --paths --noheadings /dev/{device}', stdout=True, stderr=False
         )
         if ecode == 0:
@@ -338,7 +338,7 @@ def main():
                     # use parted to create a gpt partition table with a single partition consuming 100% of the disk minus one megabyte at the beginning
                     if debug:
                         eprint(f"Partitioning {device}...")
-                    ecode, partedOut = run_process(
+                    ecode, partedOut = run_subprocess(
                         f'/sbin/parted --script --align optimal {device} -- mklabel gpt \\\n unit mib mkpart primary 1 100%',
                         stdout=True,
                         stderr=True,
@@ -351,7 +351,7 @@ def main():
                             eprint(f"Success partitioning {device}")
 
                         # get the list of partitions from the newly partitioned device (should be just one)
-                        _, fdiskOut = run_process(f'fdisk -l {device}')
+                        _, fdiskOut = run_subprocess(f'fdisk -l {device}')
                         pars = []
                         parsList = False
                         for line in fdiskOut:
@@ -384,12 +384,12 @@ def main():
                                             else:
                                                 print(line)
 
-                                _, reloadOut = run_process("systemctl daemon-reload")
+                                _, reloadOut = run_subprocess("systemctl daemon-reload")
 
                                 # for good measure, run luksErase in case it was a previous luks volume
                                 if debug:
                                     eprint(f"Running crypsetup luksErase on {parDev}...")
-                                _, cryptOut = run_process(
+                                _, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksErase {parDev}",
                                     stdout=True,
                                     stderr=True,
@@ -399,14 +399,14 @@ def main():
                                     for line in cryptOut:
                                         eprint(f"\t{line}")
 
-                                _, reloadOut = run_process("systemctl daemon-reload")
+                                _, reloadOut = run_subprocess("systemctl daemon-reload")
 
                                 # luks volume creation
 
                                 # format device as a luks volume
                                 if debug:
                                     eprint(f"Running crypsetup luksFormat on {device}...")
-                                ecode, cryptOut = run_process(
+                                ecode, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksFormat {parDev} --uuid='{parUuid}' --key-file {CAPTURE_CRYPT_KEYFILE}",
                                     stdout=True,
                                     stderr=True,
@@ -420,7 +420,7 @@ def main():
                                     if debug:
                                         eprint(f"Running crypsetup luksOpen on {device}...")
                                     parMapperDev = CreateMapperDeviceName(parDev)
-                                    ecode, cryptOut = run_process(
+                                    ecode, cryptOut = run_subprocess(
                                         f"/sbin/cryptsetup --verbose luksOpen {parDev} {CreateMapperName(parDev)} --key-file {CAPTURE_CRYPT_KEYFILE}",
                                         stdout=True,
                                         stderr=True,
@@ -448,7 +448,7 @@ def main():
                                     formatCmd = f"/sbin/mkfs.xfs -f -m uuid='{parUuid}' {parDev}"
                                 if debug:
                                     eprint(f"Formatting: {formatCmd}")
-                                ecode, mkfsOut = run_process(formatCmd, stdout=True, stderr=True, timeout=3600)
+                                ecode, mkfsOut = run_subprocess(formatCmd, stdout=True, stderr=True, timeout=3600)
                                 if debug:
                                     for line in mkfsOut:
                                         eprint(f"\t{line}")
@@ -489,11 +489,11 @@ def main():
             eprint(formattedDevs)
 
         # mountpoints are probably not already mounted, but this will make sure
-        run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR)}")
-        run_process(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
-        run_process(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
+        run_subprocess(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR)}")
+        run_subprocess(f"umount {os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_ZEEK_DIR)}")
+        run_subprocess(f"umount {CAPTURE_MOUNT_ROOT_PATH}")
 
-        _, reloadOut = run_process("systemctl daemon-reload")
+        _, reloadOut = run_subprocess("systemctl daemon-reload")
 
         # clean out any previous fstab entries that might be interfering from previous configurations
         if Fstab.remove_by_mountpoint(os.path.join(CAPTURE_MOUNT_ROOT_PATH, CAPTURE_MOUNT_PCAP_DIR), path=FSTAB_FILE):
@@ -511,11 +511,11 @@ def main():
                 eprint(f"Removed previous {CAPTURE_MOUNT_ROOT_PATH} mount from {FSTAB_FILE}")
 
         # reload tab files with systemctl
-        _, reloadOut = run_process("systemctl daemon-reload")
+        _, reloadOut = run_subprocess("systemctl daemon-reload")
 
         # get the GID of the group of the user(s) that will be doing the capture
         try:
-            ecode, guidGetOut = run_process(f"getent group {CAPTURE_GROUP_OWNER}", stdout=True, stderr=True)
+            ecode, guidGetOut = run_subprocess(f"getent group {CAPTURE_GROUP_OWNER}", stdout=True, stderr=True)
             if (ecode == 0) and (len(guidGetOut) > 0):
                 netdevGuid = int(guidGetOut[0].split(':')[2])
             else:
@@ -574,11 +574,11 @@ def main():
             eprint(f'Added "{entry}" to {FSTAB_FILE} for {par.partition}')
 
         # reload tab files with systemctl
-        _, reloadOut = run_process("systemctl daemon-reload")
+        _, reloadOut = run_subprocess("systemctl daemon-reload")
 
         # mount the partitions and create a directory with user permissions
         for par in formattedDevs:
-            ecode, mountOut = run_process(f"mount {par.mount}")
+            ecode, mountOut = run_subprocess(f"mount {par.mount}")
             if ecode == 0:
                 if debug:
                     eprint(f'Mounted {par.partition} at {par.mount}')
