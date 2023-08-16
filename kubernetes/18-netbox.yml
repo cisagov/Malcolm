@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:23.08.0
+        image: ghcr.io/idaholab/malcolm/netbox:23.08.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -88,7 +88,7 @@ spec:
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.08.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.08.1
         imagePullPolicy: Always
         stdin: false
         tty: true
