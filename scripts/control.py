@@ -1781,7 +1781,7 @@ def main():
         dest='composeFile',
         metavar='<STR>',
         type=str,
-        default='docker-compose.yml',
+        default=os.path.join(MalcolmPath, 'docker-compose.yml'),
         help='docker-compose or kubeconfig YML file',
     )
     parser.add_argument(
