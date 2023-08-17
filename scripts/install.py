@@ -309,7 +309,9 @@ class Installer(object):
         return result
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def install_malcolm_files(self, malcolm_install_file):
+    def install_malcolm_files(self, malcolm_install_file, default_config_dir):
+        global args
+
         result = False
         installPath = None
         if (
@@ -341,8 +343,10 @@ class Installer(object):
 
             # extract runtime files
             if installPath and os.path.isdir(installPath):
+                MalcolmPath = installPath
                 if self.debug:
                     eprint(f"Created {installPath} for Malcolm runtime files")
+
                 tar = tarfile.open(malcolm_install_file)
                 try:
                     tar.extractall(path=installPath, numeric_owner=True)
@@ -357,6 +361,19 @@ class Installer(object):
                     for f in os.listdir(childDir[0]):
                         shutil.move(os.path.join(childDir[0], f), installPath)
                     shutil.rmtree(childDir[0], ignore_errors=True)
+
+                # create the config directory for the .env files
+                if default_config_dir:
+                    args.configDir = os.path.join(installPath, 'config')
+                try:
+                    os.makedirs(args.configDir)
+                except OSError as exc:
+                    if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
+                        pass
+                    else:
+                        raise
+                if self.debug:
+                    eprint(f"Created {args.configDir} for Malcolm configuration files")
 
                 # verify the installation worked
                 if os.path.isfile(os.path.join(installPath, "docker-compose.yml")):
@@ -2879,7 +2896,8 @@ def main():
             success = installer.install_docker_images(imageFile)
 
     # if .env directory is unspecified, use the default ./config directory
-    if args.configDir is None:
+    defaultConfigDir = args.configDir is None
+    if defaultConfigDir:
         args.configDir = os.path.join(MalcolmPath, 'config')
     try:
         os.makedirs(args.configDir)
@@ -2887,7 +2905,9 @@ def main():
         if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
             pass
         else:
-            raise
+            eprint(f"Creating {args.configDir} failed: {exc}, attempting to continue anyway")
+    except Exception as e:
+        eprint(f"Creating {args.configDir} failed: {e}, attempting to continue anyway")
 
     if orchMode is OrchestrationFramework.KUBERNETES:
         kube_imported = KubernetesDynamic(debug=args.debug)
@@ -2924,7 +2944,7 @@ def main():
             eprint(f"Malcolm installation detected at {installPath}")
 
     elif hasattr(installer, 'install_malcolm_files'):
-        success, installPath = installer.install_malcolm_files(malcolmFile)
+        success, installPath = installer.install_malcolm_files(malcolmFile, defaultConfigDir)
 
     if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
         installer.tweak_malcolm_runtime(
