@@ -776,25 +776,38 @@ class Installer(object):
                 except Exception as e:
                     eprint(f"Creating {pathToCreate} failed: {e}")
 
-        # delete oldest indexes based on index pattern size
+        # storage management (deleting oldest indices and/or PCAP files)
         indexPruneSizeLimit = '0'
         indexPruneNameSort = False
-        if not opensearchPrimaryRemote:
-            if InstallerYesOrNo('Delete the oldest indices when the database exceeds a certain size?', default=False):
-                indexPruneSizeLimit = ''
-                while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
-                    indexPruneSizeLimit != '0'
-                ):
-                    indexPruneSizeLimit = InstallerAskForString('Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)')
-                indexPruneNameSort = InstallerYesOrNo(
-                    'Determine oldest indices by name (instead of creation time)?', default=True
-                )
+        arkimeManagePCAP = False
 
-        # let Arkime delete old PCAP files based on available storage
-        arkimeManagePCAP = InstallerYesOrNo(
-            'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+        if InstallerYesOrNo(
+            'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
+            if not opensearchPrimaryRemote
+            else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
             default=False,
-        )
+        ):
+            # delete oldest indexes based on index pattern size
+            if not opensearchPrimaryRemote:
+                if InstallerYesOrNo(
+                    'Delete the oldest indices when the database exceeds a certain size?', default=False
+                ):
+                    indexPruneSizeLimit = ''
+                    while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
+                        indexPruneSizeLimit != '0'
+                    ):
+                        indexPruneSizeLimit = InstallerAskForString(
+                            'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)'
+                        )
+                    indexPruneNameSort = InstallerYesOrNo(
+                        'Determine oldest indices by name (instead of creation time)?', default=True
+                    )
+
+            # let Arkime delete old PCAP files based on available storage
+            arkimeManagePCAP = opensearchPrimaryRemote or InstallerYesOrNo(
+                'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                default=False,
+            )
 
         autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
         suricataRuleUpdate = autoSuricata and InstallerYesOrNo(

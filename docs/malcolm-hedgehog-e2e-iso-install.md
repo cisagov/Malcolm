@@ -171,10 +171,12 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - When using LDAP authentication, this question allows users to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
 * **Store PCAP, log and index files locally under /home/user/Malcolm?**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
-* **Delete the oldest indices when the database exceeds a certain size?**
-    - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
-* **Should Arkime delete PCAP files based on available storage?**
-    - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
+* **Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?**
+    - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
+    - **Delete the oldest indices when the database exceeds a certain size?**
+        - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
+    - **Should Arkime delete PCAP files based on available storage?**
+        - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * **Automatically analyze all PCAP files with Suricata?**
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
 * **Download updated Suricata signatures periodically?**

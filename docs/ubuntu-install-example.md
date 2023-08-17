@@ -130,9 +130,7 @@ Select authentication method (Basic): 1
 
 Store PCAP, log and index files locally under /home/user/Malcolm? (Y/n): y
 
-Delete the oldest indices when the database exceeds a certain size? (y/N): n
-
-Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y/N): y
+Should Malcolm delete the oldest database indices and/or PCAP files based on available storage? n
 
 Automatically analyze all PCAP files with Suricata? (Y/n): y
 
