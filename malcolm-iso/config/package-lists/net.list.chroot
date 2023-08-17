@@ -11,7 +11,7 @@ libcurl4
 libssh2-1
 macchanger
 netcat-openbsd
-ntp
+ntpsec
 openssh-client
 openssh-server
 openvpn
