@@ -976,29 +976,43 @@ class Installer(object):
         pcapIface = 'lo'
         tweakIface = False
         pcapFilter = ''
+        captureSelection = 'unset'
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            if InstallerYesOrNo(
-                'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
-            ):
-                pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
-                if not pcapNetSniff:
-                    pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=True)
+            captureOptions = ('no', 'yes', 'customize')
+            while captureSelection not in [x[0] for x in captureOptions]:
+                captureSelection = InstallerChooseOne(
+                    'Should Malcolm capture live network traffic?',
+                    choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
+                )[0]
+            if captureSelection == 'y':
+                pcapNetSniff = True
+                liveSuricata = True
+                liveZeek = True
+            elif captureSelection == 'c':
+                if InstallerYesOrNo(
+                    'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
+                ):
+                    pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
+                    if not pcapNetSniff:
+                        pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=True)
                 liveSuricata = InstallerYesOrNo(
                     'Should Malcolm analyze live network traffic with Suricata?', default=False
                 )
                 liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+                if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+                    pcapFilter = InstallerAskForString(
+                        'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
+                        default='',
+                    )
+                    tweakIface = InstallerYesOrNo(
+                        'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
+                    )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
             while len(pcapIface) <= 0:
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
-            pcapFilter = InstallerAskForString(
-                'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)', default=''
-            )
-            tweakIface = InstallerYesOrNo(
-                'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
-            )
 
         dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
 

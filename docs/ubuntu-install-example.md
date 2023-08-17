@@ -183,19 +183,12 @@ Download updated file scanner signatures periodically? (n/Y): y
 
 Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y/N): n
 
-Should Malcolm capture live network traffic to PCAP files for analysis with Arkime? (y/N): y
-
-Capture packets using netsniff-ng? (Y/n): y   
-
-Should Malcolm analyze live network traffic with Suricata? (y/N): y
-
-Should Malcolm analyze live network traffic with Zeek? (y/N): y
+1: no
+2: yes
+3: customize
+Should Malcolm capture live network traffic? 2
 
 Specify capture interface(s) (comma-separated): eth0
-
-Capture filter (tcpdump-like filter expression; leave blank to capture all traffic) (): not port 5044 and not port 8005 and not port 9200
-
-Disable capture interface hardware offloading and adjust ring buffer sizes? (y/N): n
 
 Enable dark mode for OpenSearch Dashboards? (n/Y): y
 
