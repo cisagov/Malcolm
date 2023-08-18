@@ -4,6 +4,14 @@ set -uo pipefail
 shopt -s nocasematch
 ENCODING="utf-8"
 
+if [ -t 0 ] ; then
+  INTERACTIVE_SHELL=yes
+  QUIET_PULL_FLAG=
+else
+  INTERACTIVE_SHELL=no
+  QUIET_PULL_FLAG=--quiet
+fi
+
 # get the nth column of output
 function _cols() {
   first="awk '{print "
@@ -71,7 +79,7 @@ function _PullAndTagGithubWorkflowBuild() {
   OWNER="$(_gitowner)"
   IMAGE=$1
 
-  docker pull ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" && \
+  docker pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" && \
     docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" ghcr.io/idaholab/"$IMAGE":"$VERSION"
 }
 
