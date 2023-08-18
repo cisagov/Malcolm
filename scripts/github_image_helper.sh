@@ -173,7 +173,7 @@ function GithubTriggerPackagesBuild () {
 trap "_cleanup" EXIT
 
 # get a list of all the "public" functions (not starting with _)
-FUNCTIONS=($(declare -F | awk '{print $NF}' | sort | egrep -v "^_"))
+FUNCTIONS=($(declare -F | awk '{print $NF}' | sort -f | egrep -v "^_"))
 
 # present the menu to our customer and get their selection
 for i in "${!FUNCTIONS[@]}"; do

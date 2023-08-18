@@ -1,0 +1,11 @@
+version = 1
+
+[[steps]]
+[steps.shell]
+script = '''
+echo "Pulling Malcolm container images"
+pushd "$HOME"/Malcolm
+bash ./scripts/github_image_helper.sh 4
+popd
+docker images
+'''
