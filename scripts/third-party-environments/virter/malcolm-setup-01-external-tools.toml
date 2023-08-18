@@ -3,8 +3,11 @@ version = 1
 [[steps]]
 [steps.shell]
 script = '''
-echo "Downloading external utilities"
+echo "Downloading external utilities..."
+
 mkdir -p "$HOME"/.local/bin "$HOME"/.config
+[[ -z "$GITHUB_OAUTH_TOKEN" ]] && [[ -n "$GITHUB_TOKEN" ]] && export GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN"
+
 cd /tmp
 FETCH_URL="https://github.com/gruntwork-io/fetch/releases/latest/download/fetch_linux_amd64"
 curl -fsSL -o /tmp/fetch "$FETCH_URL"
@@ -13,8 +16,6 @@ chmod 755 /tmp/fetch
 rm -rf /tmp/fetch
 
 if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
-
-  [[ -z "$GITHUB_OAUTH_TOKEN" ]] && [[ -n "$GITHUB_TOKEN" ]] && export GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN"
 
   ASSETS=(
     "https://github.com/aptible/supercronic|^supercronic-linux-amd64$|"$HOME"/.local/bin/supercronic|755"
@@ -62,6 +63,7 @@ if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
       fi
     fi
   done
+
 else
   echo "Could not download and/or execute fetch"
   rm -f "$HOME"/.local/bin/fetch

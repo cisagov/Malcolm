@@ -1,20 +1,28 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -o pipefail
+set -u
+shopt -s nocasematch
+ENCODING="utf-8"
 
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-unset SSH_AUTH_SOCK
 
-MALCOLM_CPU=${QEMU_CPU:-4}
-MALCOLM_RAM=${QEMU_RAM:-16384}
-MALCOLM_DISK=${QEMU_DISK:-50G}
-MALCOLM_IMAGE=${QEMU_IMAGE:-debian-12}
-DEFAULT_USER=${QEMU_USER:-debian}
 MALCOLM_REPO_OWNER=idaholab
 MALCOLM_REPO_NAME=Malcolm
 MALCOLM_REPO_BRANCH=main
 GITHUB_TOKEN=${GITHUB_TOKEN:-}
+
+MALCOLM_CPU=${QEMU_CPU:-4}
+MALCOLM_RAM=${QEMU_RAM:-16384}
+MALCOLM_DISK=${QEMU_DISK:-50G}
+
+MALCOLM_IMAGE=${QEMU_IMAGE:-debian-12}
+MALCOLM_IMAGE_USER=${QEMU_USER:-debian}
+
 VM_ID=$((120 + $RANDOM % 80))
 VM_NAME="malcolm-${VM_ID}"
 RM_AFTER_EXEC=
+
 while getopts 'rvo:b:c:m:d:i:u:n:g:' OPTION; do
   case "$OPTION" in
 
@@ -59,11 +67,12 @@ while getopts 'rvo:b:c:m:d:i:u:n:g:' OPTION; do
       ;;
 
     u)
-      DEFAULT_USER="$OPTARG"
+      MALCOLM_IMAGE_USER="$OPTARG"
       ;;
 
     ?)
-      echo "script usage: $(basename $0) [-r (remove VM upon completion)] [-v (verbose)] [-c <CPUs>] [-m <RAM mebibytes>] [-d <disk size and units>] [-i <image name>] [-n <VM name>] [-u <default user>] [-o <Malcolm repo owner>] [-b <Malcolm repo branch>] [-g <GitHub token>]" >&2
+      echo -e "\nscript usage: $(basename $0) OPTIONS"
+      echo -e "Options:\n\t[-v (verbose)]\n\t[-c <CPUs>]\n\t[-m <RAM mebibytes>]\n\t[-d <disk size and units>]\n\t[-i <image name>]\n\t[-n <VM name>]\n\t[-u <default user>]\n\t[-o <Malcolm repo owner>]\n\t[-b <Malcolm repo branch>]\n\t[-g <GitHub token>]\n\t[-r (remove VM upon completion)]\n" >&2
       exit 1
       ;;
 
@@ -71,13 +80,15 @@ while getopts 'rvo:b:c:m:d:i:u:n:g:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
+unset SSH_AUTH_SOCK
+
 virter vm run "${MALCOLM_IMAGE}" \
   --id ${VM_ID} \
   --name "${VM_NAME}" \
   --vcpus ${MALCOLM_CPU} \
   --memory ${MALCOLM_RAM}MiB \
   --bootcapacity "${MALCOLM_DISK}" \
-  --user "${DEFAULT_USER}" \
+  --user "${MALCOLM_IMAGE_USER}" \
   --wait-ssh \
   "$@"
 
@@ -93,4 +104,3 @@ done
 popd >/dev/null 2>&1
 
 [[ -n "$RM_AFTER_EXEC" ]] && virter vm rm "${VM_NAME}"
-

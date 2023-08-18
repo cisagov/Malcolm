@@ -3,7 +3,7 @@ version = 1
 [[steps]]
 [steps.shell]
 script = '''
-echo "Installing system packages"
+echo "Installing system packages..."
 sudo apt-get -y -q update
 sudo apt-get -y -q --no-install-recommends install \
     bash \
