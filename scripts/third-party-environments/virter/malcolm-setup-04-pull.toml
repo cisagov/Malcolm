@@ -5,7 +5,7 @@ version = 1
 script = '''
 echo "Pulling Malcolm container images"
 pushd "$HOME"/Malcolm
-bash ./scripts/github_image_helper.sh 4
+./scripts/github_image_helper.sh "$(./scripts/github_image_helper.sh 99999 2>&1 | grep PullAndTagGithubWorkflowImages | awk '{print $1}')"
 popd
 docker images
 '''
