@@ -2693,57 +2693,15 @@ def main():
         description='Malcolm install script', add_help=False, usage=f'{ScriptName} <arguments>'
     )
     parser.add_argument(
-        '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
-    )
-    parser.add_argument(
-        '-m',
-        '--malcolm-file',
-        required=False,
-        dest='mfile',
-        metavar='<STR>',
-        type=str,
-        default='',
-        help='Malcolm .tar.gz file for installation',
-    )
-    parser.add_argument(
-        '-i',
-        '--image-file',
-        required=False,
-        dest='ifile',
-        metavar='<STR>',
-        type=str,
-        default='',
-        help='Malcolm docker images .tar.gz file for installation',
-    )
-    parser.add_argument(
-        '-c',
-        '--configure',
-        dest='configOnly',
+        '-v',
+        '--verbose',
+        dest='debug',
         type=str2bool,
         nargs='?',
+        metavar="true|false",
         const=True,
         default=False,
-        help="Only do configuration (not installation)",
-    )
-    parser.add_argument(
-        '-f',
-        '--configure-file',
-        required=False,
-        dest='configFile',
-        metavar='<STR>',
-        type=str,
-        default='',
-        help='YAML file (docker-compose file to configure or kubeconfig file)',
-    )
-    parser.add_argument(
-        '-e',
-        '--environment-dir',
-        required=False,
-        dest='configDir',
-        metavar='<STR>',
-        type=str,
-        default=None,
-        help="Directory containing Malcolm's .env files",
+        help="Verbose output",
     )
     parser.add_argument(
         '-d',
@@ -2751,55 +2709,593 @@ def main():
         dest='acceptDefaultsNonInteractive',
         type=str2bool,
         nargs='?',
+        metavar="true|false",
         const=True,
         default=False,
         help="Accept defaults to prompts without user interaction",
     )
     parser.add_argument(
+        '-c',
+        '--configure',
+        dest='configOnly',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Only do configuration (not installation)",
+    )
+
+    configDomainArgGroup = parser.add_argument_group('Configuration files')
+    configDomainArgGroup.add_argument(
+        '-f',
+        '--configure-file',
+        required=False,
+        dest='configFile',
+        metavar='<string>',
+        type=str,
+        default='',
+        help='YAML file (docker-compose file to configure or kubeconfig file)',
+    )
+    configDomainArgGroup.add_argument(
+        '-e',
+        '--environment-dir',
+        required=False,
+        dest='configDir',
+        metavar='<string>',
+        type=str,
+        default=None,
+        help="Directory containing Malcolm's .env files",
+    )
+
+    installFilesArgGroup = parser.add_argument_group('Installation files')
+    installFilesArgGroup.add_argument(
+        '-m',
+        '--malcolm-file',
+        required=False,
+        dest='mfile',
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Malcolm .tar.gz file for installation',
+    )
+    installFilesArgGroup.add_argument(
+        '-i',
+        '--image-file',
+        required=False,
+        dest='ifile',
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Malcolm docker images .tar.gz file for installation',
+    )
+
+    authencOptionsArgGroup = parser.add_argument_group('Entryption and authentication options')
+    authencOptionsArgGroup.add_argument(
+        '--https',
+        dest='nginxSSL',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Require encrypted HTTPS connections",
+    )
+    authencOptionsArgGroup.add_argument(
+        '--ldap',
+        dest='authModeLDAP',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Use Lightweight Directory Access Protocol (LDAP)",
+    )
+    authencOptionsArgGroup.add_argument(
+        '--ldap-mode',
+        dest='ldapServerType',
+        required=False,
+        metavar='<openldap|winldap>',
+        type=str,
+        default=None,
+        help='LDAP server compatibility type',
+    )
+    authencOptionsArgGroup.add_argument(
+        '--ldap-start-tls',
+        dest='ldapStartTLS',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Use StartTLS (rather than LDAPS) for LDAP connection security",
+    )
+
+    dockerOptionsArgGroup = parser.add_argument_group('Docker options')
+    dockerOptionsArgGroup.add_argument(
+        '-r',
+        '--restart-malcolm',
+        dest='malcolmAutoRestart',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Restart Malcolm on system restart (unless-stopped)",
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--reverse-proxied',
+        dest='behindReverseProxy',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Malcolm will be running behind another reverse proxy (Traefik, Caddy, etc.)",
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--traefik-enabled',
+        dest='traefikLabels',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Malcolm will be running behind Traefik",
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--traefik-host',
+        dest='traefikHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--traefik-host-opensearch',
+        dest='traefikOpenSearchHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.malcolm.example.org)',
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--traefik-entrypoint',
+        dest='traefikEntrypoint',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='websecure',
+        help='Traefik router entrypoint (e.g., websecure)',
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--traefik-resolver',
+        dest='traefikEntrypoint',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='myresolver',
+        help='Traefik router resolver (e.g., myresolver)',
+    )
+
+    opensearchArgGroup = parser.add_argument_group('OpenSearch options')
+    opensearchArgGroup.add_argument(
+        '--opensearch',
+        dest='ownOpenSearch',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Malcolm should use and maintain its own OpenSearch instance",
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-memory',
+        dest='osMemory',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='Memory for OpenSearch (e.g., 16g, 9500m, etc.)',
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-primary-url',
+        dest='opensearchPrimaryUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Primary remote OpenSearch connection URL',
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-primary-ssl-verify',
+        dest='opensearchPrimarySslVerify',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Require SSL certificate validation for communication with primary OpenSearch instance",
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-compress-snapshots',
+        dest='indexSnapshotCompressed',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Compress OpenSearch index snapshots",
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-secondary-remote',
+        dest='opensearchSecondaryRemote',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Forward Logstash logs to a secondary remote OpenSearch instance",
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-secondary-url',
+        dest='opensearchSecondaryUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Secondary remote OpenSearch connection URL',
+    )
+    opensearchArgGroup.add_argument(
+        '--opensearch-secondary-ssl-verify',
+        dest='opensearchSecondarySslVerify',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Require SSL certificate validation for communication with secondary OpenSearch instance",
+    )
+
+    logstashArgGroup = parser.add_argument_group('LogStash options')
+    logstashArgGroup.add_argument(
+        '--logstash-memory',
+        dest='lsMemory',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='Memory for LogStash (e.g., 4g, 2500m, etc.)',
+    )
+    logstashArgGroup.add_argument(
+        '--logstash-workers',
+        dest='lsWorkers',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=None,
+        help='Number of Logstash workers (e.g., 4, 8, etc.)',
+    )
+
+    openPortsArgGroup = parser.add_argument_group('Expose ports')
+    openPortsArgGroup.add_argument(
         '--logstash-expose',
         dest='exposeLogstash',
         type=str2bool,
+        metavar="true|false",
         nargs='?',
         const=True,
         default=False,
         help="Expose Logstash port to external hosts",
     )
-    parser.add_argument(
+    openPortsArgGroup.add_argument(
         '--opensearch-expose',
         dest='exposeOpenSearch',
         type=str2bool,
+        metavar="true|false",
         nargs='?',
         const=True,
         default=False,
         help="Expose OpenSearch port to external hosts",
     )
-    parser.add_argument(
+    openPortsArgGroup.add_argument(
         '--filebeat-tcp-expose',
         dest='exposeFilebeatTcp',
         type=str2bool,
+        metavar="true|false",
         nargs='?',
         const=True,
         default=False,
         help="Expose Filebeat TCP port to external hosts",
     )
-    parser.add_argument(
+    openPortsArgGroup.add_argument(
         '--sftp-expose',
         dest='exposeSFTP',
         type=str2bool,
+        metavar="true|false",
         nargs='?',
         const=True,
         default=False,
         help="Expose SFTP server (for PCAP upload) to external hosts",
     )
-    parser.add_argument(
-        '-r',
-        '--restart-malcolm',
-        dest='malcolmAutoRestart',
+
+    storageArgGroup = parser.add_argument_group('Storage options')
+    storageArgGroup.add_argument(
+        '--default-storage-paths',
+        dest='storageDefaultPaths',
         type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Store PCAP, log and index files locally under Malcolm installation path",
+    )
+    storageArgGroup.add_argument(
+        '--pcap-path',
+        dest='pcapDir',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='PCAP storage directory',
+    )
+    storageArgGroup.add_argument(
+        '--zeek-path',
+        dest='zeekLogDir',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Zeek log storage directory',
+    )
+    storageArgGroup.add_argument(
+        '--suricata-path',
+        dest='suricataLogDir',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Suricata log storage directory',
+    )
+    storageArgGroup.add_argument(
+        '--opensearch-path',
+        dest='indexDir',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='OpenSearch index directory',
+    )
+    storageArgGroup.add_argument(
+        '--opensearch-snapshot-path',
+        dest='indexSnapshotDir',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='OpenSearch snapshot directory',
+    )
+    storageArgGroup.add_argument(
+        '--delete-old-pcap',
+        dest='arkimeManagePCAP',
+        type=str2bool,
+        metavar="true|false",
         nargs='?',
         const=True,
         default=False,
-        help="Restart Malcolm on system restart (unless-stopped)",
+        help="Arkime should delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)",
+    )
+    storageArgGroup.add_argument(
+        '--delete-index-threshold',
+        dest='indexPruneSizeLimit',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Delete the oldest indices when the database exceeds this threshold (e.g., 250GB, 1TB, 60٪, etc.)',
+    )
+
+    analysisArgGroup = parser.add_argument_group('Analysis options')
+    analysisArgGroup.add_argument(
+        '--auto-suricata',
+        dest='autoSuricata',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Automatically analyze all PCAP files with Suricata",
+    )
+    analysisArgGroup.add_argument(
+        '--suricata-rule-update',
+        dest='suricataRuleUpdate',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Automatically analyze all PCAP files with Suricata",
+    )
+    analysisArgGroup.add_argument(
+        '--auto-zeek',
+        dest='autoZeek',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Automatically analyze all PCAP files with Zeek",
+    )
+    analysisArgGroup.add_argument(
+        '--zeek-ics-best-guess',
+        dest='zeekICSBestGuess',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='Use "best guess" to identify potential OT/ICS traffic with Zeek',
+    )
+    analysisArgGroup.add_argument(
+        '--reverse-dns',
+        dest='reverseDns',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='Perform reverse DNS lookup locally for source and destination IP addresses in logs',
+    )
+    analysisArgGroup.add_argument(
+        '--auto-oui',
+        dest='autoOui',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help='Perform hardware vendor OUI lookups for MAC addresses',
+    )
+    analysisArgGroup.add_argument(
+        '--auto-freq',
+        dest='autoFreq',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='Perform string randomness scoring on some fields',
+    )
+
+    fileCarveArgGroup = parser.add_argument_group('File extraction options')
+    fileCarveArgGroup.add_argument(
+        '--file-extraction',
+        dest='fileCarveMode',
+        required=False,
+        metavar='<none|known|mapped|all|interesting>',
+        type=str,
+        default=None,
+        help='Zeek file extraction behavior',
+    )
+    fileCarveArgGroup.add_argument(
+        '--file-preservation',
+        dest='filePreserveMode',
+        required=False,
+        metavar='<none|quarantined|all>',
+        type=str,
+        default=None,
+        help='Zeek file preservation behavior',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-server',
+        dest='fileCarveHttpServer',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='Expose web interface for downloading preserved files',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-server-password',
+        dest='fileCarveHttpServeEncryptKey',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-clamav',
+        dest='clamAvScan',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help='Scan extracted files with ClamAV',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-yara',
+        dest='yaraScan',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help='Scan extracted files with Yara',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-capa',
+        dest='capaScan',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help='Scan extracted files with Capa',
+    )
+    fileCarveArgGroup.add_argument(
+        '--extracted-file-virustotal',
+        dest='vtotApiKey',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='VirusTotal API key',
+    )
+    fileCarveArgGroup.add_argument(
+        '--file-scan-rule-update',
+        dest='fileScanRuleUpdate',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Download updated file scanner signatures periodically",
+    )
+
+    netboxArgGroup = parser.add_argument_group('NetBox options')
+    netboxArgGroup.add_argument(
+        '--netbox',
+        dest='netboxEnabled',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Run and maintain an instance of NetBox",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-enrich',
+        dest='netboxLogstashEnrich',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Enrich network traffic using NetBox",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-autopopulate',
+        dest='netboxLogstashAutoPopulate',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Automatically populate NetBox inventory based on observed network traffic",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-site-name',
+        dest='netboxSiteName',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Default NetBox site name',
     )
 
     try:
