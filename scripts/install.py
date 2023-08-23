@@ -63,6 +63,7 @@ from malcolm_common import (
     YesOrNo,
 )
 from malcolm_utils import (
+    CountUntilException,
     deep_get,
     eprint,
     run_process,
@@ -98,6 +99,7 @@ dotenv_imported = None
 ###################################################################################################
 TrueOrFalseQuote = lambda x: "'true'" if x else "'false'"
 TrueOrFalseNoQuote = lambda x: 'true' if x else 'false'
+MaxAskForValueCount = 100
 
 
 ###################################################################################################
@@ -322,7 +324,8 @@ class Installer(object):
             )
         ):
             # determine and create destination path for installation
-            while True:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid installation path')
+            while loopBreaker.increment():
                 defaultPath = os.path.join(origPath, 'malcolm')
                 installPath = InstallerAskForString(
                     f'Enter installation path for Malcolm [{defaultPath}]', default=defaultPath, forceInteraction=True
@@ -435,6 +438,7 @@ class Installer(object):
             puid = defaultUid
             pgid = defaultGid
 
+        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid UID/GID')
         while (
             (not puid.isdigit())
             or (not pgid.isdigit())
@@ -443,7 +447,7 @@ class Installer(object):
                     f'Malcolm processes will run as UID {puid} and GID {pgid}. Is this OK?', default=True
                 )
             )
-        ):
+        ) and loopBreaker.increment():
             puid = InstallerAskForString(
                 'Enter user ID (UID) for running non-root Malcolm processes', default=defaultUid
             )
@@ -522,8 +526,9 @@ class Installer(object):
             default=args.ownOpenSearch,
         )
         if opensearchPrimaryRemote:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
             opensearchPrimaryUrl = ''
-            while len(opensearchPrimaryUrl) <= 1:
+            while (len(opensearchPrimaryUrl) <= 1) and loopBreaker.increment():
                 opensearchPrimaryUrl = InstallerAskForString(
                     'Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchPrimaryUrl,
@@ -542,8 +547,9 @@ class Installer(object):
             default=args.opensearchSecondaryRemote,
         )
         if opensearchSecondaryRemote:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
             opensearchSecondaryUrl = ''
-            while len(opensearchSecondaryUrl) <= 1:
+            while (len(opensearchSecondaryUrl) <= 1) and loopBreaker.increment():
                 opensearchSecondaryUrl = InstallerAskForString(
                     'Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchSecondaryUrl,
@@ -558,15 +564,21 @@ class Installer(object):
                 f'You must run auth_setup after {ScriptName} to store OpenSearch connection credentials.',
             )
 
-        while not InstallerYesOrNo(
-            f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
+        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch/LogStash memory setting(s)')
+        while (
+            not InstallerYesOrNo(
+                f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
+            )
+            and loopBreaker.increment()
         ):
             osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
             lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
 
-        while (not str(lsWorkers).isdigit()) or (
-            not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True)
-        ):
+        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LogStash worker setting(s)')
+        while (
+            (not str(lsWorkers).isdigit())
+            or (not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True))
+        ) and loopBreaker.increment():
             lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
 
         restartMode = None
@@ -574,7 +586,8 @@ class Installer(object):
         if (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE) and InstallerYesOrNo(
             'Restart Malcolm upon system or Docker daemon restart?', default=args.malcolmAutoRestart
         ):
-            while restartMode not in allowedRestartModes:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid restart mode')
+            while restartMode not in allowedRestartModes and loopBreaker.increment():
                 restartMode = InstallerChooseOne(
                     'Select Malcolm restart behavior',
                     choices=[(x, '', x == 'unless-stopped') for x in allowedRestartModes],
@@ -605,22 +618,28 @@ class Installer(object):
             if behindReverseProxy:
                 traefikLabels = InstallerYesOrNo('Configure labels for Traefik?', default=bool(args.traefikHost))
                 if traefikLabels:
-                    while len(traefikHost) <= 1:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik request domain')
+                    while (len(traefikHost) <= 1) and loopBreaker.increment():
                         traefikHost = InstallerAskForString(
                             'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
                             default=args.traefikHost,
                         )
-                    while (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost):
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik OpenSearch request domain')
+                    while (
+                        (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost)
+                    ) and loopBreaker.increment():
                         traefikOpenSearchHost = InstallerAskForString(
                             f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
                             default=args.traefikOpenSearchHost,
                         )
-                    while len(traefikEntrypoint) <= 1:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik router entrypoint')
+                    while (len(traefikEntrypoint) <= 1) and loopBreaker.increment():
                         traefikEntrypoint = InstallerAskForString(
                             'Enter Traefik router entrypoint (e.g., websecure)',
                             default=args.traefikEntrypoint,
                         )
-                    while len(traefikResolver) <= 1:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik router resolver')
+                    while (len(traefikResolver) <= 1) and loopBreaker.increment():
                         traefikResolver = InstallerAskForString(
                             'Enter Traefik router resolver (e.g., myresolver)',
                             default=args.traefikResolver,
@@ -637,7 +656,8 @@ class Installer(object):
             'None': 'no_authentication',
         }
         authMode = None
-        while authMode not in list(allowedAuthModes.keys()):
+        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid authentication method')
+        while authMode not in list(allowedAuthModes.keys()) and loopBreaker.increment():
             authMode = InstallerChooseOne(
                 'Select authentication method',
                 choices=[
@@ -652,7 +672,8 @@ class Installer(object):
         if 'ldap' in authMode.lower():
             allowedLdapModes = ('winldap', 'openldap')
             ldapServerType = args.ldapServerType if args.ldapServerType else None
-            while ldapServerType not in allowedLdapModes:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LDAP server compatibility type')
+            while ldapServerType not in allowedLdapModes and loopBreaker.increment():
                 ldapServerType = InstallerChooseOne(
                     'Select LDAP server compatibility type',
                     choices=[(x, '', x == ldapServerTypeDefault) for x in allowedLdapModes],
@@ -705,7 +726,8 @@ class Installer(object):
                     'Store PCAP files locally in {}?'.format(pcapDirDefault),
                     default=not bool(args.pcapDir),
                 ):
-                    while True:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP directory')
+                    while loopBreaker.increment():
                         pcapDir = InstallerAskForString('Enter PCAP directory', default=args.pcapDir)
                         if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
                             pcapDirFull = os.path.realpath(pcapDir)
@@ -721,7 +743,8 @@ class Installer(object):
                     'Store Zeek logs locally in {}?'.format(zeekLogDirDefault),
                     default=not bool(args.zeekLogDir),
                 ):
-                    while True:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Zeek directory')
+                    while loopBreaker.increment():
                         zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=args.zeekLogDir)
                         if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
                             zeekLogDirFull = os.path.realpath(zeekLogDir)
@@ -737,7 +760,8 @@ class Installer(object):
                     'Store Suricata logs locally in {}?'.format(suricataLogDirDefault),
                     default=not bool(args.suricataLogDir),
                 ):
-                    while True:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Suricata directory')
+                    while loopBreaker.increment():
                         suricataLogDir = InstallerAskForString(
                             'Enter Suricata log directory', default=args.suricataLogDir
                         )
@@ -756,7 +780,8 @@ class Installer(object):
                         'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
                         default=not bool(args.indexDir),
                     ):
-                        while True:
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch index directory')
+                        while loopBreaker.increment():
                             indexDir = InstallerAskForString('Enter OpenSearch index directory', default=args.indexDir)
                             if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                 indexDirFull = os.path.realpath(indexDir)
@@ -772,7 +797,8 @@ class Installer(object):
                         'Store OpenSearch index snapshots locally in {}?'.format(indexSnapshotDirDefault),
                         default=not bool(args.indexSnapshotDir),
                     ):
-                        while True:
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch snapshots directory')
+                        while loopBreaker.increment():
                             indexSnapshotDir = InstallerAskForString(
                                 'Enter OpenSearch index snapshot directory', default=args.indexSnapshotDir
                             )
@@ -833,8 +859,11 @@ class Installer(object):
                     default=bool(args.indexPruneSizeLimit),
                 ):
                     indexPruneSizeLimit = ''
-                    while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
-                        indexPruneSizeLimit != '0'
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
+                    while (
+                        (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE))
+                        and (indexPruneSizeLimit != '0')
+                        and loopBreaker.increment()
                     ):
                         indexPruneSizeLimit = InstallerAskForString(
                             'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
@@ -874,7 +903,8 @@ class Installer(object):
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             openPortsOptions = ('no', 'yes', 'customize')
-            while openPortsSelection not in [x[0] for x in openPortsOptions]:
+            loopBreaker = CountUntilException(MaxAskForValueCount)
+            while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
                 openPortsSelection = InstallerChooseOne(
                     'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
                     choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
@@ -914,7 +944,8 @@ class Installer(object):
         ):
             allowedFilebeatTcpFormats = ('json', 'raw')
             filebeatTcpFormat = 'unset'
-            while filebeatTcpFormat not in allowedFilebeatTcpFormats:
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid log format')
+            while filebeatTcpFormat not in allowedFilebeatTcpFormats and loopBreaker.increment():
                 filebeatTcpFormat = InstallerChooseOne(
                     'Select log format for messages sent to Filebeat TCP listener',
                     choices=[(x, '', x == allowedFilebeatTcpFormats[0]) for x in allowedFilebeatTcpFormats],
@@ -958,12 +989,14 @@ class Installer(object):
         fileCarveHttpServeEncryptKey = ''
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
-            while fileCarveMode not in allowedFileCarveModes:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file extraction behavior')
+            while fileCarveMode not in allowedFileCarveModes and loopBreaker.increment():
                 fileCarveMode = InstallerChooseOne(
                     'Select file extraction behavior',
                     choices=[(x, '', x == allowedFileCarveModes[0]) for x in allowedFileCarveModes],
                 )
-            while filePreserveMode not in allowedFilePreserveModes:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file preservation behavior')
+            while filePreserveMode not in allowedFilePreserveModes and loopBreaker.increment():
                 filePreserveMode = InstallerChooseOne(
                     'Select file preservation behavior',
                     choices=[(x, '', x == allowedFilePreserveModes[0]) for x in allowedFilePreserveModes],
@@ -983,7 +1016,8 @@ class Installer(object):
                 if InstallerYesOrNo('Scan extracted PE files with Capa?', default=True):
                     capaScan = True
                 if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
-                    while len(vtotApiKey) <= 1:
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid VirusTotal API key')
+                    while (len(vtotApiKey) <= 1) and loopBreaker.increment():
                         vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
                 fileScanRuleUpdate = InstallerYesOrNo(
                     'Download updated file scanner signatures periodically?', default=False
@@ -1042,7 +1076,8 @@ class Installer(object):
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             captureOptions = ('no', 'yes', 'customize')
-            while captureSelection not in [x[0] for x in captureOptions]:
+            loopBreaker = CountUntilException(MaxAskForValueCount)
+            while captureSelection not in [x[0] for x in captureOptions] and loopBreaker.increment():
                 captureSelection = InstallerChooseOne(
                     'Should Malcolm capture live network traffic?',
                     choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
@@ -1073,7 +1108,8 @@ class Installer(object):
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
-            while len(pcapIface) <= 0:
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
+            while (len(pcapIface) <= 0) and loopBreaker.increment():
                 pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
 
         dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
