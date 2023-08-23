@@ -389,15 +389,7 @@ class Installer(object):
         return result, installPath
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def tweak_malcolm_runtime(
-        self,
-        malcolm_install_path,
-        expose_opensearch_default=False,
-        expose_logstash_default=False,
-        expose_filebeat_default=False,
-        expose_sftp_default=False,
-        restart_mode_default=False,
-    ):
+    def tweak_malcolm_runtime(self, malcolm_install_path):
         global args
         global dotenv_imported
 
@@ -452,8 +444,12 @@ class Installer(object):
                 )
             )
         ):
-            puid = InstallerAskForString('Enter user ID (UID) for running non-root Malcolm processes')
-            pgid = InstallerAskForString('Enter group ID (GID) for running non-root Malcolm processes')
+            puid = InstallerAskForString(
+                'Enter user ID (UID) for running non-root Malcolm processes', default=defaultUid
+            )
+            pgid = InstallerAskForString(
+                'Enter group ID (GID) for running non-root Malcolm processes', default=defaultGid
+            )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
@@ -506,6 +502,13 @@ class Installer(object):
         else:
             lsWorkers = 6
 
+        if args.osMemory:
+            osMemory = args.osMemory
+        if args.lsMemory:
+            lsMemory = args.lsMemory
+        if args.lsWorkers:
+            lsWorkers = args.lsWorkers
+
         opensearchPrimaryRemote = False
         opensearchPrimaryUrl = 'http://opensearch:9200'
         opensearchPrimarySslVerify = False
@@ -516,33 +519,38 @@ class Installer(object):
 
         opensearchPrimaryRemote = not InstallerYesOrNo(
             'Should Malcolm use and maintain its own OpenSearch instance?',
-            default=True,
+            default=args.ownOpenSearch,
         )
         if opensearchPrimaryRemote:
             opensearchPrimaryUrl = ''
             while len(opensearchPrimaryUrl) <= 1:
                 opensearchPrimaryUrl = InstallerAskForString(
                     'Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    default=args.opensearchPrimaryUrl,
                 )
             opensearchPrimarySslVerify = opensearchPrimaryUrl.lower().startswith('https') and InstallerYesOrNo(
                 'Require SSL certificate validation for communication with primary OpenSearch instance?',
-                default=False,
+                default=args.opensearchPrimarySslVerify,
             )
-            indexSnapshotCompressed = InstallerYesOrNo('Compress OpenSearch index snapshots?', default=False)
+            indexSnapshotCompressed = InstallerYesOrNo(
+                'Compress OpenSearch index snapshots?',
+                default=args.indexSnapshotCompressed,
+            )
 
         opensearchSecondaryRemote = InstallerYesOrNo(
             'Forward Logstash logs to a secondary remote OpenSearch instance?',
-            default=False,
+            default=args.opensearchSecondaryRemote,
         )
         if opensearchSecondaryRemote:
             opensearchSecondaryUrl = ''
             while len(opensearchSecondaryUrl) <= 1:
                 opensearchSecondaryUrl = InstallerAskForString(
                     'Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    default=args.opensearchSecondaryUrl,
                 )
             opensearchSecondarySslVerify = opensearchSecondaryUrl.lower().startswith('https') and InstallerYesOrNo(
                 'Require SSL certificate validation for communication with secondary OpenSearch instance?',
-                default=False,
+                default=args.opensearchSecondarySslVerify,
             )
 
         if opensearchPrimaryRemote or opensearchSecondaryRemote:
@@ -564,7 +572,7 @@ class Installer(object):
         restartMode = None
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
         if (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE) and InstallerYesOrNo(
-            'Restart Malcolm upon system or Docker daemon restart?', default=restart_mode_default
+            'Restart Malcolm upon system or Docker daemon restart?', default=args.malcolmAutoRestart
         ):
             while restartMode not in allowedRestartModes:
                 restartMode = InstallerChooseOne(
@@ -576,8 +584,8 @@ class Installer(object):
         if restartMode == 'no':
             restartMode = '"no"'
 
-        nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=True)
-        if not nginxSSL:
+        nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
+        if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
             nginxSSL = not InstallerYesOrNo('Unencrypted connections are NOT recommended. Are you sure?', default=False)
 
         behindReverseProxy = False
@@ -589,32 +597,38 @@ class Installer(object):
         traefikResolver = ""
 
         behindReverseProxy = (self.orchMode is OrchestrationFramework.KUBERNETES) or InstallerYesOrNo(
-            'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?', default=(not nginxSSL)
+            'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
+            default=args.behindReverseProxy or (not nginxSSL),
         )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if behindReverseProxy:
-                traefikLabels = InstallerYesOrNo('Configure labels for Traefik?', default=False)
+                traefikLabels = InstallerYesOrNo('Configure labels for Traefik?', default=bool(args.traefikHost))
                 if traefikLabels:
                     while len(traefikHost) <= 1:
                         traefikHost = InstallerAskForString(
-                            'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)'
+                            'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
+                            default=args.traefikHost,
                         )
                     while (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost):
                         traefikOpenSearchHost = InstallerAskForString(
-                            f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})'
+                            f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
+                            default=args.traefikOpenSearchHost,
                         )
                     while len(traefikEntrypoint) <= 1:
                         traefikEntrypoint = InstallerAskForString(
-                            'Enter Traefik router entrypoint (e.g., websecure)', default="websecure"
+                            'Enter Traefik router entrypoint (e.g., websecure)',
+                            default=args.traefikEntrypoint,
                         )
                     while len(traefikResolver) <= 1:
                         traefikResolver = InstallerAskForString(
-                            'Enter Traefik router resolver (e.g., myresolver)', default="myresolver"
+                            'Enter Traefik router resolver (e.g., myresolver)',
+                            default=args.traefikResolver,
                         )
 
             dockerNetworkExternalName = InstallerAskForString(
-                'Specify external Docker network name (or leave blank for default networking)', default=""
+                'Specify external Docker network name (or leave blank for default networking)',
+                default=args.dockerNetworkName,
             )
 
         allowedAuthModes = {
@@ -626,21 +640,25 @@ class Installer(object):
         while authMode not in list(allowedAuthModes.keys()):
             authMode = InstallerChooseOne(
                 'Select authentication method',
-                choices=[(x, '', x == 'Basic') for x in list(allowedAuthModes.keys())],
+                choices=[
+                    (x, '', x == ('Lightweight Directory Access Protocol (LDAP)' if args.authModeLDAP else 'Basic'))
+                    for x in list(allowedAuthModes.keys())
+                ],
             )
 
         ldapStartTLS = False
-        ldapServerType = 'winldap'
+        ldapServerTypeDefault = args.ldapServerType if args.ldapServerType else 'winldap'
+        ldapServerType = ldapServerTypeDefault
         if 'ldap' in authMode.lower():
             allowedLdapModes = ('winldap', 'openldap')
-            ldapServerType = None
+            ldapServerType = args.ldapServerType if args.ldapServerType else None
             while ldapServerType not in allowedLdapModes:
                 ldapServerType = InstallerChooseOne(
                     'Select LDAP server compatibility type',
-                    choices=[(x, '', x == 'winldap') for x in allowedLdapModes],
+                    choices=[(x, '', x == ldapServerTypeDefault) for x in allowedLdapModes],
                 )
             ldapStartTLS = InstallerYesOrNo(
-                'Use StartTLS (rather than LDAPS) for LDAP connection security?', default=False
+                'Use StartTLS (rather than LDAPS) for LDAP connection security?', default=args.ldapStartTLS
             )
             try:
                 with open(
@@ -680,15 +698,15 @@ class Installer(object):
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if not InstallerYesOrNo(
                 'Store PCAP, log and index files locally under {}?'.format(malcolm_install_path),
-                default=True,
+                default=args.storageDefaultPaths,
             ):
                 # PCAP directory
                 if not InstallerYesOrNo(
                     'Store PCAP files locally in {}?'.format(pcapDirDefault),
-                    default=True,
+                    default=not bool(args.pcapDir),
                 ):
                     while True:
-                        pcapDir = InstallerAskForString('Enter PCAP directory')
+                        pcapDir = InstallerAskForString('Enter PCAP directory', default=args.pcapDir)
                         if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
                             pcapDirFull = os.path.realpath(pcapDir)
                             pcapDir = (
@@ -701,10 +719,10 @@ class Installer(object):
                 # Zeek log directory
                 if not InstallerYesOrNo(
                     'Store Zeek logs locally in {}?'.format(zeekLogDirDefault),
-                    default=True,
+                    default=not bool(args.zeekLogDir),
                 ):
                     while True:
-                        zeekLogDir = InstallerAskForString('Enter Zeek log directory')
+                        zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=args.zeekLogDir)
                         if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
                             zeekLogDirFull = os.path.realpath(zeekLogDir)
                             zeekLogDir = (
@@ -717,10 +735,12 @@ class Installer(object):
                 # Suricata log directory
                 if not InstallerYesOrNo(
                     'Store Suricata logs locally in {}?'.format(suricataLogDirDefault),
-                    default=True,
+                    default=not bool(args.suricataLogDir),
                 ):
                     while True:
-                        suricataLogDir = InstallerAskForString('Enter Suricata log directory')
+                        suricataLogDir = InstallerAskForString(
+                            'Enter Suricata log directory', default=args.suricataLogDir
+                        )
                         if (len(suricataLogDir) > 1) and os.path.isdir(suricataLogDir):
                             suricataLogDirFull = os.path.realpath(suricataLogDir)
                             suricataLogDir = (
@@ -734,10 +754,10 @@ class Installer(object):
                     # opensearch index directory
                     if not InstallerYesOrNo(
                         'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
-                        default=True,
+                        default=not bool(args.indexDir),
                     ):
                         while True:
-                            indexDir = InstallerAskForString('Enter OpenSearch index directory')
+                            indexDir = InstallerAskForString('Enter OpenSearch index directory', default=args.indexDir)
                             if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                 indexDirFull = os.path.realpath(indexDir)
                                 indexDir = (
@@ -750,10 +770,12 @@ class Installer(object):
                     # opensearch snapshot repository directory and compression
                     if not InstallerYesOrNo(
                         'Store OpenSearch index snapshots locally in {}?'.format(indexSnapshotDirDefault),
-                        default=True,
+                        default=not bool(args.indexSnapshotDir),
                     ):
                         while True:
-                            indexSnapshotDir = InstallerAskForString('Enter OpenSearch index snapshot directory')
+                            indexSnapshotDir = InstallerAskForString(
+                                'Enter OpenSearch index snapshot directory', default=args.indexSnapshotDir
+                            )
                             if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
                                 indexSnapshotDirFull = os.path.realpath(indexSnapshotDir)
                                 indexSnapshotDir = (
@@ -802,19 +824,20 @@ class Installer(object):
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
             if not opensearchPrimaryRemote
             else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
-            default=False,
+            default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
         ):
             # delete oldest indexes based on index pattern size
             if not opensearchPrimaryRemote:
                 if InstallerYesOrNo(
-                    'Delete the oldest indices when the database exceeds a certain size?', default=False
+                    'Delete the oldest indices when the database exceeds a certain size?',
+                    default=bool(args.indexPruneSizeLimit),
                 ):
                     indexPruneSizeLimit = ''
                     while (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE)) and (
                         indexPruneSizeLimit != '0'
                     ):
                         indexPruneSizeLimit = InstallerAskForString(
-                            'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)'
+                            'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
                         )
                     indexPruneNameSort = InstallerYesOrNo(
                         'Determine oldest indices by name (instead of creation time)?', default=True
@@ -823,24 +846,32 @@ class Installer(object):
             # let Arkime delete old PCAP files based on available storage
             arkimeManagePCAP = opensearchPrimaryRemote or InstallerYesOrNo(
                 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
-                default=False,
+                default=args.arkimeManagePCAP,
             )
 
-        autoSuricata = InstallerYesOrNo('Automatically analyze all PCAP files with Suricata?', default=True)
-        suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
-            'Download updated Suricata signatures periodically?', default=False
+        autoSuricata = InstallerYesOrNo(
+            'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
         )
-        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=True)
+        suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
+            'Download updated Suricata signatures periodically?', default=args.suricataRuleUpdate
+        )
+        autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=args.autoZeek)
         zeekICSBestGuess = autoZeek and InstallerYesOrNo(
-            'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?', default=False
+            'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
+            default=args.zeekICSBestGuess,
         )
         reverseDns = InstallerYesOrNo(
-            'Perform reverse DNS lookup locally for source and destination IP addresses in logs?', default=False
+            'Perform reverse DNS lookup locally for source and destination IP addresses in logs?',
+            default=args.reverseDns,
         )
-        autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=True)
-        autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=True)
+        autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui)
+        autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=args.autoFreq)
 
-        openPortsSelection = 'unset'
+        openPortsSelection = (
+            'customize'
+            if (args.exposeLogstash or args.exposeOpenSearch or args.exposeFilebeatTcp or args.exposeSFTP)
+            else 'unset'
+        )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             openPortsOptions = ('no', 'yes', 'customize')
             while openPortsSelection not in [x[0] for x in openPortsOptions]:
@@ -859,13 +890,11 @@ class Installer(object):
             else:
                 openPortsSelection = 'c'
                 opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
-                    'Expose OpenSearch port to external hosts?', default=expose_opensearch_default
+                    'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
                 )
-                logstashOpen = InstallerYesOrNo(
-                    'Expose Logstash port to external hosts?', default=expose_logstash_default
-                )
+                logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=args.exposeLogstash)
                 filebeatTcpOpen = InstallerYesOrNo(
-                    'Expose Filebeat TCP port to external hosts?', default=expose_filebeat_default
+                    'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
                 )
         else:
             opensearchOpen = not opensearchPrimaryRemote
@@ -911,7 +940,7 @@ class Installer(object):
         sftpOpen = (
             (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
             and (openPortsSelection == 'c')
-            and InstallerYesOrNo('Expose SFTP server (for PCAP upload) to external hosts?', default=expose_sftp_default)
+            and InstallerYesOrNo('Expose SFTP server (for PCAP upload) to external hosts?', default=args.exposeSFTP)
         )
 
         # input file extraction parameters
@@ -982,9 +1011,12 @@ class Installer(object):
                 'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
                 default=False,
             )
-            and InstallerYesOrNo(
-                "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                default=False,
+            and (
+                args.acceptDefaultsNonInteractive
+                or InstallerYesOrNo(
+                    "Autopopulating NetBox's inventory is not recommended. Are you sure?",
+                    default=False,
+                )
             )
         )
         netboxSiteName = (
@@ -2778,7 +2810,7 @@ def main():
         metavar="true|false",
         nargs='?',
         const=True,
-        default=False,
+        default=True,
         help="Require encrypted HTTPS connections",
     )
     authencOptionsArgGroup.add_argument(
@@ -2834,16 +2866,6 @@ def main():
         help="Malcolm will be running behind another reverse proxy (Traefik, Caddy, etc.)",
     )
     dockerOptionsArgGroup.add_argument(
-        '--traefik-enabled',
-        dest='traefikLabels',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Malcolm will be running behind Traefik",
-    )
-    dockerOptionsArgGroup.add_argument(
         '--traefik-host',
         dest='traefikHost',
         required=False,
@@ -2872,12 +2894,21 @@ def main():
     )
     dockerOptionsArgGroup.add_argument(
         '--traefik-resolver',
-        dest='traefikEntrypoint',
+        dest='traefikResolver',
         required=False,
         metavar='<string>',
         type=str,
         default='myresolver',
         help='Traefik router resolver (e.g., myresolver)',
+    )
+    dockerOptionsArgGroup.add_argument(
+        '--docker-network-name',
+        dest='dockerNetworkName',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='myresolver',
+        help='External Docker network name (or leave blank for default networking)',
     )
 
     opensearchArgGroup = parser.add_argument_group('OpenSearch options')
@@ -3165,7 +3196,7 @@ def main():
         metavar="true|false",
         nargs='?',
         const=True,
-        default=False,
+        default=True,
         help='Perform string randomness scoring on some fields',
     )
 
@@ -3443,14 +3474,7 @@ def main():
         success, installPath = installer.install_malcolm_files(malcolmFile, defaultConfigDir)
 
     if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-        installer.tweak_malcolm_runtime(
-            installPath,
-            expose_opensearch_default=args.exposeOpenSearch,
-            expose_logstash_default=args.exposeLogstash,
-            expose_filebeat_default=args.exposeFilebeatTcp,
-            expose_sftp_default=args.exposeSFTP,
-            restart_mode_default=args.malcolmAutoRestart,
-        )
+        installer.tweak_malcolm_runtime(installPath)
         eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
         eprint(
             f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
