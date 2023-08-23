@@ -897,7 +897,7 @@ class Installer(object):
         autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=args.autoFreq)
 
         openPortsSelection = (
-            'customize'
+            'c'
             if (args.exposeLogstash or args.exposeOpenSearch or args.exposeFilebeatTcp or args.exposeSFTP)
             else 'unset'
         )
@@ -2943,7 +2943,7 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default='myresolver',
+        default='',
         help='External Docker network name (or leave blank for default networking)',
     )
 
