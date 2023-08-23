@@ -4,7 +4,7 @@ Malcolm's runtime settings are stored (with a few exceptions) as environment var
 
 Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**.
 
-## <a name="MalcolmConfigEnvVars"></a>Environment Variable Files
+## <a name="MalcolmConfigEnvVars"></a>Environment variable files
 
 Although the configuration script automates many of the following configuration and tuning parameters, some environment variables of particular interest are listed here for reference.
 
@@ -92,3 +92,25 @@ Although the configuration script automates many of the following configuration 
     - `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files (defaults to empty, which disables automatic refresh)
     - `ZEEK_LIVE_CAPTURE` - if set to `true`, Zeek will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
     - `ZEEK_ROTATED_PCAP` - if set to `true`, Zeek can analyze captured PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `ZEEK_AUTO_ANALYZE_PCAP_FILES`); if `ZEEK_LIVE_CAPTURE` is `true`, this should be `false`; otherwise Zeek will see duplicate traffic
+
+## <a name="CommandLineConfig"></a>Command-line arguments
+
+The `./scripts/configure` script can also be run noninteractively which can be useful for scripting Malcolm setup. This behavior can be selected by supplying the `-d` or `--defaults` option on the command line. Running with the `--help` option will list the arguments accepted by the script:
+
+```
+$ ./scripts/configure --help
+usage: configure <arguments>
+
+Malcolm install script
+
+options:
+  -v [true|false], --verbose [true|false]
+                        Verbose output
+  -d [true|false], --defaults [true|false]
+                        Accept defaults to prompts without user interaction
+  -c [true|false], --configure [true|false]
+                        Only do configuration (not installation)
+…
+```
+
+Note that the value for **any** argument not specified on the command line will be reset to its default (as if for a new Malcolm installation) regardless of the setting's current value in the corresponding `.env` file. In other words, users who want to use the `--defaults` option should carefully review all available command-line options and choose all that apply.
