@@ -719,7 +719,7 @@ class Installer(object):
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if not InstallerYesOrNo(
                 'Store PCAP, log and index files locally under {}?'.format(malcolm_install_path),
-                default=args.storageDefaultPaths,
+                default=not args.acceptDefaultsNonInteractive,
             ):
                 # PCAP directory
                 if not InstallerYesOrNo(
@@ -979,7 +979,9 @@ class Installer(object):
         allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
         fileCarveMode = None
+        fileCarveModeDefault = args.fileCarveMode.lower() if args.fileCarveMode else None
         filePreserveMode = None
+        filePreserveModeDefault = args.filePreserveMode.lower() if args.filePreserveMode else None
         vtotApiKey = '0'
         yaraScan = False
         capaScan = False
@@ -988,40 +990,56 @@ class Installer(object):
         fileCarveHttpServer = False
         fileCarveHttpServeEncryptKey = ''
 
-        if InstallerYesOrNo('Enable file extraction with Zeek?', default=False):
+        if InstallerYesOrNo('Enable file extraction with Zeek?', default=bool(fileCarveModeDefault)):
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file extraction behavior')
             while fileCarveMode not in allowedFileCarveModes and loopBreaker.increment():
                 fileCarveMode = InstallerChooseOne(
                     'Select file extraction behavior',
-                    choices=[(x, '', x == allowedFileCarveModes[0]) for x in allowedFileCarveModes],
+                    choices=[
+                        (x, '', x == fileCarveModeDefault if fileCarveModeDefault else allowedFileCarveModes[0])
+                        for x in allowedFileCarveModes
+                    ],
                 )
-            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file preservation behavior')
-            while filePreserveMode not in allowedFilePreserveModes and loopBreaker.increment():
-                filePreserveMode = InstallerChooseOne(
-                    'Select file preservation behavior',
-                    choices=[(x, '', x == allowedFilePreserveModes[0]) for x in allowedFilePreserveModes],
+            if fileCarveMode and (fileCarveMode != 'none'):
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file preservation behavior')
+                while filePreserveMode not in allowedFilePreserveModes and loopBreaker.increment():
+                    filePreserveMode = InstallerChooseOne(
+                        'Select file preservation behavior',
+                        choices=[
+                            (
+                                x,
+                                '',
+                                x == filePreserveModeDefault
+                                if filePreserveModeDefault
+                                else allowedFilePreserveModes[0],
+                            )
+                            for x in allowedFilePreserveModes
+                        ],
+                    )
+                fileCarveHttpServer = InstallerYesOrNo(
+                    'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
-            fileCarveHttpServer = InstallerYesOrNo(
-                'Expose web interface for downloading preserved files?', default=False
-            )
-            if fileCarveHttpServer:
-                fileCarveHttpServeEncryptKey = InstallerAskForString(
-                    'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
-                )
-            if fileCarveMode is not None:
-                if InstallerYesOrNo('Scan extracted files with ClamAV?', default=True):
-                    clamAvScan = True
-                if InstallerYesOrNo('Scan extracted files with Yara?', default=True):
-                    yaraScan = True
-                if InstallerYesOrNo('Scan extracted PE files with Capa?', default=True):
-                    capaScan = True
-                if InstallerYesOrNo('Lookup extracted file hashes with VirusTotal?', default=False):
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid VirusTotal API key')
-                    while (len(vtotApiKey) <= 1) and loopBreaker.increment():
-                        vtotApiKey = InstallerAskForString('Enter VirusTotal API key')
-                fileScanRuleUpdate = InstallerYesOrNo(
-                    'Download updated file scanner signatures periodically?', default=False
-                )
+                if fileCarveHttpServer:
+                    fileCarveHttpServeEncryptKey = InstallerAskForString(
+                        'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
+                        default=args.fileCarveHttpServeEncryptKey,
+                    )
+                if fileCarveMode is not None:
+                    if InstallerYesOrNo('Scan extracted files with ClamAV?', default=args.clamAvScan):
+                        clamAvScan = True
+                    if InstallerYesOrNo('Scan extracted files with Yara?', default=args.yaraScan):
+                        yaraScan = True
+                    if InstallerYesOrNo('Scan extracted PE files with Capa?', default=args.capaScan):
+                        capaScan = True
+                    if InstallerYesOrNo(
+                        'Lookup extracted file hashes with VirusTotal?', default=(len(args.vtotApiKey) > 1)
+                    ):
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid VirusTotal API key')
+                        while (len(vtotApiKey) <= 1) and loopBreaker.increment():
+                            vtotApiKey = InstallerAskForString('Enter VirusTotal API key', default=args.vtotApiKey)
+                    fileScanRuleUpdate = InstallerYesOrNo(
+                        'Download updated file scanner signatures periodically?', default=args.fileScanRuleUpdate
+                    )
 
         if fileCarveMode not in allowedFileCarveModes:
             fileCarveMode = allowedFileCarveModes[0]
@@ -1033,30 +1051,29 @@ class Installer(object):
         # NetBox
         netboxEnabled = InstallerYesOrNo(
             'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
-            default=False,
+            default=args.netboxEnabled,
         )
         netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
             'Should Malcolm enrich network traffic using NetBox?',
-            default=netboxEnabled,
+            default=args.netboxLogstashEnrich,
         )
         netboxLogstashAutoPopulate = (
             netboxEnabled
             and InstallerYesOrNo(
                 'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
-                default=False,
+                default=args.netboxLogstashAutoPopulate,
             )
             and (
-                args.acceptDefaultsNonInteractive
-                or InstallerYesOrNo(
+                InstallerYesOrNo(
                     "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                    default=False,
+                    default=args.netboxLogstashAutoPopulate,
                 )
             )
         )
         netboxSiteName = (
             InstallerAskForString(
                 'Specify default NetBox site name',
-                default='',
+                default=args.netboxSiteName,
             )
             if netboxEnabled
             else ''
@@ -1072,7 +1089,9 @@ class Installer(object):
         pcapIface = 'lo'
         tweakIface = False
         pcapFilter = ''
-        captureSelection = 'unset'
+        captureSelection = (
+            'c' if (args.pcapNetSniff or args.pcapTcpDump or args.liveZeek or args.liveSuricata) else 'unset'
+        )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             captureOptions = ('no', 'yes', 'customize')
@@ -1088,31 +1107,39 @@ class Installer(object):
                 liveZeek = True
             elif captureSelection == 'c':
                 if InstallerYesOrNo(
-                    'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?', default=False
+                    'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
+                    default=args.pcapNetSniff or args.pcapTcpDump,
                 ):
-                    pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=True)
+                    pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
                     if not pcapNetSniff:
-                        pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=True)
+                        pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
                 liveSuricata = InstallerYesOrNo(
-                    'Should Malcolm analyze live network traffic with Suricata?', default=False
+                    'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
                 )
-                liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=False)
+                liveZeek = InstallerYesOrNo(
+                    'Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek
+                )
                 if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
                     pcapFilter = InstallerAskForString(
                         'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
-                        default='',
+                        default=args.pcapFilter,
                     )
                     tweakIface = InstallerYesOrNo(
-                        'Disable capture interface hardware offloading and adjust ring buffer sizes?', default=False
+                        'Disable capture interface hardware offloading and adjust ring buffer sizes?',
+                        default=args.tweakIface,
                     )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
             while (len(pcapIface) <= 0) and loopBreaker.increment():
-                pcapIface = InstallerAskForString('Specify capture interface(s) (comma-separated)')
+                pcapIface = InstallerAskForString(
+                    'Specify capture interface(s) (comma-separated)', default=args.pcapIface
+                )
 
-        dashboardsDarkMode = InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=True)
+        dashboardsDarkMode = InstallerYesOrNo(
+            'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
+        )
 
         # modify values in .env files in args.configDir
 
@@ -2838,6 +2865,18 @@ def main():
         help='Malcolm docker images .tar.gz file for installation',
     )
 
+    authencOptionsArgGroup = parser.add_argument_group('Runtime options')
+    authencOptionsArgGroup.add_argument(
+        '--dark-mode',
+        dest='dashboardsDarkMode',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Enable dark mode for OpenSearch Dashboards",
+    )
+
     authencOptionsArgGroup = parser.add_argument_group('Entryption and authentication options')
     authencOptionsArgGroup.add_argument(
         '--https',
@@ -3090,16 +3129,6 @@ def main():
 
     storageArgGroup = parser.add_argument_group('Storage options')
     storageArgGroup.add_argument(
-        '--default-storage-paths',
-        dest='storageDefaultPaths',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=True,
-        help="Store PCAP, log and index files locally under Malcolm installation path",
-    )
-    storageArgGroup.add_argument(
         '--pcap-path',
         dest='pcapDir',
         required=False,
@@ -3243,7 +3272,7 @@ def main():
         required=False,
         metavar='<none|known|mapped|all|interesting>',
         type=str,
-        default=None,
+        default='none',
         help='Zeek file extraction behavior',
     )
     fileCarveArgGroup.add_argument(
@@ -3252,7 +3281,7 @@ def main():
         required=False,
         metavar='<none|quarantined|all>',
         type=str,
-        default=None,
+        default='none',
         help='Zeek file preservation behavior',
     )
     fileCarveArgGroup.add_argument(
@@ -3305,13 +3334,13 @@ def main():
         help='Scan extracted files with Capa',
     )
     fileCarveArgGroup.add_argument(
-        '--extracted-file-virustotal',
+        '--virustotal-api-key',
         dest='vtotApiKey',
         required=False,
         metavar='<string>',
         type=str,
-        default=None,
-        help='VirusTotal API key',
+        default='',
+        help='VirusTotal API key to scan extracted files with VirusTotal',
     )
     fileCarveArgGroup.add_argument(
         '--file-scan-rule-update',
@@ -3363,6 +3392,76 @@ def main():
         type=str,
         default='',
         help='Default NetBox site name',
+    )
+
+    captureArgGroup = parser.add_argument_group('Live traffic capture options')
+    captureArgGroup.add_argument(
+        '--live-capture-iface',
+        dest='pcapIface',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Capture interface(s) (comma-separated)',
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-filter',
+        dest='pcapFilter',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-iface-tweak',
+        dest='tweakIface',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Disable capture interface hardware offloading and adjust ring buffer sizes",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-arkime',
+        dest='pcapNetSniff',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Capture live network traffic with netsniff-ng for Arkime",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-arkime-tcpdump',
+        dest='pcapTcpDump',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Capture live network traffic with tcpdump for Arkime",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-zeek',
+        dest='liveZeek',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Capture live network traffic with Zeek",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-suricata',
+        dest='liveSuricata',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Capture live network traffic with Suricata",
     )
 
     try:
