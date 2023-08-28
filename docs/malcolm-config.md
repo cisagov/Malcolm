@@ -12,7 +12,7 @@ Although the configuration script automates many of the following configuration 
     - `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
     - `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
     - `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
-* **`auth-common.env`** - [authentication](#MalcolmAuthSetup)-related settings
+* **`auth-common.env`** - [authentication](authsetup.md)-related settings
     - `NGINX_BASIC_AUTH` - if set to `true`, use [TLS-encrypted HTTP basic](authsetup.md#AuthBasicAccountManagement) authentication (default); if set to `false`, use [Lightweight Directory Access Protocol (LDAP)](authsetup.md#AuthLDAP) authentication
 * **`auth.env`** - stores the Malcolm administrator's username and password hash for its nginx reverse proxy
 * **`beats-common.env`** - settings for interactions between [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat)
@@ -114,3 +114,5 @@ options:
 ```
 
 Note that the value for **any** argument not specified on the command line will be reset to its default (as if for a new Malcolm installation) regardless of the setting's current value in the corresponding `.env` file. In other words, users who want to use the `--defaults` option should carefully review all available command-line options and choose all that apply.
+
+Similarly, [authentication](authsetup.md#AuthSetup)-related settings can also be set noninteractively by using the [command-line arguments](authsetup.md#CommandLineConfig) for `./scripts/auth_setup`.

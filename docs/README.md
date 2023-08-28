@@ -31,6 +31,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP)
             * [LDAP connection security](authsetup.md#AuthLDAPSecurity)
         + [TLS certificates](authsetup.md#TLSCerts)
+        + [Command-line arguments](authsetup.md#CommandLineConfig)
     - [Platform-specific Configuration](host-config.md#HostSystemConfig)
         + [Linux host system configuration](host-config-linux.md#HostSystemConfigLinux)
         + [macOS host system configuration](host-config-macos.md#HostSystemConfigMac)
