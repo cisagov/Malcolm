@@ -64,50 +64,48 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
                     + --tcp-services-configmap=ingress-nginx/tcp-services
         …
         ```
-
     - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
         ```
         apiVersion: v1
-        kind: Service
-        metadata:
-        …
-          name: ingress-nginx-controller
-          namespace: ingress-nginx
-        spec:
-          externalTrafficPolicy: Local
-          ipFamilies:
-            - IPv4
-          ipFamilyPolicy: SingleStack
-          ports:
-            - appProtocol: http
-              name: http
-              port: 80
-              protocol: TCP
-              targetPort: http
-            - appProtocol: https
-              name: https
-              port: 443
-              protocol: TCP
-              targetPort: https
-            - appProtocol: tcp
-              name: lumberjack
-              port: 5044
-              targetPort: 5044
-              protocol: TCP
-            - appProtocol: tcp
-              name: tcpjson
-              port: 5045
-              targetPort: 5045
-              protocol: TCP
-        - appProtocol: tcp
-              name: opensearch
-              port: 9200
-              targetPort: 9200
-              protocol: TCP
-        …
-          type: LoadBalancer
+                kind: Service
+                metadata:
+                …
+                  name: ingress-nginx-controller
+                  namespace: ingress-nginx
+                spec:
+                  externalTrafficPolicy: Local
+                  ipFamilies:
+                    - IPv4
+                  ipFamilyPolicy: SingleStack
+                  ports:
+                    - appProtocol: http
+                      name: http
+                      port: 80
+                      protocol: TCP
+                      targetPort: http
+                    - appProtocol: https
+                      name: https
+                      port: 443
+                      protocol: TCP
+                      targetPort: https
+                    - appProtocol: tcp
+                      name: lumberjack
+                      port: 5044
+                      targetPort: 5044
+                      protocol: TCP
+                    - appProtocol: tcp
+                      name: tcpjson
+                      port: 5045
+                      targetPort: 5045
+                      protocol: TCP
+                - appProtocol: tcp
+                      name: opensearch
+                      port: 9200
+                      targetPort: 9200
+                      protocol: TCP
+                …
+                  type: LoadBalancer
         ```
-
     - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
         ```
         apiVersion: apps/v1
