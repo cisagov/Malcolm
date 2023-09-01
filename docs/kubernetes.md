@@ -9,7 +9,7 @@
     - [OpenSearch Instances](#OpenSearchInstances)
     - [PersistentVolumeClaim Definitions](#PVC)
 * [Running Malcolm](#Running)
-* [Deployment Example](#Example)n
+* [Deployment Example](#Example)
 * [Future Enhancements](#Future)
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
