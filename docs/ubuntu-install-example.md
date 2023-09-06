@@ -138,7 +138,7 @@ Download updated Suricata signatures periodically? (y/N): y
 
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
-Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek? (y/N): n
+Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y/N): n
 
 Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
 

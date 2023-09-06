@@ -885,10 +885,21 @@ class Installer(object):
             'Download updated Suricata signatures periodically?', default=args.suricataRuleUpdate
         )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=args.autoZeek)
-        zeekICSBestGuess = autoZeek and InstallerYesOrNo(
-            'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
-            default=args.zeekICSBestGuess,
+
+        zeekIcs = InstallerYesOrNo(
+            'Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?',
+            default=args.zeekIcs,
         )
+
+        zeekICSBestGuess = (
+            autoZeek
+            and zeekIcs
+            and InstallerYesOrNo(
+                'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
+                default=args.zeekICSBestGuess,
+            )
+        )
+
         reverseDns = InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?',
             default=args.reverseDns,
@@ -1486,6 +1497,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_UPDATE_RULES',
                 TrueOrFalseNoQuote(fileScanRuleUpdate),
+            ),
+            # disable/enable ICS analyzers
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'ZEEK_DISABLE_ICS_ALL',
+                '' if zeekIcs else TrueOrFalseNoQuote(not zeekIcs),
             ),
             # disable/enable ICS best guess
             EnvValue(
@@ -3223,6 +3240,16 @@ def main():
         const=True,
         default=True,
         help="Automatically analyze all PCAP files with Zeek",
+    )
+    analysisArgGroup.add_argument(
+        '--zeek-ics',
+        dest='zeekIcs',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Malcolm is being used to monitor an Industrial Control Systems (ICS) or Operational Technology (OT) network",
     )
     analysisArgGroup.add_argument(
         '--zeek-ics-best-guess',

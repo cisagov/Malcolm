@@ -23,6 +23,19 @@ global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == "") 
 global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == "") ? F : T;
 global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == "") ? F : T;
 
+global disable_ics_all = (getenv("ZEEK_DISABLE_ICS_ALL") == "") ? F : T;
+global disable_ics_bacnet = (getenv("ZEEK_DISABLE_ICS_BACNET") == "") ? F : T;
+global disable_ics_bsap = (getenv("ZEEK_DISABLE_ICS_BSAP") == "") ? F : T;
+global disable_ics_dnp3 = (getenv("ZEEK_DISABLE_ICS_DNP3") == "") ? F : T;
+global disable_ics_enip = (getenv("ZEEK_DISABLE_ICS_ENIP") == "") ? F : T;
+global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == "") ? F : T;
+global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == "") ? F : T;
+global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == "") ? F : T;
+global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == "") ? F : T;
+global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == "") ? F : T;
+global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == "") ? F : T;
+global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == "") ? F : T;
+
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
 
@@ -67,13 +80,53 @@ redef ignore_checksums = T;
 @load ./login.zeek
 
 @if (!disable_best_guess_ics)
-  @load ./guess.zeek
+ @load ./guess.zeek
 @endif
 
 @load packages
 @load /opt/sensor/sensor_ctl/zeek/intel
 
 event zeek_init() &priority=-5 {
+
+  if (disable_ics_all || disable_ics_genisys) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GENISYS_TCP);
+  }
+  if (disable_ics_all || disable_ics_synchrophasor) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP);
+  }
+  if (disable_ics_all || disable_ics_bacnet) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BACNET);
+  }
+  if (disable_ics_all || disable_ics_bacnet) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BACNET);
+  }
+  if (disable_ics_all || disable_ics_bsap) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BSAP);
+  }
+  if (disable_ics_all || disable_ics_dnp3) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_DNP3_TCP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_DNP3_UDP);
+  }
+  if (disable_ics_all || disable_ics_enip) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ENIP_TCP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ENIP_UDP);
+  }
+  if (disable_ics_all || disable_ics_ethercat) {
+    PacketAnalyzer::__disable_analyzer(PacketAnalyzer::ANALYZER_ETHERCAT);
+  }
+  if (disable_ics_all || disable_ics_opcua_binary) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
+  }
+  if (disable_ics_all || disable_ics_modbus) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_MODBUS);
+  }
+  if (disable_ics_all || disable_ics_profinet) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_PROFINET);
+  }
+  if (disable_ics_all || disable_ics_s7comm) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
+  }
   if (disable_spicy_dhcp) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
   }
@@ -118,7 +171,7 @@ event zeek_init() &priority=-5 {
   }
 
   # register additional ports for Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_...
-  if (synchrophasor_ports_str != "") {
+  if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
     local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
     if (|synchrophasor_ports| > 0) {
       local synch_ports_tcp: set[port] = {};
@@ -153,7 +206,7 @@ event zeek_init() &priority=-5 {
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
-@if (synchrophasor_detailed)
+@if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_detailed))
   redef SYNCHROPHASOR::log_data_frame = T;
   redef SYNCHROPHASOR::log_data_detail = T;
   redef SYNCHROPHASOR::log_cfg_detail = T;

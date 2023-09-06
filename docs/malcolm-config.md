@@ -85,6 +85,7 @@ Although the configuration script automates many of the following configuration 
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)
     - `ZEEK_DISABLE_…` - if set to any non-blank value, each of these variables can be used to disable a certain Zeek function when it analyzes PCAP files (for example, setting `ZEEK_DISABLE_LOG_PASSWORDS` to `true` to disable logging of cleartext passwords)
+    - `ZEEK_DISABLE_ICS_ALL` and `ZEEK_DISABLE_ICS_…` - if set to any non-blank value, these variables can be used to disable Zeek's protocol analyzers for Operational Technology/Industrial Control Systems (OT/ICS) protocols
     - `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess)
     - `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction) for more details
     - `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](zeek-intel.md#ZeekIntelSTIX) or [MISP](zeek-intel.md#ZeekIntelMISP) feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2021`) or relative interval (`30 days ago`)

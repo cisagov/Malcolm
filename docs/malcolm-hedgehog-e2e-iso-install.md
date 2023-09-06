@@ -183,6 +183,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - If the Malcolm instance has Internet connectivity, answer **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
 * **Automatically analyze all PCAP files with Zeek?**
     - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+* **Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?**
+    - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable Malcolm's ICS protocol analyzers for Zeek.
 * **Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?**
     - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
 * **Perform reverse DNS lookup locally for source and destination IP addresses in logs?**
