@@ -11,6 +11,7 @@ global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == ""
 global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? F : T;
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? F : T;
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
+global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -167,7 +168,7 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_WIREGUARD);
   }
 
-  # register additional ports for Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_...
+  # register additional ports for Analyzers
   if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_ports_str != "")) {
     local synchrophasor_ports = split_string(synchrophasor_ports_str, /,/);
     if (|synchrophasor_ports| > 0) {
@@ -187,6 +188,22 @@ event zeek_init() &priority=-5 {
       }
       if (|synch_ports_udp| > 0) {
         Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP, synch_ports_udp);
+      }
+    }
+  }
+  if ((!disable_ics_all) && (!disable_ics_genisys) && (genisys_ports_str != "")) {
+    local genisys_ports = split_string(genisys_ports_str, /,/);
+    if (|genisys_ports| > 0) {
+      local gen_ports_tcp: set[port] = {};
+      for (gen_port_idx in genisys_ports) {
+        local gen_port = to_port(genisys_ports[gen_port_idx]);
+        local gen_prot = get_port_transport_proto(gen_port);
+        if (gen_prot == tcp) {
+          add gen_ports_tcp[gen_port];
+        }
+      }
+      if (|gen_ports_tcp| > 0) {
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_GENISYS_TCP, gen_ports_tcp);
       }
     }
   }
