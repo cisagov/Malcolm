@@ -88,21 +88,11 @@ redef ignore_checksums = T;
 
 event zeek_init() &priority=-5 {
 
-  if (disable_ics_all || disable_ics_genisys) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GENISYS_TCP);
-  }
-  if (disable_ics_all || disable_ics_synchrophasor) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP);
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP);
-  }
   if (disable_ics_all || disable_ics_bacnet) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BACNET);
-  }
-  if (disable_ics_all || disable_ics_bacnet) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BACNET);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_BACNET);
   }
   if (disable_ics_all || disable_ics_bsap) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_BSAP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_BSAP);
   }
   if (disable_ics_all || disable_ics_dnp3) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_DNP3_TCP);
@@ -115,6 +105,9 @@ event zeek_init() &priority=-5 {
   if (disable_ics_all || disable_ics_ethercat) {
     PacketAnalyzer::__disable_analyzer(PacketAnalyzer::ANALYZER_ETHERCAT);
   }
+  if (disable_ics_all || disable_ics_genisys) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GENISYS_TCP);
+  }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
   }
@@ -126,6 +119,10 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
+  }
+  if (disable_ics_all || disable_ics_synchrophasor) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP);
   }
   if (disable_spicy_dhcp) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
