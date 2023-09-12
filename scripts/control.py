@@ -1851,7 +1851,7 @@ def main():
         dest='composeFile',
         metavar='<string>',
         type=str,
-        default=os.path.join(MalcolmPath, 'docker-compose.yml'),
+        default=os.getenv('MALCOLM_COMPOSE_FILE', os.path.join(MalcolmPath, 'docker-compose.yml')),
         help='docker-compose or kubeconfig YML file',
     )
     parser.add_argument(
@@ -1861,7 +1861,7 @@ def main():
         dest='configDir',
         metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_CONFIG_DIR', None),
         help="Directory containing Malcolm's .env files",
     )
 
