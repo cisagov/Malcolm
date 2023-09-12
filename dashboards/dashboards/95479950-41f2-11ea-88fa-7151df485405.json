@@ -130,7 +130,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"rule.category:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"(rule.category:*) AND (NOT rule.category:Generic Protocol Command Decode)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
@@ -153,8 +153,8 @@
       "updated_at": "2022-05-11T16:08:47.608Z",
       "version": "WzUwOCwxXQ==",
       "attributes": {
-        "title": "Notice, Alert, Signature and Weird - Summary",
-        "visState": "{\"title\":\"Notice, Alert, Signature and Weird - Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Provider\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dataset\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Category\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "title": "Notice, Alert and Signature - Summary",
+        "visState": "{\"title\":\"Notice, Alert, and Signature - Summary\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Provider\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dataset\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Category\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":200,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}}}}",
         "description": "",
         "version": 1,
@@ -448,7 +448,7 @@
       "updated_at": "2022-05-11T16:08:47.608Z",
       "version": "WzUxNywxXQ==",
       "attributes": {
-        "title": "Notice, Alert, Signature and Weird - Logs",
+        "title": "Notice, Alert, and Signature - Logs",
         "description": "",
         "hits": 0,
         "columns": [
@@ -466,7 +466,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(event.provider:zeek AND event.dataset:(notice OR signatures OR weird)) OR (event.provider:suricata AND event.dataset:alert)\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(event.provider:zeek AND event.dataset:(notice OR signatures)) OR (event.provider:suricata AND event.dataset:alert AND (NOT rule.category:Generic Protocol Command Decode))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
