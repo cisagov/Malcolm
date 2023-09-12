@@ -1209,9 +1209,17 @@ def authSetup():
 
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
                 while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
-                    password = AskForPassword(f"{username} password: ", defaultBehavior=defaultBehavior)
-                    passwordConfirm = AskForPassword(f"{username} password (again): ", defaultBehavior=defaultBehavior)
-                    if password == passwordConfirm:
+                    password = AskForPassword(
+                        f"{username} password: ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    passwordConfirm = AskForPassword(
+                        f"{username} password (again): ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if password and (password == passwordConfirm):
                         break
                     eprint("Passwords do not match")
 
@@ -1616,7 +1624,11 @@ def authSetup():
 
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch password')
                         while loopBreaker.increment():
-                            esPassword = AskForPassword(f"{esUsername} password: ", defaultBehavior=defaultBehavior)
+                            esPassword = AskForPassword(
+                                f"{esUsername} password: ",
+                                default='',
+                                defaultBehavior=defaultBehavior,
+                            )
                             if (
                                 (len(esPassword) == 0)
                                 and (prevCurlContents['password'] is not None)
@@ -1631,6 +1643,7 @@ def authSetup():
                             else:
                                 esPasswordConfirm = AskForPassword(
                                     f"{esUsername} password (again): ",
+                                    default='',
                                     defaultBehavior=defaultBehavior,
                                 )
                             if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
@@ -1671,11 +1684,17 @@ def authSetup():
 
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account password')
                 while loopBreaker.increment():
-                    emailPassword = AskForPassword(f"{emailUsername} password: ", defaultBehavior=defaultBehavior)
-                    emailPasswordConfirm = AskForPassword(
-                        f"{emailUsername} password (again): ", defaultBehavior=defaultBehavior
+                    emailPassword = AskForPassword(
+                        f"{emailUsername} password: ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
                     )
-                    if emailPassword == emailPasswordConfirm:
+                    emailPasswordConfirm = AskForPassword(
+                        f"{emailUsername} password (again): ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if emailPassword and (emailPassword == emailPasswordConfirm):
                         break
                     eprint("Passwords do not match")
 

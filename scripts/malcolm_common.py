@@ -278,10 +278,18 @@ def AskForString(
 # get interactive password (without echoing)
 def AskForPassword(
     prompt,
+    default=None,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
-    if (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+    if (default is not None) and (
+        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
+    ):
+        reply = default
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.passwordbox(prompt, insecure=True)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise RuntimeError("Operation cancelled")
