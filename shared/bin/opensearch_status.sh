@@ -14,7 +14,8 @@ ENCODING="utf-8"
 # opensearch connection parameters are read from environment variables
 
 WAIT_FOR_LOG_DATA=0
-while getopts 'vw' OPTION; do
+WAIT_FOR_TEMPLATE=
+while getopts 'vwt:' OPTION; do
   case "$OPTION" in
     v)
       set -x
@@ -24,8 +25,12 @@ while getopts 'vw' OPTION; do
       WAIT_FOR_LOG_DATA=1
       ;;
 
+    t)
+      WAIT_FOR_TEMPLATE=${OPTARG}
+      ;;
+
     ?)
-      echo "script usage: $(basename $0) [-v] [-w]" >&2
+      echo "script usage: $(basename $0) [-v] [-w] [-t <template name>]" >&2
       exit 1
       ;;
   esac
@@ -46,7 +51,7 @@ else
 fi
 
 # wait for the ES HTTP server to respond at all
-until $(curl "${CURL_CONFIG_PARAMS[@]}" --output /dev/null --silent --head --fail "$OPENSEARCH_URL"); do
+until curl "${CURL_CONFIG_PARAMS[@]}" --output /dev/null --silent --head --fail "$OPENSEARCH_URL" >/dev/null 2>&1; do
   # printf '.' >&2
   sleep 1
 done
@@ -64,6 +69,16 @@ until [[ "$(curl "${CURL_CONFIG_PARAMS[@]}" -fsSL "$OPENSEARCH_URL/_cat/health?h
 done
 
 echo "OpenSearch is up and healthy at "$OPENSEARCH_URL"" >&2
+
+if [[ -n "$WAIT_FOR_TEMPLATE" ]]; then
+  sleep 1
+  echo "Waiting until OpenSearch has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
+  until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_index_template/$WAIT_FOR_TEMPLATE" 2>/dev/null | grep -q index_templates ); do
+    sleep 5
+  done
+  echo "OpenSearch index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
+  sleep 5
+fi
 
 if (( $WAIT_FOR_LOG_DATA == 1 )); then
   sleep 1
