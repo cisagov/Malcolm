@@ -28,7 +28,6 @@ cryptsetup
 cryptsetup-bin
 cryptsetup-initramfs
 cryptsetup-run
-curl
 debsums
 dialog
 dmidecode
@@ -55,11 +54,11 @@ ghostscript-x
 gnupg
 gnupg1
 gnupg2
+google-perftools
 gpart
 gparted
 grep
 gvfs
-gvfs-backends
 gvfs-daemons
 gvfs-fuse
 gzip
@@ -74,10 +73,15 @@ jq
 less
 libatomic1
 libffi8
+libfl2
+libgoogle-perftools4
 libgtk2.0-bin
+libjansson4
 libjson-perl
 libkrb5-3
 liblsan0
+libmagic1
+libmaxminddb0
 libmhash2
 libnl-3-200
 libnl-genl-3-200
@@ -87,6 +91,9 @@ libpcre2-16-0
 libpcre2-32-0
 libpcre2-8-0
 libpcre3
+libsodium23
+libssl3
+libtcmalloc-minimal4
 libtool
 libtsan0
 libubsan1

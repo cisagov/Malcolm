@@ -40,7 +40,7 @@ RUN apt-get -q update && \
       python3-pip \
       rsync \
       tini && \
-    pip3 install --break-system-packages supervisor six && \
+    pip3 install --break-system-packages --no-compile --no-cache-dir supervisor six && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \

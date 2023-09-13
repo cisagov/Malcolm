@@ -20,6 +20,8 @@ ENV PUSER_PRIV_DROP true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ARG ZEEK_EXTRACTOR_PATH=/zeek/extract_files
 ARG ZEEK_LOG_DIRECTORY=/zeek/logs
@@ -135,7 +137,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       python3-requests \
       python3-zmq \
       rsync && \
-    python3 -m pip install --break-system-packages --no-cache-dir clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

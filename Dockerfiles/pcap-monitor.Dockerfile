@@ -23,6 +23,8 @@ ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL=true
@@ -61,7 +63,7 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip install --break-system-packages --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

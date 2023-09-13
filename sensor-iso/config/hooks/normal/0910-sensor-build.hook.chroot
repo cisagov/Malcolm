@@ -13,6 +13,7 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
+ZEEK_VERSION=6.0.1
 ZEEK_DIR="/opt/zeek"
 export PATH="${ZEEK_DIR}"/bin:$PATH
 
@@ -27,10 +28,20 @@ YARA_RULES_DIR="/opt/yara-rules"
 
 mkdir -p /opt/hedgehog_install_artifacts/
 
-# Download and install spicy and 3rd-party zeek plugins
-mkdir -p "${CCACHE_DIR}"
+# download and install Zeek
+mkdir -p /usr/share/src/zeek "${CCACHE_DIR}"
+cd /usr/share/src
+curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C ./zeek --strip-components 1
+cd /usr/share/src/zeek
+./configure --prefix="${ZEEK_DIR}" --ccache --enable-perftools
+make
+# make install
+checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="https://download.zeek.org" make install
+cp *.deb /opt/hedgehog_install_artifacts/
+cd /tmp
+rm -rf /usr/share/src/zeek
 
-# zeek plugins
+# Download and install spicy and 3rd-party zeek plugins
 cd /tmp
 zkg autoconfig --force
 bash /usr/local/bin/zeek_install_plugins.sh

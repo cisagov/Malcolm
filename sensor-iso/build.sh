@@ -5,10 +5,6 @@ IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-ZEEK_DISTRO=Debian_12
-ZEEK_VER=5.2.2-0
-ZEEK_LTS=
-
 BEATS_VER="8.10.0"
 BEATS_OSS="-oss"
 
@@ -148,19 +144,7 @@ if [ -d "$WORKDIR" ]; then
   # download deb files to be installed during installation
   pushd ./config/packages.chroot/ >/dev/null 2>&1
 
-  # zeek
-  if [ -n "${ZEEK_LTS}" ]; then ZEEK_LTS="-lts"; fi && export ZEEK_LTS
-  curl -sSL --remote-name-all \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/libbroker${ZEEK_LTS}-dev_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core-dev_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-core_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}-spicy-dev_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeek${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/amd64/zeekctl${ZEEK_LTS}_${ZEEK_VER}_amd64.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-client_${ZEEK_VER}_all.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-zkg_${ZEEK_VER}_all.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest_${ZEEK_VER}_all.deb" \
-    "https://download.zeek.org/binary-packages/${ZEEK_DISTRO}/all/zeek${ZEEK_LTS}-btest-data_${ZEEK_VER}_all.deb"
+  # none for now
 
   popd >/dev/null 2>&1
 
