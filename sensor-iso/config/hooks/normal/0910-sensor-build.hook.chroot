@@ -26,8 +26,6 @@ CROC_RELEASE_URL="https://api.github.com/repos/schollz/croc/releases/latest"
 YARA_RULES_SRC_DIR="/opt/yara-rules-src"
 YARA_RULES_DIR="/opt/yara-rules"
 
-mkdir -p /opt/hedgehog_install_artifacts/
-
 # download and install Zeek
 mkdir -p /usr/share/src/zeek "${CCACHE_DIR}"
 cd /usr/share/src
@@ -37,7 +35,6 @@ cd /usr/share/src/zeek
 make
 # make install
 checkinstall -y -D --strip=yes --stripso=yes --install=yes --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VER" --pkgarch="amd64" --pkgsource="https://download.zeek.org" make install
-cp *.deb /opt/hedgehog_install_artifacts/
 cd /tmp
 rm -rf /usr/share/src/zeek
 
@@ -72,7 +69,6 @@ touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
 # cleanup
 cd /usr/local/src
 tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
@@ -167,7 +163,6 @@ EOF
 
 cd "${SURICATA_RULES_DIR}"/..
 tar czf suricata-rules-hedgehog.tar.gz "$(basename "${SURICATA_RULES_DIR}")"
-mv ./suricata-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # update yara rules
@@ -177,11 +172,9 @@ mkdir -p "${YARA_RULES_DIR}"/custom "${YARA_RULES_SRC_DIR}"
 
 cd "${YARA_RULES_DIR}"/..
 tar czf yara-rules-hedgehog.tar.gz "$(basename "${YARA_RULES_DIR}")"
-mv ./yara-rules-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 
 cd "${YARA_RULES_SRC_DIR}"/..
 tar czf yara-rules-src-hedgehog.tar.gz "$(basename "${YARA_RULES_SRC_DIR}")"
-mv ./yara-rules-src-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # capa
@@ -191,8 +184,6 @@ unzip ./capa.zip
 mv ./capa /usr/local/bin/capa
 chmod 755 /usr/local/bin/capa
 rm -rf /tmp/capa*
-
-cp /usr/local/bin/capa /opt/hedgehog_install_artifacts/
 ###
 
 # yq

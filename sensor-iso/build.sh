@@ -177,10 +177,6 @@ if [ -d "$WORKDIR" ]; then
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
 
-  # save these extra debs off into hedgehog_install_artifacts
-  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
-  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
   cp -v ./config/includes.chroot/usr/local/bin/preseed_partman_determine_disk.sh ./config/includes.installer/
