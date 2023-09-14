@@ -651,7 +651,7 @@
         "columns": [
           "source.ip",
           "zeek.known_modbus.device_type",
-          "event.id"
+          "network.direction"
         ],
         "sort": [
           [
