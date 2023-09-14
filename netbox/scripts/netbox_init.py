@@ -587,7 +587,7 @@ def main():
             logging.debug(f"interfaces (after): { {k:v.id for k, v in interfaces.items()} }")
 
             # and associate IP addresses with them
-            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id}": x for x in nb.ipam.ip_addresses.all()}
+            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id if x.vrf else ''}": x for x in nb.ipam.ip_addresses.all()}
             logging.debug(f"IP addresses (before): { {k:v.id for k, v in ipAddressesPreExisting.items()} }")
 
             for host in [
