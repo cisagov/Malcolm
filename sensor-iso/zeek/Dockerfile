@@ -18,7 +18,6 @@ RUN apt-get -q update && \
         flex \
         g++ \
         gcc \
-        git \
         libfl-dev \
         libgoogle-perftools4 \
         libgoogle-perftools-dev \

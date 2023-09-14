@@ -10,14 +10,16 @@ export PYTHONUNBUFFERED=1
 ZEEK_URL=https://github.com/zeek/zeek.git
 ZEEK_VERSION=6.0.1
 ZEEK_DIR=/opt/zeek
+BUILD_JOBS=0
 OUTPUT_DIR=/tmp
 unset VERBOSE
 
-while getopts b:p:o:v opts; do
+while getopts b:p:o:j:v opts; do
    case ${opts} in
       b) ZEEK_VERSION=${OPTARG} ;;
       p) ZEEK_DIR=${OPTARG} ;;
       o) OUTPUT_DIR=${OPTARG} ;;
+      j) BUILD_JOBS=${OPTARG} ;;
       v) VERBOSE=1 ;;
    esac
 done
@@ -27,19 +29,14 @@ if [[ -n $VERBOSE ]]; then
   set -x
 fi
 
-git clone \
-    --recurse-submodules \
-    --shallow-submodules \
-    --depth=1 \
-    --single-branch \
-    --branch="v${ZEEK_VERSION}" \
-    https://github.com/zeek/zeek \
-    /tmp/"zeek-v${ZEEK_VERSION}"
+cd /tmp
+mkdir ./"zeek-v${ZEEK_VERSION}"
+curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C ./"zeek-v${ZEEK_VERSION}" --strip-components 1
 
 mkdir -p "${CCACHE_DIR}"
 pushd /tmp/"zeek-v${ZEEK_VERSION}" >/dev/null 2>&1
 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
-ninja -C build
+ninja -C build -j "${BUILD_JOBS}"
 pushd build >/dev/null 2>&1
 cpack -G DEB
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/

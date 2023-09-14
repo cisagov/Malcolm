@@ -150,6 +150,27 @@ if [ -d "$WORKDIR" ]; then
   bash "$SCRIPT_PATH/yara/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/yara:/build yara-build:latest -o /build
   mv "$SCRIPT_PATH/yara"/*.deb ./config/packages.chroot/
+  docker rmi -f yara-build:latest
+
+  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
+  rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
+  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
+  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+  docker rmi -f arkime-build:latest
+
+  # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build
+  mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
+  docker rmi -f zeek-build:latest
+
+  # reclaim some space
+  docker system prune --volumes --force
+
+  # save these extra debs off into hedgehog_install_artifacts
+  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
@@ -168,21 +189,6 @@ if [ -d "$WORKDIR" ]; then
   curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
   curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
   popd >/dev/null 2>&1
-
-  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
-  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
-
-  # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build
-  mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
-
-  # save these extra debs off into hedgehog_install_artifacts
-  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
-  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/

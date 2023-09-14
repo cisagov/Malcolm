@@ -3,15 +3,13 @@ FROM debian:12-slim as build
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-# for download and install
+# for build
 ARG ZEEK_VERSION=6.0.1
 ENV ZEEK_VERSION $ZEEK_VERSION
-
-# put Zeek and Spicy in PATH
-ENV ZEEK_DIR "/opt/zeek"
-ENV PATH "${ZEEK_DIR}/bin:${PATH}"
-
-# for build
+ARG ZEEK_DBG=0
+ENV ZEEK_DBG $ZEEK_DBG
+ARG BUILD_JOBS=4
+ENV BUILD_JOBS $BUILD_JOBS
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -39,6 +37,7 @@ RUN apt-get -q update && \
         libssl-dev \
         libtcmalloc-minimal4 \
         make \
+        ninja-build \
         python3 \
         python3-dev \
         python3-git \
@@ -51,10 +50,11 @@ RUN apt-get -q update && \
         ( curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C ./zeek --strip-components 1 ) && \
         cd /usr/share/src/zeek && \
         [ "$ZEEK_DBG" = "1" ] && \
-            ./configure --prefix=/opt/zeek --ccache --enable-perftools --enable-debug || \
-            ./configure --prefix=/opt/zeek --ccache --enable-perftools && \
-        make && \
-        make install
+            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools --enable-debug || \
+            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools && \
+        ninja -C build -j "${BUILD_JOBS}" && \
+        cd ./build && \
+        cpack -G DEB
 
 FROM debian:12-slim
 
@@ -108,7 +108,7 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
-COPY --from=build $ZEEK_DIR $ZEEK_DIR
+COPY --from=build /usr/share/src/zeek/build/*.deb /tmp/zeekdebs/
 
 # add script for building 3rd-party plugins
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
@@ -173,6 +173,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       vim-tiny \
       xxd \
       zlib1g-dev && \
+    dpkg -i /tmp/zeekdebs/*.deb && \
     python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
