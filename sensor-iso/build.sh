@@ -152,6 +152,24 @@ if [ -d "$WORKDIR" ]; then
   mv "$SCRIPT_PATH/yara"/*.deb ./config/packages.chroot/
   docker rmi -f yara-build:latest
 
+  # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
+  mkdir -p "$SCRIPT_PATH/arkime/etc"
+  pushd "$SCRIPT_PATH/arkime/etc"
+  MAXMIND_GEOIP_DB_LICENSE_KEY=""
+  if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
+    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
+    if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
+      for DB in ASN Country City; do
+        curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
+        tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 --no-same-owner
+        rm -f "GeoLite2-$DB.mmdb.tar.gz"
+      done
+    fi
+  fi
+  curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
+  curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
+  popd >/dev/null 2>&1
+
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
   rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
   bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
@@ -171,24 +189,6 @@ if [ -d "$WORKDIR" ]; then
   # save these extra debs off into hedgehog_install_artifacts
   mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
   cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
-
-  # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
-  mkdir -p "$SCRIPT_PATH/arkime/etc"
-  pushd "$SCRIPT_PATH/arkime/etc"
-  MAXMIND_GEOIP_DB_LICENSE_KEY=""
-  if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
-    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
-    if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
-      for DB in ASN Country City; do
-        curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
-        tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 --no-same-owner
-        rm -f "GeoLite2-$DB.mmdb.tar.gz"
-      done
-    fi
-  fi
-  curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-  curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
-  popd >/dev/null 2>&1
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
