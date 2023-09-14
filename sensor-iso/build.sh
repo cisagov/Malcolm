@@ -161,7 +161,7 @@ if [ -d "$WORKDIR" ]; then
 
   # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
   bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build
+  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build -j "${BUILD_JOBS:-0}"
   mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
   docker rmi -f zeek-build:latest
 
