@@ -143,9 +143,7 @@ if [ -d "$WORKDIR" ]; then
 
   # download deb files to be installed during installation
   pushd ./config/packages.chroot/ >/dev/null 2>&1
-
   # none for now
-
   popd >/dev/null 2>&1
 
   # clone and build yara .deb package in its own clean environment (rather than in hooks/)
@@ -176,6 +174,15 @@ if [ -d "$WORKDIR" ]; then
   bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
   docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
+
+  # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build
+  mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
+
+  # save these extra debs off into hedgehog_install_artifacts
+  mkdir -p ./config/includes.chroot/opt/hedgehog_install_artifacts
+  cp ./config/packages.chroot/*.deb ./config/includes.chroot/opt/hedgehog_install_artifacts/
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
