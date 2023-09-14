@@ -455,7 +455,7 @@ def filter(event)
                       _query = { :offset => 0,
                                  :limit => 1,
                                  :name => _autopopulate_default_role }
-                      if (_roles_response = _nb.get('dcim/roles/', _query).body) &&
+                      if (_roles_response = _nb.get('dcim/device-roles/', _query).body) &&
                          _roles_response.is_a?(Hash) &&
                          (_tmp_roles = _roles_response.fetch(:results, [])) &&
                          (_tmp_roles.length() > 0)
@@ -468,7 +468,7 @@ def filter(event)
                         _role_data = { :name => _autopopulate_default_role,
                                         :slug => _autopopulate_default_role.to_url,
                                         :color => "d3d3d3" }
-                        if (_role_create_response = _nb.post('dcim/roles/', _role_data.to_json, _nb_headers).body) &&
+                        if (_role_create_response = _nb.post('dcim/device-roles/', _role_data.to_json, _nb_headers).body) &&
                            _role_create_response.is_a?(Hash) &&
                            _role_create_response.has_key?(:id)
                         then

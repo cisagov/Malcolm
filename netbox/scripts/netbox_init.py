@@ -392,13 +392,13 @@ def main():
 
     # ###### ROLES #################################################################################################
     try:
-        rolesPreExisting = {x.name: x for x in nb.dcim.roles.all()}
+        rolesPreExisting = {x.name: x for x in nb.dcim.device_roles.all()}
         logging.debug(f"Roles (before): { {k:v.id for k, v in rolesPreExisting.items()} }")
 
         # create roles that don't already exist
         for roleName in [x for x in args.roles if x not in rolesPreExisting]:
             try:
-                nb.dcim.roles.create(
+                nb.dcim.device_roles.create(
                     {
                         "name": roleName,
                         "slug": slugify(roleName),
@@ -409,7 +409,7 @@ def main():
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing role \"{roleName}\": {nbe}")
 
-        roles = {x.name: x for x in nb.dcim.roles.all()}
+        roles = {x.name: x for x in nb.dcim.device_roles.all()}
         logging.debug(f"Roles (after): { {k:v.id for k, v in roles.items()} }")
     except Exception as e:
         logging.error(f"{type(e).__name__} processing roles: {e}")
