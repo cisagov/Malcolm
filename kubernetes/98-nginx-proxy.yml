@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/mmguero-dev/malcolm/nginx-proxy:development
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:23.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -95,7 +95,7 @@ spec:
           subPath: "nginx"
       initContainers:
       - name: nginx-dirinit-container
-        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        image: ghcr.io/idaholab/malcolm/dirinit:23.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true
