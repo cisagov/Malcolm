@@ -13,6 +13,7 @@ RUN apt-get -q update && \
         bison \
         ca-certificates \
         ccache \
+        checkinstall \
         cmake \
         curl \
         flex \

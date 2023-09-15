@@ -36,9 +36,10 @@ curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C
 mkdir -p "${CCACHE_DIR}"
 pushd /tmp/"zeek-v${ZEEK_VERSION}" >/dev/null 2>&1
 ./configure --prefix="${ZEEK_DIR}" --generator=Ninja --ccache --enable-perftools
-ninja -C build -j "${BUILD_JOBS}"
+mkdir -p build
 pushd build >/dev/null 2>&1
-cpack -G DEB
+ninja -j "${BUILD_JOBS}"
+checkinstall -y -D --strip=yes --stripso=yes --install=no --fstrans=no --pkgname="zeek" --pkgversion="$ZEEK_VERSION" --pkgarch="amd64" --pkgsource="$ZEEK_URL" ninja install
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/
 popd >/dev/null 2>&1
 popd >/dev/null 2>&1
