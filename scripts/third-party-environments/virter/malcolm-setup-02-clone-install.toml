@@ -1,0 +1,77 @@
+version = 1
+
+[env]
+MALCOLM_REPO_OWNER = "idaholab"
+MALCOLM_REPO_NAME = "Malcolm"
+MALCOLM_REPO_BRANCH = "main"
+
+[[steps]]
+[steps.shell]
+script = '''
+echo "Setting up Malcolm..."
+
+pushd "$HOME"
+touch "$HOME"/.hushlogin
+mkdir -p "$HOME"/.local/bin "$HOME"/.config/procps "$HOME"/.config/systemd/user
+
+git clone --depth=1 --single-branch --recurse-submodules --shallow-submodules -b "$MALCOLM_REPO_BRANCH" "https://github.com/$MALCOLM_REPO_OWNER/$MALCOLM_REPO_NAME"
+
+rm -f "$HOME"/.bashrc \
+      "$HOME"/.bash_aliases \
+      "$HOME"/.bash_functions \
+      "$HOME"/.config/procps/toprc \
+      "$HOME"/.selected_editor \
+      "$HOME"/.tmux.conf \
+      "$HOME"/.vimrc
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_aliases "$HOME"/.bash_aliases
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/bash.bash_functions "$HOME"/.bash_functions
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.bashrc "$HOME"/.bashrc
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.config/procps/toprc "$HOME"/.config/procps/toprc
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.selected_editor "$HOME"/.selected_editor
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.tmux.conf "$HOME"/.tmux.conf
+ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.vimrc "$HOME"/.vimrc
+ln -s -r -f "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.config/systemd/user/*.service "$HOME"/.config/systemd/user/
+
+pushd Malcolm
+python3 ./scripts/install.py --defaults --restart-malcolm
+sudo usermod -a -G docker "$USER"
+sudo loginctl enable-linger "$USER"
+sudo ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+sudo sysctl --system
+rm -f ~/Malcolm/.configured
+
+popd
+    cat << 'EOF' >> "$HOME"/.bashrc
+
+# Configure Malcolm on first login
+if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
+    pushd ~/Malcolm >/dev/null 2>&1
+    ./scripts/configure
+    ./scripts/auth_setup
+    popd >/dev/null 2>&1
+    clear
+    cat << 'EOT'
+
+To start, stop, restart, etc. Malcolm:
+  Use the control scripts in the "~/Malcolm/scripts/" directory:
+   - start         (start Malcolm)
+   - stop          (stop Malcolm)
+   - restart       (restart Malcolm)
+   - logs          (monitor Malcolm logs)
+   - wipe          (stop Malcolm and clear its database)
+   - auth_setup    (change authentication-related settings)
+
+A minute or so after starting Malcolm, the following services will be accessible:
+  - Arkime: https://<IP or hostname>/
+  - OpenSearch Dashboards: https://<IP or hostname>/dashboards/
+  - PCAP upload (web): https://<IP or hostname>/upload/
+  - NetBox: https://<IP or hostname>/netbox/
+  - Account management: https://<IP or hostname>/auth/
+  - Documentation: https://<IP or hostname>/readme/
+
+EOT
+fi
+EOF
+
+popd
+'''

@@ -150,12 +150,12 @@ sed -r -i "s/((disk_full_action|disk_error_action)\s*=\s*).*/\1 SYSLOG/" /etc/au
 sed -r -i "s/(network_failure_action\s*=\s*).*/\1 syslog/" /etc/audit/audisp-remote.conf
 
 # disable ntp for now, and disable servers, but it could be turned back on later
-systemctl disable ntp || true
-sed -i "s/^\(pool \)/# \1/" /etc/ntp.conf
-sed -i "s/^\(restrict -6\)/# \1/" /etc/ntp.conf
-sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntp.conf
-sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntp
-usermod -d /var/lib/ntp ntp
+systemctl disable ntpsec || true
+sed -i "s/^\(pool \)/# \1/" /etc/ntpsec/ntp.conf
+sed -i "s/^\(restrict -6\)/# \1/" /etc/ntpsec/ntp.conf
+sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntpsec/ntp.conf
+sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntpsec
+usermod -d /var/lib/ntpsec ntpsec
 
 # disable default fluentbit configuration
 systemctl disable fluent-bit || true

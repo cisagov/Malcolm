@@ -3,8 +3,11 @@ FROM debian:12-slim AS build
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-ENV ARKIME_VERSION "v4.4.0"
+ENV ARKIME_VERSION "v4.5.0"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -50,7 +53,7 @@ RUN apt-get -q update && \
         swig \
         wget \
         zlib1g-dev && \
-  python3 -m pip install --break-system-packages --no-cache-dir beautifulsoup4 meson && \
+  python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 meson && \
   cd /opt && \
     git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
@@ -94,6 +97,8 @@ ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_LOCAL=true
@@ -169,7 +174,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       vim-tiny \
       wget \
       tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
-    python3 -m pip install --break-system-packages --no-cache-dir beautifulsoup4 pyzmq watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \

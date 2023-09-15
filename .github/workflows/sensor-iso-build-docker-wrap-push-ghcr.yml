@@ -102,6 +102,7 @@ jobs:
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
           echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
+          echo "BUILD_JOBS=2" > ./shared/environment.chroot
           sudo /usr/bin/env bash ./build.sh
           rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md
           sudo chmod 644 ./hedgehog-*.*

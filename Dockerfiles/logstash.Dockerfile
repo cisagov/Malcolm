@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.9.0
+FROM docker.elastic.co/logstash/logstash-oss:8.10.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -51,6 +51,7 @@ RUN set -x && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
+        curl \
         gettext \
         patch \
         python3-setuptools \
@@ -81,6 +82,7 @@ RUN set -x && \
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
 COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/

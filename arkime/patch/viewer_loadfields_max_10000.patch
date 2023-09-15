@@ -1,0 +1,13 @@
+diff --git a/viewer/db.js b/viewer/db.js
+index 96a75ecd..12f24c0b 100644
+--- a/viewer/db.js
++++ b/viewer/db.js
+@@ -1747,7 +1747,7 @@ exports.sid2Index = function (id, options) {
+ };
+ 
+ exports.loadFields = async () => {
+-  return exports.search('fields', 'field', { size: 3000 });
++  return exports.search('fields', 'field', { size: 10000 });
+ };
+ 
+ exports.getIndices = async (startTime, stopTime, bounding, rotateIndex) => {

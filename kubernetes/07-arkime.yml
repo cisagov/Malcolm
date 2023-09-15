@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:23.08.1
+        image: ghcr.io/idaholab/malcolm/arkime:23.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -83,7 +83,7 @@ spec:
             subPath: "arkime"
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.08.1
+        image: ghcr.io/idaholab/malcolm/dirinit:23.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true

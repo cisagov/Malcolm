@@ -128,6 +128,9 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 [[ -r /usr/share/logstash/config/logstash.orig.yml ]] && \
   cp /usr/share/logstash/config/logstash.orig.yml /usr/share/logstash/config/logstash.yml
 
+# give OpenSearch time to start before starting Logstash
+/usr/local/bin/opensearch_status.sh -t malcolm_template 2>&1
+
 # start logstash (adapted from docker-entrypoint)
 env2yaml /usr/share/logstash/config/logstash.yml
 export LS_JAVA_OPTS="-Dls.cgroup.cpuacct.path.override=/ -Dls.cgroup.cpu.path.override=/ $LS_JAVA_OPTS"
