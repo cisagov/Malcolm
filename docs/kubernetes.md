@@ -9,7 +9,7 @@
     - [OpenSearch Instances](#OpenSearchInstances)
     - [PersistentVolumeClaim Definitions](#PVC)
 * [Running Malcolm](#Running)
-* [Deployment Example](#Example)n
+* [Deployment Example](#Example)
 * [Future Enhancements](#Future)
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
@@ -64,51 +64,48 @@ Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{
                     + --tcp-services-configmap=ingress-nginx/tcp-services
         …
         ```
-
     - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` load-balancer service definition:
         ```
-        ---
-        apiVersion: v1
-        kind: Service
-        metadata:
-        …
-          name: ingress-nginx-controller
-          namespace: ingress-nginx
-        spec:
-          externalTrafficPolicy: Local
-          ipFamilies:
-            - IPv4
-          ipFamilyPolicy: SingleStack
-          ports:
-            - appProtocol: http
-              name: http
-              port: 80
-              protocol: TCP
-              targetPort: http
-            - appProtocol: https
-              name: https
-              port: 443
-              protocol: TCP
-              targetPort: https
-            - appProtocol: tcp
-              name: lumberjack
-              port: 5044
-              targetPort: 5044
-              protocol: TCP
-            - appProtocol: tcp
-              name: tcpjson
-              port: 5045
-              targetPort: 5045
-              protocol: TCP
-        - appProtocol: tcp
-              name: opensearch
-              port: 9200
-              targetPort: 9200
-              protocol: TCP
-        …
-          type: LoadBalancer
+          apiVersion: v1
+          kind: Service
+          metadata:
+          …
+            name: ingress-nginx-controller
+            namespace: ingress-nginx
+          spec:
+            externalTrafficPolicy: Local
+            ipFamilies:
+              - IPv4
+            ipFamilyPolicy: SingleStack
+            ports:
+              - appProtocol: http
+                name: http
+                port: 80
+                protocol: TCP
+                targetPort: http
+              - appProtocol: https
+                name: https
+                port: 443
+                protocol: TCP
+                targetPort: https
+              - appProtocol: tcp
+                name: lumberjack
+                port: 5044
+                targetPort: 5044
+                protocol: TCP
+              - appProtocol: tcp
+                name: tcpjson
+                port: 5045
+                targetPort: 5045
+                protocol: TCP
+          - appProtocol: tcp
+                name: opensearch
+                port: 9200
+                targetPort: 9200
+                protocol: TCP
+          …
+            type: LoadBalancer
         ```
-
     - Add the appropriate ports (minimally TCP ports 5044 and 9200) to the `ingress-nginx-controller` deployment container's definition:
         ```
         apiVersion: apps/v1
@@ -275,28 +272,28 @@ agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     |
 agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     | 861.34m   | 14.36%      | 19.55Gi      | 9.29Gi       | 61.28Gi       | 11           |
 
 Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
-api-deployment-6f4686cf59-bn286                | Running | 10.42.2.14 | ReplicaSet | agent1      | 0.11m     | 59.62Mi      | api-container:0                | api:23.08.1               |
-file-monitor-deployment-855646bd75-vk7st       | Running | 10.42.2.16 | ReplicaSet | agent1      | 8.47m     | 1.46Gi       | file-monitor-container:0       | file-monitor:23.08.1      |
-zeek-live-deployment-64b69d4b6f-947vr          | Running | 10.42.2.17 | ReplicaSet | agent1      | 0.02m     | 12.44Mi      | zeek-live-container:0          | zeek:23.08.1              |
-dashboards-helper-deployment-69dc54f6b6-ln4sq  | Running | 10.42.2.15 | ReplicaSet | agent1      | 10.77m    | 38.43Mi      | dashboards-helper-container:0  | dashboards-helper:23.08.1 |
-upload-deployment-586568844b-4jnk9             | Running | 10.42.2.18 | ReplicaSet | agent1      | 0.15m     | 29.78Mi      | upload-container:0             | file-upload:23.08.1       |
-filebeat-deployment-6ff8bc444f-t7h49           | Running | 10.42.2.20 | ReplicaSet | agent1      | 2.84m     | 70.71Mi      | filebeat-container:0           | filebeat-oss:23.08.1      |
-zeek-offline-deployment-844f4865bd-g2sdm       | Running | 10.42.2.21 | ReplicaSet | agent1      | 0.17m     | 41.92Mi      | zeek-offline-container:0       | zeek:23.08.1              |
-logstash-deployment-6fbc9fdcd5-hwx8s           | Running | 10.42.2.22 | ReplicaSet | agent1      | 85.55m    | 2.91Gi       | logstash-container:0           | logstash-oss:23.08.1      |
-netbox-deployment-cdcff4977-hbbw5              | Running | 10.42.2.23 | ReplicaSet | agent1      | 807.64m   | 702.86Mi     | netbox-container:0             | netbox:23.08.1            |
-suricata-offline-deployment-6ccdb89478-z5696   | Running | 10.42.2.19 | ReplicaSet | agent1      | 0.22m     | 34.88Mi      | suricata-offline-container:0   | suricata:23.08.1          |
-dashboards-deployment-69b5465db-vz88g          | Running | 10.42.1.14 | ReplicaSet | agent2      | 0.94m     | 100.12Mi     | dashboards-container:0         | dashboards:23.08.1        |
-netbox-redis-cache-deployment-5f77d47b8b-z7t2z | Running | 10.42.1.15 | ReplicaSet | agent2      | 3.57m     | 7.36Mi       | netbox-redis-cache-container:0 | redis:23.08.1             |
-suricata-live-deployment-6494c77759-9rlnt      | Running | 10.42.1.16 | ReplicaSet | agent2      | 0.02m     | 9.69Mi       | suricata-live-container:0      | suricata:23.08.1          |
-freq-deployment-cfd84fd97-dnngf                | Running | 10.42.1.17 | ReplicaSet | agent2      | 0.2m      | 26.36Mi      | freq-container:0               | freq:23.08.1              |
-arkime-deployment-56999cdd66-s98pp             | Running | 10.42.1.18 | ReplicaSet | agent2      | 4.15m     | 113.07Mi     | arkime-container:0             | arkime:23.08.1            |
-pcap-monitor-deployment-594ff674c4-fsm7m       | Running | 10.42.1.19 | ReplicaSet | agent2      | 1.24m     | 48.44Mi      | pcap-monitor-container:0       | pcap-monitor:23.08.1      |
-pcap-capture-deployment-7c8bf6957-jzpzn        | Running | 10.42.1.20 | ReplicaSet | agent2      | 0.02m     | 9.64Mi       | pcap-capture-container:0       | pcap-capture:23.08.1      |
-netbox-postgres-deployment-5879b8dffc-kkt56    | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | netbox-postgres-container:0    | postgresql:23.08.1        |
-htadmin-deployment-6fc46888b9-sq6ln            | Running | 10.42.1.23 | ReplicaSet | agent2      | 0.14m     | 30.53Mi      | htadmin-container:0            | htadmin:23.08.1           |
-netbox-redis-deployment-5bcd8f6c96-j5xpf       | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | netbox-redis-container:0       | redis:23.08.1             |
-nginx-proxy-deployment-69fcc4968d-f68tq        | Running | 10.42.1.22 | ReplicaSet | agent2      | 0.31m     | 22.63Mi      | nginx-proxy-container:0        | nginx-proxy:23.08.1       |
-opensearch-deployment-75498799f6-4zmwd         | Running | 10.42.1.25 | ReplicaSet | agent2      | 89.8m     | 11.03Gi      | opensearch-container:0         | opensearch:23.08.1        |
+api-deployment-6f4686cf59-bn286                | Running | 10.42.2.14 | ReplicaSet | agent1      | 0.11m     | 59.62Mi      | api-container:0                | api:23.09.0               |
+file-monitor-deployment-855646bd75-vk7st       | Running | 10.42.2.16 | ReplicaSet | agent1      | 8.47m     | 1.46Gi       | file-monitor-container:0       | file-monitor:23.09.0      |
+zeek-live-deployment-64b69d4b6f-947vr          | Running | 10.42.2.17 | ReplicaSet | agent1      | 0.02m     | 12.44Mi      | zeek-live-container:0          | zeek:23.09.0              |
+dashboards-helper-deployment-69dc54f6b6-ln4sq  | Running | 10.42.2.15 | ReplicaSet | agent1      | 10.77m    | 38.43Mi      | dashboards-helper-container:0  | dashboards-helper:23.09.0 |
+upload-deployment-586568844b-4jnk9             | Running | 10.42.2.18 | ReplicaSet | agent1      | 0.15m     | 29.78Mi      | upload-container:0             | file-upload:23.09.0       |
+filebeat-deployment-6ff8bc444f-t7h49           | Running | 10.42.2.20 | ReplicaSet | agent1      | 2.84m     | 70.71Mi      | filebeat-container:0           | filebeat-oss:23.09.0      |
+zeek-offline-deployment-844f4865bd-g2sdm       | Running | 10.42.2.21 | ReplicaSet | agent1      | 0.17m     | 41.92Mi      | zeek-offline-container:0       | zeek:23.09.0              |
+logstash-deployment-6fbc9fdcd5-hwx8s           | Running | 10.42.2.22 | ReplicaSet | agent1      | 85.55m    | 2.91Gi       | logstash-container:0           | logstash-oss:23.09.0      |
+netbox-deployment-cdcff4977-hbbw5              | Running | 10.42.2.23 | ReplicaSet | agent1      | 807.64m   | 702.86Mi     | netbox-container:0             | netbox:23.09.0            |
+suricata-offline-deployment-6ccdb89478-z5696   | Running | 10.42.2.19 | ReplicaSet | agent1      | 0.22m     | 34.88Mi      | suricata-offline-container:0   | suricata:23.09.0          |
+dashboards-deployment-69b5465db-vz88g          | Running | 10.42.1.14 | ReplicaSet | agent2      | 0.94m     | 100.12Mi     | dashboards-container:0         | dashboards:23.09.0        |
+netbox-redis-cache-deployment-5f77d47b8b-z7t2z | Running | 10.42.1.15 | ReplicaSet | agent2      | 3.57m     | 7.36Mi       | netbox-redis-cache-container:0 | redis:23.09.0             |
+suricata-live-deployment-6494c77759-9rlnt      | Running | 10.42.1.16 | ReplicaSet | agent2      | 0.02m     | 9.69Mi       | suricata-live-container:0      | suricata:23.09.0          |
+freq-deployment-cfd84fd97-dnngf                | Running | 10.42.1.17 | ReplicaSet | agent2      | 0.2m      | 26.36Mi      | freq-container:0               | freq:23.09.0              |
+arkime-deployment-56999cdd66-s98pp             | Running | 10.42.1.18 | ReplicaSet | agent2      | 4.15m     | 113.07Mi     | arkime-container:0             | arkime:23.09.0            |
+pcap-monitor-deployment-594ff674c4-fsm7m       | Running | 10.42.1.19 | ReplicaSet | agent2      | 1.24m     | 48.44Mi      | pcap-monitor-container:0       | pcap-monitor:23.09.0      |
+pcap-capture-deployment-7c8bf6957-jzpzn        | Running | 10.42.1.20 | ReplicaSet | agent2      | 0.02m     | 9.64Mi       | pcap-capture-container:0       | pcap-capture:23.09.0      |
+netbox-postgres-deployment-5879b8dffc-kkt56    | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | netbox-postgres-container:0    | postgresql:23.09.0        |
+htadmin-deployment-6fc46888b9-sq6ln            | Running | 10.42.1.23 | ReplicaSet | agent2      | 0.14m     | 30.53Mi      | htadmin-container:0            | htadmin:23.09.0           |
+netbox-redis-deployment-5bcd8f6c96-j5xpf       | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | netbox-redis-container:0       | redis:23.09.0             |
+nginx-proxy-deployment-69fcc4968d-f68tq        | Running | 10.42.1.22 | ReplicaSet | agent2      | 0.31m     | 22.63Mi      | nginx-proxy-container:0        | nginx-proxy:23.09.0       |
+opensearch-deployment-75498799f6-4zmwd         | Running | 10.42.1.25 | ReplicaSet | agent2      | 89.8m     | 11.03Gi      | opensearch-container:0         | opensearch:23.09.0        |
 ```
 
 The other control scripts (`stop`, `restart`, `logs`, etc.) work in a similar manner as in a Docker-based deployment. One notable difference is the `wipe` script: data on PersistentVolume storage cannot be deleted by `wipe`. It must be deleted manually on the storage media underlying the PersistentVolumes.
@@ -384,7 +381,7 @@ Download updated Suricata signatures periodically? (y/N): y
 
 Automatically analyze all PCAP files with Zeek? (Y/n): y
 
-Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek? (y/N): n
+Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y/N): n
 
 Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
 
@@ -552,28 +549,28 @@ agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     |
 agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     | 552.71m   | 9.21%       | 19.55Gi      | 13.27Gi      | 61.28Gi       | 12           |
 
 Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
-netbox-redis-cache-deployment-5f77d47b8b-jr9nt | Running | 10.42.2.6  | ReplicaSet | agent2      | 1.89m     | 7.24Mi       | netbox-redis-cache-container:0 | redis:23.08.1             |
-netbox-redis-deployment-5bcd8f6c96-bkzmh       | Running | 10.42.2.5  | ReplicaSet | agent2      | 1.62m     | 7.52Mi       | netbox-redis-container:0       | redis:23.08.1             |
-dashboards-helper-deployment-69dc54f6b6-ks7ps  | Running | 10.42.2.4  | ReplicaSet | agent2      | 12.95m    | 40.75Mi      | dashboards-helper-container:0  | dashboards-helper:23.08.1 |
-freq-deployment-cfd84fd97-5bwp6                | Running | 10.42.2.8  | ReplicaSet | agent2      | 0.11m     | 26.33Mi      | freq-container:0               | freq:23.08.1              |
-pcap-capture-deployment-7c8bf6957-hkvkn        | Running | 10.42.2.12 | ReplicaSet | agent2      | 0.02m     | 9.21Mi       | pcap-capture-container:0       | pcap-capture:23.08.1      |
-nginx-proxy-deployment-69fcc4968d-m57rz        | Running | 10.42.2.10 | ReplicaSet | agent2      | 0.91m     | 22.72Mi      | nginx-proxy-container:0        | nginx-proxy:23.08.1       |
-htadmin-deployment-6fc46888b9-vpt7l            | Running | 10.42.2.7  | ReplicaSet | agent2      | 0.16m     | 30.21Mi      | htadmin-container:0            | htadmin:23.08.1           |
-opensearch-deployment-75498799f6-5v92w         | Running | 10.42.2.13 | ReplicaSet | agent2      | 139.2m    | 10.86Gi      | opensearch-container:0         | opensearch:23.08.1        |
-zeek-live-deployment-64b69d4b6f-fcb6n          | Running | 10.42.2.9  | ReplicaSet | agent2      | 0.02m     | 109.55Mi     | zeek-live-container:0          | zeek:23.08.1              |
-dashboards-deployment-69b5465db-kgsqk          | Running | 10.42.2.3  | ReplicaSet | agent2      | 14.98m    | 108.85Mi     | dashboards-container:0         | dashboards:23.08.1        |
-arkime-deployment-56999cdd66-xxpw9             | Running | 10.42.2.11 | ReplicaSet | agent2      | 208.95m   | 78.42Mi      | arkime-container:0             | arkime:23.08.1            |
-api-deployment-6f4686cf59-xt9md                | Running | 10.42.1.3  | ReplicaSet | agent1      | 0.14m     | 56.88Mi      | api-container:0                | api:23.08.1               |
-netbox-postgres-deployment-5879b8dffc-lb4qm    | Running | 10.42.1.6  | ReplicaSet | agent1      | 141.2m    | 48.02Mi      | netbox-postgres-container:0    | postgresql:23.08.1        |
-pcap-monitor-deployment-594ff674c4-fwq7g       | Running | 10.42.1.12 | ReplicaSet | agent1      | 3.93m     | 46.44Mi      | pcap-monitor-container:0       | pcap-monitor:23.08.1      |
-suricata-offline-deployment-6ccdb89478-j5fgj   | Running | 10.42.1.10 | ReplicaSet | agent1      | 10.42m    | 35.12Mi      | suricata-offline-container:0   | suricata:23.08.1          |
-suricata-live-deployment-6494c77759-rpt48      | Running | 10.42.1.8  | ReplicaSet | agent1      | 0.01m     | 9.62Mi       | suricata-live-container:0      | suricata:23.08.1          |
-netbox-deployment-cdcff4977-7ns2q              | Running | 10.42.1.7  | ReplicaSet | agent1      | 830.47m   | 530.7Mi      | netbox-container:0             | netbox:23.08.1            |
-zeek-offline-deployment-844f4865bd-7x68b       | Running | 10.42.1.9  | ReplicaSet | agent1      | 1.44m     | 43.66Mi      | zeek-offline-container:0       | zeek:23.08.1              |
-filebeat-deployment-6ff8bc444f-pdgzj           | Running | 10.42.1.11 | ReplicaSet | agent1      | 0.78m     | 75.25Mi      | filebeat-container:0           | filebeat-oss:23.08.1      |
-file-monitor-deployment-855646bd75-nbngq       | Running | 10.42.1.4  | ReplicaSet | agent1      | 1.69m     | 1.46Gi       | file-monitor-container:0       | file-monitor:23.08.1      |
-upload-deployment-586568844b-9s7f5             | Running | 10.42.1.13 | ReplicaSet | agent1      | 0.14m     | 29.62Mi      | upload-container:0             | file-upload:23.08.1       |
-logstash-deployment-6fbc9fdcd5-2hhx8           | Running | 10.42.1.5  | ReplicaSet | agent1      | 3236.29m  | 357.36Mi     | logstash-container:0           | logstash-oss:23.08.1      |
+netbox-redis-cache-deployment-5f77d47b8b-jr9nt | Running | 10.42.2.6  | ReplicaSet | agent2      | 1.89m     | 7.24Mi       | netbox-redis-cache-container:0 | redis:23.09.0             |
+netbox-redis-deployment-5bcd8f6c96-bkzmh       | Running | 10.42.2.5  | ReplicaSet | agent2      | 1.62m     | 7.52Mi       | netbox-redis-container:0       | redis:23.09.0             |
+dashboards-helper-deployment-69dc54f6b6-ks7ps  | Running | 10.42.2.4  | ReplicaSet | agent2      | 12.95m    | 40.75Mi      | dashboards-helper-container:0  | dashboards-helper:23.09.0 |
+freq-deployment-cfd84fd97-5bwp6                | Running | 10.42.2.8  | ReplicaSet | agent2      | 0.11m     | 26.33Mi      | freq-container:0               | freq:23.09.0              |
+pcap-capture-deployment-7c8bf6957-hkvkn        | Running | 10.42.2.12 | ReplicaSet | agent2      | 0.02m     | 9.21Mi       | pcap-capture-container:0       | pcap-capture:23.09.0      |
+nginx-proxy-deployment-69fcc4968d-m57rz        | Running | 10.42.2.10 | ReplicaSet | agent2      | 0.91m     | 22.72Mi      | nginx-proxy-container:0        | nginx-proxy:23.09.0       |
+htadmin-deployment-6fc46888b9-vpt7l            | Running | 10.42.2.7  | ReplicaSet | agent2      | 0.16m     | 30.21Mi      | htadmin-container:0            | htadmin:23.09.0           |
+opensearch-deployment-75498799f6-5v92w         | Running | 10.42.2.13 | ReplicaSet | agent2      | 139.2m    | 10.86Gi      | opensearch-container:0         | opensearch:23.09.0        |
+zeek-live-deployment-64b69d4b6f-fcb6n          | Running | 10.42.2.9  | ReplicaSet | agent2      | 0.02m     | 109.55Mi     | zeek-live-container:0          | zeek:23.09.0              |
+dashboards-deployment-69b5465db-kgsqk          | Running | 10.42.2.3  | ReplicaSet | agent2      | 14.98m    | 108.85Mi     | dashboards-container:0         | dashboards:23.09.0        |
+arkime-deployment-56999cdd66-xxpw9             | Running | 10.42.2.11 | ReplicaSet | agent2      | 208.95m   | 78.42Mi      | arkime-container:0             | arkime:23.09.0            |
+api-deployment-6f4686cf59-xt9md                | Running | 10.42.1.3  | ReplicaSet | agent1      | 0.14m     | 56.88Mi      | api-container:0                | api:23.09.0               |
+netbox-postgres-deployment-5879b8dffc-lb4qm    | Running | 10.42.1.6  | ReplicaSet | agent1      | 141.2m    | 48.02Mi      | netbox-postgres-container:0    | postgresql:23.09.0        |
+pcap-monitor-deployment-594ff674c4-fwq7g       | Running | 10.42.1.12 | ReplicaSet | agent1      | 3.93m     | 46.44Mi      | pcap-monitor-container:0       | pcap-monitor:23.09.0      |
+suricata-offline-deployment-6ccdb89478-j5fgj   | Running | 10.42.1.10 | ReplicaSet | agent1      | 10.42m    | 35.12Mi      | suricata-offline-container:0   | suricata:23.09.0          |
+suricata-live-deployment-6494c77759-rpt48      | Running | 10.42.1.8  | ReplicaSet | agent1      | 0.01m     | 9.62Mi       | suricata-live-container:0      | suricata:23.09.0          |
+netbox-deployment-cdcff4977-7ns2q              | Running | 10.42.1.7  | ReplicaSet | agent1      | 830.47m   | 530.7Mi      | netbox-container:0             | netbox:23.09.0            |
+zeek-offline-deployment-844f4865bd-7x68b       | Running | 10.42.1.9  | ReplicaSet | agent1      | 1.44m     | 43.66Mi      | zeek-offline-container:0       | zeek:23.09.0              |
+filebeat-deployment-6ff8bc444f-pdgzj           | Running | 10.42.1.11 | ReplicaSet | agent1      | 0.78m     | 75.25Mi      | filebeat-container:0           | filebeat-oss:23.09.0      |
+file-monitor-deployment-855646bd75-nbngq       | Running | 10.42.1.4  | ReplicaSet | agent1      | 1.69m     | 1.46Gi       | file-monitor-container:0       | file-monitor:23.09.0      |
+upload-deployment-586568844b-9s7f5             | Running | 10.42.1.13 | ReplicaSet | agent1      | 0.14m     | 29.62Mi      | upload-container:0             | file-upload:23.09.0       |
+logstash-deployment-6fbc9fdcd5-2hhx8           | Running | 10.42.1.5  | ReplicaSet | agent1      | 3236.29m  | 357.36Mi     | logstash-container:0           | logstash-oss:23.09.0      |
 ```
 
 View container logs for the Malcolm deployment with `./scripts/logs` (if **[stern](https://github.com/stern/stern)** present in `$PATH`):

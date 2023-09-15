@@ -13,9 +13,6 @@ GITHUB_API_CURL_ARGS+=( -H )
 GITHUB_API_CURL_ARGS+=( "Accept: application/vnd.github.v3+json" )
 [[ -n "$GITHUB_TOKEN" ]] && GITHUB_API_CURL_ARGS+=( -H ) && GITHUB_API_CURL_ARGS+=( "Authorization: token $GITHUB_TOKEN" )
 
-ZEEK_DIR="/opt/zeek"
-export PATH="${ZEEK_DIR}"/bin:$PATH
-
 SURICATA_RULES_DIR="/etc/suricata/rules"
 
 CAPA_RELEASE_URL="https://api.github.com/repos/fireeye/capa/releases/latest"
@@ -28,9 +25,8 @@ YARA_RULES_DIR="/opt/yara-rules"
 mkdir -p /opt/hedgehog_install_artifacts/
 
 # Download and install spicy and 3rd-party zeek plugins
-mkdir -p "${CCACHE_DIR}"
-
-# zeek plugins
+ZEEK_DIR="/opt/zeek"
+export PATH="${ZEEK_DIR}"/bin:$PATH
 cd /tmp
 zkg autoconfig --force
 bash /usr/local/bin/zeek_install_plugins.sh

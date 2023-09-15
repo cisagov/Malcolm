@@ -14,7 +14,7 @@ libssh2-1
 macchanger
 netcat-openbsd
 netsniff-ng
-ntp
+ntpsec
 openssh-client
 openssh-server
 openvpn

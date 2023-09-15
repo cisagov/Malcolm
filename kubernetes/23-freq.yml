@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: freq-container
-        image: ghcr.io/idaholab/malcolm/freq:23.08.1
+        image: ghcr.io/idaholab/malcolm/freq:23.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -54,7 +54,7 @@ class Constants:
     TIME_SYNC_HTPDATE_CRON = '/etc/cron.d/htpdate'
     TIME_SYNC_HTPDATE_TEST_COMMAND = '/usr/sbin/htpdate -4 -a -d'
     TIME_SYNC_HTPDATE_COMMAND = '/usr/sbin/htpdate -4 -a -l -s'
-    TIME_SYNC_NTP_CONFIG = '/etc/ntp.conf'
+    TIME_SYNC_NTP_CONFIG = '/etc/ntpsec/ntp.conf'
 
     SSHD_CONFIG_FILE = "/etc/ssh/sshd_config"
 
@@ -344,8 +344,8 @@ def main():
                         raise CancelledError
 
                     # stop and disable the ntp process
-                    run_subprocess('/bin/systemctl stop ntp')
-                    run_subprocess('/bin/systemctl disable ntp')
+                    run_subprocess('/bin/systemctl stop ntpsec')
+                    run_subprocess('/bin/systemctl disable ntpsec')
 
                     # write out htpdate file for cron
                     with open(Constants.TIME_SYNC_HTPDATE_CRON, 'w+') as f:
@@ -398,9 +398,9 @@ def main():
                                 print(line)
 
                     # enable and start the ntp process
-                    run_subprocess('/bin/systemctl stop ntp')
-                    run_subprocess('/bin/systemctl enable ntp')
-                    ecode, start_output = run_subprocess('/bin/systemctl start ntp', stderr=True)
+                    run_subprocess('/bin/systemctl stop ntpsec')
+                    run_subprocess('/bin/systemctl enable ntpsec')
+                    ecode, start_output = run_subprocess('/bin/systemctl start ntpsec', stderr=True)
                     if ecode == 0:
                         code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS}")
                     else:

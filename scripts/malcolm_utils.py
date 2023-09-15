@@ -66,6 +66,21 @@ class AtomicInt:
 
 
 ###################################################################################################
+# increment until we hit a limit, then raise an exception
+class CountUntilException:
+    def __init__(self, max=100, err=None):
+        self.val = 0
+        self.max = max
+        self.err = err if err else 'Invalid value'
+
+    def increment(self):
+        self.val += 1
+        if self.val >= self.max:
+            raise ValueError(self.err)
+        return True
+
+
+###################################################################################################
 # if a string starts with 'base64:', decode it, otherwise return it as-is
 def base64_decode_if_prefixed(s: str):
     if s.startswith('base64:'):

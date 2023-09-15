@@ -193,13 +193,13 @@ def main():
     )
     parser.add_argument(
         '-r',
-        '--device-role',
-        dest='deviceRoles',
+        '--role',
+        dest='roles',
         nargs='*',
         type=str,
-        default=[os.getenv('NETBOX_DEFAULT_DEVICE_ROLE', 'Unspecified')],
+        default=[os.getenv('NETBOX_DEFAULT_ROLE', 'Unspecified')],
         required=False,
-        help="Device role(s) to create (see also --device-roles)",
+        help="Role(s) to create",
     )
     parser.add_argument(
         '-y',
@@ -270,7 +270,7 @@ def main():
     interfaces = {}
     ipAddresses = {}
     deviceTypes = {}
-    deviceRoles = {}
+    roles = {}
     manufacturers = {}
     randColor = randomcolor.RandomColor(seed=datetime.now().timestamp())
 
@@ -390,29 +390,29 @@ def main():
     except Exception as e:
         logging.error(f"{type(e).__name__} processing manufacturers: {e}")
 
-    # ###### DEVICE ROLES ##########################################################################################
+    # ###### ROLES #################################################################################################
     try:
-        deviceRolesPreExisting = {x.name: x for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (before): { {k:v.id for k, v in deviceRolesPreExisting.items()} }")
+        rolesPreExisting = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Roles (before): { {k:v.id for k, v in rolesPreExisting.items()} }")
 
-        # create device roles that don't already exist
-        for deviceRoleName in [x for x in args.deviceRoles if x not in deviceRolesPreExisting]:
+        # create roles that don't already exist
+        for roleName in [x for x in args.roles if x not in rolesPreExisting]:
             try:
                 nb.dcim.device_roles.create(
                     {
-                        "name": deviceRoleName,
-                        "slug": slugify(deviceRoleName),
+                        "name": roleName,
+                        "slug": slugify(roleName),
                         "vm_role": True,
                         "color": randColor.generate()[0][1:],
                     },
                 )
             except pynetbox.RequestError as nbe:
-                logging.warning(f"{type(nbe).__name__} processing device role \"{deviceRoleName}\": {nbe}")
+                logging.warning(f"{type(nbe).__name__} processing role \"{roleName}\": {nbe}")
 
-        deviceRoles = {x.name: x for x in nb.dcim.device_roles.all()}
-        logging.debug(f"Device roles (after): { {k:v.id for k, v in deviceRoles.items()} }")
+        roles = {x.name: x for x in nb.dcim.device_roles.all()}
+        logging.debug(f"Roles (after): { {k:v.id for k, v in roles.items()} }")
     except Exception as e:
-        logging.error(f"{type(e).__name__} processing device roles: {e}")
+        logging.error(f"{type(e).__name__} processing roles: {e}")
 
     # ###### DEVICE TYPES ##########################################################################################
     try:
@@ -541,13 +541,13 @@ def main():
                 try:
                     site = min_hash_value_by_value(sites)
                     dType = min_hash_value_by_value(deviceTypes)
-                    dRole = min_hash_value_by_value(deviceRoles)
+                    role = min_hash_value_by_value(roles)
                     deviceCreated = nb.dcim.devices.create(
                         {
                             "name": host['name'],
                             "site": site.id if site else None,
                             "device_type": dType.id if dType else None,
-                            "device_role": dRole.id if dRole else None,
+                            "role": role.id if role else None,
                         },
                     )
                     if deviceCreated is not None:
@@ -587,7 +587,7 @@ def main():
             logging.debug(f"interfaces (after): { {k:v.id for k, v in interfaces.items()} }")
 
             # and associate IP addresses with them
-            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id}": x for x in nb.ipam.ip_addresses.all()}
+            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id if x.vrf else ''}": x for x in nb.ipam.ip_addresses.all()}
             logging.debug(f"IP addresses (before): { {k:v.id for k, v in ipAddressesPreExisting.items()} }")
 
             for host in [

@@ -138,6 +138,10 @@ class Constants:
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
     MSG_CONFIG_AUTOSTARTS = 'Specify autostart processes'
+    MSG_CONFIG_ICS_ANALYZERS = (
+        'Is the sensor being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?'
+    )
+    MSG_CONFIG_ICS_BEST_GUESS = 'Should the sensor use "best guess" to identify potential OT/ICS traffic with Zeek?'
     MSG_CONFIG_ZEEK_CARVED_SCANNERS = 'Specify scanners for Zeek-carved files'
     MSG_CONFIG_ZEEK_CARVING = 'Specify Zeek file carving mode'
     MSG_CONFIG_ZEEK_CARVING_MIMES = 'Specify file types to carve'
@@ -526,6 +530,8 @@ def main():
                 zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
                 zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH)\s*=\s*.+?$")
                 zeek_file_scanner_re = re.compile(r"(\bZEEK_FILE_SCAN_\w+)\s*=\s*.+?$")
+                disable_ics_all_re = re.compile(r"(\bZEEK_DISABLE_ICS_ALL)\s*=\s*.+?$")
+                ics_best_guess_re = re.compile(r"(\bZEEK_DISABLE_BEST_GUESS_ICS)\s*=\s*.+?$")
 
                 # get paths for captured PCAP and Zeek files
                 while True:
@@ -551,6 +557,10 @@ def main():
                         break
                     else:
                         code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
+
+                # enable/disable ICs
+                ics_network = d.yesno(Constants.MSG_CONFIG_ICS_ANALYZERS) == Dialog.OK
+                ics_best_guess = ics_network and (d.yesno(Constants.MSG_CONFIG_ICS_BEST_GUESS) == Dialog.OK)
 
                 # configure file carving
                 code, zeek_carve_mode = d.radiolist(
@@ -727,6 +737,8 @@ def main():
                 capture_config_dict["ZEEK_LOG_PATH"] = path_values[1]
                 capture_config_dict["ZEEK_EXTRACTOR_MODE"] = zeek_carve_mode
                 capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = zeek_carved_file_preservation
+                capture_config_dict["ZEEK_DISABLE_ICS_ALL"] = '' if ics_network else 'true'
+                capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"] = '' if ics_best_guess else 'true'
 
                 # get confirmation from user that we really want to do this
                 code = d.yesno(
@@ -769,6 +781,16 @@ def main():
                                 print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
                             elif zeek_file_watch_re.search(line) is not None:
                                 print(zeek_file_watch_re.sub(r"\1=%s" % capture_config_dict["ZEEK_FILE_WATCH"], line))
+                            elif disable_ics_all_re.search(line) is not None:
+                                print(
+                                    disable_ics_all_re.sub(r'\1=%s' % capture_config_dict["ZEEK_DISABLE_ICS_ALL"], line)
+                                )
+                            elif ics_best_guess_re.search(line) is not None:
+                                print(
+                                    ics_best_guess_re.sub(
+                                        r'\1=%s' % capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"], line
+                                    )
+                                )
                             else:
                                 zeek_file_scanner_match = zeek_file_scanner_re.search(line)
                                 if zeek_file_scanner_match is not None:

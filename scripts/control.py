@@ -47,11 +47,13 @@ from malcolm_common import (
     posInt,
     ProcessLogLine,
     ScriptPath,
+    UserInputDefaultsBehavior,
     YAMLDynamic,
     YesOrNo,
 )
 
 from malcolm_utils import (
+    CountUntilException,
     deep_get,
     dictsearch,
     eprint,
@@ -117,7 +119,7 @@ orchMode = None
 shuttingDown = [False]
 yamlImported = None
 dotenvImported = None
-
+MaxAskForValueCount = 100
 
 ###################################################################################################
 try:
@@ -1074,7 +1076,7 @@ def start():
 
 
 ###################################################################################################
-def authSetup(wipe=False):
+def authSetup():
     global args
     global opensslBin
 
@@ -1105,19 +1107,32 @@ def authSetup(wipe=False):
             'admin',
             "Store administrator username/password for local Malcolm access",
             False,
-            True,
+            (not args.cmdAuthSetupNonInteractive)
+            or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
         ),
         (
             'webcerts',
             "(Re)generate self-signed certificates for HTTPS access",
             False,
-            True,
+            not args.cmdAuthSetupNonInteractive
+            or (
+                args.authGenWebCerts
+                or not os.path.isfile(
+                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
+                )
+            ),
         ),
         (
             'fwcerts',
             "(Re)generate self-signed certificates for a remote log forwarder",
             False,
-            True,
+            not args.cmdAuthSetupNonInteractive
+            or (
+                args.authGenFwCerts
+                or not os.path.isfile(
+                    os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'server.key')))
+                )
+            ),
         ),
         (
             'remoteos',
@@ -1135,9 +1150,12 @@ def authSetup(wipe=False):
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
-            not os.path.isfile(
-                os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox-secret.env')))
-            ),
+            (
+                not os.path.isfile(
+                    os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox-secret.env')))
+                )
+            )
+            or (args.cmdAuthSetupNonInteractive and args.authGenNetBoxPasswords),
         ),
         (
             'txfwcerts',
@@ -1147,15 +1165,31 @@ def authSetup(wipe=False):
         ),
     )[: 8 if txRxScript else -1]
 
-    authMode = ChooseOne(
-        'Configure Authentication',
-        choices=[x[:-1] for x in authModeChoices],
+    authMode = (
+        ChooseOne(
+            'Configure Authentication',
+            choices=[x[:-1] for x in authModeChoices],
+        )
+        if not args.cmdAuthSetupNonInteractive
+        else 'all'
+    )
+    defaultBehavior = (
+        UserInputDefaultsBehavior.DefaultsPrompt
+        if not args.cmdAuthSetupNonInteractive
+        else UserInputDefaultsBehavior.DefaultsPrompt
+        | UserInputDefaultsBehavior.DefaultsAccept
+        | UserInputDefaultsBehavior.DefaultsNonInteractive
     )
 
     for authItem in authModeChoices[1:]:
-        if ((authMode == 'all') and YesOrNo(f'{authItem[1]}?', default=authItem[3])) or (
-            (authMode != 'all') and (authMode == authItem[0])
-        ):
+        if (
+            (authMode == 'all')
+            and YesOrNo(
+                f'{authItem[1]}?',
+                default=authItem[3],
+                defaultBehavior=defaultBehavior,
+            )
+        ) or ((authMode != 'all') and (authMode == authItem[0])):
             if authItem[0] == 'admin':
                 # prompt username and password
                 usernamePrevious = None
@@ -1163,15 +1197,29 @@ def authSetup(wipe=False):
                 passwordConfirm = None
                 passwordEncrypted = ''
 
-                while True:
-                    username = AskForString("Administrator username")
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid administrator username')
+                while loopBreaker.increment():
+                    username = AskForString(
+                        "Administrator username",
+                        default=args.authUserName,
+                        defaultBehavior=defaultBehavior,
+                    )
                     if len(username) > 0:
                         break
 
-                while True:
-                    password = AskForPassword(f"{username} password: ")
-                    passwordConfirm = AskForPassword(f"{username} password (again): ")
-                    if password == passwordConfirm:
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
+                while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
+                    password = AskForPassword(
+                        f"{username} password: ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    passwordConfirm = AskForPassword(
+                        f"{username} password (again): ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if password and (password == passwordConfirm):
                         break
                     eprint("Passwords do not match")
 
@@ -1190,16 +1238,19 @@ def authSetup(wipe=False):
                         usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
 
                 # get openssl hash of password
-                err, out = run_process(
-                    [opensslBin, 'passwd', '-1', '-stdin'],
-                    stdin=password,
-                    stderr=False,
-                    debug=args.debug,
-                )
-                if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
-                    passwordEncrypted = out[0]
+                if args.cmdAuthSetupNonInteractive:
+                    passwordEncrypted = args.authPasswordOpenssl
                 else:
-                    raise Exception('Unable to generate password hash with openssl')
+                    err, out = run_process(
+                        [opensslBin, 'passwd', '-1', '-stdin'],
+                        stdin=password,
+                        stderr=False,
+                        debug=args.debug,
+                    )
+                    if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
+                        passwordEncrypted = out[0]
+                    else:
+                        raise Exception('Unable to generate password hash with openssl')
 
                 # write auth.env (used by htadmin and file-upload containers)
                 with open(authEnvFile, 'w') as f:
@@ -1213,21 +1264,30 @@ def authSetup(wipe=False):
 
                 # create or update the htpasswd file
                 htpasswdFile = os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))
-                htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
-                if not os.path.isfile(htpasswdFile):
-                    htpasswdCmd.insert(1, '-c')
-                err, out = run_process(htpasswdCmd, stdin=password, stderr=True, debug=args.debug)
-                if err != 0:
-                    raise Exception(f'Unable to generate htpasswd file: {out}')
+                if not args.cmdAuthSetupNonInteractive:
+                    htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
+                    if not os.path.isfile(htpasswdFile):
+                        htpasswdCmd.insert(1, '-c')
+                    err, out = run_process(htpasswdCmd, stdin=password, stderr=True, debug=args.debug)
+                    if err != 0:
+                        raise Exception(f'Unable to generate htpasswd file: {out}')
 
-                # if the admininstrator username has changed, remove the previous administrator username from htpasswd
-                if (usernamePrevious is not None) and (usernamePrevious != username):
+                if (
+                    (usernamePrevious is not None) and (usernamePrevious != username)
+                ) or args.cmdAuthSetupNonInteractive:
                     htpasswdLines = list()
                     with open(htpasswdFile, 'r') as f:
                         htpasswdLines = f.readlines()
                     with open(htpasswdFile, 'w') as f:
+                        if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
+                            f.write(f'{username}:{args.authPasswordHtpasswd}')
                         for line in htpasswdLines:
-                            if not line.startswith(f"{usernamePrevious}:"):
+                            # if the admininstrator username has changed, remove the previous administrator username from htpasswd
+                            if (
+                                (usernamePrevious is not None)
+                                and (usernamePrevious != username)
+                                and (not line.startswith(f"{usernamePrevious}:"))
+                            ):
                                 f.write(line)
 
                 # configure default LDAP stuff (they'll have to edit it by hand later)
@@ -1302,6 +1362,7 @@ def authSetup(wipe=False):
 
                 DisplayMessage(
                     'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
+                    defaultBehavior=defaultBehavior,
                 )
 
             # generate HTTPS self-signed certificates
@@ -1541,6 +1602,7 @@ def authSetup(wipe=False):
                     if YesOrNo(
                         f'Store username/password for {instance} remote OpenSearch instance?',
                         default=False,
+                        defaultBehavior=defaultBehavior,
                     ):
                         prevCurlContents = ParseCurlFile(openSearchCredFileName)
 
@@ -1549,26 +1611,41 @@ def authSetup(wipe=False):
                         esPassword = None
                         esPasswordConfirm = None
 
-                        while True:
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch username')
+                        while loopBreaker.increment():
                             esUsername = AskForString(
                                 "OpenSearch username",
                                 default=prevCurlContents['user'],
+                                defaultBehavior=defaultBehavior,
                             )
                             if (len(esUsername) > 0) and (':' not in esUsername):
                                 break
                             eprint("Username is blank (or contains a colon, which is not allowed)")
 
-                        while True:
-                            esPassword = AskForPassword(f"{esUsername} password: ")
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch password')
+                        while loopBreaker.increment():
+                            esPassword = AskForPassword(
+                                f"{esUsername} password: ",
+                                default='',
+                                defaultBehavior=defaultBehavior,
+                            )
                             if (
                                 (len(esPassword) == 0)
                                 and (prevCurlContents['password'] is not None)
-                                and YesOrNo(f'Use previously entered password for "{esUsername}"?', default=True)
+                                and YesOrNo(
+                                    f'Use previously entered password for "{esUsername}"?',
+                                    default=True,
+                                    defaultBehavior=defaultBehavior,
+                                )
                             ):
                                 esPassword = prevCurlContents['password']
                                 esPasswordConfirm = esPassword
                             else:
-                                esPasswordConfirm = AskForPassword(f"{esUsername} password (again): ")
+                                esPasswordConfirm = AskForPassword(
+                                    f"{esUsername} password (again): ",
+                                    default='',
+                                    defaultBehavior=defaultBehavior,
+                                )
                             if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
                                 break
                             eprint("Passwords do not match")
@@ -1576,6 +1653,7 @@ def authSetup(wipe=False):
                         esSslVerify = YesOrNo(
                             'Require SSL certificate validation for OpenSearch communication?',
                             default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
+                            defaultBehavior=defaultBehavior,
                         )
 
                         with open(openSearchCredFileName, 'w') as f:
@@ -1597,16 +1675,26 @@ def authSetup(wipe=False):
                 # prompt username and password
                 emailPassword = None
                 emailPasswordConfirm = None
-                emailSender = AskForString("OpenSearch alerting email sender name")
-                while True:
-                    emailUsername = AskForString("Email account username")
+                emailSender = AskForString("OpenSearch alerting email sender name", defaultBehavior=defaultBehavior)
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account username')
+                while loopBreaker.increment():
+                    emailUsername = AskForString("Email account username", defaultBehavior=defaultBehavior)
                     if len(emailUsername) > 0:
                         break
 
-                while True:
-                    emailPassword = AskForPassword(f"{emailUsername} password: ")
-                    emailPasswordConfirm = AskForPassword(f"{emailUsername} password (again): ")
-                    if emailPassword == emailPasswordConfirm:
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account password')
+                while loopBreaker.increment():
+                    emailPassword = AskForPassword(
+                        f"{emailUsername} password: ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    emailPasswordConfirm = AskForPassword(
+                        f"{emailUsername} password (again): ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if emailPassword and (emailPassword == emailPasswordConfirm):
                         break
                     eprint("Passwords do not match")
 
@@ -1716,6 +1804,7 @@ def authSetup(wipe=False):
             elif authItem[0] == 'txfwcerts':
                 DisplayMessage(
                     'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
+                    defaultBehavior=defaultBehavior,
                 )
                 with pushd(filebeatPath):
                     with Popen(
@@ -1779,9 +1868,9 @@ def main():
         '--file',
         required=False,
         dest='composeFile',
-        metavar='<STR>',
+        metavar='<string>',
         type=str,
-        default='docker-compose.yml',
+        default=os.getenv('MALCOLM_COMPOSE_FILE', os.path.join(MalcolmPath, 'docker-compose.yml')),
         help='docker-compose or kubeconfig YML file',
     )
     parser.add_argument(
@@ -1789,32 +1878,151 @@ def main():
         '--environment-dir',
         required=False,
         dest='configDir',
-        metavar='<STR>',
+        metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_CONFIG_DIR', None),
         help="Directory containing Malcolm's .env files",
     )
-    parser.add_argument(
+
+    operationsGroup = parser.add_argument_group('Runtime Control')
+    operationsGroup.add_argument(
+        '--start',
+        dest='cmdStart',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Start Malcolm",
+    )
+    operationsGroup.add_argument(
+        '--restart',
+        dest='cmdRestart',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Stop and restart Malcolm",
+    )
+    operationsGroup.add_argument(
+        '--stop',
+        dest='cmdStop',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Stop Malcolm",
+    )
+    operationsGroup.add_argument(
+        '--wipe',
+        dest='cmdWipe',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Stop Malcolm and delete all data",
+    )
+
+    kubernetesGroup = parser.add_argument_group('Kubernetes')
+    kubernetesGroup.add_argument(
         '-n',
         '--namespace',
         required=False,
         dest='namespace',
-        metavar='<STR>',
+        metavar='<string>',
         type=str,
         default='malcolm',
         help="Kubernetes namespace",
     )
-    parser.add_argument(
-        '-s',
-        '--service',
-        required=False,
-        dest='service',
-        metavar='<STR>',
-        type=str,
-        default=None,
-        help='docker-compose service (only for status and logs operations)',
+    kubernetesGroup.add_argument(
+        '--reclaim-persistent-volume',
+        dest='deleteRetPerVol',
+        action='store_true',
+        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "stop" operation with Kubernetes)',
     )
-    parser.add_argument(
+    kubernetesGroup.add_argument(
+        '--no-reclaim-persistent-volume',
+        dest='deleteRetPerVol',
+        action='store_false',
+        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "stop" operation with Kubernetes)',
+    )
+    kubernetesGroup.set_defaults(deleteRetPerVol=True)
+
+    authSetupGroup = parser.add_argument_group('Authentication Setup')
+    authSetupGroup.add_argument(
+        '--auth',
+        dest='cmdAuthSetup',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Configure Malcolm authentication",
+    )
+    authSetupGroup.add_argument(
+        '--auth-noninteractive',
+        dest='cmdAuthSetupNonInteractive',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Configure Malcolm authentication (noninteractive using arguments provided)",
+    )
+    authSetupGroup.add_argument(
+        '--auth-admin-username',
+        dest='authUserName',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Administrator username (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-admin-password-openssl',
+        dest='authPasswordOpenssl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Administrator password hash from "openssl -passwd -1" (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-admin-password-htpasswd',
+        dest='authPasswordHtpasswd',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Administrator password hash from "htpasswd -n -B username | cut -d: -f2" (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-webcerts',
+        dest='authGenWebCerts',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate self-signed certificates for HTTPS access (for --auth-noninteractive)",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-fwcerts',
+        dest='authGenFwCerts',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate self-signed certificates for a remote log forwarder",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-netbox-passwords',
+        dest='authGenNetBoxPasswords',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate internal passwords for NetBox",
+    )
+
+    logsAndStatusGroup = parser.add_argument_group('Logs and Status')
+    logsAndStatusGroup.add_argument(
         '-l',
         '--logs',
         dest='cmdLogs',
@@ -1824,7 +2032,7 @@ def main():
         default=False,
         help="Tail Malcolm logs",
     )
-    parser.add_argument(
+    logsAndStatusGroup.add_argument(
         '--lines',
         dest='logLineCount',
         type=posInt,
@@ -1833,83 +2041,7 @@ def main():
         default=None,
         help='Number of log lines to output. Outputs all lines by default (only for logs operation)',
     )
-    parser.add_argument(
-        '--netbox-backup',
-        dest='netboxBackupFile',
-        required=False,
-        metavar='<STR>',
-        type=str,
-        default=None,
-        help='Filename to which to back up NetBox configuration database',
-    )
-    parser.add_argument(
-        '--netbox-restore',
-        dest='netboxRestoreFile',
-        required=False,
-        metavar='<STR>',
-        type=str,
-        default=None,
-        help='Filename from which to restore NetBox configuration database',
-    )
-    parser.add_argument(
-        '--start',
-        dest='cmdStart',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Start Malcolm",
-    )
-    parser.add_argument(
-        '--restart',
-        dest='cmdRestart',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Stop and restart Malcolm",
-    )
-    parser.add_argument(
-        '--stop',
-        dest='cmdStop',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Stop Malcolm",
-    )
-    parser.add_argument(
-        '--wipe',
-        dest='cmdWipe',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Stop Malcolm and delete all data",
-    )
-    parser.add_argument(
-        '--reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_true',
-        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "stop" operation with Kubernetes)',
-    )
-    parser.add_argument(
-        '--no-reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_false',
-        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "stop" operation with Kubernetes)',
-    )
-    parser.set_defaults(deleteRetPerVol=True)
-    parser.add_argument(
-        '--auth',
-        dest='cmdAuthSetup',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Configure Malcolm authentication",
-    )
-    parser.add_argument(
+    logsAndStatusGroup.add_argument(
         '--status',
         dest='cmdStatus',
         type=str2bool,
@@ -1918,7 +2050,7 @@ def main():
         default=False,
         help="Display status of Malcolm components",
     )
-    parser.add_argument(
+    logsAndStatusGroup.add_argument(
         '--urls',
         dest='cmdPrintURLs',
         type=str2bool,
@@ -1926,6 +2058,36 @@ def main():
         const=True,
         default=False,
         help="Display Malcolm URLs",
+    )
+    logsAndStatusGroup.add_argument(
+        '-s',
+        '--service',
+        required=False,
+        dest='service',
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='docker-compose service (only for status and logs operations)',
+    )
+
+    netboxGroup = parser.add_argument_group('NetBox Backup and Restore')
+    netboxGroup.add_argument(
+        '--netbox-backup',
+        dest='netboxBackupFile',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='Filename to which to back up NetBox configuration database',
+    )
+    netboxGroup.add_argument(
+        '--netbox-restore',
+        dest='netboxRestoreFile',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='Filename from which to restore NetBox configuration database',
     )
 
     try:
@@ -2072,7 +2234,7 @@ def main():
             stop(wipe=args.cmdWipe)
 
         # configure Malcolm authentication
-        if args.cmdAuthSetup:
+        if args.cmdAuthSetup or args.cmdAuthSetupNonInteractive:
             authSetup()
 
         # start Malcolm

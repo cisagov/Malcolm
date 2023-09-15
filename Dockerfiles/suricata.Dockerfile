@@ -11,6 +11,8 @@ LABEL org.opencontainers.image.description='Malcolm container providing Suricata
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 # configure unprivileged user and runtime parameters
 ARG DEFAULT_UID=1000
@@ -99,7 +101,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
         tini \
         vim-tiny \
         zlib1g && \
-    python3 -m pip install --break-system-packages --no-cache-dir watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
         chmod +x "$SUPERCRONIC" && \
