@@ -67,6 +67,8 @@ jobs:
           file: ./Dockerfiles/zeek.Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/zeek:${{ steps.extract_branch.outputs.branch }}
+          build-args: |
+            BUILD_JOBS=2
       -
         name: Run Trivy vulnerability scanner
         id: trivy-scan

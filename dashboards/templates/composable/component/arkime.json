@@ -2,6 +2,7 @@
   "template": {
     "mappings": {
       "properties": {
+        "destination.as.full": { "type": "keyword" },
         "destination.geo.country_code2": { "type": "keyword" },
         "destination.geo.country_code3": { "type": "keyword" },
         "destination.geo.dma_code": { "type": "short" },
@@ -9,18 +10,9 @@
         "destination.geo.latitude": { "type": "float" },
         "destination.geo.location": { "type": "geo_point" },
         "destination.geo.longitude": { "type": "float" },
-        "dns.host": { "type": "keyword" },
-        "firstPacket": { "type": "date" },
-        "http.xffASN": { "type": "keyword" },
-        "http.xffGEO": { "type": "keyword" },
-        "http.xffIp": { "type": "ip" },
-        "http.xffRIR": { "type": "keyword" },
-        "lastPacket": { "type": "date" },
-        "node": { "type": "keyword" },
-        "protocol": { "type": "keyword" },
-        "quic.host": { "type": "keyword" },
-        "quic.version": { "type": "keyword" },
-        "rootId": { "type": "keyword" },
+        "destination.mac-cnt": { "type": "long" },
+        "network.vlan.id-cnt": { "type": "long" },
+        "source.as.full": { "type": "keyword" },
         "source.geo.country_code2": { "type": "keyword" },
         "source.geo.country_code3": { "type": "keyword" },
         "source.geo.dma_code": { "type": "short" },
@@ -28,9 +20,896 @@
         "source.geo.latitude": { "type": "float" },
         "source.geo.location": { "type": "geo_point" },
         "source.geo.longitude": { "type": "float" },
+        "source.mac-cnt": { "type": "long" },
         "timestamp": { "type": "date" },
-        "user": { "type": "keyword" }
+        "asset" : {
+          "type" : "keyword"
+        },
+        "assetCnt" : {
+          "type" : "long"
+        },
+        "bgp" : {
+          "properties" : {
+            "type" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "cert" : {
+          "properties" : {
+            "alt" : {
+              "type" : "keyword"
+            },
+            "altCnt" : {
+              "type" : "long"
+            },
+            "curve" : {
+              "type" : "keyword"
+            },
+            "hash" : {
+              "type" : "keyword"
+            },
+            "issuerCN" : {
+              "type" : "keyword"
+            },
+            "issuerON" : {
+              "type" : "keyword"
+            },
+            "notAfter" : {
+              "type" : "date"
+            },
+            "notBefore" : {
+              "type" : "date"
+            },
+            "publicAlgorithm" : {
+              "type" : "keyword"
+            },
+            "remainingDays" : {
+              "type" : "long"
+            },
+            "serial" : {
+              "type" : "keyword"
+            },
+            "subjectCN" : {
+              "type" : "keyword"
+            },
+            "subjectON" : {
+              "type" : "keyword"
+            },
+            "validDays" : {
+              "type" : "long"
+            }
+          }
+        },
+        "certCnt" : {
+          "type" : "long"
+        },
+        "dhcp" : {
+          "properties" : {
+            "host" : {
+              "type" : "keyword"
+            },
+            "hostCnt" : {
+              "type" : "long"
+            },
+            "id" : {
+              "type" : "keyword"
+            },
+            "idCnt" : {
+              "type" : "long"
+            },
+            "mac" : {
+              "type" : "keyword"
+            },
+            "macCnt" : {
+              "type" : "long"
+            },
+            "oui" : {
+              "type" : "keyword"
+            },
+            "ouiCnt" : {
+              "type" : "long"
+            },
+            "type" : {
+              "type" : "keyword"
+            },
+            "typeCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "dns" : {
+          "properties" : {
+            "ASN" : {
+              "type" : "keyword"
+            },
+            "GEO" : {
+              "type" : "keyword"
+            },
+            "RIR" : {
+              "type" : "keyword"
+            },
+            "host" : {
+              "type" : "keyword"
+            },
+            "hostCnt" : {
+              "type" : "long"
+            },
+            "ip" : {
+              "type" : "ip"
+            },
+            "ipCnt" : {
+              "type" : "long"
+            },
+            "opcode" : {
+              "type" : "keyword"
+            },
+            "opcodeCnt" : {
+              "type" : "long"
+            },
+            "puny" : {
+              "type" : "keyword"
+            },
+            "punyCnt" : {
+              "type" : "long"
+            },
+            "qc" : {
+              "type" : "keyword"
+            },
+            "qcCnt" : {
+              "type" : "long"
+            },
+            "qt" : {
+              "type" : "keyword"
+            },
+            "qtCnt" : {
+              "type" : "long"
+            },
+            "status" : {
+              "type" : "keyword"
+            },
+            "statusCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "dstOui" : {
+          "type" : "keyword"
+        },
+        "dstOuiCnt" : {
+          "type" : "long"
+        },
+        "dstPayload8" : {
+          "type" : "keyword"
+        },
+        "dstRIR" : {
+          "type" : "keyword"
+        },
+        "email" : {
+          "properties" : {
+            "ASN" : {
+              "type" : "keyword"
+            },
+            "GEO" : {
+              "type" : "keyword"
+            },
+            "RIR" : {
+              "type" : "keyword"
+            },
+            "bodyMagic" : {
+              "type" : "keyword"
+            },
+            "bodyMagicCnt" : {
+              "type" : "long"
+            },
+            "contentType" : {
+              "type" : "keyword"
+            },
+            "contentTypeCnt" : {
+              "type" : "long"
+            },
+            "dst" : {
+              "type" : "keyword"
+            },
+            "dstCnt" : {
+              "type" : "long"
+            },
+            "filename" : {
+              "type" : "keyword"
+            },
+            "filenameCnt" : {
+              "type" : "long"
+            },
+            "header" : {
+              "type" : "keyword"
+            },
+            "header-chad" : {
+              "type" : "keyword"
+            },
+            "header-chadCnt" : {
+              "type" : "long"
+            },
+            "headerCnt" : {
+              "type" : "long"
+            },
+            "host" : {
+              "type" : "keyword"
+            },
+            "hostCnt" : {
+              "type" : "long"
+            },
+            "id" : {
+              "type" : "keyword"
+            },
+            "idCnt" : {
+              "type" : "long"
+            },
+            "ip" : {
+              "type" : "ip"
+            },
+            "ipCnt" : {
+              "type" : "long"
+            },
+            "md5" : {
+              "type" : "keyword"
+            },
+            "md5Cnt" : {
+              "type" : "long"
+            },
+            "mimeVersion" : {
+              "type" : "keyword"
+            },
+            "mimeVersionCnt" : {
+              "type" : "long"
+            },
+            "smtpHello" : {
+              "type" : "keyword"
+            },
+            "smtpHelloCnt" : {
+              "type" : "long"
+            },
+            "src" : {
+              "type" : "keyword"
+            },
+            "srcCnt" : {
+              "type" : "long"
+            },
+            "subject" : {
+              "type" : "keyword"
+            },
+            "subjectCnt" : {
+              "type" : "long"
+            },
+            "useragent" : {
+              "type" : "keyword"
+            },
+            "useragentCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "fileId" : {
+          "type" : "long"
+        },
+        "firstPacket" : {
+          "type" : "date"
+        },
+        "srcOuterIp" : {
+          "type" : "ip"
+        },
+        "srcOuterIpCnt" : {
+          "type" : "long"
+        },
+        "dstOuterIp" : {
+          "type" : "ip"
+        },
+        "dstOuterIpCnt" : {
+          "type" : "long"
+        },
+        "srcOuterOui" : {
+          "type" : "keyword"
+        },
+        "srcOuterOuiCnt" : {
+          "type" : "long"
+        },
+        "dstOuterOui" : {
+          "type" : "keyword"
+        },
+        "dstOuterOuiCnt" : {
+          "type" : "long"
+        },
+        "srcOuterMac" : {
+          "type" : "keyword"
+        },
+        "srcOuterMacCnt" : {
+          "type" : "long"
+        },
+        "dstOuterMac" : {
+          "type" : "keyword"
+        },
+        "dstOuterMacCnt" : {
+          "type" : "long"
+        },
+        "srcOuterRIR" : {
+          "type" : "keyword"
+        },
+        "dstOuterRIR" : {
+          "type" : "keyword"
+        },
+        "srcOuterGEO" : {
+          "type" : "keyword"
+        },
+        "dstOuterGEO" : {
+          "type" : "keyword"
+        },
+        "srcOuterASN" : {
+          "type" : "keyword"
+        },
+        "dstOuterASN" : {
+          "type" : "keyword"
+        },
+        "http" : {
+          "properties" : {
+            "authType" : {
+              "type" : "keyword"
+            },
+            "authTypeCnt" : {
+              "type" : "long"
+            },
+            "bodyMagic" : {
+              "type" : "keyword"
+            },
+            "bodyMagicCnt" : {
+              "type" : "long"
+            },
+            "clientVersion" : {
+              "type" : "keyword"
+            },
+            "clientVersionCnt" : {
+              "type" : "long"
+            },
+            "cookieKey" : {
+              "type" : "keyword"
+            },
+            "cookieKeyCnt" : {
+              "type" : "long"
+            },
+            "cookieValue" : {
+              "type" : "keyword"
+            },
+            "cookieValueCnt" : {
+              "type" : "long"
+            },
+            "host" : {
+              "type" : "keyword"
+            },
+            "hostCnt" : {
+              "type" : "long"
+            },
+            "key" : {
+              "type" : "keyword"
+            },
+            "keyCnt" : {
+              "type" : "long"
+            },
+            "md5" : {
+              "type" : "keyword"
+            },
+            "md5Cnt" : {
+              "type" : "long"
+            },
+            "method" : {
+              "type" : "keyword"
+            },
+            "methodCnt" : {
+              "type" : "long"
+            },
+            "path" : {
+              "type" : "keyword"
+            },
+            "pathCnt" : {
+              "type" : "long"
+            },
+            "request-authorization" : {
+              "type" : "keyword"
+            },
+            "request-authorizationCnt" : {
+              "type" : "long"
+            },
+            "request-chad" : {
+              "type" : "keyword"
+            },
+            "request-chadCnt" : {
+              "type" : "long"
+            },
+            "request-content-type" : {
+              "type" : "keyword"
+            },
+            "request-content-typeCnt" : {
+              "type" : "long"
+            },
+            "request-origin" : {
+              "type" : "keyword"
+            },
+            "request-referer" : {
+              "type" : "keyword"
+            },
+            "request-refererCnt" : {
+              "type" : "long"
+            },
+            "requestBody" : {
+              "type" : "keyword"
+            },
+            "requestHeader" : {
+              "type" : "keyword"
+            },
+            "requestHeaderCnt" : {
+              "type" : "long"
+            },
+            "response-content-type" : {
+              "type" : "keyword"
+            },
+            "response-content-typeCnt" : {
+              "type" : "long"
+            },
+            "response-location" : {
+              "type" : "keyword"
+            },
+            "response-server" : {
+              "type" : "keyword"
+            },
+            "responseHeader" : {
+              "type" : "keyword"
+            },
+            "responseHeaderCnt" : {
+              "type" : "long"
+            },
+            "serverVersion" : {
+              "type" : "keyword"
+            },
+            "serverVersionCnt" : {
+              "type" : "long"
+            },
+            "statuscode" : {
+              "type" : "long"
+            },
+            "statuscodeCnt" : {
+              "type" : "long"
+            },
+            "uri" : {
+              "type" : "keyword"
+            },
+            "uriCnt" : {
+              "type" : "long"
+            },
+            "user" : {
+              "type" : "keyword"
+            },
+            "userCnt" : {
+              "type" : "long"
+            },
+            "useragent" : {
+              "type" : "keyword"
+            },
+            "useragentCnt" : {
+              "type" : "long"
+            },
+            "value" : {
+              "type" : "keyword"
+            },
+            "valueCnt" : {
+              "type" : "long"
+            },
+            "xffASN" : {
+              "type" : "keyword"
+            },
+            "xffGEO" : {
+              "type" : "keyword"
+            },
+            "xffIp" : {
+              "type" : "ip"
+            },
+            "xffIpCnt" : {
+              "type" : "long"
+            },
+            "xffRIR" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "icmp" : {
+          "properties" : {
+            "code" : {
+              "type" : "long"
+            },
+            "type" : {
+              "type" : "long"
+            }
+          }
+        },
+        "initRTT" : {
+          "type" : "long"
+        },
+        "ipProtocol" : {
+          "type" : "long"
+        },
+        "irc" : {
+          "properties" : {
+            "channel" : {
+              "type" : "keyword"
+            },
+            "channelCnt" : {
+              "type" : "long"
+            },
+            "nick" : {
+              "type" : "keyword"
+            },
+            "nickCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "krb5" : {
+          "properties" : {
+            "cname" : {
+              "type" : "keyword"
+            },
+            "cnameCnt" : {
+              "type" : "long"
+            },
+            "realm" : {
+              "type" : "keyword"
+            },
+            "realmCnt" : {
+              "type" : "long"
+            },
+            "sname" : {
+              "type" : "keyword"
+            },
+            "snameCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "lastPacket" : {
+          "type" : "date"
+        },
+        "ldap" : {
+          "properties" : {
+            "authtype" : {
+              "type" : "keyword"
+            },
+            "authtypeCnt" : {
+              "type" : "long"
+            },
+            "bindname" : {
+              "type" : "keyword"
+            },
+            "bindnameCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "length" : {
+          "type" : "long"
+        },
+        "mysql" : {
+          "properties" : {
+            "user" : {
+              "type" : "keyword"
+            },
+            "version" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "node" : {
+          "type" : "keyword"
+        },
+        "oracle" : {
+          "properties" : {
+            "host" : {
+              "type" : "keyword"
+            },
+            "service" : {
+              "type" : "keyword"
+            },
+            "user" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "packetLen" : {
+          "type" : "integer",
+          "index" : false
+        },
+        "packetPos" : {
+          "type" : "long",
+          "index" : false
+        },
+        "postgresql" : {
+          "properties" : {
+            "app" : {
+              "type" : "keyword"
+            },
+            "db" : {
+              "type" : "keyword"
+            },
+            "user" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "protocol" : {
+          "type" : "keyword"
+        },
+        "protocolCnt" : {
+          "type" : "long"
+        },
+        "quic" : {
+          "properties" : {
+            "host" : {
+              "type" : "keyword"
+            },
+            "hostCnt" : {
+              "type" : "long"
+            },
+            "useragent" : {
+              "type" : "keyword"
+            },
+            "useragentCnt" : {
+              "type" : "long"
+            },
+            "version" : {
+              "type" : "keyword"
+            },
+            "versionCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "radius" : {
+          "properties" : {
+            "framedASN" : {
+              "type" : "keyword"
+            },
+            "framedGEO" : {
+              "type" : "keyword"
+            },
+            "framedIp" : {
+              "type" : "ip"
+            },
+            "framedIpCnt" : {
+              "type" : "long"
+            },
+            "framedRIR" : {
+              "type" : "keyword"
+            },
+            "mac" : {
+              "type" : "keyword"
+            },
+            "macCnt" : {
+              "type" : "long"
+            },
+            "user" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "rootId" : {
+          "type" : "keyword"
+        },
+        "segmentCnt" : {
+          "type" : "long"
+        },
+        "smb" : {
+          "properties" : {
+            "filename" : {
+              "type" : "keyword"
+            },
+            "filenameCnt" : {
+              "type" : "long"
+            },
+            "host" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "socks" : {
+          "properties" : {
+            "ASN" : {
+              "type" : "keyword"
+            },
+            "GEO" : {
+              "type" : "keyword"
+            },
+            "RIR" : {
+              "type" : "keyword"
+            },
+            "host" : {
+              "type" : "keyword"
+            },
+            "ip" : {
+              "type" : "ip"
+            },
+            "port" : {
+              "type" : "long"
+            },
+            "user" : {
+              "type" : "keyword"
+            }
+          }
+        },
+        "srcOui" : {
+          "type" : "keyword"
+        },
+        "srcOuiCnt" : {
+          "type" : "long"
+        },
+        "srcPayload8" : {
+          "type" : "keyword"
+        },
+        "srcRIR" : {
+          "type" : "keyword"
+        },
+        "ssh" : {
+          "properties" : {
+            "hassh" : {
+              "type" : "keyword"
+            },
+            "hasshCnt" : {
+              "type" : "long"
+            },
+            "hasshServer" : {
+              "type" : "keyword"
+            },
+            "hasshServerCnt" : {
+              "type" : "long"
+            },
+            "key" : {
+              "type" : "keyword"
+            },
+            "keyCnt" : {
+              "type" : "long"
+            },
+            "version" : {
+              "type" : "keyword"
+            },
+            "versionCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "suricata" : {
+          "properties" : {
+            "action" : {
+              "type" : "keyword"
+            },
+            "actionCnt" : {
+              "type" : "long"
+            },
+            "category" : {
+              "type" : "keyword"
+            },
+            "categoryCnt" : {
+              "type" : "long"
+            },
+            "flowId" : {
+              "type" : "keyword"
+            },
+            "flowIdCnt" : {
+              "type" : "long"
+            },
+            "gid" : {
+              "type" : "long"
+            },
+            "gidCnt" : {
+              "type" : "long"
+            },
+            "severity" : {
+              "type" : "long"
+            },
+            "severityCnt" : {
+              "type" : "long"
+            },
+            "signature" : {
+              "type" : "keyword"
+            },
+            "signatureCnt" : {
+              "type" : "long"
+            },
+            "signatureId" : {
+              "type" : "long"
+            },
+            "signatureIdCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "tags" : {
+          "type" : "keyword"
+        },
+        "tagsCnt" : {
+          "type" : "long"
+        },
+        "tcpflags" : {
+          "properties" : {
+            "ack" : {
+              "type" : "long"
+            },
+            "dstZero" : {
+              "type" : "long"
+            },
+            "fin" : {
+              "type" : "long"
+            },
+            "psh" : {
+              "type" : "long"
+            },
+            "rst" : {
+              "type" : "long"
+            },
+            "srcZero" : {
+              "type" : "long"
+            },
+            "syn" : {
+              "type" : "long"
+            },
+            "syn-ack" : {
+              "type" : "long"
+            },
+            "urg" : {
+              "type" : "long"
+            }
+          }
+        },
+        "tls" : {
+          "properties" : {
+            "cipher" : {
+              "type" : "keyword"
+            },
+            "cipherCnt" : {
+              "type" : "long"
+            },
+            "dstSessionId" : {
+              "type" : "keyword"
+            },
+            "ja3" : {
+              "type" : "keyword"
+            },
+            "ja3Cnt" : {
+              "type" : "long"
+            },
+            "ja3s" : {
+              "type" : "keyword"
+            },
+            "ja3sCnt" : {
+              "type" : "long"
+            },
+            "srcSessionId" : {
+              "type" : "keyword"
+            },
+            "version" : {
+              "type" : "keyword"
+            },
+            "versionCnt" : {
+              "type" : "long"
+            }
+          }
+        },
+        "totDataBytes" : {
+          "type" : "long"
+        },
+        "user" : {
+          "type" : "keyword"
+        },
+        "userCnt" : {
+          "type" : "long"
+        }
       }
     }
+  },
+  "_meta": {
+    "description": "mostly lifted from Arkime's db.pl sessions3Update"
   }
 }

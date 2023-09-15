@@ -1,0 +1,49 @@
+version = 1
+
+[[steps]]
+[steps.shell]
+script = '''
+echo "Installing system packages..."
+sudo apt-get -y -q update
+sudo apt-get -y -q --no-install-recommends install \
+    bash \
+    bat \
+    bc \
+    bzip2 \
+    ca-certificates \
+    curl \
+    detox \
+    dialog \
+    direnv \
+    dtrx \
+    fd-find \
+    file \
+    git \
+    gpg \
+    iproute2 \
+    iputils-ping \
+    jq \
+    less \
+    lz4 \
+    moreutils \
+    ncat \
+    netcat-openbsd \
+    p7zip-full \
+    procps \
+    psmisc \
+    pv \
+    python3-dialog \
+    python3-dotenv \
+    python3-requests \
+    ripgrep \
+    rsync \
+    socat \
+    tmux \
+    unzip \
+    vim-tiny \
+    xz-utils \
+    yq \
+    zip \
+    zlib1g
+sudo ln -s -r /usr/bin/batcat /usr/bin/bat
+'''

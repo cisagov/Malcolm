@@ -1,0 +1,11 @@
+version = 1
+
+[[steps]]
+[steps.shell]
+script = '''
+echo "Pulling Malcolm container images..."
+pushd "$HOME"/Malcolm
+./scripts/github_image_helper.sh "$(./scripts/github_image_helper.sh 99999 2>&1 | grep PullAndTagGithubWorkflowImages | awk '{print $1}')"
+popd
+docker images
+'''

@@ -104,7 +104,7 @@ def register(params)
   @source_mac = params["source_mac"]
   @source_segment = params["source_segment"]
 
-  # default manufacturer, device role and device type if not specified, either specified directly or read from ENVs
+  # default manufacturer, role and device type if not specified, either specified directly or read from ENVs
   @default_manuf = params["default_manuf"]
   _default_manuf_env = params["default_manuf_env"]
   if @default_manuf.nil? && !_default_manuf_env.nil?
@@ -149,13 +149,13 @@ def register(params)
     @default_dtype = nil
   end
 
-  @default_drole = params["default_drole"]
-  _default_drole_env = params["default_drole_env"]
-  if @default_drole.nil? && !_default_drole_env.nil?
-    @default_drole = ENV[_default_drole_env]
+  @default_role = params["default_role"]
+  _default_role_env = params["default_role_env"]
+  if @default_role.nil? && !_default_role_env.nil?
+    @default_role = ENV[_default_role_env]
   end
-  if !@default_drole.nil? && @default_drole.empty?
-    @default_drole = nil
+  if !@default_role.nil? && @default_role.empty?
+    @default_role = nil
   end
 
   # threshold for fuzzy string matching (for manufacturer, etc.)
@@ -181,8 +181,8 @@ def register(params)
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = LruRedux::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048))
 
-  # case-insensitive hash of device role names to IDs
-  @drole_hash = LruRedux::ThreadSafeCache.new(params.fetch("drole_cache_size", 128))
+  # case-insensitive hash of role names to IDs
+  @role_hash = LruRedux::ThreadSafeCache.new(params.fetch("role_cache_size", 128))
 
   # case-insensitive hash of site names to IDs
   @site_hash = LruRedux::ThreadSafeCache.new(params.fetch("site_cache_size", 128))
@@ -209,7 +209,7 @@ def filter(event)
   _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
   _autopopulate = @autopopulate
   _autopopulate_default_manuf = (@default_manuf.nil? || @default_manuf.empty?) ? "Unspecified" : @default_manuf
-  _autopopulate_default_drole = (@default_drole.nil? || @default_drole.empty?) ? "Unspecified" : @default_drole
+  _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
   _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
   _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
   _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
@@ -231,7 +231,7 @@ def filter(event)
 
               _lookup_result = nil
               _autopopulate_device = nil
-              _autopopulate_drole = nil
+              _autopopulate_role = nil
               _autopopulate_dtype = nil
               _autopopulate_interface = nil
               _autopopulate_ip = nil
@@ -298,7 +298,7 @@ def filter(event)
                                         :url => _device.fetch(:url, nil),
                                         :service => _device.fetch(:service, []).map {|s| s.fetch(:name, s.fetch(:display, nil)) },
                                         :site => _device_site,
-                                        :role => ((_role = _device.fetch(:role, _device.fetch(:device_role, nil))) && _role&.has_key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
+                                        :role => ((_role = _device.fetch(:role, nil)) && _role&.has_key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
                                         :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.has_key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                                         :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.has_key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
                                         :manufacturer => ((_manuf = _device.dig(:device_type, :manufacturer)) && _manuf&.has_key?(:name)) ? _manuf[:name] : _manuf&.fetch(:display, nil),
@@ -409,7 +409,7 @@ def filter(event)
                                             :id => nil}
                   end
 
-                  # make sure the site and device role exists
+                  # make sure the site and role exists
 
                   _autopopulate_site = @site_hash.getset(_autopopulate_default_site) {
                     begin
@@ -447,32 +447,32 @@ def filter(event)
                     _site
                   }
 
-                  _autopopulate_drole = @drole_hash.getset(_autopopulate_default_drole) {
+                  _autopopulate_role = @role_hash.getset(_autopopulate_default_role) {
                     begin
-                      _drole = nil
+                      _role = nil
 
                       # look it up first
                       _query = { :offset => 0,
                                  :limit => 1,
-                                 :name => _autopopulate_default_drole }
-                      if (_droles_response = _nb.get('dcim/device-roles/', _query).body) &&
-                         _droles_response.is_a?(Hash) &&
-                         (_tmp_droles = _droles_response.fetch(:results, [])) &&
-                         (_tmp_droles.length() > 0)
+                                 :name => _autopopulate_default_role }
+                      if (_roles_response = _nb.get('dcim/device-roles/', _query).body) &&
+                         _roles_response.is_a?(Hash) &&
+                         (_tmp_roles = _roles_response.fetch(:results, [])) &&
+                         (_tmp_roles.length() > 0)
                       then
-                         _drole = _tmp_droles.first
+                         _role = _tmp_roles.first
                       end
 
-                      if _drole.nil?
-                        # the device role is not found, create it
-                        _drole_data = { :name => _autopopulate_default_drole,
-                                        :slug => _autopopulate_default_drole.to_url,
+                      if _role.nil?
+                        # the role is not found, create it
+                        _role_data = { :name => _autopopulate_default_role,
+                                        :slug => _autopopulate_default_role.to_url,
                                         :color => "d3d3d3" }
-                        if (_drole_create_response = _nb.post('dcim/device-roles/', _drole_data.to_json, _nb_headers).body) &&
-                           _drole_create_response.is_a?(Hash) &&
-                           _drole_create_response.has_key?(:id)
+                        if (_role_create_response = _nb.post('dcim/device-roles/', _role_data.to_json, _nb_headers).body) &&
+                           _role_create_response.is_a?(Hash) &&
+                           _role_create_response.has_key?(:id)
                         then
-                           _drole = _drole_create_response
+                           _role = _role_create_response
                         end
                       end
 
@@ -480,13 +480,13 @@ def filter(event)
                       # give up aka do nothing
                       _exception_error = true
                     end
-                    _drole
+                    _role
                   }
 
-                  # we should have found or created the autopopulate device role and site
+                  # we should have found or created the autopopulate role and site
                   begin
                     if _autopopulate_site&.fetch(:id, nil)&.nonzero? &&
-                       _autopopulate_drole&.fetch(:id, nil)&.nonzero?
+                       _autopopulate_role&.fetch(:id, nil)&.nonzero?
                     then
 
                       if _autopopulate_manuf[:vm]
@@ -568,7 +568,7 @@ def filter(event)
                             _device_name = _autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{_key}" : "#{_autopopulate_hostname} @ #{_key}"
                             _device_data = { :name => _device_name,
                                              :device_type => _autopopulate_dtype[:id],
-                                             :device_role => _autopopulate_drole[:id],
+                                             :role => _autopopulate_role[:id],
                                              :site => _autopopulate_site[:id],
                                              :status => "staged" }
                             if (_device_create_response = _nb.post('dcim/devices/', _device_data.to_json, _nb_headers).body) &&
@@ -584,7 +584,7 @@ def filter(event)
 
                       end # virtual machine vs. regular device
 
-                    end # site and drole are valid
+                    end # site and role are valid
 
                   rescue Faraday::Error
                     # give up aka do nothing
@@ -597,7 +597,7 @@ def filter(event)
                                   :id => _autopopulate_device&.fetch(:id, nil),
                                   :url => _autopopulate_device&.fetch(:url, nil),
                                   :site => _autopopulate_site&.fetch(:name, nil),
-                                  :role => _autopopulate_drole&.fetch(:name, nil),
+                                  :role => _autopopulate_role&.fetch(:name, nil),
                                   :device_type => _autopopulate_dtype&.fetch(:name, nil),
                                   :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
                                   :details => _verbose ? _autopopulate_device : nil }

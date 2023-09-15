@@ -171,16 +171,20 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - When using LDAP authentication, this question allows users to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
 * **Store PCAP, log and index files locally under /home/user/Malcolm?**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
-* **Delete the oldest indices when the database exceeds a certain size?**
-    - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
-* **Should Arkime delete PCAP files based on available storage?**
-    - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
+* **Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?**
+    - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
+    - **Delete the oldest indices when the database exceeds a certain size?**
+        - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
+    - **Should Arkime delete PCAP files based on available storage?**
+        - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
 * **Automatically analyze all PCAP files with Suricata?**
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
 * **Download updated Suricata signatures periodically?**
     - If the Malcolm instance has Internet connectivity, answer **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
 * **Automatically analyze all PCAP files with Zeek?**
     - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+* **Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?**
+    - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable Malcolm's ICS protocol analyzers for Zeek.
 * **Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?**
     - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
 * **Perform reverse DNS lookup locally for source and destination IP addresses in logs?**
@@ -249,22 +253,24 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Answer **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
 * **Specify default NetBox site name**
     - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used as a query parameter for these enrichment lookups.
-* **Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?**
-    - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). Answer **N** to this question in installations where Hedgehog Linux will be handling all network traffic capture. If users want Malcolm to observe and capture traffic instead of, or in addition to, a sensor running Hedgehog Linux, they should answer **Y**.
-* **Capture packets using netsniff-ng?**
-    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [netsniff-ng](http://netsniff-ng.org/) (instead of tcpdump). These PCAP files are then periodically rotated into Arkime for analysis. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
-* **Capture packets using tcpdump?**
-    - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated using [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng). Do not answer **Y** for both `tcpdump` and `netsniff-ng`.
-* **Should Malcolm analyze live network traffic with Suricata?**
-    - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
-* **Should Malcolm analyze live network traffic with Zeek?**
-    - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
+* **Should Malcolm capture live network traffic?**
+    - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). Answer **no** to this question in installations where Hedgehog Linux will be handling all network traffic capture. If users want Malcolm to observe and capture traffic instead of, or in addition to, a sensor running Hedgehog Linux, they should answer **yes** enable life traffic analysis using default settings, or select **customize** to proceed to answer the following related questions individually.
+    - **Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?**
+        - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated to be periodically rotated into Arkime for analysis.
+    - **Capture packets using netsniff-ng?**
+        - Answer **Y** to use [netsniff-ng](http://netsniff-ng.org/) to generate PCAP files for Arkime to analyze. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
+    - **Capture packets using tcpdump?**
+        - Answer **Y** to use [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng) to generate PCAP files for Arkime to analyze.
+    - **Should Malcolm analyze live network traffic with Suricata?**
+        - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
+    - **Should Malcolm analyze live network traffic with Zeek?**
+        - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
+    - **Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)**
+        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`.
+    - **Disable capture interface hardware offloading and adjust ring buffer sizes?**
+        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If unsure, users should probably answer **N**.
 * **Specify capture interface(s) (comma-separated)**
     - Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
-* **Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)**
-    - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`.
-* **Disable capture interface hardware offloading and adjust ring buffer sizes?**
-    - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If unsure, users should probably answer **N**.
 * **Enable dark mode for OpenSearch Dashboards?**
     - Answer **Y** for dark-themed dashboards or **N** for light-themed ones.
 
