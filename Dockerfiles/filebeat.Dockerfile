@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.9.0
+FROM docker.elastic.co/beats/filebeat-oss:8.10.0
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -23,6 +23,8 @@ ENV PUSER_PRIV_DROP false
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ARG AUTO_TAG=true
 ARG FILEBEAT_SCAN_FREQUENCY=10s
@@ -93,7 +95,7 @@ RUN apt-get -q update && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
+    python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

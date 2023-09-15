@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v3.5.7
+FROM netboxcommunity/netbox:v3.6.1
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -13,13 +13,15 @@ LABEL org.opencontainers.image.description='Malcolm container providing the NetB
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 ENV LANG C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ARG DEFAULT_UID=1000
 ARG DEFAULT_GID=1000
 ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "boxer"
-ENV PGROUP "boxer"
+ENV PUSER "ubuntu"
+ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 
 ENV SUPERCRONIC_VERSION "0.2.26"
@@ -50,15 +52,24 @@ ADD netbox/patch/* /tmp/netbox-patches/
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      gcc \
       git \
       jq \
+      libpq-dev \
+      libpq5 \
       patch \
       procps \
       psmisc \
+      python3-dev \
       rsync \
       supervisor \
       tini && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-cache-dir 'git+https://github.com/mmguero-dev/netbox-initializers' psycopg2 pynetbox python-slugify randomcolor && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
+      'git+https://github.com/tobiasge/netbox-initializers' \
+      psycopg2 \
+      pynetbox \
+      python-slugify \
+      randomcolor && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSLO "${SUPERCRONIC_URL}" && \
@@ -69,13 +80,11 @@ RUN apt-get -q update && \
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch git && \
+    apt-get -q -y --purge remove patch gcc git libpq-dev python3-dev && \
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    groupadd --gid ${DEFAULT_GID} ${PUSER} && \
-      useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
-      usermod -a -G tty ${PUSER} && \
+    usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \

@@ -1,0 +1,72 @@
+version = 1
+
+[[steps]]
+[steps.shell]
+script = '''
+echo "Downloading external utilities..."
+
+mkdir -p "$HOME"/.local/bin "$HOME"/.config
+[[ -z "$GITHUB_OAUTH_TOKEN" ]] && [[ -n "$GITHUB_TOKEN" ]] && export GITHUB_OAUTH_TOKEN="$GITHUB_TOKEN"
+
+cd /tmp
+FETCH_URL="https://github.com/gruntwork-io/fetch/releases/latest/download/fetch_linux_amd64"
+curl -fsSL -o /tmp/fetch "$FETCH_URL"
+chmod 755 /tmp/fetch
+/tmp/fetch --version >/dev/null 2>&1 && cp -f /tmp/fetch "$HOME"/.local/bin/fetch
+rm -rf /tmp/fetch
+
+if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
+
+  ASSETS=(
+    "https://github.com/aptible/supercronic|^supercronic-linux-amd64$|"$HOME"/.local/bin/supercronic|755"
+    "https://github.com/boringproxy/boringproxy|^boringproxy-linux-x86_64$|"$HOME"/.local/bin/boringproxy|755"
+    "https://github.com/FiloSottile/age|^age-v.+-linux-amd64\.tar\.gz$|/tmp/age.tar.gz"
+    "https://github.com/schollz/croc|^croc_.+_Linux-64bit\.tar\.gz$|/tmp/croc.tar.gz"
+    "https://github.com/smallstep/cli|^step_linux_.+_amd64\.tar\.gz$|/tmp/step.tar.gz"
+    "https://github.com/starship/starship|^starship-x86_64-unknown-linux-gnu\.tar\.gz$|/tmp/starship.tar.gz"
+  )
+
+  for i in ${ASSETS[@]}; do
+    REPO="$(echo "$i" | cut -d'|' -f1)"
+    ASSET_REGEX="$(echo "$i" | cut -d'|' -f2)"
+    OUTPUT_FILE="$(echo "$i" | cut -d'|' -f3)"
+    OUTPUT_FILE_PERMS="$(echo "$i" | cut -d'|' -f4)"
+    echo "" >&2
+    echo "Downloading asset for $REPO..." >&2
+    FETCH_DIR="$(mktemp -d)"
+    "$HOME"/.local/bin/fetch --log-level warn \
+      --repo="$REPO" \
+      --tag=">=0.0.0" \
+      --release-asset="$ASSET_REGEX" \
+      "$FETCH_DIR"
+    mv "$FETCH_DIR"/* "$OUTPUT_FILE"
+    rm -rf "$FETCH_DIR"
+    if [[ -f "$OUTPUT_FILE" ]]; then
+      chmod "${OUTPUT_FILE_PERMS:-644}" "$OUTPUT_FILE"
+      if [[ "$OUTPUT_FILE" == *.tar.gz ]] || [[ "$OUTPUT_FILE" == *.tgz ]]; then
+        UNPACK_DIR="$(mktemp -d)"
+        tar xzf "$OUTPUT_FILE" -C "$UNPACK_DIR"
+      elif [[ "$OUTPUT_FILE" == *.tar.xz ]] || [[ "$OUTPUT_FILE" == *.xz ]]; then
+        UNPACK_DIR="$(mktemp -d)"
+        tar xJf "$OUTPUT_FILE" -C "$UNPACK_DIR" --strip-components 1
+      elif [[ "$OUTPUT_FILE" == *.zip ]]; then
+        UNPACK_DIR="$(mktemp -d)"
+        unzip -q "$OUTPUT_FILE" -d "$UNPACK_DIR"
+      else
+        UNPACK_DIR=
+      fi
+      if [[ -d "$UNPACK_DIR" ]]; then
+        find "$UNPACK_DIR" -type f -exec file --mime-type "{}" \; | \
+          grep -P ":\s+application/.*executable" | \
+          cut -d: -f 1 | xargs -I XXX -r mv "XXX" "$HOME"/.local/bin
+        rm -rf "$UNPACK_DIR" "$OUTPUT_FILE"
+      fi
+    fi
+  done
+
+else
+  echo "Could not download and/or execute fetch"
+  rm -f "$HOME"/.local/bin/fetch
+  exit 1
+fi
+'''
