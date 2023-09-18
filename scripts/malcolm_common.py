@@ -74,6 +74,13 @@ class UserInterfaceMode(IntFlag):
     InteractionInput = auto()
 
 
+class DatabaseMode(IntFlag):
+    OpenSearchLocal = auto()
+    OpenSearchRemote = auto()
+    ElasticSearchRemote = auto()
+    DatabaseUnset = auto()
+
+
 BoundPath = namedtuple(
     "BoundPath",
     ["service", "container_dir", "files", "relative_dirs", "clean_empty_dirs"],

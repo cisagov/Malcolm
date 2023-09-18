@@ -35,6 +35,7 @@ from malcolm_common import (
     AskForString,
     ChooseMultiple,
     ChooseOne,
+    DatabaseMode,
     DetermineYamlFileFormat,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
@@ -513,65 +514,114 @@ class Installer(object):
         if args.lsWorkers:
             lsWorkers = args.lsWorkers
 
-        opensearchPrimaryRemote = False
+        opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
         opensearchPrimaryUrl = 'http://opensearch:9200'
         opensearchPrimarySslVerify = False
-        opensearchSecondaryRemote = False
+        opensearchPrimaryLabel = 'local OpenSearch'
+        opensearchSecondaryMode = DatabaseMode.DatabaseUnset
         opensearchSecondaryUrl = ''
         opensearchSecondarySslVerify = False
+        opensearchSecondaryLabel = 'remote OpenSearch'
         indexSnapshotCompressed = False
 
-        opensearchPrimaryRemote = not InstallerYesOrNo(
+        if InstallerYesOrNo(
             'Should Malcolm use and maintain its own OpenSearch instance?',
             default=args.ownOpenSearch,
-        )
-        if opensearchPrimaryRemote:
-            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
+        ):
+            opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
+
+        else:
+            databaseModeChoice = 'unset'
+            allowedDatabaseModes = {
+                'opensearch-local': [DatabaseMode.OpenSearchLocal, 'local OpenSearch'],
+                'opensearch-remote': [DatabaseMode.OpenSearchRemote, 'remote OpenSearch'],
+                'elasticsearch-remote': [DatabaseMode.ElasticSearchRemote, 'remote Elasticsearch'],
+            }
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid primary document store mode')
+            while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
+                databaseModeChoice = InstallerChooseOne(
+                    'Select primary Malcolm document store',
+                    choices=[
+                        (x, allowedDatabaseModes[x][1], x == 'opensearch-local')
+                        for x in list(allowedDatabaseModes.keys())
+                    ],
+                )
+            opensearchPrimaryMode = allowedDatabaseModes[databaseModeChoice][0]
+            opensearchPrimaryLabel = allowedDatabaseModes[databaseModeChoice][1]
+
+        if opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote):
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchPrimaryLabel} URL')
             opensearchPrimaryUrl = ''
             while (len(opensearchPrimaryUrl) <= 1) and loopBreaker.increment():
                 opensearchPrimaryUrl = InstallerAskForString(
-                    'Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    f'Enter primary {opensearchPrimaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchPrimaryUrl,
                 )
             opensearchPrimarySslVerify = opensearchPrimaryUrl.lower().startswith('https') and InstallerYesOrNo(
-                'Require SSL certificate validation for communication with primary OpenSearch instance?',
+                f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                 default=args.opensearchPrimarySslVerify,
             )
             indexSnapshotCompressed = InstallerYesOrNo(
-                'Compress OpenSearch index snapshots?',
+                f'Compress {opensearchPrimaryLabel} index snapshots?',
                 default=args.indexSnapshotCompressed,
             )
 
-        opensearchSecondaryRemote = InstallerYesOrNo(
-            'Forward Logstash logs to a secondary remote OpenSearch instance?',
+        if InstallerYesOrNo(
+            'Forward Logstash logs to a secondary remote document store?',
             default=args.opensearchSecondaryRemote,
-        )
-        if opensearchSecondaryRemote:
-            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
+        ):
+            databaseModeChoice = 'unset'
+            allowedDatabaseModes = {
+                'opensearch-remote': [DatabaseMode.OpenSearchRemote, 'remote OpenSearch'],
+                'elasticsearch-remote': [DatabaseMode.ElasticSearchRemote, 'remote Elasticsearch'],
+            }
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid secondary document store mode')
+            while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
+                databaseModeChoice = InstallerChooseOne(
+                    'Select secondary Malcolm document store',
+                    choices=[
+                        (x, allowedDatabaseModes[x][1], x == 'opensearch-remote')
+                        for x in list(allowedDatabaseModes.keys())
+                    ],
+                )
+            opensearchSecondaryMode = allowedDatabaseModes[databaseModeChoice][0]
+            opensearchSecondaryLabel = allowedDatabaseModes[databaseModeChoice][1]
+
+        if opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote):
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchSecondaryLabel} URL')
             opensearchSecondaryUrl = ''
             while (len(opensearchSecondaryUrl) <= 1) and loopBreaker.increment():
                 opensearchSecondaryUrl = InstallerAskForString(
-                    'Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    f'Enter secondary {opensearchSecondaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchSecondaryUrl,
                 )
             opensearchSecondarySslVerify = opensearchSecondaryUrl.lower().startswith('https') and InstallerYesOrNo(
-                'Require SSL certificate validation for communication with secondary OpenSearch instance?',
+                f'Require SSL certificate validation for communication with secondary {opensearchSecondaryLabel} instance?',
                 default=args.opensearchSecondarySslVerify,
             )
 
-        if opensearchPrimaryRemote or opensearchSecondaryRemote:
+        if (opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote)) or (
+            opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote)
+        ):
             InstallerDisplayMessage(
-                f'You must run auth_setup after {ScriptName} to store OpenSearch connection credentials.',
+                f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
             )
 
-        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch/LogStash memory setting(s)')
+        loopBreaker = CountUntilException(
+            MaxAskForValueCount,
+            f'Invalid {"OpenSearch/" if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal else ""}LogStash memory setting(s)',
+        )
         while (
             not InstallerYesOrNo(
-                f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
+                f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
+                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
+                else f'Setting {lsMemory} for Logstash. Is this OK?',
+                default=True,
             )
             and loopBreaker.increment()
         ):
-            osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
+            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
             lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
 
         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LogStash worker setting(s)')
@@ -624,14 +674,17 @@ class Installer(object):
                             'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
                             default=args.traefikHost,
                         )
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik OpenSearch request domain')
-                    while (
-                        (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost)
-                    ) and loopBreaker.increment():
-                        traefikOpenSearchHost = InstallerAskForString(
-                            f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
-                            default=args.traefikOpenSearchHost,
+                    if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid Traefik OpenSearch request domain'
                         )
+                        while (
+                            (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost)
+                        ) and loopBreaker.increment():
+                            traefikOpenSearchHost = InstallerAskForString(
+                                f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
+                                default=args.traefikOpenSearchHost,
+                            )
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik router entrypoint')
                     while (len(traefikEntrypoint) <= 1) and loopBreaker.increment():
                         traefikEntrypoint = InstallerAskForString(
@@ -774,7 +827,7 @@ class Installer(object):
                             )
                             break
 
-                if not opensearchPrimaryRemote:
+                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
                     # opensearch index directory
                     if not InstallerYesOrNo(
                         'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
@@ -848,12 +901,12 @@ class Installer(object):
 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
-            if not opensearchPrimaryRemote
+            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
             default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
         ):
             # delete oldest indexes based on index pattern size
-            if not opensearchPrimaryRemote:
+            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
                 if InstallerYesOrNo(
                     'Delete the oldest indices when the database exceeds a certain size?',
                     default=bool(args.indexPruneSizeLimit),
@@ -873,7 +926,7 @@ class Installer(object):
                     )
 
             # let Arkime delete old PCAP files based on available storage
-            arkimeManagePCAP = opensearchPrimaryRemote or InstallerYesOrNo(
+            arkimeManagePCAP = (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal) or InstallerYesOrNo(
                 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                 default=args.arkimeManagePCAP,
             )
@@ -930,7 +983,7 @@ class Installer(object):
                 filebeatTcpOpen = True
             else:
                 openPortsSelection = 'c'
-                opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
+                opensearchOpen = (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and InstallerYesOrNo(
                     'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
                 )
                 logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=args.exposeLogstash)
@@ -938,7 +991,7 @@ class Installer(object):
                     'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
                 )
         else:
-            opensearchOpen = not opensearchPrimaryRemote
+            opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
@@ -1328,7 +1381,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_LOCAL',
-                TrueOrFalseNoQuote(not opensearchPrimaryRemote),
+                TrueOrFalseNoQuote(opensearchPrimaryMode == DatabaseMode.OpenSearchLocal),
             ),
             # OpenSearch primary instance URL
             EnvValue(
@@ -1358,7 +1411,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY',
-                TrueOrFalseNoQuote(opensearchSecondaryRemote),
+                TrueOrFalseNoQuote(opensearchSecondaryMode == DatabaseMode.OpenSearchRemote),
             ),
             # OpenSearch memory allowance
             EnvValue(
