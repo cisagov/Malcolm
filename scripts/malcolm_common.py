@@ -77,9 +77,18 @@ class UserInterfaceMode(IntFlag):
 class DatabaseMode(IntFlag):
     OpenSearchLocal = auto()
     OpenSearchRemote = auto()
-    ElasticSearchRemote = auto()
+    ElasticsearchRemote = auto()
     DatabaseUnset = auto()
 
+
+DATABASE_MODE_LABELS = defaultdict(lambda: '')
+DATABASE_MODE_ENUMS = defaultdict(lambda: DatabaseMode.DatabaseUnset)
+DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal] = 'opensearch-local'
+DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote] = 'opensearch-remote'
+DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote] = 'elasticsearch-remote'
+DATABASE_MODE_ENUMS['opensearch-local'] = DatabaseMode.OpenSearchLocal
+DATABASE_MODE_ENUMS['opensearch-remote'] = DatabaseMode.OpenSearchRemote
+DATABASE_MODE_ENUMS['elasticsearch-remote'] = DatabaseMode.ElasticsearchRemote
 
 BoundPath = namedtuple(
     "BoundPath",

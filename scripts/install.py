@@ -36,6 +36,7 @@ from malcolm_common import (
     ChooseMultiple,
     ChooseOne,
     DatabaseMode,
+    DATABASE_MODE_LABELS,
     DetermineYamlFileFormat,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
@@ -531,25 +532,31 @@ class Installer(object):
             opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
 
         else:
-            databaseModeChoice = 'unset'
+            databaseModeChoice = ''
             allowedDatabaseModes = {
-                'opensearch-local': [DatabaseMode.OpenSearchLocal, 'local OpenSearch'],
-                'opensearch-remote': [DatabaseMode.OpenSearchRemote, 'remote OpenSearch'],
-                'elasticsearch-remote': [DatabaseMode.ElasticSearchRemote, 'remote Elasticsearch'],
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]: [DatabaseMode.OpenSearchLocal, 'local OpenSearch'],
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote]: [
+                    DatabaseMode.OpenSearchRemote,
+                    'remote OpenSearch',
+                ],
+                DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote]: [
+                    DatabaseMode.ElasticsearchRemote,
+                    'remote Elasticsearch',
+                ],
             }
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid primary document store mode')
             while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
                 databaseModeChoice = InstallerChooseOne(
                     'Select primary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == 'opensearch-local')
+                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal])
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
             opensearchPrimaryMode = allowedDatabaseModes[databaseModeChoice][0]
             opensearchPrimaryLabel = allowedDatabaseModes[databaseModeChoice][1]
 
-        if opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote):
+        if opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote):
             loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchPrimaryLabel} URL')
             opensearchPrimaryUrl = ''
             while (len(opensearchPrimaryUrl) <= 1) and loopBreaker.increment():
@@ -570,24 +577,30 @@ class Installer(object):
             'Forward Logstash logs to a secondary remote document store?',
             default=args.opensearchSecondaryRemote,
         ):
-            databaseModeChoice = 'unset'
+            databaseModeChoice = ''
             allowedDatabaseModes = {
-                'opensearch-remote': [DatabaseMode.OpenSearchRemote, 'remote OpenSearch'],
-                'elasticsearch-remote': [DatabaseMode.ElasticSearchRemote, 'remote Elasticsearch'],
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote]: [
+                    DatabaseMode.OpenSearchRemote,
+                    'remote OpenSearch',
+                ],
+                DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote]: [
+                    DatabaseMode.ElasticsearchRemote,
+                    'remote Elasticsearch',
+                ],
             }
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid secondary document store mode')
             while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
                 databaseModeChoice = InstallerChooseOne(
                     'Select secondary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == 'opensearch-remote')
+                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote])
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
             opensearchSecondaryMode = allowedDatabaseModes[databaseModeChoice][0]
             opensearchSecondaryLabel = allowedDatabaseModes[databaseModeChoice][1]
 
-        if opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote):
+        if opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote):
             loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchSecondaryLabel} URL')
             opensearchSecondaryUrl = ''
             while (len(opensearchSecondaryUrl) <= 1) and loopBreaker.increment():
@@ -600,8 +613,8 @@ class Installer(object):
                 default=args.opensearchSecondarySslVerify,
             )
 
-        if (opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote)) or (
-            opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticSearchRemote)
+        if (opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)) or (
+            opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
         ):
             InstallerDisplayMessage(
                 f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
@@ -1380,8 +1393,8 @@ class Installer(object):
             # OpenSearch primary instance is local vs. remote
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
-                'OPENSEARCH_LOCAL',
-                TrueOrFalseNoQuote(opensearchPrimaryMode == DatabaseMode.OpenSearchLocal),
+                'OPENSEARCH_MODE',
+                DATABASE_MODE_LABELS[opensearchPrimaryMode],
             ),
             # OpenSearch primary instance URL
             EnvValue(
@@ -1411,7 +1424,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY',
-                TrueOrFalseNoQuote(opensearchSecondaryMode == DatabaseMode.OpenSearchRemote),
+                DATABASE_MODE_LABELS[opensearchSecondaryMode],
             ),
             # OpenSearch memory allowance
             EnvValue(
@@ -3076,6 +3089,7 @@ def main():
         default=None,
         help='Memory for OpenSearch (e.g., 16g, 9500m, etc.)',
     )
+    # TODO: handle opensearch modes in command-line arguments
     opensearchArgGroup.add_argument(
         '--opensearch-primary-url',
         dest='opensearchPrimaryUrl',
