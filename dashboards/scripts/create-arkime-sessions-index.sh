@@ -27,6 +27,9 @@ DEFAULT_DASHBOARD=${OPENSEARCH_DEFAULT_DASHBOARD:-"0ad3d7c2-3441-485e-9dfe-dbb22
 ISM_SNAPSHOT_REPO=${ISM_SNAPSHOT_REPO:-"logs"}
 ISM_SNAPSHOT_COMPRESSED=${ISM_SNAPSHOT_COMPRESSED:-"false"}
 
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
+OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
+
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
@@ -37,18 +40,20 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
     if [[ "$LOOP" == "primary" ]]; then
       OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"http://opensearch:9200"}
-      OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
       OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-      if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
+      if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
+        OPENSEARCH_LOCAL=false
         CURL_CONFIG_PARAMS=(
           --config
           "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
           )
       else
+        OPENSEARCH_LOCAL=true
         CURL_CONFIG_PARAMS=()
+
       fi
 
-    elif [[ "$LOOP" == "secondary" ]] && [[ "${OPENSEARCH_SECONDARY:-"false"}" == "true" ]] && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
+    elif [[ "$LOOP" == "secondary" ]] && ( [[ "$OPENSEARCH_SECONDARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]] ) && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
       OPENSEARCH_URL_TO_USE=$OPENSEARCH_SECONDARY_URL
       OPENSEARCH_LOCAL=false
       OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.secondary.curlrc"}

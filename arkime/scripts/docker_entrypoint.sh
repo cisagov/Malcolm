@@ -11,9 +11,9 @@ function urlencodeall() {
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     # need to build the opensearch URL (including username/password) by combining
     # OPENSEARCH_URL and parameters from OPENSEARCH_CREDS_CONFIG_FILE
 

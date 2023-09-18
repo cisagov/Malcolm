@@ -167,7 +167,9 @@ debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
 dashboardsUrl = app.config["DASHBOARDS_URL"]
-opensearchLocal = (app.config["OPENSEARCH_LOCAL"] == "true") or (opensearchUrl == 'http://opensearch:9200')
+opensearchLocal = (app.config["OPENSEARCH_PRIMARY"] == "opensearch-local") or (
+    opensearchUrl == 'http://opensearch:9200'
+)
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = (
     malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])

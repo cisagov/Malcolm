@@ -1393,7 +1393,7 @@ class Installer(object):
             # OpenSearch primary instance is local vs. remote
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
-                'OPENSEARCH_MODE',
+                'OPENSEARCH_PRIMARY',
                 DATABASE_MODE_LABELS[opensearchPrimaryMode],
             ),
             # OpenSearch primary instance URL

@@ -3,10 +3,10 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
   CURL_CONFIG_PARAMS=(
     --config
     "$OPENSEARCH_CREDS_CONFIG_FILE"

@@ -5,7 +5,7 @@ ORIG_YML=/usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
 FINAL_YML=/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
 
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 
 if [[ -f "$ORIG_YML" ]]; then
@@ -14,7 +14,7 @@ if [[ -f "$ORIG_YML" ]]; then
     # get the new username/password from the curl file (I already wrote python code to do this, so sue me)
     OPENSSL_USER=
     OPENSSL_PASSWORD=
-    if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+    if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
         pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
         NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
         OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
@@ -35,7 +35,7 @@ if [[ -f "$ORIG_YML" ]]; then
         SSL_VERIFICATION_MODE=certificate || \
         SSL_VERIFICATION_MODE=none
 
-    [[ "$OPENSEARCH_LOCAL" == "false" ]] && \
+    ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && \
         sed -i "s/_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_/$SSL_VERIFICATION_MODE/g" "$FINAL_YML" || \
         sed -i '/_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_/d' "$FINAL_YML"
 
