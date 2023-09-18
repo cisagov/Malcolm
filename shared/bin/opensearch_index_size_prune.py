@@ -76,13 +76,18 @@ def main():
         help="Verify SSL certificates for OpenSearch",
     )
     parser.add_argument(
-        '--opensearch-local',
-        dest='opensearchIsLocal',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
-        help="Malcolm is using its local OpenSearch instance",
+        '--opensearch-mode',
+        dest='opensearchMode',
+        help="Malcolm data store mode ('opensearch-local', 'opensearch-remote', 'elasticsearch-remote')",
+        type=malcolm_utils.DatabaseModeStrToEnum,
+        metavar='<STR>',
+        default=malcolm_utils.DatabaseModeStrToEnum(
+            os.getenv(
+                'OPENSEARCH_PRIMARY',
+                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+            )
+        ),
+        required=False,
     )
     parser.add_argument(
         '--node',
@@ -149,12 +154,12 @@ def main():
     if args.limit == '0':
         return
 
-    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
-    opensearchCreds = (
-        ParseCurlFile(args.opensearchCurlRcFile) if (not args.opensearchIsLocal) else defaultdict(lambda: None)
+    opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+        args.opensearchUrl == 'http://opensearch:9200'
     )
+    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
     if not args.opensearchUrl:
-        if args.opensearchIsLocal:
+        if opensearchIsLocal:
             args.opensearchUrl = 'http://opensearch:9200'
         elif 'url' in opensearchCreds:
             args.opensearchUrl = opensearchCreds['url']

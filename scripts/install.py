@@ -35,8 +35,6 @@ from malcolm_common import (
     AskForString,
     ChooseMultiple,
     ChooseOne,
-    DatabaseMode,
-    DATABASE_MODE_LABELS,
     DetermineYamlFileFormat,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
@@ -66,6 +64,9 @@ from malcolm_common import (
 )
 from malcolm_utils import (
     CountUntilException,
+    DatabaseMode,
+    DATABASE_MODE_LABELS,
+    DATABASE_MODE_ENUMS,
     deep_get,
     eprint,
     run_process,
