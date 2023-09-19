@@ -17,6 +17,7 @@ Although the configuration script automates many of the following configuration 
 * **`auth.env`** - stores the Malcolm administrator's username and password hash for its nginx reverse proxy
 * **`beats-common.env`** - settings for interactions between [Logstash](https://www.elastic.co/products/logstash) and [Filebeat](https://www.elastic.co/products/beats/filebeat)
     - `BEATS_SSL` – if set to `true`, Logstash will use require encrypted communications for any external [Beats](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-beats.html)-based forwarders from which it will accept logs (default `true`)
+    - `LOGSTASH_HOST` – the host and port at which Beats-based forwarders will connect to Logstash (default `logstash:5044`)
 * **`dashboards-helper.env`** - settings for the container that helps configure and maintain [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/)
     - `DASHBOARDS_DARKMODE` – if set to `true`, [OpenSearch Dashboards](dashboards.md#DashboardsVisualizations) will be set to dark mode upon initialization (default `true`)
 * **`filebeat.env`** - settings specific to [Filebeat](https://www.elastic.co/products/beats/filebeat), particularly for how Filebeat watches for new log files to parse and how it receives and stores [third-Party logs](third-party-logs.md#ThirdPartyLogs)
