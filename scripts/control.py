@@ -47,6 +47,7 @@ from malcolm_common import (
     posInt,
     ProcessLogLine,
     PROFILE_HEDGEHOG,
+    PROFILE_KEY,
     PROFILE_MALCOLM,
     ScriptPath,
     UserInputDefaultsBehavior,
@@ -1916,7 +1917,7 @@ def main():
         dest='composeProfile',
         metavar='<string>',
         type=str,
-        default=os.getenv('MALCOLM_COMPOSE_PROFILE', PROFILE_MALCOLM),
+        default=None,
         help='docker-compose profile to enable',
     )
 
@@ -2238,6 +2239,26 @@ def main():
                 raise Exception(
                     f'{ScriptName} requires the official Python client library for kubernetes for {orchMode} mode'
                 )
+
+        # identify running profile
+        runProfileSrc = ''
+        if not args.composeProfile:
+            profileEnvFile = os.path.join(args.configDir, 'process.env')
+            try:
+                if os.path.isfile(profileEnvFile):
+                    args.composeProfile = dotenvImported.get_key(profileEnvFile, PROFILE_KEY)
+                    runProfileSrc = os.path.basename(profileEnvFile)
+                elif args.debug:
+                    runProfileSrc = 'process.env not found'
+            except Exception as e:
+                runProfileSrc = f'exception ({e})'
+        elif args.debug:
+            runProfileSrc = 'specified'
+        if not args.composeProfile:
+            args.composeProfile = PROFILE_MALCOLM
+            runProfileSrc = 'default'
+        if args.debug:
+            eprint(f"Run profile ({runProfileSrc}): {args.composeProfile}")
 
         # identify openssl binary
         opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('openssl.exe')) else 'openssl'

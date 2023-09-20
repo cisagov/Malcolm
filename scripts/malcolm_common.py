@@ -54,6 +54,7 @@ MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 
 ###################################################################################################
+PROFILE_KEY = 'MALCOLM_PROFILE'
 PROFILE_MALCOLM = 'malcolm'
 PROFILE_HEDGEHOG = 'hedgehog'
 
