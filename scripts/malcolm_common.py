@@ -54,6 +54,10 @@ MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 
 ###################################################################################################
+PROFILE_MALCOLM = 'malcolm'
+PROFILE_HEDGEHOG = 'hedgehog'
+
+###################################################################################################
 PLATFORM_WINDOWS = "Windows"
 PLATFORM_MAC = "Darwin"
 PLATFORM_LINUX = "Linux"

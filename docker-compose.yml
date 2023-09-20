@@ -8,6 +8,7 @@ services:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
     image: ghcr.io/idaholab/malcolm/opensearch:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -44,6 +45,7 @@ services:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards-helper:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -74,6 +76,7 @@ services:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -103,6 +106,7 @@ services:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
     image: ghcr.io/idaholab/malcolm/logstash-oss:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -152,6 +156,7 @@ services:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
     image: ghcr.io/idaholab/malcolm/filebeat-oss:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -190,6 +195,8 @@ services:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:23.10.0
+    # todo: viewer/wise in hedgehog profile (and what about nginx reaching back?)
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -232,6 +239,7 @@ services:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -274,6 +282,7 @@ services:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -306,6 +315,7 @@ services:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -345,6 +355,7 @@ services:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -374,6 +385,7 @@ services:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-monitor:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -403,6 +415,7 @@ services:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-capture:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -428,6 +441,7 @@ services:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-monitor:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -457,6 +471,7 @@ services:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-upload:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -484,6 +499,7 @@ services:
       start_period: 60s
   htadmin:
     image: ghcr.io/idaholab/malcolm/htadmin:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -512,6 +528,7 @@ services:
       start_period: 60s
   freq:
     image: ghcr.io/idaholab/malcolm/freq:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -537,6 +554,7 @@ services:
       start_period: 60s
   netbox:
     image: ghcr.io/idaholab/malcolm/netbox:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -572,6 +590,7 @@ services:
       start_period: 120s
   netbox-postgres:
     image: ghcr.io/idaholab/malcolm/postgresql:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -599,6 +618,7 @@ services:
       start_period: 45s
   netbox-redis:
     image: ghcr.io/idaholab/malcolm/redis:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -630,6 +650,7 @@ services:
       start_period: 45s
   netbox-redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -660,6 +681,7 @@ services:
       start_period: 45s
   api:
     image: ghcr.io/idaholab/malcolm/api:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -690,6 +712,7 @@ services:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
     image: ghcr.io/idaholab/malcolm/nginx-proxy:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true

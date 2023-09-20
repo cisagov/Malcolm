@@ -77,15 +77,15 @@ from malcolm_utils import (
 )
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.20.3"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
 MAC_BREW_DOCKER_PACKAGE = 'docker-edge'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
-OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms10g -Xmx10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
 ScriptName = os.path.basename(__file__)

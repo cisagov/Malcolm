@@ -25,11 +25,11 @@ fi
 
 if [[ -f "$1" ]]; then
   CONFIG_FILE="$1"
-  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN -f "$CONFIG_FILE""
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN --profile malcolm -f "$CONFIG_FILE""
   shift # use remainder of arguments for services
 else
   CONFIG_FILE="docker-compose.yml"
-  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN"
+  DOCKER_COMPOSE_COMMAND="$DOCKER_COMPOSE_BIN --profile malcolm"
 fi
 
 function filesize_in_image() {
