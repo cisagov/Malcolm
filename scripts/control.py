@@ -380,6 +380,10 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 dbgStr = f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
                 eprint(dbgStr)
 
+    elif args.composeProfile == PROFILE_HEDGEHOG:
+        # keystore operation doesn't mean anything in hedgehog mode, just return "Ok"
+        err = 0
+
     else:
         raise Exception(
             f'{sys._getframe().f_code.co_name} does not yet support {orchMode} with profile {args.composeProfile}'
