@@ -175,8 +175,6 @@ services:
       - ./config/nginx.env
       - ./config/beats-common.env
       - ./config/filebeat.env
-    depends_on:
-      - logstash
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
@@ -341,8 +339,6 @@ services:
       - ./config/upload-common.env
       - ./config/suricata.env
       - ./config/suricata-offline.env
-    depends_on:
-      - logstash
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
@@ -488,8 +484,6 @@ services:
       - ./config/auth.env
     environment:
       VIRTUAL_HOST : 'upload.malcolm.local'
-    depends_on:
-      - arkime
     ports:
       - "127.0.0.1:8022:22"
     volumes:
