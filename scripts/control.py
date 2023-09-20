@@ -401,7 +401,7 @@ def status():
 
         err, out = run_process(
             [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
-                : 5 if args.service is not None else -1
+                : 7 if args.service is not None else -1
             ],
             env=osEnv,
             debug=args.debug,
@@ -724,7 +724,7 @@ def logs():
 
         err, out = run_process(
             [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
-                : 5 if args.service is not None else -1
+                : 7 if args.service is not None else -1
             ],
             env=osEnv,
             debug=args.debug,
@@ -742,7 +742,7 @@ def logs():
             str(args.logLineCount) if args.logLineCount else 'all',
             '-f',
             args.service,
-        ][: 8 if args.service else -1]
+        ][: 10 if args.service else -1]
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if which("stern"):
@@ -829,7 +829,7 @@ def stop(wipe=False):
         # then also remove named and anonymous volumes (not external volumes, of course)
         err, out = run_process(
             [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'down', '--volumes'][
-                : 5 if wipe else -1
+                : 7 if wipe else -1
             ],
             env=osEnv,
             debug=args.debug,
