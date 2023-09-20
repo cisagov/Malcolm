@@ -523,6 +523,12 @@ class Installer(object):
         if args.lsWorkers:
             lsWorkers = args.lsWorkers
 
+        if args.opensearchPrimaryMode not in DATABASE_MODE_ENUMS.keys():
+            raise Exception(f'"{args.opensearchPrimaryMode}" is not valid for --opensearch')
+
+        if args.opensearchSecondaryMode and (args.opensearchSecondaryMode not in DATABASE_MODE_ENUMS.keys()):
+            raise Exception(f'"{args.opensearchSecondaryMode}" is not valid for --opensearch-secondary')
+
         opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
         opensearchPrimaryUrl = 'http://opensearch:9200'
         opensearchPrimarySslVerify = False
@@ -546,7 +552,7 @@ class Installer(object):
 
         if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Should Malcolm use and maintain its own OpenSearch instance?',
-            default=args.ownOpenSearch,
+            default=DATABASE_MODE_ENUMS[args.opensearchPrimaryMode] == DatabaseMode.OpenSearchLocal,
         ):
             opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
 
@@ -605,7 +611,10 @@ class Installer(object):
 
         if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Forward Logstash logs to a secondary remote document store?',
-            default=args.opensearchSecondaryRemote,
+            default=(
+                DATABASE_MODE_ENUMS[args.opensearchSecondaryMode]
+                in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
+            ),
         ):
             databaseModeChoice = ''
             allowedDatabaseModes = {
@@ -623,7 +632,7 @@ class Installer(object):
                 databaseModeChoice = InstallerChooseOne(
                     'Select secondary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote])
+                        (x, allowedDatabaseModes[x][1], x == args.opensearchSecondaryMode)
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
@@ -1268,6 +1277,17 @@ class Installer(object):
                 pcapIface = InstallerAskForString(
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
+
+        if (
+            (malcolmProfile == PROFILE_HEDGEHOG)
+            and (not pcapNetSniff)
+            and (not pcapTcpDump)
+            and (not liveZeek)
+            and (not liveSuricata)
+        ):
+            InstallerDisplayMessage(
+                f'Warning: Running with the {malcolmProfile} profile but no capture methods are enabled.',
+            )
 
         dashboardsDarkMode = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
@@ -3149,13 +3169,12 @@ def main():
     opensearchArgGroup = parser.add_argument_group('OpenSearch options')
     opensearchArgGroup.add_argument(
         '--opensearch',
-        dest='ownOpenSearch',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=True,
-        help="Malcolm should use and maintain its own OpenSearch instance",
+        dest='opensearchPrimaryMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal],
+        help=f'Primary OpenSearch mode ({", ".join(list(DATABASE_MODE_ENUMS.keys()))})',
     )
     opensearchArgGroup.add_argument(
         '--opensearch-memory',
@@ -3166,9 +3185,8 @@ def main():
         default=None,
         help='Memory for OpenSearch (e.g., 16g, 9500m, etc.)',
     )
-    # TODO: handle opensearch modes in command-line arguments
     opensearchArgGroup.add_argument(
-        '--opensearch-primary-url',
+        '--opensearch-url',
         dest='opensearchPrimaryUrl',
         required=False,
         metavar='<string>',
@@ -3177,7 +3195,7 @@ def main():
         help='Primary remote OpenSearch connection URL',
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-primary-ssl-verify',
+        '--opensearch-ssl-verify',
         dest='opensearchPrimarySslVerify',
         type=str2bool,
         metavar="true|false",
@@ -3197,14 +3215,13 @@ def main():
         help="Compress OpenSearch index snapshots",
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-secondary-remote',
-        dest='opensearchSecondaryRemote',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Forward Logstash logs to a secondary remote OpenSearch instance",
+        '--opensearch-secondary',
+        dest='opensearchSecondaryMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Secondary OpenSearch mode to forward Logstash logs to a remote OpenSearch instance',
     )
     opensearchArgGroup.add_argument(
         '--opensearch-secondary-url',
