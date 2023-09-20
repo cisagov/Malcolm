@@ -595,6 +595,7 @@ class Installer(object):
                 f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                 default=args.opensearchPrimarySslVerify,
             )
+        else:
             indexSnapshotCompressed = InstallerYesOrNo(
                 f'Compress {opensearchPrimaryLabel} index snapshots?',
                 default=args.indexSnapshotCompressed,

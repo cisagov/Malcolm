@@ -8,7 +8,11 @@ services:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
     image: ghcr.io/idaholab/malcolm/opensearch:23.10.0
-    profiles: ["malcolm"]
+    # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
+    #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
+    #   start but not actually run OpenSearch. It's included in both profiles to
+    #   satisfy some other containers' depends_on.
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
