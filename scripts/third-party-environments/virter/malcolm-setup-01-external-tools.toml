@@ -18,6 +18,7 @@ rm -rf /tmp/fetch
 if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
 
   ASSETS=(
+    "https://github.com/antonmedv/fx|^fx_linux_amd64$|"$HOME"/.local/bin/fx|755"
     "https://github.com/aptible/supercronic|^supercronic-linux-amd64$|"$HOME"/.local/bin/supercronic|755"
     "https://github.com/boringproxy/boringproxy|^boringproxy-linux-x86_64$|"$HOME"/.local/bin/boringproxy|755"
     "https://github.com/FiloSottile/age|^age-v.+-linux-amd64\.tar\.gz$|/tmp/age.tar.gz"
