@@ -94,6 +94,10 @@ if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
          [[ "${!LOCAL_VARNAME}" == "n" ]] ); then
         DISABLED=1
     fi
+    # kinda hacky but check a special case for OpenSearch
+    if [[ "$SERVICE" == "opensearch" ]] && [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "opensearch-local" ]]; then
+        DISABLED=1
+    fi
 fi
 
 # if port and/or format not specified via command line, make some inferences based on service
