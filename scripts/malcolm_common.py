@@ -201,11 +201,11 @@ def YesOrNo(
     elif uiMode & UserInterfaceMode.InteractionInput:
         if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
             if str2bool(default):
-                questionStr = f"\n{question} (Y/n): "
+                questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / n{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
             else:
-                questionStr = f"\n{question} (y/N): "
+                questionStr = f"\n{question} (y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
         else:
-            questionStr = f"\n{question}: "
+            questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
 
         while True:
             reply = str(input(questionStr)).lower().strip()
