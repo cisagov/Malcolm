@@ -156,6 +156,13 @@ def custom_make_translation(text, translation):
 
 
 ###################################################################################################
+def decapitalize(s):
+    if not s:
+        return s
+    return s[0].lower() + s[1:]
+
+
+###################################################################################################
 # safe deep get for a dictionary
 #
 # Example:

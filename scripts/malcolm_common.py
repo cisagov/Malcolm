@@ -14,6 +14,7 @@ import sys
 
 import malcolm_utils
 from malcolm_utils import (
+    decapitalize,
     deep_get,
     eprint,
     EscapeAnsi,
@@ -176,6 +177,8 @@ def YesOrNo(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    yesLabel='Yes',
+    noLabel='No',
 ):
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
@@ -186,7 +189,9 @@ def YesOrNo(
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         defaultYes = (default is not None) and str2bool(default)
         reply = MainDialog.yesno(
-            question, yes_label='Yes' if defaultYes else 'No', no_label='no' if defaultYes else 'yes'
+            question,
+            yes_label=yesLabel.capitalize() if defaultYes else noLabel.capitalize(),
+            no_label=decapitalize(noLabel) if defaultYes else decapitalize(yesLabel),
         )
         if defaultYes:
             reply = 'y' if (reply == Dialog.OK) else 'n'

@@ -54,6 +54,9 @@ from malcolm_common import (
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
+    PROFILE_MALCOLM,
+    PROFILE_HEDGEHOG,
+    PROFILE_KEY,
     ReplaceBindMountLocation,
     RequestsDynamic,
     ScriptPath,
@@ -113,6 +116,8 @@ def InstallerYesOrNo(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    yesLabel='Yes',
+    noLabel='No',
 ):
     global args
     defBehavior = defaultBehavior
@@ -124,6 +129,8 @@ def InstallerYesOrNo(
         default=default,
         defaultBehavior=defBehavior,
         uiMode=uiMode,
+        yesLabel=yesLabel,
+        noLabel=noLabel,
     )
 
 
@@ -524,9 +531,20 @@ class Installer(object):
         opensearchSecondaryUrl = ''
         opensearchSecondarySslVerify = False
         opensearchSecondaryLabel = 'remote OpenSearch'
+        logstashHost = 'logstash:5044'
         indexSnapshotCompressed = False
+        malcolmProfile = (
+            PROFILE_MALCOLM
+            if InstallerYesOrNo(
+                'Run with Malcolm (all containers) or Hedgehog (capture only) profile?',
+                default=args.malcolmProfile,
+                yesLabel='Malcolm',
+                noLabel='Hedgehog',
+            )
+            else PROFILE_HEDGEHOG
+        )
 
-        if InstallerYesOrNo(
+        if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Should Malcolm use and maintain its own OpenSearch instance?',
             default=args.ownOpenSearch,
         ):
@@ -545,6 +563,8 @@ class Installer(object):
                     'remote Elasticsearch',
                 ],
             }
+            if malcolmProfile != PROFILE_MALCOLM:
+                del allowedDatabaseModes[DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]]
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid primary document store mode')
             while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
                 databaseModeChoice = InstallerChooseOne(
@@ -574,7 +594,16 @@ class Installer(object):
                 default=args.indexSnapshotCompressed,
             )
 
-        if InstallerYesOrNo(
+        if malcolmProfile != PROFILE_MALCOLM:
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Logstash host and port')
+            logstashHost = ''
+            while (len(logstashHost) <= 1) and loopBreaker.increment():
+                logstashHost = InstallerAskForString(
+                    f'Enter Logstash host and port (192.168.1.123:5044)',
+                    default=args.logstashHost,
+                )
+
+        if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Forward Logstash logs to a secondary remote document store?',
             default=args.opensearchSecondaryRemote,
         ):
@@ -614,36 +643,41 @@ class Installer(object):
                 default=args.opensearchSecondarySslVerify,
             )
 
-        if (opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)) or (
+        if (opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)) or (
             opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
         ):
             InstallerDisplayMessage(
                 f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
             )
 
-        loopBreaker = CountUntilException(
-            MaxAskForValueCount,
-            f'Invalid {"OpenSearch/" if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal else ""}LogStash memory setting(s)',
-        )
-        while (
-            not InstallerYesOrNo(
-                f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
-                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
-                else f'Setting {lsMemory} for Logstash. Is this OK?',
-                default=True,
+        if malcolmProfile == PROFILE_MALCOLM:
+            loopBreaker = CountUntilException(
+                MaxAskForValueCount,
+                f'Invalid {"OpenSearch/" if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal else ""}Logstash memory setting(s)',
             )
-            and loopBreaker.increment()
-        ):
-            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
-                osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
-            lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
+            while (
+                not InstallerYesOrNo(
+                    f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
+                    if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
+                    else f'Setting {lsMemory} for Logstash. Is this OK?',
+                    default=True,
+                )
+                and loopBreaker.increment()
+            ):
+                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                    osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
+                lsMemory = InstallerAskForString('Enter memory for Logstash (e.g., 4g, 2500m, etc.)')
 
-        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LogStash worker setting(s)')
-        while (
-            (not str(lsWorkers).isdigit())
-            or (not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True))
-        ) and loopBreaker.increment():
-            lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Logstash worker setting(s)')
+            while (
+                (not str(lsWorkers).isdigit())
+                or (
+                    not InstallerYesOrNo(
+                        f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True
+                    )
+                )
+            ) and loopBreaker.increment():
+                lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
 
         restartMode = None
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
@@ -967,12 +1001,16 @@ class Installer(object):
             )
         )
 
-        reverseDns = InstallerYesOrNo(
+        reverseDns = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?',
             default=args.reverseDns,
         )
-        autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui)
-        autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=args.autoFreq)
+        autoOui = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui
+        )
+        autoFreq = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Perform string randomness scoring on some fields?', default=args.autoFreq
+        )
 
         openPortsSelection = (
             'c'
@@ -980,30 +1018,38 @@ class Installer(object):
             else 'unset'
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            openPortsOptions = ('no', 'yes', 'customize')
-            loopBreaker = CountUntilException(MaxAskForValueCount)
-            while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
-                openPortsSelection = InstallerChooseOne(
-                    'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
-                    choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
-                )[0]
-            if openPortsSelection == 'n':
+            if malcolmProfile == PROFILE_MALCOLM:
+                openPortsOptions = ('no', 'yes', 'customize')
+                loopBreaker = CountUntilException(MaxAskForValueCount)
+                while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
+                    openPortsSelection = InstallerChooseOne(
+                        'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
+                        choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
+                    )[0]
+                if openPortsSelection == 'n':
+                    opensearchOpen = False
+                    logstashOpen = False
+                    filebeatTcpOpen = False
+                elif openPortsSelection == 'y':
+                    opensearchOpen = True
+                    logstashOpen = True
+                    filebeatTcpOpen = True
+                else:
+                    openPortsSelection = 'c'
+                    opensearchOpen = (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and InstallerYesOrNo(
+                        'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
+                    )
+                    logstashOpen = InstallerYesOrNo(
+                        'Expose Logstash port to external hosts?', default=args.exposeLogstash
+                    )
+                    filebeatTcpOpen = InstallerYesOrNo(
+                        'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
+                    )
+            else:
                 opensearchOpen = False
+                openPortsSelection = 'n'
                 logstashOpen = False
                 filebeatTcpOpen = False
-            elif openPortsSelection == 'y':
-                opensearchOpen = True
-                logstashOpen = True
-                filebeatTcpOpen = True
-            else:
-                openPortsSelection = 'c'
-                opensearchOpen = (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and InstallerYesOrNo(
-                    'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
-                )
-                logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=args.exposeLogstash)
-                filebeatTcpOpen = InstallerYesOrNo(
-                    'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
-                )
         else:
             opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
@@ -1094,7 +1140,7 @@ class Installer(object):
                             for x in allowedFilePreserveModes
                         ],
                     )
-                fileCarveHttpServer = InstallerYesOrNo(
+                fileCarveHttpServer = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                     'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
                 if fileCarveHttpServer:
@@ -1127,7 +1173,7 @@ class Installer(object):
             vtotApiKey = '0'
 
         # NetBox
-        netboxEnabled = InstallerYesOrNo(
+        netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
             default=args.netboxEnabled,
         )
@@ -1168,7 +1214,15 @@ class Installer(object):
         tweakIface = False
         pcapFilter = ''
         captureSelection = (
-            'c' if (args.pcapNetSniff or args.pcapTcpDump or args.liveZeek or args.liveSuricata) else 'unset'
+            'c'
+            if (
+                args.pcapNetSniff
+                or args.pcapTcpDump
+                or args.liveZeek
+                or args.liveSuricata
+                or (malcolmProfile == PROFILE_HEDGEHOG)
+            )
+            else 'unset'
         )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -1186,7 +1240,7 @@ class Installer(object):
             elif captureSelection == 'c':
                 if InstallerYesOrNo(
                     'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                    default=args.pcapNetSniff or args.pcapTcpDump,
+                    default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
                 ):
                     pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
                     if not pcapNetSniff:
@@ -1215,7 +1269,7 @@ class Installer(object):
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
 
-        dashboardsDarkMode = InstallerYesOrNo(
+        dashboardsDarkMode = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
         )
 
@@ -1258,6 +1312,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_LDAP_TLS_STUNNEL',
                 TrueOrFalseNoQuote(('ldap' in authMode.lower()) and ldapStartTLS),
+            ),
+            # Logstash host and port
+            EnvValue(
+                os.path.join(args.configDir, 'beats-common.env'),
+                'LOGSTASH_HOST',
+                logstashHost,
             ),
             # turn on dark mode, or not
             EnvValue(
@@ -1474,6 +1534,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'process.env'),
                 'PGID',
                 pgid,
+            ),
+            # Malcolm run profile (malcolm vs. hedgehog)
+            EnvValue(
+                os.path.join(args.configDir, 'process.env'),
+                PROFILE_KEY,
+                malcolmProfile,
             ),
             # Suricata signature updates (via suricata-update)
             EnvValue(
@@ -2949,8 +3015,18 @@ def main():
         help='Malcolm docker images .tar.gz file for installation',
     )
 
-    authencOptionsArgGroup = parser.add_argument_group('Runtime options')
-    authencOptionsArgGroup.add_argument(
+    runtimeOptionsArgGroup = parser.add_argument_group('Runtime options')
+    runtimeOptionsArgGroup.add_argument(
+        '--malcolm-profile',
+        dest='malcolmProfile',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Run all Malcolm containers (true) vs. run capture-only containers (false)",
+    )
+    runtimeOptionsArgGroup.add_argument(
         '--dark-mode',
         dest='dashboardsDarkMode',
         type=str2bool,
@@ -3150,7 +3226,7 @@ def main():
         help="Require SSL certificate validation for communication with secondary OpenSearch instance",
     )
 
-    logstashArgGroup = parser.add_argument_group('LogStash options')
+    logstashArgGroup = parser.add_argument_group('Logstash options')
     logstashArgGroup.add_argument(
         '--logstash-memory',
         dest='lsMemory',
@@ -3158,7 +3234,7 @@ def main():
         metavar='<string>',
         type=str,
         default=None,
-        help='Memory for LogStash (e.g., 4g, 2500m, etc.)',
+        help='Memory for Logstash (e.g., 4g, 2500m, etc.)',
     )
     logstashArgGroup.add_argument(
         '--logstash-workers',
@@ -3168,6 +3244,15 @@ def main():
         type=int,
         default=None,
         help='Number of Logstash workers (e.g., 4, 8, etc.)',
+    )
+    opensearchArgGroup.add_argument(
+        '--logstash-host',
+        dest='logstashHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Logstash host and port (for when running "capture-only" profile; e.g., 192.168.1.123:5044)',
     )
 
     openPortsArgGroup = parser.add_argument_group('Expose ports')
