@@ -15,11 +15,11 @@ Or, to use a remote OpenSearch cluster:
 
 ```
 …
-Should Malcolm use and maintain its own OpenSearch instance? (Y/n): n
+Should Malcolm use and maintain its own OpenSearch instance? (Y / n): n
 
 Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.123:9200
 
-Require SSL certificate validation for communication with primary OpenSearch instance? (y/N): n
+Require SSL certificate validation for communication with primary OpenSearch instance? (y / N): n
 
 You must run auth_setup after install.py to store OpenSearch connection credentials.
 …
@@ -30,11 +30,11 @@ Whether the primary OpenSearch instance is a locally maintained single-node inst
 
 ```
 …
-Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): y
+Forward Logstash logs to a secondary remote document store? (y / N): y
 
 Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.124:9200
 
-Require SSL certificate validation for communication with secondary OpenSearch instance? (y/N): n
+Require SSL certificate validation for communication with secondary OpenSearch instance? (y / N): n
 
 You must run auth_setup after install.py to store OpenSearch connection credentials.
 …
@@ -49,7 +49,7 @@ $ ./scripts/auth_setup
 
 …
 
-Store username/password for primary remote OpenSearch instance? (y/N): y
+Store username/password for primary remote OpenSearch instance? (y / N): y
 
 OpenSearch username: servicedb 
 servicedb password:
@@ -57,17 +57,17 @@ servicedb password (again):
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
-Require SSL certificate validation for OpenSearch communication? (Y/n): n
+Require SSL certificate validation for OpenSearch communication? (Y / n): n
 
-Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): y
+Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y / N): y
 
-Store username/password for secondary remote OpenSearch instance? (y/N): y
+Store username/password for secondary remote OpenSearch instance? (y / N): y
 
 OpenSearch username: remotedb
 remotedb password:
 remotedb password (again):
 
-Require SSL certificate validation for OpenSearch communication? (Y/n): n
+Require SSL certificate validation for OpenSearch communication? (Y / n): n
 
 …
 ```

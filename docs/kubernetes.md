@@ -348,50 +348,52 @@ Run `./scripts/configure` and answer the questions to configure Malcolm. For an 
 ```
 $ ./scripts/configure -f /path/to/kubeconfig.yaml
 
-Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
+Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
 
-Should Malcolm use and maintain its own OpenSearch instance? (Y/n): y
+Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y (Malcolm) / n (Hedgehog)): y
 
-Compress OpenSearch index snapshots? (y/N): n
+Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
 
-Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): n
+Compress OpenSearch index snapshots? (y / N): n
 
-Setting 16g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
+Forward Logstash logs to a secondary remote document store? (y / N): n
 
-Setting 6 workers for Logstash pipelines. Is this OK? (Y/n): y
+Setting 16g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
 
-Require encrypted HTTPS connections? (Y/n): y
+Setting 6 workers for Logstash pipelines. Is this OK? (Y / n): y
+
+Require encrypted HTTPS connections? (Y / n): y
 
 1: Basic
 2: Lightweight Directory Access Protocol (LDAP)
 3: None
 Select authentication method (Basic): 1
 
-Delete the oldest indices when the database exceeds a certain size? (y/N): y
+Delete the oldest indices when the database exceeds a certain size? (y / N): y
 
 Enter index threshold (e.g., 250GB, 1TB, 60%, etc.): 250G
 
-Determine oldest indices by name (instead of creation time)? (Y/n): y
+Determine oldest indices by name (instead of creation time)? (Y / n): y
 
-Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y/N): y
+Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y / N): y
 
-Automatically analyze all PCAP files with Suricata? (Y/n): y
+Automatically analyze all PCAP files with Suricata? (Y / n): y
 
-Download updated Suricata signatures periodically? (y/N): y
+Download updated Suricata signatures periodically? (y / N): y
 
-Automatically analyze all PCAP files with Zeek? (Y/n): y
+Automatically analyze all PCAP files with Zeek? (Y / n): y
 
-Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y/N): n
+Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y / N): n
 
-Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
+Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y / N): n
 
-Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
+Perform hardware vendor OUI lookups for MAC addresses? (Y / n): y
 
-Perform string randomness scoring on some fields? (Y/n): y
+Perform string randomness scoring on some fields? (Y / n): y
 
-Use default field values for Filebeat TCP listener? (Y/n): y
+Use default field values for Filebeat TCP listener? (Y / n): y
 
-Enable file extraction with Zeek? (y/N): y
+Enable file extraction with Zeek? (y / N): y
 1: none
 2: known
 3: mapped
@@ -404,29 +406,29 @@ Select file extraction behavior (none): 5
 3: none
 Select file preservation behavior (quarantined): 1
 
-Expose web interface for downloading preserved files? (y/N): y
+Expose web interface for downloading preserved files? (y / N): y
 
 Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted): quarantined
 
-Scan extracted files with ClamAV? (Y/n): y
+Scan extracted files with ClamAV? (Y / n): y
 
-Scan extracted files with Yara? (Y/n): y
+Scan extracted files with Yara? (Y / n): y
 
-Scan extracted PE files with Capa? (Y/n): y
+Scan extracted PE files with Capa? (Y / n): y
 
-Lookup extracted file hashes with VirusTotal? (y/N): n
+Lookup extracted file hashes with VirusTotal? (y / N): n
 
-Download updated file scanner signatures periodically? (y/N): y
+Download updated file scanner signatures periodically? (y / N): y
 
-Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y/N): y
+Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): y
 
-Should Malcolm enrich network traffic using NetBox? (Y/n): y
+Should Malcolm enrich network traffic using NetBox? (Y / n): y
 
 Should Malcolm automatically populate NetBox inventory based on observed network traffic? (/N): n
 
 Specify default NetBox site name: Malcolm
 
-Enable dark mode for OpenSearch Dashboards? (Y/n): y
+Enable dark mode for OpenSearch Dashboards? (Y / n): y
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 
@@ -449,7 +451,7 @@ $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 
 Configure Authentication (all): 1
 
-Store administrator username/password for local Malcolm access? (Y/n): y
+Store administrator username/password for local Malcolm access? (Y / n): y
 
 Administrator username: analyst
 analyst password:
@@ -457,17 +459,17 @@ analyst password (again):
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
-(Re)generate self-signed certificates for HTTPS access? (Y/n): y
+(Re)generate self-signed certificates for HTTPS access? (Y / n): y
 
-(Re)generate self-signed certificates for a remote log forwarder? (Y/n): y
+(Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
 
-Configure remote primary or secondary OpenSearch instance? (y/N): n
+Configure remote primary or secondary OpenSearch instance? (y / N): n
 
-Store username/password for email alert sender account? (y/N): n
+Store username/password for email alert sender account? (y / N): n
 
-(Re)generate internal passwords for NetBox? (Y/n): y
+(Re)generate internal passwords for NetBox? (Y / n): y
 
-Transfer self-signed client certificates to a remote log forwarder? (y/N): n
+Transfer self-signed client certificates to a remote log forwarder? (y / N): n
 
 ```
 

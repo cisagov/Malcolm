@@ -145,7 +145,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch cluster instead.
 * **Compress OpenSearch index snapshots?**
     - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should users opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
-* **Forward Logstash logs to a secondary remote OpenSearch instance?**
+* **Forward Logstash logs to a secondary remote document store?**
     - Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
 * **Setting 16g for OpenSearch and 3g for Logstash. Is this OK?**
     - Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 16 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.

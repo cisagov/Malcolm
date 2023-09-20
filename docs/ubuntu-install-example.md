@@ -34,9 +34,9 @@ Next, run the `install.py` script to configure the system. Replace `user` in thi
 user@host:~/Malcolm$ sudo ./scripts/install.py
 Installing required packages: ['apache2-utils', 'make', 'openssl', 'python3-dialog']
 
-"docker info" failed, attempt to install Docker? (Y/n): y  
+"docker info" failed, attempt to install Docker? (Y / n): y  
 
-Attempt to install Docker using official repositories? (Y/n): y
+Attempt to install Docker using official repositories? (Y / n): y
 Installing required packages: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
 Installing docker packages: ['docker-ce', 'docker-ce-cli', 'containerd.io']
 Installation of docker packages apparently succeeded
@@ -47,40 +47,40 @@ Enter user account: user
 
 Add another non-root user to the "docker" group?: n
 
-"docker-compose version" failed, attempt to install docker-compose? (Y/n): y
+"docker-compose version" failed, attempt to install docker-compose? (Y / n): y
 
-Install docker-compose directly from docker github? (Y/n): y
+Install docker-compose directly from docker github? (Y / n): y
 Download and installation of docker-compose apparently succeeded
 
 fs.file-max increases allowed maximum for file handles
-fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 fs.inotify.max_user_watches increases allowed maximum for monitored files
-fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 fs.inotify.max_queued_events increases queue size for monitored files
-fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 fs.inotify.max_user_instances increases allowed maximum monitor file watchers
-fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 vm.max_map_count increases allowed maximum for memory segments
-vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 net.core.somaxconn increases allowed maximum for socket connections
-net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages
-vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing
-vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
-vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y/n): y
+vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
 /etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
-/etc/security/limits.d/limits.conf does not exist, create it? (Y/n): y
+/etc/security/limits.d/limits.conf does not exist, create it? (Y / n): y
 ```
 
 If Malcolm is being configured from within a git working copy, `install.py` will now exit. Run `./scripts/configure` to continue with configuration:
@@ -90,7 +90,7 @@ user@host:~/Malcolm$ ./scripts/configure
 
 Alternately, if Malcolm is being installed from the release tarball, the script will ask whether the user would like to extract the contents of the tarball and to specify the installation directory and Malcolm configuration will continue:
 ```
-Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y/n): y
+Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y / n): y
 
 Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/Malcolm
 Malcolm runtime files extracted to /home/user/Malcolm
@@ -98,28 +98,28 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
-Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y/n): y
+Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
 
-Should Malcolm use and maintain its own OpenSearch instance? (Y/n): y
+Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
 
-Compress OpenSearch index snapshots? (y/N): n
+Compress OpenSearch index snapshots? (y / N): n
 
-Forward Logstash logs to a secondary remote OpenSearch instance? (y/N): n
+Forward Logstash logs to a secondary remote document store? (y / N): n
 
-Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y/n): y
+Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
 
-Setting 3 workers for Logstash pipelines. Is this OK? (Y/n): y
+Setting 3 workers for Logstash pipelines. Is this OK? (Y / n): y
 
-Restart Malcolm upon system or Docker daemon restart? (y/N): y
+Restart Malcolm upon system or Docker daemon restart? (y / N): y
 1: no
 2: on-failure
 3: always
 4: unless-stopped
 Select Malcolm restart behavior (unless-stopped): 4
 
-Require encrypted HTTPS connections? (Y/n): y
+Require encrypted HTTPS connections? (Y / n): y
 
-Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y/N): n
+Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y / N): n
 
 Specify external Docker network name (or leave blank for default networking) (): 
 
@@ -128,30 +128,30 @@ Specify external Docker network name (or leave blank for default networking) ():
 3: None
 Select authentication method (Basic): 1
 
-Store PCAP, log and index files locally under /home/user/Malcolm? (Y/n): y
+Store PCAP, log and index files locally under /home/user/Malcolm? (Y / n): y
 
 Should Malcolm delete the oldest database indices and/or PCAP files based on available storage? n
 
-Automatically analyze all PCAP files with Suricata? (Y/n): y
+Automatically analyze all PCAP files with Suricata? (Y / n): y
 
-Download updated Suricata signatures periodically? (y/N): y
+Download updated Suricata signatures periodically? (y / N): y
 
-Automatically analyze all PCAP files with Zeek? (Y/n): y
+Automatically analyze all PCAP files with Zeek? (Y / n): y
 
-Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y/N): n
+Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y / N): n
 
-Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y/N): n
+Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y / N): n
 
-Perform hardware vendor OUI lookups for MAC addresses? (Y/n): y
+Perform hardware vendor OUI lookups for MAC addresses? (Y / n): y
 
-Perform string randomness scoring on some fields? (Y/n): y
+Perform string randomness scoring on some fields? (Y / n): y
 
 1: no
 2: yes
 3: customize
 Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder? (no): 1
 
-Enable file extraction with Zeek? (y/N): y
+Enable file extraction with Zeek? (y / N): y
 
 1: none
 2: known
@@ -165,21 +165,21 @@ Select file extraction behavior (none): 5
 3: none
 Select file preservation behavior (quarantined): 1
 
-Expose web interface for downloading preserved files? (y/N): y
+Expose web interface for downloading preserved files? (y / N): y
 
 Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted): decryptme
 
-Scan extracted files with ClamAV? (y/N): y
+Scan extracted files with ClamAV? (y / N): y
 
-Scan extracted files with Yara? (y/N): y
+Scan extracted files with Yara? (y / N): y
 
-Scan extracted PE files with Capa? (y/N): y
+Scan extracted PE files with Capa? (y / N): y
 
-Lookup extracted file hashes with VirusTotal? (y/N): n
+Lookup extracted file hashes with VirusTotal? (y / N): n
 
 Download updated file scanner signatures periodically? (n/Y): y
 
-Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y/N): n
+Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): n
 
 1: no
 2: yes
@@ -200,7 +200,7 @@ The next step is to [set up authentication](authsetup.md#AuthSetup) and generate
 ```
 user@host:~/Malcolm$ ./scripts/auth_setup 
 
-Store administrator username/password for local Malcolm access? (Y/n): y
+Store administrator username/password for local Malcolm access? (Y / n): y
 
 Administrator username: analyst
 analyst password:
@@ -208,15 +208,15 @@ analyst password (again):
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
-(Re)generate self-signed certificates for HTTPS access (Y/n): y 
+(Re)generate self-signed certificates for HTTPS access (Y / n): y 
 
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
+(Re)generate self-signed certificates for a remote log forwarder (Y / n): y
 
-Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): n
+Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y / N): n
 
-Store username/password for email alert sender account? (y/N): n
+Store username/password for email alert sender account? (y / N): n
 
-(Re)generate internal passwords for NetBox (Y/n): y
+(Re)generate internal passwords for NetBox (Y / n): y
 ```
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
