@@ -1303,8 +1303,9 @@ def authSetup():
                     (usernamePrevious is not None) and (usernamePrevious != username)
                 ) or args.cmdAuthSetupNonInteractive:
                     htpasswdLines = list()
-                    with open(htpasswdFile, 'r') as f:
-                        htpasswdLines = f.readlines()
+                    if os.path.isfile(htpasswdFile):
+                        with open(htpasswdFile, 'r') as f:
+                            htpasswdLines = f.readlines()
                     with open(htpasswdFile, 'w') as f:
                         if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
                             f.write(f'{username}:{args.authPasswordHtpasswd}')

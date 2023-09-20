@@ -3497,7 +3497,7 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default=None,
+        default='',
         help='AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
     )
     fileCarveArgGroup.add_argument(
