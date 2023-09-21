@@ -100,9 +100,11 @@ Now that any necessary system configuration changes have been made, the local Ma
 ```
 Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
 
+Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y / n): y
+
 Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
 
-Compress OpenSearch index snapshots? (y / N): n
+Compress local OpenSearch index snapshots? (y / N): n
 
 Forward Logstash logs to a secondary remote document store? (y / N): n
 

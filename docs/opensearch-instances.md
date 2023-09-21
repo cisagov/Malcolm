@@ -19,7 +19,7 @@ Should Malcolm use and maintain its own OpenSearch instance? (Y / n): n
 
 Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.123:9200
 
-Require SSL certificate validation for communication with primary OpenSearch instance? (y / N): n
+Require SSL certificate validation for communication with remote OpenSearch instance? (y / N): n
 
 You must run auth_setup after install.py to store OpenSearch connection credentials.
 …
@@ -34,7 +34,7 @@ Forward Logstash logs to a secondary remote document store? (y / N): y
 
 Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://192.168.1.124:9200
 
-Require SSL certificate validation for communication with secondary OpenSearch instance? (y / N): n
+Require SSL certificate validation for communication with secondary remote OpenSearch instance? (y / N): n
 
 You must run auth_setup after install.py to store OpenSearch connection credentials.
 …

@@ -354,7 +354,7 @@ Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y (Malcol
 
 Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
 
-Compress OpenSearch index snapshots? (y / N): n
+Compress local OpenSearch index snapshots? (y / N): n
 
 Forward Logstash logs to a secondary remote document store? (y / N): n
 
@@ -368,6 +368,8 @@ Require encrypted HTTPS connections? (Y / n): y
 2: Lightweight Directory Access Protocol (LDAP)
 3: None
 Select authentication method (Basic): 1
+
+Should Malcolm delete the oldest database indices and/or PCAP files based on available storage? (y / N): y
 
 Delete the oldest indices when the database exceeds a certain size? (y / N): y
 
@@ -424,7 +426,7 @@ Should Malcolm run and maintain an instance of NetBox, an infrastructure resourc
 
 Should Malcolm enrich network traffic using NetBox? (Y / n): y
 
-Should Malcolm automatically populate NetBox inventory based on observed network traffic? (/N): n
+Should Malcolm automatically populate NetBox inventory based on observed network traffic? (y / N): n
 
 Specify default NetBox site name: Malcolm
 
