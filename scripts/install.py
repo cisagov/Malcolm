@@ -93,7 +93,6 @@ OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms10g -Xmx10g -Xss256k -XX:-HeapDumpOn
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
 origPath = os.getcwd()
-HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0]
 
 ###################################################################################################
 args = None
@@ -465,6 +464,12 @@ class Installer(object):
                 'Enter group ID (GID) for running non-root Malcolm processes', default=defaultGid
             )
 
+        pcapNodeName = InstallerAskForString(
+            f'Enter the node name to associate with network traffic metadata',
+            default=args.pcapNodeName,
+        )
+        pcapNodeHost = ''
+
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
 
@@ -606,8 +611,20 @@ class Installer(object):
             logstashHost = ''
             while (len(logstashHost) <= 1) and loopBreaker.increment():
                 logstashHost = InstallerAskForString(
-                    f'Enter Logstash host and port (192.168.1.123:5044)',
+                    f'Enter Logstash host and port (e.g., 192.168.1.123:5044)',
                     default=args.logstashHost,
+                )
+            pcapNodeHost = InstallerAskForString(
+                f'Enter the node host or IP to associate with network traffic metadata',
+                default=args.pcapNodeHost,
+            )
+            if not pcapNodeHost and not InstallerYesOrNo(
+                f'Node host or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
+                default=False,
+            ):
+                pcapNodeHost = InstallerAskForString(
+                    f'Enter the node host or IP to associate with network traffic metadata',
+                    default=args.pcapNodeHost,
                 )
 
         if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
@@ -1590,7 +1607,13 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
-                HostName,
+                pcapNodeName,
+            ),
+            # capture source "node host" for locally processed PCAP files
+            EnvValue(
+                os.path.join(args.configDir, 'upload-common.env'),
+                'PCAP_NODE_HOST',
+                pcapNodeHost,
             ),
             # zeek file extraction mode
             EnvValue(
@@ -3660,6 +3683,24 @@ def main():
         const=True,
         default=False,
         help="Capture live network traffic with Suricata",
+    )
+    captureArgGroup.add_argument(
+        '--node-name',
+        dest='pcapNodeName',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0],
+        help='The node name to associate with network traffic metadata',
+    )
+    captureArgGroup.add_argument(
+        '--node-host',
+        dest='pcapNodeHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='The node host or IP address to associate with network traffic metadata',
     )
 
     try:
