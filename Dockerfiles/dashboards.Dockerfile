@@ -1,5 +1,5 @@
 # build ####################################################################
-FROM amazonlinux:2 AS build
+FROM amazonlinux:2023 AS build
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -14,22 +14,18 @@ ENV PGROUP "dashboarder"
 
 ENV TERM xterm
 
-ARG OPENSEARCH_VERSION="2.8.0"
+ARG OPENSEARCH_VERSION="2.10.0"
 ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
 
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
+ARG OPENSEARCH_DASHBOARDS_VERSION="2.10.0"
 ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
 
 # base system dependencies for checking out and building plugins
 
 USER root
 
-RUN amazon-linux-extras install -y epel && \
-    yum upgrade -y && \
-    yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
-    amazon-linux-extras install -y python3.8 && \
-        ln -s -r -f /usr/bin/python3.8 /usr/bin/python3 && \
-        ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3 && \
+RUN yum upgrade -y && \
+    yum install -y curl-minimal patch procps psmisc tar zip unzip gcc-c++ make jq git && \
     groupadd -g ${DEFAULT_GID} ${PGROUP} && \
     adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
     mkdir -p /usr/share && \
@@ -71,7 +67,7 @@ RUN eval "$(nodenv init -)" && \
 
 # runtime ##################################################################
 
-FROM opensearchproject/opensearch-dashboards:2.8.0
+FROM opensearchproject/opensearch-dashboards:2.10.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -93,7 +89,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.9.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_PRIMARY="opensearch-local"
@@ -120,17 +116,17 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
+    yum install -y curl-minimal psmisc util-linux openssl rsync python3 zip unzip && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /usr/share/opensearch-dashboards/plugins && \
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.9\.0/2\.10\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.9\.0/2\.10\.0/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
