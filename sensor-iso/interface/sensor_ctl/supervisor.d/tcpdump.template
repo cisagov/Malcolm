@@ -5,5 +5,6 @@ startretries=3
 stopasgroup=true
 killasgroup=true
 autostart=%(ENV_AUTOSTART_TCPDUMP)s
+autorestart=%(ENV_AUTOSTART_TCPDUMP)s
 directory=%(ENV_PCAP_PATH)s
 user=sensor
