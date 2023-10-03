@@ -63,7 +63,13 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
+      elasticsearch \
+      opensearch-py \
+      python-magic \
+      pyzmq \
+      requests \
+      watchdog && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

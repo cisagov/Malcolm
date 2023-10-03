@@ -1,6 +1,7 @@
 import dateparser
 import json
 import malcolm_utils
+import elasticsearch
 import opensearchpy
 import os
 import pytz
@@ -167,7 +168,14 @@ debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
 dashboardsUrl = app.config["DASHBOARDS_URL"]
-opensearchLocal = (app.config["OPENSEARCH_PRIMARY"] == "opensearch-local") or (
+databaseMode = malcolm_utils.DATABASE_MODE_ENUMS[app.config["OPENSEARCH_PRIMARY"]]
+if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+    DatabaseImport = elasticsearch
+    DatabaseClass = elasticsearch.Elasticsearch
+else:
+    DatabaseImport = opensearchpy
+    DatabaseClass = opensearchpy.OpenSearch
+opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
     opensearchUrl == 'http://opensearch:9200'
 )
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
@@ -183,7 +191,7 @@ else:
     opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-opensearchClient = opensearchpy.OpenSearch(
+databaseClient = DatabaseClass(
     hosts=[opensearchUrl],
     http_auth=opensearchHttpAuth,
     verify_certs=opensearchSslVerify,
@@ -423,7 +431,7 @@ def filtervalues(search, args):
                     )
                 else:
                     # field does not exist ("is null")
-                    s = s.filter('bool', must_not=opensearchpy.helpers.query.Q('exists', field=fieldname))
+                    s = s.filter('bool', must_not=DatabaseImport.helpers.query.Q('exists', field=fieldname))
 
     if debugApi:
         print(f'filtervalues: {json.dumps(s.to_dict())}')
@@ -452,10 +460,10 @@ def bucketfield(fieldname, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    global opensearchClient
+    global databaseClient
 
-    s = opensearchpy.Search(
-        using=opensearchClient,
+    s = DatabaseImport.Search(
+        using=databaseClient,
         index=app.config["ARKIME_INDEX_PATTERN"],
     ).extra(size=0)
     args = get_request_arguments(current_request)
@@ -550,11 +558,11 @@ def document(index):
     results
         array of the documents retrieved (up to 'limit')
     """
-    global opensearchClient
+    global databaseClient
 
     args = get_request_arguments(request)
-    s = opensearchpy.Search(
-        using=opensearchClient,
+    s = DatabaseImport.Search(
+        using=databaseClient,
         index=index,
     ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
@@ -612,7 +620,7 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
-    global opensearchClient
+    global databaseClient
 
     args = get_request_arguments(request)
 
@@ -625,8 +633,8 @@ def fields():
     if arkimeFields:
         try:
             # get fields from Arkime's field's table
-            s = opensearchpy.Search(
-                using=opensearchClient,
+            s = DatabaseImport.Search(
+                using=databaseClient,
                 index=app.config["ARKIME_FIELDS_INDEX"],
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
@@ -740,7 +748,7 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
-    global opensearchClient
+    global databaseClient
 
     return jsonify(
         version=app.config["MALCOLM_VERSION"],
@@ -751,7 +759,7 @@ def version():
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json(),
-        opensearch_health=opensearchClient.cluster.health(),
+        opensearch_health=databaseClient.cluster.health(),
     )
 
 
@@ -834,7 +842,7 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    global opensearchClient
+    global databaseClient
 
     alert = {}
     idxResponse = {}
@@ -933,7 +941,7 @@ def event():
                     alert['event']['hits'] = hitCount
 
         docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
-        idxResponse = opensearchClient.index(
+        idxResponse = databaseClient.index(
             index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
             id=f"{docDateStr}-{alert['event']['id']}",
             body=alert,

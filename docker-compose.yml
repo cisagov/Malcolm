@@ -60,6 +60,7 @@ services:
       - ./config/process.env
       - ./config/ssl.env
       - ./config/opensearch.env
+      - ./config/dashboards.env
       - ./config/dashboards-helper.env
     environment:
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
@@ -693,6 +694,7 @@ services:
     env_file:
       - ./config/process.env
       - ./config/ssl.env
+      - ./config/dashboards.env
       - ./config/opensearch.env
     environment:
       VIRTUAL_HOST : 'api.malcolm.local'

@@ -542,6 +542,7 @@ class Installer(object):
         opensearchSecondaryUrl = ''
         opensearchSecondarySslVerify = False
         opensearchSecondaryLabel = 'remote OpenSearch'
+        dashboardsUrl = 'http://dashboards:5601/dashboards'
         logstashHost = 'logstash:5044'
         indexSnapshotCompressed = False
         malcolmProfile = (
@@ -605,6 +606,15 @@ class Installer(object):
                 f'Compress {opensearchPrimaryLabel} index snapshots?',
                 default=args.indexSnapshotCompressed,
             )
+
+        if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Kibana connection URL')
+            dashboardsUrl = ''
+            while (len(dashboardsUrl) <= 1) and loopBreaker.increment():
+                dashboardsUrl = InstallerAskForString(
+                    f'Enter Kibana connection URL (e.g., https://192.168.1.123:5601)',
+                    default=args.dashboardsUrl,
+                )
 
         if malcolmProfile != PROFILE_MALCOLM:
             loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Logstash host and port')
@@ -1307,8 +1317,10 @@ class Installer(object):
                 f'Warning: Running with the {malcolmProfile} profile but no capture methods are enabled.',
             )
 
-        dashboardsDarkMode = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
-            'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
+        dashboardsDarkMode = (
+            (malcolmProfile == PROFILE_MALCOLM)
+            and (opensearchPrimaryMode != DatabaseMode.ElasticsearchRemote)
+            and InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode)
         )
 
         # modify values in .env files in args.configDir
@@ -1356,6 +1368,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'beats-common.env'),
                 'LOGSTASH_HOST',
                 logstashHost,
+            ),
+            # OpenSearch Dashboards URL
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards.env'),
+                'DASHBOARDS_URL',
+                dashboardsUrl,
             ),
             # turn on dark mode, or not
             EnvValue(
@@ -3265,6 +3283,15 @@ def main():
         const=True,
         default=False,
         help="Require SSL certificate validation for communication with secondary OpenSearch instance",
+    )
+    opensearchArgGroup.add_argument(
+        '--dashboards-url',
+        dest='dashboardsUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Remote OpenSearch Dashboards connection URL',
     )
 
     logstashArgGroup = parser.add_argument_group('Logstash options')

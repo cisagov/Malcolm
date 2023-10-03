@@ -5,14 +5,7 @@
 set -euo pipefail
 shopt -s nocasematch
 
-if [[ -n $DASHBOARDS_URL ]]; then
-  DASHB_URL="$DASHBOARDS_URL"
-elif [[ -n $DASHBOARDS_HOST ]] && [[ -n $DASHBOARDS_PORT ]]; then
-  DASHB_URL="http://$DASHBOARDS_HOST:$DASHBOARDS_PORT"
-else
-  DASHB_URL="http://dashboards:5601/dashboards"
-fi
-
+DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}

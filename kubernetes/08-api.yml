@@ -54,6 +54,8 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
+              name: dashboards-env
+          - configMapRef:
               name: opensearch-env
         env:
           - name: VIRTUAL_HOST
