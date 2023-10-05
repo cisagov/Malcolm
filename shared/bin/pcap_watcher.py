@@ -40,8 +40,6 @@ import watch_common
 from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 
-from opensearchpy import OpenSearch, Search
-from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
 from urllib3.exceptions import NewConnectionError
 
 from watchdog.observers import Observer
@@ -67,6 +65,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = [False]
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
+DatabaseClass = None
 
 
 ###################################################################################################
@@ -94,7 +93,7 @@ class EventWatcher:
                     try:
                         self.logger.info(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
 
-                        self.openSearchClient = OpenSearch(
+                        self.openSearchClient = DatabaseClass(
                             hosts=[args.opensearchUrl],
                             http_auth=opensearchHttpAuth,
                             verify_certs=args.opensearchSslVerify,
@@ -198,7 +197,7 @@ class EventWatcher:
                 fileIsDuplicate = False
                 if self.useOpenSearch:
                     s = (
-                        Search(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
+                        self.openSearchClient.search(index=ARKIME_FILES_INDEX)
                         .filter("term", node=args.nodeName)
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )
@@ -426,6 +425,13 @@ def main():
     logging.info("Arguments: {}".format(args))
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
+
+    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        from opensearchpy import OpenSearch as DatabaseClass
+        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
+    else:
+        from elasticsearch import Elasticsearch as DatabaseClass
+        from elasticsearch.exceptions import ConnectionError, ConnectionTimeout
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'http://opensearch:9200'

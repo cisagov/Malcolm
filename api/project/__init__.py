@@ -1,8 +1,6 @@
 import dateparser
 import json
 import malcolm_utils
-import elasticsearch
-import opensearchpy
 import os
 import pytz
 import random
@@ -168,13 +166,19 @@ debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
 dashboardsUrl = app.config["DASHBOARDS_URL"]
-databaseMode = malcolm_utils.DATABASE_MODE_ENUMS[app.config["OPENSEARCH_PRIMARY"]]
+
+databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
 if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-    DatabaseImport = elasticsearch
-    DatabaseClass = elasticsearch.Elasticsearch
+    import elasticsearch as DatabaseImport
 else:
-    DatabaseImport = opensearchpy
-    DatabaseClass = opensearchpy.OpenSearch
+    import opensearchpy as DatabaseImport
+
+DatabaseClass = (
+    DatabaseImport.Elasticsearch
+    if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote
+    else DatabaseImport.OpenSearch
+)
+
 opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
     opensearchUrl == 'http://opensearch:9200'
 )
@@ -462,8 +466,7 @@ def bucketfield(fieldname, current_request, urls=None):
     """
     global databaseClient
 
-    s = DatabaseImport.Search(
-        using=databaseClient,
+    s = databaseClient.Search(
         index=app.config["ARKIME_INDEX_PATTERN"],
     ).extra(size=0)
     args = get_request_arguments(current_request)
@@ -561,8 +564,7 @@ def document(index):
     global databaseClient
 
     args = get_request_arguments(request)
-    s = DatabaseImport.Search(
-        using=databaseClient,
+    s = databaseClient.Search(
         index=index,
     ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
@@ -633,8 +635,7 @@ def fields():
     if arkimeFields:
         try:
             # get fields from Arkime's field's table
-            s = DatabaseImport.Search(
-                using=databaseClient,
+            s = databaseClient.Search(
                 index=app.config["ARKIME_FIELDS_INDEX"],
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:

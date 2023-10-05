@@ -45,6 +45,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         CURL_CONFIG_PARAMS=()
 
       fi
+      DATASTORE_TYPE="$(echo "$OPENSEARCH_PRIMARY" | cut -d- -f1)"
 
     elif [[ "$LOOP" == "secondary" ]] && ( [[ "$OPENSEARCH_SECONDARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]] ) && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then
       OPENSEARCH_URL_TO_USE=$OPENSEARCH_SECONDARY_URL
@@ -58,10 +59,14 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       else
         CURL_CONFIG_PARAMS=()
       fi
+      DATASTORE_TYPE="$(echo "$OPENSEARCH_SECONDARY" | cut -d- -f1)"
 
     else
       continue
     fi
+    [[ -z "$DATASTORE_TYPE" ]] && DATASTORE_TYPE="opensearch"
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && DASHBOARDS_URI_PATH="kibana" || DASHBOARDS_URI_PATH="opensearch-dashboards"
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && XSRF_HEADER="kbn-xsrf" || XSRF_HEADER="osd-xsrf"
 
     # is the Dashboards process server up and responding to requests?
     if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
@@ -158,15 +163,15 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
           # From https://github.com/elastic/kibana/issues/3709
           # Create index pattern
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
             -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
 
           echo "Setting default index pattern..."
 
           # Make it the default index
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
-            "$DASHB_URL/api/opensearch-dashboards/settings/defaultIndex" \
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
             -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
 
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
@@ -174,7 +179,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             IDX_NAME="$(echo "$i" | cut -d';' -f2)"
             IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
             echo "Creating index pattern \"$IDX_NAME\"..."
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "osd-xsrf: anything" \
+            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
               "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
               -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1 || true
           done
@@ -183,7 +188,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
           # install default dashboards
           for i in /opt/dashboards/*.json; do
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
 
           # beats will no longer import its dashbaords into OpenSearch
@@ -191,81 +196,86 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
           # manually add load our dashboards in /opt/dashboards/beats as well.
           for i in /opt/dashboards/beats/*.json; do
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/dashboards/import?force=true" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
+            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
 
           # set dark theme (or not)
           [[ "$DARK_MODE" == "true" ]] && DARK_MODE_ARG='{"value":true}' || DARK_MODE_ARG='{"value":false}'
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/theme:darkMode" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "$DARK_MODE_ARG"
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/theme:darkMode" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$DARK_MODE_ARG"
 
           # set default dashboard
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/defaultRoute" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}"
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultRoute" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}"
 
           # set default query time range
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d \
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d \
             '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
 
           # turn off telemetry
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/telemetry/v2/optIn" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"enabled":false}'
+          [[ "$DATASTORE_TYPE" == "opensearch" ]] && \
+            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/telemetry/v2/optIn" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d '{"enabled":false}'
 
           # pin filters by default
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/filters:pinnedByDefault" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/filters:pinnedByDefault" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d '{"value":true}'
 
           # enable in-session storage
-          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/opensearch-dashboards/settings/state:storeInSessionStorage" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d '{"value":true}'
+          curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d '{"value":true}'
 
           echo "OpenSearch Dashboards saved objects import complete!"
 
-          # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
-          /data/opensearch_status.sh -w >/dev/null 2>&1
-          sleep 60
+          # features like anomaly detection, alerting, etc. only exist in opensearch
+          if [[ "$DATASTORE_TYPE" == "opensearch" ]]; then
 
-          echo "Creating OpenSearch anomaly detectors..."
+            # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
+            /data/opensearch_status.sh -w >/dev/null 2>&1
+            sleep 60
 
-          # Create anomaly detectors here
-          for i in /opt/anomaly_detectors/*.json; do
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
-          done
+            echo "Creating OpenSearch anomaly detectors..."
 
-          # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
-          # see:
-          # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/109
-          # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/155
-          # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/156
-          # - https://discuss.opendistrocommunity.dev/t/errors-opening-anomaly-detection-plugin-for-dashboards-after-creation-via-api/7711
-          set +e
-          DUMMY_DETECTOR_ID=""
-          until [[ -n "$DUMMY_DETECTOR_ID" ]]; do
-            sleep 5
-            DUMMY_DETECTOR_ID="$(curl "${CURL_CONFIG_PARAMS[@]}" -L --fail --silent --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/_search" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
-          done
-          set -e
-          if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" -H 'osd-xsrf:true' -H 'Content-type:application/json'
-            sleep 10
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" -H 'osd-xsrf:true' -H 'Content-type:application/json'
-            sleep 10
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XDELETE "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" -H 'osd-xsrf:true' -H 'Content-type:application/json'
-          fi
+            # Create anomaly detectors here
+            for i in /opt/anomaly_detectors/*.json; do
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
+            done
 
-          echo "OpenSearch anomaly detectors creation complete!"
+            # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
+            # see:
+            # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/109
+            # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/155
+            # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/156
+            # - https://discuss.opendistrocommunity.dev/t/errors-opening-anomaly-detection-plugin-for-dashboards-after-creation-via-api/7711
+            set +e
+            DUMMY_DETECTOR_ID=""
+            until [[ -n "$DUMMY_DETECTOR_ID" ]]; do
+              sleep 5
+              DUMMY_DETECTOR_ID="$(curl "${CURL_CONFIG_PARAMS[@]}" -L --fail --silent --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/_search" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+            done
+            set -e
+            if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+              sleep 10
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+              sleep 10
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XDELETE "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+            fi
 
-          echo "Creating OpenSearch alerting objects..."
+            echo "OpenSearch anomaly detectors creation complete!"
 
-          # Create notification/alerting objects here
+            echo "Creating OpenSearch alerting objects..."
 
-          # notification channels
-          for i in /opt/notifications/channels/*.json; do
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_notifications/configs" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
-          done
+            # Create notification/alerting objects here
 
-          # monitors
-          for i in /opt/alerting/monitors/*.json; do
-            curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" -H 'osd-xsrf:true' -H 'Content-type:application/json' -d "@$i"
-          done
+            # notification channels
+            for i in /opt/notifications/channels/*.json; do
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_notifications/configs" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
+            done
 
-          echo "OpenSearch alerting objects creation complete!"
+            # monitors
+            for i in /opt/alerting/monitors/*.json; do
+              curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
+            done
 
+            echo "OpenSearch alerting objects creation complete!"
+
+          fi # DATASTORE_TYPE == opensearch
         fi # stuff to only do for primary
       fi # index pattern not already created check
     fi # dashboards is running
