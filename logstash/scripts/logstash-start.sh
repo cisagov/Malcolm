@@ -124,9 +124,6 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_P
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_SECONDARY_DATASTORE_TYPE_/${OPENSEARCH_SECONDARY_TYPE}/g" "{}" \; 2>/dev/null
 
 
-_MALCOLM_LOGSTASH_PRIMARY_DATASTORE_TYPE_
-_MALCOLM_LOGSTASH_SECONDARY_DATASTORE_TYPE_
-
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
