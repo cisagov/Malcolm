@@ -65,8 +65,15 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
       continue
     fi
     [[ -z "$DATASTORE_TYPE" ]] && DATASTORE_TYPE="opensearch"
-    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && DASHBOARDS_URI_PATH="kibana" || DASHBOARDS_URI_PATH="opensearch-dashboards"
-    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && XSRF_HEADER="kbn-xsrf" || XSRF_HEADER="osd-xsrf"
+    if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
+      DASHBOARDS_URI_PATH="kibana"
+      XSRF_HEADER="kbn-xsrf"
+      ECS_TEMPLATES_DIR=/opt/ecs-templates
+    else
+      DASHBOARDS_URI_PATH="opensearch-dashboards"
+      XSRF_HEADER="osd-xsrf"
+      ECS_TEMPLATES_DIR=/opt/ecs-templates-os
+    fi
 
     # is the Dashboards process server up and responding to requests?
     if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
@@ -88,7 +95,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
         # we need to do this import (mostly useful for the secondary loop)
-        TEMPLATE_HASH="$(find /opt/ecs-templates/composable "$MALCOLM_TEMPLATES_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
+        TEMPLATE_HASH="$(find "$ECS_TEMPLATES_DIR"/composable "$MALCOLM_TEMPLATES_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
 
         # get the previous stored template hash (if any) to avoid importing if it's already been imported
         set +e
@@ -102,9 +109,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         # was an error calculating or storing either
         if [[ "$TEMPLATE_HASH" != "$TEMPLATE_HASH_OLD" ]] || [[ -z "$TEMPLATE_HASH_OLD" ]] || [[ -z "$TEMPLATE_HASH" ]]; then
 
-          if [[ -d /opt/ecs-templates/composable/component ]]; then
+          if [[ -d "$ECS_TEMPLATES_DIR"/composable/component ]]; then
             echo "Importing ECS composable templates..."
-            for i in /opt/ecs-templates/composable/component/*.json; do
+            for i in "$ECS_TEMPLATES_DIR"/composable/component/*.json; do
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing ECS composable template $TEMP_FILENAME ..."
