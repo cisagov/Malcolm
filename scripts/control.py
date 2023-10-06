@@ -1684,7 +1684,7 @@ def authSetup():
 
                         esSslVerify = YesOrNo(
                             'Require SSL certificate validation for OpenSearch communication?',
-                            default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
+                            default=False,
                             defaultBehavior=defaultBehavior,
                         )
 

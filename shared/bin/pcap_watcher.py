@@ -65,7 +65,7 @@ scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = [False]
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
-DatabaseClass = None
+DatabaseClass, SearchClass, ConnectionError, ConnectionTimeout, AuthenticationException = None, None, None, None, None
 
 
 ###################################################################################################
@@ -75,6 +75,11 @@ class EventWatcher:
         global args
         global opensearchHttpAuth
         global shuttingDown
+        global DatabaseClass
+        global SearchClass
+        global ConnectionError
+        global ConnectionTimeout
+        global AuthenticationException
 
         super().__init__()
 
@@ -120,6 +125,7 @@ class EventWatcher:
                         ConnectionTimeout,
                         ConnectionRefusedError,
                         NewConnectionError,
+                        AuthenticationException,
                     ) as connError:
                         self.logger.error(f"{scriptName}:\tOpenSearch connection error: {connError}")
 
@@ -151,6 +157,7 @@ class EventWatcher:
                     ConnectionTimeout,
                     ConnectionRefusedError,
                     NewConnectionError,
+                    AuthenticationException,
                 ) as connError:
                     self.logger.debug(f"{scriptName}:\tOpenSearch health check: {connError}")
 
@@ -177,6 +184,8 @@ class EventWatcher:
     # set up event processor to append processed events from to the event queue
     def processFile(self, pathname):
         global args
+        global DatabaseClass
+        global SearchClass
 
         self.logger.info(f"{scriptName}:\t👓\t{pathname}")
 
@@ -197,7 +206,7 @@ class EventWatcher:
                 fileIsDuplicate = False
                 if self.useOpenSearch:
                     s = (
-                        self.openSearchClient.search(index=ARKIME_FILES_INDEX)
+                        SearchClass(using=self.openSearchClient, index=ARKIME_FILES_INDEX)
                         .filter("term", node=args.nodeName)
                         .query("wildcard", name=f"*{os.path.sep}{relativePath}")
                     )
@@ -260,6 +269,11 @@ def main():
     global opensearchHttpAuth
     global pdbFlagged
     global shuttingDown
+    global DatabaseClass
+    global SearchClass
+    global ConnectionError
+    global ConnectionTimeout
+    global AuthenticationException
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
     parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
@@ -427,16 +441,18 @@ def main():
         sys.tracebacklimit = 0
 
     if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-        from opensearchpy import OpenSearch as DatabaseClass
-        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout
+        from opensearchpy import OpenSearch as DatabaseClass, Search as SearchClass
+        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
     else:
         from elasticsearch import Elasticsearch as DatabaseClass
-        from elasticsearch.exceptions import ConnectionError, ConnectionTimeout
+        from elasticsearch_dsl import Search as SearchClass
+        from elasticsearch.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'http://opensearch:9200'
     )
     opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
+
     if not args.opensearchUrl:
         if opensearchIsLocal:
             args.opensearchUrl = 'http://opensearch:9200'

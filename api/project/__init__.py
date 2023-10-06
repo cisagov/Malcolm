@@ -170,8 +170,10 @@ dashboardsUrl = app.config["DASHBOARDS_URL"]
 databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
 if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
     import elasticsearch as DatabaseImport
+    from elasticsearch_dsl import Search as SearchClass
 else:
     import opensearchpy as DatabaseImport
+    from opensearchpy import Search as SearchClass
 
 DatabaseClass = (
     DatabaseImport.Elasticsearch
@@ -465,8 +467,10 @@ def bucketfield(fieldname, current_request, urls=None):
         the name of the field(s) on which the aggregation was performed
     """
     global databaseClient
+    global SearchClass
 
-    s = databaseClient.Search(
+    s = SearchClass(
+        using=databaseClient,
         index=app.config["ARKIME_INDEX_PATTERN"],
     ).extra(size=0)
     args = get_request_arguments(current_request)
@@ -562,9 +566,11 @@ def document(index):
         array of the documents retrieved (up to 'limit')
     """
     global databaseClient
+    global SearchClass
 
     args = get_request_arguments(request)
-    s = databaseClient.Search(
+    s = SearchClass(
+        using=databaseClient,
         index=index,
     ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
@@ -623,6 +629,7 @@ def fields():
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
     global databaseClient
+    global SearchClass
 
     args = get_request_arguments(request)
 
@@ -634,8 +641,9 @@ def fields():
 
     if arkimeFields:
         try:
-            # get fields from Arkime's field's table
-            s = databaseClient.Search(
+            # get fields from Arkime's fields table
+            s = SearchClass(
+                using=databaseClient,
                 index=app.config["ARKIME_FIELDS_INDEX"],
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:

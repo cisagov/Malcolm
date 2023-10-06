@@ -65,6 +65,7 @@ RUN apt-get -q update && \
     rm -rf /var/lib/apt/lists/* && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
       elasticsearch \
+      elasticsearch-dsl \
       opensearch-py \
       python-magic \
       pyzmq \
