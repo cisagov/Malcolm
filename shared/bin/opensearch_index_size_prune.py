@@ -151,7 +151,7 @@ def main():
         sys.tracebacklimit = 0
 
     # short-circuit without printing anything else
-    if args.limit == '0':
+    if (args.limit == '0') or (args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote):
         return
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
