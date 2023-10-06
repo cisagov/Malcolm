@@ -28,6 +28,9 @@ Resolving deltas: 100% (81/81), done.
 
 user@host:~$ cd Malcolm/
 ```
+If you are planning on setting up Hedgehog sensors you will need to download Croc and ensure it is in your `PATH` variable. You can find Croc here: `https://github.com/schollz/croc`.
+
+Croc is not automatically downloaded as it is not in `apt` and must be downloaded either as a release or through a curl + bash.
 
 Next, run the `install.py` script to configure the system. Replace `user` in this example with the local account username, and follow the prompts. Most questions have acceptable defaults that can be accepted by pressing the `Enter` key. Depending on whether Malcolm is being installed from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
