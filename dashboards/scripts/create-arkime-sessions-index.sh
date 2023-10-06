@@ -184,17 +184,17 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
               "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
               -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
 
-            for i in ${OTHER_INDEX_PATTERNS[@]}; do
-              IDX_ID="$(echo "$i" | cut -d';' -f1)"
-              IDX_NAME="$(echo "$i" | cut -d';' -f2)"
-              IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
-              echo "Creating index pattern \"$IDX_NAME\"..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-                "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
-                -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1 || true
-            done
-
           fi # TODO: for elasticsearch
+
+          for i in ${OTHER_INDEX_PATTERNS[@]}; do
+            IDX_ID="$(echo "$i" | cut -d';' -f1)"
+            IDX_NAME="$(echo "$i" | cut -d';' -f2)"
+            IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
+            echo "Creating index pattern \"$IDX_NAME\"..."
+            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+              "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
+              -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1 || true
+          done
 
           echo "Importing OpenSearch Dashboards saved objects..."
 
