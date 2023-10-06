@@ -335,16 +335,17 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     )
     translated = []
 
-    for field in get_iterable(fieldname):
-        for url_regex_pair in fields_to_urls:
-            if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
-                for url in url_regex_pair[1]:
-                    if url.startswith('DASH:'):
-                        translated.append(
-                            f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
-                        )
-                    else:
-                        translated.append(url)
+    if databaseMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        for field in get_iterable(fieldname):
+            for url_regex_pair in fields_to_urls:
+                if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
+                    for url in url_regex_pair[1]:
+                        if url.startswith('DASH:'):
+                            translated.append(
+                                f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
+                            )
+                        else:
+                            translated.append(url)
 
     return list(set(translated))
 
