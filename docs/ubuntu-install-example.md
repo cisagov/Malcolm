@@ -28,9 +28,6 @@ Resolving deltas: 100% (81/81), done.
 
 user@host:~$ cd Malcolm/
 ```
-If you are planning on setting up Hedgehog sensors you will need to download Croc and ensure it is in your `PATH` variable. You can find Croc here: `https://github.com/schollz/croc`.
-
-Croc is not automatically downloaded as it is not in `apt` and must be downloaded either as a release or through a curl + bash.
 
 Next, run the `install.py` script to configure the system. Replace `user` in this example with the local account username, and follow the prompts. Most questions have acceptable defaults that can be accepted by pressing the `Enter` key. Depending on whether Malcolm is being installed from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
 ```
@@ -223,6 +220,10 @@ Store username/password for email alert sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox (Y / n): y
 ```
+
+Users planning to install and configure sensor devices running [Hedgehog Linux](hedgehog.md) must perform an additional step to allow communication between a Malcolm instance and an installation of Hedgehog Linux. In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected above. The certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in Malcolm's `filebeat/certs/` directory; these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the Hedgehog Linux sensor.
+
+As an alternative to manually copying the files to the sensor, Malcolm can facilitate the secure transfer of these certificates using [`croc`](https://github.com/schollz/croc), an open-source tool for secure file transfer between two computers. Malcolm does not automatically download and install `croc`, but it may be downloaded from its [releases page on GitHub](https://github.com/schollz/croc/releases) or [installed from the command line](https://github.com/schollz/croc#install). If `croc` exists in the `PATH` on the Malcolm system, the `auth_setup` script will prompt to "Transfer self-signed client certificates to a remote log forwarder." Users can follow the steps outlined in the **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)** (see [the Malcolm portion](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) and [the sensor portion](malcolm-hedgehog-e2e-iso-install.md##HedgehogGetCerts) of those instructions) to copy the certificates to the sensor.
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
