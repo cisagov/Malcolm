@@ -7,9 +7,9 @@ set -e
 ENCODING="utf-8"
 
 # options
-# -v          (verbose)
-#
-# -w      (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
+# -v       (verbose)
+# -t <str> (wait not only for "up" status, but also wait for specified index template ot exist
+# -w       (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
 #
 # opensearch connection parameters are read from environment variables
 
@@ -68,22 +68,22 @@ until [[ "$(curl "${CURL_CONFIG_PARAMS[@]}" -fsSL "$OPENSEARCH_URL/_cat/health?h
   sleep 1
 done
 
-echo "OpenSearch is up and healthy at "$OPENSEARCH_URL"" >&2
+echo "$OPENSEARCH_PRIMARY is up and healthy at "$OPENSEARCH_URL"" >&2
 
 if [[ -n "$WAIT_FOR_TEMPLATE" ]]; then
   sleep 1
-  echo "Waiting until OpenSearch has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
   until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_index_template/$WAIT_FOR_TEMPLATE" 2>/dev/null | grep -q index_templates ); do
     sleep 5
   done
-  echo "OpenSearch index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
+  echo "$OPENSEARCH_PRIMARY index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
   sleep 5
 fi
 
 if (( $WAIT_FOR_LOG_DATA == 1 )); then
   sleep 1
 
-  echo "Waiting until OpenSearch has logs..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has logs..." >&2
 
   # wait until at least one arkime_sessions3-* index exists
   until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/arkime_sessions3-*" 2>/dev/null | wc -l) > 0 )) ; do
