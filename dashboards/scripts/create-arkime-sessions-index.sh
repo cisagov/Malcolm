@@ -168,23 +168,18 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
         if [[ "$LOOP" == "primary" ]]; then
           echo "Importing index pattern..."
 
-          # TODO: for elasticsearch:
-          if [[ "$DATASTORE_TYPE" == "opensearch" ]]; then
+          # From https://github.com/elastic/kibana/issues/3709
+          # Create index pattern
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
+            -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
 
-            # From https://github.com/elastic/kibana/issues/3709
-            # Create index pattern
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-              "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
-              -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
+          echo "Setting default index pattern..."
 
-            echo "Setting default index pattern..."
-
-            # Make it the default index
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-              "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
-              -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
-
-          fi # TODO: for elasticsearch
+          # Make it the default index
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
+            -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
 
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
             IDX_ID="$(echo "$i" | cut -d';' -f1)"
