@@ -15,7 +15,8 @@ ENCODING="utf-8"
 
 WAIT_FOR_LOG_DATA=0
 WAIT_FOR_TEMPLATE=
-while getopts 'vwt:' OPTION; do
+WAIT_FOR_TEMPLATE_LEGACY=
+while getopts 'vwt:l:' OPTION; do
   case "$OPTION" in
     v)
       set -x
@@ -27,6 +28,10 @@ while getopts 'vwt:' OPTION; do
 
     t)
       WAIT_FOR_TEMPLATE=${OPTARG}
+      ;;
+
+    l)
+      WAIT_FOR_TEMPLATE_LEGACY=${OPTARG}
       ;;
 
     ?)
@@ -69,6 +74,16 @@ until [[ "$(curl "${CURL_CONFIG_PARAMS[@]}" -fsSL "$OPENSEARCH_URL/_cat/health?h
 done
 
 echo "$OPENSEARCH_PRIMARY is up and healthy at "$OPENSEARCH_URL"" >&2
+
+if [[ -n "$WAIT_FOR_TEMPLATE_LEGACY" ]]; then
+  sleep 1
+  echo "Waiting until $OPENSEARCH_PRIMARY has legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\"..." >&2
+  until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_template/$WAIT_FOR_TEMPLATE_LEGACY" 2>/dev/null | grep -q mappings ); do
+    sleep 5
+  done
+  echo "$OPENSEARCH_PRIMARY legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\" exists" >&2
+  sleep 5
+fi
 
 if [[ -n "$WAIT_FOR_TEMPLATE" ]]; then
   sleep 1

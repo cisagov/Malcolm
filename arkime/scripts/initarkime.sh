@@ -32,8 +32,8 @@ if ( [[ ! -f "$CERT_FILE" ]] || [[ ! -f "$KEY_FILE" ]] ) && [[ -x /usr/local/bin
   popd >/dev/null 2>&1
 fi
 
-echo "Giving OpenSearch time to start..."
-/opt/opensearch_status.sh 2>&1 && echo "OpenSearch is running!"
+echo "Giving $OPENSEARCH_PRIMARY time to start..."
+/opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
 
 # download and/or update geo updates
 $ARKIME_DIR/bin/arkime_update_geo.sh
@@ -55,7 +55,7 @@ fi
 # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
 if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
 
-  echo "Initializing OpenSearch database..."
+  echo "Initializing $OPENSEARCH_PRIMARY database..."
 
 	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt
 
@@ -86,23 +86,15 @@ if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/j
 
   curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
 
-  echo -e "\nOpenSearch database initialized!\n"
+  echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
 
 else
-  echo "OpenSearch database previously initialized!"
+  echo "$OPENSEARCH_PRIMARY database previously initialized!"
   echo
 
-  if /opt/arkime-needs-upgrade.sh 2>&1; then
-    echo "OpenSearch database needs to be upgraded for $ARKIME_VERSION!"
-    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt
-    echo "OpenSearch database upgrade complete!"
-    echo
+  $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded
+  echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
 
-  else
-    echo "OpenSearch database is up-to-date for Arkime version $ARKIME_VERSION!"
-    echo
-
-  fi # if /opt/moloch-needs-upgrade.sh
 fi # if/else OpenSearch database initialized
 
 # increase OpenSearch max shards per node from default if desired
