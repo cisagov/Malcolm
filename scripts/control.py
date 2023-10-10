@@ -1167,13 +1167,13 @@ def authSetup():
         ),
         (
             'remoteos',
-            "Configure remote primary or secondary OpenSearch instance",
+            "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
             False,
             False,
         ),
         (
             'email',
-            "Store username/password for email alert sender account",
+            "Store username/password for OpenSearch Alerting email sender account",
             False,
             False,
         ),
@@ -1632,7 +1632,7 @@ def authSetup():
                 for instance in ['primary', 'secondary']:
                     openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
                     if YesOrNo(
-                        f'Store username/password for {instance} remote OpenSearch instance?',
+                        f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
                         default=False,
                         defaultBehavior=defaultBehavior,
                     ):
@@ -1643,10 +1643,12 @@ def authSetup():
                         esPassword = None
                         esPasswordConfirm = None
 
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch username')
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
+                        )
                         while loopBreaker.increment():
                             esUsername = AskForString(
-                                "OpenSearch username",
+                                "OpenSearch/Elasticsearch username",
                                 default=prevCurlContents['user'],
                                 defaultBehavior=defaultBehavior,
                             )
@@ -1654,7 +1656,9 @@ def authSetup():
                                 break
                             eprint("Username is blank (or contains a colon, which is not allowed)")
 
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch password')
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
+                        )
                         while loopBreaker.increment():
                             esPassword = AskForPassword(
                                 f"{esUsername} password: ",
@@ -1683,7 +1687,7 @@ def authSetup():
                             eprint("Passwords do not match")
 
                         esSslVerify = YesOrNo(
-                            'Require SSL certificate validation for OpenSearch communication?',
+                            'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
                             default=False,
                             defaultBehavior=defaultBehavior,
                         )

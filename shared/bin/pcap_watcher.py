@@ -96,7 +96,7 @@ class EventWatcher:
             while (not connected) and (not shuttingDown[0]):
                 try:
                     try:
-                        self.logger.info(f"{scriptName}:\tconnecting to OpenSearch {args.opensearchUrl}...")
+                        self.logger.info(f"{scriptName}:\tconnecting to {args.opensearchMode} {args.opensearchUrl}...")
 
                         self.openSearchClient = DatabaseClass(
                             hosts=[args.opensearchUrl],
@@ -127,11 +127,11 @@ class EventWatcher:
                         NewConnectionError,
                         AuthenticationException,
                     ) as connError:
-                        self.logger.error(f"{scriptName}:\tOpenSearch connection error: {connError}")
+                        self.logger.error(f"{scriptName}:\t{args.opensearchMode} connection error: {connError}")
 
                 except Exception as genericError:
                     self.logger.error(
-                        f"{scriptName}:\tUnexpected exception while connecting to OpenSearch: {genericError}"
+                        f"{scriptName}:\tUnexpected exception while connecting to {args.opensearchMode}: {genericError}"
                     )
 
                 if (not connected) and args.opensearchWaitForHealth:
@@ -144,7 +144,7 @@ class EventWatcher:
             # if requested, wait for at least "yellow" health in the cluster for the "files" index
             while connected and args.opensearchWaitForHealth and (not healthy) and (not shuttingDown[0]):
                 try:
-                    self.logger.info(f"{scriptName}:\twaiting for OpenSearch to be healthy")
+                    self.logger.info(f"{scriptName}:\twaiting for {args.opensearchMode} to be healthy")
                     self.openSearchClient.cluster.health(
                         index=ARKIME_FILES_INDEX,
                         wait_for_status='yellow',
@@ -159,7 +159,7 @@ class EventWatcher:
                     NewConnectionError,
                     AuthenticationException,
                 ) as connError:
-                    self.logger.debug(f"{scriptName}:\tOpenSearch health check: {connError}")
+                    self.logger.debug(f"{scriptName}:\t{args.opensearchMode} health check: {connError}")
 
                 if not healthy:
                     time.sleep(1)
@@ -302,7 +302,7 @@ def main():
         metavar='<STR>',
         type=str,
         default=os.getenv('OPENSEARCH_URL', None),
-        help='OpenSearch connection string for querying Arkime files index to ignore duplicates',
+        help='OpenSearch/Elasticsearch connection string for querying Arkime files index to ignore duplicates',
     )
     parser.add_argument(
         '--opensearch-curlrc',
@@ -310,7 +310,7 @@ def main():
         metavar='<filename>',
         type=str,
         default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
-        help='cURL.rc formatted file containing OpenSearch connection parameters',
+        help='cURL.rc formatted file containing OpenSearch/Elasticsearch connection parameters',
     )
     parser.add_argument(
         '--opensearch-ssl-verify',
@@ -319,7 +319,7 @@ def main():
         nargs='?',
         const=True,
         default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
-        help="Verify SSL certificates for OpenSearch",
+        help="Verify SSL certificates for OpenSearch/Elasticsearch",
     )
     parser.add_argument(
         '--opensearch-mode',
@@ -338,7 +338,7 @@ def main():
     parser.add_argument(
         '--opensearch-wait',
         dest='opensearchWaitForHealth',
-        help="Wait for OpenSearch to be healthy before starting",
+        help="Wait for OpenSearch/Elasticsearch to be healthy before starting",
         metavar='true|false',
         type=str2bool,
         nargs='?',

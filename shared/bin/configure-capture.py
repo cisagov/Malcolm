@@ -225,9 +225,9 @@ def input_opensearch_connection_info(
     # opensearch protocol and SSL verification mode
     opensearch_protocol = "http"
     opensearch_ssl_verify = "none"
-    if d.yesno("OpenSearch connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK:
+    if d.yesno("OpenSearch/Elasticsearch connection protocol", yes_label="HTTPS", no_label="HTTP") == Dialog.OK:
         opensearch_protocol = "https"
-        if d.yesno("OpenSearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK:
+        if d.yesno("OpenSearch/Elasticsearch SSL verification", yes_label="None", no_label="Full") != Dialog.OK:
             opensearch_ssl_verify = "full"
     return_dict[Constants.BEAT_OS_PROTOCOL] = opensearch_protocol
     return_dict[Constants.BEAT_OS_SSL_VERIFY] = opensearch_ssl_verify
@@ -237,8 +237,8 @@ def input_opensearch_connection_info(
         code, values = d.form(
             Constants.MSG_CONFIG_GENERIC.format(forwarder),
             [
-                ('OpenSearch Host', 1, 1, default_os_host or "", 1, 25, 30, 255),
-                ('OpenSearch Port', 2, 1, default_os_port or "9200", 2, 25, 6, 5),
+                ('OpenSearch/Elasticsearch Host', 1, 1, default_os_host or "", 1, 25, 30, 255),
+                ('OpenSearch/Elasticsearch Port', 2, 1, default_os_port or "9200", 2, 25, 6, 5),
             ],
         )
         values = [x.strip() for x in values]
@@ -255,7 +255,7 @@ def input_opensearch_connection_info(
             break
 
     # HTTP/HTTPS authentication
-    code, http_username = d.inputbox("OpenSearch HTTP/HTTPS server username", init=default_username)
+    code, http_username = d.inputbox("OpenSearch/Elasticsearch HTTP/HTTPS server username", init=default_username)
     if (code == Dialog.CANCEL) or (code == Dialog.ESC):
         raise CancelledError
     return_dict[Constants.BEAT_HTTP_USERNAME] = http_username.strip()
@@ -263,13 +263,13 @@ def input_opensearch_connection_info(
     # make them enter the password twice
     while True:
         code, http_password = d.passwordbox(
-            "OpenSearch HTTP/HTTPS server password", insecure=True, init=default_password
+            "OpenSearch/Elasticsearch HTTP/HTTPS server password", insecure=True, init=default_password
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise CancelledError
 
         code, http_password2 = d.passwordbox(
-            "OpenSearch HTTP/HTTPS server password (again)",
+            "OpenSearch/Elasticsearch HTTP/HTTPS server password (again)",
             insecure=True,
             init=default_password if (http_password == default_password) else "",
         )
@@ -283,7 +283,7 @@ def input_opensearch_connection_info(
             code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format("Passwords did not match"))
 
     # test OpenSearch connection
-    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("OpenSearch"))
+    code = d.infobox(Constants.MSG_TESTING_CONNECTION.format("OpenSearch/Elasticsearch"))
     retcode, message, output = test_connection(
         protocol=return_dict[Constants.BEAT_OS_PROTOCOL],
         host=return_dict[Constants.BEAT_OS_HOST],
@@ -297,10 +297,14 @@ def input_opensearch_connection_info(
         ssl_verify=return_dict[Constants.BEAT_OS_SSL_VERIFY],
     )
     if retcode == 200:
-        code = d.msgbox(text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("OpenSearch", retcode, message))
+        code = d.msgbox(
+            text=Constants.MSG_TESTING_CONNECTION_SUCCESS.format("OpenSearch/Elasticsearch", retcode, message)
+        )
     else:
         code = d.yesno(
-            text=Constants.MSG_TESTING_CONNECTION_FAILURE.format("OpenSearch", retcode, message, "\n".join(output)),
+            text=Constants.MSG_TESTING_CONNECTION_FAILURE.format(
+                "OpenSearch/Elasticsearch", retcode, message, "\n".join(output)
+            ),
             yes_label="Ignore Error",
             no_label="Start Over",
         )
