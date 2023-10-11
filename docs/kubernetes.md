@@ -6,7 +6,7 @@
             * [Ingress-NGINX Controller](#IngressNGINX)
         + [Kubernetes Provider Settings](#Limits)
 * [Configuration](#Config)
-    - [OpenSearch Instances](#OpenSearchInstances)
+    - [OpenSearch and Elasticsearch Instances](#OpenSearchInstances)
     - [PersistentVolumeClaim Definitions](#PVC)
 * [Running Malcolm](#Running)
 * [Deployment Example](#Example)
@@ -223,9 +223,9 @@ Malcolm's configuration and runtime scripts (e.g., `./scripts/configure`, `./scr
 
 Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**. Users will need to run [`./scripts/auth_setup`](authsetup.md#AuthSetup) to configure authentication.
 
-### <a name="OpenSearchInstances"></a> OpenSearch Instances
+### <a name="OpenSearchInstances"></a> OpenSearch and Elasticsearch Instances
 
-While Malcolm can manage its own single-node OpenSearch instance as part of its Kubernetes deployment, users may want to use an existing multi-node OpenSearch cluster hosted on Kubernetes or some other provider (see, for example, ["Setup OpenSearch multi-node cluster on Kubernetes using Helm Charts"](https://opensearch.org/blog/setup-multinode-cluster-kubernetes/) on the OpenSearch blog and ["OpenSearch Kubernetes Operator"](https://opensearch.org/docs/latest/tools/k8s-operator/) in the OpenSearch documentation). Review Malcolm's documentation on [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) to configure a Malcolm deployment to use an OpenSearch cluster.
+While Malcolm can manage its own single-node OpenSearch instance as part of its Kubernetes deployment, users may want to use an existing multi-node OpenSearch or Elasticsearch cluster hosted on Kubernetes or some other provider (see, for example, ["Setup OpenSearch multi-node cluster on Kubernetes using Helm Charts"](https://opensearch.org/blog/setup-multinode-cluster-kubernetes/) on the OpenSearch blog and ["OpenSearch Kubernetes Operator"](https://opensearch.org/docs/latest/tools/k8s-operator/) in the OpenSearch documentation). Review Malcolm's documentation on [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) to configure a Malcolm deployment to use an OpenSearch or Elasticesarch cluster.
 
 ### <a name="PVC"></a> PersistentVolumeClaim Definitions
 
@@ -446,8 +446,8 @@ $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 2: admin - Store administrator username/password for local Malcolm access
 3: webcerts - (Re)generate self-signed certificates for HTTPS access
 4: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
-5: remoteos - Configure remote primary or secondary OpenSearch instance
-6: email - Store username/password for email alert sender account
+5: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
+6: email - Store username/password for OpenSearch Alerting email sender account
 7: netbox - (Re)generate internal passwords for NetBox
 8: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 
@@ -465,7 +465,7 @@ Additional local accounts can be created at https://localhost/auth/ when Malcolm
 
 (Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
 
-Configure remote primary or secondary OpenSearch instance? (y / N): n
+Store username/password for primary remote OpenSearch/Elasticsearch instance? (y / N): n
 
 Store username/password for email alert sender account? (y / N): n
 

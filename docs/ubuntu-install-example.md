@@ -214,9 +214,9 @@ Additional local accounts can be created at https://localhost/auth/ when Malcolm
 
 (Re)generate self-signed certificates for a remote log forwarder (Y / n): y
 
-Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y / N): n
+Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
 
-Store username/password for email alert sender account? (y / N): n
+Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox (Y / n): y
 ```

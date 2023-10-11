@@ -144,11 +144,11 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * **Run with Malcolm (all containers) or Hedgehog (capture only) profile?**
     - Malcolm can be run in either of two [profiles](https://docs.docker.com/compose/profiles/): the "malcolm" profile runs all containers including those for log enrichment and indexing, while the "hedgehog" (named as a nod to [Hedgehog Linux](hedgehog.md), Malcolm's [dedicated network sensor OS](live-analysis.md#Hedgehog)) profile rules only the containers required for [live traffic analysis](live-analysis.md#LocalPCAP). When using the "hedgehog" profile, captured network artifacts must be forwarded to another Malcolm instance: its [OpenSearch instance](opensearch-instances.md#OpenSearchInstance) connection parameters (e.g., `https://192.168.122.5:9200`) and Logstash connection parameters (e.g., `192.168.122.5:5044`) must be specified later on in the configuration. See [idaholab/Malcolm#254](https://github.com/idaholab/Malcolm/issues/254) for the origin of this feature.
 * **Should Malcolm use and maintain its own OpenSearch instance?**
-    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch cluster instead.
+    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
 * **Compress local OpenSearch index snapshots?**
     - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should users opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
 * **Forward Logstash logs to a secondary remote document store?**
-    - Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
+    - Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
 * **Setting 16g for OpenSearch and 3g for Logstash. Is this OK?**
     - Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 16 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
 * **Setting 3 workers for Logstash pipelines. Is this OK?**
@@ -312,9 +312,9 @@ Users will be prompted to do the following:
     - This generates the self-signed [TLS certificates](authsetup.md#TLSCerts) used for encrypting the connections between users' web browsers and Malcolm.
 * **(Re)generate self-signed certificates for a remote log forwarder**
     - This generates the self-signed [TLS certificates](authsetup.md#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-party logs](third-party-logs.md#ThirdPartyLogs)).
-* **Configure remote primary or secondary OpenSearch instance**
-    - Users should answer **N** if using Malcolm's local OpenSearch instance, or **Y** to specify credentials for a remote OpenSearch cluster (see [OpenSearch instances](opensearch-instances.md#OpenSearchInstance)).
-* **Store username/password for email alert sender account**
+* **Configure remote primary or secondary OpenSearch/Elasticsearch instance**
+    - Users should answer **N** if using Malcolm's local OpenSearch instance, or **Y** to specify credentials for a remote OpenSearch or Elasticsearch cluster (see [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance)).
+* **Store username/password for OpenSearch Alerting email sender account**
     - Users may answer **Y** to specify credentials for [Email Sender Accounts](alerting.md#AlertingEmail) to be used with OpenSearch Dashboards' alerting plugin.
 * **(Re)generate internal passwords for NetBox**
     - If users answered **Y** to "Should Malcolm run and maintain an instance of NetBox...?" during the configuration questions, they should also answer **Y** to this question at least the first time authentication is configured.
