@@ -9,7 +9,9 @@ function urlencodeall() {
 }
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
+ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 
+MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
@@ -45,6 +47,12 @@ fi
 if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
     cp "${ARKIME_DIR}"/etc/config.orig.ini "${ARKIME_DIR}"/etc/config.ini
     sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_DIR}"/etc/config.ini
+    if [[ "$MALCOLM_PROFILE" == "hedgehog" ]]; then
+        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
+    fi
     chmod 600 "${ARKIME_DIR}"/etc/config.ini
 fi
 unset OPENSEARCH_URL_FINAL
