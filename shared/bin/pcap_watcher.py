@@ -40,6 +40,7 @@ import watch_common
 from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 
+from urllib.parse import urlparse
 from urllib3.exceptions import NewConnectionError
 
 from watchdog.observers import Observer
@@ -98,14 +99,21 @@ class EventWatcher:
                     try:
                         self.logger.info(f"{scriptName}:\tconnecting to {args.opensearchMode} {args.opensearchUrl}...")
 
-                        self.openSearchClient = DatabaseClass(
-                            hosts=[args.opensearchUrl],
-                            http_auth=opensearchHttpAuth,
-                            verify_certs=args.opensearchSslVerify,
-                            ssl_assert_hostname=False,
-                            ssl_show_warn=False,
-                            request_timeout=1,
-                        )
+                        if urlparse(args.opensearchUrl).scheme == 'https':
+                            self.openSearchClient = DatabaseClass(
+                                hosts=[args.opensearchUrl],
+                                http_auth=opensearchHttpAuth,
+                                verify_certs=args.opensearchSslVerify,
+                                ssl_assert_hostname=False,
+                                ssl_show_warn=False,
+                                request_timeout=1,
+                            )
+                        else:
+                            self.openSearchClient = DatabaseClass(
+                                hosts=[args.opensearchUrl],
+                                http_auth=opensearchHttpAuth,
+                                request_timeout=1,
+                            )
 
                         self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 

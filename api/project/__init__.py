@@ -197,13 +197,19 @@ else:
     opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-databaseClient = DatabaseClass(
-    hosts=[opensearchUrl],
-    http_auth=opensearchHttpAuth,
-    verify_certs=opensearchSslVerify,
-    ssl_assert_hostname=False,
-    ssl_show_warn=False,
-)
+if urlparse(opensearchUrl).scheme == 'https':
+    databaseClient = DatabaseClass(
+        hosts=[opensearchUrl],
+        http_auth=opensearchHttpAuth,
+        verify_certs=opensearchSslVerify,
+        ssl_assert_hostname=False,
+        ssl_show_warn=False,
+    )
+else:
+    databaseClient = DatabaseClass(
+        hosts=[opensearchUrl],
+        http_auth=opensearchHttpAuth,
+    )
 
 
 def deep_get(d, keys, default=None):
