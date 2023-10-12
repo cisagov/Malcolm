@@ -51,6 +51,8 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
         sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
     fi
