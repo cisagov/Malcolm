@@ -449,12 +449,12 @@ def main():
         sys.tracebacklimit = 0
 
     if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-        from opensearchpy import OpenSearch as DatabaseClass, Search as SearchClass
-        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
-    else:
         from elasticsearch import Elasticsearch as DatabaseClass
         from elasticsearch_dsl import Search as SearchClass
         from elasticsearch.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
+    else:
+        from opensearchpy import OpenSearch as DatabaseClass, Search as SearchClass
+        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'http://opensearch:9200'
