@@ -625,15 +625,15 @@ class Installer(object):
                     default=args.logstashHost,
                 )
             pcapNodeHost = InstallerAskForString(
-                f'Enter the node host or IP to associate with network traffic metadata',
+                f"Enter this node's hostname or IP to associate with network traffic metadata",
                 default=args.pcapNodeHost,
             )
             if not pcapNodeHost and not InstallerYesOrNo(
-                f'Node host or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
+                f'Node hostname or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
                 default=False,
             ):
                 pcapNodeHost = InstallerAskForString(
-                    f'Enter the node host or IP to associate with network traffic metadata',
+                    f"Enter this node's hostname or IP to associate with network traffic metadata",
                     default=args.pcapNodeHost,
                 )
 
@@ -3766,7 +3766,7 @@ def main():
         metavar='<string>',
         type=str,
         default='',
-        help='The node host or IP address to associate with network traffic metadata',
+        help='The node hostname or IP address to associate with network traffic metadata',
     )
 
     try:
