@@ -7,6 +7,10 @@ LABEL maintainer="malcolm@inl.gov"
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
+ENV CMAKE_C_COMPILER clang-14
+ENV CMAKE_CXX_COMPILER clang++-14
+ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
+
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -14,11 +18,12 @@ RUN apt-get -q update && \
         ca-certificates \
         ccache \
         checkinstall \
+        clang \
         cmake \
         curl \
         flex \
-        g++ \
-        gcc \
+        libc++-dev \
+        libc++abi-dev \
         libfl-dev \
         libgoogle-perftools4 \
         libgoogle-perftools-dev \
