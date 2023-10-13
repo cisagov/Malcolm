@@ -12,6 +12,9 @@ ARG BUILD_JOBS=4
 ENV BUILD_JOBS $BUILD_JOBS
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
+ENV CMAKE_C_COMPILER clang-14
+ENV CMAKE_CXX_COMPILER clang++-14
+ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -21,15 +24,16 @@ RUN apt-get -q update && \
         bison \
         ca-certificates \
         ccache \
+        clang \
         cmake \
         curl \
         flex \
-        g++ \
-        gcc \
         git \
+        libc++-dev \
+        libc++abi-dev \
         libfl-dev \
-        libgoogle-perftools4 \
         libgoogle-perftools-dev \
+        libgoogle-perftools4 \
         libkrb5-3 \
         libkrb5-dev \
         libmaxminddb-dev \
@@ -107,6 +111,9 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 # for build
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
+ENV CMAKE_C_COMPILER clang-14
+ENV CMAKE_CXX_COMPILER clang++-14
+ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
 COPY --from=build /usr/share/src/zeek/build/*.deb /tmp/zeekdebs/
 
@@ -123,19 +130,20 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       bison \
       ca-certificates \
       ccache \
+      clang \
       cmake \
       curl \
       ethtool \
       file \
       flex \
-      g++ \
-      gcc \
       git \
       gnupg2 \
       iproute2 \
       jq \
       less \
       libatomic1 \
+      libc++-dev \
+      libc++abi-dev \
       libcap2-bin \
       libfl-dev \
       libfl2 \
