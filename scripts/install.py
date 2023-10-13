@@ -732,9 +732,14 @@ class Installer(object):
         if restartMode == 'no':
             restartMode = '"no"'
 
-        nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
-        if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
-            nginxSSL = not InstallerYesOrNo('Unencrypted connections are NOT recommended. Are you sure?', default=False)
+        if malcolmProfile == PROFILE_MALCOLM:
+            nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
+            if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
+                nginxSSL = not InstallerYesOrNo(
+                    'Unencrypted connections are NOT recommended. Are you sure?', default=False
+                )
+        else:
+            nginxSSL = True
 
         behindReverseProxy = False
         dockerNetworkExternalName = ""
@@ -744,9 +749,12 @@ class Installer(object):
         traefikEntrypoint = ""
         traefikResolver = ""
 
-        behindReverseProxy = (self.orchMode is OrchestrationFramework.KUBERNETES) or InstallerYesOrNo(
-            'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
-            default=args.behindReverseProxy or (not nginxSSL),
+        behindReverseProxy = (self.orchMode is OrchestrationFramework.KUBERNETES) or (
+            (malcolmProfile == PROFILE_MALCOLM)
+            and InstallerYesOrNo(
+                'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
+                default=args.behindReverseProxy or (not nginxSSL),
+            )
         )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -793,7 +801,7 @@ class Installer(object):
             'Lightweight Directory Access Protocol (LDAP)': 'false',
             'None': 'no_authentication',
         }
-        authMode = None
+        authMode = None if (malcolmProfile == PROFILE_MALCOLM) else 'Basic'
         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid authentication method')
         while authMode not in list(allowedAuthModes.keys()) and loopBreaker.increment():
             authMode = InstallerChooseOne(
@@ -856,7 +864,7 @@ class Installer(object):
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if not InstallerYesOrNo(
-                'Store PCAP, log and index files locally under {}?'.format(malcolm_install_path),
+                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files locally under {malcolm_install_path}?',
                 default=not args.acceptDefaultsNonInteractive,
             ):
                 # PCAP directory
@@ -912,7 +920,7 @@ class Installer(object):
                             )
                             break
 
-                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                if (malcolmProfile == PROFILE_MALCOLM) and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal):
                     # opensearch index directory
                     if not InstallerYesOrNo(
                         'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
@@ -986,34 +994,41 @@ class Installer(object):
 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
-            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
+            if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
             else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
             default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
         ):
             # delete oldest indexes based on index pattern size
-            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
-                if InstallerYesOrNo(
+            if (
+                (malcolmProfile == PROFILE_MALCOLM)
+                and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal)
+                and InstallerYesOrNo(
                     'Delete the oldest indices when the database exceeds a certain size?',
                     default=bool(args.indexPruneSizeLimit),
+                )
+            ):
+                indexPruneSizeLimit = ''
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
+                while (
+                    (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE))
+                    and (indexPruneSizeLimit != '0')
+                    and loopBreaker.increment()
                 ):
-                    indexPruneSizeLimit = ''
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
-                    while (
-                        (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE))
-                        and (indexPruneSizeLimit != '0')
-                        and loopBreaker.increment()
-                    ):
-                        indexPruneSizeLimit = InstallerAskForString(
-                            'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
-                        )
-                    indexPruneNameSort = InstallerYesOrNo(
-                        'Determine oldest indices by name (instead of creation time)?', default=True
+                    indexPruneSizeLimit = InstallerAskForString(
+                        'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
                     )
+                indexPruneNameSort = InstallerYesOrNo(
+                    'Determine oldest indices by name (instead of creation time)?', default=True
+                )
 
             # let Arkime delete old PCAP files based on available storage
-            arkimeManagePCAP = (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal) or InstallerYesOrNo(
-                'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
-                default=args.arkimeManagePCAP,
+            arkimeManagePCAP = (
+                (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
+                or (malcolmProfile != PROFILE_MALCOLM)
+                or InstallerYesOrNo(
+                    'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                    default=args.arkimeManagePCAP,
+                )
             )
 
         autoSuricata = InstallerYesOrNo(
@@ -1056,6 +1071,7 @@ class Installer(object):
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if malcolmProfile == PROFILE_MALCOLM:
+                arkimeViewerOpen = False
                 openPortsOptions = ('no', 'yes', 'customize')
                 loopBreaker = CountUntilException(MaxAskForValueCount)
                 while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
@@ -1087,11 +1103,16 @@ class Installer(object):
                 openPortsSelection = 'n'
                 logstashOpen = False
                 filebeatTcpOpen = False
+                arkimeViewerOpen = InstallerYesOrNo(
+                    'Expose Arkime viewer to external hosts for PCAP payload retrieval?',
+                    default=args.exposeArkimeViewer,
+                )
         else:
             opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
+            arkimeViewerOpen = malcolmProfile == PROFILE_HEDGEHOG
 
         filebeatTcpFormat = 'json'
         filebeatTcpSourceField = 'message'
@@ -1131,6 +1152,7 @@ class Installer(object):
 
         sftpOpen = (
             (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and (malcolmProfile == PROFILE_MALCOLM)
             and (openPortsSelection == 'c')
             and InstallerYesOrNo('Expose SFTP server (for PCAP upload) to external hosts?', default=args.exposeSFTP)
         )
@@ -1853,6 +1875,13 @@ class Installer(object):
                                         line,
                                         pcapDir,
                                         sectionIndents[currentSection] * 3,
+                                    )
+                                elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                    # set bind IP based on whether it should be externally exposed or not
+                                    line = re.sub(
+                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                        fr"\g<1>{'0.0.0.0' if arkimeViewerOpen else '127.0.0.1'}:\g<3>",
+                                        line,
                                     )
 
                             elif currentService == 'filebeat':
@@ -3353,6 +3382,16 @@ def main():
         const=True,
         default=False,
         help="Expose Filebeat TCP port to external hosts",
+    )
+    openPortsArgGroup.add_argument(
+        '--arkime-viewer-expose',
+        dest='exposeArkimeViewer',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose Arkime viewer to external hosts for PCAP payload retrieval",
     )
     openPortsArgGroup.add_argument(
         '--sftp-expose',

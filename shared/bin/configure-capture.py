@@ -110,6 +110,7 @@ class Constants:
     BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
     # specific to arkime
+    ARKIME_PASSWORD_SECRET = "ARKIME_PASSWORD_SECRET"
     ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
     ARKIME_COMPRESSION_TYPE = "ARKIME_COMPRESSION_TYPE"
     ARKIME_COMPRESSION_LEVEL = "ARKIME_COMPRESSION_LEVEL"
@@ -155,6 +156,7 @@ class Constants:
     MSG_CONFIG_FORWARDING_SUCCESS = (
         '{} forwarding configured:\n\n{}\n\nRestart forwarding services or reboot to apply changes.'
     )
+    MSG_CONFIG_ARKIME_VIEWER_PASSWORD = 'Specify password hash secret for Arkime viewer cluster'
     MSG_CONFIG_ARKIME_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
     MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
     MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
@@ -384,6 +386,12 @@ def main():
                 "ARKIME_PACKET_ACL" in capture_config_dict.keys()
             ):
                 previous_config_values[Constants.ARKIME_PACKET_ACL] = capture_config_dict[Constants.ARKIME_PACKET_ACL]
+            if (Constants.ARKIME_PASSWORD_SECRET not in previous_config_values.keys()) and (
+                "ARKIME_PASSWORD_SECRET" in capture_config_dict.keys()
+            ):
+                previous_config_values[Constants.ARKIME_PASSWORD_SECRET] = capture_config_dict[
+                    Constants.ARKIME_PASSWORD_SECRET
+                ]
 
             code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
             if code == Dialog.CANCEL or code == Dialog.ESC:
@@ -860,19 +868,44 @@ def main():
                         default_username=previous_config_values[Constants.BEAT_HTTP_USERNAME],
                         default_password=previous_config_values[Constants.BEAT_HTTP_PASSWORD],
                     )
-                    arkime_opensearch_config_dict = opensearch_config_dict.copy()
+                    arkime_config_dict = opensearch_config_dict.copy()
                     # massage the data a bit for how arkime's going to want it in the control_vars.conf file
-                    if Constants.BEAT_HTTP_USERNAME in arkime_opensearch_config_dict.keys():
-                        arkime_opensearch_config_dict["OS_USERNAME"] = arkime_opensearch_config_dict.pop(
-                            Constants.BEAT_HTTP_USERNAME
+                    if Constants.BEAT_HTTP_USERNAME in arkime_config_dict.keys():
+                        arkime_config_dict["OS_USERNAME"] = arkime_config_dict.pop(Constants.BEAT_HTTP_USERNAME)
+                    if Constants.BEAT_HTTP_PASSWORD in arkime_config_dict.keys():
+                        arkime_config_dict["OS_PASSWORD"] = aggressive_url_encode(
+                            arkime_config_dict.pop(Constants.BEAT_HTTP_PASSWORD)
                         )
-                    if Constants.BEAT_HTTP_PASSWORD in arkime_opensearch_config_dict.keys():
-                        arkime_opensearch_config_dict["OS_PASSWORD"] = aggressive_url_encode(
-                            arkime_opensearch_config_dict.pop(Constants.BEAT_HTTP_PASSWORD)
+                    arkime_config_dict = {k.replace('BEAT_', ''): v for k, v in arkime_config_dict.items()}
+
+                    # get the password hash secret for the Arkime viewer cluster
+                    while True:
+                        code, arkime_password = d.passwordbox(
+                            MSG_CONFIG_ARKIME_VIEWER_PASSWORD,
+                            insecure=True,
+                            init=previous_config_values[Constants.ARKIME_PASSWORD_SECRET],
                         )
-                    arkime_opensearch_config_dict = {
-                        k.replace('BEAT_', ''): v for k, v in arkime_opensearch_config_dict.items()
-                    }
+                        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+                            raise CancelledError
+
+                        code, arkime_password2 = d.passwordbox(
+                            f"{MSG_CONFIG_ARKIME_VIEWER_PASSWORD} (again)",
+                            insecure=True,
+                            init=previous_config_values[Constants.ARKIME_PASSWORD_SECRET]
+                            if (arkime_password == previous_config_values[Constants.ARKIME_PASSWORD_SECRET])
+                            else "",
+                        )
+                        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+                            raise CancelledError
+
+                        if arkime_password == arkime_password2:
+                            arkime_password = arkime_password.strip()
+                            break
+                        else:
+                            code = d.msgbox(text=Constants.MSG_MESSAGE_ERROR.format("Passwords did not match"))
+
+                    if arkime_password:
+                        arkime_config_dict[Constants.ARKIME_PASSWORD_SECRET] = arkime_password
 
                     # get list of IP addresses allowed for packet payload retrieval
                     lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
@@ -882,7 +915,7 @@ def main():
                     )
                     if code != Dialog.OK:
                         raise CancelledError
-                    arkime_opensearch_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join(
+                    arkime_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join(
                         [
                             ip
                             for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))
@@ -900,7 +933,7 @@ def main():
                     )
                     if code == Dialog.CANCEL or code == Dialog.ESC:
                         raise CancelledError
-                    arkime_opensearch_config_dict[Constants.ARKIME_COMPRESSION_TYPE] = compression_type
+                    arkime_config_dict[Constants.ARKIME_COMPRESSION_TYPE] = compression_type
 
                     compression_level = 0
                     if compression_type in Constants.ARKIME_COMPRESSION_LEVELS:
@@ -931,12 +964,12 @@ def main():
                         )
                     if code == Dialog.CANCEL or code == Dialog.ESC:
                         raise CancelledError
-                    arkime_opensearch_config_dict[Constants.ARKIME_COMPRESSION_LEVEL] = str(compression_level)
+                    arkime_config_dict[Constants.ARKIME_COMPRESSION_LEVEL] = str(compression_level)
 
                     list_results = sorted(
                         [
                             f"{k}={v}"
-                            for k, v in arkime_opensearch_config_dict.items()
+                            for k, v in arkime_config_dict.items()
                             if ("PASSWORD" not in k) and (not k.startswith("#"))
                         ]
                     )
@@ -953,7 +986,7 @@ def main():
 
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
                     opensearch_values_re = re.compile(
-                        r"\b(" + '|'.join(list(arkime_opensearch_config_dict.keys())) + r")\s*=\s*.*?$"
+                        r"\b(" + '|'.join(list(arkime_config_dict.keys())) + r")\s*=\s*.*?$"
                     )
                     with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
                         for line in file:
@@ -962,7 +995,7 @@ def main():
                             if opensearch_key_match is not None:
                                 print(
                                     opensearch_values_re.sub(
-                                        r"\1=%s" % arkime_opensearch_config_dict[opensearch_key_match.group(1)], line
+                                        r"\1=%s" % arkime_config_dict[opensearch_key_match.group(1)], line
                                     )
                                 )
                             else:

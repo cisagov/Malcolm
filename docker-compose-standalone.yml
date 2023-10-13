@@ -200,6 +200,8 @@ services:
         hard: -1
     depends_on:
       - opensearch
+    ports:
+      - "127.0.0.1:8005:8005"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
