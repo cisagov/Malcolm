@@ -711,6 +711,7 @@ LOG_IGNORE_REGEX = re.compile(
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
   | POST\s+HTTP/[\d\.].+\b200\b
+  | (POST|PATCH)\s+/netbox/api/.+HTTP/[\d\.].+\b20[01]\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
