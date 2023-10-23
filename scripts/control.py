@@ -1074,11 +1074,13 @@ def start():
         if CheckPersistentStorageDefs(
             namespace=args.namespace,
             malcolmPath=MalcolmPath,
+            profile=args.composeProfile,
         ):
             startResults = StartMalcolm(
                 namespace=args.namespace,
                 malcolmPath=MalcolmPath,
                 configPath=args.configDir,
+                profile=args.composeProfile,
             )
 
             if dictsearch(startResults, 'error'):

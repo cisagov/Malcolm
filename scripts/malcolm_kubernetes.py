@@ -16,6 +16,8 @@ from malcolm_common import (
     DotEnvDynamic,
     KubernetesDynamic,
     MalcolmPath,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
     YAMLDynamic,
 )
 from malcolm_utils import (
@@ -153,7 +155,10 @@ MALCOLM_CONFIGMAPS = {
     ],
 }
 
-REQUIRED_VOLUME_OBJECTS = {
+# the PersistentVolumes themselves aren't used directly,
+#   so we only need to define the PersistentVolumeClaims
+REQUIRED_VOLUME_OBJECTS = defaultdict(lambda: dict)
+REQUIRED_VOLUME_OBJECTS[PROFILE_MALCOLM] = {
     'pcap-claim': 'PersistentVolumeClaim',
     'zeek-claim': 'PersistentVolumeClaim',
     'suricata-claim': 'PersistentVolumeClaim',
@@ -161,16 +166,51 @@ REQUIRED_VOLUME_OBJECTS = {
     'runtime-logs-claim': 'PersistentVolumeClaim',
     'opensearch-claim': 'PersistentVolumeClaim',
     'opensearch-backup-claim': 'PersistentVolumeClaim',
-    # the PersistentVolumes themselves aren't used directly,
-    #   so we only need to define the PersistentVolumeClaims
-    # 'pcap-volume': 'PersistentVolume',
-    # 'zeek-volume': 'PersistentVolume',
-    # 'suricata-volume': 'PersistentVolume',
-    # 'config-volume': 'PersistentVolume',
-    # 'runtime-logs-volume': 'PersistentVolume',
-    # 'opensearch-volume': 'PersistentVolume',
-    # 'opensearch-backup-volume': 'PersistentVolume',
 }
+REQUIRED_VOLUME_OBJECTS[PROFILE_HEDGEHOG] = {
+    'pcap-claim': 'PersistentVolumeClaim',
+    'zeek-claim': 'PersistentVolumeClaim',
+    'suricata-claim': 'PersistentVolumeClaim',
+    'config-claim': 'PersistentVolumeClaim',
+    'runtime-logs-claim': 'PersistentVolumeClaim',
+}
+
+MALCOLM_PROFILES_CONTAINERS = defaultdict(lambda: list)
+MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
+    'api',
+    'arkime',
+    'dashboards',
+    'dashboards-helper',
+    'filebeat',
+    'file-monitor',
+    'freq',
+    'htadmin',
+    'logstash',
+    'netbox',
+    'netbox-postgres',
+    'netbox-redis-cache',
+    'netbox-redis',
+    'nginx-proxy',
+    'opensearch',
+    'pcap-capture',
+    'pcap-monitor',
+    'suricata-live',
+    'suricata-offline',
+    'upload',
+    'zeek-live',
+    'zeek-offline',
+]
+MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
+    'arkime',
+    'file-monitor',
+    'filebeat',
+    'pcap-capture',
+    'pcap-monitor',
+    'suricata-live',
+    'suricata-offline',
+    'zeek-live',
+    'zeek-offline',
+]
 
 
 ###################################################################################################
@@ -617,7 +657,7 @@ def DeleteNamespace(namespace, deleteRetPerVol=False):
     return results_dict
 
 
-def StartMalcolm(namespace, malcolmPath, configPath):
+def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
     if not namespace:
         namespace = 'malcolm'
 
@@ -628,6 +668,7 @@ def StartMalcolm(namespace, malcolmPath, configPath):
         and os.path.isdir(configPath)
         and (kubeImported := KubernetesDynamic())
         and (dotenvImported := DotEnvDynamic())
+        and (yamlImported := YAMLDynamic())
         and (client := kubeImported.client.CoreV1Api())
         and (apiClient := kubeImported.client.ApiClient())
     ):
@@ -759,34 +800,50 @@ def StartMalcolm(namespace, malcolmPath, configPath):
             )
         )
         for yamlName in yamlFiles:
-            try:
-                results_dict['create_from_yaml']['result'][
-                    os.path.basename(yamlName)
-                ] = kubeImported.utils.create_from_yaml(
-                    apiClient,
-                    yamlName,
-                    namespace=namespace,
-                )
-            except kubeImported.client.rest.ApiException as x:
-                if x.status != 409:
-                    if 'error' not in results_dict['create_from_yaml']:
-                        results_dict['create_from_yaml']['error'] = dict()
-                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(x))
-                    if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
-                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
-            except kubeImported.utils.FailToCreateError as fe:
-                if [exc for exc in fe.api_exceptions if exc.status != 409]:
-                    if 'error' not in results_dict['create_from_yaml']:
-                        results_dict['create_from_yaml']['error'] = dict()
-                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(fe))
-                    if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
-                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
+            # check to make sure the container in this YAML file belongs to this profile
+            containerBelongsInProfile = True
+            with open(yamlName, 'r') as manYamlFile:
+                if manYamlFileContents := list(yamlImported.safe_load_all(manYamlFile)):
+                    for doc in manYamlFileContents:
+                        if (
+                            containers := [
+                                remove_suffix(x.get('name', ''), '-container')
+                                for x in deep_get(doc, ['spec', 'template', 'spec', 'containers'])
+                            ]
+                        ) and (not all(x in MALCOLM_PROFILES_CONTAINERS[profile] for x in containers)):
+                            containerBelongsInProfile = False
+                            break
+
+            # apply the manifests in this YAML file, otherwise skip it
+            if containerBelongsInProfile:
+                try:
+                    results_dict['create_from_yaml']['result'][
+                        os.path.basename(yamlName)
+                    ] = kubeImported.utils.create_from_yaml(
+                        apiClient,
+                        yamlName,
+                        namespace=namespace,
+                    )
+                except kubeImported.client.rest.ApiException as x:
+                    if x.status != 409:
+                        if 'error' not in results_dict['create_from_yaml']:
+                            results_dict['create_from_yaml']['error'] = dict()
+                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(x))
+                        if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                            results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
+                except kubeImported.utils.FailToCreateError as fe:
+                    if [exc for exc in fe.api_exceptions if exc.status != 409]:
+                        if 'error' not in results_dict['create_from_yaml']:
+                            results_dict['create_from_yaml']['error'] = dict()
+                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(fe))
+                        if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                            results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
 
 
-def CheckPersistentStorageDefs(namespace, malcolmPath):
-    foundObjects = {k: False for (k, v) in REQUIRED_VOLUME_OBJECTS.items()}
+def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):
+    foundObjects = {k: False for (k, v) in REQUIRED_VOLUME_OBJECTS[profile].items()}
 
     if yamlImported := YAMLDynamic():
         allYamlContents = []
@@ -803,7 +860,7 @@ def CheckPersistentStorageDefs(namespace, malcolmPath):
         for yamlName in yamlFiles:
             with open(yamlName, 'r') as cf:
                 allYamlContents.extend(list(yamlImported.safe_load_all(cf)))
-        for name, kind in REQUIRED_VOLUME_OBJECTS.items():
+        for name, kind in REQUIRED_VOLUME_OBJECTS[profile].items():
             for doc in allYamlContents:
                 if (
                     (doc.get('kind', None) == kind)
