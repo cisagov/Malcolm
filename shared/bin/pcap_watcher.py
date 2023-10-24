@@ -60,13 +60,19 @@ ARKIME_FILE_SIZE_FIELD = "filesize"
 ###################################################################################################
 pdbFlagged = False
 args = None
-opensearchHttpAuth = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = [False]
 DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
-DatabaseClass, SearchClass, ConnectionError, ConnectionTimeout, AuthenticationException = None, None, None, None, None
+DatabaseClass, DatabaseInitArgs, SearchClass, ConnectionError, ConnectionTimeout, AuthenticationException = (
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+)
 
 
 ###################################################################################################
@@ -74,9 +80,9 @@ DatabaseClass, SearchClass, ConnectionError, ConnectionTimeout, AuthenticationEx
 class EventWatcher:
     def __init__(self, logger=None):
         global args
-        global opensearchHttpAuth
         global shuttingDown
         global DatabaseClass
+        global DatabaseInitArgs
         global SearchClass
         global ConnectionError
         global ConnectionTimeout
@@ -98,23 +104,10 @@ class EventWatcher:
                 try:
                     try:
                         self.logger.info(f"{scriptName}:\tconnecting to {args.opensearchMode} {args.opensearchUrl}...")
-
-                        if urlparse(args.opensearchUrl).scheme == 'https':
-                            self.openSearchClient = DatabaseClass(
-                                hosts=[args.opensearchUrl],
-                                http_auth=opensearchHttpAuth,
-                                verify_certs=args.opensearchSslVerify,
-                                ssl_assert_hostname=False,
-                                ssl_show_warn=False,
-                                request_timeout=1,
-                            )
-                        else:
-                            self.openSearchClient = DatabaseClass(
-                                hosts=[args.opensearchUrl],
-                                http_auth=opensearchHttpAuth,
-                                request_timeout=1,
-                            )
-
+                        self.openSearchClient = DatabaseClass(
+                            hosts=[args.opensearchUrl],
+                            **DatabaseInitArgs,
+                        )
                         self.logger.debug(f"{scriptName}:\t{self.openSearchClient.cluster.health()}")
 
                         self.openSearchClient.cluster.health(
@@ -274,10 +267,10 @@ def pdb_handler(sig, frame):
 # main
 def main():
     global args
-    global opensearchHttpAuth
     global pdbFlagged
     global shuttingDown
     global DatabaseClass
+    global DatabaseInitArgs
     global SearchClass
     global ConnectionError
     global ConnectionTimeout
@@ -448,14 +441,6 @@ def main():
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
-    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-        from elasticsearch import Elasticsearch as DatabaseClass
-        from elasticsearch_dsl import Search as SearchClass
-        from elasticsearch.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
-    else:
-        from opensearchpy import OpenSearch as DatabaseClass, Search as SearchClass
-        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
-
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'http://opensearch:9200'
     )
@@ -466,9 +451,27 @@ def main():
             args.opensearchUrl = 'http://opensearch:9200'
         elif 'url' in opensearchCreds:
             args.opensearchUrl = opensearchCreds['url']
-    opensearchHttpAuth = (
-        f"{opensearchCreds['user']}:{opensearchCreds['password']}" if opensearchCreds['user'] is not None else None
-    )
+
+    DatabaseInitArgs = {}
+    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        from elasticsearch import Elasticsearch as DatabaseClass
+        from elasticsearch_dsl import Search as SearchClass
+        from elasticsearch.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
+
+        if opensearchCreds['user'] is not None:
+            DatabaseInitArgs['basic_auth'] = (opensearchCreds['user'], opensearchCreds['password'])
+    else:
+        from opensearchpy import OpenSearch as DatabaseClass, Search as SearchClass
+        from opensearchpy.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException
+
+        if opensearchCreds['user'] is not None:
+            DatabaseInitArgs['http_auth'] = (opensearchCreds['user'], opensearchCreds['password'])
+
+    DatabaseInitArgs['request_timeout'] = 1
+    if urlparse(args.opensearchUrl).scheme == 'https':
+        DatabaseInitArgs['verify_certs'] = args.opensearchSslVerify
+        DatabaseInitArgs['ssl_assert_hostname'] = False
+        DatabaseInitArgs['ssl_show_warn'] = False
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)

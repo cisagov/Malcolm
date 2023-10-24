@@ -166,20 +166,7 @@ debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
 dashboardsUrl = app.config["DASHBOARDS_URL"]
-
 databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
-if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-    import elasticsearch as DatabaseImport
-    from elasticsearch_dsl import Search as SearchClass
-else:
-    import opensearchpy as DatabaseImport
-    from opensearchpy import Search as SearchClass
-
-DatabaseClass = (
-    DatabaseImport.Elasticsearch
-    if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote
-    else DatabaseImport.OpenSearch
-)
 
 opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
     opensearchUrl == 'http://opensearch:9200'
@@ -190,26 +177,39 @@ opensearchCreds = (
     if (not opensearchLocal)
     else defaultdict(lambda: None)
 )
+
+DatabaseInitArgs = {}
+if urlparse(opensearchUrl).scheme == 'https':
+    DatabaseInitArgs['verify_certs'] = opensearchSslVerify
+    DatabaseInitArgs['ssl_assert_hostname'] = False
+    DatabaseInitArgs['ssl_show_warn'] = False
+
 if opensearchCreds['user'] is not None:
-    opensearchHttpAuth = f"{opensearchCreds['user']}:{opensearchCreds['password']}"
+    opensearchHttpAuth = (opensearchCreds['user'], opensearchCreds['password'])
     opensearchReqHttpAuth = HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
 else:
     opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-if urlparse(opensearchUrl).scheme == 'https':
-    databaseClient = DatabaseClass(
-        hosts=[opensearchUrl],
-        http_auth=opensearchHttpAuth,
-        verify_certs=opensearchSslVerify,
-        ssl_assert_hostname=False,
-        ssl_show_warn=False,
-    )
+if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+    import elasticsearch as DatabaseImport
+    from elasticsearch_dsl import Search as SearchClass
+
+    DatabaseClass = DatabaseImport.Elasticsearch
+    if opensearchHttpAuth:
+        DatabaseInitArgs['basic_auth'] = opensearchHttpAuth
 else:
-    databaseClient = DatabaseClass(
-        hosts=[opensearchUrl],
-        http_auth=opensearchHttpAuth,
-    )
+    import opensearchpy as DatabaseImport
+    from opensearchpy import Search as SearchClass
+
+    DatabaseClass = DatabaseImport.OpenSearch
+    if opensearchHttpAuth:
+        DatabaseInitArgs['http_auth'] = opensearchHttpAuth
+
+databaseClient = DatabaseClass(
+    hosts=[opensearchUrl],
+    **DatabaseInitArgs,
+)
 
 
 def deep_get(d, keys, default=None):
