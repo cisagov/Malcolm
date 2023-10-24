@@ -808,7 +808,7 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                         if (
                             containers := [
                                 remove_suffix(x.get('name', ''), '-container')
-                                for x in deep_get(doc, ['spec', 'template', 'spec', 'containers'])
+                                for x in deep_get(doc, ['spec', 'template', 'spec', 'containers'], [])
                             ]
                         ) and (not all(x in MALCOLM_PROFILES_CONTAINERS[profile] for x in containers)):
                             containerBelongsInProfile = False
