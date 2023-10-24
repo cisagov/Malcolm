@@ -3070,7 +3070,7 @@ def main():
         dest='configFile',
         metavar='<string>',
         type=str,
-        default='',
+        default=os.getenv('MALCOLM_COMPOSE_FILE', ''),
         help='YAML file (docker-compose file to configure or kubeconfig file)',
     )
     configDomainArgGroup.add_argument(
@@ -3080,7 +3080,7 @@ def main():
         dest='configDir',
         metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_CONFIG_DIR', None),
         help="Directory containing Malcolm's .env files",
     )
 
