@@ -88,7 +88,8 @@ def file_processor(pathname, **kwargs):
 
             else:
                 # unhandled file type uploaded, delete it
-                logger.warning(f"{scriptName}:\t🗑\t{pathname} ({fileMime}/{fileType})")
+                logger.error(f"{scriptName}: Invalid file type uploade {fileMime}/{fileType}")
+                logger.error(f"{scriptName}: Deleting {pathname}")
                 os.unlink(pathname)
 
         except Exception as genericError:
