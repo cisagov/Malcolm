@@ -775,7 +775,7 @@ def version():
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json(),
-        opensearch_health=databaseClient.cluster.health(),
+        opensearch_health=dict(databaseClient.cluster.health()),
     )
 
 
