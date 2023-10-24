@@ -770,6 +770,7 @@ def version():
         version=app.config["MALCOLM_VERSION"],
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
+        mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
         opensearch=requests.get(
             opensearchUrl,
             auth=opensearchReqHttpAuth,
