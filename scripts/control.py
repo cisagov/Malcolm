@@ -2027,7 +2027,7 @@ def main():
         dest='namespace',
         metavar='<string>',
         type=str,
-        default='malcolm',
+        default=os.getenv('MALCOLM_NAMESPACE', 'malcolm'),
         help="Kubernetes namespace",
     )
     kubernetesGroup.add_argument(
