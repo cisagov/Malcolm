@@ -239,8 +239,8 @@ def input_opensearch_connection_info(
         code, values = d.form(
             Constants.MSG_CONFIG_GENERIC.format(forwarder),
             [
-                ('OpenSearch/Elasticsearch Host', 1, 1, default_os_host or "", 1, 25, 30, 255),
-                ('OpenSearch/Elasticsearch Port', 2, 1, default_os_port or "9200", 2, 25, 6, 5),
+                ('OpenSearch/Elasticsearch Host', 1, 1, default_os_host or "", 1, 32, 30, 255),
+                ('OpenSearch/Elasticsearch Port', 2, 1, default_os_port or "9200", 2, 32, 6, 5),
             ],
         )
         values = [x.strip() for x in values]
@@ -881,7 +881,7 @@ def main():
                     # get the password hash secret for the Arkime viewer cluster
                     while True:
                         code, arkime_password = d.passwordbox(
-                            MSG_CONFIG_ARKIME_VIEWER_PASSWORD,
+                            Constants.MSG_CONFIG_ARKIME_VIEWER_PASSWORD,
                             insecure=True,
                             init=previous_config_values[Constants.ARKIME_PASSWORD_SECRET],
                         )
@@ -889,7 +889,7 @@ def main():
                             raise CancelledError
 
                         code, arkime_password2 = d.passwordbox(
-                            f"{MSG_CONFIG_ARKIME_VIEWER_PASSWORD} (again)",
+                            f"{Constants.MSG_CONFIG_ARKIME_VIEWER_PASSWORD} (again)",
                             insecure=True,
                             init=previous_config_values[Constants.ARKIME_PASSWORD_SECRET]
                             if (arkime_password == previous_config_values[Constants.ARKIME_PASSWORD_SECRET])
