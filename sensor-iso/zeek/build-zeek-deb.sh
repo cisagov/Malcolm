@@ -5,7 +5,9 @@
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 export CMAKE_C_COMPILER="clang-14"
+export CC="$CMAKE_C_COMPILER"
 export CMAKE_CXX_COMPILER="clang++-14"
+export CXX="$CMAKE_CXX_COMPILER"
 export CXXFLAGS="-stdlib=libc++ -lc++abi"
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1

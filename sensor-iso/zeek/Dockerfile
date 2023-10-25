@@ -9,6 +9,8 @@ ENV TERM xterm
 
 ENV CMAKE_C_COMPILER clang-14
 ENV CMAKE_CXX_COMPILER clang++-14
+ENV CC clang-14
+ENV CXX clang++-14
 ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
 RUN apt-get -q update && \

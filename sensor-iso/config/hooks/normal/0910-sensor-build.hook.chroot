@@ -6,10 +6,22 @@
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1
 export CMAKE_C_COMPILER="clang-14"
+export CC="$CMAKE_C_COMPILER"
 export CMAKE_CXX_COMPILER="clang++-14"
+export CXX="$CMAKE_CXX_COMPILER"
 export CXXFLAGS="-stdlib=libc++ -lc++abi"
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
+
+cat > /etc/environment << EOF
+CMAKE_C_COMPILER="clang-14"
+CC="clang-14"
+CMAKE_CXX_COMPILER="clang++-14"
+CXX="clang++-14"
+CXXFLAGS="-stdlib=libc++ -lc++abi"
+PYTHONDONTWRITEBYTECODE=1
+PYTHONUNBUFFERED=1
+EOF
 
 # we'll use cURL to get release information and assets from GitHub using the GitHub API
 GITHUB_API_CURL_ARGS=()
