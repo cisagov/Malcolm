@@ -18,12 +18,13 @@ rm -rf /tmp/fetch
 if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
 
   ASSETS=(
+    "https://github.com/alphasoc/flightsim|^flightsim_.+_linux_amd64\.tar\.gz$|/tmp/flightsim.tar.gz"
+    "https://github.com/antonmedv/fx|^fx_linux_amd64$|"$HOME"/.local/bin/fx|755"
     "https://github.com/aptible/supercronic|^supercronic-linux-amd64$|"$HOME"/.local/bin/supercronic|755"
     "https://github.com/boringproxy/boringproxy|^boringproxy-linux-x86_64$|"$HOME"/.local/bin/boringproxy|755"
     "https://github.com/FiloSottile/age|^age-v.+-linux-amd64\.tar\.gz$|/tmp/age.tar.gz"
     "https://github.com/schollz/croc|^croc_.+_Linux-64bit\.tar\.gz$|/tmp/croc.tar.gz"
     "https://github.com/smallstep/cli|^step_linux_.+_amd64\.tar\.gz$|/tmp/step.tar.gz"
-    "https://github.com/starship/starship|^starship-x86_64-unknown-linux-gnu\.tar\.gz$|/tmp/starship.tar.gz"
   )
 
   for i in ${ASSETS[@]}; do

@@ -15,7 +15,7 @@ class Config(object):
     MALCOLM_TEMPLATE = f"{os.getenv('MALCOLM_TEMPLATE', 'malcolm_template')}"
     MALCOLM_VERSION = f"{os.getenv('MALCOLM_VERSION', 'unknown')}"
     OPENSEARCH_URL = f"{os.getenv('OPENSEARCH_URL', 'http://opensearch:9200')}"
-    OPENSEARCH_LOCAL = f"{os.getenv('OPENSEARCH_LOCAL', 'true')}"
+    OPENSEARCH_PRIMARY = f"{os.getenv('OPENSEARCH_PRIMARY', 'opensearch-local')}"
     OPENSEARCH_SSL_CERTIFICATE_VERIFICATION = f"{os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', 'false')}"
     OPENSEARCH_CREDS_CONFIG_FILE = (
         f"{os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc')}"

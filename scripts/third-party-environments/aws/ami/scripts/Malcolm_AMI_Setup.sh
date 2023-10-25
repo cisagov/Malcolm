@@ -107,7 +107,7 @@ function InstallPythonPackages {
         pythondialog \
         pyyaml \
         requests \
-        urllib3==1.26.16
+        urllib3==1.26.18
 }
 
 ################################################################################

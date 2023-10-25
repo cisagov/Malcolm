@@ -23,7 +23,7 @@ In either case, you **must** run `./scripts/auth_setup` before starting Malcolm 
 * specify whether or not to (re)generate the self-signed certificates used by a remote log forwarder (see the `BEATS_SSL` environment variable above)
     * certificate authority, certificate, and key files for Malcolm's Logstash instance are located in the `logstash/certs/` directory
     * certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in the `filebeat/certs/` directory; if using [Hedgehog Linux](live-analysis.md#Hedgehog), these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the sensor
-* specify whether or not to [store the username/password](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) for [email alert senders](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations)
+* specify whether or not to [store the username/password](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) for [OpenSearch Alerting email sender accounts](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#create-destinations)
     * these parameters are stored securely in the OpenSearch keystore file `opensearch/opensearch.keystore`
 
 # <a name="AuthBasicAccountManagement"></a>Local account management

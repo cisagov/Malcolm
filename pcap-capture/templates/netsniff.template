@@ -6,4 +6,5 @@ startretries=3
 stopasgroup=true
 killasgroup=true
 autostart=%(ENV_PCAP_ENABLE_NETSNIFF)s
+autorestart=%(ENV_PCAP_ENABLE_NETSNIFF)s
 directory=%(ENV_PCAP_PATH)s
