@@ -356,7 +356,13 @@ def main():
                             f'*/{htpdate_interval} * * * * root {Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}\n'
                         )
                         f.write('\n')
-                    code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS}")
+
+                    # now actually do the sync "for real" one time (so we can get in sync before waiting for the interval)
+                    ecode, sync_output = run_subprocess(
+                        f"{Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}"
+                    )
+                    emsg_str = '\n'.join(sync_output)
+                    code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS if (ecode == 0) else ''}{emsg_str}")
 
                 elif time_sync_mode == Constants.TIME_SYNC_NTP:
                     # sync time via ntp, run via service

@@ -9,7 +9,7 @@ apt-get -y --purge remove \
   libc6-dbg \
   ninja-build \
   sparse \
-  $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc6|libcrypt|libdbus|libffi|libfl|libgcc|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libtirpc|libxml|libyaml|libz|linux-libc|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+  $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc\+\+(abi)?|libc6|libclang|libcrypt|libdbus|libffi|libfl|libgoogle-perftools|libgcc|libkrb5|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libtirpc|libunwind|libxml|libyaml|libz|linux-libc|python3|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
 
 # remove unwanted packages

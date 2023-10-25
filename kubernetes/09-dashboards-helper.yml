@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: dashboards-helper-container
-        image: ghcr.io/idaholab/malcolm/dashboards-helper:23.09.0
+        image: ghcr.io/idaholab/malcolm/dashboards-helper:v23.10.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -45,6 +45,8 @@ spec:
               name: ssl-env
           - configMapRef:
               name: opensearch-env
+          - configMapRef:
+              name: dashboards-env
           - configMapRef:
               name: dashboards-helper-env
         env:

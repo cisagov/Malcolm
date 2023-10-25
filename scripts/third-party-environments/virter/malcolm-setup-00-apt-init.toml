@@ -18,6 +18,7 @@ sudo apt-get -y -q --no-install-recommends install \
     dtrx \
     fd-find \
     file \
+    gawk \
     git \
     gpg \
     iproute2 \

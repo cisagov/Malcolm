@@ -14,6 +14,7 @@ import sys
 
 import malcolm_utils
 from malcolm_utils import (
+    decapitalize,
     deep_get,
     eprint,
     EscapeAnsi,
@@ -52,6 +53,11 @@ ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
+
+###################################################################################################
+PROFILE_KEY = 'MALCOLM_PROFILE'
+PROFILE_MALCOLM = 'malcolm'
+PROFILE_HEDGEHOG = 'hedgehog'
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -171,6 +177,8 @@ def YesOrNo(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    yesLabel='Yes',
+    noLabel='No',
 ):
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
@@ -181,7 +189,9 @@ def YesOrNo(
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         defaultYes = (default is not None) and str2bool(default)
         reply = MainDialog.yesno(
-            question, yes_label='Yes' if defaultYes else 'No', no_label='no' if defaultYes else 'yes'
+            question,
+            yes_label=yesLabel.capitalize() if defaultYes else noLabel.capitalize(),
+            no_label=decapitalize(noLabel) if defaultYes else decapitalize(yesLabel),
         )
         if defaultYes:
             reply = 'y' if (reply == Dialog.OK) else 'n'
@@ -191,11 +201,11 @@ def YesOrNo(
     elif uiMode & UserInterfaceMode.InteractionInput:
         if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
             if str2bool(default):
-                questionStr = f"\n{question} (Y/n): "
+                questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / n{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
             else:
-                questionStr = f"\n{question} (y/N): "
+                questionStr = f"\n{question} (y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
         else:
-            questionStr = f"\n{question}: "
+            questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
 
         while True:
             reply = str(input(questionStr)).lower().strip()
@@ -701,6 +711,7 @@ LOG_IGNORE_REGEX = re.compile(
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
   | POST\s+HTTP/[\d\.].+\b200\b
+  | (POST|PATCH)\s+/netbox/api/.+HTTP/[\d\.].+\b20[01]\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)

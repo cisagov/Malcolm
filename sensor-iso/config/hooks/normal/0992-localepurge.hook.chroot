@@ -22,10 +22,9 @@ echo "en_US" >> /etc/locale.nopurge
 echo "en_US.UTF-8" >> /etc/locale.nopurge
 localepurge
 
-cat > /etc/environment << EOF
+cat >> /etc/environment << EOF
 LANG=en_US.UTF-8
 LC_ALL=en_US.UTF-8
-PYTHONDONTWRITEBYTECODE=1
 EOF
 
 cat > /etc/locale.conf << EOF

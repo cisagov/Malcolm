@@ -48,7 +48,6 @@ PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
-DEFAULT_NODE_NAME = os.getenv('PCAP_NODE_NAME', 'malcolm')
 
 SURICATA_PATH = "/usr/bin/suricata"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
@@ -113,7 +112,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, arkimeBin, nodeName, autoTag, notLocked, logger = (
+    newFileQueue, pcapBaseDir, arkimeBin, nodeName, nodeHost, autoTag, notLocked, logger = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
         arkimeWorkerArgs[2],
@@ -121,6 +120,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         arkimeWorkerArgs[4],
         arkimeWorkerArgs[5],
         arkimeWorkerArgs[6],
+        arkimeWorkerArgs[7],
     )
 
     if not logger:
@@ -158,7 +158,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         arkimeBin,
                         '--quiet',
                         '--insecure',
-                        '-n',
+                        '--node',
                         fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
                         '-o',
                         f'ecsEventProvider={arkimeProvider}',
@@ -167,6 +167,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         '-r',
                         fileInfo[FILE_INFO_DICT_NAME],
                     ]
+                    if nodeHost:
+                        cmd.append('--host')
+                        cmd.append(nodeHost)
                     if notLocked:
                         cmd.append('--nolockpcap')
                     cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
@@ -519,7 +522,16 @@ def main():
         help="PCAP source node name (may be overriden by publisher)",
         metavar='<STR>',
         type=str,
-        default=DEFAULT_NODE_NAME,
+        default=os.getenv('PCAP_NODE_NAME', 'malcolm'),
+    )
+    parser.add_argument(
+        '--host',
+        required=False,
+        dest='nodeHost',
+        help="PCAP source node host (for Arkime viewer reachback)",
+        metavar='<STR>',
+        type=str,
+        default=os.getenv('PCAP_NODE_HOST', ''),
     )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
@@ -700,6 +712,7 @@ def main():
                     args.pcapBaseDir,
                     args.executable,
                     args.nodeName,
+                    args.nodeHost,
                     args.autoTag,
                     args.notLocked,
                     logging,

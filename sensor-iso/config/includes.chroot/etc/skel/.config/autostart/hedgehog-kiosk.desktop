@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Sensor Kiosk
-Exec=/opt/firefox/firefox --setDefaultBrowser --no-remote --private --kiosk http://127.0.0.1:5000
+Exec=/usr/local/bin/hedgehog-kiosk.sh
 Terminal=false
 X-MultipleArgs=false
 Type=Application
