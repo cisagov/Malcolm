@@ -22,11 +22,12 @@ RUN apt-get -q update && \
         cmake \
         curl \
         flex \
+        git \
         libc++-dev \
         libc++abi-dev \
         libfl-dev \
-        libgoogle-perftools4 \
         libgoogle-perftools-dev \
+        libgoogle-perftools4 \
         libkrb5-3 \
         libkrb5-dev \
         libmaxminddb-dev \
