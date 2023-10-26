@@ -12,6 +12,9 @@ ARG BUILD_JOBS=4
 ENV BUILD_JOBS $BUILD_JOBS
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
+ENV CMAKE_C_COMPILER clang-14
+ENV CMAKE_CXX_COMPILER clang++-14
+ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -21,15 +24,16 @@ RUN apt-get -q update && \
         bison \
         ca-certificates \
         ccache \
+        clang \
         cmake \
         curl \
         flex \
-        g++ \
-        gcc \
         git \
+        libc++-dev \
+        libc++abi-dev \
         libfl-dev \
-        libgoogle-perftools4 \
         libgoogle-perftools-dev \
+        libgoogle-perftools4 \
         libkrb5-3 \
         libkrb5-dev \
         libmaxminddb-dev \
@@ -90,10 +94,10 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.26"
+ENV SUPERCRONIC_VERSION "0.2.27"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
+ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for download and install
@@ -107,6 +111,9 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 # for build
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
+ENV CMAKE_C_COMPILER clang-14
+ENV CMAKE_CXX_COMPILER clang++-14
+ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
 COPY --from=build /usr/share/src/zeek/build/*.deb /tmp/zeekdebs/
 
@@ -123,19 +130,20 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       bison \
       ca-certificates \
       ccache \
+      clang \
       cmake \
       curl \
       ethtool \
       file \
       flex \
-      g++ \
-      gcc \
       git \
       gnupg2 \
       iproute2 \
       jq \
       less \
       libatomic1 \
+      libc++-dev \
+      libc++abi-dev \
       libcap2-bin \
       libfl-dev \
       libfl2 \

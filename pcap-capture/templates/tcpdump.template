@@ -6,4 +6,5 @@ startretries=3
 stopasgroup=true
 killasgroup=true
 autostart=%(ENV_PCAP_ENABLE_TCPDUMP)s
+autorestart=%(ENV_PCAP_ENABLE_TCPDUMP)s
 directory=%(ENV_PCAP_PATH)s

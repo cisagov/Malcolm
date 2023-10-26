@@ -38,6 +38,11 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_ELASTICSEARCH|" "$ARKIME_CONFIG_FILE"
   fi
 
+  if [[ -n $ARKIME_PASSWORD_SECRET ]]; then
+    # place the Arkime viewer cluster password hash in the config file
+    sed -r -i "s|(passwordSecret)\s*=\s*.*|\1=$ARKIME_PASSWORD_SECRET|" "$ARKIME_CONFIG_FILE"
+  fi
+
   # if SSL certificate verification is turned off, supply the --insecure flag
   if [[ -n $OS_SSL_VERIFY ]] && [ "$OS_SSL_VERIFY" = none ]; then
     export ARKIME_HTTPS_FLAG="--insecure"

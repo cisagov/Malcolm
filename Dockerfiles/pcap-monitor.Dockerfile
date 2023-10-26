@@ -27,7 +27,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
-ARG OPENSEARCH_LOCAL=true
+ARG OPENSEARCH_PRIMARY="opensearch-local"
 ARG PCAP_PATH=/pcap
 ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_PIPELINE_IGNORE_PREEXISTING=false
@@ -37,7 +37,7 @@ ARG PCAP_NODE_NAME=malcolm
 ARG ZEEK_PATH=/zeek
 
 ENV OPENSEARCH_URL $OPENSEARCH_URL
-ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
+ENV OPENSEARCH_PRIMARY $OPENSEARCH_PRIMARY
 ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_PIPELINE_IGNORE_PREEXISTING $PCAP_PIPELINE_IGNORE_PREEXISTING
@@ -63,7 +63,14 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir opensearch-py pyzmq python-magic requests watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
+      elasticsearch \
+      elasticsearch-dsl \
+      opensearch-py \
+      python-magic \
+      pyzmq \
+      requests \
+      watchdog && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

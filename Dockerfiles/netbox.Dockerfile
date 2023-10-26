@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v3.6.1
+FROM netboxcommunity/netbox:v3.6.4
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -24,10 +24,10 @@ ENV PUSER "ubuntu"
 ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 
-ENV SUPERCRONIC_VERSION "0.2.26"
+ENV SUPERCRONIC_VERSION "0.2.27"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
+ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.33.3"

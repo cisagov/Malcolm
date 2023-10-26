@@ -12,6 +12,7 @@ global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? 
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? F : T;
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
+global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -204,6 +205,28 @@ event zeek_init() &priority=-5 {
       }
       if (|gen_ports_tcp| > 0) {
         Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_GENISYS_TCP, gen_ports_tcp);
+      }
+    }
+  }
+  if ((!disable_ics_all) && (!disable_ics_enip) && (enip_ports_str != "")) {
+    local enip_ports = split_string(enip_ports_str, /,/);
+    if (|enip_ports| > 0) {
+      local enip_ports_tcp: set[port] = {};
+      local enip_ports_udp: set[port] = {};
+      for (enip_port_idx in enip_ports) {
+        local enip_port = to_port(enip_ports[enip_port_idx]);
+        local enip_prot = get_port_transport_proto(enip_port);
+        if (enip_prot == tcp) {
+          add enip_ports_tcp[enip_port];
+        } else if (enip_prot == udp) {
+          add enip_ports_udp[enip_port];
+        }
+      }
+      if (|enip_ports_tcp| > 0) {
+        Analyzer::register_for_ports(Analyzer::ANALYZER_ENIP_TCP, enip_ports_tcp);
+      }
+      if (|enip_ports_udp| > 0) {
+        Analyzer::register_for_ports(Analyzer::ANALYZER_ENIP_UDP, enip_ports_udp);
       }
     }
   }

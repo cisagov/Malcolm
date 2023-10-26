@@ -1,7 +1,6 @@
 import dateparser
 import json
 import malcolm_utils
-import opensearchpy
 import os
 import pytz
 import random
@@ -167,26 +166,49 @@ debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
 opensearchUrl = app.config["OPENSEARCH_URL"]
 dashboardsUrl = app.config["DASHBOARDS_URL"]
-opensearchLocal = (app.config["OPENSEARCH_LOCAL"] == "true") or (opensearchUrl == 'http://opensearch:9200')
+databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
+
+opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+    opensearchUrl == 'http://opensearch:9200'
+)
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = (
     malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
     if (not opensearchLocal)
     else defaultdict(lambda: None)
 )
+
+DatabaseInitArgs = {}
+if urlparse(opensearchUrl).scheme == 'https':
+    DatabaseInitArgs['verify_certs'] = opensearchSslVerify
+    DatabaseInitArgs['ssl_assert_hostname'] = False
+    DatabaseInitArgs['ssl_show_warn'] = False
+
 if opensearchCreds['user'] is not None:
-    opensearchHttpAuth = f"{opensearchCreds['user']}:{opensearchCreds['password']}"
+    opensearchHttpAuth = (opensearchCreds['user'], opensearchCreds['password'])
     opensearchReqHttpAuth = HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
 else:
     opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-opensearchClient = opensearchpy.OpenSearch(
+if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+    import elasticsearch as DatabaseImport
+    from elasticsearch_dsl import Search as SearchClass
+
+    DatabaseClass = DatabaseImport.Elasticsearch
+    if opensearchHttpAuth:
+        DatabaseInitArgs['basic_auth'] = opensearchHttpAuth
+else:
+    import opensearchpy as DatabaseImport
+    from opensearchpy import Search as SearchClass
+
+    DatabaseClass = DatabaseImport.OpenSearch
+    if opensearchHttpAuth:
+        DatabaseInitArgs['http_auth'] = opensearchHttpAuth
+
+databaseClient = DatabaseClass(
     hosts=[opensearchUrl],
-    http_auth=opensearchHttpAuth,
-    verify_certs=opensearchSslVerify,
-    ssl_assert_hostname=False,
-    ssl_show_warn=False,
+    **DatabaseInitArgs,
 )
 
 
@@ -319,16 +341,17 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     )
     translated = []
 
-    for field in get_iterable(fieldname):
-        for url_regex_pair in fields_to_urls:
-            if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
-                for url in url_regex_pair[1]:
-                    if url.startswith('DASH:'):
-                        translated.append(
-                            f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
-                        )
-                    else:
-                        translated.append(url)
+    if databaseMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        for field in get_iterable(fieldname):
+            for url_regex_pair in fields_to_urls:
+                if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
+                    for url in url_regex_pair[1]:
+                        if url.startswith('DASH:'):
+                            translated.append(
+                                f"/dashboards/app/dashboards#/view/{url[5:]}?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:{start_time_str},to:{end_time_str}))"
+                            )
+                        else:
+                            translated.append(url)
 
     return list(set(translated))
 
@@ -421,7 +444,7 @@ def filtervalues(search, args):
                     )
                 else:
                     # field does not exist ("is null")
-                    s = s.filter('bool', must_not=opensearchpy.helpers.query.Q('exists', field=fieldname))
+                    s = s.filter('bool', must_not=DatabaseImport.helpers.query.Q('exists', field=fieldname))
 
     if debugApi:
         print(f'filtervalues: {json.dumps(s.to_dict())}')
@@ -450,10 +473,11 @@ def bucketfield(fieldname, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    global opensearchClient
+    global databaseClient
+    global SearchClass
 
-    s = opensearchpy.Search(
-        using=opensearchClient,
+    s = SearchClass(
+        using=databaseClient,
         index=app.config["ARKIME_INDEX_PATTERN"],
     ).extra(size=0)
     args = get_request_arguments(current_request)
@@ -548,11 +572,12 @@ def document(index):
     results
         array of the documents retrieved (up to 'limit')
     """
-    global opensearchClient
+    global databaseClient
+    global SearchClass
 
     args = get_request_arguments(request)
-    s = opensearchpy.Search(
-        using=opensearchClient,
+    s = SearchClass(
+        using=databaseClient,
         index=index,
     ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
@@ -610,7 +635,8 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
-    global opensearchClient
+    global databaseClient
+    global SearchClass
 
     args = get_request_arguments(request)
 
@@ -622,9 +648,9 @@ def fields():
 
     if arkimeFields:
         try:
-            # get fields from Arkime's field's table
-            s = opensearchpy.Search(
-                using=opensearchClient,
+            # get fields from Arkime's fields table
+            s = SearchClass(
+                using=databaseClient,
                 index=app.config["ARKIME_FIELDS_INDEX"],
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
@@ -738,18 +764,19 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
-    global opensearchClient
+    global databaseClient
 
     return jsonify(
         version=app.config["MALCOLM_VERSION"],
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
+        mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
         opensearch=requests.get(
             opensearchUrl,
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json(),
-        opensearch_health=opensearchClient.cluster.health(),
+        opensearch_health=dict(databaseClient.cluster.health()),
     )
 
 
@@ -832,7 +859,7 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    global opensearchClient
+    global databaseClient
 
     alert = {}
     idxResponse = {}
@@ -931,7 +958,7 @@ def event():
                     alert['event']['hits'] = hitCount
 
         docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
-        idxResponse = opensearchClient.index(
+        idxResponse = databaseClient.index(
             index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
             id=f"{docDateStr}-{alert['event']['id']}",
             body=alert,

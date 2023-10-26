@@ -44,6 +44,7 @@ Returns version information about Malcolm and version/[health](https://opensearc
         "unassigned_shards": 6
     },
     "sha": "8ddbbf4",
-    "version": "5.2.0"
+    "version": "5.2.0",
+    "mode": "opensearch-local"
 }
 ```

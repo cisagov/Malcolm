@@ -1,13 +1,15 @@
 bison
 ccache
 checkinstall
+clang
 cmake
-g++
-gcc
 git
+libc++-dev
+libc++abi-dev
 libfl-dev
 libgoogle-perftools-dev
 libjansson-dev
+libkrb5-dev
 libmagic-dev
 libmaxminddb-dev
 libnl-3-dev

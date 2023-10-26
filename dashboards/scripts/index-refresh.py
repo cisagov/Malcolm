@@ -102,13 +102,18 @@ def main():
         help="Verify SSL certificates for OpenSearch",
     )
     parser.add_argument(
-        '--opensearch-local',
-        dest='opensearchIsLocal',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=str2bool(os.getenv('OPENSEARCH_LOCAL', default='True')),
-        help="Malcolm is using its local OpenSearch instance",
+        '--opensearch-mode',
+        dest='opensearchMode',
+        help="Malcolm data store mode ('opensearch-local', 'opensearch-remote', 'elasticsearch-remote')",
+        type=malcolm_utils.DatabaseModeStrToEnum,
+        metavar='<STR>',
+        default=malcolm_utils.DatabaseModeStrToEnum(
+            os.getenv(
+                'OPENSEARCH_PRIMARY',
+                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+            )
+        ),
+        required=False,
     )
     parser.add_argument(
         '-t',
@@ -147,14 +152,14 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    args.opensearchIsLocal = args.opensearchIsLocal or (args.opensearchUrl == 'http://opensearch:9200')
+    opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+        args.opensearchUrl == 'http://opensearch:9200'
+    )
     opensearchCreds = (
-        malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile)
-        if (not args.opensearchIsLocal)
-        else defaultdict(lambda: None)
+        malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
     )
     if not args.opensearchUrl:
-        if args.opensearchIsLocal:
+        if opensearchIsLocal:
             args.opensearchUrl = 'http://opensearch:9200'
         elif 'url' in opensearchCreds:
             args.opensearchUrl = opensearchCreds['url']
@@ -454,7 +459,7 @@ def main():
     else:
         print("failure (could not find Index ID for {})".format(args.index))
 
-    if args.opensearchIsLocal and args.fixUnassigned and not args.dryrun:
+    if (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) and args.fixUnassigned and not args.dryrun:
         # set some configuration-related indexes (opensearch/opendistro) replica count to 0
         # so we don't have yellow index state on those
         shardsResponse = requests.get(

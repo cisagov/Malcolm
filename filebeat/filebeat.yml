@@ -106,7 +106,7 @@ filebeat.inputs:
 
 #-------------------------- Logstash Output ------------------------------------
 output.logstash:
-  hosts: ["logstash:5044"]
+  hosts: ["${LOGSTASH_HOST:logstash:5044}"]
   ssl.enabled: ${BEATS_SSL:false}
   ssl.certificate_authorities: ["/certs/ca.crt"]
   ssl.certificate: "/certs/client.crt"

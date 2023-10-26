@@ -4,6 +4,7 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import contextlib
+import enum
 import hashlib
 import ipaddress
 import json
@@ -29,6 +30,33 @@ try:
 except ImportError:
     from collections import Iterable
 from collections import defaultdict, namedtuple, OrderedDict
+
+
+###################################################################################################
+# methods for Malcolm's connection to a data store
+class DatabaseMode(enum.IntFlag):
+    OpenSearchLocal = enum.auto()
+    OpenSearchRemote = enum.auto()
+    ElasticsearchRemote = enum.auto()
+    DatabaseUnset = enum.auto()
+
+
+DATABASE_MODE_LABELS = defaultdict(lambda: '')
+DATABASE_MODE_ENUMS = defaultdict(lambda: DatabaseMode.DatabaseUnset)
+DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal] = 'opensearch-local'
+DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote] = 'opensearch-remote'
+DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote] = 'elasticsearch-remote'
+DATABASE_MODE_ENUMS['opensearch-local'] = DatabaseMode.OpenSearchLocal
+DATABASE_MODE_ENUMS['opensearch-remote'] = DatabaseMode.OpenSearchRemote
+DATABASE_MODE_ENUMS['elasticsearch-remote'] = DatabaseMode.ElasticsearchRemote
+
+
+def DatabaseModeEnumToStr(val):
+    return DATABASE_MODE_LABELS[val]
+
+
+def DatabaseModeStrToEnum(val):
+    return DATABASE_MODE_ENUMS[val]
 
 
 ###################################################################################################
@@ -125,6 +153,13 @@ class ContextLockedOrderedDict(OrderedDict):
 def custom_make_translation(text, translation):
     regex = re.compile('|'.join(map(re.escape, translation)))
     return regex.sub(lambda match: translation[match.group(0)], text)
+
+
+###################################################################################################
+def decapitalize(s):
+    if not s:
+        return s
+    return s[0].lower() + s[1:]
 
 
 ###################################################################################################

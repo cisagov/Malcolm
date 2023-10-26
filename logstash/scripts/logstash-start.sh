@@ -29,8 +29,11 @@ export OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRE
 OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES=${LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES:-"$OPENSEARCH_PIPELINE_ADDRESS_INTERNAL,$OPENSEARCH_PIPELINE_ADDRESS_EXTERNAL"}
 
 # output plugin configuration for primary and secondary opensearch destinations
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
-OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-"false"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
+OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
+OPENSEARCH_PRIMARY_TYPE="$(echo "$OPENSEARCH_PRIMARY" | cut -d- -f1)"
+OPENSEARCH_SECONDARY_TYPE="$(echo "$OPENSEARCH_SECONDARY" | cut -d- -f1)"
+[[ -z "$OPENSEARCH_SECONDARY_TYPE" ]] && OPENSEARCH_SECONDARY_TYPE="opensearch"
 
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION:-"false"}
@@ -38,7 +41,7 @@ OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SECONDARY_SSL_CER
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE=${OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.secondary.curlrc"}
 
-[[ "$OPENSEARCH_SECONDARY" != "true" ]] && OPENSEARCH_SECONDARY_URL=
+( [[ "$OPENSEARCH_SECONDARY" != "opensearch-remote" ]] && [[ "$OPENSEARCH_SECONDARY" != "elasticsearch-remote" ]] ) && OPENSEARCH_SECONDARY_URL=
 export OPENSEARCH_SECONDARY_URL
 
 ####################################################################################################################
@@ -82,7 +85,7 @@ MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPEL
 # (I already wrote python code to do this, so sue me)
 OPENSSL_USER=
 OPENSSL_PASSWORD=
-if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
@@ -92,7 +95,7 @@ fi
 
 OPENSSL_SECONDARY_USER=
 OPENSSL_SECONDARY_PASSWORD=
-if [[ "$OPENSEARCH_SECONDARY" == "true" ]] && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_SECONDARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     OPENSSL_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
@@ -116,6 +119,10 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_SSL_VERIFICATION_/${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_USER_/${OPENSSL_SECONDARY_USER}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_PASSWORD_/${OPENSSL_SECONDARY_PASSWORD}/g" "{}" \; 2>/dev/null
+
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_PRIMARY_DATASTORE_TYPE_/${OPENSEARCH_PRIMARY_TYPE}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_SECONDARY_DATASTORE_TYPE_/${OPENSEARCH_SECONDARY_TYPE}/g" "{}" \; 2>/dev/null
+
 
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
