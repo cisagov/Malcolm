@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-redis-cache-container
-        image: ghcr.io/idaholab/malcolm/redis:v23.10.0
+        image: ghcr.io/mmguero-dev/malcolm/redis:development
         imagePullPolicy: Always
         stdin: false
         tty: true
