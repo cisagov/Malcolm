@@ -12,11 +12,14 @@ import os
 import pynetbox
 import randomcolor
 import re
+import shutil
 import sys
+import tempfile
 import time
 import malcolm_utils
 
 from collections.abc import Iterable
+from distutils.dir_util import copy_tree
 from datetime import datetime
 from slugify import slugify
 from netbox_library_import import import_library
@@ -237,6 +240,16 @@ def main():
         default=os.getenv('NETBOX_PRELOAD_PATH', '/opt/netbox-preload'),
         required=False,
         help="Directory containing netbox-initializers files to preload",
+    )
+    parser.add_argument(
+        '--preload-prefixes',
+        dest='preloadPrefixes',
+        type=malcolm_utils.str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=malcolm_utils.str2bool(os.getenv('NETBOX_PRELOAD_PREFIXES', default='False')),
+        help="Preload IPAM VRFs/IP Prefixes for private IP space",
     )
     try:
         parser.error = parser.exit
@@ -642,20 +655,35 @@ def main():
     if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
         try:
             with malcolm_utils.pushd(os.path.dirname(manageScript)):
-                retcode, output = malcolm_utils.run_process(
-                    [
-                        netboxVenvPy,
-                        os.path.basename(manageScript),
-                        "load_initializer_data",
-                        "--path",
-                        args.preloadDir,
-                    ],
-                    logger=logging,
-                )
-                if retcode == 0:
-                    logging.debug(f"netbox-initializers: {retcode} {output}")
-                else:
-                    logging.error(f"Error processing netbox-initializers: {retcode} {output}")
+                # make a local copy of the YMLs to preload
+                with tempfile.TemporaryDirectory() as tmpPreloadDir:
+                    copy_tree(args.preloadDir, tmpPreloadDir)
+
+                    # only preload catch-all VRFs and IP Prefixes if explicitly specified and they don't already exist
+                    if args.preloadPrefixes:
+                        for loadType in ('vrfs', 'prefixes'):
+                            defaultFileName = os.path.join(tmpPreloadDir, f'{loadType}_defaults.yml')
+                            loadFileName = os.path.join(tmpPreloadDir, f'{loadType}.yml')
+                            if os.path.isfile(defaultFileName) and (not os.path.isfile(loadFileName)):
+                                try:
+                                    shutil.copyfile(defaultFileName, loadFileName)
+                                except Exception:
+                                    pass
+
+                    retcode, output = malcolm_utils.run_process(
+                        [
+                            netboxVenvPy,
+                            os.path.basename(manageScript),
+                            "load_initializer_data",
+                            "--path",
+                            tmpPreloadDir,
+                        ],
+                        logger=logging,
+                    )
+                    if retcode == 0:
+                        logging.debug(f"netbox-initializers: {retcode} {output}")
+                    else:
+                        logging.error(f"Error processing netbox-initializers: {retcode} {output}")
 
         except Exception as e:
             logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")

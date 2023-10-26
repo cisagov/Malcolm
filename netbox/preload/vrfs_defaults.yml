@@ -1,0 +1,6 @@
+- enforce_unique: true
+  name: Private IP Space (10.0.0.0/8)
+- enforce_unique: true
+  name: Private IP Space (172.16.0.0/12)
+- enforce_unique: true
+  name: Private IP Space (192.168.0.0/16)

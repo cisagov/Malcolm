@@ -430,6 +430,8 @@ Should Malcolm automatically populate NetBox inventory based on observed network
 
 Specify default NetBox site name: Malcolm
 
+Should Malcolm create "catch-all" prefixes for private IP address space? (y / N): n
+
 Enable dark mode for OpenSearch Dashboards? (Y / n): y
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.

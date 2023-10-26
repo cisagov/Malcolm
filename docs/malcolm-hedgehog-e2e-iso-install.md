@@ -255,6 +255,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Answer **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
 * **Specify default NetBox site name**
     - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used as a query parameter for these enrichment lookups.
+* **Should Malcolm create "catch-all" prefixes for private IP address space?**
+    - Answer **Y** to automatically create "catch-all" NetBox prefixes for private IP address space (i.e., one each for `10.0.0.0/8`, `172.16.0.0/12`, and `192.168.0.0/16`, respectively). This is not recommended for networks with more than one subnet.
 * **Should Malcolm capture live network traffic?**
     - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). Answer **no** to this question in installations where Hedgehog Linux will be handling all network traffic capture. If users want Malcolm to observe and capture traffic instead of, or in addition to, a sensor running Hedgehog Linux, they should answer **yes** enable life traffic analysis using default settings, or select **customize** to proceed to answer the following related questions individually.
     - **Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?**

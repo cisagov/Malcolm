@@ -1263,6 +1263,10 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
+        netboxPreloadPrefixes = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm create "catch-all" prefixes for private IP address space?',
+            default=args.netboxPreloadPrefixes,
+        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -1510,6 +1514,11 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_PRELOAD_PREFIXES',
+                TrueOrFalseNoQuote(netboxPreloadPrefixes),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
@@ -3670,6 +3679,16 @@ def main():
         const=True,
         default=False,
         help="Automatically populate NetBox inventory based on observed network traffic",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-preload-prefixes',
+        dest='netboxPreloadPrefixes',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Preload NetBox IPAM VRFs/IP Prefixes for private IP space",
     )
     netboxArgGroup.add_argument(
         '--netbox-site-name',
