@@ -7,7 +7,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:23.09.0
+    image: ghcr.io/idaholab/malcolm/opensearch:23.10.0
+    # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
+    #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
+    #   start but not actually run OpenSearch. It's included in both profiles to
+    #   satisfy some other containers' depends_on.
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -43,7 +48,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.09.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -54,6 +60,7 @@ services:
       - ./config/process.env
       - ./config/ssl.env
       - ./config/opensearch.env
+      - ./config/dashboards.env
       - ./config/dashboards-helper.env
     environment:
       VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
@@ -73,7 +80,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:23.09.0
+    image: ghcr.io/idaholab/malcolm/dashboards:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -102,7 +110,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:23.09.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -151,7 +160,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.09.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -166,8 +176,6 @@ services:
       - ./config/nginx.env
       - ./config/beats-common.env
       - ./config/filebeat.env
-    depends_on:
-      - logstash
     ports:
       - "127.0.0.1:5045:5045"
     volumes:
@@ -189,7 +197,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:23.09.0
+    image: ghcr.io/idaholab/malcolm/arkime:23.10.0
+    # todo: viewer/wise in hedgehog profile (and what about nginx reaching back?)
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -212,6 +222,8 @@ services:
         hard: -1
     depends_on:
       - opensearch
+    ports:
+      - "127.0.0.1:8005:8005"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
@@ -231,7 +243,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.09.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -273,7 +286,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.09.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -305,7 +319,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.09.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -327,8 +342,6 @@ services:
       - ./config/upload-common.env
       - ./config/suricata.env
       - ./config/suricata-offline.env
-    depends_on:
-      - logstash
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
@@ -344,7 +357,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.09.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -373,7 +387,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:23.09.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -402,7 +417,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:23.09.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -427,7 +443,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.09.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.10.0
+    profiles: ["malcolm", "hedgehog"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -456,7 +473,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:23.09.0
+    image: ghcr.io/idaholab/malcolm/file-upload:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true
@@ -469,8 +487,6 @@ services:
       - ./config/auth.env
     environment:
       VIRTUAL_HOST : 'upload.malcolm.local'
-    depends_on:
-      - arkime
     ports:
       - "127.0.0.1:8022:22"
     volumes:
@@ -483,7 +499,8 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:23.09.0
+    image: ghcr.io/idaholab/malcolm/htadmin:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -511,7 +528,8 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:23.09.0
+    image: ghcr.io/idaholab/malcolm/freq:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -536,7 +554,8 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:23.09.0
+    image: ghcr.io/idaholab/malcolm/netbox:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -571,7 +590,8 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:23.09.0
+    image: ghcr.io/idaholab/malcolm/postgresql:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -598,7 +618,8 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:23.09.0
+    image: ghcr.io/idaholab/malcolm/redis:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -629,7 +650,8 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:23.09.0
+    image: ghcr.io/idaholab/malcolm/redis:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -659,7 +681,8 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:23.09.0
+    image: ghcr.io/idaholab/malcolm/api:23.10.0
+    profiles: ["malcolm"]
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -673,6 +696,7 @@ services:
     env_file:
       - ./config/process.env
       - ./config/ssl.env
+      - ./config/dashboards.env
       - ./config/opensearch.env
     environment:
       VIRTUAL_HOST : 'api.malcolm.local'
@@ -689,7 +713,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.09.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.10.0
+    profiles: ["malcolm"]
     restart: "no"
     stdin_open: false
     tty: true

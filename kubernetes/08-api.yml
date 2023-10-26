@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:23.09.0
+        image: ghcr.io/idaholab/malcolm/api:v23.10.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -53,6 +53,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: dashboards-env
           - configMapRef:
               name: opensearch-env
         env:

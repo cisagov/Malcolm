@@ -9,11 +9,13 @@ function urlencodeall() {
 }
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
+ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 
+MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     # need to build the opensearch URL (including username/password) by combining
     # OPENSEARCH_URL and parameters from OPENSEARCH_CREDS_CONFIG_FILE
 
@@ -45,8 +47,20 @@ fi
 if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
     cp "${ARKIME_DIR}"/etc/config.orig.ini "${ARKIME_DIR}"/etc/config.ini
     sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_DIR}"/etc/config.ini
+    sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
+    if [[ "$MALCOLM_PROFILE" == "hedgehog" ]]; then
+        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(plugins=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
+        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
+    fi
     chmod 600 "${ARKIME_DIR}"/etc/config.ini
 fi
+
 unset OPENSEARCH_URL_FINAL
 
 # start supervisor or whatever the default command is

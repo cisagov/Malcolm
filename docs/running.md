@@ -1,8 +1,8 @@
 # <a name="Running"></a>Running Malcolm
 
 * [Running Malcolm](#Running)
-    - [OpenSearch instances](opensearch-instances.md#OpenSearchInstance)
-        + [Authentication and authorization for remote OpenSearch clusters](opensearch-instances.md#OpenSearchAuth)
+    - [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance)
+        + [Authentication and authorization for remote data store clusters](opensearch-instances.md#OpenSearchAuth)
     - [Starting Malcolm](#Starting)
     - [Stopping and restarting Malcolm](#StopAndRestart)
     - [Clearing Malcolm's data](#Wipe)

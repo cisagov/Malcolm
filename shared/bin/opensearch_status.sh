@@ -7,15 +7,16 @@ set -e
 ENCODING="utf-8"
 
 # options
-# -v          (verbose)
-#
-# -w      (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
+# -v       (verbose)
+# -t <str> (wait not only for "up" status, but also wait for specified index template ot exist
+# -w       (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
 #
 # opensearch connection parameters are read from environment variables
 
 WAIT_FOR_LOG_DATA=0
 WAIT_FOR_TEMPLATE=
-while getopts 'vwt:' OPTION; do
+WAIT_FOR_TEMPLATE_LEGACY=
+while getopts 'vwt:l:' OPTION; do
   case "$OPTION" in
     v)
       set -x
@@ -29,6 +30,10 @@ while getopts 'vwt:' OPTION; do
       WAIT_FOR_TEMPLATE=${OPTARG}
       ;;
 
+    l)
+      WAIT_FOR_TEMPLATE_LEGACY=${OPTARG}
+      ;;
+
     ?)
       echo "script usage: $(basename $0) [-v] [-w] [-t <template name>]" >&2
       exit 1
@@ -38,10 +43,10 @@ done
 shift "$(($OPTIND -1))"
 
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
-OPENSEARCH_LOCAL=${OPENSEARCH_LOCAL:-"true"}
+OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-if [[ "$OPENSEARCH_LOCAL" == "false" ]] && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
   CURL_CONFIG_PARAMS=(
     --config
     "$OPENSEARCH_CREDS_CONFIG_FILE"
@@ -68,22 +73,32 @@ until [[ "$(curl "${CURL_CONFIG_PARAMS[@]}" -fsSL "$OPENSEARCH_URL/_cat/health?h
   sleep 1
 done
 
-echo "OpenSearch is up and healthy at "$OPENSEARCH_URL"" >&2
+echo "$OPENSEARCH_PRIMARY is up and healthy at "$OPENSEARCH_URL"" >&2
+
+if [[ -n "$WAIT_FOR_TEMPLATE_LEGACY" ]]; then
+  sleep 1
+  echo "Waiting until $OPENSEARCH_PRIMARY has legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\"..." >&2
+  until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_template/$WAIT_FOR_TEMPLATE_LEGACY" 2>/dev/null | grep -q mappings ); do
+    sleep 5
+  done
+  echo "$OPENSEARCH_PRIMARY legacy template \"$WAIT_FOR_TEMPLATE_LEGACY\" exists" >&2
+  sleep 5
+fi
 
 if [[ -n "$WAIT_FOR_TEMPLATE" ]]; then
   sleep 1
-  echo "Waiting until OpenSearch has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has index template \"$WAIT_FOR_TEMPLATE\"..." >&2
   until ( curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_index_template/$WAIT_FOR_TEMPLATE" 2>/dev/null | grep -q index_templates ); do
     sleep 5
   done
-  echo "OpenSearch index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
+  echo "$OPENSEARCH_PRIMARY index template \"$WAIT_FOR_TEMPLATE\" exists" >&2
   sleep 5
 fi
 
 if (( $WAIT_FOR_LOG_DATA == 1 )); then
   sleep 1
 
-  echo "Waiting until OpenSearch has logs..." >&2
+  echo "Waiting until $OPENSEARCH_PRIMARY has logs..." >&2
 
   # wait until at least one arkime_sessions3-* index exists
   until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/arkime_sessions3-*" 2>/dev/null | wc -l) > 0 )) ; do

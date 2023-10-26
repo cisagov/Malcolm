@@ -54,6 +54,9 @@ from malcolm_common import (
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
+    PROFILE_MALCOLM,
+    PROFILE_HEDGEHOG,
+    PROFILE_KEY,
     ReplaceBindMountLocation,
     RequestsDynamic,
     ScriptPath,
@@ -64,6 +67,9 @@ from malcolm_common import (
 )
 from malcolm_utils import (
     CountUntilException,
+    DatabaseMode,
+    DATABASE_MODE_LABELS,
+    DATABASE_MODE_ENUMS,
     deep_get,
     eprint,
     run_process,
@@ -74,20 +80,19 @@ from malcolm_utils import (
 )
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.14.2"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.20.3"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
 MAC_BREW_DOCKER_PACKAGE = 'docker-edge'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2g -Xmx2g -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
-OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms4g -Xmx4g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms10g -Xmx10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
 origPath = os.getcwd()
-HostName = os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0]
 
 ###################################################################################################
 args = None
@@ -110,6 +115,8 @@ def InstallerYesOrNo(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    yesLabel='Yes',
+    noLabel='No',
 ):
     global args
     defBehavior = defaultBehavior
@@ -121,6 +128,8 @@ def InstallerYesOrNo(
         default=default,
         defaultBehavior=defBehavior,
         uiMode=uiMode,
+        yesLabel=yesLabel,
+        noLabel=noLabel,
     )
 
 
@@ -455,6 +464,12 @@ class Installer(object):
                 'Enter group ID (GID) for running non-root Malcolm processes', default=defaultGid
             )
 
+        pcapNodeName = InstallerAskForString(
+            f'Enter the node name to associate with network traffic metadata',
+            default=args.pcapNodeName,
+        )
+        pcapNodeHost = ''
+
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
 
@@ -513,73 +528,193 @@ class Installer(object):
         if args.lsWorkers:
             lsWorkers = args.lsWorkers
 
-        opensearchPrimaryRemote = False
+        if args.opensearchPrimaryMode not in DATABASE_MODE_ENUMS.keys():
+            raise Exception(f'"{args.opensearchPrimaryMode}" is not valid for --opensearch')
+
+        if args.opensearchSecondaryMode and (args.opensearchSecondaryMode not in DATABASE_MODE_ENUMS.keys()):
+            raise Exception(f'"{args.opensearchSecondaryMode}" is not valid for --opensearch-secondary')
+
+        opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
         opensearchPrimaryUrl = 'http://opensearch:9200'
         opensearchPrimarySslVerify = False
-        opensearchSecondaryRemote = False
+        opensearchPrimaryLabel = 'local OpenSearch'
+        opensearchSecondaryMode = DatabaseMode.DatabaseUnset
         opensearchSecondaryUrl = ''
         opensearchSecondarySslVerify = False
+        opensearchSecondaryLabel = 'remote OpenSearch'
+        dashboardsUrl = 'http://dashboards:5601/dashboards'
+        logstashHost = 'logstash:5044'
         indexSnapshotCompressed = False
-
-        opensearchPrimaryRemote = not InstallerYesOrNo(
-            'Should Malcolm use and maintain its own OpenSearch instance?',
-            default=args.ownOpenSearch,
+        malcolmProfile = (
+            PROFILE_MALCOLM
+            if InstallerYesOrNo(
+                'Run with Malcolm (all containers) or Hedgehog (capture only) profile?',
+                default=args.malcolmProfile,
+                yesLabel='Malcolm',
+                noLabel='Hedgehog',
+            )
+            else PROFILE_HEDGEHOG
         )
-        if opensearchPrimaryRemote:
-            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
+
+        if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Should Malcolm use and maintain its own OpenSearch instance?',
+            default=DATABASE_MODE_ENUMS[args.opensearchPrimaryMode] == DatabaseMode.OpenSearchLocal,
+        ):
+            opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
+
+        else:
+            databaseModeChoice = ''
+            allowedDatabaseModes = {
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]: [DatabaseMode.OpenSearchLocal, 'local OpenSearch'],
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote]: [
+                    DatabaseMode.OpenSearchRemote,
+                    'remote OpenSearch',
+                ],
+                DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote]: [
+                    DatabaseMode.ElasticsearchRemote,
+                    'remote Elasticsearch',
+                ],
+            }
+            if malcolmProfile != PROFILE_MALCOLM:
+                del allowedDatabaseModes[DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]]
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid primary document store mode')
+            while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
+                databaseModeChoice = InstallerChooseOne(
+                    'Select primary Malcolm document store',
+                    choices=[
+                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal])
+                        for x in list(allowedDatabaseModes.keys())
+                    ],
+                )
+            opensearchPrimaryMode = allowedDatabaseModes[databaseModeChoice][0]
+            opensearchPrimaryLabel = allowedDatabaseModes[databaseModeChoice][1]
+
+        if opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote):
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchPrimaryLabel} URL')
             opensearchPrimaryUrl = ''
             while (len(opensearchPrimaryUrl) <= 1) and loopBreaker.increment():
                 opensearchPrimaryUrl = InstallerAskForString(
-                    'Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    f'Enter primary {opensearchPrimaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchPrimaryUrl,
                 )
             opensearchPrimarySslVerify = opensearchPrimaryUrl.lower().startswith('https') and InstallerYesOrNo(
-                'Require SSL certificate validation for communication with primary OpenSearch instance?',
+                f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                 default=args.opensearchPrimarySslVerify,
             )
+        else:
             indexSnapshotCompressed = InstallerYesOrNo(
-                'Compress OpenSearch index snapshots?',
+                f'Compress {opensearchPrimaryLabel} index snapshots?',
                 default=args.indexSnapshotCompressed,
             )
 
-        opensearchSecondaryRemote = InstallerYesOrNo(
-            'Forward Logstash logs to a secondary remote OpenSearch instance?',
-            default=args.opensearchSecondaryRemote,
-        )
-        if opensearchSecondaryRemote:
-            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch URL')
+        if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Kibana connection URL')
+            dashboardsUrl = ''
+            while (len(dashboardsUrl) <= 1) and loopBreaker.increment():
+                dashboardsUrl = InstallerAskForString(
+                    f'Enter Kibana connection URL (e.g., https://192.168.1.123:5601)',
+                    default=args.dashboardsUrl,
+                )
+
+        if malcolmProfile != PROFILE_MALCOLM:
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Logstash host and port')
+            logstashHost = ''
+            while (len(logstashHost) <= 1) and loopBreaker.increment():
+                logstashHost = InstallerAskForString(
+                    f'Enter Logstash host and port (e.g., 192.168.1.123:5044)',
+                    default=args.logstashHost,
+                )
+            pcapNodeHost = InstallerAskForString(
+                f"Enter this node's hostname or IP to associate with network traffic metadata",
+                default=args.pcapNodeHost,
+            )
+            if not pcapNodeHost and not InstallerYesOrNo(
+                f'Node hostname or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
+                default=False,
+            ):
+                pcapNodeHost = InstallerAskForString(
+                    f"Enter this node's hostname or IP to associate with network traffic metadata",
+                    default=args.pcapNodeHost,
+                )
+
+        if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Forward Logstash logs to a secondary remote document store?',
+            default=(
+                DATABASE_MODE_ENUMS[args.opensearchSecondaryMode]
+                in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
+            ),
+        ):
+            databaseModeChoice = ''
+            allowedDatabaseModes = {
+                DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote]: [
+                    DatabaseMode.OpenSearchRemote,
+                    'remote OpenSearch',
+                ],
+                DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote]: [
+                    DatabaseMode.ElasticsearchRemote,
+                    'remote Elasticsearch',
+                ],
+            }
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid secondary document store mode')
+            while databaseModeChoice not in list(allowedDatabaseModes.keys()) and loopBreaker.increment():
+                databaseModeChoice = InstallerChooseOne(
+                    'Select secondary Malcolm document store',
+                    choices=[
+                        (x, allowedDatabaseModes[x][1], x == args.opensearchSecondaryMode)
+                        for x in list(allowedDatabaseModes.keys())
+                    ],
+                )
+            opensearchSecondaryMode = allowedDatabaseModes[databaseModeChoice][0]
+            opensearchSecondaryLabel = allowedDatabaseModes[databaseModeChoice][1]
+
+        if opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote):
+            loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opensearchSecondaryLabel} URL')
             opensearchSecondaryUrl = ''
             while (len(opensearchSecondaryUrl) <= 1) and loopBreaker.increment():
                 opensearchSecondaryUrl = InstallerAskForString(
-                    'Enter secondary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200)',
+                    f'Enter secondary {opensearchSecondaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                     default=args.opensearchSecondaryUrl,
                 )
             opensearchSecondarySslVerify = opensearchSecondaryUrl.lower().startswith('https') and InstallerYesOrNo(
-                'Require SSL certificate validation for communication with secondary OpenSearch instance?',
+                f'Require SSL certificate validation for communication with secondary {opensearchSecondaryLabel} instance?',
                 default=args.opensearchSecondarySslVerify,
             )
 
-        if opensearchPrimaryRemote or opensearchSecondaryRemote:
-            InstallerDisplayMessage(
-                f'You must run auth_setup after {ScriptName} to store OpenSearch connection credentials.',
-            )
-
-        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch/LogStash memory setting(s)')
-        while (
-            not InstallerYesOrNo(
-                f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?', default=True
-            )
-            and loopBreaker.increment()
+        if (opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)) or (
+            opensearchSecondaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
         ):
-            osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
-            lsMemory = InstallerAskForString('Enter memory for LogStash (e.g., 4g, 2500m, etc.)')
+            InstallerDisplayMessage(
+                f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
+            )
 
-        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LogStash worker setting(s)')
-        while (
-            (not str(lsWorkers).isdigit())
-            or (not InstallerYesOrNo(f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True))
-        ) and loopBreaker.increment():
-            lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
+        if malcolmProfile == PROFILE_MALCOLM:
+            loopBreaker = CountUntilException(
+                MaxAskForValueCount,
+                f'Invalid {"OpenSearch/" if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal else ""}Logstash memory setting(s)',
+            )
+            while (
+                not InstallerYesOrNo(
+                    f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
+                    if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
+                    else f'Setting {lsMemory} for Logstash. Is this OK?',
+                    default=True,
+                )
+                and loopBreaker.increment()
+            ):
+                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                    osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
+                lsMemory = InstallerAskForString('Enter memory for Logstash (e.g., 4g, 2500m, etc.)')
+
+            loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Logstash worker setting(s)')
+            while (
+                (not str(lsWorkers).isdigit())
+                or (
+                    not InstallerYesOrNo(
+                        f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?', default=True
+                    )
+                )
+            ) and loopBreaker.increment():
+                lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
 
         restartMode = None
         allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
@@ -597,9 +732,14 @@ class Installer(object):
         if restartMode == 'no':
             restartMode = '"no"'
 
-        nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
-        if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
-            nginxSSL = not InstallerYesOrNo('Unencrypted connections are NOT recommended. Are you sure?', default=False)
+        if malcolmProfile == PROFILE_MALCOLM:
+            nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
+            if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
+                nginxSSL = not InstallerYesOrNo(
+                    'Unencrypted connections are NOT recommended. Are you sure?', default=False
+                )
+        else:
+            nginxSSL = True
 
         behindReverseProxy = False
         dockerNetworkExternalName = ""
@@ -609,9 +749,12 @@ class Installer(object):
         traefikEntrypoint = ""
         traefikResolver = ""
 
-        behindReverseProxy = (self.orchMode is OrchestrationFramework.KUBERNETES) or InstallerYesOrNo(
-            'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
-            default=args.behindReverseProxy or (not nginxSSL),
+        behindReverseProxy = (self.orchMode is OrchestrationFramework.KUBERNETES) or (
+            (malcolmProfile == PROFILE_MALCOLM)
+            and InstallerYesOrNo(
+                'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
+                default=args.behindReverseProxy or (not nginxSSL),
+            )
         )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -624,14 +767,17 @@ class Installer(object):
                             'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
                             default=args.traefikHost,
                         )
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik OpenSearch request domain')
-                    while (
-                        (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost)
-                    ) and loopBreaker.increment():
-                        traefikOpenSearchHost = InstallerAskForString(
-                            f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
-                            default=args.traefikOpenSearchHost,
+                    if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid Traefik OpenSearch request domain'
                         )
+                        while (
+                            (len(traefikOpenSearchHost) <= 1) or (traefikOpenSearchHost == traefikHost)
+                        ) and loopBreaker.increment():
+                            traefikOpenSearchHost = InstallerAskForString(
+                                f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
+                                default=args.traefikOpenSearchHost,
+                            )
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik router entrypoint')
                     while (len(traefikEntrypoint) <= 1) and loopBreaker.increment():
                         traefikEntrypoint = InstallerAskForString(
@@ -655,7 +801,7 @@ class Installer(object):
             'Lightweight Directory Access Protocol (LDAP)': 'false',
             'None': 'no_authentication',
         }
-        authMode = None
+        authMode = None if (malcolmProfile == PROFILE_MALCOLM) else 'Basic'
         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid authentication method')
         while authMode not in list(allowedAuthModes.keys()) and loopBreaker.increment():
             authMode = InstallerChooseOne(
@@ -718,7 +864,7 @@ class Installer(object):
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if not InstallerYesOrNo(
-                'Store PCAP, log and index files locally under {}?'.format(malcolm_install_path),
+                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files locally under {malcolm_install_path}?',
                 default=not args.acceptDefaultsNonInteractive,
             ):
                 # PCAP directory
@@ -774,7 +920,7 @@ class Installer(object):
                             )
                             break
 
-                if not opensearchPrimaryRemote:
+                if (malcolmProfile == PROFILE_MALCOLM) and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal):
                     # opensearch index directory
                     if not InstallerYesOrNo(
                         'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
@@ -848,34 +994,41 @@ class Installer(object):
 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
-            if not opensearchPrimaryRemote
+            if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
             else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
             default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
         ):
             # delete oldest indexes based on index pattern size
-            if not opensearchPrimaryRemote:
-                if InstallerYesOrNo(
+            if (
+                (malcolmProfile == PROFILE_MALCOLM)
+                and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal)
+                and InstallerYesOrNo(
                     'Delete the oldest indices when the database exceeds a certain size?',
                     default=bool(args.indexPruneSizeLimit),
+                )
+            ):
+                indexPruneSizeLimit = ''
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
+                while (
+                    (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE))
+                    and (indexPruneSizeLimit != '0')
+                    and loopBreaker.increment()
                 ):
-                    indexPruneSizeLimit = ''
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
-                    while (
-                        (not re.match(r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', indexPruneSizeLimit, flags=re.IGNORECASE))
-                        and (indexPruneSizeLimit != '0')
-                        and loopBreaker.increment()
-                    ):
-                        indexPruneSizeLimit = InstallerAskForString(
-                            'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
-                        )
-                    indexPruneNameSort = InstallerYesOrNo(
-                        'Determine oldest indices by name (instead of creation time)?', default=True
+                    indexPruneSizeLimit = InstallerAskForString(
+                        'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
                     )
+                indexPruneNameSort = InstallerYesOrNo(
+                    'Determine oldest indices by name (instead of creation time)?', default=True
+                )
 
             # let Arkime delete old PCAP files based on available storage
-            arkimeManagePCAP = opensearchPrimaryRemote or InstallerYesOrNo(
-                'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
-                default=args.arkimeManagePCAP,
+            arkimeManagePCAP = (
+                (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
+                or (malcolmProfile != PROFILE_MALCOLM)
+                or InstallerYesOrNo(
+                    'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                    default=args.arkimeManagePCAP,
+                )
             )
 
         autoSuricata = InstallerYesOrNo(
@@ -900,12 +1053,16 @@ class Installer(object):
             )
         )
 
-        reverseDns = InstallerYesOrNo(
+        reverseDns = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Perform reverse DNS lookup locally for source and destination IP addresses in logs?',
             default=args.reverseDns,
         )
-        autoOui = InstallerYesOrNo('Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui)
-        autoFreq = InstallerYesOrNo('Perform string randomness scoring on some fields?', default=args.autoFreq)
+        autoOui = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui
+        )
+        autoFreq = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+            'Perform string randomness scoring on some fields?', default=args.autoFreq
+        )
 
         openPortsSelection = (
             'c'
@@ -913,35 +1070,49 @@ class Installer(object):
             else 'unset'
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            openPortsOptions = ('no', 'yes', 'customize')
-            loopBreaker = CountUntilException(MaxAskForValueCount)
-            while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
-                openPortsSelection = InstallerChooseOne(
-                    'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
-                    choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
-                )[0]
-            if openPortsSelection == 'n':
+            if malcolmProfile == PROFILE_MALCOLM:
+                arkimeViewerOpen = False
+                openPortsOptions = ('no', 'yes', 'customize')
+                loopBreaker = CountUntilException(MaxAskForValueCount)
+                while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
+                    openPortsSelection = InstallerChooseOne(
+                        'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
+                        choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
+                    )[0]
+                if openPortsSelection == 'n':
+                    opensearchOpen = False
+                    logstashOpen = False
+                    filebeatTcpOpen = False
+                elif openPortsSelection == 'y':
+                    opensearchOpen = True
+                    logstashOpen = True
+                    filebeatTcpOpen = True
+                else:
+                    openPortsSelection = 'c'
+                    opensearchOpen = (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and InstallerYesOrNo(
+                        'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
+                    )
+                    logstashOpen = InstallerYesOrNo(
+                        'Expose Logstash port to external hosts?', default=args.exposeLogstash
+                    )
+                    filebeatTcpOpen = InstallerYesOrNo(
+                        'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
+                    )
+            else:
                 opensearchOpen = False
+                openPortsSelection = 'n'
                 logstashOpen = False
                 filebeatTcpOpen = False
-            elif openPortsSelection == 'y':
-                opensearchOpen = True
-                logstashOpen = True
-                filebeatTcpOpen = True
-            else:
-                openPortsSelection = 'c'
-                opensearchOpen = (not opensearchPrimaryRemote) and InstallerYesOrNo(
-                    'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
-                )
-                logstashOpen = InstallerYesOrNo('Expose Logstash port to external hosts?', default=args.exposeLogstash)
-                filebeatTcpOpen = InstallerYesOrNo(
-                    'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
+                arkimeViewerOpen = InstallerYesOrNo(
+                    'Expose Arkime viewer to external hosts for PCAP payload retrieval?',
+                    default=args.exposeArkimeViewer,
                 )
         else:
-            opensearchOpen = not opensearchPrimaryRemote
+            opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
+            arkimeViewerOpen = malcolmProfile == PROFILE_HEDGEHOG
 
         filebeatTcpFormat = 'json'
         filebeatTcpSourceField = 'message'
@@ -981,6 +1152,7 @@ class Installer(object):
 
         sftpOpen = (
             (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and (malcolmProfile == PROFILE_MALCOLM)
             and (openPortsSelection == 'c')
             and InstallerYesOrNo('Expose SFTP server (for PCAP upload) to external hosts?', default=args.exposeSFTP)
         )
@@ -1027,7 +1199,7 @@ class Installer(object):
                             for x in allowedFilePreserveModes
                         ],
                     )
-                fileCarveHttpServer = InstallerYesOrNo(
+                fileCarveHttpServer = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                     'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
                 if fileCarveHttpServer:
@@ -1060,7 +1232,7 @@ class Installer(object):
             vtotApiKey = '0'
 
         # NetBox
-        netboxEnabled = InstallerYesOrNo(
+        netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
             'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
             default=args.netboxEnabled,
         )
@@ -1101,7 +1273,15 @@ class Installer(object):
         tweakIface = False
         pcapFilter = ''
         captureSelection = (
-            'c' if (args.pcapNetSniff or args.pcapTcpDump or args.liveZeek or args.liveSuricata) else 'unset'
+            'c'
+            if (
+                args.pcapNetSniff
+                or args.pcapTcpDump
+                or args.liveZeek
+                or args.liveSuricata
+                or (malcolmProfile == PROFILE_HEDGEHOG)
+            )
+            else 'unset'
         )
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -1119,7 +1299,7 @@ class Installer(object):
             elif captureSelection == 'c':
                 if InstallerYesOrNo(
                     'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                    default=args.pcapNetSniff or args.pcapTcpDump,
+                    default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
                 ):
                     pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
                     if not pcapNetSniff:
@@ -1148,8 +1328,21 @@ class Installer(object):
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
 
-        dashboardsDarkMode = InstallerYesOrNo(
-            'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
+        if (
+            (malcolmProfile == PROFILE_HEDGEHOG)
+            and (not pcapNetSniff)
+            and (not pcapTcpDump)
+            and (not liveZeek)
+            and (not liveSuricata)
+        ):
+            InstallerDisplayMessage(
+                f'Warning: Running with the {malcolmProfile} profile but no capture methods are enabled.',
+            )
+
+        dashboardsDarkMode = (
+            (malcolmProfile == PROFILE_MALCOLM)
+            and (opensearchPrimaryMode != DatabaseMode.ElasticsearchRemote)
+            and InstallerYesOrNo('Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode)
         )
 
         # modify values in .env files in args.configDir
@@ -1191,6 +1384,18 @@ class Installer(object):
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_LDAP_TLS_STUNNEL',
                 TrueOrFalseNoQuote(('ldap' in authMode.lower()) and ldapStartTLS),
+            ),
+            # Logstash host and port
+            EnvValue(
+                os.path.join(args.configDir, 'beats-common.env'),
+                'LOGSTASH_HOST',
+                logstashHost,
+            ),
+            # OpenSearch Dashboards URL
+            EnvValue(
+                os.path.join(args.configDir, 'dashboards.env'),
+                'DASHBOARDS_URL',
+                dashboardsUrl,
             ),
             # turn on dark mode, or not
             EnvValue(
@@ -1327,8 +1532,8 @@ class Installer(object):
             # OpenSearch primary instance is local vs. remote
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
-                'OPENSEARCH_LOCAL',
-                TrueOrFalseNoQuote(not opensearchPrimaryRemote),
+                'OPENSEARCH_PRIMARY',
+                DATABASE_MODE_LABELS[opensearchPrimaryMode],
             ),
             # OpenSearch primary instance URL
             EnvValue(
@@ -1358,7 +1563,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY',
-                TrueOrFalseNoQuote(opensearchSecondaryRemote),
+                DATABASE_MODE_LABELS[opensearchSecondaryMode],
             ),
             # OpenSearch memory allowance
             EnvValue(
@@ -1408,6 +1613,12 @@ class Installer(object):
                 'PGID',
                 pgid,
             ),
+            # Malcolm run profile (malcolm vs. hedgehog)
+            EnvValue(
+                os.path.join(args.configDir, 'process.env'),
+                PROFILE_KEY,
+                malcolmProfile,
+            ),
             # Suricata signature updates (via suricata-update)
             EnvValue(
                 os.path.join(args.configDir, 'suricata.env'),
@@ -1436,7 +1647,13 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
-                HostName,
+                pcapNodeName,
+            ),
+            # capture source "node host" for locally processed PCAP files
+            EnvValue(
+                os.path.join(args.configDir, 'upload-common.env'),
+                'PCAP_NODE_HOST',
+                pcapNodeHost,
             ),
             # zeek file extraction mode
             EnvValue(
@@ -1658,6 +1875,13 @@ class Installer(object):
                                         line,
                                         pcapDir,
                                         sectionIndents[currentSection] * 3,
+                                    )
+                                elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
+                                    # set bind IP based on whether it should be externally exposed or not
+                                    line = re.sub(
+                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
+                                        fr"\g<1>{'0.0.0.0' if arkimeViewerOpen else '127.0.0.1'}:\g<3>",
+                                        line,
                                     )
 
                             elif currentService == 'filebeat':
@@ -2846,7 +3070,7 @@ def main():
         dest='configFile',
         metavar='<string>',
         type=str,
-        default='',
+        default=os.getenv('MALCOLM_COMPOSE_FILE', ''),
         help='YAML file (docker-compose file to configure or kubeconfig file)',
     )
     configDomainArgGroup.add_argument(
@@ -2856,7 +3080,7 @@ def main():
         dest='configDir',
         metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_CONFIG_DIR', None),
         help="Directory containing Malcolm's .env files",
     )
 
@@ -2882,8 +3106,18 @@ def main():
         help='Malcolm docker images .tar.gz file for installation',
     )
 
-    authencOptionsArgGroup = parser.add_argument_group('Runtime options')
-    authencOptionsArgGroup.add_argument(
+    runtimeOptionsArgGroup = parser.add_argument_group('Runtime options')
+    runtimeOptionsArgGroup.add_argument(
+        '--malcolm-profile',
+        dest='malcolmProfile',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Run all Malcolm containers (true) vs. run capture-only containers (false)",
+    )
+    runtimeOptionsArgGroup.add_argument(
         '--dark-mode',
         dest='dashboardsDarkMode',
         type=str2bool,
@@ -3006,13 +3240,12 @@ def main():
     opensearchArgGroup = parser.add_argument_group('OpenSearch options')
     opensearchArgGroup.add_argument(
         '--opensearch',
-        dest='ownOpenSearch',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=True,
-        help="Malcolm should use and maintain its own OpenSearch instance",
+        dest='opensearchPrimaryMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal],
+        help=f'Primary OpenSearch mode ({", ".join(list(DATABASE_MODE_ENUMS.keys()))})',
     )
     opensearchArgGroup.add_argument(
         '--opensearch-memory',
@@ -3024,7 +3257,7 @@ def main():
         help='Memory for OpenSearch (e.g., 16g, 9500m, etc.)',
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-primary-url',
+        '--opensearch-url',
         dest='opensearchPrimaryUrl',
         required=False,
         metavar='<string>',
@@ -3033,7 +3266,7 @@ def main():
         help='Primary remote OpenSearch connection URL',
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-primary-ssl-verify',
+        '--opensearch-ssl-verify',
         dest='opensearchPrimarySslVerify',
         type=str2bool,
         metavar="true|false",
@@ -3053,14 +3286,13 @@ def main():
         help="Compress OpenSearch index snapshots",
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-secondary-remote',
-        dest='opensearchSecondaryRemote',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Forward Logstash logs to a secondary remote OpenSearch instance",
+        '--opensearch-secondary',
+        dest='opensearchSecondaryMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Secondary OpenSearch mode to forward Logstash logs to a remote OpenSearch instance',
     )
     opensearchArgGroup.add_argument(
         '--opensearch-secondary-url',
@@ -3081,8 +3313,17 @@ def main():
         default=False,
         help="Require SSL certificate validation for communication with secondary OpenSearch instance",
     )
+    opensearchArgGroup.add_argument(
+        '--dashboards-url',
+        dest='dashboardsUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Remote OpenSearch Dashboards connection URL',
+    )
 
-    logstashArgGroup = parser.add_argument_group('LogStash options')
+    logstashArgGroup = parser.add_argument_group('Logstash options')
     logstashArgGroup.add_argument(
         '--logstash-memory',
         dest='lsMemory',
@@ -3090,7 +3331,7 @@ def main():
         metavar='<string>',
         type=str,
         default=None,
-        help='Memory for LogStash (e.g., 4g, 2500m, etc.)',
+        help='Memory for Logstash (e.g., 4g, 2500m, etc.)',
     )
     logstashArgGroup.add_argument(
         '--logstash-workers',
@@ -3100,6 +3341,15 @@ def main():
         type=int,
         default=None,
         help='Number of Logstash workers (e.g., 4, 8, etc.)',
+    )
+    opensearchArgGroup.add_argument(
+        '--logstash-host',
+        dest='logstashHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Logstash host and port (for when running "capture-only" profile; e.g., 192.168.1.123:5044)',
     )
 
     openPortsArgGroup = parser.add_argument_group('Expose ports')
@@ -3132,6 +3382,16 @@ def main():
         const=True,
         default=False,
         help="Expose Filebeat TCP port to external hosts",
+    )
+    openPortsArgGroup.add_argument(
+        '--arkime-viewer-expose',
+        dest='exposeArkimeViewer',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Expose Arkime viewer to external hosts for PCAP payload retrieval",
     )
     openPortsArgGroup.add_argument(
         '--sftp-expose',
@@ -3327,7 +3587,7 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default=None,
+        default='',
         help='AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
     )
     fileCarveArgGroup.add_argument(
@@ -3489,6 +3749,24 @@ def main():
         const=True,
         default=False,
         help="Capture live network traffic with Suricata",
+    )
+    captureArgGroup.add_argument(
+        '--node-name',
+        dest='pcapNodeName',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default=os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0],
+        help='The node name to associate with network traffic metadata',
+    )
+    captureArgGroup.add_argument(
+        '--node-host',
+        dest='pcapNodeHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='The node hostname or IP address to associate with network traffic metadata',
     )
 
     try:

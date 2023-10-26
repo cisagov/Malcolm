@@ -25,7 +25,7 @@ ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
 ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
 ARG OPENSEARCH_URL="http://opensearch:9200"
-ARG OPENSEARCH_LOCAL=true
+ARG OPENSEARCH_PRIMARY="opensearch-local"
 ARG ISM_SNAPSHOT_COMPRESSED=false
 ARG ISM_SNAPSHOT_REPO=logs
 ARG OFFLINE_REGION_MAPS_PORT="28991"
@@ -38,7 +38,7 @@ ENV ARKIME_INDEX_PATTERN_ID $ARKIME_INDEX_PATTERN_ID
 ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
 ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
 ENV OPENSEARCH_URL $OPENSEARCH_URL
-ENV OPENSEARCH_LOCAL $OPENSEARCH_LOCAL
+ENV OPENSEARCH_PRIMARY $OPENSEARCH_PRIMARY
 ENV ISM_SNAPSHOT_COMPRESSED $ISM_SNAPSHOT_COMPRESSED
 ENV ISM_SNAPSHOT_REPO $ISM_SNAPSHOT_REPO
 ENV OFFLINE_REGION_MAPS_PORT $OFFLINE_REGION_MAPS_PORT
@@ -47,10 +47,10 @@ ENV DASHBOARDS_URL $DASHBOARDS_URL
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.2.26"
+ENV SUPERCRONIC_VERSION "0.2.27"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7a79496cf8ad899b99a719355d4db27422396735"
+ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
@@ -89,13 +89,14 @@ RUN apk update --no-cache && \
       cd /opt && \
       curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
       mv /opt/ecs/generated/elasticsearch /opt/ecs-templates && \
-      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
-      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"constant_keyword"/\1"keyword"/' "{}" \; && \
-      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
-      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
-      find /opt/ecs-templates -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
+      rsync -av /opt/ecs-templates/ /opt/ecs-templates-os/ && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"constant_keyword"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
       rm -rf /opt/ecs && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/maps /data/init /opt/anomaly_detectors && \
+    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/ecs-templates-os /opt/maps /data/init /opt/anomaly_detectors && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index 'malcolm_beats_*' --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})

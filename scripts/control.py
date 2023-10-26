@@ -46,6 +46,9 @@ from malcolm_common import (
     PLATFORM_WINDOWS,
     posInt,
     ProcessLogLine,
+    PROFILE_HEDGEHOG,
+    PROFILE_KEY,
+    PROFILE_MALCOLM,
     ScriptPath,
     UserInputDefaultsBehavior,
     YAMLDynamic,
@@ -184,7 +187,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
     uidGidDict = GetUidGidFromEnv(args.configDir)
 
-    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+    if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
         dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
@@ -227,7 +230,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
 
                 # determine if Malcolm is running; if so, we'll use docker-compose exec, other wise we'll use docker run
                 err, out = run_process(
-                    [dockerComposeBin, '-f', args.composeFile, 'ps', '-q', service], env=osEnv, debug=args.debug
+                    [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q', service],
+                    env=osEnv,
+                    debug=args.debug,
                 )
                 out[:] = [x for x in out if x]
                 if (err == 0) and (len(out) > 0):
@@ -236,6 +241,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     # assemble the service-keystore command
                     dockerCmd = [
                         dockerComposeBin,
+                        '--profile',
+                        args.composeProfile,
                         '-f',
                         args.composeFile,
                         'exec',
@@ -373,8 +380,14 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 dbgStr = f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
                 eprint(dbgStr)
 
+    elif args.composeProfile == PROFILE_HEDGEHOG:
+        # keystore operation doesn't mean anything in hedgehog mode, just return "Ok"
+        err = 0
+
     else:
-        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+        raise Exception(
+            f'{sys._getframe().f_code.co_name} does not yet support {orchMode} with profile {args.composeProfile}'
+        )
 
     return (err == 0), results
 
@@ -391,7 +404,9 @@ def status():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         err, out = run_process(
-            [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
+                : 7 if args.service is not None else -1
+            ],
             env=osEnv,
             debug=args.debug,
         )
@@ -459,13 +474,15 @@ def netboxBackup(backupFileName=None):
 
     uidGidDict = GetUidGidFromEnv(args.configDir)
 
-    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+    if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         dockerCmd = [
             dockerComposeBin,
+            '--profile',
+            args.composeProfile,
             '-f',
             args.composeFile,
             'exec',
@@ -530,7 +547,9 @@ def netboxBackup(backupFileName=None):
         backupMediaFileName = None
 
     else:
-        raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+        raise Exception(
+            f'{sys._getframe().f_code.co_name} does not yet support {orchMode} with profile {args.composeProfile}'
+        )
 
     return backupFileName, backupMediaFileName
 
@@ -544,13 +563,15 @@ def netboxRestore(backupFileName=None):
     if backupFileName and os.path.isfile(backupFileName):
         uidGidDict = GetUidGidFromEnv(args.configDir)
 
-        if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
             # docker-compose use local temporary path
             osEnv = os.environ.copy()
             osEnv['TMPDIR'] = MalcolmTmpPath
 
             dockerCmdBase = [
                 dockerComposeBin,
+                '--profile',
+                args.composeProfile,
                 '-f',
                 args.composeFile,
                 'exec',
@@ -682,7 +703,9 @@ def netboxRestore(backupFileName=None):
             # TODO: can't restore netbox/media directory via kubernetes at the moment
 
         else:
-            raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
+            raise Exception(
+                f'{sys._getframe().f_code.co_name} does not yet support {orchMode} with profile {args.composeProfile}'
+            )
 
 
 ###################################################################################################
@@ -704,7 +727,9 @@ def logs():
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
 
         err, out = run_process(
-            [dockerComposeBin, '-f', args.composeFile, 'ps', args.service][: 5 if args.service is not None else -1],
+            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
+                : 7 if args.service is not None else -1
+            ],
             env=osEnv,
             debug=args.debug,
         )
@@ -712,6 +737,8 @@ def logs():
 
         cmd = [
             dockerComposeBin,
+            '--profile',
+            args.composeProfile,
             '-f',
             args.composeFile,
             'logs',
@@ -719,7 +746,7 @@ def logs():
             str(args.logLineCount) if args.logLineCount else 'all',
             '-f',
             args.service,
-        ][: 8 if args.service else -1]
+        ][: 10 if args.service else -1]
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if which("stern"):
@@ -805,7 +832,9 @@ def stop(wipe=False):
         # if stop.sh is being called with wipe.sh (after the docker-compose file)
         # then also remove named and anonymous volumes (not external volumes, of course)
         err, out = run_process(
-            [dockerComposeBin, '-f', args.composeFile, 'down', '--volumes'][: 5 if wipe else -1],
+            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'down', '--volumes'][
+                : 7 if wipe else -1
+            ],
             env=osEnv,
             debug=args.debug,
         )
@@ -1032,7 +1061,9 @@ def start():
 
         # start docker
         err, out = run_process(
-            [dockerComposeBin, '-f', args.composeFile, 'up', '--detach'], env=osEnv, debug=args.debug
+            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'up', '--detach'],
+            env=osEnv,
+            debug=args.debug,
         )
         if err != 0:
             eprint("Malcolm failed to start\n")
@@ -1043,11 +1074,13 @@ def start():
         if CheckPersistentStorageDefs(
             namespace=args.namespace,
             malcolmPath=MalcolmPath,
+            profile=args.composeProfile,
         ):
             startResults = StartMalcolm(
                 namespace=args.namespace,
                 malcolmPath=MalcolmPath,
                 configPath=args.configDir,
+                profile=args.composeProfile,
             )
 
             if dictsearch(startResults, 'error'):
@@ -1136,13 +1169,13 @@ def authSetup():
         ),
         (
             'remoteos',
-            "Configure remote primary or secondary OpenSearch instance",
+            "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
             False,
             False,
         ),
         (
             'email',
-            "Store username/password for email alert sender account",
+            "Store username/password for OpenSearch Alerting email sender account",
             False,
             False,
         ),
@@ -1158,12 +1191,18 @@ def authSetup():
             or (args.cmdAuthSetupNonInteractive and args.authGenNetBoxPasswords),
         ),
         (
+            'arkime',
+            "Store password hash secret for Arkime viewer cluster",
+            False,
+            False,
+        ),
+        (
             'txfwcerts',
             "Transfer self-signed client certificates to a remote log forwarder",
             False,
             False,
         ),
-    )[: 8 if txRxScript else -1]
+    )[: 9 if txRxScript else -1]
 
     authMode = (
         ChooseOne(
@@ -1276,8 +1315,9 @@ def authSetup():
                     (usernamePrevious is not None) and (usernamePrevious != username)
                 ) or args.cmdAuthSetupNonInteractive:
                     htpasswdLines = list()
-                    with open(htpasswdFile, 'r') as f:
-                        htpasswdLines = f.readlines()
+                    if os.path.isfile(htpasswdFile):
+                        with open(htpasswdFile, 'r') as f:
+                            htpasswdLines = f.readlines()
                     with open(htpasswdFile, 'w') as f:
                         if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
                             f.write(f'{username}:{args.authPasswordHtpasswd}')
@@ -1600,7 +1640,7 @@ def authSetup():
                 for instance in ['primary', 'secondary']:
                     openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
                     if YesOrNo(
-                        f'Store username/password for {instance} remote OpenSearch instance?',
+                        f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
                         default=False,
                         defaultBehavior=defaultBehavior,
                     ):
@@ -1611,10 +1651,12 @@ def authSetup():
                         esPassword = None
                         esPasswordConfirm = None
 
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch username')
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
+                        )
                         while loopBreaker.increment():
                             esUsername = AskForString(
-                                "OpenSearch username",
+                                "OpenSearch/Elasticsearch username",
                                 default=prevCurlContents['user'],
                                 defaultBehavior=defaultBehavior,
                             )
@@ -1622,7 +1664,9 @@ def authSetup():
                                 break
                             eprint("Username is blank (or contains a colon, which is not allowed)")
 
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch password')
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
+                        )
                         while loopBreaker.increment():
                             esPassword = AskForPassword(
                                 f"{esUsername} password: ",
@@ -1651,8 +1695,8 @@ def authSetup():
                             eprint("Passwords do not match")
 
                         esSslVerify = YesOrNo(
-                            'Require SSL certificate validation for OpenSearch communication?',
-                            default=(not (('k' in prevCurlContents) or ('insecure' in prevCurlContents))),
+                            'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
+                            default=False,
                             defaultBehavior=defaultBehavior,
                         )
 
@@ -1801,6 +1845,49 @@ def authSetup():
 
                     os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
 
+            elif authItem[0] == 'arkime':
+                # prompt password
+                arkimePassword = None
+                arkimePasswordConfirm = None
+
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password hash secret')
+                while loopBreaker.increment():
+                    arkimePassword = AskForPassword(
+                        f"Arkime password hash secret: ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    arkimePasswordConfirm = AskForPassword(
+                        f"Arkime password hash secret (again): ",
+                        default='',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if arkimePassword and (arkimePassword == arkimePasswordConfirm):
+                        break
+                    eprint("Passwords do not match")
+
+                if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
+                    arkimePassword = args.authArkimePassword
+
+                with pushd(args.configDir):
+                    if (not os.path.isfile('arkime-secret.env')) and (os.path.isfile('arkime-secret.env.example')):
+                        shutil.copy2('arkime-secret.env.example', 'arkime-secret.env')
+
+                    with fileinput.FileInput('arkime-secret.env', inplace=True, backup=None) as envFile:
+                        for line in envFile:
+                            line = line.rstrip("\n")
+
+                            if arkimePassword and line.startswith('ARKIME_PASSWORD_SECRET'):
+                                line = re.sub(
+                                    r'(ARKIME_PASSWORD_SECRET\s*=\s*)(\S+)',
+                                    fr"\g<1>{arkimePassword}",
+                                    line,
+                                )
+
+                            print(line)
+
+                    os.chmod('arkime-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+
             elif authItem[0] == 'txfwcerts':
                 DisplayMessage(
                     'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
@@ -1883,6 +1970,16 @@ def main():
         default=os.getenv('MALCOLM_CONFIG_DIR', None),
         help="Directory containing Malcolm's .env files",
     )
+    parser.add_argument(
+        '-p',
+        '--profile',
+        required=False,
+        dest='composeProfile',
+        metavar='<string>',
+        type=str,
+        default=None,
+        help='docker-compose profile to enable',
+    )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -1930,7 +2027,7 @@ def main():
         dest='namespace',
         metavar='<string>',
         type=str,
-        default='malcolm',
+        default=os.getenv('MALCOLM_NAMESPACE', 'malcolm'),
         help="Kubernetes namespace",
     )
     kubernetesGroup.add_argument(
@@ -1992,6 +2089,15 @@ def main():
         type=str,
         default='',
         help='Administrator password hash from "htpasswd -n -B username | cut -d: -f2" (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-arkime-password',
+        dest='authArkimePassword',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='Malcolm',
+        help='Password hash secret for Arkime viewer cluster (for --auth-noninteractive)',
     )
     authSetupGroup.add_argument(
         '--auth-generate-webcerts',
@@ -2180,7 +2286,11 @@ def main():
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
-            err, out = run_process([dockerComposeBin, '-f', args.composeFile, 'version'], env=osEnv, debug=args.debug)
+            err, out = run_process(
+                [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
+                env=osEnv,
+                debug=args.debug,
+            )
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
 
@@ -2198,6 +2308,26 @@ def main():
                 raise Exception(
                     f'{ScriptName} requires the official Python client library for kubernetes for {orchMode} mode'
                 )
+
+        # identify running profile
+        runProfileSrc = ''
+        if not args.composeProfile:
+            profileEnvFile = os.path.join(args.configDir, 'process.env')
+            try:
+                if os.path.isfile(profileEnvFile):
+                    args.composeProfile = dotenvImported.get_key(profileEnvFile, PROFILE_KEY)
+                    runProfileSrc = os.path.basename(profileEnvFile)
+                elif args.debug:
+                    runProfileSrc = 'process.env not found'
+            except Exception as e:
+                runProfileSrc = f'exception ({e})'
+        elif args.debug:
+            runProfileSrc = 'specified'
+        if not args.composeProfile:
+            args.composeProfile = PROFILE_MALCOLM
+            runProfileSrc = 'default'
+        if args.debug:
+            eprint(f"Run profile ({runProfileSrc}): {args.composeProfile}")
 
         # identify openssl binary
         opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('openssl.exe')) else 'openssl'
