@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:v23.10.0
+        image: ghcr.io/idaholab/malcolm/dashboards:23.10.0
         imagePullPolicy: Always
         stdin: false
         tty: true
