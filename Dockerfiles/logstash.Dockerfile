@@ -63,11 +63,12 @@ RUN set -x && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
-    echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \
