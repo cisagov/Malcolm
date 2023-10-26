@@ -2,5 +2,5 @@
   vrf: Private IP Space (10.0.0.0/8)
 - prefix: 172.16.0.0/12
   vrf: Private IP Space (172.16.0.0/12)
-- prefix: 10.0.0.0/8
+- prefix: 192.168.0.0/16
   vrf: Private IP Space (192.168.0.0/16)
