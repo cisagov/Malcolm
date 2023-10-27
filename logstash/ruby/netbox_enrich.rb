@@ -236,6 +236,7 @@ def filter(event)
 
     # make sure the connection to the NetBox API exists and wasn't flagged for reconnect
     if @netbox_conn.nil? || @netbox_conn_needs_reset
+      @netbox_conn_lock.release_read_lock
       @netbox_conn_lock.acquire_write_lock
       begin
         if @netbox_conn.nil? || @netbox_conn_needs_reset
@@ -254,6 +255,7 @@ def filter(event)
         end # connection check in write lock
       ensure
         @netbox_conn_lock.release_write_lock
+        @netbox_conn_lock.acquire_read_lock
       end
     end # connection check in read lock
 
@@ -723,6 +725,7 @@ def filter(event)
     end # check if device was created and has ID
 
     if _exception_error_connection && !@netbox_conn_resetting
+      @netbox_conn_lock.release_read_lock
       @netbox_conn_lock.acquire_write_lock
       begin
         if !@netbox_conn_resetting
@@ -730,6 +733,7 @@ def filter(event)
         end
       ensure
         @netbox_conn_lock.release_write_lock
+        @netbox_conn_lock.acquire_read_lock
       end
     end
   ensure
