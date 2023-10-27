@@ -66,7 +66,7 @@ RUN set -x && \
     echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'lru_redux'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
