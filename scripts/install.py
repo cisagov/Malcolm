@@ -1288,41 +1288,38 @@ class Installer(object):
             else 'unset'
         )
 
-        if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            captureOptions = ('no', 'yes', 'customize')
-            loopBreaker = CountUntilException(MaxAskForValueCount)
-            while captureSelection not in [x[0] for x in captureOptions] and loopBreaker.increment():
-                captureSelection = InstallerChooseOne(
-                    'Should Malcolm capture live network traffic?',
-                    choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
-                )[0]
-            if captureSelection == 'y':
-                pcapNetSniff = True
-                liveSuricata = True
-                liveZeek = True
-            elif captureSelection == 'c':
-                if InstallerYesOrNo(
-                    'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                    default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
-                ):
-                    pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
-                    if not pcapNetSniff:
-                        pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
-                liveSuricata = InstallerYesOrNo(
-                    'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
+        captureOptions = ('no', 'yes', 'customize')
+        loopBreaker = CountUntilException(MaxAskForValueCount)
+        while captureSelection not in [x[0] for x in captureOptions] and loopBreaker.increment():
+            captureSelection = InstallerChooseOne(
+                'Should Malcolm capture live network traffic?',
+                choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
+            )[0]
+        if captureSelection == 'y':
+            pcapNetSniff = True
+            liveSuricata = True
+            liveZeek = True
+        elif captureSelection == 'c':
+            if InstallerYesOrNo(
+                'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
+                default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
+            ):
+                pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
+                if not pcapNetSniff:
+                    pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+            liveSuricata = InstallerYesOrNo(
+                'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
+            )
+            liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek)
+            if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+                pcapFilter = InstallerAskForString(
+                    'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
+                    default=args.pcapFilter,
                 )
-                liveZeek = InstallerYesOrNo(
-                    'Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek
+                tweakIface = InstallerYesOrNo(
+                    'Disable capture interface hardware offloading and adjust ring buffer sizes?',
+                    default=args.tweakIface,
                 )
-                if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
-                    pcapFilter = InstallerAskForString(
-                        'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
-                        default=args.pcapFilter,
-                    )
-                    tweakIface = InstallerYesOrNo(
-                        'Disable capture interface hardware offloading and adjust ring buffer sizes?',
-                        default=args.tweakIface,
-                    )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
