@@ -231,11 +231,13 @@ def filter(event)
   _exception_error_general = false
   _exception_error_connection = false
 
-  @netbox_conn_lock.with_read_lock {
+  @netbox_conn_lock.acquire_read_lock
+  begin
 
     # make sure the connection to the NetBox API exists and wasn't flagged for reconnect
     if @netbox_conn.nil? || @netbox_conn_needs_reset
-      @netbox_conn_lock.with_write_lock {
+      @netbox_conn_lock.acquire_write_lock
+      begin
         if @netbox_conn.nil? || @netbox_conn_needs_reset
           begin
             # we need to reconnect to the NetBox API
@@ -250,7 +252,9 @@ def filter(event)
             @netbox_conn_needs_reset = @netbox_conn.nil?
           end
         end # connection check in write lock
-      } # @netbox_conn_lock.with_write_lock
+      ensure
+        @netbox_conn_lock.release_write_lock
+      end
     end # connection check in read lock
 
     # handle :ip_device first, because if we're doing autopopulate we're also going to use
@@ -719,13 +723,18 @@ def filter(event)
     end # check if device was created and has ID
 
     if _exception_error_connection && !@netbox_conn_resetting
-      @netbox_conn_lock.with_write_lock {
+      @netbox_conn_lock.acquire_write_lock
+      begin
         if !@netbox_conn_resetting
           @netbox_conn_needs_reset = true
         end
-      }
+      ensure
+        @netbox_conn_lock.release_write_lock
+      end
     end
-  } # @netbox_conn_lock.with_read_lock
+  ensure
+    @netbox_conn_lock.release_read_lock
+  end
 
   if !_result.nil? && _result.has_key?(:url) && !_result[:url]&.empty?
     _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
