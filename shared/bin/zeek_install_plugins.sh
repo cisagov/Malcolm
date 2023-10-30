@@ -74,7 +74,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-genisys"
-  "https://github.com/cisagov/icsnpp-modbus"
+  "https://github.com/mmguero-dev/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-s7comm"
   "https://github.com/cisagov/icsnpp-synchrophasor"
