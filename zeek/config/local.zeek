@@ -20,6 +20,7 @@ global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == "") ? F : T;
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == "") ? F : T;
 global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == "") ? F : T;
 global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == "") ? F : T;
+global disable_spicy_quic = (getenv("ZEEK_DISABLE_SPICY_QUIC") == "") ? F : T;
 global disable_spicy_stun = (getenv("ZEEK_DISABLE_SPICY_STUN") == "") ? F : T;
 global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == "") ? F : T;
 global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == "") ? F : T;
@@ -141,7 +142,8 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_IPSEC_IKE_UDP);
   }
   if (disable_spicy_ldap) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_LDAP_TCP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_LDAP_TCP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_LDAP_UDP);
   }
   if (disable_spicy_openvpn) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_TCP);
@@ -154,6 +156,9 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA1);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA256);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA512);
+  }
+  if (disable_spicy_quic) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_QUIC);
   }
   if (disable_spicy_stun) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_STUN);
