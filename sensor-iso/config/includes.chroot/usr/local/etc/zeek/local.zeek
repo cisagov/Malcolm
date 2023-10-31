@@ -109,7 +109,7 @@ event zeek_init() &priority=-5 {
     PacketAnalyzer::__disable_analyzer(PacketAnalyzer::ANALYZER_ETHERCAT);
   }
   if (disable_ics_all || disable_ics_genisys) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GENISYS_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_GENISYS_TCP);
   }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
@@ -124,8 +124,8 @@ event zeek_init() &priority=-5 {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
   }
   if (disable_ics_all || disable_ics_synchrophasor) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP);
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_UDP);
   }
   if (disable_spicy_dhcp) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
