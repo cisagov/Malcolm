@@ -20,7 +20,7 @@ def register(params)
   @source = params["source"]
 
   # lookup type
-  #   valid values are: ip_device, ip_vrf
+  #   valid values are: ip_device, ip_prefix
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
   # site value to include in queries for enrichment lookups, either specified directly or read from ENV
@@ -257,12 +257,12 @@ def filter(event)
               _autopopulate_ip = nil
               _autopopulate_manuf = nil
               _autopopulate_site = nil
-              _vrfs = nil
+              _prefixes = nil
               _devices = nil
               _exception_error = false
 
               # handle :ip_device first, because if we're doing autopopulate we're also going to use
-              # some of the logic from :ip_vrf
+              # some of the logic from :ip_prefix
 
               if (_lookup_type == :ip_device)
               #################################################################################
@@ -630,13 +630,13 @@ def filter(event)
                 _lookup_result = _devices
               end # _lookup_type == :ip_device
 
-              # this || is because we are going to need to do the VRF lookup if we're autopopulating
+              # this || is because we are going to need to do the prefix lookup if we're autopopulating
               # as well as if we're specifically requested to do that enrichment
 
-              if (_lookup_type == :ip_vrf) || !_autopopulate_device.nil?
+              if (_lookup_type == :ip_prefix) || !_autopopulate_device.nil?
               #################################################################################
-                # retrieve the list VRFs containing IP address prefixes containing the search key
-                _vrfs = Array.new
+                # retrieve the list of IP address prefixes containing the search key
+                _prefixes = Array.new
                 _query = { :contains => _key,
                            :offset => 0,
                            :limit => _page_size }
@@ -648,16 +648,14 @@ def filter(event)
                     then
                       _tmp_prefixes = _prefixes_response.fetch(:results, [])
                       _tmp_prefixes.each do |p|
-                        if (_vrf = p.fetch(:vrf, nil))
-                          # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
-                          # if _verbose, include entire object as :details
-                          _vrfs << { :name => _vrf.fetch(:name, _vrf.fetch(:display, nil)),
-                                     :id => _vrf.fetch(:id, nil),
-                                     :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
-                                     :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
-                                     :url => p.fetch(:url, _vrf.fetch(:url, nil)),
-                                     :details => _verbose ? _vrf.merge({:prefix => p.tap { |h| h.delete(:vrf) }}) : nil }
-                        end
+                        # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
+                        # if _verbose, include entire object as :details
+                        _prefixes << { :name => p.fetch(:description, p.fetch(:display, nil)),
+                                       :id => p.fetch(:id, nil),
+                                       :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                       :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
+                                       :url => p.fetch(:url, p.fetch(:url, nil)),
+                                       :details => _verbose ? p : nil }
                       end
                       _query[:offset] += _tmp_prefixes.length()
                       break unless (_tmp_prefixes.length() >= _page_size)
@@ -669,9 +667,9 @@ def filter(event)
                   # give up aka do nothing
                   _exception_error = true
                 end
-                _vrfs = collect_values(crush(_vrfs))
-                _lookup_result = _vrfs unless (_lookup_type != :ip_vrf)
-              end # _lookup_type == :ip_vrf
+                _prefixes = collect_values(crush(_prefixes))
+                _lookup_result = _prefixes unless (_lookup_type != :ip_prefix)
+              end # _lookup_type == :ip_prefix
 
               if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero?
                 # device has been created, we need to create an interface for it
@@ -680,9 +678,6 @@ def filter(event)
                                     :type => "other" }
                 if !_autopopulate_mac.nil? && !_autopopulate_mac.empty?
                   _interface_data[:mac_address] = _autopopulate_mac.is_a?(Array) ? _autopopulate_mac.first : _autopopulate_mac
-                end
-                if !_vrfs.nil? && !_vrfs.empty?
-                  _interface_data[:vrf] = _vrfs.fetch(:id, []).first
                 end
                 if (_interface_create_reponse = _nb.post(_autopopulate_manuf[:vm] ? 'virtualization/interfaces/' : 'dcim/interfaces/', _interface_data.to_json, _nb_headers).body) &&
                    _interface_create_reponse.is_a?(Hash) &&
@@ -697,11 +692,6 @@ def filter(event)
                                :assigned_object_type => _autopopulate_manuf[:vm] ? "virtualization.vminterface" : "dcim.interface",
                                :assigned_object_id => _autopopulate_interface[:id],
                                :status => "active" }
-                  if (_vrf = _autopopulate_interface.fetch(:vrf, nil)) &&
-                     (_vrf.has_key?(:id))
-                  then
-                    _ip_data[:vrf] = _vrf[:id]
-                  end
                   if (_ip_create_reponse = _nb.post('ipam/ip-addresses/', _ip_data.to_json, _nb_headers).body) &&
                      _ip_create_reponse.is_a?(Hash) &&
                      _ip_create_reponse.has_key?(:id)

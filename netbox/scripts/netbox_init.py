@@ -249,7 +249,7 @@ def main():
         nargs='?',
         const=True,
         default=malcolm_utils.str2bool(os.getenv('NETBOX_PRELOAD_PREFIXES', default='False')),
-        help="Preload IPAM VRFs/IP Prefixes for private IP space",
+        help="Preload IPAM IP Prefixes for private IP space",
     )
     try:
         parser.error = parser.exit
@@ -277,7 +277,6 @@ def main():
     sites = {}
     groups = {}
     permissions = {}
-    vrfs = {}
     prefixes = {}
     devices = {}
     interfaces = {}
@@ -481,33 +480,7 @@ def main():
             with open(args.netMapFileName) as f:
                 netMapJson = json.load(f)
         if netMapJson is not None:
-            # create new VRFs
-            vrfPreExisting = {x.name: x for x in nb.ipam.vrfs.all()}
-            logging.debug(f"VRFs (before): { {k:v.id for k, v in vrfPreExisting.items()} }")
-
-            for segment in [
-                x
-                for x in get_iterable(netMapJson)
-                if isinstance(x, dict)
-                and (x.get('type', '') == "segment")
-                and x.get('name', None)
-                and is_ip_network(x.get('address', None))
-                and x['name'] not in vrfPreExisting
-            ]:
-                try:
-                    nb.ipam.vrfs.create(
-                        {
-                            "name": segment['name'],
-                            "enforce_unique": True,
-                        },
-                    )
-                except pynetbox.RequestError as nbe:
-                    logging.warning(f"{type(nbe).__name__} processing VRF \"{segment['name']}\": {nbe}")
-
-            vrfs = {x.name: x for x in nb.ipam.vrfs.all()}
-            logging.debug(f"VRFs (after): { {k:v.id for k, v in vrfs.items()} }")
-
-            # create prefixes in VRFs
+            # create IP prefixes
 
             prefixesPreExisting = {x.prefix: x for x in nb.ipam.prefixes.all()}
             logging.debug(f"prefixes (before): { {k:v.id for k, v in prefixesPreExisting.items()} }")
@@ -519,7 +492,6 @@ def main():
                 and (x.get('type', '') == "segment")
                 and x.get('name', None)
                 and is_ip_network(x.get('address', None))
-                and x['name'] in vrfs
             ]:
                 try:
                     site = min_hash_value_by_value(sites)
@@ -527,7 +499,7 @@ def main():
                         {
                             "prefix": segment['address'],
                             "site": site.id if site else None,
-                            "vrf": vrfs[segment['name']].id,
+                            "description": segment['name'],
                         },
                     )
                 except pynetbox.RequestError as nbe:
@@ -566,19 +538,11 @@ def main():
                     if deviceCreated is not None:
                         # create interface for the device
                         if is_ip_address(host['address']):
-                            hostVrf = max_hash_value_by_key(
-                                {
-                                    ipaddress.ip_network(k): v
-                                    for k, v in prefixes.items()
-                                    if ipaddress.ip_address(host['address']) in ipaddress.ip_network(k)
-                                }
-                            )
                             nb.dcim.interfaces.create(
                                 {
                                     "device": deviceCreated.id,
                                     "name": "default",
                                     "type": "other",
-                                    "vrf": hostVrf.id if hostVrf else None,
                                 },
                             )
                         elif re.match(r'^([0-9a-f]{2}[:-]){5}([0-9a-f]{2})$', host['address'].lower()):
@@ -600,7 +564,7 @@ def main():
             logging.debug(f"interfaces (after): { {k:v.id for k, v in interfaces.items()} }")
 
             # and associate IP addresses with them
-            ipAddressesPreExisting = {f"{x.address}:{x.vrf.id if x.vrf else ''}": x for x in nb.ipam.ip_addresses.all()}
+            ipAddressesPreExisting = {x.address: x for x in nb.ipam.ip_addresses.all()}
             logging.debug(f"IP addresses (before): { {k:v.id for k, v in ipAddressesPreExisting.items()} }")
 
             for host in [
@@ -613,19 +577,11 @@ def main():
                 and x['name'] in devices
             ]:
                 try:
-                    hostVrf = max_hash_value_by_key(
-                        {
-                            ipaddress.ip_network(k): v
-                            for k, v in prefixes.items()
-                            if ipaddress.ip_address(host['address']) in ipaddress.ip_network(k)
-                        }
-                    )
-                    hostKey = f"{host['address']}/{'32' if is_ip_v4_address(host['address']) else '128'}:{hostVrf.id if hostVrf else ''}"
+                    hostKey = f"{host['address']}/{'32' if is_ip_v4_address(host['address']) else '128'}"
                     if hostKey not in ipAddressesPreExisting:
                         ipCreated = nb.ipam.ip_addresses.create(
                             {
                                 "address": host['address'],
-                                "vrf": hostVrf.id if hostVrf else None,
                                 "assigned_object_type": "dcim.interface",
                                 "assigned_object_id": interfaces[devices[host['name']].id].id,
                             },
@@ -643,7 +599,7 @@ def main():
                 except pynetbox.RequestError as nbe:
                     logging.warning(f"{type(nbe).__name__} processing address \"{host['address']}\": {nbe}")
 
-            ipAddresses = {f"{x.address}:{x.vrf}": x for x in nb.ipam.ip_addresses.all()}
+            ipAddresses = {x.address: x for x in nb.ipam.ip_addresses.all()}
             logging.debug(f"IP addresses (after): { {k:v.id for k, v in ipAddresses.items()} }")
 
     except Exception as e:
@@ -659,7 +615,7 @@ def main():
                 with tempfile.TemporaryDirectory() as tmpPreloadDir:
                     copy_tree(args.preloadDir, tmpPreloadDir)
 
-                    # only preload catch-all VRFs and IP Prefixes if explicitly specified and they don't already exist
+                    # only preload catch-all IP Prefixes if explicitly specified and they don't already exist
                     if args.preloadPrefixes:
                         for loadType in ('vrfs', 'prefixes'):
                             defaultFileName = os.path.join(tmpPreloadDir, f'{loadType}_defaults.yml')

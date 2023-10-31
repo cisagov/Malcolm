@@ -3685,7 +3685,7 @@ def main():
         nargs='?',
         const=True,
         default=False,
-        help="Preload NetBox IPAM VRFs/IP Prefixes for private IP space",
+        help="Preload NetBox IPAM IP Prefixes for private IP space",
     )
     netboxArgGroup.add_argument(
         '--netbox-site-name',

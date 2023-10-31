@@ -1,6 +1,0 @@
-- enforce_unique: true
-  name: 10.0.0.0/8
-- enforce_unique: true
-  name: 172.16.0.0/12
-- enforce_unique: true
-  name: 192.168.0.0/16
