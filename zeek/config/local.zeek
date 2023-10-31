@@ -142,8 +142,8 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_IPSEC_IKE_UDP);
   }
   if (disable_spicy_ldap) {
-    Analyzer::disable_analyzer(Analyzer::ANALYZER_LDAP_TCP);
-    Analyzer::disable_analyzer(Analyzer::ANALYZER_LDAP_UDP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_LDAP_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_LDAP_UDP);
   }
   if (disable_spicy_openvpn) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_TCP);
