@@ -31,7 +31,7 @@ You can now run Docker from the Applications folder.
 $ brew install docker-compose
 ```
 
-This will install the latest version of the `docker-compose` plugin. It can be upgraded later using [`brew`] as well:
+This will install the latest version of the Docker Compose plugin. It can be upgraded later using [`brew`] as well:
 
 ```
 $ brew upgrade --no-quarantine docker-compose
