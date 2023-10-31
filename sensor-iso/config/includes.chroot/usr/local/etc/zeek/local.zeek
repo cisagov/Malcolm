@@ -190,10 +190,10 @@ event zeek_init() &priority=-5 {
         }
       }
       if (|synch_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP, synch_ports_tcp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_TCP, synch_ports_tcp);
       }
       if (|synch_ports_udp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP, synch_ports_udp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_UDP, synch_ports_udp);
       }
     }
   }
@@ -209,7 +209,7 @@ event zeek_init() &priority=-5 {
         }
       }
       if (|gen_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_GENISYS_TCP, gen_ports_tcp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_GENISYS_TCP, gen_ports_tcp);
       }
     }
   }
