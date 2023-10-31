@@ -26,9 +26,9 @@ You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's D
     
 ### Pull Malcolm's Docker images
 
-Malcolm's Docker images are periodically built and hosted on [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker-compose pull` like this:
+Malcolm's Docker images are periodically built and hosted on [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker compose --profile malcolm pull` like this:
 ```
-$ docker-compose pull
+$ docker compose --profile malcolm pull
 Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done

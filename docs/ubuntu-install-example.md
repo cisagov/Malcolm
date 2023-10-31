@@ -47,10 +47,10 @@ Enter user account: user
 
 Add another non-root user to the "docker" group?: n
 
-"docker-compose version" failed, attempt to install docker-compose? (Y / n): y
+"docker compose version" failed, attempt to install docker compose? (Y / n): y
 
-Install docker-compose directly from docker github? (Y / n): y
-Download and installation of docker-compose apparently succeeded
+Install docker compose directly from docker github? (Y / n): y
+Download and installation of docker compose apparently succeeded
 
 fs.file-max increases allowed maximum for file handles
 fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
@@ -227,7 +227,7 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
-user@host:~/Malcolm$ docker-compose pull
+user@host:~/Malcolm$ docker compose pull
 Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done

@@ -71,7 +71,7 @@ The contents of `nginx_ldap.conf` will vary depending on how the LDAP server is 
 * **`group_attribute_is_dn`** - whether or not to search for the user's full distinguished name as the value in the group's member attribute
 * **`require`** and **`satisfy`** - `require user`, `require group` and `require valid_user` can be used in conjunction with `satisfy any` or `satisfy all` to limit the users that are allowed to access the Malcolm instance
 
-Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker-compose logs nginx`) and examining the output of the `nginx` container.
+Before starting Malcolm, edit `nginx/nginx_ldap.conf` according to the specifics of your LDAP server and directory tree structure. Using a LDAP search tool such as [`ldapsearch`](https://www.openldap.org/software/man.cgi?query=ldapsearch) in Linux or [`dsquery`](https://social.technet.microsoft.com/wiki/contents/articles/2195.active-directory-dsquery-commands.aspx) in Windows may be of help as you formulate the configuration. Your changes should be made within the curly braces of the `ldap_server ad_server { … }` section. You can troubleshoot configuration file syntax errors and LDAP connection or credentials issues by running `./scripts/logs` (or `docker compose logs nginx`) and examining the output of the `nginx` container.
 
 The **Malcolm User Management** page described above is not available when using LDAP authentication.
 
@@ -119,7 +119,7 @@ options:
   -v [DEBUG], --verbose [DEBUG]
                         Verbose output
   -f <string>, --file <string>
-                        docker-compose or kubeconfig YML file
+                        Docker compose or kubeconfig YML file
   -e <string>, --environment-dir <string>
                         Directory containing Malcolm's .env files
 

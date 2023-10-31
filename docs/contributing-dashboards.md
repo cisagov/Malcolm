@@ -10,7 +10,7 @@ Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboa
 1. Export the dashboard with that ID and save it in the `./dashboards./dashboards/` directory with the following command:
    ```
     export DASHID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx && \
-      docker-compose exec dashboards curl -XGET \
+      docker compose exec dashboards curl -XGET \
       "http://localhost:5601/dashboards/api/opensearch-dashboards/dashboards/export?dashboard=$DASHID" > \
       ./dashboards/dashboards/$DASHID.json
     ```

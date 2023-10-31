@@ -45,7 +45,7 @@ Finished, created "/malcolm-build/malcolm-iso/malcolm-23.11.0.iso"
 …
 ```
 
-By default, Malcolm's Docker images are not packaged with the installer ISO. Malcolm assumes instead that users will pull the [latest images](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) with a `docker-compose pull` command as described in the [Quick start](quickstart.md#QuickStart) section. To build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](development.md#Packager), which include a tarball with a name such as `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
+By default, Malcolm's Docker images are not packaged with the installer ISO. Malcolm assumes instead that users will pull the [latest images](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) with a `docker compose --profile malcolm pull` command as described in the [Quick start](quickstart.md#QuickStart) section. To build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](development.md#Packager), which include a tarball with a name such as `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
 
 ```
 $ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz
@@ -83,6 +83,6 @@ Following these prompts, the installer will reboot and the Malcolm base operatin
 
 When the system boots for the first time, the Malcolm Docker images will load if the installer was built with pre-packaged installation files as described above. Wait for this operation to continue (the progress dialog will disappear when they have finished loading) before continuing the setup.
 
-Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](quickstart.md#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](authsetup.md#AuthSetup) to configure authentication. If the ISO does not include pre-packaged Malcolm images, or to retrieve the latest updates, run `docker-compose pull`. Finalize the configuration by running `scripts/configure` and follow the prompts as illustrated in the [installation example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig).
+Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](quickstart.md#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](authsetup.md#AuthSetup) to configure authentication. If the ISO does not include pre-packaged Malcolm images, or to retrieve the latest updates, run `docker compose --profile malcolm pull`. Finalize the configuration by running `scripts/configure` and follow the prompts as illustrated in the [installation example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig).
 
 Once Malcolm is configured, users can [start Malcolm](running.md#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
