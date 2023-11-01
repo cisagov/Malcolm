@@ -1,3 +1,6 @@
 - prefix: 10.0.0.0/8
+  site: NETBOX_DEFAULT_SITE
 - prefix: 172.16.0.0/12
+  site: NETBOX_DEFAULT_SITE
 - prefix: 192.168.0.0/16
+  site: NETBOX_DEFAULT_SITE

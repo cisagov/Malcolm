@@ -617,12 +617,16 @@ def main():
 
                     # only preload catch-all IP Prefixes if explicitly specified and they don't already exist
                     if args.preloadPrefixes:
+                        defaultSiteName = next(iter([x for x in args.netboxSites]), None)
                         for loadType in ('vrfs', 'prefixes'):
                             defaultFileName = os.path.join(tmpPreloadDir, f'{loadType}_defaults.yml')
                             loadFileName = os.path.join(tmpPreloadDir, f'{loadType}.yml')
                             if os.path.isfile(defaultFileName) and (not os.path.isfile(loadFileName)):
                                 try:
-                                    shutil.copyfile(defaultFileName, loadFileName)
+                                    with open(defaultFileName, 'r') as infile:
+                                        with open(loadFileName, 'w') as outfile:
+                                            for line in infile:
+                                                outfile.write(line.replace("NETBOX_DEFAULT_SITE", defaultSiteName))
                                 except Exception:
                                     pass
 
