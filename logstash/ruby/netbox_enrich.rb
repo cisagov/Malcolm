@@ -650,7 +650,11 @@ def filter(event)
                       _tmp_prefixes.each do |p|
                         # non-verbose output is flatter with just names { :name => "name", :id => "id", ... }
                         # if _verbose, include entire object as :details
-                        _prefixes << { :name => p.fetch(:description, p.fetch(:display, nil)),
+                        _prefixName = p.fetch(:description, nil)
+                        if _prefixName.nil? || _prefixName.empty?
+                          _prefixName = p.fetch(:display, p.fetch(:prefix, nil))
+                        end
+                        _prefixes << { :name => _prefixName,
                                        :id => p.fetch(:id, nil),
                                        :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                                        :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
