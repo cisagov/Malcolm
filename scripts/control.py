@@ -785,7 +785,7 @@ def logs():
 
     if cmd:
         process = Popen(
-            flatten(cmd),
+            list(flatten(cmd)),
             env=osEnv,
             stdout=PIPE,
             stderr=None if args.debug else DEVNULL,
@@ -807,6 +807,7 @@ def logs():
                 and (not args.cmdLogs)
                 and finishedStartingRegEx.match(output)
             ):
+                shuttingDown[0] = True
                 process.terminate()
                 try:
                     process.wait(timeout=5.0)
