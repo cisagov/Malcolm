@@ -99,6 +99,8 @@ DOCKER_INSTALL_URLS[PLATFORM_LINUX_FEDORA] = 'https://docs.docker.com/install/li
 DOCKER_INSTALL_URLS[PLATFORM_MAC] = [
     'https://www.code2bits.com/how-to-install-docker-on-macos-using-homebrew/',
     'https://docs.docker.com/docker-for-mac/install/',
+    'https://formulae.brew.sh/formula/docker',
+    'https://formulae.brew.sh/formula/docker-compose',
 ]
 DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compose/install/')
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')

@@ -298,6 +298,17 @@ def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes
 
 
 ###################################################################################################
+# flatten a collection, but don't split strings
+def flatten(coll):
+    for i in coll:
+        if isinstance(i, Iterable) and not isinstance(i, str):
+            for subc in flatten(i):
+                yield subc
+        else:
+            yield i
+
+
+###################################################################################################
 # if the object is an iterable, return it, otherwise return a tuple with it as a single element.
 # useful if you want to user either a scalar or an array in a loop, etc.
 def get_iterable(x):
@@ -634,11 +645,12 @@ def run_process(
 ):
     retcode = -1
     output = []
+    flat_command = list(flatten(get_iterable(command)))
 
     try:
         # run the command
         retcode, cmdout, cmderr = check_output_input(
-            command,
+            flat_command,
             input=stdin.encode() if stdin else None,
             cwd=cwd,
             env=env,
@@ -652,11 +664,11 @@ def run_process(
 
     except (FileNotFoundError, OSError, IOError):
         if stderr:
-            output.append("Command {} not found or unable to execute".format(command))
+            output.append("Command {} not found or unable to execute".format(flat_command))
 
     if debug:
         dbgStr = "{}{} returned {}: {}".format(
-            command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
+            flat_command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
         )
         if logger is not None:
             logger.debug(dbgStr)
@@ -666,7 +678,7 @@ def run_process(
     if (retcode != 0) and retry and (retry > 0):
         # sleep then retry
         time.sleep(retrySleepSec)
-        return run_process(command, stdout, stderr, stdin, retry - 1, retrySleepSec, cwd, env, debug, logger)
+        return run_process(flat_command, stdout, stderr, stdin, retry - 1, retrySleepSec, cwd, env, debug, logger)
     else:
         return retcode, output
 

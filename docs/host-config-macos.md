@@ -14,14 +14,14 @@ $ brew install cask
 $ brew tap homebrew/cask-versions
 ```
 
-## Install docker-edge
+## Install docker
 
 ```
-$ brew install --cask docker-edge
+$ brew install --cask docker
 ```
 This will install the latest version of `docker`. It can be upgraded later using `brew` as well:
 ```
-$ brew upgrade --cask --no-quarantine docker-edge
+$ brew upgrade --cask --no-quarantine docker
 ```
 You can now run Docker from the Applications folder.
 

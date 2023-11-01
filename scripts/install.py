@@ -72,6 +72,7 @@ from malcolm_utils import (
     DATABASE_MODE_ENUMS,
     deep_get,
     eprint,
+    flatten,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -80,11 +81,12 @@ from malcolm_utils import (
 )
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.20.3"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.23.0"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
-MAC_BREW_DOCKER_PACKAGE = 'docker-edge'
+MAC_BREW_DOCKER_PACKAGE = 'docker'
+MAC_BREW_DOCKER_COMPOSE_PACKAGE = 'docker-compose'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
 LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
@@ -2570,22 +2572,27 @@ class LinuxInstaller(Installer):
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            dockerComposeCmd = 'docker-compose'
-            if not which(dockerComposeCmd, debug=self.debug):
-                if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                    dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
-                elif os.path.isfile('/usr/local/bin/docker-compose'):
-                    dockerComposeCmd = '/usr/local/bin/docker-compose'
-
-            # first see if docker-compose is already installed and runnable (try non-root and root)
+            # first see if docker compose/docker-compose is already installed and runnable
+            #   (try non-root and root)
+            dockerComposeCmd = ('docker', 'compose')
             err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
             if err != 0:
                 err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+                if err != 0:
+                    dockerComposeCmd = 'docker-compose'
+                    if not which(dockerComposeCmd, debug=self.debug):
+                        if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                            dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
+                        elif os.path.isfile('/usr/local/bin/docker-compose'):
+                            dockerComposeCmd = '/usr/local/bin/docker-compose'
+                    err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
+                    if err != 0:
+                        err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
 
             if (err != 0) and InstallerYesOrNo(
-                '"docker-compose version" failed, attempt to install docker-compose?', default=True
+                'docker compose failed, attempt to install docker compose?', default=True
             ):
-                if InstallerYesOrNo('Install docker-compose directly from docker github?', default=True):
+                if InstallerYesOrNo('Install docker compose directly from docker github?', default=True):
                     # download docker-compose from github and put it in /usr/local/bin
 
                     # need to know some linux platform info
@@ -2617,7 +2624,7 @@ class LinuxInstaller(Installer):
 
                 elif InstallerYesOrNo('Install docker-compose via pip (privileged)?', default=False):
                     # install docker-compose via pip (as root)
-                    err, out = self.run_process([self.pipCmd, 'install', dockerComposeCmd], privileged=True)
+                    err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=True)
                     if err == 0:
                         eprint("Installation of docker-compose apparently succeeded")
                     else:
@@ -2625,7 +2632,7 @@ class LinuxInstaller(Installer):
 
                 elif InstallerYesOrNo('Install docker-compose via pip (user)?', default=True):
                     # install docker-compose via pip (regular user)
-                    err, out = self.run_process([self.pipCmd, 'install', dockerComposeCmd], privileged=False)
+                    err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=False)
                     if err == 0:
                         eprint("Installation of docker-compose apparently succeeded")
                     else:
@@ -2639,11 +2646,11 @@ class LinuxInstaller(Installer):
             if err == 0:
                 result = True
                 if self.debug:
-                    eprint('"docker-compose version" succeeded')
+                    eprint('docker compose succeeded')
 
             else:
                 raise Exception(
-                    f'{ScriptName} requires docker-compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
+                    f'{ScriptName} requires docker compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
                 )
 
         return result
@@ -2894,7 +2901,7 @@ class MacInstaller(Installer):
             elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
                 if self.useBrew:
                     # install docker via brew cask (requires user interaction)
-                    dockerPackages = [MAC_BREW_DOCKER_PACKAGE, "docker-compose"]
+                    dockerPackages = [MAC_BREW_DOCKER_PACKAGE, MAC_BREW_DOCKER_COMPOSE_PACKAGE]
                     eprint(f"Installing docker packages: {dockerPackages}")
                     if self.install_package(dockerPackages):
                         eprint("Installation of docker packages apparently succeeded")
@@ -2915,7 +2922,7 @@ class MacInstaller(Installer):
                     else:
                         tempFileName = os.path.join(self.tempDirName, 'Docker.dmg')
                     if DownloadToFile(
-                        'https://download.docker.com/mac/edge/Docker.dmg', tempFileName, debug=self.debug
+                        'https://desktop.docker.com/mac/main/amd64/Docker.dmg', tempFileName, debug=self.debug
                     ):
                         while True:
                             response = InstallerAskForString(
@@ -2932,12 +2939,10 @@ class MacInstaller(Installer):
                         eprint('"docker info" succeeded')
 
                 elif err != 0:
-                    raise Exception(
-                        f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}'
-                    )
+                    raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
             elif err != 0:
-                raise Exception(f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}')
+                raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
             # tweak CPU/RAM usage for Docker in Mac
             settingsFile = MAC_BREW_DOCKER_SETTINGS.format(self.scriptUser)

@@ -114,6 +114,8 @@ pyPlatform = platform.system()
 
 args = None
 dockerBin = None
+# dockerComposeBin might be e.g., ('docker', 'compose') or 'docker-compose',
+#   it will be flattened in run_process
 dockerComposeBin = None
 dockerComposeYaml = None
 kubeImported = None
@@ -2267,30 +2269,38 @@ def main():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            # make sure docker/docker-compose is available
+            # make sure docker and docker compose are available
             dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
-            if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
-                dockerComposeBin = 'docker-compose.exe'
-            elif which('docker-compose'):
-                dockerComposeBin = 'docker-compose'
-            elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
-            elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
-                dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
-            elif os.path.isfile('/usr/local/bin/docker-compose'):
-                dockerComposeBin = '/usr/local/bin/docker-compose'
-            elif os.path.isfile('/usr/bin/docker-compose'):
-                dockerComposeBin = '/usr/bin/docker-compose'
-            else:
-                dockerComposeBin = 'docker-compose'
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
+            # first check if compose is available as a docker plugin
+            dockerComposeBin = (dockerBin, 'compose')
             err, out = run_process(
                 [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
                 env=osEnv,
                 debug=args.debug,
             )
+            if err != 0:
+                if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
+                    dockerComposeBin = 'docker-compose.exe'
+                elif which('docker-compose'):
+                    dockerComposeBin = 'docker-compose'
+                elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                    dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
+                elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
+                    dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
+                elif os.path.isfile('/usr/local/bin/docker-compose'):
+                    dockerComposeBin = '/usr/local/bin/docker-compose'
+                elif os.path.isfile('/usr/bin/docker-compose'):
+                    dockerComposeBin = '/usr/bin/docker-compose'
+                else:
+                    dockerComposeBin = 'docker-compose'
+                err, out = run_process(
+                    [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
+                    env=osEnv,
+                    debug=args.debug,
+                )
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
 
