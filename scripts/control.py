@@ -60,6 +60,7 @@ from malcolm_utils import (
     deep_get,
     dictsearch,
     eprint,
+    flatten,
     EscapeAnsi,
     EscapeForCurl,
     get_iterable,
@@ -784,7 +785,7 @@ def logs():
 
     if cmd:
         process = Popen(
-            cmd,
+            flatten(cmd),
             env=osEnv,
             stdout=PIPE,
             stderr=None if args.debug else DEVNULL,
