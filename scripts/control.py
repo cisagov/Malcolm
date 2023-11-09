@@ -608,6 +608,19 @@ def netboxRestore(backupFileName=None):
             if err != 0:
                 raise Exception('Error creating new NetBox database')
 
+            # make sure permissions are set up right
+            dockerCmd = dockerCmdBase + [
+                'netbox-postgres',
+                'psql',
+                '-U',
+                'netbox',
+                '-c',
+                'GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox',
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if err != 0:
+                raise Exception('Error setting NetBox database permissions')
+
             # load the backed-up psql dump
             dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
             with gzip.open(backupFileName, 'rt') as f:
@@ -672,6 +685,27 @@ def netboxRestore(backupFileName=None):
                 results = []
             if err != 0:
                 raise Exception(f'Error creating new NetBox database: {results}')
+
+            # make sure permissions are set up right
+            if podsResults := PodExec(
+                service='netbox-postgres',
+                namespace=args.namespace,
+                command=[
+                    'netbox-postgres',
+                    'psql',
+                    '-U',
+                    'netbox',
+                    '-c',
+                    'GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox',
+                ],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if err != 0:
+                raise Exception(f'Error setting NetBox database permissions: {results}')
 
             # load the backed-up psql dump
             with gzip.open(backupFileName, 'rt') as f:

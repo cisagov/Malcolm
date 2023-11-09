@@ -133,5 +133,3 @@ To clear the existing NetBox database and restore a previous backup, run the fol
 ./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.gz
 
 ```
-
-Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox-secret.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
