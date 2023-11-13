@@ -639,6 +639,19 @@ def netboxRestore(backupFileName=None):
             if (err != 0) or (len(results) == 0):
                 raise Exception('Error loading NetBox database')
 
+            # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
+            dockerCmd = dockerCmdBase + [
+                'netbox-postgres',
+                'psql',
+                '-U',
+                'netbox',
+                '-c',
+                'TRUNCATE auth_user CASCADE',
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) and args.debug:
+                eprint(f'Error truncating table auth_user table: {results}')
+
             # start back up the netbox processes (except initialization)
             dockerCmd = dockerCmdBase + [
                 'netbox',
@@ -656,6 +669,17 @@ def netboxRestore(backupFileName=None):
             if (err != 0) or (len(results) == 0):
                 raise Exception('Error performing NetBox migration')
 
+            # create auth_user for superuser
+            dockerCmd = dockerCmdBase + [
+                'netbox',
+                'bash',
+                '-c',
+                "/opt/netbox/netbox/manage.py shell --interface python < /usr/local/bin/netbox_superuser_create.py",
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) or (len(results) == 0):
+                raise Exception('Error setting up superuser')
+
             # restore media directory
             backupFileParts = os.path.splitext(backupFileName)
             backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
@@ -666,7 +690,21 @@ def netboxRestore(backupFileName=None):
                     t.extractall(mediaPath)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
-            # if the netbox_init.py process is happening, interrupt it
+            # stop the netbox processes
+            if podsResults := PodExec(
+                service='netbox',
+                namespace=args.namespace,
+                command=['supervisorctl', 'stop', 'netbox:*'],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if (err != 0) and args.debug:
+                eprint(f'Error ({err}) stopping NetBox: {results}')
+
+            # if the netbox_init.py process is still happening, interrupt it
             if podsResults := PodExec(
                 service='netbox',
                 namespace=args.namespace,
@@ -713,7 +751,6 @@ def netboxRestore(backupFileName=None):
                 service='netbox-postgres',
                 namespace=args.namespace,
                 command=[
-                    'netbox-postgres',
                     'psql',
                     '-U',
                     'netbox',
@@ -745,6 +782,45 @@ def netboxRestore(backupFileName=None):
             if (err != 0) or (len(results) == 0):
                 raise Exception(f'Error loading NetBox database: {results}')
 
+            # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
+            # make sure permissions are set up right
+            if podsResults := PodExec(
+                service='netbox-postgres',
+                namespace=args.namespace,
+                command=[
+                    'psql',
+                    '-U',
+                    'netbox',
+                    '-c',
+                    'TRUNCATE auth_user CASCADE',
+                ],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if err != 0:
+                raise Exception(f'Error truncating table auth_user table: {results}')
+
+            # start the netbox processes
+            if podsResults := PodExec(
+                service='netbox',
+                namespace=args.namespace,
+                command=[
+                    'bash',
+                    '-c',
+                    "supervisorctl status netbox:* | grep -v :initialization | awk '{ print $1 }' | xargs -r -L 1 -P 4 supervisorctl start",
+                ],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if (err != 0) and args.debug:
+                eprint(f'Error ({err}) starting NetBox: {results}')
+
             # migrations if needed
             if podsResults := PodExec(
                 service='netbox',
@@ -758,6 +834,24 @@ def netboxRestore(backupFileName=None):
                 results = []
             if (err != 0) or (len(results) == 0):
                 raise Exception(f'Error performing NetBox migration: {results}')
+
+            # migrations if needed
+            if podsResults := PodExec(
+                service='netbox',
+                namespace=args.namespace,
+                command=[
+                    'bash',
+                    '-c',
+                    "/opt/netbox/netbox/manage.py shell --interface python < /usr/local/bin/netbox_superuser_create.py",
+                ],
+            ):
+                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+            else:
+                err = 1
+                results = []
+            if (err != 0) or (len(results) == 0):
+                raise Exception(f'Error setting up superuser: {results}')
 
             # TODO: can't restore netbox/media directory via kubernetes at the moment
 
