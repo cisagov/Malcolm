@@ -585,7 +585,18 @@ def netboxRestore(backupFileName=None):
                 f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
             ]
 
-            # if the netbox_init.py process is happening, interrupt it
+            # stop the netbox processes
+            dockerCmd = dockerCmdBase + [
+                'netbox',
+                'supervisorctl',
+                'stop',
+                'netbox:*',
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) and args.debug:
+                eprint(f'Error stopping netbox:*: {results}')
+
+            # if the netbox_init.py process is still happening, interrupt it
             dockerCmd = dockerCmdBase + [
                 'netbox',
                 'bash',
@@ -627,6 +638,19 @@ def netboxRestore(backupFileName=None):
                 err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
             if (err != 0) or (len(results) == 0):
                 raise Exception('Error loading NetBox database')
+
+            # start back up the netbox processes
+            dockerCmd = dockerCmdBase + [
+                'netbox',
+                'supervisorctl',
+                'start',
+                'netbox:housekeeping',
+                'netbox:main',
+                'netbox:worker',
+            ]
+            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            if (err != 0) and args.debug:
+                eprint(f'Error starting netbox:*: {results}')
 
             # migrations if needed
             dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
