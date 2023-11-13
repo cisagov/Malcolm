@@ -639,14 +639,12 @@ def netboxRestore(backupFileName=None):
             if (err != 0) or (len(results) == 0):
                 raise Exception('Error loading NetBox database')
 
-            # start back up the netbox processes
+            # start back up the netbox processes (except initialization)
             dockerCmd = dockerCmdBase + [
                 'netbox',
-                'supervisorctl',
-                'start',
-                'netbox:housekeeping',
-                'netbox:main',
-                'netbox:worker',
+                'bash',
+                '-c',
+                "supervisorctl status netbox:* | grep -v :initialization | awk '{ print $1 }' | xargs -r -L 1 -P 4 supervisorctl start",
             ]
             err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
             if (err != 0) and args.debug:
