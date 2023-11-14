@@ -74,7 +74,6 @@
     <script src="upload/filepond/dist/filepond.js"></script>
     <script src="upload/filepond-plugin-file-rename/dist/filepond-plugin-file-rename.js"></script>
     <script src="upload/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.js"></script>
-    <script src="upload/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
     <script src="upload/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.js"></script>
 
     <script>
@@ -89,8 +88,7 @@
             FilePond.registerPlugin(
                 FilePondPluginFileMetadata,
                 FilePondPluginFileRename,
-                FilePondPluginFileValidateSize,
-                FilePondPluginFileValidateType
+                FilePondPluginFileValidateSize
             );
 
             FilePond.setOptions({
@@ -100,23 +98,7 @@
                 allowRemove: true,
                 allowRevert: true,
                 allowFileMetadata: true,
-                credits: false,
-                acceptedFileTypes: [
-                    'application/gzip',
-                    'application/octet-stream',
-                    'application/vnd.tcpdump.pcap',
-                    'application/x-7z-compressed',
-                    'application/x-bzip2',
-                    'application/x-cpio',
-                    'application/x-gzip',
-                    'application/x-lzip',
-                    'application/x-lzma',
-                    'application/x-pcapng',
-                    'application/x-rar-compressed',
-                    'application/x-tar',
-                    'application/x-xz',
-                    'application/zip'
-                ],
+                credits: false
             });
 
             // Turn a file input into a file pond
