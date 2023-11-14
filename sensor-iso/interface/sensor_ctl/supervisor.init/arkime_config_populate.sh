@@ -60,6 +60,11 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(maxFileTimeM)\s*=\s*.*/\1=$PCAP_ROTATE_MINUTES/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # pcap deletion threshold
+  if [[ -n $ARKIME_FREESPACEG ]]; then
+    sed -r -i "s/(freeSpaceG)\s*=\s*.*/\1=$ARKIME_FREESPACEG/" "$ARKIME_CONFIG_FILE"
+  fi
+
   # pcap compression
   COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
   COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"

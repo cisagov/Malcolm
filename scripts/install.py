@@ -993,6 +993,7 @@ class Installer(object):
         indexPruneSizeLimit = '0'
         indexPruneNameSort = False
         arkimeManagePCAP = False
+        arkimeFreeSpaceG = '10%'
 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
@@ -1032,6 +1033,16 @@ class Installer(object):
                     default=args.arkimeManagePCAP,
                 )
             )
+            if arkimeManagePCAP:
+                arkimeFreeSpaceGTmp = ''
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP deletion threshold')
+                while (not re.match(r'^\d+%?$', arkimeFreeSpaceGTmp, flags=re.IGNORECASE)) and loopBreaker.increment():
+                    arkimeFreeSpaceGTmp = InstallerAskForString(
+                        'Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)',
+                        default=args.arkimeFreeSpaceG,
+                    )
+                if arkimeFreeSpaceGTmp:
+                    arkimeFreeSpaceG = arkimeFreeSpaceGTmp
 
         autoSuricata = InstallerYesOrNo(
             'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
@@ -1375,6 +1386,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'MANAGE_PCAP_FILES',
                 TrueOrFalseNoQuote(arkimeManagePCAP),
+            ),
+            # Threshold for Arkime PCAP deletion
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ARKIME_FREESPACEG',
+                arkimeFreeSpaceG,
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
@@ -3470,6 +3487,15 @@ def main():
         const=True,
         default=False,
         help="Arkime should delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)",
+    )
+    storageArgGroup.add_argument(
+        '--delete-pcap-threshold',
+        dest='arkimeFreeSpaceG',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Threshold for Arkime PCAP deletion (see https://arkime.com/faq#pcap-deletion)',
     )
     storageArgGroup.add_argument(
         '--delete-index-threshold',
