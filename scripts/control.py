@@ -457,7 +457,8 @@ def printURLs():
 
     print("\nMalcolm services can be accessed via the following URLs:")
     print("------------------------------------------------------------------------------")
-    print(f"  - Arkime: https://{myIp}/")
+    print(f"  - Landing Page: https://{myIp}/")
+    print(f"  - Arkime: https://{myIp}/sessions/")
     print(f"  - OpenSearch Dashboards: https://{myIp}/dashboards/")
     print(f"  - PCAP upload (web): https://{myIp}/upload/")
     if orchMode is not OrchestrationFramework.KUBERNETES:

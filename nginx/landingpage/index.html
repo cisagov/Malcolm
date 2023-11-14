@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <title>Malcolm</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .imgcenter {
+            width: 50%;
+        }
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card {
+        /* position: relative; */
+        width: 50%;
+        }
+        .image {
+        opacity: 1;
+        display: block;
+        width: 100%;
+        height: auto;
+        transition: .5s ease;
+        backface-visibility: hidden;
+        }
+
+        .middle {
+        transition: .5s ease;
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        text-align: center;
+        }
+
+        .card:hover .image {
+        opacity: 0.3;
+        }
+
+        .card:hover .middle {
+        opacity: 1;
+        }
+    </style>
+    </head>
+
+    <body class="bg-dark">
+        <br />
+        <div>
+            <img class="imgcenter center" src="assets/imgs/Malcolm_banner_white.png" alt="%SITE_NAME%"> 
+        </div>
+
+        <br />
+
+        <!-- Internal Links -->
+        <div class="container">
+            <h3 style="color:white">Internal Links</h3>
+            <div class="card-group">
+                <div class="card bg-dark">
+                    <img src="assets/imgs/Arkime_Logo_FullGradientWhite_Square.png" alt="Arkime" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/sessions/" class="btn btn-primary" target="_blank">Arkime</a>
+                    </div>
+                </div>
+                <div class="card bg-dark">
+                    <img src="assets/imgs/icon.png" alt="Upload" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/upload/" class="btn btn-primary" target="_blank">Upload</a>
+                    </div>
+                </div>
+                <div class="card bg-dark">
+                    <img src="assets/imgs/markdown.png" alt="ReadMe" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/readme/" class="btn btn-primary" target="_blank">ReadMe</a>
+                    </div>
+                </div>
+                <div class="card bg-dark">
+                    <img src="assets/imgs/opensearch.png" alt="Opensearch" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/dashboards/" class="btn btn-primary" target="_blank">Opensearch</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-group">
+                <div class="card bg-dark">
+                    <img src="assets/imgs/netbox_icon.svg" alt="NetBox" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/netbox/" class="btn btn-primary" target="_blank">Netbox</a>
+                    </div>
+                </div>
+                <div class="card bg-dark">
+                    <img src="assets/imgs/lock.png" alt="Auth" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/auth/" class="btn btn-primary" target="_blank">Admin Access</a>
+                    </div>                
+                </div>
+                <div class="card bg-dark">
+                    <img src="assets/imgs/cyberchef.svg" alt="Auth" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/cyberchef/" class="btn btn-primary" target="_blank">CyberChef</a>
+                    </div>                
+                </div>
+                <div class="card bg-dark">    
+                    <img src="assets/imgs/api.png" alt="API" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://localhost/mapi/" class="btn btn-primary" target="_blank">API</a>
+                    </div>             
+                </div>
+            </div>
+        </div>
+        <br />
+
+        <div class="container">
+            <h3 style="color:white">External Links</h3>
+            <div class="card-group">
+                <div class="card bg-dark">
+                    <img src="assets/imgs/github-mark-white.svg" alt="Auth" class="image" style="width:100%">
+                    <div class="middle">
+                        <a href="https://github.com/cisagov/Malcolm" class="btn btn-primary" target="_blank">GitHub</a>
+                    </div>                
+                </div>
+                <div class="card bg-dark">             
+                </div>
+                <div class="card bg-dark">             
+                </div>
+                <div class="card bg-dark">             
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

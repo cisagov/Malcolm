@@ -221,6 +221,8 @@ COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/ngi
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
+RUN mkdir -p /usr/share/nginx/html/landingpage
+COPY nginx/landingpage /usr/share/nginx/html/landingpage
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
