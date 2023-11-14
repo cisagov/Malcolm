@@ -1,76 +1,3 @@
-# build ####################################################################
-FROM amazonlinux:2 AS build
-
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
-
-# set up build environment for dashboard plugins built from source
-
-ARG DEFAULT_UID=1000
-ARG DEFAULT_GID=1000
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "dashboarder"
-ENV PGROUP "dashboarder"
-
-ENV TERM xterm
-
-ARG OPENSEARCH_VERSION="2.8.0"
-ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
-
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
-ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
-
-# base system dependencies for checking out and building plugins
-
-USER root
-
-RUN amazon-linux-extras install -y epel && \
-    yum upgrade -y && \
-    yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
-    amazon-linux-extras install -y python3.8 && \
-        ln -s -r -f /usr/bin/python3.8 /usr/bin/python3 && \
-        ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3 && \
-    groupadd -g ${DEFAULT_GID} ${PGROUP} && \
-    adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
-    mkdir -p /usr/share && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_VERSION}" https://github.com/opensearch-project/OpenSearch /usr/share/opensearch && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_DASHBOARDS_VERSION}" https://github.com/opensearch-project/OpenSearch-Dashboards /usr/share/opensearch-dashboards && \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards /usr/share/opensearch
-
-# build plugins as non-root
-
-USER ${PUSER}
-
-# use nodenv (https://github.com/nodenv/nodenv) to manage nodejs/yarn
-
-ENV PATH "/home/${PUSER}/.nodenv/bin:${PATH}"
-
-RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodules https://github.com/nodenv/nodenv.git /home/${PUSER}/.nodenv && \
-    cd /home/${PUSER}/.nodenv && \
-    ./src/configure && \
-    make -C src && \
-    cd /tmp && \
-    eval "$(nodenv init -)" && \
-    mkdir -p "$(nodenv root)"/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/node-build.git "$(nodenv root)"/plugins/node-build && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/nodenv-update.git "$(nodenv root)"/plugins/nodenv-update && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/pine/nodenv-yarn-install.git "$(nodenv root)"/plugins/nodenv-yarn-install && \
-    nodenv install "$(cat /usr/share/opensearch-dashboards/.node-version)" && \
-    nodenv global "$(cat /usr/share/opensearch-dashboards/.node-version)"
-
-# check out and build plugins
-
-RUN eval "$(nodenv init -)" && \
-    mkdir -p /usr/share/opensearch-dashboards/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch opensearch-v2-dashboards-compatibility https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
-    cd /usr/share/opensearch-dashboards/plugins/sankey_vis && \
-    yarn osd bootstrap && \
-    yarn install && \
-    yarn build --opensearch-dashboards-version "${OPENSEARCH_DASHBOARDS_VERSION}" && \
-    mv ./build/kbnSankeyVis-"${OPENSEARCH_DASHBOARDS_VERSION}".zip ./build/kbnSankeyVis.zip
-
-# runtime ##################################################################
-
 FROM opensearchproject/opensearch-dashboards:2.8.0
 
 LABEL maintainer="malcolm@inl.gov"
@@ -115,7 +42,6 @@ ENV NODE_OPTIONS $NODE_OPTIONS
 
 USER root
 
-COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
@@ -124,8 +50,6 @@ RUN yum upgrade -y && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
-    cd /usr/share/opensearch-dashboards/plugins && \
-    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
         # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
