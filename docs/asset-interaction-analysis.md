@@ -133,3 +133,5 @@ To clear the existing NetBox database and restore a previous backup, run the fol
 ./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.gz
 
 ```
+
+If you have a previous NetBox database backup (created with `netbox-backup` as described above) that you would like automatically restored on startup, that `.gz` file may be manually copied to the [`./netbox/preload`](#NetBoxPreload) directory. Upon startup that file will be extracted and used to populate the NetBox database, taking priority over the other preload files. This process does not remove the `.gz` file from the directory upon restoring it; it will be restored again on subsequent restarts unless manually removed.

@@ -60,6 +60,7 @@ RUN apt-get -q update && \
       libpq-dev \
       libpq5 \
       patch \
+      postgresql-client \
       procps \
       psmisc \
       python3-dev \
