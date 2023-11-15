@@ -127,11 +127,11 @@ $ ./scripts/netbox-backup
 NetBox configuration database saved to ('malcolm_netbox_backup_20230110-133855.gz', 'malcolm_netbox_backup_20230110-133855.media.tar.gz')
 ```
 
-To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
+To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….gz` to be restored) from within the Malcolm installation directory while Malcolm is running:
 
 ```
 ./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.gz
 
 ```
 
-If you have a previous NetBox database backup (created with `netbox-backup` as described above) that you would like automatically restored on startup, that `.gz` file may be manually copied to the [`./netbox/preload`](#NetBoxPreload) directory. Upon startup that file will be extracted and used to populate the NetBox database, taking priority over the other preload files. This process does not remove the `.gz` file from the directory upon restoring it; it will be restored again on subsequent restarts unless manually removed.
+Users with a prior NetBox database backup (created with `netbox-backup` as described above) that they wish to be automatically restored on startup, that `.gz` file may be manually copied to the [`./netbox/preload`](#NetBoxPreload) directory. Upon startup that file will be extracted and used to populate the NetBox database, taking priority over the other preload files. This process does not remove the `.gz` file from the directory upon restoring it; it will be restored again on subsequent restarts unless manually removed.
