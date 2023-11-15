@@ -651,7 +651,7 @@ def run_process(
         # run the command
         retcode, cmdout, cmderr = check_output_input(
             flat_command,
-            input=stdin.encode() if stdin else None,
+            input=(stdin.encode() if isinstance(stdin, str) else stdin) if stdin else None,
             cwd=cwd,
             env=env,
         )
@@ -668,7 +668,10 @@ def run_process(
 
     if debug:
         dbgStr = "{}{} returned {}: {}".format(
-            flat_command, "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if stdin else ""), retcode, output
+            flat_command,
+            "({})".format(stdin[:80] + bool(stdin[80:]) * '...' if (stdin and isinstance(stdin, str)) else ""),
+            retcode,
+            output,
         )
         if logger is not None:
             logger.debug(dbgStr)

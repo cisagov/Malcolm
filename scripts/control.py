@@ -583,277 +583,120 @@ def netboxRestore(backupFileName=None):
                 # execute as UID:GID in docker-compose.yml file
                 '-u',
                 f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-            ]
-
-            # stop the netbox processes
-            dockerCmd = dockerCmdBase + [
+                # run in the netbox container
                 'netbox',
-                'supervisorctl',
-                'stop',
-                'netbox:*',
             ]
+
+            # get remote temporary directory for restore
+            dockerCmd = dockerCmdBase + ['mktemp', '-d', '-t', 'restore.XXXXXXXXXX']
             err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) and args.debug:
-                eprint(f'Error stopping netbox:*: {results}')
+            if (err == 0) and results:
+                tmpRestoreDir = results[0]
+            else:
+                tmpRestoreDir = '/tmp'
 
-            # if the netbox_init.py process is still happening, interrupt it
-            dockerCmd = dockerCmdBase + [
-                'netbox',
-                'bash',
-                '-c',
-                'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill',
-            ]
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) and args.debug:
-                eprint(f'Error interrupting netbox_init.py: {results}')
+            try:
+                # copy database backup and media backup to remote temporary directory
+                for tmpFile in [
+                    x
+                    for x in [backupFileName, os.path.splitext(backupFileName)[0] + ".media.tar.gz"]
+                    if os.path.isfile(x)
+                ]:
+                    dockerCmd = dockerCmdBase + ['tee', os.path.join(tmpRestoreDir, os.path.basename(tmpFile))]
+                    with open(tmpFile, 'rb') as f:
+                        err, results = run_process(
+                            dockerCmd, env=osEnv, debug=args.debug, stdout=False, stderr=True, stdin=f.read()
+                        )
+                    if err != 0:
+                        raise Exception(
+                            f'Error {err} copying backed-up NetBox file {os.path.basename(tmpFile)} to {tmpRestoreDir}: {results}'
+                        )
 
-            # drop the existing netbox database
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if ((err != 0) or (len(results) == 0)) and args.debug:
-                eprint(f'Error dropping NetBox database: {results}')
+                # perform the restore inside the container
+                dockerCmd = dockerCmdBase + [
+                    '/opt/netbox/venv/bin/python',
+                    '/usr/local/bin/netbox_init.py',
+                    '--preload-backup',
+                    os.path.join(tmpRestoreDir, os.path.basename(backupFileName)),
+                ]
+                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} restoring NetBox database {os.path.basename(backupFileName)}: {results}'
+                    )
 
-            # create a new netbox database
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if err != 0:
-                raise Exception('Error creating new NetBox database')
-
-            # make sure permissions are set up right
-            dockerCmd = dockerCmdBase + [
-                'netbox-postgres',
-                'psql',
-                '-U',
-                'netbox',
-                '-c',
-                'GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox',
-            ]
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if err != 0:
-                raise Exception('Error setting NetBox database permissions')
-
-            # load the backed-up psql dump
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
-            with gzip.open(backupFileName, 'rt') as f:
-                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
-            if (err != 0) or (len(results) == 0):
-                raise Exception('Error loading NetBox database')
-
-            # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
-            dockerCmd = dockerCmdBase + [
-                'netbox-postgres',
-                'psql',
-                '-U',
-                'netbox',
-                '-c',
-                'TRUNCATE auth_user CASCADE',
-            ]
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) and args.debug:
-                eprint(f'Error truncating table auth_user table: {results}')
-
-            # start back up the netbox processes (except initialization)
-            dockerCmd = dockerCmdBase + [
-                'netbox',
-                'bash',
-                '-c',
-                "supervisorctl status netbox:* | grep -v :initialization | awk '{ print $1 }' | xargs -r -L 1 -P 4 supervisorctl start",
-            ]
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) and args.debug:
-                eprint(f'Error starting netbox:*: {results}')
-
-            # migrations if needed
-            dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) or (len(results) == 0):
-                raise Exception('Error performing NetBox migration')
-
-            # create auth_user for superuser
-            dockerCmd = dockerCmdBase + [
-                'netbox',
-                'bash',
-                '-c',
-                "/opt/netbox/netbox/manage.py shell --interface python < /usr/local/bin/netbox_superuser_create.py",
-            ]
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) or (len(results) == 0):
-                raise Exception('Error setting up superuser')
-
-            # restore media directory
-            backupFileParts = os.path.splitext(backupFileName)
-            backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
-            mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
-            if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
-                RemoveEmptyFolders(mediaPath, removeRoot=False)
-                with tarfile.open(backupMediaFileName) as t:
-                    t.extractall(mediaPath)
+            finally:
+                # cleanup the remote directory
+                if tmpRestoreDir != '/tmp':
+                    dockerCmd = dockerCmdBase + ['rm', '-rf', tmpRestoreDir]
+                else:
+                    dockerCmd = dockerCmdBase + [
+                        'bash',
+                        '-c',
+                        f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
+                    ]
+                run_process(dockerCmd, env=osEnv, debug=args.debug)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
-            # stop the netbox processes
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=['supervisorctl', 'stop', 'netbox:*'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) and args.debug:
-                eprint(f'Error ({err}) stopping NetBox: {results}')
+            # copy database backup and media backup to remote temporary directory
+            try:
+                tmpRestoreDir = '/tmp'
+                for tmpFile in [
+                    x
+                    for x in [backupFileName, os.path.splitext(backupFileName)[0] + ".media.tar.gz"]
+                    if os.path.isfile(x)
+                ]:
+                    with open(tmpFile, 'rb') as f:
+                        if podsResults := PodExec(
+                            service='netbox',
+                            namespace=args.namespace,
+                            command=['tee', os.path.join(tmpRestoreDir, os.path.basename(tmpFile))],
+                            stdout=False,
+                            stderr=True,
+                            stdin=f.read(),
+                        ):
+                            err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                            results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+                        else:
+                            err = 1
+                            results = []
+                    if err != 0:
+                        raise Exception(
+                            f'Error {err} copying backed-up NetBox file {os.path.basename(tmpFile)} to {tmpRestoreDir}: {results}'
+                        )
 
-            # if the netbox_init.py process is still happening, interrupt it
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=['bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) and args.debug:
-                eprint(f'Error ({err}) interrupting netbox_init.py: {results}')
-
-            # drop the existing netbox database
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=['dropdb', '-U', 'netbox', 'netbox', '--force'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if ((err != 0) or (len(results) == 0)) and args.debug:
-                eprint(f'Error dropping NetBox database: {results}')
-
-            # create a new netbox database
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=['createdb', '-U', 'netbox', 'netbox'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if err != 0:
-                raise Exception(f'Error creating new NetBox database: {results}')
-
-            # make sure permissions are set up right
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=[
-                    'psql',
-                    '-U',
-                    'netbox',
-                    '-c',
-                    'GRANT ALL PRIVILEGES ON DATABASE netbox TO netbox',
-                ],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if err != 0:
-                raise Exception(f'Error setting NetBox database permissions: {results}')
-
-            # load the backed-up psql dump
-            with gzip.open(backupFileName, 'rt') as f:
+                # perform the restore inside the container
                 if podsResults := PodExec(
-                    service='netbox-postgres',
+                    service='netbox',
                     namespace=args.namespace,
-                    command=['psql', '-U', 'netbox'],
-                    stdin=f.read(),
+                    command=[
+                        '/opt/netbox/venv/bin/python',
+                        '/usr/local/bin/netbox_init.py',
+                        '--preload-backup',
+                        os.path.join(tmpRestoreDir, os.path.basename(backupFileName)),
+                    ],
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                     results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
                 else:
                     err = 1
                     results = []
-            if (err != 0) or (len(results) == 0):
-                raise Exception(f'Error loading NetBox database: {results}')
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} restoring NetBox database {os.path.basename(backupFileName)}: {results}'
+                    )
 
-            # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
-            # make sure permissions are set up right
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=[
-                    'psql',
-                    '-U',
-                    'netbox',
-                    '-c',
-                    'TRUNCATE auth_user CASCADE',
-                ],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if err != 0:
-                raise Exception(f'Error truncating table auth_user table: {results}')
-
-            # start the netbox processes
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=[
-                    'bash',
-                    '-c',
-                    "supervisorctl status netbox:* | grep -v :initialization | awk '{ print $1 }' | xargs -r -L 1 -P 4 supervisorctl start",
-                ],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) and args.debug:
-                eprint(f'Error ({err}) starting NetBox: {results}')
-
-            # migrations if needed
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=['/opt/netbox/netbox/manage.py', 'migrate'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) or (len(results) == 0):
-                raise Exception(f'Error performing NetBox migration: {results}')
-
-            # migrations if needed
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=[
-                    'bash',
-                    '-c',
-                    "/opt/netbox/netbox/manage.py shell --interface python < /usr/local/bin/netbox_superuser_create.py",
-                ],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) or (len(results) == 0):
-                raise Exception(f'Error setting up superuser: {results}')
-
-            # TODO: can't restore netbox/media directory via kubernetes at the moment
+            finally:
+                # cleanup on other side
+                PodExec(
+                    service='netbox',
+                    namespace=args.namespace,
+                    command=[
+                        'bash',
+                        '-c',
+                        f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
+                    ],
+                )
 
         else:
             raise Exception(

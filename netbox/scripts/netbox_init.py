@@ -5,11 +5,12 @@
 
 import argparse
 import glob
-import ipaddress
 import gzip
+import ipaddress
 import itertools
 import json
 import logging
+import magic
 import os
 import psycopg
 import pynetbox
@@ -17,6 +18,7 @@ import randomcolor
 import re
 import shutil
 import sys
+import tarfile
 import tempfile
 import time
 import malcolm_utils
@@ -150,7 +152,7 @@ def main():
         dest='netboxToken',
         type=str,
         default=None,
-        required=True,
+        required=False,
         help="NetBox API Token",
     )
     parser.add_argument(
@@ -255,12 +257,20 @@ def main():
         help="Preload IPAM IP Prefixes for private IP space",
     )
     parser.add_argument(
+        '--preload-backup',
+        dest='preloadBackupFile',
+        type=str,
+        default=os.getenv('NETBOX_PRELOAD_GZ', default=''),
+        required=False,
+        help="Database dump .gz file to preload into postgreSQL",
+    )
+    parser.add_argument(
         '--postgres-host',
         dest='postgresHost',
         type=str,
         default=os.getenv('DB_HOST', 'netbox-postgres'),
         required=False,
-        help="postgreSQL host for preloading an entire database dump .gz from the --preload directory",
+        help="postgreSQL host for preloading an entire database dump .gz (specified with --preload-backup or loaded from the --preload directory)",
     )
     parser.add_argument(
         '--postgres-db',
@@ -308,18 +318,18 @@ def main():
 
     # if there is a database backup .gz in the preload directory, load it up (preferring the newest)
     # if there are multiple) instead of populating via API
-    preloadDatabaseTarball = None
+    preloadDatabaseFile = args.preloadBackupFile
     preloadDatabaseSuccess = False
-    if os.path.isdir(args.preloadDir):
-        preloadTarballs = [
+    if (not os.path.isfile(preloadDatabaseFile)) and os.path.isdir(args.preloadDir):
+        preloadFiles = [
             x
             for x in list(filter(os.path.isfile, glob.glob(os.path.join(args.preloadDir, '*.gz'))))
             if not x.endswith('.media.tar.gz')
         ]
-        preloadTarballs.sort(key=lambda x: os.path.getmtime(x))
-        preloadDatabaseTarball = next(iter(preloadTarballs), None)
+        preloadFiles.sort(key=lambda x: os.path.getmtime(x))
+        preloadDatabaseFile = next(iter(preloadFiles), None)
 
-    if os.path.isfile(preloadDatabaseTarball):
+    if os.path.isfile(preloadDatabaseFile):
         # we're loading an existing database directly with postgreSQL
         # this should pretty much match what is in control.py:netboxRestore
         try:
@@ -385,7 +395,11 @@ def main():
                 '-U',
                 args.postgresUser,
             ]
-            with gzip.open(preloadDatabaseTarball, 'rt') as f:
+            with (
+                gzip.open(preloadDatabaseFile, 'rt')
+                if 'application/gzip' in magic.from_file(preloadDatabaseFile, mime=True)
+                else open(preloadDatabaseFile, 'r')
+            ) as f:
                 err, results = malcolm_utils.run_process(cmd, env=osEnv, logger=logging, stdin=f.read())
             if (err == 0) and results:
                 preloadDatabaseSuccess = True
@@ -440,19 +454,24 @@ def main():
                 if (err != 0) or (not results):
                     logging.error(f'{err} setting up superuser: {results}')
 
-            # # restore media directory
-            # backupFileParts = os.path.splitext(backupFileName)
-            # backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
-            # mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
-            # if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
-            #     RemoveEmptyFolders(mediaPath, removeRoot=False)
-            #     with tarfile.open(backupMediaFileName) as t:
-            #         t.extractall(mediaPath)
+            # restore media directory
+            preloadDatabaseFileParts = os.path.splitext(preloadDatabaseFile)
+            mediaFileName = preloadDatabaseFileParts[0] + ".media.tar.gz"
+            mediaPath = os.path.join(args.netboxDir, os.path.join('netbox', 'media'))
+            if os.path.isfile(mediaFileName) and os.path.isdir(mediaPath):
+                try:
+                    malcolm_utils.RemoveEmptyFolders(mediaPath, removeRoot=False)
+                    with tarfile.open(mediaFileName) as t:
+                        t.extractall(mediaPath)
+                except Exception as e:
+                    logging.error(f"{type(e).__name__} processing restoring {os.path.basename(mediaFileName)}: {e}")
 
         except Exception as e:
-            logging.error(f"{type(e).__name__} restoring {os.path.basename(preloadDatabaseTarball)}: {e}")
+            logging.error(f"{type(e).__name__} restoring {os.path.basename(preloadDatabaseFile)}: {e}")
 
-    if not preloadDatabaseSuccess:
+    # only proceed to do the regular population/preload if if we didn't preload a database backup, or
+    #   if we attempted (and failed) but they didn't explicitly specify a backup file
+    if not preloadDatabaseSuccess and (not args.preloadBackupFile):
         # create connection to netbox API
         nb = pynetbox.api(
             args.netboxUrl,

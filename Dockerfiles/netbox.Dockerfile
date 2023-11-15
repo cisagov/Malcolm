@@ -55,8 +55,11 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       gcc \
+      file \
       git \
       jq \
+      libmagic-dev \
+      libmagic1 \
       libpq-dev \
       libpq5 \
       patch \
@@ -71,6 +74,7 @@ RUN apt-get -q update && \
       'git+https://github.com/tobiasge/netbox-initializers' \
       psycopg2 \
       pynetbox \
+      python-magic \
       python-slugify \
       randomcolor && \
     cd "${NETBOX_PATH}" && \

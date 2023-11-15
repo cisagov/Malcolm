@@ -135,3 +135,5 @@ To clear the existing NetBox database and restore a previous backup, run the fol
 ```
 
 Users with a prior NetBox database backup (created with `netbox-backup` as described above) that they wish to be automatically restored on startup, that `.gz` file may be manually copied to the [`./netbox/preload`](#NetBoxPreload) directory. Upon startup that file will be extracted and used to populate the NetBox database, taking priority over the other preload files. This process does not remove the `.gz` file from the directory upon restoring it; it will be restored again on subsequent restarts unless manually removed.
+
+Note that [network log enrichment](#NetBoxEnrichment) will fail while a restore is in progress (indicated with `HTTP/1.1 403` messages in the output of the `netbox` container in the Malcolm debug logs), but should resume once the restore process has completed.
