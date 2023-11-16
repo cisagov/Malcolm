@@ -406,6 +406,21 @@ def main():
             else:
                 raise Exception(f'Error {err} loading NetBox database: {results}')
 
+            # with idaholab/Malcolm#280 we switched to use prefix.description instead of VRF for identifying subnets in NetBox,
+            # this will migrate ipam_vrf.name to ipam_prefix.description if we're coming from an older backup
+            cmd = [
+                'psql',
+                '-h',
+                args.postgresHost,
+                '-U',
+                {args.postgresUser},
+                '-c',
+                "UPDATE ipam_prefix SET description = (SELECT name from ipam_vrf WHERE id = ipam_prefix.vrf_id) WHERE ((description = '') IS NOT FALSE) AND (vrf_id > 0)",
+            ]
+            err, results = malcolm_utils.run_process(cmd, env=osEnv, logger=logging)
+            if err != 0:
+                logging.error(f'{err} migrating ipam_vrf.name to ipam_prefix.description: {results}')
+
             # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
             cmd = [
                 'psql',
