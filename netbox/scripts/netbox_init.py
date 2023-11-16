@@ -327,7 +327,7 @@ def main():
             if not x.endswith('.media.tar.gz')
         ]
         preloadFiles.sort(key=lambda x: os.path.getmtime(x))
-        preloadDatabaseFile = next(iter(preloadFiles), None)
+        preloadDatabaseFile = next(iter(preloadFiles), '')
 
     if os.path.isfile(preloadDatabaseFile):
         # we're loading an existing database directly with postgreSQL
