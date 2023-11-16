@@ -828,6 +828,13 @@ def main():
         except Exception as e:
             logging.error(f"{type(e).__name__} processing net map JSON \"{args.netMapFileName}\": {e}")
 
+        # ###### Missing prefix descriptions from VRF names (see idaholab/Malcolm#280) ##################################
+        try:
+            pass
+            # TODO
+        except Exception as e:
+            logging.error(f"{type(e).__name__} migrating ipam_vrf.name to ipam_prefix.description: {e}")
+
         # ###### Netbox-Initializers ###################################################################################
         if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
             try:
