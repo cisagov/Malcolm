@@ -13,6 +13,7 @@ global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? 
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -90,6 +91,18 @@ redef ignore_checksums = T;
 @load intel
 
 event zeek_init() &priority=-5 {
+
+  if (zeek_local_nets_str != "") {
+    local nets_strs = split_string(zeek_local_nets_str, /,/);
+    if (|nets_strs| > 0) {
+      for (net_idx in nets_strs) {
+        local local_subnet = to_subnet(nets_strs[net_idx]);
+        if (local_subnet != [::]/0) {
+          add Site::local_nets[local_subnet];
+        }
+      }
+    }
+  }
 
   if (disable_ics_all || disable_ics_bacnet) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_BACNET);

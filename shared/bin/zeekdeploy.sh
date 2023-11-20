@@ -62,6 +62,7 @@ fi
 [[ -z $ZEEK_EXTRACTOR_MODE ]] && ZEEK_EXTRACTOR_MODE="none"
 
 # some other defaults
+[[ -z $ZEEK_LOCAL_NETS ]] && ZEEK_LOCAL_NETS=
 [[ -z $ZEEK_LB_PROCS ]] && ZEEK_LB_PROCS="1"
 [[ -z $WORKER_LB_PROCS ]] && WORKER_LB_PROCS="$ZEEK_LB_PROCS"
 [[ -z $ZEEK_LB_METHOD ]] && ZEEK_LB_METHOD="custom"
@@ -208,7 +209,12 @@ EOF
   ZEEK_PROCS=$((ZEEK_PROCS+1))
 done
 
-# we'll assume we didn't mess with networks.cfg, leave it alone
+# populate networks.cfg from ZEEK_LOCAL_NETS
+echo "# \$ZEEK_LOCAL_NETS:" > ./networks.cfg
+echo "#   $ZEEK_LOCAL_NETS" >> ./networks.cfg
+for NET in ${ZEEK_LOCAL_NETS//,/ }; do
+  echo "$NET" | sed -re 's/^[[:blank:]]+|[[:blank:]]+$//g' -e 's/[[:blank:]]+/ /g' >> ./networks.cfg
+done
 
 popd >/dev/null 2>&1
 
