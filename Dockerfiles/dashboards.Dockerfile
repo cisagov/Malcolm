@@ -47,6 +47,7 @@ ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSF
 
 RUN yum upgrade -y && \
     yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
+    yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
