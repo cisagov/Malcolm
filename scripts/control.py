@@ -641,29 +641,27 @@ def netboxRestore(backupFileName=None):
             # copy database backup and media backup to remote temporary directory
             try:
                 tmpRestoreDir = '/tmp'
-                for tmpFile in [
-                    x
-                    for x in [backupFileName, os.path.splitext(backupFileName)[0] + ".media.tar.gz"]
-                    if os.path.isfile(x)
-                ]:
-                    with open(tmpFile, 'rb') as f:
-                        if podsResults := PodExec(
-                            service='netbox',
-                            namespace=args.namespace,
-                            command=['tee', os.path.join(tmpRestoreDir, os.path.basename(tmpFile))],
-                            stdout=False,
-                            stderr=True,
-                            stdin=f.read(),
-                        ):
-                            err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                            results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-                        else:
-                            err = 1
-                            results = []
-                    if err != 0:
-                        raise Exception(
-                            f'Error {err} copying backed-up NetBox file {os.path.basename(tmpFile)} to {tmpRestoreDir}: {results}'
-                        )
+                tmpRestoreFile = os.path.join(
+                    tmpRestoreDir, os.path.splitext(os.path.basename(backupFileName))[0] + '.txt'
+                )
+                with gzip.open(backupFileName, 'rt') as f:
+                    if podsResults := PodExec(
+                        service='netbox',
+                        namespace=args.namespace,
+                        command=['tee', tmpRestoreFile],
+                        stdout=False,
+                        stderr=True,
+                        stdin=f.read(),
+                    ):
+                        err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                        results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+                    else:
+                        err = 1
+                        results = []
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} copying backed-up NetBox file {os.path.basename(backupFileName)} to {tmpRestoreFile}: {results}'
+                    )
 
                 # perform the restore inside the container
                 if podsResults := PodExec(
@@ -673,7 +671,7 @@ def netboxRestore(backupFileName=None):
                         '/opt/netbox/venv/bin/python',
                         '/usr/local/bin/netbox_init.py',
                         '--preload-backup',
-                        os.path.join(tmpRestoreDir, os.path.basename(backupFileName)),
+                        tmpRestoreFile,
                     ],
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
