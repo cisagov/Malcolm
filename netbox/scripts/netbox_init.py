@@ -830,10 +830,16 @@ def main():
 
         # ###### Missing prefix descriptions from VRF names (see idaholab/Malcolm#280) ##################################
         try:
-            pass
-            # TODO
+            for prefix in [x for x in nb.ipam.prefixes.filter(description__empty=True) if x.vrf]:
+                logging.debug(f"Updating prefix {str(prefix)}'s description to {str(prefix.vrf)}")
+                prefix.update(
+                    {
+                        "description": str(prefix.vrf),
+                    }
+                )
+
         except Exception as e:
-            logging.error(f"{type(e).__name__} migrating ipam_vrf.name to ipam_prefix.description: {e}")
+            logging.error(f"{type(e).__name__} migrating prefix VRF to prefix description: {e}")
 
         # ###### Netbox-Initializers ###################################################################################
         if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
