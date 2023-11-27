@@ -64,7 +64,7 @@ ARG FILEBEAT_TCP_TAG="_malcolm_beats"
 ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "c646d115c152545765b7eea0f5c3591849f6d7c6"
+ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV TINI_VERSION v0.19.0
