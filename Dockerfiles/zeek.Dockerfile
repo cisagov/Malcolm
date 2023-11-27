@@ -94,10 +94,10 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.27"
+ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
+ENV SUPERCRONIC_SHA1SUM "c646d115c152545765b7eea0f5c3591849f6d7c6"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for download and install
