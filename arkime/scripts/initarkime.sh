@@ -3,7 +3,6 @@
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
-ARKIME_LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-"false"}
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
@@ -36,81 +35,76 @@ fi
 
 if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
-  echo "Giving $OPENSEARCH_PRIMARY time to start..."
-  /opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
-
   # download and/or update geo updates
   $ARKIME_DIR/bin/arkime_update_geo.sh
 
-  # don't do database initialization or run wise in arkime-live mode
-  if [[ "$ARKIME_LIVE_CAPTURE" == "false" ]]; then
+  echo "Giving $OPENSEARCH_PRIMARY time to start..."
+  /opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
 
-    # start and wait patiently for WISE
-    if [[ "$WISE" = "on" ]] ; then
-      touch /var/run/arkime/runwise
-      echo "Giving WISE time to start..."
-      sleep 5
-      until curl -fsS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
-      do
-          echo "Waiting for WISE to start"
-          sleep 1
-      done
-      echo "WISE is running!"
-      echo
-    fi
+  # start and wait patiently for WISE
+  if [[ "$WISE" = "on" ]] ; then
+    touch /var/run/arkime/runwise
+    echo "Giving WISE time to start..."
+    sleep 5
+    until curl -fsS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
+    do
+        echo "Waiting for WISE to start"
+        sleep 1
+    done
+    echo "WISE is running!"
+    echo
+  fi
 
-    # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
-    if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
+  # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
+  if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 )); then
 
-      echo "Initializing $OPENSEARCH_PRIMARY database..."
+    echo "Initializing $OPENSEARCH_PRIMARY database..."
 
-    	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt
+  	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt
 
-      echo "Creating default user..."
+    echo "Creating default user..."
 
-    	# this password isn't going to be used by Arkime, nginx will do the auth instead
-    	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG
+  	# this password isn't going to be used by Arkime, nginx will do the auth instead
+  	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG
 
-      echo "Initializing fields..."
+    echo "Initializing fields..."
 
-      # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
-      touch /tmp/not_a_packet.pcap
-      $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
-      rm -f /tmp/not_a_packet.pcap
+    # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
+    touch /tmp/not_a_packet.pcap
+    $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+    rm -f /tmp/not_a_packet.pcap
 
-      echo "Initializing views..."
+    echo "Initializing views..."
 
-      for VIEW_FILE in "$ARKIME_DIR"/etc/views/*.json; do
-        TEMP_JSON=$(mktemp --suffix=.json)
-        RANDOM_ID="$(openssl rand -base64 14 | sed -E 's/[^[:alnum:][:space:]]+/_/g')"
-        echo "Creating view $(jq '.name' < "${VIEW_FILE}")"
-        jq ". += {\"user\": \"${MALCOLM_USERNAME}\"}" < "${VIEW_FILE}" >"${TEMP_JSON}"
-        curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_views/_doc/${RANDOM_ID}" -d "@${TEMP_JSON}"
-        rm -f "${TEMP_JSON}"
-      done
+    for VIEW_FILE in "$ARKIME_DIR"/etc/views/*.json; do
+      TEMP_JSON=$(mktemp --suffix=.json)
+      RANDOM_ID="$(openssl rand -base64 14 | sed -E 's/[^[:alnum:][:space:]]+/_/g')"
+      echo "Creating view $(jq '.name' < "${VIEW_FILE}")"
+      jq ". += {\"user\": \"${MALCOLM_USERNAME}\"}" < "${VIEW_FILE}" >"${TEMP_JSON}"
+      curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_views/_doc/${RANDOM_ID}" -d "@${TEMP_JSON}"
+      rm -f "${TEMP_JSON}"
+    done
 
-      echo "Setting defaults..."
+    echo "Setting defaults..."
 
-      curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
+    curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
 
-      echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
+    echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
 
-    else
-      echo "$OPENSEARCH_PRIMARY database previously initialized!"
-      echo
+  else
+    echo "$OPENSEARCH_PRIMARY database previously initialized!"
+    echo
 
-      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded
-      echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded
+    echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
 
-    fi # if/else OpenSearch database initialized
+  fi # if/else OpenSearch database initialized
 
-    # increase OpenSearch max shards per node from default if desired
-    if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
-      # see https://github.com/elastic/elasticsearch/issues/40803
-      curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
-    fi
-
-  fi # "$ARKIME_LIVE_CAPTURE" == "false"
+  # increase OpenSearch max shards per node from default if desired
+  if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
+    # see https://github.com/elastic/elasticsearch/issues/40803
+    curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
+  fi
 
   # before running viewer, call _refresh to make sure everything is available for search first
   curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
