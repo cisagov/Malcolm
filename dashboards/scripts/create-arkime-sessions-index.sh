@@ -197,8 +197,12 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           DASHBOARDS_IMPORT_DIR="$(mktemp -d -t dashboards-XXXXXX)"
           cp /opt/dashboards/*.json "${DASHBOARDS_IMPORT_DIR}"/
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
-            # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
-            [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/sessions)//' "$i"
+            if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
+              # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
+              sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/sessions)//' "$i"
+              # take care of a few other substitutions
+              sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
+            fi
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
           rm -rf "${DASHBOARDS_IMPORT_DIR}"
