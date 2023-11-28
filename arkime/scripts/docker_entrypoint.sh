@@ -9,6 +9,7 @@ function urlencodeall() {
 }
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
+ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
@@ -49,12 +50,12 @@ if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMA
 fi
 
 if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
-    cp "${ARKIME_DIR}"/etc/config.orig.ini "${ARKIME_DIR}"/etc/config.ini
+    cp "${ARKIME_DIR}"/etc/config.orig.ini "${ARKIME_CONFIG_FILE}"
 
-    sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_DIR}"/etc/config.ini
-    sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
-    sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_DIR}"/etc/config.ini
-    sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_DIR}"/etc/config.ini
+    sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
 
     # capture interface(s)
     if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then
@@ -63,20 +64,20 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
       ARKIME_CAPTURE_INTERFACE="$(echo "$CAPTURE_INTERFACE" | sed "s/,/;/g")"
 
       # place capture interfaces in the config file
-      sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_DIR}"/etc/config.ini
-      sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_DIR}"/etc/config.ini
-      sed -r -i "s/(bpf)\s*=\s*.*/\1=${PCAP_FILTER:-}/" "${ARKIME_DIR}"/etc/config.ini
+      sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_CONFIG_FILE}"
+      sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_CONFIG_FILE}"
+      sed -r -i "s/(bpf)\s*=\s*.*/\1=${PCAP_FILTER:-}/" "${ARKIME_CONFIG_FILE}"
 
       # convert pcap rotation size units (MB to GB) and stick in config file
       if [[ -n $PCAP_ROTATE_MEGABYTES ]]; then
         PCAP_ROTATE_GIGABYTES=$(echo "($PCAP_ROTATE_MEGABYTES + 1024 - 1)/1024" | bc)
-        sed -r -i "s/(maxFileSizeG)\s*=\s*.*/\1=$PCAP_ROTATE_GIGABYTES/" "${ARKIME_DIR}"/etc/config.ini
+        sed -r -i "s/(maxFileSizeG)\s*=\s*.*/\1=$PCAP_ROTATE_GIGABYTES/" "${ARKIME_CONFIG_FILE}"
       fi
 
       # convert pcap rotation time units (sec to min) and stick in config file
       if [[ -n $PCAP_ROTATE_SECONDS ]]; then
         PCAP_ROTATE_MINUTES=$(echo "($PCAP_ROTATE_SECONDS + 60 - 1)/60" | bc)
-        sed -r -i "s/(maxFileTimeM)\s*=\s*.*/\1=$PCAP_ROTATE_MINUTES/" "${ARKIME_DIR}"/etc/config.ini
+        sed -r -i "s/(maxFileTimeM)\s*=\s*.*/\1=$PCAP_ROTATE_MINUTES/" "${ARKIME_CONFIG_FILE}"
       fi
 
       # pcap compression
@@ -96,19 +97,19 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
 
     # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
-        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(plugins=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
-        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
+        sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(plugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
     fi
 
-    chmod 600 "${ARKIME_DIR}"/etc/config.ini || true
-    [[ -n ${PUID} ]] && chown -f ${PUID} "${ARKIME_DIR}"/etc/config.ini || true
-    [[ -n ${PGID} ]] && chown -f :${PGID} "${ARKIME_DIR}"/etc/config.ini || true
+    chmod 600 "${ARKIME_CONFIG_FILE}" || true
+    [[ -n ${PUID} ]] && chown -f ${PUID} "${ARKIME_CONFIG_FILE}" || true
+    [[ -n ${PGID} ]] && chown -f :${PGID} "${ARKIME_CONFIG_FILE}" || true
 fi
 
 unset OPENSEARCH_URL_FINAL

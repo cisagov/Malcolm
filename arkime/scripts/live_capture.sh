@@ -48,7 +48,7 @@ $ARKIME_DIR/bin/arkime_update_geo.sh
 
 # wait patiently for the non-live Arkime to initialize the database
 echo "Giving $OPENSEARCH_PRIMARY time to start..."
-/opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
+/opt/opensearch_status.sh -t malcolm_template 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
 echo "Giving Arkime time to initialize..."
 sleep 5
 until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) >= 1 )); do
