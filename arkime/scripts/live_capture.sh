@@ -43,8 +43,10 @@ fi
 # download and/or update geo updates
 $ARKIME_DIR/bin/arkime_update_geo.sh
 
-# wait patiently for the non-live Arkime to initialize the database
+# we haven't dropUser/dropGroup'ed yet, so make sure the regular user owns the files we just touched
+[[ -n ${PUID} ]] && [[ -n ${PGID} ]] && chown -f -R ${PUID}:${PGID} "${ARKIME_DIR}"/etc/ || true
 
+# wait patiently for the non-live Arkime to initialize the database
 echo "Giving $OPENSEARCH_PRIMARY time to start..."
 /opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
 echo "Giving Arkime time to initialize..."
@@ -68,4 +70,4 @@ echo
   -o ecsEventProvider=arkime \
   -o ecsEventDataset=session \
   --node "${ARKIME_LIVE_NODE_NAME}" \
-  --host "${ARKIME_LIVE_NODE_HOST}" | tee -a "${ARKIME_DIR}"/logs/capture.log 2>&1
+  --host "${ARKIME_LIVE_NODE_HOST}"

@@ -206,8 +206,6 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
-      - ./arkime-logs:/opt/arkime/logs
-      - ./arkime-raw:/opt/arkime/raw
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s

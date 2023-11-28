@@ -7,7 +7,7 @@ while true; do
     echo "Launch viewer..."
     rm -f $ARKIME_DIR/logs/viewer*
     pushd $ARKIME_DIR/viewer >/dev/null 2>&1
-    $ARKIME_DIR/bin/node viewer.js --insecure -n "${PCAP_NODE_NAME:-malcolm}" -c $ARKIME_DIR/etc/config.ini | tee -a $ARKIME_DIR/logs/viewer.log 2>&1
+    $ARKIME_DIR/bin/node viewer.js --insecure -n "${PCAP_NODE_NAME:-malcolm}" -c $ARKIME_DIR/etc/config.ini
     popd >/dev/null 2>&1
   fi
   sleep 5

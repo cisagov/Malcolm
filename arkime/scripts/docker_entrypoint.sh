@@ -91,7 +91,7 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
 
       # ensure capabilities for capture
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capture || true
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ARKIME_DIR}"/bin/capture || true
     fi
 
     # comment-out features that are unused in hedgehog run profile mode and in live-capture mode

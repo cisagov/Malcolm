@@ -78,9 +78,6 @@ spec:
             name: arkime-opensearch-curlrc-secret-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
-          - name: arkime-runtime-logs-volume
-            mountPath: /opt/arkime/logs
-            subPath: "arkime"
       initContainers:
       - name: arkime-dirinit-container
         image: ghcr.io/idaholab/malcolm/dirinit:v23.11.0
@@ -92,12 +89,10 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:processed;/data/runtime-logs:arkime"
+            value: "/data/pcap:processed"
         volumeMounts:
           - name: arkime-pcap-volume
             mountPath: "/data/pcap"
-          - name: arkime-runtime-logs-volume
-            mountPath: "/data/runtime-logs"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:
@@ -108,6 +103,3 @@ spec:
         - name: arkime-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
-        - name: arkime-runtime-logs-volume
-          persistentVolumeClaim:
-            claimName: runtime-logs-claim

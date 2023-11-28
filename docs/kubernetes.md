@@ -307,8 +307,6 @@ Here is a basic step-by-step example illustrating how to deploy Malcolm with Kub
 ```
 $ ls -l
 total 45,056
-drwxr-xr-x 2 user user      6 Apr 24 14:35 arkime-logs
-drwxr-xr-x 2 user user      6 Apr 24 14:35 arkime-raw
 drwxr-xr-x 2 user user  4,096 Apr 24 14:35 config
 drwxr-xr-x 3 user user     19 Apr 24 14:35 filebeat
 drwxr-xr-x 2 user user      6 Apr 24 14:35 htadmin

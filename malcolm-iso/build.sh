@@ -92,8 +92,6 @@ if [ -d "$WORKDIR" ]; then
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
-  mkdir -p "$MALCOLM_DEST_DIR/arkime-logs/"
-  mkdir -p "$MALCOLM_DEST_DIR/arkime-raw/"
   mkdir -p "$MALCOLM_DEST_DIR/config/"
   mkdir -p "$MALCOLM_DEST_DIR/filebeat/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
