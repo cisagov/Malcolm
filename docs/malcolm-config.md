@@ -9,7 +9,7 @@ Run `./scripts/configure` and answer the questions to configure Malcolm. For an 
 Although the configuration script automates many of the following configuration and tuning parameters, some environment variables of particular interest are listed here for reference.
 
 * **`arkime.env`** and **`arkime-secret.env`** - settings for [Arkime](https://arkime.com/)
-    - `ARKIME_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
+    - `ARKIME_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
     - `ARKIME_PASSWORD_SECRET` - the password hash secret for the Arkime viewer cluster (see `passwordSecret` in [Arkime INI Settings](https://arkime.com/settings)) used to secure the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface
     - `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
     - `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.

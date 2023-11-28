@@ -11,6 +11,8 @@ function urlencodeall() {
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
+CAPTURE_INTERFACE=${PCAP_IFACE:-}
+LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -47,9 +49,49 @@ fi
 
 if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
     cp "${ARKIME_DIR}"/etc/config.orig.ini "${ARKIME_DIR}"/etc/config.ini
+
     sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_DIR}"/etc/config.ini
     sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_DIR}"/etc/config.ini
+
+    # capture interface(s)
+    if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then
+
+      # in config.ini multiple interfaces are separated by ;
+      ARKIME_CAPTURE_INTERFACE="$(echo "$CAPTURE_INTERFACE" | sed "s/,/;/g")"
+
+      # place capture interfaces in the config file
+      sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_DIR}"/etc/config.ini
+      sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_DIR}"/etc/config.ini
+
+      # convert pcap rotation size units (MB to GB) and stick in config file
+      if [[ -n $PCAP_ROTATE_MEGABYTES ]]; then
+        PCAP_ROTATE_GIGABYTES=$(echo "($PCAP_ROTATE_MEGABYTES + 1024 - 1)/1024" | bc)
+        sed -r -i "s/(maxFileSizeG)\s*=\s*.*/\1=$PCAP_ROTATE_GIGABYTES/" "${ARKIME_DIR}"/etc/config.ini
+      fi
+
+      # convert pcap rotation time units (sec to min) and stick in config file
+      if [[ -n $PCAP_ROTATE_SECONDS ]]; then
+        PCAP_ROTATE_MINUTES=$(echo "($PCAP_ROTATE_SECONDS + 60 - 1)/60" | bc)
+        sed -r -i "s/(maxFileTimeM)\s*=\s*.*/\1=$PCAP_ROTATE_MINUTES/" "${ARKIME_DIR}"/etc/config.ini
+      fi
+
+      # pcap compression
+      COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
+      COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"
+      sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "$ARKIME_CONFIG_FILE"
+      if [[ "$COMPRESSION_TYPE" == "zstd" ]]; then
+        sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+      elif [[ "$COMPRESSION_TYPE" == "gzip" ]]; then
+        sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+      fi
+
+      # ensure capabilities for capture
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capture || true
+    fi
+
+    # comment-out features that are only unused in hedgehog run profile mode
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]]; then
         sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
@@ -60,6 +102,7 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
     fi
+
     chmod 600 "${ARKIME_DIR}"/etc/config.ini
 fi
 

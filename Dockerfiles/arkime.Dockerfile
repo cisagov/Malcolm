@@ -92,7 +92,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "arkime"
 ENV PGROUP "arkime"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in docker_entrypoint.sh before startup
+ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -106,12 +112,19 @@ ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
 ARG ARKIME_INTERFACE=eth0
-ARG ARKIME_ANALYZE_PCAP_THREADS=1
+ARG ARKIME_AUTO_ANALYZE_PCAP_FILES=false
+ARG ARKIME_AUTO_ANALYZE_PCAP_THREADS=1
 ARG OPENSEARCH_MAX_SHARDS_PER_NODE=2500
 ARG WISE=on
 ARG VIEWER=on
 #Whether or not Arkime is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
+ARG ARKIME_PCAP_PROCESSOR=true
+ARG ARKIME_LIVE_CAPTURE=false
+ARG ARKIME_ROTATED_PCAP=true
+ARG ARKIME_COMPRESSION_TYPE=none
+ARG ARKIME_COMPRESSION_LEVEL=0
+
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
 ARG PCAP_PIPELINE_VERBOSITY=""
@@ -130,7 +143,13 @@ ENV ARKIME_PASSWORD "ignored"
 ENV ARKIME_ECS_PROVIDER $ARKIME_ECS_PROVIDER
 ENV ARKIME_ECS_DATASET $ARKIME_ECS_DATASET
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
+ENV ARKIME_AUTO_ANALYZE_PCAP_FILES $ARKIME_AUTO_ANALYZE_PCAP_FILES
+ENV ARKIME_AUTO_ANALYZE_PCAP_THREADS $ARKIME_AUTO_ANALYZE_PCAP_THREADS
+ENV ARKIME_PCAP_PROCESSOR $ARKIME_PCAP_PROCESSOR
+ENV ARKIME_LIVE_CAPTURE $ARKIME_LIVE_CAPTURE
+ENV ARKIME_COMPRESSION_TYPE $ARKIME_COMPRESSION_TYPE
+ENV ARKIME_COMPRESSION_LEVEL $ARKIME_COMPRESSION_LEVEL
+ENV ARKIME_ROTATED_PCAP $ARKIME_ROTATED_PCAP
 ENV OPENSEARCH_MAX_SHARDS_PER_NODE $OPENSEARCH_MAX_SHARDS_PER_NODE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
@@ -147,7 +166,9 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      bc \
       curl \
+      ethtool \
       file \
       geoip-bin \
       gettext \
@@ -191,6 +212,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/opensearch_status.sh /opt
 COPY --chmod=755 shared/bin/pcap_processor.py /opt/
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
@@ -226,6 +248,9 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     cp -f /opt/arkime_update_geo.sh $ARKIME_DIR/bin/arkime_update_geo.sh && \
     mv $ARKIME_DIR/etc/config.ini $ARKIME_DIR/etc/config.orig.ini && \
     chmod u+s $ARKIME_DIR/bin/capture && \
+    chown root:${PGROUP} /sbin/ethtool $ARKIME_DIR/bin/capture && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
     mkdir -p /var/run/arkime && \
     chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime
 #Update Path

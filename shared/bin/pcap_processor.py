@@ -48,6 +48,7 @@ PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
+ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
 SURICATA_PATH = "/usr/bin/suricata"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
@@ -71,6 +72,7 @@ USERTAG_TAG = 'USERTAG'
 
 TAGS_NOSHOW = (
     USERTAG_TAG,
+    ARKIME_AUTOARKIME_TAG,
     SURICATA_AUTOSURICATA_TAG,
     ZEEK_AUTOZEEK_TAG,
 )
@@ -112,7 +114,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
 
-    newFileQueue, pcapBaseDir, arkimeBin, nodeName, nodeHost, autoTag, notLocked, logger = (
+    newFileQueue, pcapBaseDir, arkimeBin, nodeName, nodeHost, autoArkime, forceArkime, autoTag, notLocked, logger = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
         arkimeWorkerArgs[2],
@@ -121,6 +123,8 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         arkimeWorkerArgs[5],
         arkimeWorkerArgs[6],
         arkimeWorkerArgs[7],
+        arkimeWorkerArgs[8],
+        arkimeWorkerArgs[9],
     )
 
     if not logger:
@@ -141,49 +145,56 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                     fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                    # finalize tags list
-                    fileInfo[FILE_INFO_DICT_TAGS] = (
-                        [
-                            x
-                            for x in fileInfo[FILE_INFO_DICT_TAGS]
-                            if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                    # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
+                    if forceArkime and (
+                        autoArkime
+                        or (
+                            (FILE_INFO_DICT_TAGS in fileInfo) and ARKIME_AUTOARKIME_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                        )
+                    ):
+                        # finalize tags list
+                        fileInfo[FILE_INFO_DICT_TAGS] = (
+                            [
+                                x
+                                for x in fileInfo[FILE_INFO_DICT_TAGS]
+                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                            ]
+                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
+                            else list()
+                        )
+                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+
+                        # put together arkime execution command
+                        cmd = [
+                            arkimeBin,
+                            '--quiet',
+                            '--insecure',
+                            '--node',
+                            fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
+                            '-o',
+                            f'ecsEventProvider={arkimeProvider}',
+                            '-o',
+                            f'ecsEventDataset={arkimeDataset}',
+                            '-r',
+                            fileInfo[FILE_INFO_DICT_NAME],
                         ]
-                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
-                        else list()
-                    )
-                    logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        if nodeHost:
+                            cmd.append('--host')
+                            cmd.append(nodeHost)
+                        if notLocked:
+                            cmd.append('--nolockpcap')
+                        cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
 
-                    # put together arkime execution command
-                    cmd = [
-                        arkimeBin,
-                        '--quiet',
-                        '--insecure',
-                        '--node',
-                        fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
-                        '-o',
-                        f'ecsEventProvider={arkimeProvider}',
-                        '-o',
-                        f'ecsEventDataset={arkimeDataset}',
-                        '-r',
-                        fileInfo[FILE_INFO_DICT_NAME],
-                    ]
-                    if nodeHost:
-                        cmd.append('--host')
-                        cmd.append(nodeHost)
-                    if notLocked:
-                        cmd.append('--nolockpcap')
-                    cmd.extend(list(chain.from_iterable(zip(repeat('-t'), fileInfo[FILE_INFO_DICT_TAGS]))))
-
-                    # execute capture for pcap file
-                    retcode, output = run_process(cmd, logger=logger)
-                    if retcode == 0:
-                        logger.info(
-                            f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                        )
-                    else:
-                        logger.warning(
-                            f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
-                        )
+                        # execute capture for pcap file
+                        retcode, output = run_process(cmd, logger=logger)
+                        if retcode == 0:
+                            logger.info(
+                                f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                            )
+                        else:
+                            logger.warning(
+                                f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
+                            )
 
     logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
@@ -544,6 +555,28 @@ def main():
     )
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
         parser.add_argument(
+            '--autoarkime',
+            dest='autoArkime',
+            help="Autoanalyze all PCAP file with Arkime",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
+        parser.add_argument(
+            '--forcearkime',
+            dest='forceArkime',
+            help="Force Arkime analysis even on rotated PCAPs",
+            metavar='true|false',
+            type=str2bool,
+            nargs='?',
+            const=True,
+            default=False,
+            required=False,
+        )
+        parser.add_argument(
             '--arkime',
             required=False,
             dest='executable',
@@ -713,6 +746,8 @@ def main():
                     args.executable,
                     args.nodeName,
                     args.nodeHost,
+                    args.autoArkime,
+                    args.forceArkime,
                     args.autoTag,
                     args.notLocked,
                     logging,
