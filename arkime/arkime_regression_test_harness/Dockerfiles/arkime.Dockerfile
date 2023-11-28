@@ -66,7 +66,7 @@ RUN git clone --recursive --depth=1 --single-branch -b "$GITHUB_BRANCH" "$GITHUB
 
 ENV PATH="/opt:$ARKIME_DIR/bin:$ARKIME_DIR/node-v10.21.0-linux-x64/bin:${PATH}"
 
-EXPOSE 8000 8005 8006 8081
+EXPOSE 8000 8005 8081
 
 WORKDIR $ARKIME_DIR/tests
 

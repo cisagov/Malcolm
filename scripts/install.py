@@ -1044,6 +1044,7 @@ class Installer(object):
                 if arkimeFreeSpaceGTmp:
                     arkimeFreeSpaceG = arkimeFreeSpaceGTmp
 
+        autoArkime = InstallerYesOrNo('Automatically analyze all PCAP files with Arkime?', default=args.autoArkime)
         autoSuricata = InstallerYesOrNo(
             'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
         )
@@ -1084,7 +1085,6 @@ class Installer(object):
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if malcolmProfile == PROFILE_MALCOLM:
-                arkimeViewerOpen = False
                 openPortsOptions = ('no', 'yes', 'customize')
                 loopBreaker = CountUntilException(MaxAskForValueCount)
                 while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
@@ -1116,16 +1116,12 @@ class Installer(object):
                 openPortsSelection = 'n'
                 logstashOpen = False
                 filebeatTcpOpen = False
-                arkimeViewerOpen = InstallerYesOrNo(
-                    'Expose Arkime viewer to external hosts for PCAP payload retrieval?',
-                    default=args.exposeArkimeViewer,
-                )
+
         else:
             opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
-            arkimeViewerOpen = malcolmProfile == PROFILE_HEDGEHOG
 
         filebeatTcpFormat = 'json'
         filebeatTcpSourceField = 'message'
@@ -1284,6 +1280,7 @@ class Installer(object):
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
+        liveArkime = False
         liveZeek = False
         liveSuricata = False
         pcapIface = 'lo'
@@ -1309,17 +1306,30 @@ class Installer(object):
                 choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
             )[0]
         if captureSelection == 'y':
-            pcapNetSniff = True
+            liveArkime = malcolmProfile == PROFILE_HEDGEHOG
+            pcapNetSniff = not liveArkime
             liveSuricata = True
             liveZeek = True
         elif captureSelection == 'c':
             if InstallerYesOrNo(
                 'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
+                default=args.pcapNetSniff
+                or args.pcapTcpDump
+                or args.liveArkime
+                or (malcolmProfile == PROFILE_HEDGEHOG),
             ):
-                pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
-                if not pcapNetSniff:
-                    pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+                liveArkime = (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal) and (
+                    (malcolmProfile == PROFILE_HEDGEHOG)
+                    or InstallerYesOrNo('Capture packets using Arkime capture?', default=args.liveArkime)
+                )
+                pcapNetSniff = (not liveArkime) and InstallerYesOrNo(
+                    'Capture packets using netsniff-ng?', default=args.pcapNetSniff
+                )
+                pcapTcpDump = (
+                    (not liveArkime)
+                    and (not pcapNetSniff)
+                    and InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+                )
             liveSuricata = InstallerYesOrNo(
                 'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
             )
@@ -1334,7 +1344,7 @@ class Installer(object):
                     default=args.tweakIface,
                 )
 
-        if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+        if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
             pcapIface = ''
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
             while (len(pcapIface) <= 0) and loopBreaker.increment():
@@ -1348,6 +1358,7 @@ class Installer(object):
             and (not pcapTcpDump)
             and (not liveZeek)
             and (not liveSuricata)
+            and (not liveArkime)
         ):
             InstallerDisplayMessage(
                 f'Warning: Running with the {malcolmProfile} profile but no capture methods are enabled.',
@@ -1392,6 +1403,24 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'ARKIME_FREESPACEG',
                 arkimeFreeSpaceG,
+            ),
+            # live traffic analysis with Arkime capture (only available with remote opensearch or elasticsearch)
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-live.env'),
+                'ARKIME_LIVE_CAPTURE',
+                TrueOrFalseNoQuote(liveArkime),
+            ),
+            # rotated captured PCAP analysis with Arkime (not live capture)
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-offline.env'),
+                'ARKIME_ROTATED_PCAP',
+                TrueOrFalseNoQuote(autoArkime and (not liveArkime)),
+            ),
+            # automatic uploaded pcap analysis with Arkime
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-offline.env'),
+                'ARKIME_AUTO_ANALYZE_PCAP_FILES',
+                TrueOrFalseNoQuote(autoArkime),
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
@@ -1900,13 +1929,6 @@ class Installer(object):
                                         line,
                                         pcapDir,
                                         sectionIndents[currentSection] * 3,
-                                    )
-                                elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IP based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if arkimeViewerOpen else '127.0.0.1'}:\g<3>",
-                                        line,
                                     )
 
                             elif currentService == 'filebeat':
@@ -3509,6 +3531,16 @@ def main():
 
     analysisArgGroup = parser.add_argument_group('Analysis options')
     analysisArgGroup.add_argument(
+        '--auto-arkime',
+        dest='autoArkime',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Automatically analyze all PCAP files with Arkime",
+    )
+    analysisArgGroup.add_argument(
         '--auto-suricata',
         dest='autoSuricata',
         type=str2bool,
@@ -3759,6 +3791,16 @@ def main():
     )
     captureArgGroup.add_argument(
         '--live-capture-arkime',
+        dest='liveArkime',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-netsniff',
         dest='pcapNetSniff',
         type=str2bool,
         metavar="true|false",
@@ -3768,7 +3810,7 @@ def main():
         help="Capture live network traffic with netsniff-ng for Arkime",
     )
     captureArgGroup.add_argument(
-        '--live-capture-arkime-tcpdump',
+        '--live-capture-tcpdump',
         dest='pcapTcpDump',
         type=str2bool,
         metavar="true|false",
