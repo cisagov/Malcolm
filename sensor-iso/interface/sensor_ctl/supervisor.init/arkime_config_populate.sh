@@ -38,6 +38,10 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s|(elasticsearch)\s*=\s*.*|\1=$ARKIME_ELASTICSEARCH|" "$ARKIME_CONFIG_FILE"
   fi
 
+  if [[ -n $ARKIME_VIEWER_PORT ]]; then
+    sed -r -i "s/(viewPort)\s*=\s*.*/\1=$ARKIME_VIEWER_PORT/" "$ARKIME_CONFIG_FILE"
+  f
+
   if [[ -n $ARKIME_PASSWORD_SECRET ]]; then
     # place the Arkime viewer cluster password hash in the config file
     sed -r -i "s|(passwordSecret)\s*=\s*.*|\1=$ARKIME_PASSWORD_SECRET|" "$ARKIME_CONFIG_FILE"
@@ -64,7 +68,6 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   if [[ -n $ARKIME_FREESPACEG ]]; then
     sed -r -i "s/(freeSpaceG)\s*=\s*.*/\1=$ARKIME_FREESPACEG/" "$ARKIME_CONFIG_FILE"
   fi
-
   # pcap compression
   COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
   COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"

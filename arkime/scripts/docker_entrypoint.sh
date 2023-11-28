@@ -13,6 +13,7 @@ ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
 LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
+VIEWER_PORT=${ARKIME_VIEWER_PORT:-8005}
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -53,6 +54,7 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
     sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_DIR}"/etc/config.ini
     sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_DIR}"/etc/config.ini
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_DIR}"/etc/config.ini
+    sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_DIR}"/etc/config.ini
 
     # capture interface(s)
     if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then
@@ -63,6 +65,7 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
       # place capture interfaces in the config file
       sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_DIR}"/etc/config.ini
       sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_DIR}"/etc/config.ini
+      sed -r -i "s/(bpf)\s*=\s*.*/\1=${PCAP_FILTER:-}/" "${ARKIME_DIR}"/etc/config.ini
 
       # convert pcap rotation size units (MB to GB) and stick in config file
       if [[ -n $PCAP_ROTATE_MEGABYTES ]]; then
@@ -91,8 +94,8 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/capture || true
     fi
 
-    # comment-out features that are only unused in hedgehog run profile mode
-    if [[ "$MALCOLM_PROFILE" == "hedgehog" ]]; then
+    # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
+    if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
         sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_DIR}"/etc/config.ini
@@ -103,7 +106,9 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_DIR}"/etc/config.ini
     fi
 
-    chmod 600 "${ARKIME_DIR}"/etc/config.ini
+    chmod 600 "${ARKIME_DIR}"/etc/config.ini || true
+    [[ -n ${PUID} ]] && chown -f ${PUID} "${ARKIME_DIR}"/etc/config.ini || true
+    [[ -n ${PGID} ]] && chown -f :${PGID} "${ARKIME_DIR}"/etc/config.ini || true
 fi
 
 unset OPENSEARCH_URL_FINAL
