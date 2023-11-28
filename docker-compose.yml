@@ -2,6 +2,14 @@
 
 version: '3.7'
 
+x-logging:
+  &default-logging
+  driver: local
+  options:
+    max-size: 200m
+    max-file: 2
+    compress: "false"
+
 services:
   opensearch:
     build:
@@ -13,6 +21,7 @@ services:
     #   start but not actually run OpenSearch. It's included in both profiles to
     #   satisfy some other containers' depends_on.
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -50,6 +59,7 @@ services:
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards-helper:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -82,6 +92,7 @@ services:
       dockerfile: Dockerfiles/dashboards.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -112,6 +123,7 @@ services:
       dockerfile: Dockerfiles/logstash.Dockerfile
     image: ghcr.io/idaholab/malcolm/logstash-oss:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -162,6 +174,7 @@ services:
       dockerfile: Dockerfiles/filebeat.Dockerfile
     image: ghcr.io/idaholab/malcolm/filebeat-oss:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -200,6 +213,7 @@ services:
     image: ghcr.io/idaholab/malcolm/arkime:23.11.0
     # todo: viewer/wise in hedgehog profile (and what about nginx reaching back?)
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -245,6 +259,7 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -288,6 +303,7 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -321,6 +337,7 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -359,6 +376,7 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -389,6 +407,7 @@ services:
       dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-monitor:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -419,6 +438,7 @@ services:
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-capture:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -445,6 +465,7 @@ services:
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-monitor:23.11.0
     profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -475,6 +496,7 @@ services:
       dockerfile: Dockerfiles/file-upload.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-upload:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
@@ -501,6 +523,7 @@ services:
   htadmin:
     image: ghcr.io/idaholab/malcolm/htadmin:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/htadmin.Dockerfile
@@ -530,6 +553,7 @@ services:
   freq:
     image: ghcr.io/idaholab/malcolm/freq:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/freq.Dockerfile
@@ -556,6 +580,7 @@ services:
   netbox:
     image: ghcr.io/idaholab/malcolm/netbox:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/netbox.Dockerfile
@@ -592,6 +617,7 @@ services:
   netbox-postgres:
     image: ghcr.io/idaholab/malcolm/postgresql:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/postgresql.Dockerfile
@@ -620,6 +646,7 @@ services:
   netbox-redis:
     image: ghcr.io/idaholab/malcolm/redis:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -652,6 +679,7 @@ services:
   netbox-redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/redis.Dockerfile
@@ -683,6 +711,7 @@ services:
   api:
     image: ghcr.io/idaholab/malcolm/api:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     build:
       context: .
       dockerfile: Dockerfiles/api.Dockerfile
@@ -715,6 +744,7 @@ services:
       dockerfile: Dockerfiles/nginx.Dockerfile
     image: ghcr.io/idaholab/malcolm/nginx-proxy:23.11.0
     profiles: ["malcolm"]
+    logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
