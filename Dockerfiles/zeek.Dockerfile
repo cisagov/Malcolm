@@ -200,7 +200,9 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
+      touch "${ZEEK_DIR}"/share/zeek/site/custom/__load__.zeek && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \
