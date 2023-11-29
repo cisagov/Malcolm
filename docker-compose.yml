@@ -290,6 +290,7 @@ services:
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
       interval: 30s
@@ -330,6 +331,7 @@ services:
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
   suricata:
     build:
       context: .

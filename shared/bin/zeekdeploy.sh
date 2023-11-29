@@ -94,6 +94,12 @@ touch "$INTEL_DIR"/__load__.zeek
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
 INTEL_UPDATE_TIME_PREV=0
 
+# make sure "custom" directory exists, even if empty
+[[ -n "$ZEEK_CUSTOM_PATH" ]] && CUSTOM_DIR="$ZEEK_CUSTOM_PATH" || CUSTOM_DIR=/opt/sensor/sensor_ctl/zeek/custom
+export CUSTOM_DIR
+mkdir -p "$CUSTOM_DIR"
+touch "$CUSTOM_DIR"/__load__.zeek
+
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
 

@@ -90,6 +90,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/processed/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/upload/"
+  mkdir $VERBOSE -p "$DESTDIR/zeek/custom/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX/"
 

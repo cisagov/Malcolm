@@ -89,6 +89,7 @@ redef ignore_checksums = T;
 
 @load packages
 @load intel
+@load custom
 
 event zeek_init() &priority=-5 {
 

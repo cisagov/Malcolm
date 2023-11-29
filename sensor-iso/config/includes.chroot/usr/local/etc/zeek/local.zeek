@@ -89,6 +89,7 @@ redef ignore_checksums = T;
 
 @load packages
 @load /opt/sensor/sensor_ctl/zeek/intel
+@load /opt/sensor/sensor_ctl/zeek/custom
 
 event zeek_init() &priority=-5 {
 

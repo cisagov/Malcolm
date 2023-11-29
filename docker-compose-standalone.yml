@@ -261,6 +261,7 @@ services:
       - ./zeek-logs/upload:/zeek/upload
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
       interval: 30s
@@ -297,6 +298,7 @@ services:
       - ./zeek-logs/live:/zeek/live
       - ./zeek-logs/extract_files:/zeek/extract_files
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
   suricata:
     image: ghcr.io/idaholab/malcolm/suricata:23.11.0
     profiles: ["malcolm", "hedgehog"]

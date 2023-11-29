@@ -66,8 +66,9 @@ EOF
 
 # set up default zeek local policy and sensor-related directories
 cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
-mkdir -p /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit
+mkdir -p /opt/sensor/sensor_ctl/zeek/custom /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit
 touch /opt/sensor/sensor_ctl/zeek/intel/__load__.zeek
+touch /opt/sensor/sensor_ctl/zeek/custom/__load__.zeek
 [[ -f /usr/local/bin/zeek_intel_setup.sh ]] && mv /usr/local/bin/zeek_intel_setup.sh "${ZEEK_DIR}"/bin/
 [[ -f /usr/local/bin/zeek_intel_from_threat_feed.py ]] && mv /usr/local/bin/zeek*threat*.py "${ZEEK_DIR}"/bin/
 
