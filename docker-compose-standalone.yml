@@ -189,7 +189,6 @@ services:
       start_period: 60s
   arkime:
     image: ghcr.io/idaholab/malcolm/arkime:23.11.0
-    # todo: viewer/wise in hedgehog profile (and what about nginx reaching back?)
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -328,6 +327,7 @@ services:
       - ./suricata-logs:/var/log/suricata
       - ./pcap:/data/pcap
       - ./suricata/rules:/opt/suricata/rules:ro
+      - ./suricata/include-configs:/opt/suricata/include-configs:ro
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
       interval: 30s
@@ -362,6 +362,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./suricata-logs:/var/log/suricata
       - ./suricata/rules:/opt/suricata/rules:ro
+      - ./suricata/include-configs:/opt/suricata/include-configs:ro
   file-monitor:
     image: ghcr.io/idaholab/malcolm/file-monitor:23.11.0
     profiles: ["malcolm", "hedgehog"]

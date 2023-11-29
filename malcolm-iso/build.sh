@@ -114,6 +114,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/scripts/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata-logs/live/"
   mkdir -p "$MALCOLM_DEST_DIR/suricata/rules/"
+  mkdir -p "$MALCOLM_DEST_DIR/suricata/include-configs/"
   mkdir -p "$MALCOLM_DEST_DIR/yara/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/current/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/extract_files/preserved/"

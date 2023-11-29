@@ -546,6 +546,16 @@ def touch(filename):
 
 
 ###################################################################################################
+# append strings to a text file
+def append_to_file(filename, value):
+    with open(filename, "a") as f:
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            f.write('\n'.join(value))
+        else:
+            f.write(value)
+
+
+###################################################################################################
 # read the contents of a file, first assuming text (with encoding), optionally falling back to binary
 def file_contents(filename, encoding='utf-8', binary_fallback=False):
     if os.path.isfile(filename):

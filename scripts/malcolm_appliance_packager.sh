@@ -82,6 +82,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
   mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
+  mkdir $VERBOSE -p "$DESTDIR/suricata/include-configs/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/current/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/preserved/"

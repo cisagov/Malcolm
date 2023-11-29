@@ -42,6 +42,7 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
+ENV SURICATA_CUSTOM_CONFIG_DIR /opt/suricata/include-configs
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
 ENV SURICATA_MANAGED_RULES_DIR "$SURICATA_MANAGED_DIR/rules"
@@ -116,8 +117,8 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
     find /tmp/default-rules/ -not -path '*/.gitignore' -type f -exec cp "{}" "$SURICATA_CONFIG_DIR"/rules/ \; && \
@@ -183,6 +184,7 @@ ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$S
 
 VOLUME ["$SURICATA_CONFIG_DIR"]
 VOLUME ["$SURICATA_CUSTOM_RULES_DIR"]
+VOLUME ["$SURICATA_CUSTOM_CONFIG_DIR"]
 VOLUME ["$SURICATA_LOG_DIR"]
 VOLUME ["$SURICATA_MANAGED_DIR"]
 VOLUME ["$SURICATA_RUN_DIR"]

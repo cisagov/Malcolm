@@ -60,10 +60,12 @@ suricata:
     - ./suricata-logs:/var/log/suricata
     - ./pcap:/data/pcap
     - ./suricata/rules:/opt/suricata/rules:ro
+    - ./suricata/include-configs:/opt/suricata/include-configs:ro
 suricata-live:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./suricata-logs:/var/log/suricata
     - ./suricata/rules:/opt/suricata/rules:ro
+    - ./suricata/include-configs:/opt/suricata/include-configs:ro
 file-monitor:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./zeek-logs/extract_files:/zeek/extract_files
