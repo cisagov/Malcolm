@@ -89,7 +89,7 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 [[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
 export INTEL_DIR
 mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP
-touch "$INTEL_DIR"/__load__.zeek
+touch "$INTEL_DIR"/__load__.zeek || true
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
 INTEL_UPDATE_TIME_PREV=0
@@ -98,7 +98,7 @@ INTEL_UPDATE_TIME_PREV=0
 [[ -n "$ZEEK_CUSTOM_PATH" ]] && CUSTOM_DIR="$ZEEK_CUSTOM_PATH" || CUSTOM_DIR=/opt/sensor/sensor_ctl/zeek/custom
 export CUSTOM_DIR
 mkdir -p "$CUSTOM_DIR"
-touch "$CUSTOM_DIR"/__load__.zeek
+touch "$CUSTOM_DIR"/__load__.zeek || true
 
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
