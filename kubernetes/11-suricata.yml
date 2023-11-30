@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-offline-container
-        image: ghcr.io/idaholab/malcolm/suricata:v23.11.0
+        image: ghcr.io/idaholab/malcolm/suricata:v23.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -59,9 +59,11 @@ spec:
             name: suricata-offline-suricata-logs-volume
           - mountPath: "/opt/suricata/rules/configmap"
             name: suricata-offline-custom-rules-volume
+          - mountPath: "/opt/suricata/include-configs/configmap"
+            name: suricata-offline-custom-configs-volume
       initContainers:
       - name: suricata-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:v23.11.0
+        image: ghcr.io/idaholab/malcolm/dirinit:v23.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -87,3 +89,6 @@ spec:
         - name: suricata-offline-custom-rules-volume
           configMap:
             name: suricata-rules
+        - name: suricata-offline-custom-configs-volume
+          configMap:
+            name: suricata-configs

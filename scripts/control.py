@@ -983,8 +983,9 @@ def start():
             # chmod 600 envFile
             os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
 
-    # touch the zeek intel file
+    # touch the zeek intel file and zeek custom file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
+    open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('custom', '__load__.zeek'))), 'a').close()
 
     # clean up any leftover intel update locks
     shutil.rmtree(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True)

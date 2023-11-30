@@ -119,6 +119,12 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
         },
     ],
+    'suricata-configs': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'include-configs')),
+        },
+    ],
     'filebeat-certs': [
         {
             'secret': True,

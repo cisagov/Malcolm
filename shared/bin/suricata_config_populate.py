@@ -27,7 +27,7 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool, deep_set, pushd, run_process
+from malcolm_utils import val2bool, deep_set, pushd, run_process, append_to_file
 
 ###################################################################################################
 args = None
@@ -47,26 +47,6 @@ class NullRepresenter:
     def __call__(self, repr, data):
         ret_val = repr.represent_scalar(u'tag:yaml.org,2002:null', u'')
         return ret_val
-
-
-###################################################################################################
-def ObjToYamlStrLines(obj, options=None):
-    outputStr = None
-    if options is None:
-        options = {}
-
-    yaml = YAML()
-    yaml.preserve_quotes = False
-    yaml.representer.ignore_aliases = lambda x: True
-    yaml.representer.add_representer(type(None), NullRepresenter())
-    yaml.boolean_representation = ['no', 'yes']
-    yaml.version = YAML_VERSION
-
-    with StringIO() as stringStream:
-        yaml.dump(obj, stringStream, **options)
-        outputStr = stringStream.getvalue()
-
-    return outputStr.splitlines()
 
 
 ###################################################################################################
@@ -543,6 +523,22 @@ def GetRuleSources(requireRulesExist=False):
 
 
 ###################################################################################################
+def GetIncludeConfigSources():
+    global DEFAULT_VARS
+
+    configSources = list(
+        [
+            os.path.join(DEFAULT_VARS['CUSTOM_CONFIG_DIR'], x)
+            for x in fnmatch.filter(os.listdir(DEFAULT_VARS['CUSTOM_CONFIG_DIR']), '*.yaml')
+        ]
+        if DEFAULT_VARS['CUSTOM_CONFIG_DIR'] is not None
+        else []
+    )
+
+    return configSources
+
+
+###################################################################################################
 def main():
     global args
     global DEFAULT_VARS
@@ -643,6 +639,7 @@ def main():
         with open(args.input, 'r') as f:
             inYaml = YAML(typ='rt')
             inYaml.preserve_quotes = False
+            inYaml.allow_duplicate_keys = True
             inYaml.emitter.alt_null = None
             inYaml.representer.ignore_aliases = lambda x: True
             inYaml.boolean_representation = ['no', 'yes']
@@ -1073,20 +1070,41 @@ def main():
             os.path.join(DEFAULT_VARS['RUN_DIR'], 'suricata-command.socket'),
         )
 
+    extraConfigFiles = GetIncludeConfigSources()
+
     # validate suricata execution prior to calling it a day
     with tempfile.TemporaryDirectory() as tmpLogDir:
         with pushd(tmpLogDir):
             deep_set(cfg, ['stats', 'enabled'], True)
+
             cfg.pop('rule-files', None)
             deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=True))
+
+            # Hackety-hack, don't talk back! Despite the "Including multiple files" section of
+            #   https://docs.suricata.io/en/latest/configuration/includes.html#including-multiple-files
+            #   saying this can be set as an array, it does not seem to be working for me.
+            #   The sample suricata.yaml file shows it should be done like this:
+            #     include: include1.yaml
+            #     include: include2.yaml
+            # The reason this is a pain is that this is not actually valid YAML. So
+            #   what we are going to do is remove the 'include' section here,
+            #   write the YAML to a file, and then append the includes: afterwards
+            #   just in plain text.
+            cfg.pop('include', None)
+
             with open('suricata.yaml', 'w') as outTestFile:
                 outTestYaml = YAML(typ='rt')
                 outTestYaml.preserve_quotes = False
+                outTestYaml.allow_duplicate_keys = True
                 outTestYaml.representer.ignore_aliases = lambda x: True
                 outTestYaml.representer.add_representer(type(None), NullRepresenter())
                 outTestYaml.boolean_representation = ['no', 'yes']
                 outTestYaml.version = YAML_VERSION
                 outTestYaml.dump(cfg, outTestFile)
+
+            # see note on 'include' above
+            append_to_file('suricata.yaml', [''] + [f"include: {x}" for x in extraConfigFiles] + [''])
+
             script_return_code, output = run_process(
                 [
                     'suricata',
@@ -1109,17 +1127,24 @@ def main():
     cfg.pop('rule-files', None)
     deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=False))
 
+    # see note on 'include' above
+    cfg.pop('include', None)
+
     ##################################################################################################
 
     # write the new YAML file
     with open(args.output, 'w') as outfile:
         outYaml = YAML(typ='rt')
         outYaml.preserve_quotes = False
+        outYaml.allow_duplicate_keys = True
         outYaml.representer.ignore_aliases = lambda x: True
         outYaml.representer.add_representer(type(None), NullRepresenter())
         outYaml.boolean_representation = ['no', 'yes']
         outYaml.version = YAML_VERSION
         outYaml.dump(cfg, outfile)
+
+    # see note on 'include' above
+    append_to_file(args.output, [''] + [f"include: {x}" for x in extraConfigFiles] + [''])
 
     ##################################################################################################
 
