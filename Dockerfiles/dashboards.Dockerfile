@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:2.8.0
+FROM opensearchproject/opensearch-dashboards:2.11.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -20,7 +20,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.11.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_PRIMARY="opensearch-local"
@@ -46,16 +46,16 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
+    yum install -y curl-minimal psmisc findutils util-linux openssl rsync python3 zip unzip && \
     yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
