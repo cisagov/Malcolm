@@ -76,17 +76,16 @@ ADD scripts/malcolm_utils.py /usr/local/bin/
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
 # internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead.
 
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-192x192.png
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-512x512.png
+COPY --chmod=644 docs/images/favicon/favicon192.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-192x192.png
+COPY --chmod=644 docs/images/favicon/favicon512.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-512x512.png
 COPY --chmod=644 docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
 COPY --chmod=644 docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
 COPY --chmod=644 docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
 COPY --chmod=644 docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-144x144.png
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-150x150.png
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-310x150.png
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-310x310.png
-# COPY --chmod=644 docs/images/ /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-70x70.png
+COPY --chmod=644 docs/images/favicon/favicon144.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-144x144.png
+COPY --chmod=644 docs/images/favicon/favicon150.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-150x150.png
+COPY --chmod=644 docs/images/favicon/favicon310.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-310x310.png
+COPY --chmod=644 docs/images/favicon/favicon70.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-70x70.png
 COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch.svg
 COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark.svg
 COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark_on_dark.svg
@@ -102,7 +101,6 @@ COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/s
 COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner.svg
 COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_dark.svg
 COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_light.svg
-
 
 
 ENTRYPOINT ["/usr/bin/tini", \
