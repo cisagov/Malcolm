@@ -159,6 +159,18 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
         },
     ],
+    'zeek-custom': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
+        },
+    ],
+    'zeek-intel-preseed': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),
+        },
+    ],
 }
 
 # the PersistentVolumes themselves aren't used directly,
