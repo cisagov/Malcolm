@@ -32,7 +32,16 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
 
     # if we have a directory to seed the intel config for the first time, start from a blank slate with just its contents
     if [[ -d "${INTEL_DIR}" ]] && [[ -d "${INTEL_PRESEED_DIR}" ]]; then
-        rsync -av --delete "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
+
+        EXCLUDES=()
+        EXCLUDES+=( --exclude='..*' )
+        EXCLUDES+=( --exclude='.dockerignore' )
+        EXCLUDES+=( --exclude='.gitignore' )
+        while read MAP_DIR; do
+            EXCLUDES+=( --exclude="${MAP_DIR}/" )
+        done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
+
+        rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
         mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX || true
     fi
 
