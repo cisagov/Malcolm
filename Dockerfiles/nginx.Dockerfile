@@ -117,8 +117,6 @@ RUN set -x ; \
     --with-http_addition_module \
     --with-http_sub_module \
     --with-http_dav_module \
-    --with-http_flv_module \
-    --with-http_mp4_module \
     --with-http_gunzip_module \
     --with-http_gzip_static_module \
     --with-http_random_index_module \
@@ -126,7 +124,6 @@ RUN set -x ; \
     --with-http_stub_status_module \
     --with-http_auth_request_module \
     --with-http_xslt_module=dynamic \
-    --with-http_image_filter_module=dynamic \
     --with-http_geoip_module=dynamic \
     --with-http_perl_module=dynamic \
     --with-threads \
@@ -154,7 +151,6 @@ RUN set -x ; \
   chown ${PUSER}:${PGROUP} /var/cache/nginx ; \
   apk add --no-cache --virtual .nginx-build-deps \
     gcc \
-    gd-dev \
     geoip-dev \
     gnupg \
     libc-dev \
@@ -178,7 +174,6 @@ RUN set -x ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
   mv objs/nginx objs/nginx-debug ; \
   mv objs/ngx_http_xslt_filter_module.so objs/ngx_http_xslt_filter_module-debug.so ; \
-  mv objs/ngx_http_image_filter_module.so objs/ngx_http_image_filter_module-debug.so ; \
   mv objs/ngx_http_geoip_module.so objs/ngx_http_geoip_module-debug.so ; \
   mv objs/ngx_http_perl_module.so objs/ngx_http_perl_module-debug.so ; \
   mv objs/ngx_stream_geoip_module.so objs/ngx_stream_geoip_module-debug.so ; \
@@ -191,7 +186,6 @@ RUN set -x ; \
   install -m644 html/50x.html /usr/share/nginx/html/ ; \
   install -m755 objs/nginx-debug /usr/sbin/nginx-debug ; \
   install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so ; \
-  install -m755 objs/ngx_http_image_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_image_filter_module-debug.so ; \
   install -m755 objs/ngx_http_geoip_module-debug.so /usr/lib/nginx/modules/ngx_http_geoip_module-debug.so ; \
   install -m755 objs/ngx_http_perl_module-debug.so /usr/lib/nginx/modules/ngx_http_perl_module-debug.so ; \
   install -m755 objs/ngx_stream_geoip_module-debug.so /usr/lib/nginx/modules/ngx_stream_geoip_module-debug.so ; \
@@ -214,7 +208,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap stunnel supervisor tini tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap shadow stunnel supervisor tini tzdata; \
   update-ca-certificates; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \

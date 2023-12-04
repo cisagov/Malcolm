@@ -22,9 +22,17 @@ if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
     "https://github.com/antonmedv/fx|^fx_linux_amd64$|"$HOME"/.local/bin/fx|755"
     "https://github.com/aptible/supercronic|^supercronic-linux-amd64$|"$HOME"/.local/bin/supercronic|755"
     "https://github.com/boringproxy/boringproxy|^boringproxy-linux-x86_64$|"$HOME"/.local/bin/boringproxy|755"
+    "https://github.com/eza-community/eza|^eza_x86_64-unknown-linux-musl\.tar\.gz$|/tmp/eza.tar.gz"
     "https://github.com/FiloSottile/age|^age-v.+-linux-amd64\.tar\.gz$|/tmp/age.tar.gz"
+    "https://github.com/neilotoole/sq|^sq-.+amd64-amd64\.tar\.gz$|/tmp/sq.tar.gz"
+    "https://github.com/peco/peco|^peco_linux_amd64\.tar\.gz$|/tmp/peco.tar.gz"
+    "https://github.com/sachaos/viddy|^viddy_Linux_x86_64\.tar\.gz$|/tmp/viddy.tar.gz"
     "https://github.com/schollz/croc|^croc_.+_Linux-64bit\.tar\.gz$|/tmp/croc.tar.gz"
+    "https://github.com/schollz/hostyoself|^hostyoself_.+_Linux-64bit\.tar\.gz$|/tmp/hostyoself.tar.gz"
     "https://github.com/smallstep/cli|^step_linux_.+_amd64\.tar\.gz$|/tmp/step.tar.gz"
+    "https://github.com/wader/fq|^fq_.+_linux_amd64\.tar\.gz$|/tmp/fq.tar.gz"
+    "https://github.com/watchexec/watchexec|^watchexec-.+-x86_64-unknown-linux-musl\.tar\.xz$|/tmp/watchexec.tar.xz"
+    "https://github.com/Wilfred/difftastic|^difft-x86_64-unknown-linux-gnu\.tar\.gz$|/tmp/difft.tar.gz"
   )
 
   for i in ${ASSETS[@]}; do

@@ -99,6 +99,8 @@ DOCKER_INSTALL_URLS[PLATFORM_LINUX_FEDORA] = 'https://docs.docker.com/install/li
 DOCKER_INSTALL_URLS[PLATFORM_MAC] = [
     'https://www.code2bits.com/how-to-install-docker-on-macos-using-homebrew/',
     'https://docs.docker.com/docker-for-mac/install/',
+    'https://formulae.brew.sh/formula/docker',
+    'https://formulae.brew.sh/formula/docker-compose',
 ]
 DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compose/install/')
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
@@ -700,8 +702,9 @@ LOG_IGNORE_REGEX = re.compile(
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
-  | GET\s+/(netbox/api|_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
+  | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
+  | (GET|POST|PATCH)\s+/netbox/.+HTTP/[\d\.].+\b20[01]\b
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
   | "netbox"\s+application\s+started
@@ -711,7 +714,6 @@ LOG_IGNORE_REGEX = re.compile(
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
   | POST\s+HTTP/[\d\.].+\b200\b
-  | (POST|PATCH)\s+/netbox/api/.+HTTP/[\d\.].+\b20[01]\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)

@@ -20,7 +20,7 @@ Here are the basic steps to perform an upgrade if Malcolm was checked with a `gi
 1. pull changes from GitHub repository
     * `git pull --rebase`
 1. pull new Docker images (this will take a while)
-    * `docker-compose pull`
+    * `docker compose --profile malcolm pull`
 1. apply saved configuration change stashed earlier
     * `git stash pop`
 1. if `Merge conflict` messages appear, resolve the [conflicts](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts) with a text editor
@@ -51,7 +51,7 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
         + using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file backed up in Step 3, and manually migrate over any customizations in file
         + compare the contents of each  `.env` file  Malcolm's `./config/` directory with its corresponding `.env.example` file
 1. pull the new docker images (this will take a while)
-    * `docker-compose pull` to pull them from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or `docker-compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` if an offline tarball of the Malcolm docker images is available
+    * `docker compose --profile malcolm pull` to pull them from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or `docker compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` if an offline tarball of the Malcolm docker images is available
 1. start Malcolm
     * `./scripts/start`
 1. users may be prompted to [configure authentication](authsetup.md#AuthSetup) if there are new authentication-related files that need to be generated
@@ -63,7 +63,7 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
 
 Technically minded users may wish to follow the debug output provided by `./scripts/start` (use `./scripts/logs` to re-open the log stream after it's been closed), although there is a lot there and it may be hard to distinguish whether or not something is okay.
 
-Running `docker-compose ps -a` should provide a good indication that all Malcolm's Docker containers started up and, in some cases, may be able to indicate if the containers are "healthy" or not.
+Running `docker compose ps -a` should provide a good indication that all Malcolm's Docker containers started up and, in some cases, may be able to indicate if the containers are "healthy" or not.
 
 After upgrading following one of the previous outlines, give Malcolm several minutes to get started. Once things are up and running, open one of Malcolm's [web interfaces](quickstart.md#UserInterfaceURLs) to verify that things are working.
 

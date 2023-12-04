@@ -60,6 +60,7 @@ from malcolm_utils import (
     deep_get,
     dictsearch,
     eprint,
+    flatten,
     EscapeAnsi,
     EscapeForCurl,
     get_iterable,
@@ -114,6 +115,8 @@ pyPlatform = platform.system()
 
 args = None
 dockerBin = None
+# dockerComposeBin might be e.g., ('docker', 'compose') or 'docker-compose',
+#   it will be flattened in run_process
 dockerComposeBin = None
 dockerComposeYaml = None
 kubeImported = None
@@ -580,127 +583,118 @@ def netboxRestore(backupFileName=None):
                 # execute as UID:GID in docker-compose.yml file
                 '-u',
                 f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-            ]
-
-            # if the netbox_init.py process is happening, interrupt it
-            dockerCmd = dockerCmdBase + [
+                # run in the netbox container
                 'netbox',
-                'bash',
-                '-c',
-                'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill',
             ]
+
+            # get remote temporary directory for restore
+            dockerCmd = dockerCmdBase + ['mktemp', '-d', '-t', 'restore.XXXXXXXXXX']
             err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) and args.debug:
-                eprint(f'Error interrupting netbox_init.py: {results}')
+            if (err == 0) and results:
+                tmpRestoreDir = results[0]
+            else:
+                tmpRestoreDir = '/tmp'
 
-            # drop the existing netbox database
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'dropdb', '-U', 'netbox', 'netbox', '--force']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if ((err != 0) or (len(results) == 0)) and args.debug:
-                eprint(f'Error dropping NetBox database: {results}')
+            try:
+                # copy database backup and media backup to remote temporary directory
+                for tmpFile in [
+                    x
+                    for x in [backupFileName, os.path.splitext(backupFileName)[0] + ".media.tar.gz"]
+                    if os.path.isfile(x)
+                ]:
+                    dockerCmd = dockerCmdBase + ['tee', os.path.join(tmpRestoreDir, os.path.basename(tmpFile))]
+                    with open(tmpFile, 'rb') as f:
+                        err, results = run_process(
+                            dockerCmd, env=osEnv, debug=args.debug, stdout=False, stderr=True, stdin=f.read()
+                        )
+                    if err != 0:
+                        raise Exception(
+                            f'Error {err} copying backed-up NetBox file {os.path.basename(tmpFile)} to {tmpRestoreDir}: {results}'
+                        )
 
-            # create a new netbox database
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'createdb', '-U', 'netbox', 'netbox']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if err != 0:
-                raise Exception('Error creating new NetBox database')
+                # perform the restore inside the container
+                dockerCmd = dockerCmdBase + [
+                    '/opt/netbox/venv/bin/python',
+                    '/usr/local/bin/netbox_init.py',
+                    '--preload-backup',
+                    os.path.join(tmpRestoreDir, os.path.basename(backupFileName)),
+                ]
+                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} restoring NetBox database {os.path.basename(backupFileName)}: {results}'
+                    )
 
-            # load the backed-up psql dump
-            dockerCmd = dockerCmdBase + ['netbox-postgres', 'psql', '-U', 'netbox']
-            with gzip.open(backupFileName, 'rt') as f:
-                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdin=f.read())
-            if (err != 0) or (len(results) == 0):
-                raise Exception('Error loading NetBox database')
-
-            # migrations if needed
-            dockerCmd = dockerCmdBase + ['netbox', '/opt/netbox/netbox/manage.py', 'migrate']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
-            if (err != 0) or (len(results) == 0):
-                raise Exception('Error performing NetBox migration')
-
-            # restore media directory
-            backupFileParts = os.path.splitext(backupFileName)
-            backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
-            mediaPath = os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media')
-            if os.path.isfile(backupMediaFileName) and os.path.isdir(mediaPath):
-                RemoveEmptyFolders(mediaPath, removeRoot=False)
-                with tarfile.open(backupMediaFileName) as t:
-                    t.extractall(mediaPath)
+            finally:
+                # cleanup the remote directory
+                if tmpRestoreDir != '/tmp':
+                    dockerCmd = dockerCmdBase + ['rm', '-rf', tmpRestoreDir]
+                else:
+                    dockerCmd = dockerCmdBase + [
+                        'bash',
+                        '-c',
+                        f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
+                    ]
+                run_process(dockerCmd, env=osEnv, debug=args.debug)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
-            # if the netbox_init.py process is happening, interrupt it
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=['bash', '-c', 'pgrep -f /usr/local/bin/netbox_init.py | xargs -r kill'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) and args.debug:
-                eprint(f'Error ({err}) interrupting netbox_init.py: {results}')
+            # copy database backup and media backup to remote temporary directory
+            try:
+                tmpRestoreDir = '/tmp'
+                tmpRestoreFile = os.path.join(
+                    tmpRestoreDir, os.path.splitext(os.path.basename(backupFileName))[0] + '.txt'
+                )
+                with gzip.open(backupFileName, 'rt') as f:
+                    if podsResults := PodExec(
+                        service='netbox',
+                        namespace=args.namespace,
+                        command=['tee', tmpRestoreFile],
+                        stdout=False,
+                        stderr=True,
+                        stdin=f.read(),
+                    ):
+                        err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
+                        results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
+                    else:
+                        err = 1
+                        results = []
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} copying backed-up NetBox file {os.path.basename(backupFileName)} to {tmpRestoreFile}: {results}'
+                    )
 
-            # drop the existing netbox database
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=['dropdb', '-U', 'netbox', 'netbox', '--force'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if ((err != 0) or (len(results) == 0)) and args.debug:
-                eprint(f'Error dropping NetBox database: {results}')
-
-            # create a new netbox database
-            if podsResults := PodExec(
-                service='netbox-postgres',
-                namespace=args.namespace,
-                command=['createdb', '-U', 'netbox', 'netbox'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if err != 0:
-                raise Exception(f'Error creating new NetBox database: {results}')
-
-            # load the backed-up psql dump
-            with gzip.open(backupFileName, 'rt') as f:
+                # perform the restore inside the container
                 if podsResults := PodExec(
-                    service='netbox-postgres',
+                    service='netbox',
                     namespace=args.namespace,
-                    command=['psql', '-U', 'netbox'],
-                    stdin=f.read(),
+                    command=[
+                        '/opt/netbox/venv/bin/python',
+                        '/usr/local/bin/netbox_init.py',
+                        '--preload-backup',
+                        tmpRestoreFile,
+                    ],
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                     results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
                 else:
                     err = 1
                     results = []
-            if (err != 0) or (len(results) == 0):
-                raise Exception(f'Error loading NetBox database: {results}')
+                if err != 0:
+                    raise Exception(
+                        f'Error {err} restoring NetBox database {os.path.basename(backupFileName)}: {results}'
+                    )
 
-            # migrations if needed
-            if podsResults := PodExec(
-                service='netbox',
-                namespace=args.namespace,
-                command=['/opt/netbox/netbox/manage.py', 'migrate'],
-            ):
-                err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
-                results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
-            else:
-                err = 1
-                results = []
-            if (err != 0) or (len(results) == 0):
-                raise Exception(f'Error performing NetBox migration: {results}')
-
-            # TODO: can't restore netbox/media directory via kubernetes at the moment
+            finally:
+                # cleanup on other side
+                PodExec(
+                    service='netbox',
+                    namespace=args.namespace,
+                    command=[
+                        'bash',
+                        '-c',
+                        f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
+                    ],
+                )
 
         else:
             raise Exception(
@@ -782,7 +776,7 @@ def logs():
 
     if cmd:
         process = Popen(
-            cmd,
+            list(flatten(cmd)),
             env=osEnv,
             stdout=PIPE,
             stderr=None if args.debug else DEVNULL,
@@ -804,6 +798,7 @@ def logs():
                 and (not args.cmdLogs)
                 and finishedStartingRegEx.match(output)
             ):
+                shuttingDown[0] = True
                 process.terminate()
                 try:
                     process.wait(timeout=5.0)
@@ -990,8 +985,9 @@ def start():
             # chmod 600 envFile
             os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
 
-    # touch the zeek intel file
+    # touch the zeek intel file and zeek custom file
     open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))), 'a').close()
+    open(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('custom', '__load__.zeek'))), 'a').close()
 
     # clean up any leftover intel update locks
     shutil.rmtree(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True)
@@ -2267,30 +2263,38 @@ def main():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            # make sure docker/docker-compose is available
+            # make sure docker and docker compose are available
             dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
-            if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
-                dockerComposeBin = 'docker-compose.exe'
-            elif which('docker-compose'):
-                dockerComposeBin = 'docker-compose'
-            elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
-            elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
-                dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
-            elif os.path.isfile('/usr/local/bin/docker-compose'):
-                dockerComposeBin = '/usr/local/bin/docker-compose'
-            elif os.path.isfile('/usr/bin/docker-compose'):
-                dockerComposeBin = '/usr/bin/docker-compose'
-            else:
-                dockerComposeBin = 'docker-compose'
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
+            # first check if compose is available as a docker plugin
+            dockerComposeBin = (dockerBin, 'compose')
             err, out = run_process(
                 [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
                 env=osEnv,
                 debug=args.debug,
             )
+            if err != 0:
+                if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
+                    dockerComposeBin = 'docker-compose.exe'
+                elif which('docker-compose'):
+                    dockerComposeBin = 'docker-compose'
+                elif os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                    dockerComposeBin = '/usr/libexec/docker/cli-plugins/docker-compose'
+                elif os.path.isfile('/usr/local/opt/docker-compose/bin/docker-compose'):
+                    dockerComposeBin = '/usr/local/opt/docker-compose/bin/docker-compose'
+                elif os.path.isfile('/usr/local/bin/docker-compose'):
+                    dockerComposeBin = '/usr/local/bin/docker-compose'
+                elif os.path.isfile('/usr/bin/docker-compose'):
+                    dockerComposeBin = '/usr/bin/docker-compose'
+                else:
+                    dockerComposeBin = 'docker-compose'
+                err, out = run_process(
+                    [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
+                    env=osEnv,
+                    debug=args.debug,
+                )
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
 

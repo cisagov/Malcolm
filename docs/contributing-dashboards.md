@@ -10,7 +10,7 @@ Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboa
 1. Export the dashboard with that ID and save it in the `./dashboards./dashboards/` directory with the following command:
    ```
     export DASHID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx && \
-      docker-compose exec dashboards curl -XGET \
+      docker compose exec dashboards curl -XGET \
       "http://localhost:5601/dashboards/api/opensearch-dashboards/dashboards/export?dashboard=$DASHID" > \
       ./dashboards/dashboards/$DASHID.json
     ```
@@ -37,5 +37,3 @@ Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboa
 ## <a name="DashboardsPlugins"></a>OpenSearch Dashboards plugins
 
 The [dashboards.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/dashboards.Dockerfile) installs the OpenSearch Dashboards plugins used by Malcolm (search for `opensearch-dashboards-plugin install` in that file). Additional Dashboards plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `dashboards` Docker image.
-
-Third-party or community plugins developed for Kibana will not install into OpenSearch dashboards without source code modification. Depending on the plugin, this could range from very smiple to very complex. As an illustrative example, the changes required to port the Sankey diagram visualization plugin from Kibana to OpenSearch Dashboards compatibility can be [viewed on GitHub](https://github.com/mmguero-dev/osd_sankey_vis/compare/edacf6b...main).

@@ -57,6 +57,7 @@ NUMERIC_REGEX='^[0-9]+$'
 # get directory script is executing from
 [[ -n $MACOS ]] && REALPATH=grealpath || REALPATH=realpath
 [[ -n $MACOS ]] && DIRNAME=gdirname || DIRNAME=dirname
+[[ -n $MACOS ]] && GREP=ggrep || GREP=grep
 if ! (type "$REALPATH" && type "$DIRNAME") > /dev/null; then
   echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME" >&2
   exit 1
@@ -77,6 +78,7 @@ RESTART="false"
 READ_ONLY="false"
 NGINX_DISABLE="false"
 MALCOLM_DOCKER_COMPOSE="$FULL_PWD"/docker-compose.yml
+MALCOLM_PROFILE=malcolm
 NETBOX_BACKUP_FILE=""
 PCAP_FILES=()
 PCAP_ADJUST_SCRIPT=""
@@ -86,7 +88,7 @@ PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
 PCAP_PROCESS_IDLE_MAX_SECONDS=3600
 NETBOX_INIT_MAX_SECONDS=300
-while getopts 'vwronlb:m:i:x:s:d:' OPTION; do
+while getopts 'vwronlb:m:i:x:s:d:p:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -118,6 +120,10 @@ while getopts 'vwronlb:m:i:x:s:d:' OPTION; do
 
     m)
       MALCOLM_DOCKER_COMPOSE="$OPTARG"
+      ;;
+
+    p)
+      MALCOLM_PROFILE="$OPTARG"
       ;;
 
     s)
@@ -161,6 +167,19 @@ else
   PCAP_ADJUST_SCRIPT=""
 fi
 
+DOCKER_COMPOSE_BIN=()
+if docker compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=(docker compose)
+elif docker-compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=(docker-compose)
+elif [[ -n $WINDOWS ]]; then
+  if docker.exe compose version >/dev/null 2>&1; then
+    DOCKER_COMPOSE_BIN=(docker.exe compose)
+  elif docker-compose.exe version >/dev/null 2>&1; then
+    DOCKER_COMPOSE_BIN=(docker-compose.exe)
+  fi
+fi
+
 [[ -n $VERBOSE_FLAG ]] && echo "$(basename "${BASH_SOURCE[0]}") in \"${SCRIPT_PATH}\" called from \"${FULL_PWD}\"" >&2 && set -x
 
 ###############################################################################
@@ -199,7 +218,7 @@ function urlencode() {
 trap clean_up EXIT
 
 if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
-   which docker-compose >/dev/null 2>&1 && \
+   (( ${#DOCKER_COMPOSE_BIN[@]} > 0 )) && \
    which jq >/dev/null 2>&1; then
   mkdir -p "$WORKDIR"
 
@@ -267,11 +286,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   fi
 
   if [[ "$NGINX_DISABLE" == "true" ]]; then
-    docker-compose -f "$MALCOLM_FILE" pause nginx-proxy
+    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" pause nginx-proxy
   fi
 
   # wait for logstash to be ready for Zeek logs to be ingested
-  until docker-compose -f "$MALCOLM_FILE" logs logstash 2>/dev/null | grep -q "Pipelines running"; do
+  until ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" logs logstash 2>/dev/null | $GREP -q "Pipelines running"; do
     [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
     sleep 10
   done
@@ -283,7 +302,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     # wait for NetBox to be ready with the initial startup before we go mucking around
     CURRENT_TIME=$(date -u +%s)
     FIRST_NETBOX_INIT_CHECK_TIME=$CURRENT_TIME
-    until docker-compose -f "$MALCOLM_FILE" logs netbox 2>/dev/null | grep -q "Unit configuration loaded successfully"; do
+    until ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" logs netbox 2>/dev/null | $GREP -q "Unit configuration loaded successfully"; do
       [[ -n $VERBOSE_FLAG ]] && echo "waiting for NetBox initialization to complete..." >&2
       sleep 10
       # if it's been more than the maximum wait time, bail
@@ -318,7 +337,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         fi
 
         # get the total number of session records in the database
-        NEW_LOG_COUNT=$(( docker-compose -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+        NEW_LOG_COUNT=$(( ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
                           curl -sSL "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
                           awk '{s+=$1} END {print s}') 2>/dev/null )
@@ -349,7 +368,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   fi
 
   if [[ "$NGINX_DISABLE" == "true" ]]; then
-    docker-compose -f "$MALCOLM_FILE" unpause nginx-proxy
+    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" unpause nginx-proxy
     sleep 10
   fi
 
@@ -357,8 +376,8 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
-      $(grep -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
-      docker-compose -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
+      $($GREP -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
+      ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
         --header "Authorization:" \
@@ -366,12 +385,12 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     done
     sleep 5
     [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
-    docker-compose -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
+    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
     sleep 5
-    docker-compose -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
+    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
     sleep 5
     for CONTAINER in htadmin filebeat logstash upload pcap-monitor zeek zeek-live suricata suricata-live pcap-capture freq; do
-      docker-compose -f "$MALCOLM_FILE" pause "$CONTAINER" || true
+      ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" pause "$CONTAINER" || true
     done
     sleep 5
   fi
@@ -381,6 +400,6 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   [[ -n $VERBOSE_FLAG ]] && echo "Finished" >&2
 else
   echo "must specify docker-compose.yml file with -m and PCAP file(s)" >&2
-  echo "also, pcap_time_shift.py, docker-compose and jq must be available"
+  echo "also, pcap_time_shift.py, docker compose and jq must be available"
   exit 1
 fi

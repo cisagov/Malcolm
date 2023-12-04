@@ -50,26 +50,6 @@ class NullRepresenter:
 
 
 ###################################################################################################
-def ObjToYamlStrLines(obj, options=None):
-    outputStr = None
-    if options is None:
-        options = {}
-
-    yaml = YAML()
-    yaml.preserve_quotes = False
-    yaml.representer.ignore_aliases = lambda x: True
-    yaml.representer.add_representer(type(None), NullRepresenter())
-    yaml.boolean_representation = ['no', 'yes']
-    yaml.version = YAML_VERSION
-
-    with StringIO() as stringStream:
-        yaml.dump(obj, stringStream, **options)
-        outputStr = stringStream.getvalue()
-
-    return outputStr.splitlines()
-
-
-###################################################################################################
 
 DEFAULT_VARS = defaultdict(lambda: None)
 DEFAULT_VARS.update(

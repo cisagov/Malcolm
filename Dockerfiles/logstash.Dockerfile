@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.10.4
+FROM docker.elastic.co/logstash/logstash-oss:8.11.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -32,6 +32,8 @@ ARG LOGSTASH_NETBOX_ENRICHMENT=false
 ARG LOGSTASH_NETBOX_ENRICHMENT_VERBOSE=false
 ARG LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE=true
 ARG LOGSTASH_NETBOX_AUTO_POPULATE=false
+ARG LOGSTASH_NETBOX_CACHE_SIZE=1000
+ARG LOGSTASH_NETBOX_CACHE_TTL=30
 
 ENV LOGSTASH_ENRICHMENT_PIPELINE $LOGSTASH_ENRICHMENT_PIPELINE
 ENV LOGSTASH_PARSE_PIPELINE_ADDRESSES $LOGSTASH_PARSE_PIPELINE_ADDRESSES
@@ -42,6 +44,8 @@ ENV LOGSTASH_NETBOX_ENRICHMENT $LOGSTASH_NETBOX_ENRICHMENT
 ENV LOGSTASH_NETBOX_ENRICHMENT_VERBOSE $LOGSTASH_NETBOX_ENRICHMENT_VERBOSE
 ENV LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE $LOGSTASH_NETBOX_ENRICHMENT_LOOKUP_SERVICE
 ENV LOGSTASH_NETBOX_AUTO_POPULATE $LOGSTASH_NETBOX_AUTO_POPULATE
+ENV LOGSTASH_NETBOX_CACHE_SIZE $LOGSTASH_NETBOX_CACHE_SIZE
+ENV LOGSTASH_NETBOX_CACHE_TTL $LOGSTASH_NETBOX_CACHE_TTL
 
 USER root
 
@@ -63,11 +67,12 @@ RUN set -x && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
-    echo "gem 'lru_cache'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'lru_redux'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
                                        logstash-filter-json logstash-filter-prune logstash-filter-http \

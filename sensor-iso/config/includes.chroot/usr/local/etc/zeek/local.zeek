@@ -13,6 +13,7 @@ global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? 
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
 global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
 global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
@@ -20,6 +21,7 @@ global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == "") ? F : T;
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == "") ? F : T;
 global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == "") ? F : T;
 global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == "") ? F : T;
+global disable_spicy_quic = (getenv("ZEEK_DISABLE_SPICY_QUIC") == "") ? F : T;
 global disable_spicy_stun = (getenv("ZEEK_DISABLE_SPICY_STUN") == "") ? F : T;
 global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == "") ? F : T;
 global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == "") ? F : T;
@@ -87,8 +89,21 @@ redef ignore_checksums = T;
 
 @load packages
 @load /opt/sensor/sensor_ctl/zeek/intel
+@load /opt/sensor/sensor_ctl/zeek/custom
 
 event zeek_init() &priority=-5 {
+
+  if (zeek_local_nets_str != "") {
+    local nets_strs = split_string(zeek_local_nets_str, /,/);
+    if (|nets_strs| > 0) {
+      for (net_idx in nets_strs) {
+        local local_subnet = to_subnet(nets_strs[net_idx]);
+        if (local_subnet != [::]/0) {
+          add Site::local_nets[local_subnet];
+        }
+      }
+    }
+  }
 
   if (disable_ics_all || disable_ics_bacnet) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_BACNET);
@@ -108,7 +123,7 @@ event zeek_init() &priority=-5 {
     PacketAnalyzer::__disable_analyzer(PacketAnalyzer::ANALYZER_ETHERCAT);
   }
   if (disable_ics_all || disable_ics_genisys) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GENISYS_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_GENISYS_TCP);
   }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
@@ -123,8 +138,8 @@ event zeek_init() &priority=-5 {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
   }
   if (disable_ics_all || disable_ics_synchrophasor) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP);
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_UDP);
   }
   if (disable_spicy_dhcp) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
@@ -141,7 +156,8 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_IPSEC_IKE_UDP);
   }
   if (disable_spicy_ldap) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_LDAP_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_LDAP_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_LDAP_UDP);
   }
   if (disable_spicy_openvpn) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_TCP);
@@ -154,6 +170,9 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA1);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA256);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_OPENVPN_UDP_HMAC_SHA512);
+  }
+  if (disable_spicy_quic) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_QUIC);
   }
   if (disable_spicy_stun) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_STUN);
@@ -185,10 +204,10 @@ event zeek_init() &priority=-5 {
         }
       }
       if (|synch_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_TCP, synch_ports_tcp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_TCP, synch_ports_tcp);
       }
       if (|synch_ports_udp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_SYNCHROPHASOR_UDP, synch_ports_udp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_SYNCHROPHASOR_UDP, synch_ports_udp);
       }
     }
   }
@@ -204,7 +223,7 @@ event zeek_init() &priority=-5 {
         }
       }
       if (|gen_ports_tcp| > 0) {
-        Analyzer::register_for_ports(Analyzer::ANALYZER_SPICY_GENISYS_TCP, gen_ports_tcp);
+        Analyzer::register_for_ports(Analyzer::ANALYZER_GENISYS_TCP, gen_ports_tcp);
       }
     }
   }
