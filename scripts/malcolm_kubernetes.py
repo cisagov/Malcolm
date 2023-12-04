@@ -165,7 +165,7 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
         },
     ],
-    'zeek-intel': [
+    'zeek-intel-preseed': [
         {
             'secret': False,
             'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),

@@ -17,6 +17,7 @@ ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
 ZEEK_INTEL_REFRESH_THREADS=${ZEEK_INTEL_REFRESH_THREADS:-"2"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
+INTEL_PRESEED_DIR=${INTEL_PRESEED_DIR:-"${ZEEK_DIR}/share/zeek/site/intel-preseed"}
 THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 LOCK_DIR="${INTEL_DIR}/lock"
 
@@ -28,6 +29,12 @@ function finish {
 mkdir -p -- "$(dirname "$LOCK_DIR")"
 if mkdir -- "$LOCK_DIR" 2>/dev/null; then
     trap finish EXIT
+
+    # if we have a directory to seed the intel config for the first time, start from a blank slate with just its contents
+    if [[ -d "${INTEL_DIR}" ]] && [[ -d "${INTEL_PRESEED_DIR}" ]]; then
+        rsync -av --delete "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
+        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX || true
+    fi
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
     if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
