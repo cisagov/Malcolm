@@ -48,7 +48,8 @@ EOF
         THREAT_JSON_FILES=()
 
         # process subdirectories under INTEL_DIR
-        for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
+        for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null | grep -v -P "$(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | sed 's/\(.*\)/^.\/(\1)$/' | tr ';' '|')"); do
+
             if [[ "${DIR}" == "./STIX" ]]; then
                 # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
                 while IFS= read -r line; do
@@ -73,7 +74,7 @@ EOF
         done
 
         # process STIX and MISP inputs by converting them to Zeek intel format
-        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \
