@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.10.4
+FROM docker.elastic.co/beats/filebeat-oss:8.11.1
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -61,10 +61,10 @@ ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
 
-ENV SUPERCRONIC_VERSION "0.2.27"
+ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
+ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV TINI_VERSION v0.19.0

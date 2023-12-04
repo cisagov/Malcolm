@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v3.6.4
+FROM netboxcommunity/netbox:v3.6.6
 
 # Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -24,10 +24,10 @@ ENV PUSER "ubuntu"
 ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 
-ENV SUPERCRONIC_VERSION "0.2.27"
+ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
+ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.33.3"
@@ -39,6 +39,7 @@ ARG NETBOX_DEVICETYPE_LIBRARY_PATH="/opt/netbox-devicetype-library"
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=true
 ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
+ARG NETBOX_PRELOAD_PREFIXES=false
 
 ENV NETBOX_PATH /opt/netbox
 ENV BASE_PATH netbox
@@ -46,6 +47,7 @@ ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
 ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
+ENV NETBOX_PRELOAD_PREFIXES $NETBOX_PRELOAD_PREFIXES
 
 ADD netbox/patch/* /tmp/netbox-patches/
 
@@ -53,11 +55,15 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       gcc \
+      file \
       git \
       jq \
+      libmagic-dev \
+      libmagic1 \
       libpq-dev \
       libpq5 \
       patch \
+      postgresql-client \
       procps \
       psmisc \
       python3-dev \
@@ -68,6 +74,7 @@ RUN apt-get -q update && \
       'git+https://github.com/tobiasge/netbox-initializers' \
       psycopg2 \
       pynetbox \
+      python-magic \
       python-slugify \
       randomcolor && \
     cd "${NETBOX_PATH}" && \

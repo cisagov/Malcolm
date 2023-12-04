@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-live-container
-        image: ghcr.io/idaholab/malcolm/suricata:23.10.0
+        image: ghcr.io/idaholab/malcolm/suricata:23.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -49,9 +49,13 @@ spec:
             name: suricata-live-var-local-catrust-volume
           - mountPath: /var/log/suricata
             name: suricata-live-suricata-logs-volume
+          - mountPath: "/opt/suricata/rules/configmap"
+            name: suricata-live-custom-rules-volume
+          - mountPath: "/opt/suricata/include-configs/configmap"
+            name: suricata-live-custom-configs-volume
       initContainers:
       - name: suricata-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.10.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -71,3 +75,9 @@ spec:
         - name: suricata-live-suricata-logs-volume
           persistentVolumeClaim:
             claimName: suricata-claim
+        - name: suricata-live-custom-rules-volume
+          configMap:
+            name: suricata-rules
+        - name: suricata-live-custom-configs-volume
+          configMap:
+            name: suricata-configs

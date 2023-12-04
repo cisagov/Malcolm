@@ -13,7 +13,7 @@ Note that Malcolm does not manage updates for these intelligence files. You shou
 Adding and deleting intelligence files under this directory will take effect upon [restarting Malcolm](running.md#StopAndRestart). Alternately, you can use the `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` environment variable containing a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) to specify the interval at which the intel files should be refreshed. This can also be done manually without restarting Malcolm by running the following command from the Malcolm installation directory:
 
 ```
-docker-compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
+docker compose exec --user $(id -u) zeek /usr/local/bin/entrypoint.sh true
 ```
 
 For a public example of Zeek intelligence files, see Critical Path Security's [repository](https://github.com/CriticalPathSecurity/Zeek-Intelligence-Feeds), which aggregates data from various other threat feeds into Zeek's format.

@@ -1,5 +1,5 @@
 {
-  "version": "2.1.0",
+  "version": "2.8.0",
   "objects": [
     {
       "id": "37041ee1-79c0-4684-a436-3173b0e89876",
@@ -7,13 +7,13 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T20:29:05.468Z",
-      "version": "Wzg5NiwxXQ==",
+      "updated_at": "2023-11-14T19:40:46.803Z",
+      "version": "Wzk1NCwxXQ==",
       "attributes": {
         "title": "HTTP",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":19,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"5\",\"w\":14,\"x\":20,\"y\":48},\"panelIndex\":\"5\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"6\",\"w\":14,\"x\":34,\"y\":48},\"panelIndex\":\"6\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":117},\"panelIndex\":\"8\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"14\",\"w\":10,\"x\":10,\"y\":48},\"panelIndex\":\"14\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"15\",\"w\":10,\"x\":0,\"y\":48},\"panelIndex\":\"15\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"16\",\"w\":48,\"x\":0,\"y\":99},\"panelIndex\":\"16\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":18,\"i\":\"17\",\"w\":24,\"x\":0,\"y\":117},\"panelIndex\":\"17\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":20,\"i\":\"20\",\"w\":24,\"x\":24,\"y\":66},\"panelIndex\":\"20\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#629E51\"}}},\"gridData\":{\"h\":20,\"i\":\"21\",\"w\":24,\"x\":0,\"y\":66},\"panelIndex\":\"21\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"gridData\":{\"h\":7,\"i\":\"23\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"23\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"24\",\"w\":16,\"x\":32,\"y\":19},\"panelIndex\":\"24\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"w\":8,\"x\":8,\"y\":7},\"panelIndex\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"w\":24,\"x\":8,\"y\":19},\"panelIndex\":\"e2ba3677-11c6-4cd9-87f3-fb3473718d10\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_14\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"w\":8,\"x\":0,\"y\":30},\"panelIndex\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_15\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":13,\"i\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"w\":48,\"x\":0,\"y\":86},\"panelIndex\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_16\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":42,\"i\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"w\":48,\"x\":0,\"y\":135},\"panelIndex\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"version\":\"2.1.0\",\"panelRefName\":\"panel_17\"}]",
+        "panelsJSON": "[{\"version\":\"2.8.0\",\"gridData\":{\"h\":30,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":19,\"i\":\"3\",\"w\":32,\"x\":16,\"y\":0},\"panelIndex\":\"3\",\"embeddableConfig\":{\"legendOpen\":false,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_1\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"5\",\"w\":14,\"x\":20,\"y\":48},\"panelIndex\":\"5\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"6\",\"w\":14,\"x\":34,\"y\":48},\"panelIndex\":\"6\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":24,\"x\":24,\"y\":117},\"panelIndex\":\"8\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_4\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"14\",\"w\":10,\"x\":10,\"y\":48},\"panelIndex\":\"14\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"15\",\"w\":10,\"x\":0,\"y\":48},\"panelIndex\":\"15\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_6\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"16\",\"w\":48,\"x\":0,\"y\":99},\"panelIndex\":\"16\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_7\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"17\",\"w\":24,\"x\":0,\"y\":117},\"panelIndex\":\"17\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_8\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":20,\"i\":\"20\",\"w\":24,\"x\":24,\"y\":66},\"panelIndex\":\"20\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_9\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":20,\"i\":\"21\",\"w\":24,\"x\":0,\"y\":66},\"panelIndex\":\"21\",\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#629E51\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":7,\"i\":\"23\",\"w\":8,\"x\":8,\"y\":0},\"panelIndex\":\"23\",\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":29,\"i\":\"24\",\"w\":16,\"x\":32,\"y\":19},\"panelIndex\":\"24\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":12,\"i\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"w\":8,\"x\":8,\"y\":7},\"panelIndex\":\"70661228-52d4-4ecf-a5a4-139d0ecdd662\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":18,\"i\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"w\":8,\"x\":0,\"y\":30},\"panelIndex\":\"128a48be-397e-4c27-a8a1-bc6cb280d6b1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":13,\"i\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"w\":48,\"x\":0,\"y\":86},\"panelIndex\":\"b6166133-469b-41cd-8396-cb2db18eb8b9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.8.0\",\"gridData\":{\"h\":42,\"i\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"w\":48,\"x\":0,\"y\":135},\"panelIndex\":\"7337ff11-23e0-4f6e-981f-a043f15e60cf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":19,\"w\":24,\"h\":29,\"i\":\"42a27d88-4f13-4d7d-b267-0ffd2a39ca3f\"},\"panelIndex\":\"42a27d88-4f13-4d7d-b267-0ffd2a39ca3f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -95,22 +95,22 @@
         {
           "name": "panel_14",
           "type": "visualization",
-          "id": "db357c20-760d-11eb-8496-3528afc64ddb"
+          "id": "6efd67a0-760f-11eb-8496-3528afc64ddb"
         },
         {
           "name": "panel_15",
           "type": "visualization",
-          "id": "6efd67a0-760f-11eb-8496-3528afc64ddb"
-        },
-        {
-          "name": "panel_16",
-          "type": "visualization",
           "id": "7b56ed70-6faa-11eb-958c-51e33b5cae2a"
         },
         {
-          "name": "panel_17",
+          "name": "panel_16",
           "type": "search",
           "id": "1762ad89-2039-4d70-8c2d-60b3e5a2c381"
+        },
+        {
+          "name": "panel_17",
+          "type": "visualization",
+          "id": "9cfed8c0-8325-11ee-a28c-7361f03cd201"
         }
       ],
       "migrationVersion": {
@@ -123,8 +123,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:51:04.273Z",
-      "version": "WzgwNSwxXQ==",
+      "updated_at": "2023-11-14T19:19:25.240Z",
+      "version": "Wzg1OSwxXQ==",
       "attributes": {
         "title": "Network Logs",
         "visState": "{\"title\":\"Network Logs\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General\\n[Overview](#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Known Summary](#/dashboard/89d1cc50-974c-11ed-bb6b-3fb06c879b11)  \\n[Zeek Intelligence](#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](#/dashboard/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[Asset Interaction Analysis](#/dashboard/677ee170-809e-11ed-8d5b-07069f823b6f)  \\n[↪ NetBox](/netbox/)  \\n[↪ Arkime](/sessions)  \\n\\n### Common Protocols\\n[DCE/RPC](#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](#/dashboard/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](#/dashboard/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](#/dashboard/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](#/dashboard/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](#/dashboard/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](#/dashboard/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [Modbus](#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](#/dashboard/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Synchrophasor](#/dashboard/2cc56240-e460-11ed-a9d5-9f591c284cb4)   ●   [Best Guess](#/dashboard/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
@@ -146,8 +146,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI1NSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI3NywxXQ==",
       "attributes": {
         "title": "HTTP - Status Over Time",
         "visState": "{\"title\":\"HTTP - Status Over Time\",\"type\":\"line\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-25y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.status_msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Status Code\"},\"schema\":\"group\"}],\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"firstPacket per 12 hours\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY-MM-DD\"}},\"params\":{\"date\":true,\"interval\":\"P30D\",\"intervalESValue\":30,\"intervalESUnit\":\"d\",\"format\":\"YYYY-MM-DD\",\"bounds\":{\"min\":\"1976-02-12T16:47:29.688Z\",\"max\":\"2020-02-12T16:47:29.689Z\"}},\"label\":\"firstPacket per 30 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Unknown\"}},\"params\":{},\"label\":\"Status Code\",\"aggType\":\"terms\"}]},\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"labels\":{\"show\":true},\"legendPosition\":\"bottom\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Count\"},\"drawLinesBetweenPoints\":true,\"interpolate\":\"linear\",\"lineWidth\":2,\"mode\":\"stacked\",\"show\":true,\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"thresholdLine\":{\"color\":\"#E7664C\",\"show\":false,\"style\":\"full\",\"value\":10,\"width\":1},\"times\":[],\"type\":\"histogram\",\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"square root\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"\"},\"type\":\"value\"}]}}",
@@ -176,8 +176,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI1NiwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI3OCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Sites\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.host\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"Site\"}}],\"listeners\":{}}",
         "description": "",
@@ -206,8 +206,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T20:28:57.331Z",
-      "version": "Wzg5NSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI3OSwxXQ==",
       "attributes": {
         "title": "HTTP - Sites Hosting EXEs",
         "visState": "{\"title\":\"HTTP - Sites Hosting EXEs\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.host\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Site\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showTotal\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
@@ -235,8 +235,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI1OCwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4MCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - URIs\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.uri\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"URI\"}}],\"listeners\":{}}",
         "description": "",
@@ -265,8 +265,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI1OSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4MSwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Source IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"source.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -295,8 +295,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2MCwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4MiwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Destination IP Address\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"destination.ip\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"IP Address\"}}],\"listeners\":{}}",
         "description": "",
@@ -325,8 +325,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2MSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4MywxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - User Agent\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"user_agent.original\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"User Agent\"}}],\"listeners\":{}}",
         "description": "",
@@ -355,8 +355,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2MiwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4NCwxXQ==",
       "attributes": {
         "visState": "{\"title\":\"HTTP - Referrer\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.http.referrer\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
         "description": "",
@@ -385,8 +385,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2MywxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4NSwxXQ==",
       "attributes": {
         "title": "HTTP - Destination Port",
         "visState": "{\"title\":\"HTTP - Destination Port\",\"type\":\"histogram\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100,\"rotate\":75},\"title\":{\"text\":\"Port\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Port\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"}}]}",
@@ -415,8 +415,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2NCwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4NiwxXQ==",
       "attributes": {
         "title": "HTTP - Destination Country",
         "visState": "{\"title\":\"HTTP - Destination Country\",\"type\":\"histogram\",\"params\":{\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{\"text\":\"Country\"}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":false,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"type\":\"histogram\",\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Country\",\"aggType\":\"terms\"},\"y\":[{\"accessor\":1,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"destination.geo.country_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Country\"}}]}",
@@ -445,8 +445,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2NSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4NywxXQ==",
       "attributes": {
         "title": "HTTP - Log Count",
         "visState": "{\"title\":\"HTTP - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}",
@@ -475,8 +475,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2NiwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4OCwxXQ==",
       "attributes": {
         "title": "HTTP  - Status and Method",
         "visState": "{\"title\":\"HTTP  - Status and Method\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.status_msg\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Status Message\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.http.method\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Method\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":20,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}",
@@ -505,8 +505,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2NywxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI4OSwxXQ==",
       "attributes": {
         "title": "HTTP - Unique Usernames and Passwords",
         "visState": "{\"title\":\"HTTP - Unique Usernames and Passwords\",\"type\":\"metric\",\"params\":{\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"type\":\"range\",\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":48}},\"dimensions\":{\"metrics\":[{\"type\":\"vis_dimension\",\"accessor\":0,\"format\":{\"id\":\"number\",\"params\":{}}},{\"type\":\"vis_dimension\",\"accessor\":1,\"format\":{\"id\":\"number\",\"params\":{}}}]},\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"related.user\",\"customLabel\":\"Unique Usernames\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"cardinality\",\"schema\":\"metric\",\"params\":{\"field\":\"related.password\",\"customLabel\":\"Unique Cleartext Passwords\"}}]}",
@@ -530,43 +530,13 @@
       }
     },
     {
-      "id": "db357c20-760d-11eb-8496-3528afc64ddb",
-      "type": "visualization",
-      "namespaces": [
-        "default"
-      ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2OCwxXQ==",
-      "attributes": {
-        "title": "HTTP - Method and Status",
-        "visState": "{\"title\":\"HTTP - Method and Status\",\"type\":\"kbn_sankey\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":40,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Method\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":40,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Status\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"computedColumns\":[],\"computedColsPerSplitCol\":false,\"hideExportLinks\":false,\"csvExportWithTotal\":false,\"stripedRows\":false,\"addRowNumberColumn\":false,\"csvEncoding\":\"utf-8\",\"showFilterBar\":false,\"filterCaseSensitive\":false,\"filterBarHideable\":false,\"filterAsYouType\":false,\"filterTermsSeparately\":false,\"filterHighlightResults\":false,\"filterBarWidth\":\"25%\"}}",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
-        "description": "",
-        "version": 1,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0"
-      },
-      "references": [
-        {
-          "name": "search_0",
-          "type": "search",
-          "id": "1762ad89-2039-4d70-8c2d-60b3e5a2c381"
-        }
-      ],
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      }
-    },
-    {
       "id": "6efd67a0-760f-11eb-8496-3528afc64ddb",
       "type": "visualization",
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI2OSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI5MSwxXQ==",
       "attributes": {
         "title": "HTTP - Version",
         "visState": "{\"title\":\"HTTP - Version\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"HTTP Version\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":false,\"last_level\":true,\"truncate\":100}}}",
@@ -595,8 +565,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI3MCwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI5MiwxXQ==",
       "attributes": {
         "title": "HTTP - File Type",
         "visState": "{\"title\":\"HTTP - File Type\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"file.mime_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"File Type\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":42,\"showLabel\":false}}",
@@ -625,8 +595,8 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-07-08T19:50:26.471Z",
-      "version": "WzI3MSwxXQ==",
+      "updated_at": "2023-11-14T19:18:33.654Z",
+      "version": "WzI5MywxXQ==",
       "attributes": {
         "title": "HTTP - Logs",
         "description": "",
@@ -660,6 +630,29 @@
       ],
       "migrationVersion": {
         "search": "7.9.3"
+      }
+    },
+    {
+      "id": "9cfed8c0-8325-11ee-a28c-7361f03cd201",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-11-14T19:40:06.603Z",
+      "version": "Wzk1MywxXQ==",
+      "attributes": {
+        "title": "HTTP - Method and Status",
+        "visState": "{\"title\":\"HTTP - Method and Status\",\"type\":\"vega\",\"aggs\":[],\"params\":{\"spec\":\"{\\n  // thanks to:\\n  // - https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana\\n  // - https://blog.davidvassallo.me/2023/09/08/adding-opensearch-dashboards-kibana-filters-to-vega-visuals/\\n  $schema: https://vega.github.io/schema/vega/v3.0.json\\n  data: [\\n    {\\n      // query ES based on the currently selected time range and filter string\\n      name: rawData\\n      url: {\\n        %context%: true\\n        %timefield%: firstPacket\\n        index: arkime_sessions3-*\\n        body: {\\n          size: 0\\n          aggs: {\\n            table: {\\n              composite: {\\n                size: 10000\\n                sources: [\\n                  {\\n                    stk1: {\\n                      terms: {field: \\\"event.action\\\"}\\n                    }\\n                  }\\n                  {\\n                    stk2: {\\n                      terms: {field: \\\"event.result\\\"}\\n                    }\\n                  }\\n                ]\\n              }\\n            }\\n          }\\n        }\\n      }\\n      // From the result, take just the data we are interested in\\n      format: {property: \\\"aggregations.table.buckets\\\"}\\n      // Convert key.stk1 -> stk1 for simpler access below\\n      transform: [\\n        {type: \\\"formula\\\", expr: \\\"datum.key.stk1\\\", as: \\\"stk1\\\"}\\n        {type: \\\"formula\\\", expr: \\\"datum.key.stk2\\\", as: \\\"stk2\\\"}\\n        {type: \\\"formula\\\", expr: \\\"datum.doc_count\\\", as: \\\"size\\\"}\\n      ]\\n    }\\n    {\\n      name: nodes\\n      source: rawData\\n      transform: [\\n        // when a value is selected, filter out unrelated data\\n        {\\n          type: filter\\n          expr: !groupSelector || groupSelector.stk1 == datum.stk1 || groupSelector.stk2 == datum.stk2\\n        }\\n        // Set new key for later lookups - identifies each node\\n        {type: \\\"formula\\\", expr: \\\"datum.stk1+datum.stk2\\\", as: \\\"key\\\"}\\n        // instead of each table row, create two new rows,\\n        // one for the source (stack=stk1) and one for destination node (stack=stk2).\\n        // The values stored in stk1 and stk2 fields is placed into grpId field.\\n        {\\n          type: fold\\n          fields: [\\\"stk1\\\", \\\"stk2\\\"]\\n          as: [\\\"stack\\\", \\\"grpId\\\"]\\n        }\\n        // Create a sortkey, different for stk1 and stk2 stacks.\\n        // Space separator ensures proper sort order in some corner cases.\\n        {\\n          type: formula\\n          expr: datum.stack == 'stk1' ? datum.stk1+' '+datum.stk2 : datum.stk2+' '+datum.stk1\\n          as: sortField\\n        }\\n        // Calculate y0 and y1 positions for stacking nodes one on top of the other,\\n        // independently for each stack, and ensuring they are in the proper order,\\n        // alphabetical from the top (reversed on the y axis)\\n        {\\n          type: stack\\n          groupby: [\\\"stack\\\"]\\n          sort: {field: \\\"sortField\\\", order: \\\"descending\\\"}\\n          field: size\\n        }\\n        // calculate vertical center point for each node, used to draw edges\\n        {type: \\\"formula\\\", expr: \\\"(datum.y0+datum.y1)/2\\\", as: \\\"yc\\\"}\\n      ]\\n    }\\n    {\\n      name: groups\\n      source: nodes\\n      transform: [\\n        // combine all nodes into groups, summing up the doc counts\\n        {\\n          type: aggregate\\n          groupby: [\\\"stack\\\", \\\"grpId\\\"]\\n          fields: [\\\"size\\\"]\\n          ops: [\\\"sum\\\"]\\n          as: [\\\"total\\\"]\\n        }\\n        // re-calculate the stacking y0,y1 values\\n        {\\n          type: stack\\n          groupby: [\\\"stack\\\"]\\n          sort: {field: \\\"grpId\\\", order: \\\"descending\\\"}\\n          field: total\\n        }\\n        // project y0 and y1 values to screen coordinates\\n        // doing it once here instead of doing it several times in marks\\n        {type: \\\"formula\\\", expr: \\\"scale('y', datum.y0)\\\", as: \\\"scaledY0\\\"}\\n        {type: \\\"formula\\\", expr: \\\"scale('y', datum.y1)\\\", as: \\\"scaledY1\\\"}\\n        // boolean flag if the label should be on the right of the stack\\n        {type: \\\"formula\\\", expr: \\\"datum.stack == 'stk1'\\\", as: \\\"rightLabel\\\"}\\n        // Calculate percentage for this value using \\\"y\\\" scale\\n        // domain upper bound, which represents the total\\n        {\\n          type: formula\\n          expr: datum.total/domain('y')[1]\\n          as: percentage\\n        }\\n      ]\\n    }\\n    {\\n      // This is a temp lookup table with all the 'stk2' stack nodes\\n      name: destinationNodes\\n      source: nodes\\n      transform: [\\n        {type: \\\"filter\\\", expr: \\\"datum.stack == 'stk2'\\\"}\\n      ]\\n    }\\n    {\\n      name: edges\\n      source: nodes\\n      transform: [\\n        // we only want nodes from the left stack\\n        {type: \\\"filter\\\", expr: \\\"datum.stack == 'stk1'\\\"}\\n        // find corresponding node from the right stack, keep it as \\\"target\\\"\\n        {\\n          type: lookup\\n          from: destinationNodes\\n          key: key\\n          fields: [\\\"key\\\"]\\n          as: [\\\"target\\\"]\\n        }\\n        // calculate SVG link path between stk1 and stk2 stacks for the node pair\\n        {\\n          type: linkpath\\n          orient: horizontal\\n          shape: diagonal\\n          sourceY: {expr: \\\"scale('y', datum.yc)\\\"}\\n          sourceX: {expr: \\\"scale('x', 'stk1') + bandwidth('x')\\\"}\\n          targetY: {expr: \\\"scale('y', datum.target.yc)\\\"}\\n          targetX: {expr: \\\"scale('x', 'stk2')\\\"}\\n        }\\n        // A little trick to calculate the thickness of the line.\\n        // The value needs to be the same as the hight of the node, but scaling\\n        // size to screen's height gives inversed value because screen's Y\\n        // coordinate goes from the top to the bottom, whereas the graph's Y=0\\n        // is at the bottom. So subtracting scaled doc count from screen height\\n        // (which is the \\\"lower\\\" bound of the \\\"y\\\" scale) gives us the right value\\n        {\\n          type: formula\\n          expr: range('y')[0]-scale('y', datum.size)\\n          as: strokeWidth\\n        }\\n        // Tooltip needs individual link's percentage of all values\\n        {\\n          type: formula\\n          expr: datum.size/domain('y')[1]\\n          as: percentage\\n        }\\n      ]\\n    }\\n  ]\\n  scales: [\\n    {\\n      // calculates horizontal stack positioning\\n      name: x\\n      type: band\\n      range: width\\n      domain: [\\\"stk1\\\", \\\"stk2\\\"]\\n      paddingOuter: 0.05\\n      paddingInner: 0.95\\n    }\\n    {\\n      // this scale goes up as high as the highest y1 value of all nodes\\n      name: y\\n      type: linear\\n      range: height\\n      domain: {data: \\\"nodes\\\", field: \\\"y1\\\"}\\n    }\\n    {\\n      // use rawData to ensure the colors stay the same when clicking.\\n      name: color\\n      type: ordinal\\n      range: category\\n      domain: {data: \\\"rawData\\\", fields: [\\\"stk1\\\", \\\"stk2\\\"]}\\n    }\\n    {\\n      // this scale is used to map internal ids (stk1, stk2) to stack names\\n      name: stackNames\\n      type: ordinal\\n      range: [\\\"Method\\\", \\\"Status\\\"]\\n      domain: [\\\"stk1\\\", \\\"stk2\\\"]\\n    }\\n  ]\\n  axes: [\\n    {\\n      // x axis should use custom label formatting to print proper stack names\\n      orient: bottom\\n      scale: x\\n      encode: {\\n        labels: {\\n          update: {\\n            text: {scale: \\\"stackNames\\\", field: \\\"value\\\"}\\n          }\\n        }\\n      }\\n    }\\n    {orient: \\\"left\\\", scale: \\\"y\\\"}\\n  ]\\n  marks: [\\n    {\\n      // draw the connecting line between stacks\\n      type: path\\n      name: edgeMark\\n      from: {data: \\\"edges\\\"}\\n      // this prevents some autosizing issues with large strokeWidth for paths\\n      clip: true\\n      encode: {\\n        update: {\\n          // By default use color of the left node, except when showing contributors\\n          // from just one value, in which case use destination color.\\n          stroke: [\\n            {\\n              test: groupSelector && groupSelector.stack=='stk1'\\n              scale: color\\n              field: stk2\\n            }\\n            {scale: \\\"color\\\", field: \\\"stk1\\\"}\\n          ]\\n          strokeWidth: {field: \\\"strokeWidth\\\"}\\n          path: {field: \\\"path\\\"}\\n          // when showing all data, and hovering over a value,\\n          // highlight the contributors for that value\\n          strokeOpacity: {\\n            signal: !groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 0.9 : 0.3\\n          }\\n          // Ensure that the hover-selected edges show on top\\n          zindex: {\\n            signal: !groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 1 : 0\\n          }\\n          // format tooltip string\\n          tooltip: {\\n            signal: datum.stk1 + ' → ' + datum.stk2 + '    ' + format(datum.size, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'\\n          }\\n        }\\n        // Simple mouseover highlighting of a single line\\n        hover: {\\n          strokeOpacity: {value: 1}\\n        }\\n      }\\n    }\\n    {\\n      // draw stack groups (countries)\\n      type: rect\\n      name: groupMark\\n      from: {data: \\\"groups\\\"}\\n      encode: {\\n        enter: {\\n          fill: {scale: \\\"color\\\", field: \\\"grpId\\\"}\\n          width: {scale: \\\"x\\\", band: 1}\\n        }\\n        update: {\\n          x: {scale: \\\"x\\\", field: \\\"stack\\\"}\\n          y: {field: \\\"scaledY0\\\"}\\n          y2: {field: \\\"scaledY1\\\"}\\n          fillOpacity: {value: 0.6}\\n          tooltip: {\\n            signal: datum.grpId + '   ' + format(datum.total, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'\\n          }\\n        }\\n        hover: {\\n          fillOpacity: {value: 1}\\n        }\\n      }\\n    }\\n    {\\n      // draw labels on the inner side of the stack\\n      type: text\\n      from: {data: \\\"groups\\\"}\\n      // don't process events for the labels - otherwise line mouseover is unclean\\n      interactive: false\\n      encode: {\\n        update: {\\n          // depending on which stack it is, position x with some padding\\n          x: {\\n            signal: scale('x', datum.stack) + (datum.rightLabel ? bandwidth('x') + 8 : -8)\\n          }\\n          // middle of the group\\n          yc: {signal: \\\"(datum.scaledY0 + datum.scaledY1)/2\\\"}\\n          align: {signal: \\\"datum.rightLabel ? 'left' : 'right'\\\"}\\n          baseline: {value: \\\"middle\\\"}\\n          fontWeight: {value: \\\"bold\\\"}\\n          // only show text label if the group's height is large enough\\n          text: {signal: \\\"abs(datum.scaledY0-datum.scaledY1) > 13 ? datum.grpId : ''\\\"}\\n        }\\n      }\\n    }\\n    {\\n      // Create a \\\"show all\\\" button. Shown only when a value is selected.\\n      type: group\\n      data: [\\n        // We need to make the button show only when groupSelector signal is true.\\n        // Each mark is drawn as many times as there are elements in the backing data.\\n        // Which means that if values list is empty, it will not be drawn.\\n        // Here I create a data source with one empty object, and filter that list\\n        // based on the signal value. This can only be done in a group.\\n        {\\n          name: dataForShowAll\\n          values: [{}]\\n          transform: [{type: \\\"filter\\\", expr: \\\"groupSelector\\\"}]\\n        }\\n      ]\\n      // Set button size and positioning\\n      encode: {\\n        enter: {\\n          xc: {signal: \\\"width/2\\\"}\\n          y: {value: 30}\\n          width: {value: 80}\\n          height: {value: 30}\\n        }\\n      }\\n      marks: [\\n        {\\n          // This group is shown as a button with rounded corners.\\n          type: group\\n          // mark name allows signal capturing\\n          name: groupReset\\n          // Only shows button if dataForShowAll has values.\\n          from: {data: \\\"dataForShowAll\\\"}\\n          encode: {\\n            enter: {\\n              cornerRadius: {value: 6}\\n              fill: {value: \\\"#f5f5f5\\\"}\\n              stroke: {value: \\\"#c1c1c1\\\"}\\n              strokeWidth: {value: 2}\\n              // use parent group's size\\n              height: {\\n                field: {group: \\\"height\\\"}\\n              }\\n              width: {\\n                field: {group: \\\"width\\\"}\\n              }\\n            }\\n            update: {\\n              // groups are transparent by default\\n              opacity: {value: 1}\\n            }\\n            hover: {\\n              opacity: {value: 0.7}\\n            }\\n          }\\n          marks: [\\n            {\\n              type: text\\n              // if true, it will prevent clicking on the button when over text.\\n              interactive: false\\n              encode: {\\n                enter: {\\n                  // center text in the paren group\\n                  xc: {\\n                    field: {group: \\\"width\\\"}\\n                    mult: 0.5\\n                  }\\n                  yc: {\\n                    field: {group: \\\"height\\\"}\\n                    mult: 0.5\\n                    offset: 2\\n                  }\\n                  align: {value: \\\"center\\\"}\\n                  baseline: {value: \\\"middle\\\"}\\n                  fontWeight: {value: \\\"bold\\\"}\\n                  text: {value: \\\"Show All\\\"}\\n                }\\n              }\\n            }\\n          ]\\n        }\\n      ]\\n    }\\n  ]\\n  signals: [\\n    {\\n      // used to highlight data to/from the same value\\n      name: groupHover\\n      value: {}\\n      on: [\\n        {\\n          events: @groupMark:mouseover\\n          update: \\\"{stk1:datum.stack=='stk1' && datum.grpId, stk2:datum.stack=='stk2' && datum.grpId}\\\"\\n        }\\n        {events: \\\"mouseout\\\", update: \\\"{}\\\"}\\n      ]\\n    }\\n    // used to filter only the data related to the selected value\\n    {\\n      name: groupSelector\\n      value: false\\n      on: [\\n        {\\n          // Clicking groupMark sets this signal to the filter values\\n          events: @groupMark:click!\\n          update: \\\"datum.stack=='stk1' ? opensearchDashboardsAddFilter({\\\\\\\"match_phrase\\\\\\\": { \\\\\\\"event.action\\\\\\\": datum.grpId } }, 'arkime_sessions3-*') : opensearchDashboardsAddFilter({\\\\\\\"match_phrase\\\\\\\": { \\\\\\\"event.result\\\\\\\": datum.grpId } }, 'arkime_sessions3-*')\\\"\\n        }\\n        {\\n          // Clicking \\\"show all\\\" button, or double-clicking anywhere resets it\\n          events: [\\n            {type: \\\"click\\\", markname: \\\"groupReset\\\"}\\n            {type: \\\"dblclick\\\"}\\n          ]\\n          update: \\\"false\\\"\\n        }\\n      ]\\n    }\\n  ]\\n}\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:http\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
       }
     }
   ]

@@ -37,13 +37,13 @@ To temporarily set the Malcolm user interfaces into read-only configuration, run
 First, to configure [Nginx](https://nginx.org/) to disable access to the upload and other interfaces for changing Malcolm settings, and to deny HTTP methods other than `GET` and `POST`:
 
 ```
-docker-compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
+docker compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
 ```
 
 Second, to set the existing OpenSearch data store to read-only:
 
 ```
-docker-compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
+docker compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
 ```
 
 These commands must be re-run every time Malcolm is restarted.

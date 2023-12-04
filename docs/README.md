@@ -13,6 +13,7 @@ This enriched data is stored in an [OpenSearch](https://opensearch.org/) documen
 Malcolm can also easily be deployed locally on an ordinary consumer workstation or laptop for smaller networks, use at home, or in the field incident response engagements. Malcolm can process local artifacts such as locally generated Zeek logs, locally captured PCAP files, and PCAP files collected offline without the use of a dedicated sensor appliance.
 
 <a name="TableOfContents"></a>
+
 * [Quick start](quickstart.md#QuickStart)
     - [Getting Malcolm](quickstart.md#GetMalcolm)
     - [User interface](quickstart.md#UserInterfaceURLs)
@@ -72,6 +73,11 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
             * [Screenshots](dashboards.md#NewVisualizationsGallery)
 * [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
+    - [Custom Rules and Scripts](custom-rules.md#CustomRulesAndScripts)
+        + [Suricata](custom-rules.md#Suricata)
+        + [Zeek](custom-rules.md#Zeek)
+        + [YARA](custom-rules.md#YARA)
+        + [Other Customizations](custom-rules.md#Other)
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
     - [OpenSearch index management](index-management.md#IndexManagement)
     - [Event severity scoring](severity.md#Severity)

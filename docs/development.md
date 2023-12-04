@@ -38,7 +38,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 
 and the following files of special note:
 
-* `docker-compose.yml` - the configuration file used by `docker-compose` to build, start, and stop an instance of the Malcolm appliance
+* `docker-compose.yml` - the configuration file used by `docker compose` to build, start, and stop an instance of the Malcolm appliance
 * `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 
 ## <a name="Build"></a>Building from source

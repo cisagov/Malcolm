@@ -46,8 +46,41 @@ popd
 # Configure Malcolm on first login
 if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
     pushd ~/Malcolm >/dev/null 2>&1
-    ./scripts/configure
-    ./scripts/auth_setup
+
+    python3 ./scripts/configure \
+        --defaults \
+        --restart-malcolm \
+        --auto-suricata \
+        --auto-zeek \
+        --zeek-ics \
+        --zeek-ics-best-guess \
+        --auto-oui \
+        --auto-freq \
+        --file-extraction interesting \
+        --file-preservation quarantined \
+        --extracted-file-server \
+        --extracted-file-server-password infected \
+        --extracted-file-clamav \
+        --extracted-file-yara \
+        --netbox \
+        --netbox-enrich \
+        --netbox-autopopulate false \
+        --netbox-preload-prefixes \
+        --netbox-site-name malcolm
+
+    # username: analyst
+    # password: M@lc0lm
+    python3 ./scripts/auth_setup \
+        --auth-noninteractive \
+        --auth-admin-username analyst \
+        --auth-admin-password-openssl '$1$owXoS5pf$YesZKhhWS0d3zVUUhdcef0' \
+        --auth-admin-password-htpasswd '$2y$05$a8jiJsLZ1mFnt5srJD3HAOKC8IUaZcOlsqp8txBlmMjW6wUXUtN3S' \
+        --auth-generate-webcerts \
+        --auth-generate-fwcerts \
+        --auth-generate-netbox-passwords
+
+    python3 ./scripts/start
+
     popd >/dev/null 2>&1
     clear
     cat << 'EOT'
