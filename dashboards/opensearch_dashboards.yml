@@ -16,6 +16,7 @@ data_source.enabled: false
 
 opensearchDashboards.branding:
   applicationTitle: "Malcolm Dashboards"
+  useExpandedHeader: false
 
 map.regionmap:
   includeOpenSearchMapsService: false
