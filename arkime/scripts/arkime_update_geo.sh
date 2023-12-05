@@ -8,7 +8,7 @@ wget -nv --no-check-certificate -O ipv4-address-space.csv_new https://www.iana.o
   mv -f ipv4-address-space.csv_new ipv4-address-space.csv || \
   rm -f ipv4-address-space.csv_new
 
-wget -nv -O oui.txt_new https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf && \
+wget -nv -O oui.txt_new https://www.wireshark.org/download/automated/data/manuf && \
   mv -f oui.txt_new oui.txt || \
   rm -f oui.txt_new
 

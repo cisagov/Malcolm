@@ -216,7 +216,7 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       rm -f "GeoLite2-$DB*"; \
     done; \
   curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
-  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
+  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
 
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIME_DIR $PUSER && \
