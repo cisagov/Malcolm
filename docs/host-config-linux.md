@@ -21,9 +21,9 @@ Docker starts automatically on DEB-based distributions. On RPM-based distributio
 
 You can test Docker by running `docker info`, or (assuming you have internet access), `docker run --rm hello-world`.
 
-## Installing docker-compose
+## Installing docker compose
 
-Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing `docker-compose`.
+Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing the Docker Compose plugin.
 
 ## Operating system configuration
 

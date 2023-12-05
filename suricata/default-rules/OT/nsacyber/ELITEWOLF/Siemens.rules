@@ -1,0 +1,5 @@
+alert tcp any 80 -> any any (msg: "ELITEWOLF S7-1200 Possible Siemens Web Activity"; content:"/CSS/S7Web.css"; sid:1000034; rev:1;)
+alert tcp any 80 -> any any (msg: "ELITEWOLF S7-1200 Possible Siemens Web Activity"; content:"/Images/CPU1200/"; sid:1; rev:1000035;)
+alert tcp any 443 -> any any (msg: "ELITEWOLF S7-1200 Possible Siemens X509 certificate activity"; content:"S7-1200 Controller Family"; sid:1000036; rev:1;)
+alert tcp any 443 -> any any (msg: "ELITEWOLF S7-1200 Possible Siemens X509 certificate activity"; content:"commonName=S7-1200 Controller Family"; sid:1000037; rev:1;)
+alert tcp any 443 -> any any (msg: "ELITEWOLF S7-1200 Possible Siemens X509 certificate activity"; content:"issuer_CN: S7-1200 Controller Family"; sid:1000038; rev:1;)

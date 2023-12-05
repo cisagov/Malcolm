@@ -1,77 +1,4 @@
-# build ####################################################################
-FROM amazonlinux:2 AS build
-
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
-
-# set up build environment for dashboard plugins built from source
-
-ARG DEFAULT_UID=1000
-ARG DEFAULT_GID=1000
-ENV DEFAULT_UID $DEFAULT_UID
-ENV DEFAULT_GID $DEFAULT_GID
-ENV PUSER "dashboarder"
-ENV PGROUP "dashboarder"
-
-ENV TERM xterm
-
-ARG OPENSEARCH_VERSION="2.8.0"
-ENV OPENSEARCH_VERSION $OPENSEARCH_VERSION
-
-ARG OPENSEARCH_DASHBOARDS_VERSION="2.8.0"
-ENV OPENSEARCH_DASHBOARDS_VERSION $OPENSEARCH_DASHBOARDS_VERSION
-
-# base system dependencies for checking out and building plugins
-
-USER root
-
-RUN amazon-linux-extras install -y epel && \
-    yum upgrade -y && \
-    yum install -y curl patch procps psmisc tar zip unzip gcc-c++ make moreutils jq git && \
-    amazon-linux-extras install -y python3.8 && \
-        ln -s -r -f /usr/bin/python3.8 /usr/bin/python3 && \
-        ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3 && \
-    groupadd -g ${DEFAULT_GID} ${PGROUP} && \
-    adduser -u ${DEFAULT_UID} -d /home/${PUSER} -s /bin/bash -G ${PGROUP} -g ${PUSER} ${PUSER} && \
-    mkdir -p /usr/share && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_VERSION}" https://github.com/opensearch-project/OpenSearch /usr/share/opensearch && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch "${OPENSEARCH_DASHBOARDS_VERSION}" https://github.com/opensearch-project/OpenSearch-Dashboards /usr/share/opensearch-dashboards && \
-    chown -R ${DEFAULT_UID}:${DEFAULT_GID} /usr/share/opensearch-dashboards /usr/share/opensearch
-
-# build plugins as non-root
-
-USER ${PUSER}
-
-# use nodenv (https://github.com/nodenv/nodenv) to manage nodejs/yarn
-
-ENV PATH "/home/${PUSER}/.nodenv/bin:${PATH}"
-
-RUN git clone --single-branch --depth=1 --recurse-submodules --shallow-submodules https://github.com/nodenv/nodenv.git /home/${PUSER}/.nodenv && \
-    cd /home/${PUSER}/.nodenv && \
-    ./src/configure && \
-    make -C src && \
-    cd /tmp && \
-    eval "$(nodenv init -)" && \
-    mkdir -p "$(nodenv root)"/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/node-build.git "$(nodenv root)"/plugins/node-build && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/nodenv/nodenv-update.git "$(nodenv root)"/plugins/nodenv-update && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch https://github.com/pine/nodenv-yarn-install.git "$(nodenv root)"/plugins/nodenv-yarn-install && \
-    nodenv install "$(cat /usr/share/opensearch-dashboards/.node-version)" && \
-    nodenv global "$(cat /usr/share/opensearch-dashboards/.node-version)"
-
-# check out and build plugins
-
-RUN eval "$(nodenv init -)" && \
-    mkdir -p /usr/share/opensearch-dashboards/plugins && \
-    git clone --depth 1 --recurse-submodules --shallow-submodules --single-branch --branch opensearch-v2-dashboards-compatibility https://github.com/mmguero-dev/osd_sankey_vis.git /usr/share/opensearch-dashboards/plugins/sankey_vis && \
-    cd /usr/share/opensearch-dashboards/plugins/sankey_vis && \
-    yarn osd bootstrap && \
-    yarn install && \
-    yarn build --opensearch-dashboards-version "${OPENSEARCH_DASHBOARDS_VERSION}" && \
-    mv ./build/kbnSankeyVis-"${OPENSEARCH_DASHBOARDS_VERSION}".zip ./build/kbnSankeyVis.zip
-
-# runtime ##################################################################
-
-FROM opensearchproject/opensearch-dashboards:2.8.0
+FROM opensearchproject/opensearch-dashboards:2.11.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -93,7 +20,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.11.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_PRIMARY="opensearch-local"
@@ -115,22 +42,20 @@ ENV NODE_OPTIONS $NODE_OPTIONS
 
 USER root
 
-COPY --from=build /usr/share/opensearch-dashboards/plugins/sankey_vis/build/kbnSankeyVis.zip /tmp/kbnSankeyVis.zip
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
+    yum install -y curl-minimal psmisc findutils util-linux openssl rsync python3 zip unzip && \
+    yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
-    cd /usr/share/opensearch-dashboards/plugins && \
-    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/kbnSankeyVis.zip --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
@@ -150,15 +75,32 @@ ADD scripts/malcolm_utils.py /usr/local/bin/
 # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
 # internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead.
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo.svg
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_dark_mode.svg
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_default_mode.svg
-ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_dark_mode.svg
-ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_default_mode.svg
-ADD docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
-ADD docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
-ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
-ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
+
+COPY --chmod=644 docs/images/favicon/favicon192.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-192x192.png
+COPY --chmod=644 docs/images/favicon/favicon512.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-512x512.png
+COPY --chmod=644 docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
+COPY --chmod=644 docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
+COPY --chmod=644 docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
+COPY --chmod=644 docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
+COPY --chmod=644 docs/images/favicon/favicon144.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-144x144.png
+COPY --chmod=644 docs/images/favicon/favicon150.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-150x150.png
+COPY --chmod=644 docs/images/favicon/favicon310.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-310x310.png
+COPY --chmod=644 docs/images/favicon/favicon70.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-70x70.png
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark_on_light.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards.svg
+COPY --chmod=644 docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards_on_dark.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards_on_light.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark_on_light.svg
+COPY --chmod=644 docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_on_dark.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_on_light.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_light.svg
 
 
 ENTRYPOINT ["/usr/bin/tini", \

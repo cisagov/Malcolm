@@ -72,6 +72,7 @@ from malcolm_utils import (
     DATABASE_MODE_ENUMS,
     deep_get,
     eprint,
+    flatten,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -80,11 +81,12 @@ from malcolm_utils import (
 )
 
 ###################################################################################################
-DOCKER_COMPOSE_INSTALL_VERSION = "2.20.3"
+DOCKER_COMPOSE_INSTALL_VERSION = "2.23.0"
 
 DEB_GPG_KEY_FINGERPRINT = '0EBFCD88'  # used to verify GPG key for Docker Debian repository
 
-MAC_BREW_DOCKER_PACKAGE = 'docker-edge'
+MAC_BREW_DOCKER_PACKAGE = 'docker'
+MAC_BREW_DOCKER_COMPOSE_PACKAGE = 'docker-compose'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
 LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
@@ -991,6 +993,7 @@ class Installer(object):
         indexPruneSizeLimit = '0'
         indexPruneNameSort = False
         arkimeManagePCAP = False
+        arkimeFreeSpaceG = '10%'
 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
@@ -1030,6 +1033,16 @@ class Installer(object):
                     default=args.arkimeManagePCAP,
                 )
             )
+            if arkimeManagePCAP:
+                arkimeFreeSpaceGTmp = ''
+                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP deletion threshold')
+                while (not re.match(r'^\d+%?$', arkimeFreeSpaceGTmp, flags=re.IGNORECASE)) and loopBreaker.increment():
+                    arkimeFreeSpaceGTmp = InstallerAskForString(
+                        'Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)',
+                        default=args.arkimeFreeSpaceG,
+                    )
+                if arkimeFreeSpaceGTmp:
+                    arkimeFreeSpaceG = arkimeFreeSpaceGTmp
 
         autoSuricata = InstallerYesOrNo(
             'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
@@ -1263,6 +1276,10 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
+        netboxPreloadPrefixes = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm create "catch-all" prefixes for private IP address space?',
+            default=args.netboxPreloadPrefixes,
+        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -1284,41 +1301,38 @@ class Installer(object):
             else 'unset'
         )
 
-        if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            captureOptions = ('no', 'yes', 'customize')
-            loopBreaker = CountUntilException(MaxAskForValueCount)
-            while captureSelection not in [x[0] for x in captureOptions] and loopBreaker.increment():
-                captureSelection = InstallerChooseOne(
-                    'Should Malcolm capture live network traffic?',
-                    choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
-                )[0]
-            if captureSelection == 'y':
-                pcapNetSniff = True
-                liveSuricata = True
-                liveZeek = True
-            elif captureSelection == 'c':
-                if InstallerYesOrNo(
-                    'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                    default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
-                ):
-                    pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
-                    if not pcapNetSniff:
-                        pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
-                liveSuricata = InstallerYesOrNo(
-                    'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
+        captureOptions = ('no', 'yes', 'customize')
+        loopBreaker = CountUntilException(MaxAskForValueCount)
+        while captureSelection not in [x[0] for x in captureOptions] and loopBreaker.increment():
+            captureSelection = InstallerChooseOne(
+                'Should Malcolm capture live network traffic?',
+                choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
+            )[0]
+        if captureSelection == 'y':
+            pcapNetSniff = True
+            liveSuricata = True
+            liveZeek = True
+        elif captureSelection == 'c':
+            if InstallerYesOrNo(
+                'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
+                default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
+            ):
+                pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
+                if not pcapNetSniff:
+                    pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+            liveSuricata = InstallerYesOrNo(
+                'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
+            )
+            liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek)
+            if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+                pcapFilter = InstallerAskForString(
+                    'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
+                    default=args.pcapFilter,
                 )
-                liveZeek = InstallerYesOrNo(
-                    'Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek
+                tweakIface = InstallerYesOrNo(
+                    'Disable capture interface hardware offloading and adjust ring buffer sizes?',
+                    default=args.tweakIface,
                 )
-                if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
-                    pcapFilter = InstallerAskForString(
-                        'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
-                        default=args.pcapFilter,
-                    )
-                    tweakIface = InstallerYesOrNo(
-                        'Disable capture interface hardware offloading and adjust ring buffer sizes?',
-                        default=args.tweakIface,
-                    )
 
         if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
             pcapIface = ''
@@ -1372,6 +1386,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'MANAGE_PCAP_FILES',
                 TrueOrFalseNoQuote(arkimeManagePCAP),
+            ),
+            # Threshold for Arkime PCAP deletion
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ARKIME_FREESPACEG',
+                arkimeFreeSpaceG,
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
@@ -1510,6 +1530,11 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_PRELOAD_PREFIXES',
+                TrueOrFalseNoQuote(netboxPreloadPrefixes),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
@@ -2564,22 +2589,27 @@ class LinuxInstaller(Installer):
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            dockerComposeCmd = 'docker-compose'
-            if not which(dockerComposeCmd, debug=self.debug):
-                if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                    dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
-                elif os.path.isfile('/usr/local/bin/docker-compose'):
-                    dockerComposeCmd = '/usr/local/bin/docker-compose'
-
-            # first see if docker-compose is already installed and runnable (try non-root and root)
+            # first see if docker compose/docker-compose is already installed and runnable
+            #   (try non-root and root)
+            dockerComposeCmd = ('docker', 'compose')
             err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
             if err != 0:
                 err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+                if err != 0:
+                    dockerComposeCmd = 'docker-compose'
+                    if not which(dockerComposeCmd, debug=self.debug):
+                        if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                            dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
+                        elif os.path.isfile('/usr/local/bin/docker-compose'):
+                            dockerComposeCmd = '/usr/local/bin/docker-compose'
+                    err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
+                    if err != 0:
+                        err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
 
             if (err != 0) and InstallerYesOrNo(
-                '"docker-compose version" failed, attempt to install docker-compose?', default=True
+                'docker compose failed, attempt to install docker compose?', default=True
             ):
-                if InstallerYesOrNo('Install docker-compose directly from docker github?', default=True):
+                if InstallerYesOrNo('Install docker compose directly from docker github?', default=True):
                     # download docker-compose from github and put it in /usr/local/bin
 
                     # need to know some linux platform info
@@ -2611,7 +2641,7 @@ class LinuxInstaller(Installer):
 
                 elif InstallerYesOrNo('Install docker-compose via pip (privileged)?', default=False):
                     # install docker-compose via pip (as root)
-                    err, out = self.run_process([self.pipCmd, 'install', dockerComposeCmd], privileged=True)
+                    err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=True)
                     if err == 0:
                         eprint("Installation of docker-compose apparently succeeded")
                     else:
@@ -2619,7 +2649,7 @@ class LinuxInstaller(Installer):
 
                 elif InstallerYesOrNo('Install docker-compose via pip (user)?', default=True):
                     # install docker-compose via pip (regular user)
-                    err, out = self.run_process([self.pipCmd, 'install', dockerComposeCmd], privileged=False)
+                    err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=False)
                     if err == 0:
                         eprint("Installation of docker-compose apparently succeeded")
                     else:
@@ -2633,11 +2663,11 @@ class LinuxInstaller(Installer):
             if err == 0:
                 result = True
                 if self.debug:
-                    eprint('"docker-compose version" succeeded')
+                    eprint('docker compose succeeded')
 
             else:
                 raise Exception(
-                    f'{ScriptName} requires docker-compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
+                    f'{ScriptName} requires docker compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
                 )
 
         return result
@@ -2888,7 +2918,7 @@ class MacInstaller(Installer):
             elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
                 if self.useBrew:
                     # install docker via brew cask (requires user interaction)
-                    dockerPackages = [MAC_BREW_DOCKER_PACKAGE, "docker-compose"]
+                    dockerPackages = [MAC_BREW_DOCKER_PACKAGE, MAC_BREW_DOCKER_COMPOSE_PACKAGE]
                     eprint(f"Installing docker packages: {dockerPackages}")
                     if self.install_package(dockerPackages):
                         eprint("Installation of docker packages apparently succeeded")
@@ -2909,7 +2939,7 @@ class MacInstaller(Installer):
                     else:
                         tempFileName = os.path.join(self.tempDirName, 'Docker.dmg')
                     if DownloadToFile(
-                        'https://download.docker.com/mac/edge/Docker.dmg', tempFileName, debug=self.debug
+                        'https://desktop.docker.com/mac/main/amd64/Docker.dmg', tempFileName, debug=self.debug
                     ):
                         while True:
                             response = InstallerAskForString(
@@ -2926,12 +2956,10 @@ class MacInstaller(Installer):
                         eprint('"docker info" succeeded')
 
                 elif err != 0:
-                    raise Exception(
-                        f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}'
-                    )
+                    raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
             elif err != 0:
-                raise Exception(f'{ScriptName} requires docker edge, please see {DOCKER_INSTALL_URLS[self.platform]}')
+                raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
 
             # tweak CPU/RAM usage for Docker in Mac
             settingsFile = MAC_BREW_DOCKER_SETTINGS.format(self.scriptUser)
@@ -3461,6 +3489,15 @@ def main():
         help="Arkime should delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)",
     )
     storageArgGroup.add_argument(
+        '--delete-pcap-threshold',
+        dest='arkimeFreeSpaceG',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Threshold for Arkime PCAP deletion (see https://arkime.com/faq#pcap-deletion)',
+    )
+    storageArgGroup.add_argument(
         '--delete-index-threshold',
         dest='indexPruneSizeLimit',
         required=False,
@@ -3670,6 +3707,16 @@ def main():
         const=True,
         default=False,
         help="Automatically populate NetBox inventory based on observed network traffic",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-preload-prefixes',
+        dest='netboxPreloadPrefixes',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Preload NetBox IPAM IP Prefixes for private IP space",
     )
     netboxArgGroup.add_argument(
         '--netbox-site-name',

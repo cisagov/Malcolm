@@ -14,27 +14,36 @@ $ brew install cask
 $ brew tap homebrew/cask-versions
 ```
 
-## Install docker-edge
+## Install docker
 
 ```
-$ brew install --cask docker-edge
+$ brew install --cask docker
 ```
 This will install the latest version of `docker`. It can be upgraded later using `brew` as well:
 ```
-$ brew upgrade --cask --no-quarantine docker-edge
+$ brew upgrade --cask --no-quarantine docker
 ```
 You can now run Docker from the Applications folder.
 
-## Install docker-compose
+## Install docker compose
 
 ```
 $ brew install docker-compose
 ```
-This will install the latest version of the `docker-compose` plugin. It can be upgraded later using `brew` as well:
+
+This will install the latest version of the Docker Compose plugin. It can be upgraded later using [`brew`] as well:
+
 ```
 $ brew upgrade --no-quarantine docker-compose
 ```
-You can now run `docker-compose` (at `/usr/local/opt/docker-compose/bin/docker-compose`) from the command-line
+
+The [brew formula for docker-compose notes](https://formulae.brew.sh/formula/docker-compose) has the following note about needing to symlink for Docker to find the compose plugin:
+
+```
+Compose is now a Docker plugin. For Docker to find this plugin, symlink it:
+    mkdir -p ~/.docker/cli-plugins
+    ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+```
 
 ## Configure docker daemon option
 

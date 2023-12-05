@@ -31,11 +31,11 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
     - `destination.device.site` (`/dcim/sites/`)
     - `destination.device.url` (`/dcim/devices/`)
     - `destination.device.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
-    - `destination.segment.id` (`/ipam/vrfs/{id}`)
-    - `destination.segment.name` (`/ipam/vrfs/`)
+    - `destination.segment.id` (`/ipam/prefixes/{id}`)
+    - `destination.segment.name` (`/ipam/prefixes/{description}`)
     - `destination.segment.site` (`/dcim/sites/`)
     - `destination.segment.tenant` (`/tenancy/tenants/`)
-    - `destination.segment.url` (`/ipam/vrfs/`)
+    - `destination.segment.url` (`/ipam/prefixes/`)
     - `destination.segment.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
@@ -78,7 +78,6 @@ The [Populating Data](https://docs.netbox.dev/en/stable/getting-started/populati
 The following elements of the NetBox data model are used by Malcolm for Asset Interaction Analysis.
 
 * Network segments
-    - [Virtual Routing and Forwarding (VRF)](https://docs.netbox.dev/en/stable/models/ipam/vrf/)
     - [Prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)
 * Network Hosts
     - [Devices](https://docs.netbox.dev/en/stable/models/dcim/device/)
@@ -99,7 +98,7 @@ However, careful consideration should be made before enabling this feature: the 
 
 Devices created using this autopopulate method will have their `status` field set to `staged`. It is recommended that users periodically review automatically-created devices for correctness and to fill in known details that couldn't be determined from network traffic. For example, the `manufacturer` field for automatically-created devices will be set based on the organizational unique identifier (OUI) determined from the first three bytes of the observed MAC address, which may not be accurate if the device's traffic was observed across a router. If possible, observed hostnames will be used in the naming of the automatically-created devices, falling back to the device manufacturer otherwise (e.g., `MYHOSTNAME @ 10.10.0.123` vs. `Schweitzer Engineering @ 10.10.0.123`).
 
-Since device autocreation is based on IP address, information about network segments (including [virtual routing and forwarding (VRF)](https://docs.netbox.dev/en/stable/models/ipam/vrf/) and [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated.
+Since device autocreation is based on IP address, information about network segments (IP [prefixes](https://docs.netbox.dev/en/stable/models/ipam/prefix/)) must be first [manually specified](#NetBoxPopManual) in NetBox in order for devices to be automatically populated. Users should populate the `description` field in the NetBox IPAM Prefixes data model to specify a name to be used for NetBox network segment autopopulation and enrichment, otherwise the IP prefix itself will be used.
 
 Although network devices can be automatically created using this method, [services](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
 
@@ -128,11 +127,13 @@ $ ./scripts/netbox-backup
 NetBox configuration database saved to ('malcolm_netbox_backup_20230110-133855.gz', 'malcolm_netbox_backup_20230110-133855.media.tar.gz')
 ```
 
-To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….gz` you wish to restore) from within the Malcolm installation directory while Malcolm is running:
+To clear the existing NetBox database and restore a previous backup, run the following command (substituting the filename of the `netbox_….gz` to be restored) from within the Malcolm installation directory while Malcolm is running:
 
 ```
 ./scripts/netbox-restore --netbox-restore ./malcolm_netbox_backup_20230110-125756.gz
 
 ```
 
-Note that some of the data in the NetBox database is cryptographically signed with the value of the `SECRET_KEY` environment variable in the `./netbox/env/netbox-secret.env` environment file. A restored NetBox backup **will not work** if this value is different from when it was created.
+Users with a prior NetBox database backup (created with `netbox-backup` as described above) that they wish to be automatically restored on startup, that `.gz` file may be manually copied to the [`./netbox/preload`](#NetBoxPreload) directory. Upon startup that file will be extracted and used to populate the NetBox database, taking priority over the other preload files. This process does not remove the `.gz` file from the directory upon restoring it; it will be restored again on subsequent restarts unless manually removed.
+
+Note that [network log enrichment](#NetBoxEnrichment) will fail while a restore is in progress (indicated with `HTTP/1.1 403` messages in the output of the `netbox` container in the Malcolm debug logs), but should resume once the restore process has completed.

@@ -30,10 +30,10 @@ ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.27"
+ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "7dadd4ac827e7bd60b386414dfefc898ae5b6c63"
+ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.33.3"
@@ -42,6 +42,7 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
+ENV SURICATA_CUSTOM_CONFIG_DIR /opt/suricata/include-configs
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
 ENV SURICATA_MANAGED_RULES_DIR "$SURICATA_MANAGED_DIR/rules"
@@ -50,6 +51,8 @@ ENV SURICATA_UPDATE_CONFIG_FILE "$SURICATA_CONFIG_DIR"/update.yaml
 ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
+
+COPY --chmod=644 suricata/default-rules/ /tmp/default-rules/
 
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
@@ -114,10 +117,11 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
+    find /tmp/default-rules/ -not -path '*/.gitignore' -type f -exec cp "{}" "$SURICATA_CONFIG_DIR"/rules/ \; && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     suricata-update update --fail --verbose --etopen --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     chown root:${PGROUP} /sbin/ethtool /usr/bin/suricata && \
@@ -180,6 +184,7 @@ ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$S
 
 VOLUME ["$SURICATA_CONFIG_DIR"]
 VOLUME ["$SURICATA_CUSTOM_RULES_DIR"]
+VOLUME ["$SURICATA_CUSTOM_CONFIG_DIR"]
 VOLUME ["$SURICATA_LOG_DIR"]
 VOLUME ["$SURICATA_MANAGED_DIR"]
 VOLUME ["$SURICATA_RUN_DIR"]
