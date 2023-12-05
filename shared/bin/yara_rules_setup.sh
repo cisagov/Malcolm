@@ -96,13 +96,14 @@ mkdir -p "$YARA_RULES_SRC_DIR" "$YARA_RULES_DIR"
 # clone yara rules and create symlinks in destination directory
 pushd "$YARA_RULES_SRC_DIR" >/dev/null 2>&1
 YARA_RULE_GITHUB_URLS=(
-  "https://github.com/Neo23x0/signature-base|master"
   "https://github.com/bartblaze/Yara-rules|master"
+  "https://github.com/Neo23x0/signature-base|master"
+  "https://github.com/reversinglabs/reversinglabs-yara-rules|develop"
 )
 for i in ${YARA_RULE_GITHUB_URLS[@]}; do
   SRC_DIR="$(clone_github_repo "$i")"
   if [[ -d "$SRC_DIR" ]]; then
-    find "$SRC_DIR" -type f -iname "*.yar" -print0 | xargs -0 -r -I XXX ln $VERBOSE_FLAG -s -f "$("$REALPATH" "XXX")" "$YARA_RULES_DIR"/
+    find "$SRC_DIR" -type f \( -iname '*.yara' -o -iname '*.yar' \) -print0 | xargs -0 -r -I XXX ln $VERBOSE_FLAG -s -f "$("$REALPATH" "XXX")" "$YARA_RULES_DIR"/
   fi
 done
 popd >/dev/null 2>&1

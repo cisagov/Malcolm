@@ -50,20 +50,24 @@ zeek:
     - ./zeek-logs/upload:/zeek/upload
     - ./zeek-logs/extract_files:/zeek/extract_files
     - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+    - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
 zeek-live:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./zeek-logs/live:/zeek/live
     - ./zeek-logs/extract_files:/zeek/extract_files
     - ./zeek/intel:/opt/zeek/share/zeek/site/intel
+    - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
 suricata:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./suricata-logs:/var/log/suricata
     - ./pcap:/data/pcap
     - ./suricata/rules:/opt/suricata/rules:ro
+    - ./suricata/include-configs:/opt/suricata/include-configs:ro
 suricata-live:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./suricata-logs:/var/log/suricata
     - ./suricata/rules:/opt/suricata/rules:ro
+    - ./suricata/include-configs:/opt/suricata/include-configs:ro
 file-monitor:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./zeek-logs/extract_files:/zeek/extract_files

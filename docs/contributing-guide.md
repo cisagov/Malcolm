@@ -2,6 +2,8 @@
 
 The purpose of this document is to provide some direction for those willing to modify Malcolm, whether for local customization or for contribution to the Malcolm project.
 
+It is recommended before reviewing this guide to read the documentation on [custom rules and scripts](custom-rules.md#CustomRulesAndScripts), which outlines customizations that can be made to the behavior of Suricata, Zeek, and YARA.
+
 <a name="ContribTableOfContents"></a>
 * [Local modifications](contributing-local-modifications.md#LocalMods)
     + [Docker bind mounts](contributing-local-modifications.md#Bind)

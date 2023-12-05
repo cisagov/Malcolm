@@ -82,6 +82,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/scripts/"
   mkdir $VERBOSE -p "$DESTDIR/suricata-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/suricata/rules/"
+  mkdir $VERBOSE -p "$DESTDIR/suricata/include-configs/"
   mkdir $VERBOSE -p "$DESTDIR/yara/rules/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/current/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/extract_files/preserved/"
@@ -89,6 +90,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/live/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/processed/"
   mkdir $VERBOSE -p "$DESTDIR/zeek-logs/upload/"
+  mkdir $VERBOSE -p "$DESTDIR/zeek/custom/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX/"
 

@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v23.05.1}
+MALCOLM_TAG=${MALCOLM_TAG:-v23.10.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -217,7 +217,7 @@ function InstallMalcolm {
         mv docker-compose-standalone.yml docker-compose.yml
         for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
         echo "Pulling Docker images..." >&2
-        docker-compose pull >/dev/null 2>&1
+        docker-compose --profile malcolm pull >/dev/null 2>&1
         rm -f ./config/*.env
         docker images
         popd >/dev/null 2>&1

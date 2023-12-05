@@ -119,6 +119,12 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
         },
     ],
+    'suricata-configs': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'include-configs')),
+        },
+    ],
     'filebeat-certs': [
         {
             'secret': True,
@@ -151,6 +157,18 @@ MALCOLM_CONFIGMAPS = {
         {
             'secret': True,
             'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+        },
+    ],
+    'zeek-custom': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
+        },
+    ],
+    'zeek-intel-preseed': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),
         },
     ],
 }
