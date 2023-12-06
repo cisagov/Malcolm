@@ -25,6 +25,8 @@ spec:
             add:
               # IPC_LOCK required for some of the memory optimizations netsniff-ng does
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limits
+              - SYS_RESOURCE
               # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW

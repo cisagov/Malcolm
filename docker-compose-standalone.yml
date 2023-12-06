@@ -36,8 +36,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
-      # IPC_LOCK required in order for OpenSearch to lock memory, preventing swapping
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
@@ -124,8 +126,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
-      # IPC_LOCK required in order for LogStash to lock memory, preventing swapping
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -386,8 +390,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
-      # IPC_LOCK required for some of the memory optimizations netsniff-ng does
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
