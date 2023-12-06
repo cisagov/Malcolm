@@ -56,7 +56,9 @@ spec:
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK - for LogStash to lock memory, preventing swapping
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limit on the node running LogStash
               - SYS_RESOURCE
         ports:
           - name: lumberjack

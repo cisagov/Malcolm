@@ -23,11 +23,11 @@ spec:
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK required for some of the memory optimizations netsniff-ng does
               - IPC_LOCK
+              # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
         envFrom:
           - configMapRef:
               name: process-env

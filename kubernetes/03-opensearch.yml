@@ -37,7 +37,9 @@ spec:
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK - for OpenSearch to lock memory, preventing swapping
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limit on the node running Elasticsearch
               - SYS_RESOURCE
         ports:
           - name: opensearch

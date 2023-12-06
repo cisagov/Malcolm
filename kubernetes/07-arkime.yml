@@ -34,11 +34,6 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
-        securityContext:
-          capabilities:
-            add:
-              - IPC_LOCK
-              - SYS_RESOURCE
         ports:
           - name: http
             protocol: TCP

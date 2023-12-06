@@ -39,6 +39,7 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK required in order for OpenSearch to lock memory, preventing swapping
       - IPC_LOCK
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
@@ -135,6 +136,7 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK required in order for LogStash to lock memory, preventing swapping
       - IPC_LOCK
     env_file:
       - ./config/process.env
@@ -229,10 +231,6 @@ services:
       - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     depends_on:
       - opensearch
     ports:
@@ -265,15 +263,9 @@ services:
     hostname: zeek
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -308,15 +300,12 @@ services:
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -345,15 +334,9 @@ services:
     hostname: suricata
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -383,15 +366,12 @@ services:
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values and scheduling policies for capture
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -451,10 +431,11 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK required for some of the memory optimizations netsniff-ng does
       - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
     env_file:
       - ./config/process.env
       - ./config/ssl.env

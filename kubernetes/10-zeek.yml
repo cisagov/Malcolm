@@ -23,11 +23,8 @@ spec:
         securityContext:
           capabilities:
             add:
-              - IPC_LOCK
-              - NET_ADMIN
-              - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
+              # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+              - SYS_NICE
         envFrom:
           - configMapRef:
               name: process-env
