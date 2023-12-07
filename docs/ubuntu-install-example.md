@@ -179,7 +179,7 @@ Scan extracted PE files with Capa? (y / N): y
 
 Lookup extracted file hashes with VirusTotal? (y / N): n
 
-Download updated file scanner signatures periodically? (n/Y): y
+Download updated file scanner signatures periodically? (Y / n): n
 
 Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): n
 
@@ -190,7 +190,9 @@ Should Malcolm capture live network traffic? 2
 
 Specify capture interface(s) (comma-separated): eth0
 
-Enable dark mode for OpenSearch Dashboards? (n/Y): y
+Enable dark mode for OpenSearch Dashboards? (Y / n): y
+
+Pull Malcolm Docker images (y / N): y
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
@@ -227,7 +229,7 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
-user@host:~/Malcolm$ docker compose pull
+user@host:~/Malcolm$ docker compose --profile=malcolm pull
 Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done

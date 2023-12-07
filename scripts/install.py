@@ -235,6 +235,7 @@ class Installer(object):
         self.checkPackageCmds = []
         self.installPackageCmds = []
         self.requiredPackages = []
+        self.dockerComposeCmd = None
 
         self.pipCmd = 'pip3'
         if not which(self.pipCmd, debug=self.debug):
@@ -302,15 +303,16 @@ class Installer(object):
         return self.install_package(self.requiredPackages)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def install_docker_images(self, docker_image_file):
+    def install_docker_images(self, docker_image_file, malcolm_install_path):
         result = False
+        composeFile = os.path.join(malcolm_install_path, 'docker-compose.yml')
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if (
                 docker_image_file
                 and os.path.isfile(docker_image_file)
                 and InstallerYesOrNo(
-                    f'Load Malcolm Docker images from {docker_image_file}', default=True, forceInteraction=True
+                    f'Load Malcolm Docker images from {docker_image_file}?', default=True, forceInteraction=True
                 )
             ):
                 ecode, out = self.run_process(['docker', 'load', '-q', '-i', docker_image_file], privileged=True)
@@ -318,6 +320,31 @@ class Installer(object):
                     result = True
                 else:
                     eprint(f"Loading Malcolm Docker images failed: {out}")
+
+            elif (
+                os.path.isfile(composeFile)
+                and self.dockerComposeCmd
+                and InstallerYesOrNo(f'Pull Malcolm Docker images?', default=True, forceInteraction=True)
+            ):
+                for priv in (False, True):
+                    ecode, out = self.run_process(
+                        [
+                            self.dockerComposeCmd,
+                            '-f',
+                            composeFile,
+                            '--profile=malcolm',
+                            'pull',
+                            '--quiet',
+                        ],
+                        privileged=priv,
+                    )
+                    if ecode == 0:
+                        break
+
+                if ecode == 0:
+                    result = True
+                else:
+                    eprint(f"Pulling Malcolm Docker images failed: {out}")
 
         return result
 
@@ -331,7 +358,7 @@ class Installer(object):
             malcolm_install_file
             and os.path.isfile(malcolm_install_file)
             and InstallerYesOrNo(
-                f'Extract Malcolm runtime files from {malcolm_install_file}', default=True, forceInteraction=True
+                f'Extract Malcolm runtime files from {malcolm_install_file}?', default=True, forceInteraction=True
             )
         ):
             # determine and create destination path for installation
@@ -434,8 +461,10 @@ class Installer(object):
         defaultUid = '1000'
         defaultGid = '1000'
         if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
-            defaultUid = str(os.stat(malcolm_install_path).st_uid)
-            defaultGid = str(os.stat(malcolm_install_path).st_gid)
+            if pathUid := os.stat(malcolm_install_path).st_uid:
+                defaultUid = str(pathUid)
+            if pathGid := os.stat(malcolm_install_path).st_gid:
+                defaultGid = str(pathGid)
 
         puid = defaultUid
         pgid = defaultGid
@@ -2613,24 +2642,28 @@ class LinuxInstaller(Installer):
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # first see if docker compose/docker-compose is already installed and runnable
             #   (try non-root and root)
-            dockerComposeCmd = ('docker', 'compose')
-            err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-            if err != 0:
-                err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
-                if err != 0:
-                    dockerComposeCmd = 'docker-compose'
-                    if not which(dockerComposeCmd, debug=self.debug):
-                        if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                            dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
-                        elif os.path.isfile('/usr/local/bin/docker-compose'):
-                            dockerComposeCmd = '/usr/local/bin/docker-compose'
-                    err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-                    if err != 0:
-                        err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+            tmpComposeCmd = ('docker', 'compose')
 
-            if (err != 0) and InstallerYesOrNo(
-                'docker compose failed, attempt to install docker compose?', default=True
-            ):
+            for priv in (False, True):
+                err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                if err == 0:
+                    break
+            if err != 0:
+                tmpComposeCmd = 'docker-compose'
+                if not which(tmpComposeCmd, debug=self.debug):
+                    if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                        tmpComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
+                    elif os.path.isfile('/usr/local/bin/docker-compose'):
+                        tmpComposeCmd = '/usr/local/bin/docker-compose'
+                for priv in (False, True):
+                    err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                    if err == 0:
+                        break
+
+            if err == 0:
+                self.dockerComposeCmd = tmpComposeCmd
+
+            elif InstallerYesOrNo('docker compose failed, attempt to install docker compose?', default=True):
                 if InstallerYesOrNo('Install docker compose directly from docker github?', default=True):
                     # download docker-compose from github and put it in /usr/local/bin
 
@@ -2644,7 +2677,7 @@ class LinuxInstaller(Installer):
                         unames.append(out[0].lower())
                     if len(unames) == 2:
                         # download docker-compose from github and save it to a temporary file
-                        tempFileName = os.path.join(self.tempDirName, dockerComposeCmd)
+                        tempFileName = os.path.join(self.tempDirName, tmpComposeCmd)
                         dockerComposeUrl = f"https://github.com/docker/compose/releases/download/v{DOCKER_COMPOSE_INSTALL_VERSION}/docker-compose-{unames[0]}-{unames[1]}"
                         if DownloadToFile(dockerComposeUrl, tempFileName, debug=self.debug):
                             os.chmod(tempFileName, 493)  # 493 = 0o755, mark as executable
@@ -2654,7 +2687,7 @@ class LinuxInstaller(Installer):
                             )
                             if err == 0:
                                 eprint("Download and installation of docker-compose apparently succeeded")
-                                dockerComposeCmd = '/usr/local/bin/docker-compose'
+                                tmpComposeCmd = '/usr/local/bin/docker-compose'
                             else:
                                 raise Exception(f'Error copying {tempFileName} to /usr/local/bin: {out}')
 
@@ -2678,11 +2711,13 @@ class LinuxInstaller(Installer):
                         eprint(f"Install docker-compose via pip failed with {err}, {out}")
 
             # see if docker-compose is now installed and runnable (try non-root and root)
-            err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-            if err != 0:
-                err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+            for priv in (False, True):
+                err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                if err == 0:
+                    break
 
             if err == 0:
+                self.dockerComposeCmd = tmpComposeCmd
                 result = True
                 if self.debug:
                     eprint('docker compose succeeded')
@@ -3948,8 +3983,6 @@ def main():
             success = installer.install_docker_compose()
         if hasattr(installer, 'tweak_system_files'):
             success = installer.tweak_system_files()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_images'):
-            success = installer.install_docker_images(imageFile)
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
             success, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
@@ -4000,11 +4033,19 @@ def main():
         if args.debug:
             eprint(f"Malcolm installation detected at {installPath}")
 
-    if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-        installer.tweak_malcolm_runtime(installPath)
-        eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
-        eprint(
-            f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
+    if (installPath is not None) and os.path.isdir(installPath):
+        if hasattr(installer, 'tweak_malcolm_runtime'):
+            installer.tweak_malcolm_runtime(installPath)
+
+        if (
+            (not args.configOnly)
+            and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and hasattr(installer, 'install_docker_images')
+        ):
+            success = installer.install_docker_images(imageFile, installPath)
+
+        InstallerDisplayMessage(
+            f"Malcolm has been installed to {installPath}. See README.md for more information.\nScripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
         )
 
 
