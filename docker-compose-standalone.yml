@@ -236,7 +236,7 @@ services:
     networks:
       - default
     cap_add:
-      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
       - ./config/process.env
@@ -272,7 +272,7 @@ services:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      # SYS_NICE - to set process nice values and scheduling policies for capture
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
       - ./config/process.env
@@ -299,7 +299,7 @@ services:
     networks:
       - default
     cap_add:
-      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
       - ./config/process.env

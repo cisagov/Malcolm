@@ -26,7 +26,7 @@ spec:
               # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW
-              # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+              # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
               - SYS_NICE
         envFrom:
           - configMapRef:

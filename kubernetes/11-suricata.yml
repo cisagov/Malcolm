@@ -23,7 +23,7 @@ spec:
         securityContext:
           capabilities:
             add:
-              # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+              # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
               - SYS_NICE
         envFrom:
           - configMapRef:
