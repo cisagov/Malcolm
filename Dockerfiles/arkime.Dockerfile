@@ -99,6 +99,7 @@ ENV PGROUP "arkime"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -251,7 +252,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     chmod u+s $ARKIME_DIR/bin/capture && \
     chown root:${PGROUP} /sbin/ethtool $ARKIME_DIR/bin/capture && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' $ARKIME_DIR/bin/capture && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
     mkdir -p /var/run/arkime && \
     chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime
 #Update Path

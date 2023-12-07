@@ -262,6 +262,10 @@ services:
     tty: true
     network_mode: host
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
+      - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
@@ -272,6 +276,7 @@ services:
       - ./config.elastic/ssl.env
       - ./config.elastic/opensearch.env
       - ./config.elastic/upload-common.env
+      - ./config.seth/pcap-capture.env
       - ./config.elastic/auth.env
       - ./config.elastic/arkime.env
       - ./config.elastic/arkime-live.env
