@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # make sure the keystore file used by the tool (e.g., foobar) is copied or created
 # into the correct location before the tool. starts up.

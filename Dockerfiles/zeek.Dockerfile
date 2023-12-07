@@ -62,7 +62,7 @@ RUN apt-get -q update && \
 
 FROM debian:12-slim
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -92,7 +92,6 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
-ENV PUSER_RLIMIT_UNLOCK true
 
 ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"

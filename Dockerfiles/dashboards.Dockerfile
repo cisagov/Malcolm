@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:2.8.0
+FROM opensearchproject/opensearch-dashboards:2.11.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -20,7 +20,7 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
-ENV OSD_TRANSFORM_VIS_VERSION 2.8.0
+ENV OSD_TRANSFORM_VIS_VERSION 2.11.0
 
 ARG OPENSEARCH_URL="http://opensearch:9200"
 ARG OPENSEARCH_PRIMARY="opensearch-local"
@@ -46,16 +46,16 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
 RUN yum upgrade -y && \
-    yum install -y curl psmisc util-linux openssl rsync python3 zip unzip && \
+    yum install -y curl-minimal psmisc findutils util-linux openssl rsync python3 zip unzip && \
     yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.9\.0/2\.9\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.11\.0/2\.11\.1/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
@@ -75,15 +75,32 @@ ADD scripts/malcolm_utils.py /usr/local/bin/
 # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
 # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
 # internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead.
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo.svg
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_dark_mode.svg
-ADD docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_logo_default_mode.svg
-ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_dark_mode.svg
-ADD docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/default_branding/opensearch_mark_default_mode.svg
-ADD docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
-ADD docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
-ADD docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
-ADD docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
+
+COPY --chmod=644 docs/images/favicon/favicon192.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-192x192.png
+COPY --chmod=644 docs/images/favicon/favicon512.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/android-chrome-512x512.png
+COPY --chmod=644 docs/images/favicon/apple-touch-icon-precomposed.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/apple-touch-icon.png
+COPY --chmod=644 docs/images/favicon/favicon16.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-16x16.png
+COPY --chmod=644 docs/images/favicon/favicon32.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon-32x32.png
+COPY --chmod=644 docs/images/favicon/favicon.ico /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/favicon.ico
+COPY --chmod=644 docs/images/favicon/favicon144.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-144x144.png
+COPY --chmod=644 docs/images/favicon/favicon150.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-150x150.png
+COPY --chmod=644 docs/images/favicon/favicon310.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-310x310.png
+COPY --chmod=644 docs/images/favicon/favicon70.png /usr/share/opensearch-dashboards/src/core/server/core_app/assets/favicons/mstile-70x70.png
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_center_mark_on_light.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards.svg
+COPY --chmod=644 docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards_on_dark.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_dashboards_on_light.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_mark_on_light.svg
+COPY --chmod=644 docs/images/logo/malcolm_logo.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_on_dark.svg
+COPY --chmod=644 docs/images/logo/Malcolm.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_on_light.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_dark.svg
+COPY --chmod=644 docs/images/icon/malcolm_mark_dashboards.svg /usr/share/opensearch-dashboards/src/core/server/core_app/assets/logos/opensearch_spinner_on_light.svg
 
 
 ENTRYPOINT ["/usr/bin/tini", \

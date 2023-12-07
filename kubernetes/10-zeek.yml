@@ -16,18 +16,15 @@ spec:
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:v23.12.0
+        image: ghcr.io/mmguero-dev/malcolm/zeek:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
         securityContext:
           capabilities:
             add:
-              - IPC_LOCK
-              - NET_ADMIN
-              - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
+              # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+              - SYS_NICE
         envFrom:
           - configMapRef:
               name: process-env
@@ -63,15 +60,16 @@ spec:
           - mountPath: "/zeek/upload"
             name: zeek-offline-zeek-volume
             subPath: "upload"
-          - mountPath: "/opt/zeek/share/zeek/site/intel"
-            name: zeek-offline-zeek-intel-and-config
-            subPath: "zeek/intel"
           - mountPath: "/opt/zeek/share/zeek/site/custom"
-            name: zeek-offline-zeek-intel-and-config
-            subPath: "zeek/custom"
+            name: zeek-offline-custom-volume
+          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed"
+            name: zeek-offline-intel-preseed-volume
+          - mountPath: "/opt/zeek/share/zeek/site/intel"
+            name: zeek-offline-intel-volume
+            subPath: "zeek/intel"
       initContainers:
       - name: zeek-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:v23.12.0
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -80,9 +78,9 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/config:zeek/intel/MISP,zeek/intel/STIX,zeek/custom;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
+            value: "/data/config:zeek/intel/MISP,zeek/intel/STIX;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
         volumeMounts:
-          - name: zeek-offline-zeek-intel-and-config
+          - name: zeek-offline-intel-volume
             mountPath: "/data/config"
           - name: zeek-offline-pcap-volume
             mountPath: "/data/pcap"
@@ -98,6 +96,12 @@ spec:
         - name: zeek-offline-zeek-volume
           persistentVolumeClaim:
             claimName: zeek-claim
-        - name: zeek-offline-zeek-intel-and-config
+        - name: zeek-offline-custom-volume
+          configMap:
+            name: zeek-custom
+        - name: zeek-offline-intel-preseed-volume
+          configMap:
+            name: zeek-intel-preseed
+        - name: zeek-offline-intel-volume
           persistentVolumeClaim:
             claimName: config-claim

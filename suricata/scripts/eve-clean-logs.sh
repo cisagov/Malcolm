@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # Clean up suricata log files that have reached a certain age. If we can
 # verify they've been parsed and logged at least one event to the database,

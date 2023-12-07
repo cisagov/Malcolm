@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export CCACHE_DIR="/var/spool/ccache"
 export CCACHE_COMPRESS=1

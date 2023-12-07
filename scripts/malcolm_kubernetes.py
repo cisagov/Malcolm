@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import base64
 import glob
@@ -157,6 +157,18 @@ MALCOLM_CONFIGMAPS = {
         {
             'secret': True,
             'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+        },
+    ],
+    'zeek-custom': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
+        },
+    ],
+    'zeek-intel-preseed': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),
         },
     ],
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 version: '3.7'
 
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:23.12.0
+    image: ghcr.io/idaholab/malcolm/opensearch:23.12.1
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -39,7 +39,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
@@ -57,7 +60,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -90,7 +93,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:23.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -121,7 +124,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -135,7 +138,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -172,7 +178,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.12.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -210,7 +216,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:23.12.0
+    image: ghcr.io/idaholab/malcolm/arkime:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -229,10 +235,6 @@ services:
       - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     depends_on:
       - opensearch
     volumes:
@@ -252,7 +254,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -261,15 +263,9 @@ services:
     hostname: zeek
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -297,22 +293,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -332,7 +325,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -341,15 +334,9 @@ services:
     hostname: suricata
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -372,22 +359,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:23.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values and scheduling policies for capture
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -404,7 +388,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:23.12.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -435,7 +419,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -447,10 +431,13 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -462,7 +449,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -493,7 +480,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:23.12.0
+    image: ghcr.io/idaholab/malcolm/file-upload:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -520,7 +507,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:23.12.0
+    image: ghcr.io/idaholab/malcolm/htadmin:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -550,7 +537,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:23.12.0
+    image: ghcr.io/idaholab/malcolm/freq:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -577,7 +564,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:23.12.0
+    image: ghcr.io/idaholab/malcolm/netbox:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -614,7 +601,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:23.12.0
+    image: ghcr.io/idaholab/malcolm/postgresql:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -643,7 +630,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:23.12.0
+    image: ghcr.io/idaholab/malcolm/redis:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -676,7 +663,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:23.12.0
+    image: ghcr.io/idaholab/malcolm/redis:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -708,7 +695,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:23.12.0
+    image: ghcr.io/idaholab/malcolm/api:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -741,7 +728,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.12.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"

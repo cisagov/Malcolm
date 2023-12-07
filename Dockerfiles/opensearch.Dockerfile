@@ -1,6 +1,6 @@
-FROM opensearchproject/opensearch:2.8.0
+FROM opensearchproject/opensearch:2.11.1
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -43,7 +43,7 @@ ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN yum upgrade -y && \
-  yum install -y openssl util-linux procps rsync && \
+  yum install -y openssl util-linux procps rsync findutils && \
   yum remove -y vim-* && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \

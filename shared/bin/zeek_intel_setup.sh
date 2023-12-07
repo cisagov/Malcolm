@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # set up intel files prior to running zeek
 #   - https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel
@@ -17,6 +17,7 @@ ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
 ZEEK_INTEL_REFRESH_THREADS=${ZEEK_INTEL_REFRESH_THREADS:-"2"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
+INTEL_PRESEED_DIR=${INTEL_PRESEED_DIR:-"${ZEEK_DIR}/share/zeek/site/intel-preseed"}
 THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 LOCK_DIR="${INTEL_DIR}/lock"
 
@@ -28,6 +29,21 @@ function finish {
 mkdir -p -- "$(dirname "$LOCK_DIR")"
 if mkdir -- "$LOCK_DIR" 2>/dev/null; then
     trap finish EXIT
+
+    # if we have a directory to seed the intel config for the first time, start from a blank slate with just its contents
+    if [[ -d "${INTEL_DIR}" ]] && [[ -d "${INTEL_PRESEED_DIR}" ]]; then
+
+        EXCLUDES=()
+        EXCLUDES+=( --exclude='..*' )
+        EXCLUDES+=( --exclude='.dockerignore' )
+        EXCLUDES+=( --exclude='.gitignore' )
+        while read MAP_DIR; do
+            EXCLUDES+=( --exclude="${MAP_DIR}/" )
+        done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
+
+        rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
+        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX || true
+    fi
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
     if [[ -d "${INTEL_DIR}" ]] && (( $(find "${INTEL_DIR}" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l) > 0 )); then
@@ -48,7 +64,8 @@ EOF
         THREAT_JSON_FILES=()
 
         # process subdirectories under INTEL_DIR
-        for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null); do
+        for DIR in $(find . -mindepth 1 -maxdepth 1 -type d 2>/dev/null | grep -v -P "$(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | sed 's/\(.*\)/^.\/(\1)$/' | tr ';' '|')"); do
+
             if [[ "${DIR}" == "./STIX" ]]; then
                 # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
                 while IFS= read -r line; do
@@ -73,7 +90,7 @@ EOF
         done
 
         # process STIX and MISP inputs by converting them to Zeek intel format
-        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \

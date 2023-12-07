@@ -167,7 +167,7 @@ if [ -d "$WORKDIR" ]; then
     fi
   fi
   curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-  curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
+  curl -s -S -L -o oui.txt "https://www.wireshark.org/download/automated/data/manuf"
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)

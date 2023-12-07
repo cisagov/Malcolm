@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-redis-container
-        image: ghcr.io/idaholab/malcolm/redis:v23.12.0
+        image: ghcr.io/mmguero-dev/malcolm/redis:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -83,7 +83,7 @@ spec:
             subPath: netbox/redis
       initContainers:
       - name: netbox-redis-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:v23.12.0
+        image: ghcr.io/mmguero-dev/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

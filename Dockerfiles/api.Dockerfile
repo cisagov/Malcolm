@@ -20,7 +20,7 @@ RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheel
 
 FROM python:3-slim-bookworm
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'

@@ -65,7 +65,7 @@ Although the configuration script automates many of the following configuration 
 * **`suricata.env`**, **`suricata-live.env`** and **`suricata-offline.env`** - settings for [Suricata](https://suricata.io/)
     - `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
     - `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
-    - `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only user-defined rules (`./suricata/rules/*.rules`).
+    - `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only [user-defined rules](custom-rules.md#Suricata) (`./suricata/rules/*.rules`).
     - `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
     - `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
     - `SURICATA_ROTATED_PCAP` - if set to `true`, Suricata can analyze PCAP files captured by `netsniff-ng` or `tcpdump` (see `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`, as well as `SURICATA_AUTO_ANALYZE_PCAP_FILES`); if `SURICATA_LIVE_CAPTURE` is `true`, this should be `false`; otherwise Suricata will see duplicate traffic
@@ -86,7 +86,7 @@ Although the configuration script automates many of the following configuration 
     - `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
     - `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction)
     - `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions (default `false`)
-    - `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`
+    - `EXTRACTED_FILE_YARA_CUSTOM_ONLY` – if set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only [user-defined rules](custom-rules.md#YARA) in `./yara/rules`
     - `VTOT_API2_KEY` – used to specify a [VirusTotal Public API v.20](https://www.virustotal.com/en/documentation/public-api/) key, which, if specified, will be used to submit hashes of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) to VirusTotal
     - `ZEEK_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Zeek, and the resulting logs will also be imported (default `false`)
     - `ZEEK_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Zeek logs (default `1`)

@@ -16,6 +16,22 @@ data_source.enabled: false
 
 opensearchDashboards.branding:
   applicationTitle: "Malcolm Dashboards"
+  useExpandedHeader: false
+  # Yeah, I know about https://opensearch.org/docs/latest/dashboards/branding ... but I can't figure out a way
+  # to specify the entries in the opensearch_dashboards.yml such that they are valid BOTH from the
+  # internal opensearch code validating them AND the web browser retrieving them. So we're going scorched earth instead
+  # by just overwriting the originals in our Dockerconfig.
+  #
+  # logo:
+  #   defaultUrl: "http://dashboards:5601/dashboards/ui/assets/Malcolm.svg"
+  #   darkModeUrl: "http://dashboards:5601/dashboards/ui/assets/malcolm_logo.svg"
+  # mark:
+  #   defaultUrl: "http://dashboards:5601/dashboards/ui/assets/icon.png"
+  #   darkModeUrl: "http://dashboards:5601/dashboards/ui/assets/icon_dark.png"
+  # loadingLogo:
+  #   defaultUrl: "http://dashboards:5601/dashboards/ui/assets/icon.png"
+  #   darkModeUrl: "http://dashboards:5601/dashboards/ui/assets/icon_dark.png"
+  # faviconUrl: "http://dashboards:5601/dashboards/ui/assets/favicon.ico"
 
 map.regionmap:
   includeOpenSearchMapsService: false
