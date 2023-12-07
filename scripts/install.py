@@ -3837,16 +3837,6 @@ def main():
         help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
     )
     captureArgGroup.add_argument(
-        '--live-capture-arkime',
-        dest='liveArkime',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
-    )
-    captureArgGroup.add_argument(
         '--live-capture-arkime-node-host',
         dest='liveArkimeNodeHost',
         required=False,
