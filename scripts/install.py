@@ -324,7 +324,7 @@ class Installer(object):
             elif (
                 os.path.isfile(composeFile)
                 and self.dockerComposeCmd
-                and InstallerYesOrNo(f'Pull Malcolm Docker images?', default=True, forceInteraction=True)
+                and InstallerYesOrNo(f'Pull Malcolm Docker images?', default=False, forceInteraction=False)
             ):
                 for priv in (False, True):
                     ecode, out = self.run_process(
