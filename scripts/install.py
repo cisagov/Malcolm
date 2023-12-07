@@ -3994,16 +3994,17 @@ def main():
     if (installPath is not None) and os.path.isdir(installPath):
         if hasattr(installer, 'tweak_malcolm_runtime'):
             installer.tweak_malcolm_runtime(installPath)
-            eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
-            eprint(
-                f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
-            )
+
         if (
             (not args.configOnly)
             and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
             and hasattr(installer, 'install_docker_images')
         ):
             success = installer.install_docker_images(imageFile, installPath)
+
+        InstallerDisplayMessage(
+            f"Malcolm has been installed to {installPath}. See README.md for more information.\nScripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
+        )
 
 
 if __name__ == '__main__':
