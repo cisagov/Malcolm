@@ -368,6 +368,10 @@ services:
     networks:
       - default
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
+      - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
       # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
@@ -400,6 +404,10 @@ services:
     tty: true
     network_mode: host
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
+      - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW

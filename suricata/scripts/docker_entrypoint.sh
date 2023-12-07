@@ -2,7 +2,7 @@
 
 # ensure capabilities for capture
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
-setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/suricata || true
+setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata || true
 
 # modify suricata.yaml according to environment variables (as non-root)
 if [[ "$(id -u)" == "0" ]] && [[ -n "$PUSER" ]]; then
