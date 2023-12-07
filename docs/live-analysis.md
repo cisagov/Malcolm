@@ -18,7 +18,7 @@ Please see the [Hedgehog Linux README](hedgehog.md) for more information.
 
 ## <a name="LocalPCAP"></a>Monitoring local network interfaces
 
-Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). These containers are started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`, and `SYS_ADMIN`) to allow opening network interfaces in promiscuous mode for capture.
+Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). These containers are started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`) to allow opening network interfaces in promiscuous mode for capture.
 
 The instances of Zeek and Suricata (in the `suricata-live` and `zeek-live` containers when the `SURICATA_LIVE_CAPTURE` and `ZEEK_LIVE_CAPTURE` [environment variables](malcolm-config.md#MalcolmConfigEnvVars) are set to `true`, respectively) analyze traffic on-the-fly and generate log files containing network session metadata. These log files are in turn scanned by [Filebeat](https://www.elastic.co/products/beats/filebeat) and forwarded to [Logstash](https://www.elastic.co/products/logstash) for enrichment and indexing into the [OpenSearch](https://opensearch.org/) document store.
 
