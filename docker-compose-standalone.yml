@@ -210,6 +210,7 @@ services:
       - ./config/upload-common.env
       - ./config/auth.env
       - ./config/arkime.env
+      - ./config/arkime-offline.env
       - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
@@ -225,6 +226,33 @@ services:
       timeout: 30s
       retries: 3
       start_period: 210s
+  arkime-live:
+    image: ghcr.io/idaholab/malcolm/arkime:23.12.1
+    profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
+    restart: "no"
+    stdin_open: false
+    tty: true
+    network_mode: host
+    cap_add:
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
+      - NET_ADMIN
+      - NET_RAW
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+      - SYS_NICE
+    env_file:
+      - ./config.elastic/process.env
+      - ./config.elastic/ssl.env
+      - ./config.elastic/opensearch.env
+      - ./config.elastic/upload-common.env
+      - ./config.elastic/auth.env
+      - ./config.elastic/arkime.env
+      - ./config.elastic/arkime-live.env
+      - ./config.elastic/arkime-secret.env
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./pcap:/data/pcap
   zeek:
     image: ghcr.io/idaholab/malcolm/zeek:23.12.1
     profiles: ["malcolm", "hedgehog"]
