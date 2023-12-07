@@ -14,7 +14,7 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 function SetCaptureCapabilities() {
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump || true
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng || true
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng || true
 }
 
 # Create config files for each capture interface for the various capture programs (tcpdump, netsniff)

@@ -87,7 +87,7 @@ RUN apt-get -q update && \
     chown root:${PGROUP} /usr/bin/tcpdump && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump && \
     chown root:${PGROUP} /usr/sbin/netsniff-ng && \
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng && \
     chmod 755 /usr/local/bin/*.sh
 
 WORKDIR "$PCAP_PATH"
