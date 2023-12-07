@@ -106,6 +106,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/kubernetes/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch-backup/"
   mkdir -p "$MALCOLM_DEST_DIR/opensearch/nodes/"
+  mkdir -p "$MALCOLM_DEST_DIR/pcap/arkime-live/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/processed/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/tmp/spool/"
   mkdir -p "$MALCOLM_DEST_DIR/pcap/upload/variants/"

@@ -979,6 +979,7 @@ class Installer(object):
             for pathToCreate in (
                 indexDirFull,
                 indexSnapshotDirFull,
+                os.path.join(pcapDirFull, 'arkime-live'),
                 os.path.join(pcapDirFull, 'processed'),
                 os.path.join(pcapDirFull, os.path.join('upload', os.path.join('tmp', 'spool'))),
                 os.path.join(pcapDirFull, os.path.join('upload', 'variants')),

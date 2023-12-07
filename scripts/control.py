@@ -849,7 +849,7 @@ def stop(wipe=False):
                 BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
                 BoundPath("netbox-redis", "/data", True, None, ["."]),
                 BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
-                BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
+                BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                 BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
                 BoundPath(
                     "upload",
@@ -1000,7 +1000,7 @@ def start():
             BoundPath("netbox-redis", "/data", False, None, None),
             BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
             BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
-            BoundPath("pcap-monitor", "/pcap", False, ["processed", "upload"], None),
+            BoundPath("pcap-monitor", "/pcap", False, ["arkime-live", "processed", "upload"], None),
             BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
             BoundPath(
                 "upload",

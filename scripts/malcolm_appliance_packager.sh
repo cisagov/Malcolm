@@ -73,6 +73,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/nginx/certs/"
   mkdir $VERBOSE -p "$DESTDIR/opensearch-backup/"
   mkdir $VERBOSE -p "$DESTDIR/opensearch/nodes/"
+  mkdir $VERBOSE -p "$DESTDIR/pcap/arkime-live/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/processed/"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/tmp/spool"
   mkdir $VERBOSE -p "$DESTDIR/pcap/upload/variants/"
