@@ -8,8 +8,8 @@ KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
 ARKIME_PACKET_THREADS=${ARKIME_PACKET_THREADS:-1}
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
-ARKIME_LIVE_NODE_NAME=${ARKIME_LIVE_NODE_NAME:-"malcolm"}
-ARKIME_LIVE_NODE_HOST=${ARKIME_LIVE_NODE_HOST:-""}
+NODE_NAME=${PCAP_NODE_NAME:-"malcolm"}-live
+NODE_HOST=${ARKIME_LIVE_NODE_HOST:-""}
 
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -69,5 +69,5 @@ echo
   -o dropGroup=${PGROUP} \
   -o ecsEventProvider=arkime \
   -o ecsEventDataset=session \
-  --node "${ARKIME_LIVE_NODE_NAME}" \
-  --host "${ARKIME_LIVE_NODE_HOST}"
+  --node "${NODE_NAME}" \
+  --host "${NODE_HOST}"

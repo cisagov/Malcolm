@@ -60,6 +60,7 @@ ARG FILEBEAT_TCP_PARSE_SOURCE_FIELD="message"
 ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
+ARG PCAP_NODE_NAME=malcolm
 
 ENV SUPERCRONIC_VERSION "0.2.28"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
@@ -163,6 +164,7 @@ ENV FILEBEAT_TCP_PARSE_DROP_FIELD $FILEBEAT_TCP_PARSE_DROP_FIELD
 ENV FILEBEAT_TCP_TAG $FILEBEAT_TCP_TAG
 ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry/filebeat/data.json"
 ENV FILEBEAT_ZEEK_DIR "/zeek/"
+ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 

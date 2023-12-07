@@ -499,7 +499,6 @@ class Installer(object):
             f'Enter the node name to associate with network traffic metadata',
             default=args.pcapNodeName,
         )
-        pcapNodeHost = ''
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
@@ -654,18 +653,6 @@ class Installer(object):
                 logstashHost = InstallerAskForString(
                     f'Enter Logstash host and port (e.g., 192.168.1.123:5044)',
                     default=args.logstashHost,
-                )
-            pcapNodeHost = InstallerAskForString(
-                f"Enter this node's hostname or IP to associate with network traffic metadata",
-                default=args.pcapNodeHost,
-            )
-            if not pcapNodeHost and not InstallerYesOrNo(
-                f'Node hostname or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
-                default=False,
-            ):
-                pcapNodeHost = InstallerAskForString(
-                    f"Enter this node's hostname or IP to associate with network traffic metadata",
-                    default=args.pcapNodeHost,
                 )
 
         if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
@@ -1310,6 +1297,7 @@ class Installer(object):
         pcapNetSniff = False
         pcapTcpDump = False
         liveArkime = False
+        liveArkimeNodeHost = ''
         liveZeek = False
         liveSuricata = False
         pcapIface = 'lo'
@@ -1381,6 +1369,20 @@ class Installer(object):
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
 
+        if liveArkime:
+            liveArkimeNodeHost = InstallerAskForString(
+                f"Enter this node's hostname or IP to associate with network traffic metadata",
+                default=args.liveArkimeNodeHost,
+            )
+            if not liveArkimeNodeHost and not InstallerYesOrNo(
+                f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
+                default=False,
+            ):
+                liveArkimeNodeHost = InstallerAskForString(
+                    f"Enter this node's hostname or IP to associate with network traffic metadata",
+                    default=args.liveArkimeNodeHost,
+                )
+
         if (
             (malcolmProfile == PROFILE_HEDGEHOG)
             and (not pcapNetSniff)
@@ -1438,6 +1440,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime-live.env'),
                 'ARKIME_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveArkime),
+            ),
+            # capture source "node host" for live Arkime capture
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-live.env'),
+                'ARKIME_LIVE_NODE_HOST',
+                liveArkimeNodeHost,
             ),
             # rotated captured PCAP analysis with Arkime (not live capture)
             EnvValue(
@@ -1731,12 +1739,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
                 pcapNodeName,
-            ),
-            # capture source "node host" for locally processed PCAP files
-            EnvValue(
-                os.path.join(args.configDir, 'upload-common.env'),
-                'PCAP_NODE_HOST',
-                pcapNodeHost,
             ),
             # zeek file extraction mode
             EnvValue(
@@ -3835,6 +3837,25 @@ def main():
         help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
     )
     captureArgGroup.add_argument(
+        '--live-capture-arkime',
+        dest='liveArkime',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-arkime-node-host',
+        dest='liveArkimeNodeHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='The node hostname or IP address to associate with live network traffic observed by Arkime capture',
+    )
+    captureArgGroup.add_argument(
         '--live-capture-netsniff',
         dest='pcapNetSniff',
         type=str2bool,
@@ -3882,15 +3903,6 @@ def main():
         type=str,
         default=os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0],
         help='The node name to associate with network traffic metadata',
-    )
-    captureArgGroup.add_argument(
-        '--node-host',
-        dest='pcapNodeHost',
-        required=False,
-        metavar='<string>',
-        type=str,
-        default='',
-        help='The node hostname or IP address to associate with network traffic metadata',
     )
 
     try:

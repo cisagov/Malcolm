@@ -74,7 +74,6 @@ Although the configuration script automates many of the following configuration 
 * **`upload-common.env`** - settings for dealing with PCAP files [uploaded](upload.md#Upload) to Malcolm for analysis
     - `AUTO_TAG` – if set to `true`, Malcolm will automatically create Arkime sessions and Zeek logs with tags based on the filename, as described in [Tagging](upload.md#Tagging) (default `true`)
     - `PCAP_NODE_NAME` - specifies the node name to associate with network traffic metadata
-    - `PCAP_NODE_HOST` - specifies the node host or IP address to associate with network traffic metadata (optional, defaults to the value of `PCAP_NODE_NAME`; generally this value *does not* need to be specified)
 * **`zeek.env`**, **`zeek-secret.env`**, **`zeek-live.env`** and **`zeek-offline.env`** - settings for [Zeek](https://www.zeek.org/index.html) and for scanning [extracted files](file-scanning.md#ZeekFileExtraction) Zeek observes in network traffic
     - `EXTRACTED_FILE_CAPA_VERBOSE` – if set to `true`, all Capa rule hits will be logged; otherwise (`false`) only [MITRE ATT&CK® technique](https://attack.mitre.org/techniques) classifications will be logged
     - `EXTRACTED_FILE_ENABLE_CAPA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) determined to be PE (portable executable) files will be scanned with [Capa](https://github.com/fireeye/capa)

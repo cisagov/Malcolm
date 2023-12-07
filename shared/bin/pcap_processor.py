@@ -542,7 +542,7 @@ def main():
         help="PCAP source node host (for Arkime viewer reachback)",
         metavar='<STR>',
         type=str,
-        default=os.getenv('PCAP_NODE_HOST', ''),
+        default='',
     )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
