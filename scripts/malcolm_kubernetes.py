@@ -197,6 +197,7 @@ MALCOLM_PROFILES_CONTAINERS = defaultdict(lambda: list)
 MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
     'api',
     'arkime',
+    'arkime-live',
     'dashboards',
     'dashboards-helper',
     'filebeat',
@@ -220,6 +221,7 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
 ]
 MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'arkime',
+    'arkime-live',
     'file-monitor',
     'filebeat',
     'pcap-capture',

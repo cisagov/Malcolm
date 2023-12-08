@@ -51,6 +51,8 @@ spec:
               name: upload-common-env
           - configMapRef:
               name: arkime-env
+          - configMapRef:
+              name: arkime-offline-env
           - secretRef:
               name: arkime-secret-env
         env:

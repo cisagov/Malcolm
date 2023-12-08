@@ -43,9 +43,6 @@ spec:
               name: zeek-live-env
           - configMapRef:
               name: pcap-capture-env
-        env:
-          - name: ZEEK_DISABLED
-            value: "true"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: zeek-live-var-local-catrust-volume
