@@ -64,7 +64,6 @@ echo
 "${ARKIME_DIR}"/bin/capture --insecure \
   -c "${ARKIME_DIR}"/etc/config.ini \
   -o pcapDir=/data/pcap/arkime-live \
-  -o packetThreads=${ARKIME_PACKET_THREADS} \
   -o dropUser=${PUSER} \
   -o dropGroup=${PGROUP} \
   -o ecsEventProvider=arkime \

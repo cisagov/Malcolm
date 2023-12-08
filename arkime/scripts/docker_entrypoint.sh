@@ -58,6 +58,26 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
 
+    # performance tuning parameters
+    [[ -n "$ARKIME_DB_BULK_SIZE" ]] && \
+      sed -r -i "s/(dbBulkSize)\s*=\s*.*/\1=$ARKIME_DB_BULK_SIZE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_MAGIC_MODE" ]] && \
+      sed -r -i "s/(magicMode)\s*=\s*.*/\1=$ARKIME_MAGIC_MODE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_MAX_PACKETS_IN_QUEUE" ]] && \
+      sed -r -i "s/(maxPacketsInQueue)\s*=\s*.*/\1=$ARKIME_MAX_PACKETS_IN_QUEUE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_PACKET_THREADS" ]] && \
+      sed -r -i "s/(packetThreads)\s*=\s*.*/\1=$ARKIME_PACKET_THREADS/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_PCAP_WRITE_METHOD" ]] && \
+      sed -r -i "s/(pcapWriteMethod)\s*=\s*.*/\1=$ARKIME_PCAP_WRITE_METHOD/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_PCAP_WRITE_SIZE" ]] && \
+      sed -r -i "s/(pcapWriteSize)\s*=\s*.*/\1=$ARKIME_PCAP_WRITE_SIZE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_PCAP_READ_METHOD" ]] && \
+      sed -r -i "s/(pcapReadMethod)\s*=\s*.*/\1=$ARKIME_PCAP_READ_METHOD/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_TPACKETV3_NUM_THREADS" ]] && \
+      sed -r -i "s/(tpacketv3NumThreads)\s*=\s*.*/\1=$ARKIME_TPACKETV3_NUM_THREADS/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_TPACKETV3_BLOCK_SIZE" ]] && \
+      sed -r -i "s/(tpacketv3BlockSize)\s*=\s*.*/\1=$ARKIME_TPACKETV3_BLOCK_SIZE/" "${ARKIME_CONFIG_FILE}"
+
     # capture interface(s)
     if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then
 
@@ -84,11 +104,11 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
       # pcap compression
       COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
       COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"
-      sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "$ARKIME_CONFIG_FILE"
+      sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "${ARKIME_CONFIG_FILE}"
       if [[ "$COMPRESSION_TYPE" == "zstd" ]]; then
-        sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+        sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "${ARKIME_CONFIG_FILE}"
       elif [[ "$COMPRESSION_TYPE" == "gzip" ]]; then
-        sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
+        sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "${ARKIME_CONFIG_FILE}"
       fi
 
       # ensure capabilities for capture
