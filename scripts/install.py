@@ -616,8 +616,7 @@ class Installer(object):
                 dashboardsUrl = InstallerAskForString(
                     f'Enter Kibana connection URL (e.g., https://192.168.1.123:5601)',
                     default=args.dashboardsUrl,
-                )
-
+                ) 
         if malcolmProfile != PROFILE_MALCOLM:
             loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Logstash host and port')
             logstashHost = ''
@@ -688,6 +687,7 @@ class Installer(object):
             InstallerDisplayMessage(
                 f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
             )
+        
 
         if malcolmProfile == PROFILE_MALCOLM:
             loopBreaker = CountUntilException(
@@ -994,7 +994,45 @@ class Installer(object):
         indexPruneNameSort = False
         arkimeManagePCAP = False
         arkimeFreeSpaceG = '10%'
+        ilmPolicy = False
+        optimizationTimePeriod = '30d'
+        replicas = 0
+        historyInWeeks = 13
+        spiDataRetention = '90d'
+        optimizeSessionSegments = 1
 
+        if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
+            loopBreaker = CountUntilException(
+                MaxAskForValueCount,
+                f'Invalid ILM setting(s)',
+            )
+            ilmPolicy =  InstallerYesOrNo(
+                    f'Should Arkime leverage Index Lifecycle Management (ILM) to manage volume?',
+                    default=False,
+            )
+            if ilmPolicy:
+                InstallerDisplayMessage(
+                    f'You must configure "hot" and "warm" nodes types in the remote Elasticsearch instance.',
+                )
+                while loopBreaker.increment():
+                    # Time in hours/days before (moving to warm) and force merge (number followed by h or d)
+                    optimizationTimePeriod = InstallerAskForString("How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)")
+                    # Time in hours/days before deleting index (number followed by h or d)
+                    spiDataRetention = InstallerAskForString("How long should Arkime retain SPI data before deletiting it? (e.g. 25h, 90d, etc.)")
+                    # Number of segments to optimize sessions to
+                    segments = InstallerAskForString("How many segments should Arkime use to optimize?")
+                    # Number of replicas for older sessions indices
+                    replicas = InstallerAskForString("How many replicas should Arkime maintain for older session indices?")
+                    # Number of replicas for older sessions indices
+                    historyInWeeks = InstallerAskForString("How many weeks of history should Arkime keep?")
+                    if (len(optimizationTimePeriod) > 1) and (len(spiDataRetention) > 1 and segments.isdigit() and replicas.isdigit() and historyInWeeks.isdigit()):
+                        break
+
+
+        
+            
+
+    
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
             if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
@@ -1338,7 +1376,7 @@ class Installer(object):
             pcapIface = ''
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
             while (len(pcapIface) <= 0) and loopBreaker.increment():
-                pcapIface = InstallerAskForString(
+                pcapIface = InstallerAskForString(  
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
 
@@ -1392,6 +1430,36 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'ARKIME_FREESPACEG',
                 arkimeFreeSpaceG,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_ENABLED',
+                ilmPolicy,
+            ),
+             EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD',
+                optimizationTimePeriod,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_RETENTION_TIME',
+                spiDataRetention,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS',
+                replicas,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS',
+                historyInWeeks,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_SEGMENTS',
+                optimizeSessionSegments,
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
