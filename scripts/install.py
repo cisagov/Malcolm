@@ -1114,7 +1114,7 @@ class Installer(object):
                     logstashOpen = False
                     filebeatTcpOpen = False
                 elif openPortsSelection == 'y':
-                    opensearchOpen = True
+                    opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
                     logstashOpen = True
                     filebeatTcpOpen = True
                 else:
