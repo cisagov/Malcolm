@@ -473,6 +473,8 @@ services:
       - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
       - SYS_RESOURCE
+      # SYS_ADMIN - for netsniff-ng to set the disc I/O scheduler policy
+      - SYS_ADMIN
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
