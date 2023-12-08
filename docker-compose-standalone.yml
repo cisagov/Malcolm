@@ -219,6 +219,7 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./arkime/rules:/opt/arkime/rules:ro
       - ./pcap:/data/pcap
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
@@ -257,6 +258,7 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./arkime/rules:/opt/arkime/rules:ro
       - ./pcap:/data/pcap
   zeek:
     image: ghcr.io/idaholab/malcolm/zeek:23.12.1

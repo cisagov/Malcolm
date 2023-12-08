@@ -9,6 +9,7 @@ function urlencodeall() {
 }
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
+ARKIME_RULES_DIR=${ARKIME_RULES_DIR:-"/opt/arkime/rules"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
@@ -113,6 +114,12 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
 
       # ensure capabilities for capture
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ARKIME_DIR}"/bin/capture || true
+    fi
+
+    # rules files
+    if [[ -d "${ARKIME_RULES_DIR}" ]]; then
+      RULES_FILES="$(find "${ARKIME_RULES_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c \( -name '*.yml' -o -name '*.yaml' \) | tr '\n' ';' | sed 's/;$//' )"
+      sed -r -i "s|(rulesFiles)\s*=\s*.*|\1=$RULES_FILES|" "${ARKIME_CONFIG_FILE}"
     fi
 
     # comment-out features that are unused in hedgehog run profile mode and in live-capture mode

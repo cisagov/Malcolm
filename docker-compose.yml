@@ -241,6 +241,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
+      - ./arkime/rules:/opt/arkime/rules:ro
       - ./arkime/etc/config.ini:/opt/arkime/etc/config.orig.ini:ro
       - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
       - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro
@@ -285,6 +286,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./pcap:/data/pcap
+      - ./arkime/rules:/opt/arkime/rules:ro
       - ./arkime/etc/config.ini:/opt/arkime/etc/config.orig.ini:ro
       - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
       - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro

@@ -222,6 +222,7 @@ COPY --chmod=644 shared/bin/watch_common.py /opt/
 COPY --chmod=644 arkime/supervisord.conf /etc/supervisord.conf
 ADD arkime/scripts /opt/
 ADD arkime/etc $ARKIME_DIR/etc/
+ADD arkime/rules/*.yml $ARKIME_DIR/rules/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
@@ -234,7 +235,7 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/logs/ && \
+      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/rules/ $ARKIME_DIR/logs/ && \
       mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
@@ -252,7 +253,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     chown root:${PGROUP} $ARKIME_DIR/bin/capture && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
     mkdir -p /var/run/arkime && \
-    chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime
+    chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/rules $ARKIME_DIR/logs /var/run/arkime
 #Update Path
 ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 
