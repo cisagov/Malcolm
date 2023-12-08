@@ -132,7 +132,6 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       clang \
       cmake \
       curl \
-      ethtool \
       file \
       flex \
       git \
@@ -223,7 +222,6 @@ ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
 ADD shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
-ADD shared/bin/nic-capture-setup.sh /usr/local/bin/
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
@@ -244,8 +242,8 @@ RUN mkdir -p /tmp/logs && \
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
-    chown root:${PGROUP} /sbin/ethtool "${ZEEK_DIR}"/bin/zeek "${ZEEK_DIR}"/bin/capstats && \
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+    cp "${ZEEK_DIR}"/bin/zeek "${ZEEK_DIR}"/bin/zeek-offline && \
+    chown root:${PGROUP} "${ZEEK_DIR}"/bin/zeek "${ZEEK_DIR}"/bin/capstats && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats && \
     touch "${SUPERCRONIC_CRONTAB}" && \

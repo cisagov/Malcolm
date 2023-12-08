@@ -3,7 +3,6 @@
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 
 # ensure capabilities for capture
-setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek || true
 setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats || true
 

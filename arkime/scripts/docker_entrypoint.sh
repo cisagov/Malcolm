@@ -92,7 +92,6 @@ if [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
       fi
 
       # ensure capabilities for capture
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ARKIME_DIR}"/bin/capture || true
     fi
 

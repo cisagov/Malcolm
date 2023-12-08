@@ -268,9 +268,6 @@ services:
     hostname: zeek
     networks:
       - default
-    cap_add:
-      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
-      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -331,13 +328,6 @@ services:
     hostname: suricata
     networks:
       - default
-    cap_add:
-      # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
-      # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
-      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
-      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env

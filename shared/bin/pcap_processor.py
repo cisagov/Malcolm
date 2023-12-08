@@ -47,15 +47,15 @@ PCAP_PROCESSING_MODE_ARKIME = "arkime"
 PCAP_PROCESSING_MODE_ZEEK = "zeek"
 PCAP_PROCESSING_MODE_SURICATA = "suricata"
 
-ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture"
+ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
-SURICATA_PATH = "/usr/bin/suricata"
+SURICATA_PATH = "/usr/bin/suricata-offline"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
 SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
 
-ZEEK_PATH = "/opt/zeek/bin/zeek"
+ZEEK_PATH = "/opt/zeek/bin/zeek-offline"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
 ZEEK_EXTRACTOR_MODE_MAPPED = 'mapped'
 ZEEK_EXTRACTOR_MODE_NONE = 'none'
@@ -146,8 +146,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
-                    if forceArkime and (
-                        autoArkime
+                    if (
+                        forceArkime
+                        or autoArkime
                         or (
                             (FILE_INFO_DICT_TAGS in fileInfo) and ARKIME_AUTOARKIME_TAG in fileInfo[FILE_INFO_DICT_TAGS]
                         )

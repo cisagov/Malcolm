@@ -71,7 +71,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
     # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
     touch /tmp/not_a_packet.pcap
-    $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+    $ARKIME_DIR/bin/capture-offline $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
     rm -f /tmp/not_a_packet.pcap
 
     echo "Initializing views..."
