@@ -3,6 +3,7 @@
 * [Live analysis](#LiveAnalysis)
     - [Using a network sensor appliance](#Hedgehog)
     - [Monitoring local network interfaces](#LocalPCAP)
+        + ["Hedgehog" run profile](#Profiles)
     - [Manually forwarding logs from an external source](#ExternalForward)
 
 ## <a name="Hedgehog"></a>Using a network sensor appliance
@@ -18,15 +19,21 @@ Please see the [Hedgehog Linux README](hedgehog.md) for more information.
 
 ## <a name="LocalPCAP"></a>Monitoring local network interfaces
 
-Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). These containers are started with additional privileges (`IPC_LOCK`, `NET_ADMIN`, `NET_RAW`) to allow opening network interfaces in promiscuous mode for capture.
+The options for monitoring traffic on local network interfaces can be [configured](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning).
+
+Malcolm's `pcap-capture`, `suricata-live` and `zeek-live` containers can monitor one or more local network interfaces, specified by the `PCAP_IFACE` environment variable in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). These containers are started with additional privileges to allow opening network interfaces in promiscuous mode for capture.
 
 The instances of Zeek and Suricata (in the `suricata-live` and `zeek-live` containers when the `SURICATA_LIVE_CAPTURE` and `ZEEK_LIVE_CAPTURE` [environment variables](malcolm-config.md#MalcolmConfigEnvVars) are set to `true`, respectively) analyze traffic on-the-fly and generate log files containing network session metadata. These log files are in turn scanned by [Filebeat](https://www.elastic.co/products/beats/filebeat) and forwarded to [Logstash](https://www.elastic.co/products/logstash) for enrichment and indexing into the [OpenSearch](https://opensearch.org/) document store.
 
-In contrast, the `pcap-capture` container buffers traffic to PCAP files and periodically rotates these files for processing (by Arkime's `capture` utlity in the `arkime` container) according to the thresholds defined by the `PCAP_ROTATE_MEGABYTES` and `PCAP_ROTATE_MINUTES` environment variables in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). If for some reason (e.g., a low resources environment) you also want Zeek and Suricata to process these intermediate PCAP files rather than monitoring the network interfaces directly, you can set `SURICATA_ROTATED_PCAP`/`ZEEK_ROTATED_PCAP` to `true` and `SURICATA_LIVE_CAPTURE`/`ZEEK_LIVE_CAPTURE` to false.
-
-These various options for monitoring traffic on local network interfaces can also be configured by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning).
+In contrast, the `pcap-capture` container buffers traffic to PCAP files and periodically rotates these files for processing (by Arkime's `capture` utlity in the `arkime` container) according to the thresholds defined by the `PCAP_ROTATE_MEGABYTES` and `PCAP_ROTATE_MINUTES` environment variables in [`pcap-capture.env`](malcolm-config.md#MalcolmConfigEnvVars). If for some reason (e.g., a low resources environment) you also want Zeek and Suricata to process these intermediate PCAP files rather than monitoring the network interfaces directly, you can set `SURICATA_ROTATED_PCAP`/`ZEEK_ROTATED_PCAP` to `true` and `SURICATA_LIVE_CAPTURE`/`ZEEK_LIVE_CAPTURE` to false. The only exception to this behavior (i.e., the creation of intermediate PCAP files by `netsniff-ng` or `tcpdump` in the `pcap-capture` which are periodically rolled over for processing by Arkime) is when running the ["Hedgehog" run profile](#Profiles) or when using [a remote OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance). In either of these configurations, users may choose to have Arkime's `capture` tool monitor live traffic on the network interface without using the intermediate PCAP file.
 
 Note that Microsoft Windows and Apple macOS platforms currently run Docker inside of a virtualized environment. Live traffic capture and analysis on those platforms would require additional configuration of virtual interfaces and port forwarding in Docker, which is outside of the scope of this document.
+
+### <a name="Profiles"></a>"Hedgehog" run profile
+
+Another configuration for monitoring local network interfaces is to use the `hedgehog` run profile. During [Malcolm configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) users are prompted "**Run with Malcolm (all containers) or Hedgehog (capture only) profile?**" Docker Compose can use [profiles](https://docs.docker.com/compose/profiles/) to selectively start services. While the `malcolm` run profile runs all of Malcolm's containers (OpenSearch, Dashboards, LogStash, etc.), the `hedgehog` profile runs *only* the containers necessary for traffic capture.
+
+When configuring the `hedgehog` profile, users must provide connection details for another Malcolm instance to which to forward its network traffic logs.
 
 ## <a name="ExternalForward"></a>Manually forwarding logs from an external source
 

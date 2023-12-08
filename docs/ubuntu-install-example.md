@@ -229,7 +229,7 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
-user@host:~/Malcolm$ docker compose --profile=malcolm pull
+user@host:~/Malcolm$ docker compose --profile malcolm pull
 Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
