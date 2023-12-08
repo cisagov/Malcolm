@@ -375,7 +375,7 @@ Enter index threshold (e.g., 250GB, 1TB, 60%, etc.): 250G
 
 Determine oldest indices by name (instead of creation time)? (Y / n): y
 
-Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y / N): y
+Should Arkime delete uploaded PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y / N): y
 
 Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.): 10%
 

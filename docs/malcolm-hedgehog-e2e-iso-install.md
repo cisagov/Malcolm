@@ -177,7 +177,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
     - **Delete the oldest indices when the database exceeds a certain size?**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
-    - **Should Arkime delete PCAP files based on available storage?**
+    - **Should Arkime delete uploaded PCAP files based on available storage?**
         - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
     - **Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)**
         - If [Arkime PCAP-deletion](https://arkime.com/faq#pcap-deletion) is enabled, Arkime will delete PCAP files when **free space** is lower than this value, specified as integer gigabytes (e.g., `500`) or a percentage (e.g., `10%`)

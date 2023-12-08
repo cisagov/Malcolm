@@ -1046,7 +1046,7 @@ class Installer(object):
                 (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
                 or (malcolmProfile != PROFILE_MALCOLM)
                 or InstallerYesOrNo(
-                    'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                    'Should Arkime delete uploaded PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                     default=args.arkimeManagePCAP,
                 )
             )
@@ -1953,7 +1953,7 @@ class Installer(object):
                                 # whether or not to restart services automatically (on boot, etc.)
                                 line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
 
-                            elif currentService == 'arkime':
+                            elif (currentService == 'arkime') or (currentService == 'arkime-live'):
                                 # stuff specifically in the arkime section
                                 if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
                                     # Arkime's reference to the PCAP directory
