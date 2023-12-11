@@ -96,14 +96,6 @@ echo "umask 077" >> /etc/profile
 echo "export UMASK=077" >> /etc/profile
 echo "export PYTHONDONTWRITEBYTECODE=1" >> /etc/profile
 
-# enable cron logging
-sed -r -i "s@^#(cron\.\*\s+.*/var/log/cron\.log)@\1@" /etc/rsyslog.conf
-
-# enable rsyslog forwarding to localhost:9514 over UDP (for filebeat syslog input)
-echo >> /etc/rsyslog.conf
-echo '*.* @127.0.0.1:9514' >> /etc/rsyslog.conf
-echo >> /etc/rsyslog.conf
-
 # put sudoers log into its own logfile
 awk 'FNR==NR{ if (/^Defaults/) p=NR; next} 1; FNR==p{ print "Defaults\t!syslog\nDefaults\tlogfile=/var/log/sudo.log" }' /etc/sudoers /etc/sudoers > /tmp/newsudoers
 mv /tmp/newsudoers /etc/sudoers && chmod 440 /etc/sudoers
