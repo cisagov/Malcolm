@@ -1,0 +1,76 @@
+{
+  "version": "2.11.1",
+  "objects": [
+    {
+      "id": "f6600310-9943-11ee-a029-e973f4774355",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-12T23:13:35.905Z",
+      "version": "Wzk2NCwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald Logs",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"version\":\"2.11.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":32,\"i\":\"77bbae8a-66cd-4e30-9b90-c7ab7c271320\"},\"panelIndex\":\"77bbae8a-66cd-4e30-9b90-c7ab7c271320\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"}]",
+        "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "c79c1e60-9943-11ee-a029-e973f4774355",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-12T23:11:28.581Z",
+      "version": "Wzk2MiwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "@timestamp",
+          "miscbeat.systemd.hostname",
+          "process.name",
+          "process.pid",
+          "process.user.id",
+          "event.original",
+          "miscbeat.systemd.systemd_unit",
+          "miscbeat.systemd.systemd_user_unit",
+          "log.logger"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"miscbeat.systemd:*\",\"language\":\"kuery\"},\"highlightAll\":true,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"calendar_interval\":\"1w\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}
