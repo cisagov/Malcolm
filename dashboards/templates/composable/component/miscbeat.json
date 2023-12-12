@@ -95,12 +95,21 @@
             },
             "systemd": {
               "properties": {
+                "audit_loginuid": { "type": "integer" },
+                "audit_session": { "type": "integer" },
                 "boot_id": { "type": "keyword" },
+                "cpu_usage_nsec": { "type": "long" },
+                "device": { "type": "keyword" },
+                "glib_domain": { "type": "keyword" },
+                "glib_old_log_api": { "type": "keyword" },
                 "hostname": { "type": "keyword" },
                 "invocation_id": { "type": "keyword" },
                 "job_id": { "type": "integer" },
                 "job_result": { "type": "keyword" },
                 "job_type": { "type": "keyword" },
+                "kernel_device": { "type": "keyword" },
+                "kernel_subsystem": { "type": "keyword" },
+                "leader": { "type": "keyword" },
                 "machine_id": { "type": "keyword" },
                 "message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "message_id": { "type": "keyword" },
@@ -110,6 +119,7 @@
                 "priority": { "type": "integer" },
                 "runtime_scope": { "type": "keyword" },
                 "selinux_context": { "type": "keyword" },
+                "session_id": { "type": "keyword" },
                 "source_monotonic_timestamp": { "type": "long" },
                 "source_realtime_timestamp" : { "type": "date" },
                 "stream_id": { "type": "keyword" },
@@ -124,7 +134,15 @@
                 "systemd_user_unit": { "type": "keyword" },
                 "timestamp_boottime": { "type": "float" },
                 "timestamp_monotonic": { "type": "float" },
-                "unit": { "type": "keyword" }
+                "udev_devnode": { "type": "keyword" },
+                "udev_sysname": { "type": "keyword" },
+                "unit": { "type": "keyword" },
+                "user_id": { "type": "keyword" },
+                "user_invocation_id": { "type": "keyword" },
+                "user_unit": { "type": "keyword" },
+                "userspace_usec": { "type": "integer" },
+                "wp_object": { "type": "keyword" },
+                "wp_object_type": { "type": "keyword" }
               }
             },
             "thermal": {
