@@ -271,8 +271,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'dnp3': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['DNP3_ENABLED']),
-            val2bool(DEFAULT_VARS['DNP3_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['DNP3_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['DNP3_EVE_ENABLED']),
             True,
             DEFAULT_VARS['DNP3_PORTS'],
             None,
@@ -287,8 +287,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'enip': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['ENIP_ENABLED']),
-            val2bool(DEFAULT_VARS['ENIP_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['ENIP_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['ENIP_EVE_ENABLED']),
             False,
             DEFAULT_VARS['ENIP_PORTS'],
             DEFAULT_VARS['ENIP_PORTS'],
@@ -359,8 +359,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'modbus': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['MODBUS_ENABLED']),
-            val2bool(DEFAULT_VARS['MODBUS_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['MODBUS_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['MODBUS_EVE_ENABLED']),
             False,
             DEFAULT_VARS['MODBUS_PORTS'],
             None,
