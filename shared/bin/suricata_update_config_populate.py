@@ -13,7 +13,7 @@
 
 import argparse
 import contextlib
-import fnmatch
+import glob
 import logging
 import os
 import sys
@@ -157,7 +157,7 @@ def main():
     if os.path.isfile(args.output) and os.path.samefile(args.input, args.output):
         backupFile = inFileParts[0] + "_bak_" + str(int(round(time.time()))) + inFileParts[1]
         CopyFile(args.input, backupFile)
-        backupFiles = sorted(fnmatch.filter(os.listdir(os.path.dirname(backupFile)), '*_bak_*'))
+        backupFiles = sorted(list(glob.glob(os.path.join(os.path.dirname(backupFile), '*_bak_*'))))
         while len(backupFiles) > BACKUP_FILES_MAX:
             toDeleteFileName = os.path.join(os.path.dirname(backupFile), backupFiles.pop(0))
             logging.debug(f'Removing old backup file "{toDeleteFileName}"')

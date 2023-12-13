@@ -42,6 +42,7 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
+ENV SURICATA_DEFAULT_RULES_DIR /opt/suricata/rules-default
 ENV SURICATA_CUSTOM_CONFIG_DIR /opt/suricata/include-configs
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
@@ -51,8 +52,6 @@ ENV SURICATA_UPDATE_CONFIG_FILE "$SURICATA_CONFIG_DIR"/update.yaml
 ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
-
-COPY --chmod=644 suricata/default-rules/ /tmp/default-rules/
 
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
@@ -116,11 +115,10 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
-    find /tmp/default-rules/ -not -path '*/.gitignore' -type f -exec cp "{}" "$SURICATA_CONFIG_DIR"/rules/ \; && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     suricata-update update --fail --verbose --etopen --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     cp /usr/bin/suricata /usr/bin/suricata-offline && \
@@ -140,6 +138,7 @@ COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
+COPY --chmod=u=rwX,go=rX suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
 
 ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor

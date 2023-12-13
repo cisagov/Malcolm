@@ -97,6 +97,8 @@ jobs:
           cp ./scripts/malcolm_utils.py ./sensor-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./sensor-iso/docs/
           cp -r ./arkime/patch ./sensor-iso/shared/arkime_patch
+          mkdir -p ./sensor-iso/suricata
+          cp -r ./suricata/rules-default ./sensor-iso/suricata/
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
@@ -104,7 +106,7 @@ jobs:
           echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
           echo "BUILD_JOBS=2" > ./shared/environment.chroot
           sudo /usr/bin/env bash ./build.sh
-          rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md
+          rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md ./suricata
           sudo chmod 644 ./hedgehog-*.*
           popd
       -

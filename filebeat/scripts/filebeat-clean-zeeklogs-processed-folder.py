@@ -9,7 +9,6 @@ from tempfile import gettempdir
 import errno
 import time
 import fcntl
-import fnmatch
 import magic
 import json
 import pprint

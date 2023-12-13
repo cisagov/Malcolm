@@ -1070,14 +1070,14 @@ class Installer(object):
         )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=args.autoZeek)
 
-        zeekIcs = InstallerYesOrNo(
+        malcolmIcs = InstallerYesOrNo(
             'Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?',
-            default=args.zeekIcs,
+            default=args.malcolmIcs,
         )
 
         zeekICSBestGuess = (
             autoZeek
-            and zeekIcs
+            and malcolmIcs
             and InstallerYesOrNo(
                 'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
                 default=args.zeekICSBestGuess,
@@ -1717,6 +1717,12 @@ class Installer(object):
                 'SURICATA_UPDATE_RULES',
                 TrueOrFalseNoQuote(suricataRuleUpdate),
             ),
+            # disable/enable ICS analyzers
+            EnvValue(
+                os.path.join(args.configDir, 'suricata.env'),
+                'SURICATA_DISABLE_ICS_ALL',
+                TrueOrFalseNoQuote(not malcolmIcs),
+            ),
             # live traffic analysis with Suricata
             EnvValue(
                 os.path.join(args.configDir, 'suricata-live.env'),
@@ -1805,7 +1811,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_DISABLE_ICS_ALL',
-                '' if zeekIcs else TrueOrFalseNoQuote(not zeekIcs),
+                '' if malcolmIcs else TrueOrFalseNoQuote(not malcolmIcs),
             ),
             # disable/enable ICS best guess
             EnvValue(
@@ -3610,7 +3616,7 @@ def main():
     )
     analysisArgGroup.add_argument(
         '--zeek-ics',
-        dest='zeekIcs',
+        dest='malcolmIcs',
         type=str2bool,
         metavar="true|false",
         nargs='?',

@@ -106,12 +106,13 @@ if [ -d "$WORKDIR" ]; then
   # replace capture interface for now, it'll need to be automatically detected/configured on boot
   sed -i "s/CAPTURE_INTERFACE=.*/CAPTURE_INTERFACE=xxxx/g" ./config/includes.chroot/opt/sensor/sensor_ctl/control_vars.conf
 
-  # copy shared scripts
+  # copy shared scripts and files
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   mkdir -p ./config/includes.chroot/opt/zeek/bin/
   mv ./config/includes.chroot/usr/local/bin/zeekdeploy.sh ./config/includes.chroot/opt/zeek/bin/
   ln -s -r ./config/includes.chroot/usr/local/bin/malcolm_utils.py ./config/includes.chroot/opt/zeek/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/zeek/bin/
+  rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info

@@ -28,7 +28,8 @@ function cleanup_shared_and_docs {
          "$SCRIPT_PATH"/_includes \
          "$SCRIPT_PATH"/_layouts \
          "$SCRIPT_PATH"/Gemfile \
-         "$SCRIPT_PATH"/README.md
+         "$SCRIPT_PATH"/README.md \
+         "$SCRIPT_PATH"/suricata
 }
 
 unset FORCE_PROVISION
@@ -87,6 +88,8 @@ cp -r "$SCRIPT_PATH"/../shared \
       "$SCRIPT_PATH"/../README.md "$SCRIPT_PATH"/
 cp "$SCRIPT_PATH"/../scripts/documentation_build.sh "$SCRIPT_PATH"/docs/
 cp "$SCRIPT_PATH"/../scripts/malcolm_utils.py "$SCRIPT_PATH"/shared/bin/
+mkdir "$SCRIPT_PATH"/suricata
+cp -r "$SCRIPT_PATH"/../suricata/rules-default "$SCRIPT_PATH"/suricata/
 
 YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 [[ -n $YML_IMAGE_VERSION ]] && echo "$YML_IMAGE_VERSION" > "$SCRIPT_PATH"/shared/version.txt
