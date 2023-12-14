@@ -277,7 +277,7 @@ services:
       - ./config/ssl.env
       - ./config/opensearch.env
       - ./config/upload-common.env
-      - ./config.seth/pcap-capture.env
+      - ./config/pcap-capture.env
       - ./config/auth.env
       - ./config/arkime.env
       - ./config/arkime-live.env
