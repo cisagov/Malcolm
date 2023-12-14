@@ -246,15 +246,15 @@ services:
       # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
-      - ./config.elastic/process.env
-      - ./config.elastic/ssl.env
-      - ./config.elastic/opensearch.env
-      - ./config.elastic/upload-common.env
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/upload-common.env
       - ./config.seth/pcap-capture.env
-      - ./config.elastic/auth.env
-      - ./config.elastic/arkime.env
-      - ./config.elastic/arkime-live.env
-      - ./config.elastic/arkime-secret.env
+      - ./config/auth.env
+      - ./config/arkime.env
+      - ./config/arkime-live.env
+      - ./config/arkime-secret.env
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
