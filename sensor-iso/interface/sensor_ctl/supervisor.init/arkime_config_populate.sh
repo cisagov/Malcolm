@@ -40,7 +40,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
 
   if [[ -n $ARKIME_VIEWER_PORT ]]; then
     sed -r -i "s/(viewPort)\s*=\s*.*/\1=$ARKIME_VIEWER_PORT/" "$ARKIME_CONFIG_FILE"
-  f
+  fi
 
   if [[ -n $ARKIME_PASSWORD_SECRET ]]; then
     # place the Arkime viewer cluster password hash in the config file
