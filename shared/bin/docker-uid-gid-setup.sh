@@ -56,7 +56,8 @@ if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
       while read FLATTENED_FILE; do
         EXPANDED_FILE="$(echo "${FLATTENED_FILE}" | sed 's@_MALDIR_@/@g')"
         mkdir -p "$(dirname "${EXPANDED_FILE}")" && \
-          mv "${FLATTENED_FILE}" "${EXPANDED_FILE}"
+          mv "${FLATTENED_FILE}" "${EXPANDED_FILE}" || \
+          true
       done # loop over flattened filenames
 
         # TODO - regarding ownership and permissions:
