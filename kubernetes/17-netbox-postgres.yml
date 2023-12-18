@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-postgres-container
-        image: ghcr.io/mmguero-dev/malcolm/postgresql:development
+        image: ghcr.io/idaholab/malcolm/postgresql:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -74,7 +74,7 @@ spec:
             subPath: netbox/postgres
       initContainers:
       - name: netbox-postgres-dirinit-container
-        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
