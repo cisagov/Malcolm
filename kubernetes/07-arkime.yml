@@ -73,8 +73,8 @@ spec:
             name: arkime-var-local-catrust-volume
           - mountPath: /var/local/curlrc/secretmap
             name: arkime-opensearch-curlrc-secret-volume
-          - mountPath: "/opt/arkime/rules"
-            name: arkime-rules-volume/configmap
+          - mountPath: "/opt/arkime/rules/configmap"
+            name: arkime-rules-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
       initContainers:
