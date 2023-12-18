@@ -74,7 +74,7 @@ spec:
           - mountPath: /var/local/curlrc/secretmap
             name: arkime-opensearch-curlrc-secret-volume
           - mountPath: "/opt/arkime/rules"
-            name: arkime-rules-volume
+            name: arkime-rules-volume/configmap
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
       initContainers:
