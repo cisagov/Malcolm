@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
 from itertools import chain
 from io import StringIO
+from pathlib import Path
 
 from malcolm_common import (
     DotEnvDynamic,
@@ -23,7 +24,6 @@ from malcolm_common import (
 from malcolm_utils import (
     deep_get,
     dictsearch,
-    eprint,
     get_iterable,
     file_contents,
     remove_suffix,
@@ -37,6 +37,7 @@ from malcolm_utils import (
 MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
 
 MALCOLM_DOTFILE_SECRET_KEY = 'K8S_SECRET'
+MALCOLM_CONFIGMAP_DIR_REPLACER = '_MALDIR_'
 
 MALCOLM_CONFIGMAPS = {
     'etc-nginx': [
@@ -710,6 +711,8 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                     results_dict['create_namespace']['error'] = str(x)
 
         # create configmaps from files
+        # files in nested directories will be created with a name like foo_MALDIR_bar_MALDIR_baz.txt
+        #   and then renamed to foo/bar/baz.txt during container start up by docker-uid-gid-setup.sh
         results_dict['create_namespaced_config_map']['result'] = dict()
         results_dict['create_namespaced_secret']['result'] = dict()
         for configMapName, configMapFiles in MALCOLM_CONFIGMAPS.items():
@@ -731,20 +734,21 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                                 else:
                                     dataMap[os.path.basename(fname)] = contents
                             elif os.path.isdir(fname):
-                                for subfname in glob.iglob(
-                                    os.path.join(os.path.join(fname, '**'), '*'), recursive=True
-                                ):
-                                    if os.path.isfile(subfname):
-                                        contents = file_contents(
-                                            subfname,
-                                            binary_fallback=True,
+                                for root, dirNames, fileNames in os.walk(fname):
+                                    for f in fileNames:
+                                        subfname = os.path.join(root, f)
+                                        relfname = str(Path(os.path.join(root, f)).relative_to(fname)).replace(
+                                            os.sep, MALCOLM_CONFIGMAP_DIR_REPLACER
                                         )
-                                        if hasattr(contents, 'decode'):
-                                            binaryDataMap[os.path.basename(subfname)] = base64.b64encode(
-                                                contents
-                                            ).decode('utf-8')
-                                        else:
-                                            dataMap[os.path.basename(subfname)] = contents
+                                        if os.path.isfile(subfname):
+                                            contents = file_contents(
+                                                subfname,
+                                                binary_fallback=True,
+                                            )
+                                            if hasattr(contents, 'decode'):
+                                                binaryDataMap[relfname] = base64.b64encode(contents).decode('utf-8')
+                                            else:
+                                                dataMap[relfname] = contents
                         metadata = kubeImported.client.V1ObjectMeta(
                             name=configMapName,
                             namespace=namespace,
