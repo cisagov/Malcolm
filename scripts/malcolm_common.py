@@ -705,6 +705,7 @@ LOG_IGNORE_REGEX = re.compile(
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | (GET|POST|PATCH)\s+/netbox/.+HTTP/[\d\.].+\b20[01]\b
+  | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
   | "netbox"\s+application\s+started
