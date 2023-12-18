@@ -30,7 +30,7 @@ config.*/
 .vagrant
 malcolm_*images.tar.gz
 malcolm_*images.tar.xz
-malcolm_netbox_backup_*.psql.gz
+malcolm_netbox_backup_*.gz
 *.iso
 *-build.log
 Gemfile.lock
