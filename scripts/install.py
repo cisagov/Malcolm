@@ -1273,7 +1273,8 @@ class Installer(object):
                 default=args.netboxLogstashAutoPopulate,
             )
             and (
-                InstallerYesOrNo(
+                args.acceptDefaultsNonInteractive
+                or InstallerYesOrNo(
                     "Autopopulating NetBox's inventory is not recommended. Are you sure?",
                     default=args.netboxLogstashAutoPopulate,
                 )
@@ -1324,10 +1325,11 @@ class Installer(object):
                 choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
             )[0]
         if captureSelection == 'y':
-            liveArkime = malcolmProfile == PROFILE_HEDGEHOG
+            liveArkime = (malcolmProfile == PROFILE_HEDGEHOG) or (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
             pcapNetSniff = not liveArkime
             liveSuricata = True
             liveZeek = True
+            tweakIface = True
         elif captureSelection == 'c':
             if InstallerYesOrNo(
                 'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
@@ -1352,12 +1354,13 @@ class Installer(object):
                 'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
             )
             liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek)
-            if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+            if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
                 pcapFilter = InstallerAskForString(
                     'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
                     default=args.pcapFilter,
                 )
-                tweakIface = InstallerYesOrNo(
+                # Arkime requires disabling NIC offloading: https://arkime.com/faq#arkime_requires_full_packet_captures_error
+                tweakIface = liveArkime or InstallerYesOrNo(
                     'Disable capture interface hardware offloading and adjust ring buffer sizes?',
                     default=args.tweakIface,
                 )
@@ -1375,9 +1378,15 @@ class Installer(object):
                 f"Enter this node's hostname or IP to associate with network traffic metadata",
                 default=args.liveArkimeNodeHost,
             )
-            if not liveArkimeNodeHost and not InstallerYesOrNo(
-                f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
-                default=False,
+            if (
+                (not liveArkimeNodeHost)
+                and (not args.acceptDefaultsNonInteractive)
+                and (
+                    not InstallerYesOrNo(
+                        f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
+                        default=False,
+                    )
+                )
             ):
                 liveArkimeNodeHost = InstallerAskForString(
                     f"Enter this node's hostname or IP to associate with network traffic metadata",
@@ -3830,7 +3839,7 @@ def main():
         metavar="true|false",
         nargs='?',
         const=True,
-        default=False,
+        default=True,
         help="Disable capture interface hardware offloading and adjust ring buffer sizes",
     )
     captureArgGroup.add_argument(

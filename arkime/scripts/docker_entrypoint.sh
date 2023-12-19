@@ -115,7 +115,19 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
 
       # ensure capabilities for capture
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ARKIME_DIR}"/bin/capture || true
-    fi
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool || true
+
+      # disable NIC hardware offloading features and adjust ring buffer sizes for each interface
+      for IFACE in ${CAPTURE_INTERFACE//,/ }; do
+
+        [[ "${PCAP_IFACE_TWEAK:-false}" == "true" ]] && \
+          [[ "$IFACE" != "lo" ]] && \
+          [[ -x /usr/local/bin/nic-capture-setup.sh ]] && \
+          /usr/local/bin/nic-capture-setup.sh "$IFACE" >/dev/null 2>&1 || true
+
+      done # loop over capture interfaces
+
+    fi # capture interface(s) defined and live capture enabled
 
     # rules files
     if [[ -d "${ARKIME_RULES_DIR}" ]]; then

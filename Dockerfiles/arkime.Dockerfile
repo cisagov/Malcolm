@@ -23,6 +23,7 @@ RUN apt-get -q update && \
         bison \
         cmake \
         curl \
+        ethtool \
         file \
         flex \
         g++ \
