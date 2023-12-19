@@ -23,7 +23,6 @@ RUN apt-get -q update && \
         bison \
         cmake \
         curl \
-        ethtool \
         file \
         flex \
         g++ \
@@ -171,6 +170,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     apt-get install -q -y --no-install-recommends \
       bc \
       curl \
+      ethtool \
       file \
       geoip-bin \
       gettext \
@@ -253,6 +253,8 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     cp $ARKIME_DIR/bin/capture $ARKIME_DIR/bin/capture-offline && \
     chown root:${PGROUP} $ARKIME_DIR/bin/capture && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
+    chown root:${PGROUP} /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
     mkdir -p /var/run/arkime && \
     chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/rules $ARKIME_DIR/logs /var/run/arkime
 #Update Path
