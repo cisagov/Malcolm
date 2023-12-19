@@ -31,6 +31,7 @@ UFW_ALLOW_RULES=(
 for i in ${UFW_ALLOW_RULES[@]}; do
   ufw allow "$i"
 done
+ufw allow proto tcp from 172.29.0.0/16 to any port 8005
 
 # docker (disallow overriding firewall)
 mkdir -p /etc/docker/
