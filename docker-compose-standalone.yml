@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 version: '3.7'
 
@@ -12,7 +12,7 @@ x-logging:
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:23.12.0
+    image: ghcr.io/idaholab/malcolm/opensearch:23.12.1
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -36,7 +36,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
@@ -51,7 +54,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -81,7 +84,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:23.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -109,7 +112,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -123,7 +126,10 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -153,7 +159,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.12.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -188,7 +194,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:23.12.0
+    image: ghcr.io/idaholab/malcolm/arkime:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -204,31 +210,58 @@ services:
       - ./config/upload-common.env
       - ./config/auth.env
       - ./config/arkime.env
+      - ./config/arkime-offline.env
       - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     depends_on:
       - opensearch
-    ports:
-      - "127.0.0.1:8005:8005"
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./arkime/rules:/opt/arkime/rules:ro
       - ./pcap:/data/pcap
-      - ./arkime-logs:/opt/arkime/logs
-      - ./arkime-raw:/opt/arkime/raw
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s
       timeout: 30s
       retries: 3
       start_period: 210s
+  arkime-live:
+    image: ghcr.io/idaholab/malcolm/arkime:23.12.1
+    profiles: ["malcolm", "hedgehog"]
+    logging: *default-logging
+    restart: "no"
+    stdin_open: false
+    tty: true
+    network_mode: host
+    cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
+      - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
+      - NET_ADMIN
+      - NET_RAW
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+      - SYS_NICE
+    env_file:
+      - ./config/process.env
+      - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/upload-common.env
+      - ./config/pcap-capture.env
+      - ./config/auth.env
+      - ./config/arkime.env
+      - ./config/arkime-live.env
+      - ./config/arkime-secret.env
+    volumes:
+      - ./nginx/ca-trust:/var/local/ca-trust:ro
+      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+      - ./arkime/rules:/opt/arkime/rules:ro
+      - ./pcap:/data/pcap
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -237,15 +270,6 @@ services:
     hostname: zeek
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -269,22 +293,19 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
-      - IPC_LOCK
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -300,7 +321,7 @@ services:
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
       - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:23.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -309,15 +330,6 @@ services:
     hostname: suricata
     networks:
       - default
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    cap_add:
-      - IPC_LOCK
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_ADMIN
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -337,22 +349,23 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:23.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
+      # SYS_NICE - to set process nice values and scheduling policies for capture
+      - SYS_NICE
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -366,7 +379,7 @@ services:
       - ./suricata/rules:/opt/suricata/rules:ro
       - ./suricata/include-configs:/opt/suricata/include-configs:ro
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:23.12.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -394,7 +407,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -406,10 +419,15 @@ services:
         soft: -1
         hard: -1
     cap_add:
+      # IPC_LOCK - to lock memory, preventing swapping
       - IPC_LOCK
+      # SYS_RESOURCE - for increasing memlock limits
+      - SYS_RESOURCE
+      # SYS_ADMIN - for netsniff-ng to set the disc I/O scheduler policy
+      - SYS_ADMIN
+      # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      - SYS_ADMIN
     env_file:
       - ./config/process.env
       - ./config/ssl.env
@@ -418,7 +436,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:23.12.1
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -446,7 +464,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:23.12.0
+    image: ghcr.io/idaholab/malcolm/file-upload:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -473,7 +491,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:23.12.0
+    image: ghcr.io/idaholab/malcolm/htadmin:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -500,7 +518,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:23.12.0
+    image: ghcr.io/idaholab/malcolm/freq:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -524,7 +542,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:23.12.0
+    image: ghcr.io/idaholab/malcolm/netbox:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -558,7 +576,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:23.12.0
+    image: ghcr.io/idaholab/malcolm/postgresql:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -584,7 +602,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:23.12.0
+    image: ghcr.io/idaholab/malcolm/redis:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -614,7 +632,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:23.12.0
+    image: ghcr.io/idaholab/malcolm/redis:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -643,7 +661,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:23.12.0
+    image: ghcr.io/idaholab/malcolm/api:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     command: gunicorn --bind 0:5000 manage:app
@@ -670,7 +688,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.12.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:23.12.1
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"

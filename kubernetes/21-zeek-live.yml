@@ -16,18 +16,18 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+        image: ghcr.io/idaholab/malcolm/zeek:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
         securityContext:
           capabilities:
             add:
-              - IPC_LOCK
+              # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
+              # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+              - SYS_NICE
         envFrom:
           - configMapRef:
               name: process-env
@@ -43,9 +43,6 @@ spec:
               name: zeek-live-env
           - configMapRef:
               name: pcap-capture-env
-        env:
-          - name: ZEEK_DISABLED
-            value: "true"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: zeek-live-var-local-catrust-volume
@@ -55,16 +52,16 @@ spec:
           - mountPath: "/zeek/upload"
             name: zeek-live-zeek-volume
             subPath: "upload"
-          - mountPath: "/opt/zeek/share/zeek/site/custom"
+          - mountPath: "/opt/zeek/share/zeek/site/custom/configmap"
             name: zeek-live-custom-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed"
+          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed/configmap"
             name: zeek-live-intel-preseed-volume
           - mountPath: "/opt/zeek/share/zeek/site/intel"
             name: zeek-live-intel-volume
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

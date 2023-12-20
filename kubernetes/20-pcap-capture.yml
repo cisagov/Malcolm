@@ -16,18 +16,22 @@ spec:
     spec:
       containers:
       - name: pcap-capture-container
-        image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.0
+        image: ghcr.io/idaholab/malcolm/pcap-capture:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK required for some of the memory optimizations netsniff-ng does
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limits
+              - SYS_RESOURCE
+              # SYS_ADMIN - for netsniff-ng to set the disc I/O scheduler policy
+              - SYS_ADMIN
+              # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
         envFrom:
           - configMapRef:
               name: process-env
@@ -46,7 +50,7 @@ spec:
             subPath: "upload"
       initContainers:
       - name: pcap-capture-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

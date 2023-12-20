@@ -1,0 +1,90 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arkime-live-deployment
+  namespace: malcolm
+spec:
+  selector:
+    matchLabels:
+      name: arkime-live-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: arkime-live-deployment
+    spec:
+      containers:
+      - name: arkime-live-container
+        image: ghcr.io/idaholab/malcolm/arkime:23.12.1
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        securityContext:
+          capabilities:
+            add:
+              # IPC_LOCK - to lock memory, preventing swapping
+              - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limits
+              - SYS_RESOURCE
+              # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
+              - NET_ADMIN
+              - NET_RAW
+              # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+              - SYS_NICE
+        envFrom:
+          - configMapRef:
+              name: process-env
+          - configMapRef:
+              name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+          - secretRef:
+              name: auth-env
+          - configMapRef:
+              name: upload-common-env
+          - configMapRef:
+              name: pcap-capture-env
+          - configMapRef:
+              name: arkime-env
+          - configMapRef:
+              name: arkime-live-env
+          - secretRef:
+              name: arkime-secret-env
+        volumeMounts:
+          - mountPath: /var/local/ca-trust/configmap
+            name: arkime-live-var-local-catrust-volume
+          - mountPath: /var/local/curlrc/secretmap
+            name: arkime-live-opensearch-curlrc-secret-volume
+          - mountPath: "/opt/arkime/rules/configmap"
+            name: arkime-live-rules-volume
+          - mountPath: "/data/pcap"
+            name: arkime-live-pcap-volume
+      initContainers:
+      - name: arkime-live-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
+        imagePullPolicy: Always
+        stdin: false
+        tty: true
+        envFrom:
+          - configMapRef:
+              name: process-env
+        env:
+          - name: PUSER_MKDIR
+            value: "/data/pcap:arkime-live"
+        volumeMounts:
+          - name: arkime-live-pcap-volume
+            mountPath: "/data/pcap"
+      volumes:
+        - name: arkime-live-var-local-catrust-volume
+          configMap:
+            name: var-local-catrust
+        - name: arkime-live-opensearch-curlrc-secret-volume
+          secret:
+            secretName: opensearch-curlrc
+        - name: arkime-live-rules-volume
+          configMap:
+            name: arkime-rules
+        - name: arkime-live-pcap-volume
+          persistentVolumeClaim:
+            claimName: pcap-claim

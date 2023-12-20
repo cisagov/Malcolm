@@ -1,0 +1,251 @@
+{
+  "version": "2.11.1",
+  "objects": [
+    {
+      "id": "f6600310-9943-11ee-a029-e973f4774355",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "WzkzOCwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald Logs",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"embeddableConfig\":{\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":19,\"i\":\"b514b4e8-689b-465e-8335-ca20c20d46fe\",\"w\":14,\"x\":0,\"y\":0},\"panelIndex\":\"b514b4e8-689b-465e-8335-ca20c20d46fe\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"7a7cfec2-8688-45a7-9790-66b3f0e9fd7e\",\"w\":11,\"x\":14,\"y\":0},\"panelIndex\":\"7a7cfec2-8688-45a7-9790-66b3f0e9fd7e\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"2143906d-7adb-4de7-8484-2f87c8c98332\",\"w\":23,\"x\":25,\"y\":0},\"panelIndex\":\"2143906d-7adb-4de7-8484-2f87c8c98332\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"bb4d56fd-b110-4d58-b6aa-e4189bdba918\",\"w\":24,\"x\":0,\"y\":19},\"panelIndex\":\"bb4d56fd-b110-4d58-b6aa-e4189bdba918\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"4e4780cd-add6-4dbe-95ac-d11afbcd630c\",\"w\":24,\"x\":24,\"y\":19},\"panelIndex\":\"4e4780cd-add6-4dbe-95ac-d11afbcd630c\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":32,\"i\":\"77bbae8a-66cd-4e30-9b90-c7ab7c271320\",\"w\":48,\"x\":0,\"y\":37},\"panelIndex\":\"77bbae8a-66cd-4e30-9b90-c7ab7c271320\",\"version\":\"2.11.1\",\"panelRefName\":\"panel_5\"}]",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "82e154f0-99e5-11ee-a12e-a134fdba98ea"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "5a3cb5c0-99e6-11ee-a12e-a134fdba98ea"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "02c189b0-99e6-11ee-a12e-a134fdba98ea"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "81e6b660-99e7-11ee-a12e-a134fdba98ea"
+        },
+        {
+          "name": "panel_4",
+          "type": "visualization",
+          "id": "9601eb20-99e6-11ee-a12e-a134fdba98ea"
+        },
+        {
+          "name": "panel_5",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "82e154f0-99e5-11ee-a12e-a134fdba98ea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "WzkzOSwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Logger",
+        "visState": "{\"title\":\"Malcolm Sensor Journald - Logger\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"log.logger\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "5a3cb5c0-99e6-11ee-a12e-a134fdba98ea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:50:36.981Z",
+      "version": "Wzk1NSwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Process UID",
+        "visState": "{\"title\":\"Malcolm Sensor Journald - Process UID\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.systemd.hostname\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Systemd Host\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"process.user.id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Process UID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "02c189b0-99e6-11ee-a12e-a134fdba98ea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "Wzk0MSwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Logs by Host Over Time",
+        "visState": "{\"title\":\"Malcolm Sensor Journald - Logs by Host Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"@timestamp\",\"timeRange\":{\"from\":\"now-15m\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{}},\"schema\":\"segment\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.systemd.hostname\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Journald Host\"},\"schema\":\"group\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":true,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "81e6b660-99e7-11ee-a12e-a134fdba98ea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "Wzk0MiwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Systemd Unit",
+        "visState": "{\"title\":\"Malcolm Sensor Journald - Systemd Unit\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.systemd.systemd_unit\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Systemd Unit\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.systemd.systemd_user_unit\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Systemd User Unit\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"miscbeat.systemd.user_unit\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"User Unit\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":3,\"direction\":\"desc\"}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9601eb20-99e6-11ee-a12e-a134fdba98ea",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "Wzk0MywxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Process Name",
+        "visState": "{\"title\":\"Malcolm Sensor Journald - Process Name\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"process.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"square root\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":72,\"showLabel\":false}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "c79c1e60-9943-11ee-a029-e973f4774355"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "c79c1e60-9943-11ee-a029-e973f4774355",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2023-12-14T22:33:38.334Z",
+      "version": "Wzk0NCwxXQ==",
+      "attributes": {
+        "title": "Malcolm Sensor Journald - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "@timestamp",
+          "miscbeat.systemd.hostname",
+          "process.name",
+          "process.pid",
+          "process.user.id",
+          "event.original",
+          "miscbeat.systemd.systemd_unit",
+          "miscbeat.systemd.systemd_user_unit",
+          "log.logger"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"miscbeat.systemd:*\",\"language\":\"kuery\"},\"highlightAll\":true,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"calendar_interval\":\"1w\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}

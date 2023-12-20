@@ -16,18 +16,10 @@ spec:
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:23.12.0
+        image: ghcr.io/idaholab/malcolm/zeek:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
-        securityContext:
-          capabilities:
-            add:
-              - IPC_LOCK
-              - NET_ADMIN
-              - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
         envFrom:
           - configMapRef:
               name: process-env
@@ -63,16 +55,16 @@ spec:
           - mountPath: "/zeek/upload"
             name: zeek-offline-zeek-volume
             subPath: "upload"
-          - mountPath: "/opt/zeek/share/zeek/site/custom"
+          - mountPath: "/opt/zeek/share/zeek/site/custom/configmap"
             name: zeek-offline-custom-volume
-          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed"
+          - mountPath: "/opt/zeek/share/zeek/site/intel-preseed/configmap"
             name: zeek-offline-intel-preseed-volume
           - mountPath: "/opt/zeek/share/zeek/site/intel"
             name: zeek-offline-intel-volume
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import sys
 
@@ -235,6 +235,7 @@ class Installer(object):
         self.checkPackageCmds = []
         self.installPackageCmds = []
         self.requiredPackages = []
+        self.dockerComposeCmd = None
 
         self.pipCmd = 'pip3'
         if not which(self.pipCmd, debug=self.debug):
@@ -302,15 +303,16 @@ class Installer(object):
         return self.install_package(self.requiredPackages)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def install_docker_images(self, docker_image_file):
+    def install_docker_images(self, docker_image_file, malcolm_install_path):
         result = False
+        composeFile = os.path.join(malcolm_install_path, 'docker-compose.yml')
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if (
                 docker_image_file
                 and os.path.isfile(docker_image_file)
                 and InstallerYesOrNo(
-                    f'Load Malcolm Docker images from {docker_image_file}', default=True, forceInteraction=True
+                    f'Load Malcolm Docker images from {docker_image_file}?', default=True, forceInteraction=True
                 )
             ):
                 ecode, out = self.run_process(['docker', 'load', '-q', '-i', docker_image_file], privileged=True)
@@ -318,6 +320,31 @@ class Installer(object):
                     result = True
                 else:
                     eprint(f"Loading Malcolm Docker images failed: {out}")
+
+            elif (
+                os.path.isfile(composeFile)
+                and self.dockerComposeCmd
+                and InstallerYesOrNo(f'Pull Malcolm Docker images?', default=False, forceInteraction=False)
+            ):
+                for priv in (False, True):
+                    ecode, out = self.run_process(
+                        [
+                            self.dockerComposeCmd,
+                            '-f',
+                            composeFile,
+                            '--profile=malcolm',
+                            'pull',
+                            '--quiet',
+                        ],
+                        privileged=priv,
+                    )
+                    if ecode == 0:
+                        break
+
+                if ecode == 0:
+                    result = True
+                else:
+                    eprint(f"Pulling Malcolm Docker images failed: {out}")
 
         return result
 
@@ -331,7 +358,7 @@ class Installer(object):
             malcolm_install_file
             and os.path.isfile(malcolm_install_file)
             and InstallerYesOrNo(
-                f'Extract Malcolm runtime files from {malcolm_install_file}', default=True, forceInteraction=True
+                f'Extract Malcolm runtime files from {malcolm_install_file}?', default=True, forceInteraction=True
             )
         ):
             # determine and create destination path for installation
@@ -434,8 +461,10 @@ class Installer(object):
         defaultUid = '1000'
         defaultGid = '1000'
         if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
-            defaultUid = str(os.stat(malcolm_install_path).st_uid)
-            defaultGid = str(os.stat(malcolm_install_path).st_gid)
+            if pathUid := os.stat(malcolm_install_path).st_uid:
+                defaultUid = str(pathUid)
+            if pathGid := os.stat(malcolm_install_path).st_gid:
+                defaultGid = str(pathGid)
 
         puid = defaultUid
         pgid = defaultGid
@@ -470,7 +499,6 @@ class Installer(object):
             f'Enter the node name to associate with network traffic metadata',
             default=args.pcapNodeName,
         )
-        pcapNodeHost = ''
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
@@ -625,18 +653,6 @@ class Installer(object):
                 logstashHost = InstallerAskForString(
                     f'Enter Logstash host and port (e.g., 192.168.1.123:5044)',
                     default=args.logstashHost,
-                )
-            pcapNodeHost = InstallerAskForString(
-                f"Enter this node's hostname or IP to associate with network traffic metadata",
-                default=args.pcapNodeHost,
-            )
-            if not pcapNodeHost and not InstallerYesOrNo(
-                f'Node hostname or IP is required for Arkime session retrieval under the {malcolmProfile} profile. Are you sure?',
-                default=False,
-            ):
-                pcapNodeHost = InstallerAskForString(
-                    f"Enter this node's hostname or IP to associate with network traffic metadata",
-                    default=args.pcapNodeHost,
                 )
 
         if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
@@ -963,6 +979,7 @@ class Installer(object):
             for pathToCreate in (
                 indexDirFull,
                 indexSnapshotDirFull,
+                os.path.join(pcapDirFull, 'arkime-live'),
                 os.path.join(pcapDirFull, 'processed'),
                 os.path.join(pcapDirFull, os.path.join('upload', os.path.join('tmp', 'spool'))),
                 os.path.join(pcapDirFull, os.path.join('upload', 'variants')),
@@ -1029,7 +1046,7 @@ class Installer(object):
                 (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
                 or (malcolmProfile != PROFILE_MALCOLM)
                 or InstallerYesOrNo(
-                    'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+                    'Should Arkime delete uploaded PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                     default=args.arkimeManagePCAP,
                 )
             )
@@ -1044,6 +1061,7 @@ class Installer(object):
                 if arkimeFreeSpaceGTmp:
                     arkimeFreeSpaceG = arkimeFreeSpaceGTmp
 
+        autoArkime = InstallerYesOrNo('Automatically analyze all PCAP files with Arkime?', default=args.autoArkime)
         autoSuricata = InstallerYesOrNo(
             'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
         )
@@ -1052,14 +1070,14 @@ class Installer(object):
         )
         autoZeek = InstallerYesOrNo('Automatically analyze all PCAP files with Zeek?', default=args.autoZeek)
 
-        zeekIcs = InstallerYesOrNo(
+        malcolmIcs = InstallerYesOrNo(
             'Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?',
-            default=args.zeekIcs,
+            default=args.malcolmIcs,
         )
 
         zeekICSBestGuess = (
             autoZeek
-            and zeekIcs
+            and malcolmIcs
             and InstallerYesOrNo(
                 'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
                 default=args.zeekICSBestGuess,
@@ -1084,7 +1102,6 @@ class Installer(object):
         )
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             if malcolmProfile == PROFILE_MALCOLM:
-                arkimeViewerOpen = False
                 openPortsOptions = ('no', 'yes', 'customize')
                 loopBreaker = CountUntilException(MaxAskForValueCount)
                 while openPortsSelection not in [x[0] for x in openPortsOptions] and loopBreaker.increment():
@@ -1097,7 +1114,7 @@ class Installer(object):
                     logstashOpen = False
                     filebeatTcpOpen = False
                 elif openPortsSelection == 'y':
-                    opensearchOpen = True
+                    opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
                     logstashOpen = True
                     filebeatTcpOpen = True
                 else:
@@ -1116,16 +1133,12 @@ class Installer(object):
                 openPortsSelection = 'n'
                 logstashOpen = False
                 filebeatTcpOpen = False
-                arkimeViewerOpen = InstallerYesOrNo(
-                    'Expose Arkime viewer to external hosts for PCAP payload retrieval?',
-                    default=args.exposeArkimeViewer,
-                )
+
         else:
             opensearchOpen = opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
             openPortsSelection = 'y'
             logstashOpen = True
             filebeatTcpOpen = True
-            arkimeViewerOpen = malcolmProfile == PROFILE_HEDGEHOG
 
         filebeatTcpFormat = 'json'
         filebeatTcpSourceField = 'message'
@@ -1260,7 +1273,8 @@ class Installer(object):
                 default=args.netboxLogstashAutoPopulate,
             )
             and (
-                InstallerYesOrNo(
+                args.acceptDefaultsNonInteractive
+                or InstallerYesOrNo(
                     "Autopopulating NetBox's inventory is not recommended. Are you sure?",
                     default=args.netboxLogstashAutoPopulate,
                 )
@@ -1284,6 +1298,8 @@ class Installer(object):
         # input packet capture parameters
         pcapNetSniff = False
         pcapTcpDump = False
+        liveArkime = False
+        liveArkimeNodeHost = ''
         liveZeek = False
         liveSuricata = False
         pcapIface = 'lo'
@@ -1309,37 +1325,72 @@ class Installer(object):
                 choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
             )[0]
         if captureSelection == 'y':
-            pcapNetSniff = True
+            liveArkime = (malcolmProfile == PROFILE_HEDGEHOG) or (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal)
+            pcapNetSniff = not liveArkime
             liveSuricata = True
             liveZeek = True
+            tweakIface = True
         elif captureSelection == 'c':
             if InstallerYesOrNo(
                 'Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?',
-                default=args.pcapNetSniff or args.pcapTcpDump or (malcolmProfile == PROFILE_HEDGEHOG),
+                default=args.pcapNetSniff
+                or args.pcapTcpDump
+                or args.liveArkime
+                or (malcolmProfile == PROFILE_HEDGEHOG),
             ):
-                pcapNetSniff = InstallerYesOrNo('Capture packets using netsniff-ng?', default=args.pcapNetSniff)
-                if not pcapNetSniff:
-                    pcapTcpDump = InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+                liveArkime = (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal) and (
+                    (malcolmProfile == PROFILE_HEDGEHOG)
+                    or InstallerYesOrNo('Capture packets using Arkime capture?', default=args.liveArkime)
+                )
+                pcapNetSniff = (not liveArkime) and InstallerYesOrNo(
+                    'Capture packets using netsniff-ng?', default=args.pcapNetSniff
+                )
+                pcapTcpDump = (
+                    (not liveArkime)
+                    and (not pcapNetSniff)
+                    and InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+                )
             liveSuricata = InstallerYesOrNo(
                 'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
             )
             liveZeek = InstallerYesOrNo('Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek)
-            if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+            if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
                 pcapFilter = InstallerAskForString(
                     'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
                     default=args.pcapFilter,
                 )
-                tweakIface = InstallerYesOrNo(
+                # Arkime requires disabling NIC offloading: https://arkime.com/faq#arkime_requires_full_packet_captures_error
+                tweakIface = liveArkime or InstallerYesOrNo(
                     'Disable capture interface hardware offloading and adjust ring buffer sizes?',
                     default=args.tweakIface,
                 )
 
-        if pcapNetSniff or pcapTcpDump or liveZeek or liveSuricata:
+        if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
             pcapIface = ''
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
             while (len(pcapIface) <= 0) and loopBreaker.increment():
                 pcapIface = InstallerAskForString(
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
+                )
+
+        if liveArkime:
+            liveArkimeNodeHost = InstallerAskForString(
+                f"Enter this node's hostname or IP to associate with network traffic metadata",
+                default=args.liveArkimeNodeHost,
+            )
+            if (
+                (not liveArkimeNodeHost)
+                and (not args.acceptDefaultsNonInteractive)
+                and (
+                    not InstallerYesOrNo(
+                        f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
+                        default=False,
+                    )
+                )
+            ):
+                liveArkimeNodeHost = InstallerAskForString(
+                    f"Enter this node's hostname or IP to associate with network traffic metadata",
+                    default=args.liveArkimeNodeHost,
                 )
 
         if (
@@ -1348,6 +1399,7 @@ class Installer(object):
             and (not pcapTcpDump)
             and (not liveZeek)
             and (not liveSuricata)
+            and (not liveArkime)
         ):
             InstallerDisplayMessage(
                 f'Warning: Running with the {malcolmProfile} profile but no capture methods are enabled.',
@@ -1392,6 +1444,30 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'ARKIME_FREESPACEG',
                 arkimeFreeSpaceG,
+            ),
+            # live traffic analysis with Arkime capture (only available with remote opensearch or elasticsearch)
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-live.env'),
+                'ARKIME_LIVE_CAPTURE',
+                TrueOrFalseNoQuote(liveArkime),
+            ),
+            # capture source "node host" for live Arkime capture
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-live.env'),
+                'ARKIME_LIVE_NODE_HOST',
+                liveArkimeNodeHost,
+            ),
+            # rotated captured PCAP analysis with Arkime (not live capture)
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-offline.env'),
+                'ARKIME_ROTATED_PCAP',
+                TrueOrFalseNoQuote(autoArkime and (not liveArkime)),
+            ),
+            # automatic uploaded pcap analysis with Arkime
+            EnvValue(
+                os.path.join(args.configDir, 'arkime-offline.env'),
+                'ARKIME_AUTO_ANALYZE_PCAP_FILES',
+                TrueOrFalseNoQuote(autoArkime),
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
@@ -1650,6 +1726,12 @@ class Installer(object):
                 'SURICATA_UPDATE_RULES',
                 TrueOrFalseNoQuote(suricataRuleUpdate),
             ),
+            # disable/enable ICS analyzers
+            EnvValue(
+                os.path.join(args.configDir, 'suricata.env'),
+                'SURICATA_DISABLE_ICS_ALL',
+                TrueOrFalseNoQuote(not malcolmIcs),
+            ),
             # live traffic analysis with Suricata
             EnvValue(
                 os.path.join(args.configDir, 'suricata-live.env'),
@@ -1673,12 +1755,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
                 pcapNodeName,
-            ),
-            # capture source "node host" for locally processed PCAP files
-            EnvValue(
-                os.path.join(args.configDir, 'upload-common.env'),
-                'PCAP_NODE_HOST',
-                pcapNodeHost,
             ),
             # zeek file extraction mode
             EnvValue(
@@ -1744,7 +1820,7 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_DISABLE_ICS_ALL',
-                '' if zeekIcs else TrueOrFalseNoQuote(not zeekIcs),
+                '' if malcolmIcs else TrueOrFalseNoQuote(not malcolmIcs),
             ),
             # disable/enable ICS best guess
             EnvValue(
@@ -1892,7 +1968,7 @@ class Installer(object):
                                 # whether or not to restart services automatically (on boot, etc.)
                                 line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
 
-                            elif currentService == 'arkime':
+                            elif (currentService == 'arkime') or (currentService == 'arkime-live'):
                                 # stuff specifically in the arkime section
                                 if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
                                     # Arkime's reference to the PCAP directory
@@ -1900,13 +1976,6 @@ class Installer(object):
                                         line,
                                         pcapDir,
                                         sectionIndents[currentSection] * 3,
-                                    )
-                                elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IP based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if arkimeViewerOpen else '127.0.0.1'}:\g<3>",
-                                        line,
                                     )
 
                             elif currentService == 'filebeat':
@@ -2591,24 +2660,28 @@ class LinuxInstaller(Installer):
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # first see if docker compose/docker-compose is already installed and runnable
             #   (try non-root and root)
-            dockerComposeCmd = ('docker', 'compose')
-            err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-            if err != 0:
-                err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
-                if err != 0:
-                    dockerComposeCmd = 'docker-compose'
-                    if not which(dockerComposeCmd, debug=self.debug):
-                        if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
-                            dockerComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
-                        elif os.path.isfile('/usr/local/bin/docker-compose'):
-                            dockerComposeCmd = '/usr/local/bin/docker-compose'
-                    err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-                    if err != 0:
-                        err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+            tmpComposeCmd = ('docker', 'compose')
 
-            if (err != 0) and InstallerYesOrNo(
-                'docker compose failed, attempt to install docker compose?', default=True
-            ):
+            for priv in (False, True):
+                err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                if err == 0:
+                    break
+            if err != 0:
+                tmpComposeCmd = 'docker-compose'
+                if not which(tmpComposeCmd, debug=self.debug):
+                    if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
+                        tmpComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
+                    elif os.path.isfile('/usr/local/bin/docker-compose'):
+                        tmpComposeCmd = '/usr/local/bin/docker-compose'
+                for priv in (False, True):
+                    err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                    if err == 0:
+                        break
+
+            if err == 0:
+                self.dockerComposeCmd = tmpComposeCmd
+
+            elif InstallerYesOrNo('docker compose failed, attempt to install docker compose?', default=True):
                 if InstallerYesOrNo('Install docker compose directly from docker github?', default=True):
                     # download docker-compose from github and put it in /usr/local/bin
 
@@ -2622,7 +2695,7 @@ class LinuxInstaller(Installer):
                         unames.append(out[0].lower())
                     if len(unames) == 2:
                         # download docker-compose from github and save it to a temporary file
-                        tempFileName = os.path.join(self.tempDirName, dockerComposeCmd)
+                        tempFileName = os.path.join(self.tempDirName, tmpComposeCmd)
                         dockerComposeUrl = f"https://github.com/docker/compose/releases/download/v{DOCKER_COMPOSE_INSTALL_VERSION}/docker-compose-{unames[0]}-{unames[1]}"
                         if DownloadToFile(dockerComposeUrl, tempFileName, debug=self.debug):
                             os.chmod(tempFileName, 493)  # 493 = 0o755, mark as executable
@@ -2632,7 +2705,7 @@ class LinuxInstaller(Installer):
                             )
                             if err == 0:
                                 eprint("Download and installation of docker-compose apparently succeeded")
-                                dockerComposeCmd = '/usr/local/bin/docker-compose'
+                                tmpComposeCmd = '/usr/local/bin/docker-compose'
                             else:
                                 raise Exception(f'Error copying {tempFileName} to /usr/local/bin: {out}')
 
@@ -2656,11 +2729,13 @@ class LinuxInstaller(Installer):
                         eprint(f"Install docker-compose via pip failed with {err}, {out}")
 
             # see if docker-compose is now installed and runnable (try non-root and root)
-            err, out = self.run_process([dockerComposeCmd, 'version'], privileged=False)
-            if err != 0:
-                err, out = self.run_process([dockerComposeCmd, 'version'], privileged=True)
+            for priv in (False, True):
+                err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
+                if err == 0:
+                    break
 
             if err == 0:
+                self.dockerComposeCmd = tmpComposeCmd
                 result = True
                 if self.debug:
                     eprint('docker compose succeeded')
@@ -3509,6 +3584,16 @@ def main():
 
     analysisArgGroup = parser.add_argument_group('Analysis options')
     analysisArgGroup.add_argument(
+        '--auto-arkime',
+        dest='autoArkime',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Automatically analyze all PCAP files with Arkime",
+    )
+    analysisArgGroup.add_argument(
         '--auto-suricata',
         dest='autoSuricata',
         type=str2bool,
@@ -3540,7 +3625,7 @@ def main():
     )
     analysisArgGroup.add_argument(
         '--zeek-ics',
-        dest='zeekIcs',
+        dest='malcolmIcs',
         type=str2bool,
         metavar="true|false",
         nargs='?',
@@ -3754,11 +3839,30 @@ def main():
         metavar="true|false",
         nargs='?',
         const=True,
-        default=False,
+        default=True,
         help="Disable capture interface hardware offloading and adjust ring buffer sizes",
     )
     captureArgGroup.add_argument(
         '--live-capture-arkime',
+        dest='liveArkime',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-arkime-node-host',
+        dest='liveArkimeNodeHost',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='The node hostname or IP address to associate with live network traffic observed by Arkime capture',
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-netsniff',
         dest='pcapNetSniff',
         type=str2bool,
         metavar="true|false",
@@ -3768,7 +3872,7 @@ def main():
         help="Capture live network traffic with netsniff-ng for Arkime",
     )
     captureArgGroup.add_argument(
-        '--live-capture-arkime-tcpdump',
+        '--live-capture-tcpdump',
         dest='pcapTcpDump',
         type=str2bool,
         metavar="true|false",
@@ -3805,15 +3909,6 @@ def main():
         type=str,
         default=os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0],
         help='The node name to associate with network traffic metadata',
-    )
-    captureArgGroup.add_argument(
-        '--node-host',
-        dest='pcapNodeHost',
-        required=False,
-        metavar='<string>',
-        type=str,
-        default='',
-        help='The node hostname or IP address to associate with network traffic metadata',
     )
 
     try:
@@ -3906,8 +4001,6 @@ def main():
             success = installer.install_docker_compose()
         if hasattr(installer, 'tweak_system_files'):
             success = installer.tweak_system_files()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_images'):
-            success = installer.install_docker_images(imageFile)
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
             success, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
@@ -3958,11 +4051,19 @@ def main():
         if args.debug:
             eprint(f"Malcolm installation detected at {installPath}")
 
-    if (installPath is not None) and os.path.isdir(installPath) and hasattr(installer, 'tweak_malcolm_runtime'):
-        installer.tweak_malcolm_runtime(installPath)
-        eprint(f"\nMalcolm has been installed to {installPath}. See README.md for more information.")
-        eprint(
-            f"Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
+    if (installPath is not None) and os.path.isdir(installPath):
+        if hasattr(installer, 'tweak_malcolm_runtime'):
+            installer.tweak_malcolm_runtime(installPath)
+
+        if (
+            (not args.configOnly)
+            and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and hasattr(installer, 'install_docker_images')
+        ):
+            success = installer.install_docker_images(imageFile, installPath)
+
+        InstallerDisplayMessage(
+            f"Malcolm has been installed to {installPath}. See README.md for more information.\nScripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."
         )
 
 

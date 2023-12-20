@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 
 import os
@@ -9,7 +9,6 @@ from tempfile import gettempdir
 import errno
 import time
 import fcntl
-import fnmatch
 import magic
 import json
 import pprint
