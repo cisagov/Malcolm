@@ -50,6 +50,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 * [Live analysis](live-analysis.md#LiveAnalysis)
     - [Using a network sensor appliance](live-analysis.md#Hedgehog)
     - [Monitoring local network interfaces](live-analysis.md#LocalPCAP)
+        + ["Hedgehog" run profile](live-analysis.md#Profiles)
     - [Manually forwarding logs from an external source](live-analysis.md#ExternalForward)
 * [Arkime](arkime.md#Arkime)
     - [Zeek log integration](arkime.md#ArkimeZeek)

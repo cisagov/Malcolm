@@ -1,0 +1,10 @@
+---
+version: 1
+rules:
+  - name: "Only save first n packets of TLS"
+    when: "fieldSet"
+    fields:
+      protocols:
+      - tls
+    ops:
+      _maxPacketsToSave: 15

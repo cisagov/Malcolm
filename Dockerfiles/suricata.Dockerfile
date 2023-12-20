@@ -30,10 +30,10 @@ ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
-ENV SUPERCRONIC_VERSION "0.2.28"
+ENV SUPERCRONIC_VERSION "0.2.29"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
+ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV YQ_VERSION "4.33.3"
@@ -42,6 +42,7 @@ ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
+ENV SURICATA_DEFAULT_RULES_DIR /opt/suricata/rules-default
 ENV SURICATA_CUSTOM_CONFIG_DIR /opt/suricata/include-configs
 ENV SURICATA_LOG_DIR /var/log/suricata
 ENV SURICATA_MANAGED_DIR /var/lib/suricata
@@ -52,15 +53,12 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-COPY --chmod=644 suricata/default-rules/ /tmp/default-rules/
-
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
         bc \
         curl \
-        ethtool \
         file \
         inotify-tools \
         iproute2 \
@@ -117,15 +115,14 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
-    find /tmp/default-rules/ -not -path '*/.gitignore' -type f -exec cp "{}" "$SURICATA_CONFIG_DIR"/rules/ \; && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
     suricata-update update --fail --verbose --etopen --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
-    chown root:${PGROUP} /sbin/ethtool /usr/bin/suricata && \
-      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
+    cp /usr/bin/suricata /usr/bin/suricata-offline && \
+    chown root:${PGROUP} /usr/bin/suricata && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata && \
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -135,13 +132,13 @@ COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
+COPY --chmod=u=rwX,go=rX suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
 
 ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
@@ -161,6 +158,7 @@ ARG SURICATA_ROTATED_PCAP=false
 ARG PCAP_IFACE=lo
 ARG PCAP_IFACE_TWEAK=false
 ARG PCAP_FILTER=
+ARG PCAP_NODE_NAME=malcolm
 
 ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
@@ -179,6 +177,8 @@ ENV SURICATA_ROTATED_PCAP $SURICATA_ROTATED_PCAP
 ENV PCAP_IFACE $PCAP_IFACE
 ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
 ENV PCAP_FILTER $PCAP_FILTER
+ENV PCAP_NODE_NAME $PCAP_NODE_NAME
+
 
 ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$SURICATA_RUN_DIR"
 

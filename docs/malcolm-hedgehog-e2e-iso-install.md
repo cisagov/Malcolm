@@ -177,7 +177,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
     - **Delete the oldest indices when the database exceeds a certain size?**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
-    - **Should Arkime delete PCAP files based on available storage?**
+    - **Should Arkime delete uploaded PCAP files based on available storage?**
         - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
     - **Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)**
         - If [Arkime PCAP-deletion](https://arkime.com/faq#pcap-deletion) is enabled, Arkime will delete PCAP files when **free space** is lower than this value, specified as integer gigabytes (e.g., `500`) or a percentage (e.g., `10%`)
@@ -572,9 +572,9 @@ Despite configuring capture and/or forwarder services as described in previous s
 * **AUTOSTART_FILEBEAT** - [filebeat](#Hedgehogfilebeat) Zeek and Suricata log forwarder 
 * **AUTOSTART_FLUENTBIT_AIDE** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/exec) [AIDE](https://aide.github.io/) file system integrity checks
 * **AUTOSTART_FLUENTBIT_AUDITLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/tail) [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs
-* *AUTOSTART_FLUENTBIT_KMSG* - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/kernel-logs) the Linux kernel log buffer (these are generally reflected in syslog as well, which may make this agent redundant)
+* *AUTOSTART_FLUENTBIT_KMSG* - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/kernel-logs) the Linux kernel log buffer (these are generally reflected in the Systemd log as well, which may make this agent redundant)
 * **AUTOSTART_FLUENTBIT_METRICS** - [Fluent Bit](https://fluentbit.io/) agent for collecting [various](https://docs.fluentbit.io/manual/pipeline/inputs) system resource and performance metrics
-* **AUTOSTART_FLUENTBIT_SYSLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/syslog) Linux syslog messages
+* **AUTOSTART_FLUENTBIT_SYSTEMD** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/systemd) log messages from the Linux Journald daemon
 * **AUTOSTART_FLUENTBIT_THERMAL** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/thermal) system temperatures (only applicable on actual hardware, not if Hedgehog is running on a virtual machine)
 * **AUTOSTART_MISCBEAT** - [filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) forwarder which sends system metrics collected by [Fluent Bit](https://fluentbit.io/) to a remote Logstash instance (e.g., [Malcolm]({{ site.github.repository_url }})'s)
 * *AUTOSTART_NETSNIFF* - [netsniff-ng](http://netsniff-ng.org/) PCAP engine for saving packet capture (PCAP) files
@@ -617,7 +617,7 @@ fluentbit-metrics:disk           RUNNING   pid 6468, uptime 0:03:17
 fluentbit-metrics:mem            RUNNING   pid 6472, uptime 0:03:17
 fluentbit-metrics:mem_p          RUNNING   pid 6473, uptime 0:03:17
 fluentbit-metrics:netif          RUNNING   pid 6474, uptime 0:03:17
-fluentbit-syslog                 RUNNING   pid 6478, uptime 0:03:17
+fluentbit-systemd                RUNNING   pid 6478, uptime 0:03:17
 fluentbit-thermal                RUNNING   pid 6480, uptime 0:03:17
 netsniff:netsniff-enp1s0         STOPPED   Not started
 prune:prune-pcap                 RUNNING   pid 6484, uptime 0:03:17

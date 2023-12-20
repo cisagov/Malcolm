@@ -27,17 +27,17 @@ jobs:
     steps:
       -
         name: Cancel previous run in progress
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.0
         with:
           ignore_sha: true
           all_but_latest: true
           access_token: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             image=moby/buildkit:master
@@ -74,7 +74,7 @@ jobs:
           sudo rm -rf /tmp/live-build /tmp/live-build*.deb
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         name: Extract branch name
         shell: bash
@@ -97,6 +97,8 @@ jobs:
           cp ./scripts/malcolm_utils.py ./sensor-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./sensor-iso/docs/
           cp -r ./arkime/patch ./sensor-iso/shared/arkime_patch
+          mkdir -p ./sensor-iso/suricata
+          cp -r ./suricata/rules-default ./sensor-iso/suricata/
           pushd ./sensor-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
@@ -104,7 +106,7 @@ jobs:
           echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
           echo "BUILD_JOBS=2" > ./shared/environment.chroot
           sudo /usr/bin/env bash ./build.sh
-          rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md
+          rm -rf ./shared/ ./docs/ ./_config.yml ./_includes ./_layouts /Gemfile ./README.md ./suricata
           sudo chmod 644 ./hedgehog-*.*
           popd
       -
@@ -129,14 +131,14 @@ jobs:
           sarif_file: 'trivy-results.sarif'
       -
         name: ghcr.io login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push ISO image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: ./sensor-iso
           push: true

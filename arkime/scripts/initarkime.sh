@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -35,11 +35,11 @@ fi
 
 if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
-  echo "Giving $OPENSEARCH_PRIMARY time to start..."
-  /opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
-
   # download and/or update geo updates
   $ARKIME_DIR/bin/arkime_update_geo.sh
+
+  echo "Giving $OPENSEARCH_PRIMARY time to start..."
+  /opt/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
 
   # start and wait patiently for WISE
   if [[ "$WISE" = "on" ]] ; then
@@ -56,7 +56,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   fi
 
   # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
-  if [[ $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 ]]; then
+  if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 )); then
 
     echo "Initializing $OPENSEARCH_PRIMARY database..."
 
@@ -71,7 +71,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
     # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
     touch /tmp/not_a_packet.pcap
-    $ARKIME_DIR/bin/capture $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+    $ARKIME_DIR/bin/capture-offline $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
     rm -f /tmp/not_a_packet.pcap
 
     echo "Initializing views..."

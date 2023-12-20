@@ -208,9 +208,9 @@ commands:
 
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
 chown root:netdev /opt/zeek/bin/zeek && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/zeek/bin/zeek
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
 chown root:netdev /sbin/ethtool && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
 chown root:netdev /opt/zeek/bin/capstats && \
@@ -218,7 +218,7 @@ chown root:netdev /opt/zeek/bin/capstats && \
 chown root:netdev /usr/bin/tcpdump && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 chown root:netdev /opt/arkime/bin/capture && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/arkime/bin/capture
 
 ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
@@ -233,9 +233,9 @@ example:
 
 ```
 root@hedgehog:/tmp# chown root:netdev /usr/sbin/netsniff-ng && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
+>   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
 root@hedgehog:/tmp# chown root:netdev /opt/zeek/bin/zeek && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/zeek/bin/zeek
+>   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
 root@hedgehog:/tmp# chown root:netdev /sbin/ethtool && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
 root@hedgehog:/tmp# chown root:netdev /opt/zeek/bin/capstats && \
@@ -243,7 +243,7 @@ root@hedgehog:/tmp# chown root:netdev /opt/zeek/bin/capstats && \
 root@hedgehog:/tmp# chown root:netdev /usr/bin/tcpdump && \
 >   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/tcpdump
 root@hedgehog:/tmp# chown root:netdev /opt/arkime/bin/capture && \
->   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
+>   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/arkime/bin/capture
 root@hedgehog:/tmp# ln -s -f /opt/zeek/bin/zeek /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/
 root@hedgehog:/tmp# ln -s -f /usr/bin/tcpdump /usr/local/bin/

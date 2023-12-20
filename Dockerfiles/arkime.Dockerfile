@@ -1,6 +1,6 @@
 FROM debian:12-slim AS build
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -92,7 +92,13 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "arkime"
 ENV PGROUP "arkime"
-ENV PUSER_PRIV_DROP true
+# not dropping privileges globally: supervisord will take care of it
+# for all processes, but first we need root to sure capabilities for
+# traffic capturing tools are in-place before they are started.
+# despite doing setcap here in the Dockerfile, the chown in
+# docker-uid-gid-setup.sh will cause them to be lost, so we need
+# a final check in docker_entrypoint.sh before startup
+ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -106,18 +112,26 @@ ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
 ARG ARKIME_INTERFACE=eth0
-ARG ARKIME_ANALYZE_PCAP_THREADS=1
+ARG ARKIME_AUTO_ANALYZE_PCAP_FILES=false
+ARG ARKIME_AUTO_ANALYZE_PCAP_THREADS=1
+ARG ARKIME_PACKET_THREADS=1
 ARG OPENSEARCH_MAX_SHARDS_PER_NODE=2500
 ARG WISE=on
 ARG VIEWER=on
+ARG ARKIME_VIEWER_PORT=8005
 #Whether or not Arkime is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
+ARG ARKIME_PCAP_PROCESSOR=true
+ARG ARKIME_LIVE_CAPTURE=false
+ARG ARKIME_ROTATED_PCAP=true
+ARG ARKIME_COMPRESSION_TYPE=none
+ARG ARKIME_COMPRESSION_LEVEL=0
+
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
 ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG PCAP_NODE_NAME=malcolm
-ARG PCAP_NODE_HOST=
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
@@ -130,16 +144,23 @@ ENV ARKIME_PASSWORD "ignored"
 ENV ARKIME_ECS_PROVIDER $ARKIME_ECS_PROVIDER
 ENV ARKIME_ECS_DATASET $ARKIME_ECS_DATASET
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_ANALYZE_PCAP_THREADS $ARKIME_ANALYZE_PCAP_THREADS
+ENV ARKIME_AUTO_ANALYZE_PCAP_FILES $ARKIME_AUTO_ANALYZE_PCAP_FILES
+ENV ARKIME_AUTO_ANALYZE_PCAP_THREADS $ARKIME_AUTO_ANALYZE_PCAP_THREADS
+ENV ARKIME_PACKET_THREADS $ARKIME_PACKET_THREADS
+ENV ARKIME_PCAP_PROCESSOR $ARKIME_PCAP_PROCESSOR
+ENV ARKIME_LIVE_CAPTURE $ARKIME_LIVE_CAPTURE
+ENV ARKIME_COMPRESSION_TYPE $ARKIME_COMPRESSION_TYPE
+ENV ARKIME_COMPRESSION_LEVEL $ARKIME_COMPRESSION_LEVEL
+ENV ARKIME_ROTATED_PCAP $ARKIME_ROTATED_PCAP
 ENV OPENSEARCH_MAX_SHARDS_PER_NODE $OPENSEARCH_MAX_SHARDS_PER_NODE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
+ENV ARKIME_VIEWER_PORT $ARKIME_VIEWER_PORT
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
 ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
-ENV PCAP_NODE_HOST $PCAP_NODE_HOST
 
 COPY --from=build $ARKIME_DIR $ARKIME_DIR
 
@@ -147,7 +168,9 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
+      bc \
       curl \
+      ethtool \
       file \
       geoip-bin \
       gettext \
@@ -191,6 +214,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/opensearch_status.sh /opt
 COPY --chmod=755 shared/bin/pcap_processor.py /opt/
 COPY --chmod=644 shared/bin/pcap_utils.py /opt/
@@ -199,6 +223,7 @@ COPY --chmod=644 shared/bin/watch_common.py /opt/
 COPY --chmod=644 arkime/supervisord.conf /etc/supervisord.conf
 ADD arkime/scripts /opt/
 ADD arkime/etc $ARKIME_DIR/etc/
+ADD arkime/rules/*.yml $ARKIME_DIR/rules/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
@@ -211,12 +236,12 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/logs/ && \
+      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/rules/ $ARKIME_DIR/logs/ && \
       mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
   curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
-  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
+  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
 
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIME_DIR $PUSER && \
@@ -225,9 +250,13 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     ln -sfr /opt/pcap_processor.py /opt/pcap_arkime_processor.py && \
     cp -f /opt/arkime_update_geo.sh $ARKIME_DIR/bin/arkime_update_geo.sh && \
     mv $ARKIME_DIR/etc/config.ini $ARKIME_DIR/etc/config.orig.ini && \
-    chmod u+s $ARKIME_DIR/bin/capture && \
+    cp $ARKIME_DIR/bin/capture $ARKIME_DIR/bin/capture-offline && \
+    chown root:${PGROUP} $ARKIME_DIR/bin/capture && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
+    chown root:${PGROUP} /sbin/ethtool && \
+      setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
     mkdir -p /var/run/arkime && \
-    chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/logs /var/run/arkime
+    chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/rules $ARKIME_DIR/logs /var/run/arkime
 #Update Path
 ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"
 

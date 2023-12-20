@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # This script will check command-line parameters and environment variables to see
 # if the service (determined by the hostname, unless otherwise specified) is
@@ -159,7 +159,7 @@ EOF
     fi # json vs http
 
     if command -v goStatic >/dev/null 2>&1; then
-        goStatic -path "$(pwd)" -fallback "index.html" -port $PORT
+        goStatic -vhost "" -path "$(pwd)" -fallback "index.html" -port $PORT
     elif command -v python3 >/dev/null 2>&1; then
         python3 -m http.server --bind 0.0.0.0 $PORT
     elif command -v python >/dev/null 2>&1; then

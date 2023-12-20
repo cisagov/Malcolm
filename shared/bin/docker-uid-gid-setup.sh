@@ -40,11 +40,25 @@ if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
     awk '{print gsub("/","/"), $0}' | sort -n | cut -d' ' -f2- | \
     while read CMDIR; do
 
+      DSTDIR="$(realpath "${CMDIR}"/../)"
       rsync --recursive --copy-links \
             "--usermap=*:${PUID:-${DEFAULT_UID}}" \
             "--groupmap=*:${PGID:-${DEFAULT_GID}}" \
             --exclude='..*' --exclude="${MAP_DIR}"/ --exclude=.dockerignore --exclude=.gitignore \
-            "${CMDIR}"/ "${CMDIR}"/../
+            "${CMDIR}"/ "${DSTDIR}"/
+
+      # Additionally, files in these directories with _MALDIR_ in the name will be expanded out,
+      #   creating the intermediate paths. For example:
+      #     ./acid_MALDIR_ACID_MALDIR_s7comm_MALDIR_detect_MALDIR_copy.zeek
+      #       will be renamed to
+      #     ./acid/ACID/s7comm/detect/copy.zeek
+      find "${DSTDIR}" -type f -name '*_MALDIR_*' -print -o -path "${CMDIR}" -prune 2>/dev/null | \
+      while read FLATTENED_FILE; do
+        EXPANDED_FILE="$(echo "${FLATTENED_FILE}" | sed 's@_MALDIR_@/@g')"
+        mkdir -p "$(dirname "${EXPANDED_FILE}")" && \
+          mv "${FLATTENED_FILE}" "${EXPANDED_FILE}" || \
+          true
+      done # loop over flattened filenames
 
         # TODO - regarding ownership and permissions:
         #
