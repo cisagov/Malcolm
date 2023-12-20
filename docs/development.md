@@ -8,7 +8,6 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 
 * `api` - code and configuration for the `api` container, which provides a REST API to query Malcolm
 * `arkime` - code and configuration for the `arkime` container that processes PCAP files using `capture`, which serves the Viewer application
-* `arkime-logs` - an initially empty directory to which the `arkime` container will write some debug log files
 * `config` - a directory containing the environment variable files that define Malcolm's configuration
 * `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
 * `Dockerfiles` - a directory containing build instructions for Malcolm's docker images

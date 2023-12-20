@@ -42,8 +42,6 @@ arkime:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     - ./pcap:/data/pcap
-    - ./arkime-logs:/opt/arkime/logs
-    - ./arkime-raw:/opt/arkime/raw
 zeek:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./pcap:/pcap

@@ -1,6 +1,6 @@
 FROM debian:12-slim AS npmget
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -49,10 +49,10 @@ ENV FILEPOND_SERVER_BRANCH $FILEPOND_SERVER_BRANCH
 ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
 
-ENV SUPERCRONIC_VERSION "0.2.28"
+ENV SUPERCRONIC_VERSION "0.2.29"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
+ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --from=npmget /usr/local/lib/node_modules/filepond /var/www/upload/filepond
