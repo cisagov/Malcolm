@@ -1,6 +1,6 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.11.1
+FROM docker.elastic.co/beats/filebeat-oss:8.11.3
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
@@ -60,11 +60,12 @@ ARG FILEBEAT_TCP_PARSE_SOURCE_FIELD="message"
 ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
+ARG PCAP_NODE_NAME=malcolm
 
-ENV SUPERCRONIC_VERSION "0.2.28"
+ENV SUPERCRONIC_VERSION "0.2.29"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
 ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "fe1a81a8a5809deebebbd7a209a3b97e542e2bcd"
+ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV TINI_VERSION v0.19.0
@@ -163,6 +164,7 @@ ENV FILEBEAT_TCP_PARSE_DROP_FIELD $FILEBEAT_TCP_PARSE_DROP_FIELD
 ENV FILEBEAT_TCP_TAG $FILEBEAT_TCP_TAG
 ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry/filebeat/data.json"
 ENV FILEBEAT_ZEEK_DIR "/zeek/"
+ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
 VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 

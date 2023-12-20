@@ -16,18 +16,22 @@ spec:
     spec:
       containers:
       - name: suricata-live-container
-        image: ghcr.io/idaholab/malcolm/suricata:23.12.0
+        image: ghcr.io/idaholab/malcolm/suricata:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK - to lock memory, preventing swapping
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limits
+              - SYS_RESOURCE
+              # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
               - NET_ADMIN
               - NET_RAW
-              - SYS_ADMIN
-              - SYS_RESOURCE
+              # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+              - SYS_NICE
         envFrom:
           - configMapRef:
               name: process-env
@@ -41,9 +45,6 @@ spec:
               name: suricata-live-env
           - configMapRef:
               name: pcap-capture-env
-        env:
-          - name: SURICATA_DISABLED
-            value: "true"
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: suricata-live-var-local-catrust-volume
@@ -55,7 +56,7 @@ spec:
             name: suricata-live-custom-configs-volume
       initContainers:
       - name: suricata-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

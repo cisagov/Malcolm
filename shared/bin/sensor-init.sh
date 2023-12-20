@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 
@@ -66,7 +66,10 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   if dpkg -s suricata >/dev/null 2>&1 ; then
     mkdir -p /etc/suricata/rules /var/log/suricata /var/lib/suricata/rules
     if [[ -d /opt/sensor/sensor_ctl ]]; then
-      mkdir -p /opt/sensor/sensor_ctl/suricata/rules /opt/sensor/sensor_ctl/suricata/include-configs
+      mkdir -p /opt/sensor/sensor_ctl/suricata/rules \
+               /opt/sensor/sensor_ctl/suricata/rules-default/OT \
+               /opt/sensor/sensor_ctl/suricata/rules-default/IT \
+               /opt/sensor/sensor_ctl/suricata/include-configs
       [[ ! -f /opt/sensor/sensor_ctl/suricata/suricata.yaml ]] && cp /etc/suricata/suricata.yaml /opt/sensor/sensor_ctl/suricata/suricata.yaml
       [[ ! -f /opt/sensor/sensor_ctl/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" /opt/sensor/sensor_ctl/suricata/update.yaml
     fi

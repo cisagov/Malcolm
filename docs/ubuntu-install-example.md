@@ -179,7 +179,7 @@ Scan extracted PE files with Capa? (y / N): y
 
 Lookup extracted file hashes with VirusTotal? (y / N): n
 
-Download updated file scanner signatures periodically? (n/Y): y
+Download updated file scanner signatures periodically? (Y / n): n
 
 Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): n
 
@@ -190,7 +190,9 @@ Should Malcolm capture live network traffic? 2
 
 Specify capture interface(s) (comma-separated): eth0
 
-Enable dark mode for OpenSearch Dashboards? (n/Y): y
+Enable dark mode for OpenSearch Dashboards? (Y / n): y
+
+Pull Malcolm Docker images (y / N): y
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
@@ -227,7 +229,7 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
-user@host:~/Malcolm$ docker compose pull
+user@host:~/Malcolm$ docker compose --profile malcolm pull
 Pulling api               ... done
 Pulling arkime            ... done
 Pulling dashboards        ... done
@@ -250,25 +252,25 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/api                                   23.12.0           xxxxxxxxxxxx   3 days ago   158MB
-ghcr.io/idaholab/malcolm/arkime                                23.12.0           xxxxxxxxxxxx   3 days ago   816MB
-ghcr.io/idaholab/malcolm/dashboards                            23.12.0           xxxxxxxxxxxx   3 days ago   1.02GB
-ghcr.io/idaholab/malcolm/dashboards-helper                     23.12.0           xxxxxxxxxxxx   3 days ago   184MB
-ghcr.io/idaholab/malcolm/file-monitor                          23.12.0           xxxxxxxxxxxx   3 days ago   588MB
-ghcr.io/idaholab/malcolm/file-upload                           23.12.0           xxxxxxxxxxxx   3 days ago   259MB
-ghcr.io/idaholab/malcolm/filebeat-oss                          23.12.0           xxxxxxxxxxxx   3 days ago   624MB
-ghcr.io/idaholab/malcolm/freq                                  23.12.0           xxxxxxxxxxxx   3 days ago   132MB
-ghcr.io/idaholab/malcolm/htadmin                               23.12.0           xxxxxxxxxxxx   3 days ago   242MB
-ghcr.io/idaholab/malcolm/logstash-oss                          23.12.0           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/netbox                                23.12.0           xxxxxxxxxxxx   3 days ago   1.01GB
-ghcr.io/idaholab/malcolm/nginx-proxy                           23.12.0           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/opensearch                            23.12.0           xxxxxxxxxxxx   3 days ago   1.17GB
-ghcr.io/idaholab/malcolm/pcap-capture                          23.12.0           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/pcap-monitor                          23.12.0           xxxxxxxxxxxx   3 days ago   213MB
-ghcr.io/idaholab/malcolm/postgresql                            23.12.0           xxxxxxxxxxxx   3 days ago   268MB
-ghcr.io/idaholab/malcolm/redis                                 23.12.0           xxxxxxxxxxxx   3 days ago   34.2MB
-ghcr.io/idaholab/malcolm/suricata                              23.12.0           xxxxxxxxxxxx   3 days ago   278MB
-ghcr.io/idaholab/malcolm/zeek                                  23.12.0           xxxxxxxxxxxx   3 days ago   1GB
+ghcr.io/idaholab/malcolm/api                                   23.12.1           xxxxxxxxxxxx   3 days ago   158MB
+ghcr.io/idaholab/malcolm/arkime                                23.12.1           xxxxxxxxxxxx   3 days ago   816MB
+ghcr.io/idaholab/malcolm/dashboards                            23.12.1           xxxxxxxxxxxx   3 days ago   1.02GB
+ghcr.io/idaholab/malcolm/dashboards-helper                     23.12.1           xxxxxxxxxxxx   3 days ago   184MB
+ghcr.io/idaholab/malcolm/file-monitor                          23.12.1           xxxxxxxxxxxx   3 days ago   588MB
+ghcr.io/idaholab/malcolm/file-upload                           23.12.1           xxxxxxxxxxxx   3 days ago   259MB
+ghcr.io/idaholab/malcolm/filebeat-oss                          23.12.1           xxxxxxxxxxxx   3 days ago   624MB
+ghcr.io/idaholab/malcolm/freq                                  23.12.1           xxxxxxxxxxxx   3 days ago   132MB
+ghcr.io/idaholab/malcolm/htadmin                               23.12.1           xxxxxxxxxxxx   3 days ago   242MB
+ghcr.io/idaholab/malcolm/logstash-oss                          23.12.1           xxxxxxxxxxxx   3 days ago   1.35GB
+ghcr.io/idaholab/malcolm/netbox                                23.12.1           xxxxxxxxxxxx   3 days ago   1.01GB
+ghcr.io/idaholab/malcolm/nginx-proxy                           23.12.1           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/opensearch                            23.12.1           xxxxxxxxxxxx   3 days ago   1.17GB
+ghcr.io/idaholab/malcolm/pcap-capture                          23.12.1           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/pcap-monitor                          23.12.1           xxxxxxxxxxxx   3 days ago   213MB
+ghcr.io/idaholab/malcolm/postgresql                            23.12.1           xxxxxxxxxxxx   3 days ago   268MB
+ghcr.io/idaholab/malcolm/redis                                 23.12.1           xxxxxxxxxxxx   3 days ago   34.2MB
+ghcr.io/idaholab/malcolm/suricata                              23.12.1           xxxxxxxxxxxx   3 days ago   278MB
+ghcr.io/idaholab/malcolm/zeek                                  23.12.1           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, start Malcolm. When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.

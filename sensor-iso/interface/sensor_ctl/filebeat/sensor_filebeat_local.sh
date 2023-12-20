@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [[ -z "$ZEEK_CAPTURE_PATH" ]]; then
   ZEEK_CAPTURE_PATH="$HOME/bro_logs"

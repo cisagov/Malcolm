@@ -5,5 +5,5 @@ opensearch-py==2.4.2
 requests==2.31.0
 regex==2022.3.2
 dateparser==1.1.1
-elasticsearch==8.11.0
+elasticsearch==8.11.1
 elasticsearch-dsl==8.11.0
