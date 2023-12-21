@@ -1786,14 +1786,6 @@ class Installer(object):
                 'EXTRACTED_FILE_HTTP_SERVER_ZIP',
                 TrueOrFalseNoQuote(fileCarveHttpServerZip),
             ),
-            # encrypt HTTP server for extracted files
-            EnvValue(
-                os.path.join(args.configDir, 'zeek.env'),
-                'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT',
-                TrueOrFalseNoQuote(
-                    fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0) and (not fileCarveHttpServerZip)
-                ),
-            ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
                 os.path.join(args.configDir, 'zeek-secret.env'),

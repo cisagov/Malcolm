@@ -3,7 +3,8 @@
 
 # Multithreaded simple HTTP directory server.
 #
-# The files can optionally be aes-256-cbc encrypted in a way that's compatible with:
+# The files can optionally be archived in a ZIP file, with or without a password, or
+# be aes-256-cbc encrypted in a way that's compatible with:
 #   openssl enc -aes-256-cbc -d -in encrypted.data -out decrypted.data
 
 import argparse
@@ -89,12 +90,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 self.wfile.write(chunk)
 
                 else:
-                    # encrypted ZIP file (streamed)
+                    # unprotected ZIP file (streamed)
                     for chunk in stream_zip(LocalFilesForZip([fullpath])):
                         self.wfile.write(chunk)
 
-            elif args.encrypt:
-                # encrypted file
+            elif args.key:
+                # openssl-compatible encrypted file
                 self.send_response(200)
                 self.send_header('Content-type', 'application/octet-stream')
                 self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.encrypted')
@@ -149,7 +150,6 @@ def main():
     global orig_path
 
     defaultDebug = os.getenv('EXTRACTED_FILE_HTTP_SERVER_DEBUG', 'false')
-    defaultEncrypt = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ENCRYPT', 'false')
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
@@ -188,21 +188,10 @@ def main():
         default=defaultDir,
     )
     parser.add_argument(
-        '-e',
-        '--encrypt',
-        dest='encrypt',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=defaultEncrypt,
-        metavar='true|false',
-        help=f"Encrypt files (with -z/--zip, or with aes-256-cbc) ({defaultEncrypt})",
-    )
-    parser.add_argument(
         '-k',
         '--key',
         dest='key',
-        help="File encryption key",
+        help="File encryption key (for ZIP file if -z/--zip, otherwise openssl-compatible encryption",
         metavar='<str>',
         type=str,
         default=defaultKey,
