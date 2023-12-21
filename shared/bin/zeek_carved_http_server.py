@@ -9,14 +9,26 @@
 import argparse
 import hashlib
 import os
+import pyminizip
 import sys
-from threading import Thread
-from socketserver import ThreadingMixIn
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 from Crypto.Cipher import AES
+from datetime import datetime
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socketserver import ThreadingMixIn
+from stat import S_IFREG
+from stream_zip import ZIP_32, stream_zip
+from threading import Thread
 
 
-from malcolm_utils import str2bool, eprint, EVP_KEY_SIZE, PKCS5_SALT_LEN, OPENSSL_ENC_MAGIC, EVP_BytesToKey
+from malcolm_utils import (
+    str2bool,
+    eprint,
+    temporary_filename,
+    EVP_KEY_SIZE,
+    PKCS5_SALT_LEN,
+    OPENSSL_ENC_MAGIC,
+    EVP_BytesToKey,
+)
 
 ###################################################################################################
 args = None
@@ -24,6 +36,19 @@ debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+
+
+###################################################################################################
+#
+def LocalFilesForZip(names):
+    now = datetime.now()
+
+    def contents(name):
+        with open(name, 'rb') as f:
+            while chunk := f.read(65536):
+                yield chunk
+
+    return ((os.path.join('.', os.path.basename(name)), now, S_IFREG | 0o600, ZIP_32, contents(name)) for name in names)
 
 
 ###################################################################################################
@@ -43,13 +68,33 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         fullpath = self.translate_path(self.path)
 
-        if (not args.encrypt) or os.path.isdir(fullpath):
-            # unencrypted, just use default implementation
+        if os.path.isdir(fullpath):
+            # directory listing
             SimpleHTTPRequestHandler.do_GET(self)
 
-        else:
-            # encrypt file transfers
-            if os.path.isfile(fullpath) or os.path.islink(fullpath):
+        elif os.path.isfile(fullpath) or os.path.islink(fullpath):
+            if args.zip:
+                # ZIP file
+                self.send_response(200)
+                self.send_header('Content-type', "application/zip")
+                self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.zip')
+                self.end_headers()
+
+                if args.encrypt:
+                    # password-protected ZIP file (temporarily persisted to disk)
+                    with temporary_filename(suffix='.zip') as tmpFileName:
+                        pyminizip.compress(fullpath, None, tmpFileName, args.key, 1)
+                        with open(tmpFileName, 'rb') as f:
+                            while chunk := f.read(65536):
+                                self.wfile.write(chunk)
+
+                else:
+                    # encrypted ZIP file (streamed)
+                    for chunk in stream_zip(LocalFilesForZip([fullpath])):
+                        self.wfile.write(chunk)
+
+            elif args.encrypt:
+                # encrypted file
                 self.send_response(200)
                 self.send_header('Content-type', 'application/octet-stream')
                 self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.encrypted')
@@ -73,7 +118,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                             break
 
             else:
-                self.send_error(404, "Not Found")
+                # unencrypted file
+                SimpleHTTPRequestHandler.do_GET(self)
+
+        else:
+            self.send_error(404, "Not Found")
 
 
 ###################################################################################################
@@ -101,8 +150,9 @@ def main():
 
     defaultDebug = os.getenv('EXTRACTED_FILE_HTTP_SERVER_DEBUG', 'false')
     defaultEncrypt = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ENCRYPT', 'false')
+    defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
-    defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'quarantined')
+    defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
 
     parser = argparse.ArgumentParser(
@@ -146,7 +196,7 @@ def main():
         const=True,
         default=defaultEncrypt,
         metavar='true|false',
-        help=f"Encrypt files with aes-256-cbc ({defaultEncrypt})",
+        help=f"Encrypt files (with -z/--zip, or with aes-256-cbc) ({defaultEncrypt})",
     )
     parser.add_argument(
         '-k',
@@ -156,6 +206,17 @@ def main():
         metavar='<str>',
         type=str,
         default=defaultKey,
+    )
+    parser.add_argument(
+        '-z',
+        '--zip',
+        dest='zip',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultZip,
+        metavar='true|false',
+        help=f"Zip file ({defaultZip})",
     )
     try:
         parser.error = parser.exit

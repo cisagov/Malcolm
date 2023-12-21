@@ -1197,6 +1197,7 @@ class Installer(object):
         clamAvScan = False
         fileScanRuleUpdate = False
         fileCarveHttpServer = False
+        fileCarveHttpServerZip = False
         fileCarveHttpServeEncryptKey = ''
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=bool(fileCarveModeDefault)):
@@ -1229,8 +1230,13 @@ class Installer(object):
                     'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
                 if fileCarveHttpServer:
+                    fileCarveHttpServerZip = InstallerYesOrNo(
+                        'ZIP downloaded preserved files?', default=args.fileCarveHttpServerZip
+                    )
                     fileCarveHttpServeEncryptKey = InstallerAskForString(
-                        'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
+                        'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
+                        if fileCarveHttpServerZip
+                        else 'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
                         default=args.fileCarveHttpServeEncryptKey,
                     )
                 if fileCarveMode is not None:
@@ -1774,11 +1780,19 @@ class Installer(object):
                 'EXTRACTED_FILE_HTTP_SERVER_ENABLE',
                 TrueOrFalseNoQuote(fileCarveHttpServer),
             ),
+            # ZIP HTTP server for extracted files
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_HTTP_SERVER_ZIP',
+                TrueOrFalseNoQuote(fileCarveHttpServerZip),
+            ),
             # encrypt HTTP server for extracted files
             EnvValue(
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT',
-                TrueOrFalseNoQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0)),
+                TrueOrFalseNoQuote(
+                    fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0) and (not fileCarveHttpServerZip)
+                ),
             ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
@@ -3704,13 +3718,23 @@ def main():
         help='Expose web interface for downloading preserved files',
     )
     fileCarveArgGroup.add_argument(
+        '--extracted-file-server-zip',
+        dest='fileCarveHttpServerZip',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='ZIP downloaded preserved files',
+    )
+    fileCarveArgGroup.add_argument(
         '--extracted-file-server-password',
         dest='fileCarveHttpServeEncryptKey',
         required=False,
         metavar='<string>',
         type=str,
         default='',
-        help='AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
+        help='ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
     )
     fileCarveArgGroup.add_argument(
         '--extracted-file-clamav',

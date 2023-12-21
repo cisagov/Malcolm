@@ -410,7 +410,9 @@ Select file preservation behavior (quarantined): 1
 
 Expose web interface for downloading preserved files? (y / N): y
 
-Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted): quarantined
+ZIP downloaded preserved files? (y / N): y
+
+Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected): infected
 
 Scan extracted files with ClamAV? (Y / n): y
 
