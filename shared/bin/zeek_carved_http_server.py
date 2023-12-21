@@ -80,7 +80,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.zip')
                 self.end_headers()
 
-                if args.encrypt:
+                if args.key:
                     # password-protected ZIP file (temporarily persisted to disk)
                     with temporary_filename(suffix='.zip') as tmpFileName:
                         pyminizip.compress(fullpath, None, tmpFileName, args.key, 1)
