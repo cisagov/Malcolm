@@ -25,7 +25,7 @@ The `EXTRACTED_FILE_PRESERVATION` [environment variable in `zeek.env`](malcolm-c
 * `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
 * `none`: preserve no extracted files
 
-The `EXTRACTED_FILE_HTTP_SERVER_…` [environment variables in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server accessible at **https://localhost/extracted-files/** if connecting locally. Beware that Zeek-extracted files may contain malware. As such, these files may be optionally ZIP archived (with or without a password) or encrypted (to be decrypted using `openssl`, e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`) upon download. In other words:
+The `EXTRACTED_FILE_HTTP_SERVER_…` [environment variables in `zeek.env` and `zeek-secret.env`](malcolm-config.md#MalcolmConfigEnvVars) configure access to the Zeek-extracted files path through the means of a simple HTTPS directory server accessible at **https://localhost/extracted-files/** if connecting locally. Beware that Zeek-extracted files may contain malware. As such, these files may be optionally ZIP archived (with or without a password) or encrypted (to be decrypted using `openssl`, e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`) upon download. In other words:
 
 * to disable the extracted files server:
     - `EXTRACTED_FILE_HTTP_SERVER_ENABLE=false`
