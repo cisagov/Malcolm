@@ -104,6 +104,11 @@ ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /u
 ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite_Square.png /usr/share/nginx/html/assets/imgs/
 ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/imgs/
 ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/upload.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/users-group.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/help-square-rounded.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/api.svg /usr/share/nginx/html/assets/imgs/
+
 ADD https://github-media-downloads.s3.amazonaws.com/GitHub-Mark.zip /tmp/
 
 RUN set -x ; \
@@ -237,15 +242,10 @@ COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
 ADD nginx/landingpage /usr/share/nginx/html
-COPY --chmod=644 docs/images/logo/Malcolm_banner.png /usr/share/nginx/html/assets/imgs/
-COPY --chmod=644 docs/images/logo/Malcolm_outline_banner_dark.png /usr/share/nginx/html/assets/imgs/
-COPY --chmod=644 docs/images/icon/icon.png /usr/share/nginx/html/assets/imgs/
-COPY --chmod=644 docs/images/icon/icon_dark.png /usr/share/nginx/html/assets/imgs/
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
-ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 
