@@ -800,7 +800,6 @@ services:
       - ./nginx/htpasswd:/etc/nginx/auth/htpasswd:ro
       - ./nginx/certs:/etc/nginx/certs:ro
       - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
-      - ./nginx/landingpage:/usr/share/nginx/:ro
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "https://localhost:443"]
       interval: 30s
