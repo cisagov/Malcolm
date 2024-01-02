@@ -16,6 +16,7 @@ ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
 LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
 VIEWER_PORT=${ARKIME_VIEWER_PORT:-8005}
+NODE_NAME=${PCAP_NODE_NAME:-malcolm}
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -59,6 +60,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/MALCOLM_PCAP_NODE_NAME/${NODE_NAME}/g" "${ARKIME_CONFIG_FILE}"
 
     # performance tuning parameters
     [[ -n "$ARKIME_DB_BULK_SIZE" ]] && \

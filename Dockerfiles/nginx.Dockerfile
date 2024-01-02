@@ -235,9 +235,8 @@ RUN set -x ; \
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
-COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
-COPY nginx/landingpage /usr/share/nginx/landing
+ADD nginx/landingpage/* /usr/share/nginx/landing/
 COPY --chmod=644 docs/images/logo/Malcolm_banner.png /usr/share/nginx/landing/assets/imgs/
 COPY --chmod=644 docs/images/logo/Malcolm_outline_banner_dark.png /usr/share/nginx/landing/assets/imgs/
 COPY --chmod=644 docs/images/icon/icon.png /usr/share/nginx/landing/assets/imgs/
@@ -247,6 +246,7 @@ ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
 ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
+ADD docs/images/icon/favicon.ico /usr/share/nginx/landing/favicon.ico
 
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
