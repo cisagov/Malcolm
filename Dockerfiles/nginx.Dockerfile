@@ -91,9 +91,20 @@ ENV NGINX_VERSION=1.22.1
 ENV NGINX_AUTH_LDAP_BRANCH=master
 ENV NGINX_HTTP_SUB_FILTER_BRANCH=master
 
+# NGINX source
 ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_LDAP_BRANCH /nginx-auth-ldap.tar.gz
 ADD https://codeload.github.com/yaoweibin/ngx_http_substitutions_filter_module/tar.gz/$NGINX_HTTP_SUB_FILTER_BRANCH /ngx_http_substitutions_filter_module-master.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
+
+# component icons from original sources
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite_Square.png /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/landingpage/assets/imgs/
+ADD https://github-media-downloads.s3.amazonaws.com/GitHub-Mark.zip /tmp/
 
 RUN set -x ; \
     CONFIG="\
@@ -214,15 +225,23 @@ RUN set -x ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_substitutions_filter_module-master.tar.gz; \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf;
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf; \
+  cd /tmp; \
+    unzip ./GitHub-Mark.zip; \
+    mv ./GitHub-Mark/PNG/GitHub-Mark-Light-120px-plus.png /usr/share/nginx/html/landingpage/assets/imgs/; \
+    rm -rf ./GitHub-Mark.zip ./GitHub-Mark; \
+  chmod 644 /usr/share/nginx/html/landingpage/assets/imgs/*.*;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
-RUN mkdir -p /usr/share/nginx/html/landingpage
 COPY nginx/landingpage /usr/share/nginx/html/landingpage
+COPY --chmod=644 docs/images/logo/Malcolm_banner.png /usr/share/nginx/html/landingpage/assets/imgs/
+COPY --chmod=644 docs/images/logo/Malcolm_outline_banner_dark.png /usr/share/nginx/html/landingpage/assets/imgs/
+COPY --chmod=644 docs/images/icon/icon.png /usr/share/nginx/html/landingpage/assets/imgs/
+COPY --chmod=644 docs/images/icon/icon_dark.png /usr/share/nginx/html/landingpage/assets/imgs/
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
