@@ -97,13 +97,13 @@ ADD https://codeload.github.com/yaoweibin/ngx_http_substitutions_filter_module/t
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 
 # component icons from original sources
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/landing/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/landing/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/landing/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/landing/assets/imgs/
-ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite_Square.png /usr/share/nginx/landing/assets/imgs/
-ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/landing/assets/imgs/
-ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/landing/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/html/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/assets/imgs/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite_Square.png /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/imgs/
+ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/imgs/
 ADD https://github-media-downloads.s3.amazonaws.com/GitHub-Mark.zip /tmp/
 
 RUN set -x ; \
@@ -193,7 +193,6 @@ RUN set -x ; \
   make install ; \
   rm -rf /etc/nginx/html/ ; \
   mkdir -p /etc/nginx/conf.d/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
-  install -m644 html/index.html /usr/share/nginx/html/ ; \
   install -m644 html/50x.html /usr/share/nginx/html/ ; \
   install -m755 objs/nginx-debug /usr/sbin/nginx-debug ; \
   install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so ; \
@@ -228,25 +227,26 @@ RUN set -x ; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf; \
   cd /tmp; \
     unzip ./GitHub-Mark.zip; \
-    mv ./GitHub-Mark/PNG/GitHub-Mark-Light-120px-plus.png /usr/share/nginx/landing/assets/imgs/; \
+    mv ./GitHub-Mark/PNG/GitHub-Mark-Light-120px-plus.png /usr/share/nginx/html/assets/imgs/; \
     rm -rf ./GitHub-Mark.zip ./GitHub-Mark; \
-  chmod 644 /usr/share/nginx/landing/assets/imgs/*.*;
+  chmod 644 /usr/share/nginx/html/assets/imgs/*.*;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
+COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
-ADD nginx/landingpage/* /usr/share/nginx/landing/
-COPY --chmod=644 docs/images/logo/Malcolm_banner.png /usr/share/nginx/landing/assets/imgs/
-COPY --chmod=644 docs/images/logo/Malcolm_outline_banner_dark.png /usr/share/nginx/landing/assets/imgs/
-COPY --chmod=644 docs/images/icon/icon.png /usr/share/nginx/landing/assets/imgs/
-COPY --chmod=644 docs/images/icon/icon_dark.png /usr/share/nginx/landing/assets/imgs/
+ADD nginx/landingpage /usr/share/nginx/html
+COPY --chmod=644 docs/images/logo/Malcolm_banner.png /usr/share/nginx/html/assets/imgs/
+COPY --chmod=644 docs/images/logo/Malcolm_outline_banner_dark.png /usr/share/nginx/html/assets/imgs/
+COPY --chmod=644 docs/images/icon/icon.png /usr/share/nginx/html/assets/imgs/
+COPY --chmod=644 docs/images/icon/icon_dark.png /usr/share/nginx/html/assets/imgs/
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
 ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
-ADD docs/images/icon/favicon.ico /usr/share/nginx/landing/favicon.ico
+ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
