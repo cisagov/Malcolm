@@ -537,10 +537,11 @@ Started Malcolm
 
 Malcolm services can be accessed via the following URLs:
 ------------------------------------------------------------------------------
-  - Arkime: https://192.168.56.10/
+  - Arkime: https://192.168.56.10/arkime/
   - OpenSearch Dashboards: https://192.168.56.10/dashboards/
   - PCAP upload (web): https://192.168.56.10/upload/
   - NetBox: https://192.168.56.10/netbox/
+  - CyberChef: https://192.168.56.10/arkime/cyberchef/
   - Account management: https://192.168.56.10/auth/
   - Documentation: https://192.168.56.10/readme/
 

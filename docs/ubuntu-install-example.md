@@ -280,11 +280,12 @@ Finally, start Malcolm. When Malcolm starts it will stream informational and deb
 user@host:~/Malcolm$ ./scripts/start
 In a few minutes, Malcolm services will be accessible via the following URLs:
 ------------------------------------------------------------------------------
-  - Arkime: https://localhost/
+  - Arkime: https://localhost/arkime/
   - OpenSearch Dashboards: https://localhost/dashboards/
   - PCAP upload (web): https://localhost/upload/
   - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
   - NetBox: https://localhost/netbox/  
+  - CyberChef: https://localhost/arkime/cyberchef/
   - Account management: https://localhost/auth/
   - Documentation: https://localhost/readme/
 

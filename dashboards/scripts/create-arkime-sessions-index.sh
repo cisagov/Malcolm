@@ -199,7 +199,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
             if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
               # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
-              sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/sessions)//' "$i"
+              sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/arkime)//' "$i"
               # take care of a few other substitutions
               sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
             fi
