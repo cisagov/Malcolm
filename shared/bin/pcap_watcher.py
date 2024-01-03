@@ -23,6 +23,7 @@ import time
 import zmq
 
 from pcap_utils import (
+    FILE_INFO_DICT_LIVE,
     FILE_INFO_DICT_NAME,
     FILE_INFO_DICT_NODE,
     FILE_INFO_DICT_SIZE,
@@ -232,6 +233,9 @@ class EventWatcher:
                             FILE_INFO_FILE_MIME: fileMime,
                             FILE_INFO_FILE_TYPE: fileType,
                             FILE_INFO_DICT_NODE: args.nodeName,
+                            FILE_INFO_DICT_LIVE: any(
+                                os.path.basename(pathname).startswith(prefix) for prefix in ('mnetsniff', 'mtcpdump')
+                            ),
                             FILE_INFO_DICT_TAGS: tags_from_filename(relativePath),
                         }
                         self.topic_socket.send_string(json.dumps(fileInfo))

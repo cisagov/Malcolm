@@ -32,7 +32,7 @@ filebeat.inputs:
     - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/logs/current/*.log
   symlinks: true
   fields_under_root: true
-  tags: ["_filebeat_zeek_live"]
+  tags: ["_filebeat_zeek_malcolm_live"]
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
@@ -91,7 +91,7 @@ filebeat.inputs:
     - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/live/eve.json
   symlinks: true
   fields_under_root: true
-  tags: ["_filebeat_suricata_live"]
+  tags: ["_filebeat_suricata_malcolm_live"]
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
