@@ -23,6 +23,7 @@ import time
 import zmq
 
 from pcap_utils import (
+    FILE_INFO_DICT_LIVE,
     FILE_INFO_DICT_NAME,
     FILE_INFO_DICT_NODE,
     FILE_INFO_DICT_SIZE,
@@ -165,13 +166,19 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         )
                         logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
+                        # if this is a "live" rotated PCAP captured by netsniff-ng or tcpdump,
+                        #   append -live to the node name used (which originates from PCAP_NODE_NAME)
+                        tmpNodeName = fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName
+                        if (FILE_INFO_DICT_LIVE in fileInfo) and fileInfo[FILE_INFO_DICT_LIVE]:
+                            tmpNodeName = tmpNodeName + '-live'
+
                         # put together arkime execution command
                         cmd = [
                             arkimeBin,
                             '--quiet',
                             '--insecure',
                             '--node',
-                            fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
+                            tmpNodeName,
                             '-o',
                             f'ecsEventProvider={arkimeProvider}',
                             '-o',
