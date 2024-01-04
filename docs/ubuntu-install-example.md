@@ -278,16 +278,8 @@ ghcr.io/idaholab/malcolm/zeek                                  24.01.0          
 Finally, start Malcolm. When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.
 ```
 user@host:~/Malcolm$ ./scripts/start
-In a few minutes, Malcolm services will be accessible via the following URLs:
+Malcolm services can be accessed at https://localhost/
 ------------------------------------------------------------------------------
-  - Arkime: https://localhost/arkime/
-  - OpenSearch Dashboards: https://localhost/dashboards/
-  - PCAP upload (web): https://localhost/upload/
-  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
-  - NetBox: https://localhost/netbox/  
-  - CyberChef: https://localhost/arkime/cyberchef/
-  - Account management: https://localhost/auth/
-  - Documentation: https://localhost/readme/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS
 malcolm-api-1                  "/usr/local/bin/dock…"   api                  running (starting)   …

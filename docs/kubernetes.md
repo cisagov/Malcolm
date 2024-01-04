@@ -535,16 +535,8 @@ logstash | [2023-04-24T21:00:34,470][INFO ][logstash.agent           ] Pipelines
 
 Started Malcolm
 
-Malcolm services can be accessed via the following URLs:
+Malcolm services can be accessed at https://192.168.56.10/
 ------------------------------------------------------------------------------
-  - Arkime: https://192.168.56.10/arkime/
-  - OpenSearch Dashboards: https://192.168.56.10/dashboards/
-  - PCAP upload (web): https://192.168.56.10/upload/
-  - NetBox: https://192.168.56.10/netbox/
-  - CyberChef: https://192.168.56.10/arkime/cyberchef/
-  - Account management: https://192.168.56.10/auth/
-  - Documentation: https://192.168.56.10/readme/
-
 ```
 
 Check the status of the Malcolm deployment with `./scripts/status`:

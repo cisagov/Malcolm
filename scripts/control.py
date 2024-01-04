@@ -455,18 +455,8 @@ def printURLs():
     else:
         myIp = get_primary_ip()
 
-    print("\nMalcolm services can be accessed via the following URLs:")
+    print("\nMalcolm services can be accessed at https://{myIp}/")
     print("------------------------------------------------------------------------------")
-    print(f"  - Landing Page: https://{myIp}/")
-    print(f"  - Arkime: https://{myIp}/arkime/")
-    print(f"  - OpenSearch Dashboards: https://{myIp}/dashboards/")
-    print(f"  - PCAP upload (web): https://{myIp}/upload/")
-    if orchMode is not OrchestrationFramework.KUBERNETES:
-        print(f"  - PCAP upload (sftp): sftp://username@{myIp}:8022/files/")
-    print(f"  - NetBox: https://{myIp}/netbox/")
-    print(f"  - CyberChef: https://{myIp}/arkime/cyberchef/")
-    print(f"  - Account management: https://{myIp}/auth/")
-    print(f"  - Documentation: https://{myIp}/readme/")
 
 
 ###################################################################################################
