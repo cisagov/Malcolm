@@ -103,6 +103,7 @@ RUN apt-get -q update && \
       sed -i "s/self.pull_repo()/pass/g" ./repo.py && \
       mkdir -p ./repo && \
       curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
+      rm -rf ./repo/device-types/WatchGuard && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
