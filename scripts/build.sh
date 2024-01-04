@@ -119,7 +119,7 @@ FILES_IN_IMAGES=(
   "/opt/arkime/etc/ipv4-address-space.csv;arkime"
   "/opt/arkime/etc/oui.txt;arkime"
   "/opt/arkime/bin/capture;arkime"
-  "/opt/netbox-devicetype-library/schema/components.json;netbox"
+  "/opt/netbox-devicetype-library-import/repo/schema/components.json;netbox"
   "/opt/zeek/bin/zeek;zeek"
   "/opt/zeek/bin/spicyz;zeek"
   "/usr/share/nginx/html/index.html;nginx-proxy"
