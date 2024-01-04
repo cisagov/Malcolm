@@ -888,7 +888,7 @@ def main():
                     osEnv = os.environ.copy()
                     osEnv['NETBOX_URL'] = args.netboxUrl
                     osEnv['NETBOX_TOKEN'] = args.netboxToken
-                    osEnv['REPO_URL'] = f"file://{os.path.join(args.libraryDir), 'repo'}"
+                    osEnv['REPO_URL'] = 'local'
                     cmd = [netboxVenvPy, 'nb-dt-import.py']
                     err, results = malcolm_utils.run_process(
                         cmd,
