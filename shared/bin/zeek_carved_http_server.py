@@ -10,7 +10,6 @@
 import argparse
 import hashlib
 import os
-import pyminizip
 import sys
 from Crypto.Cipher import AES
 from datetime import datetime
@@ -75,24 +74,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         elif os.path.isfile(fullpath) or os.path.islink(fullpath):
             if args.zip:
-                # ZIP file
+                # ZIP file (streamed, AES-encrypted with password or unencrypted)
                 self.send_response(200)
                 self.send_header('Content-type', "application/zip")
                 self.send_header('Content-Disposition', f'attachment; filename={os.path.basename(fullpath)}.zip')
                 self.end_headers()
 
-                if args.key:
-                    # password-protected ZIP file (temporarily persisted to disk)
-                    with temporary_filename(suffix='.zip') as tmpFileName:
-                        pyminizip.compress(fullpath, None, tmpFileName, args.key, 1)
-                        with open(tmpFileName, 'rb') as f:
-                            while chunk := f.read(65536):
-                                self.wfile.write(chunk)
-
-                else:
-                    # unprotected ZIP file (streamed)
-                    for chunk in stream_zip(LocalFilesForZip([fullpath])):
-                        self.wfile.write(chunk)
+                for chunk in stream_zip(LocalFilesForZip([fullpath]), password=args.key if args.key else None):
+                    self.wfile.write(chunk)
 
             elif args.key:
                 # openssl-compatible encrypted file
@@ -119,7 +108,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                             break
 
             else:
-                # unencrypted file
+                # original file, unencrypted
                 SimpleHTTPRequestHandler.do_GET(self)
 
         else:
