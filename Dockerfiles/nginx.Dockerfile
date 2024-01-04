@@ -96,20 +96,24 @@ ADD https://codeload.github.com/mmguero-dev/nginx-auth-ldap/tar.gz/$NGINX_AUTH_L
 ADD https://codeload.github.com/yaoweibin/ngx_http_substitutions_filter_module/tar.gz/$NGINX_HTTP_SUB_FILTER_BRANCH /ngx_http_substitutions_filter_module-master.tar.gz
 ADD http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz /nginx.tar.gz
 
-# component icons from original sources
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/html/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/assets/imgs/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite_Square.png /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/upload.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/users-group.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/help-square-rounded.svg /usr/share/nginx/html/assets/imgs/
-ADD https://raw.githubusercontent.com/tabler/tabler-icons/master/icons/api.svg /usr/share/nginx/html/assets/imgs/
+# component icons from original sources and stuff for offline landing page
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
+ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientBlack.svg /usr/share/nginx/html/assets/img/
+ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite.svg /usr/share/nginx/html/assets/img/
+ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
+ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
+ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
+ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf /usr/share/nginx/html/css/
+ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share/nginx/html/css/
+ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf /usr/share/nginx/html/css/
+ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf /usr/share/nginx/html/css/
+ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf /usr/share/nginx/html/css/
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff2
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff
 
-ADD https://github-media-downloads.s3.amazonaws.com/GitHub-Mark.zip /tmp/
 
 RUN set -x ; \
     CONFIG="\
@@ -229,12 +233,7 @@ RUN set -x ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_substitutions_filter_module-master.tar.gz; \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf; \
-  cd /tmp; \
-    unzip ./GitHub-Mark.zip; \
-    mv ./GitHub-Mark/PNG/GitHub-Mark-Light-120px-plus.png /usr/share/nginx/html/assets/imgs/; \
-    rm -rf ./GitHub-Mark.zip ./GitHub-Mark; \
-  chmod 644 /usr/share/nginx/html/assets/imgs/*.*;
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
@@ -246,8 +245,8 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
-ADD docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
-
+ADD docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
+ADD docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

@@ -1,136 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-    <title>Malcolm</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <style>
-        .imgcenter {
-            width: 50%;
-        }
-        .center {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .card {
-        /* position: relative; */
-        width: 50%;
-        }
-        .image {
-        opacity: 1;
-        display: block;
-        width: 100%;
-        height: auto;
-        transition: .5s ease;
-        backface-visibility: hidden;
-        }
-
-        .middle {
-        transition: .5s ease;
-        opacity: 0;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        -ms-transform: translate(-50%, -50%);
-        text-align: center;
-        }
-
-        .card:hover .image {
-        opacity: 0.3;
-        }
-
-        .card:hover .middle {
-        opacity: 1;
-        }
-    </style>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Landing Page - Start Bootstrap Theme</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Bootstrap icons-->
+        <link href="css/bootstrap-icons.css" rel="stylesheet" type="text/css" />
+        <!-- Google fonts-->
+        <link href="css/google-fonts.css" rel="stylesheet" type="text/css" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
     </head>
-
-    <body class="bg-dark">
-        <br />
-        <div>
-            <img class="imgcenter center" src="readme/docs/images/logo/Malcolm_outline_banner_dark.png">
-        </div>
-
-        <br />
-
-        <!-- Internal Links -->
-        <div class="container">
-            <h3 style="color:white">Internal Links</h3>
-            <div class="card-group">
-                <div class="card bg-dark">
-                    <img src="assets/imgs/Arkime_Logo_FullGradientWhite_Square.png" alt="Arkime" class="image" style="width:100%">
-                    <div class="middle">
-                        <a href="/arkime/" class="btn btn-primary" target="_blank">Arkime</a>
-                    </div>
-                </div>
-                <div class="card bg-dark">
-                    <img src="assets/imgs/upload.svg" alt="Upload" class="image" style="width:100%;filter: invert(1)">
-                    <div class="middle">
-                        <a href="/upload/" class="btn btn-primary" target="_blank">Upload</a>
-                    </div>
-                </div>
-                <div class="card bg-dark">
-                    <img src="assets/imgs/help-square-rounded.svg" alt="ReadMe" class="image" style="width:100%;filter: invert(1)">
-                    <div class="middle">
-                        <a href="/readme/" class="btn btn-primary" target="_blank">ReadMe</a>
-                    </div>
-                </div>
-                <div class="card bg-dark">
-                    <img src="assets/imgs/opensearch_mark_darkmode.svg" alt="Opensearch" class="image" style="width:100%">
-                    <div class="middle">
-                        <a href="/dashboards/" class="btn btn-primary" target="_blank">Dashboards</a>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-light bg-light static-top">
+            <div class="container"/>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container position-relative">
+                <div class="row justify-content-center">
+                    <div class="col-xl-6">
+                        <div class="text-center text-white">
+                            <!-- Page heading-->
+                            <h1 class="mb-5"/>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-group">
-                <div class="card bg-dark">
-                    <img src="assets/imgs/netbox_icon.svg" alt="NetBox" class="image" style="width:100%">
-                    <div class="middle">
-                        <a href="/netbox/" class="btn btn-primary" target="_blank">NetBox</a>
+        </header>
+        <!-- Icons Grid-->
+        <section class="features-icons bg-light text-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                            <a href="/dashboards/"><img style='max-width: 35%; height: auto; object-fit: contain' src="assets/img/opensearch_mark_default.svg"/>
+                            <h3>Dashboards</h3></a>
+                            <p class="lead mb-0">Visualize traffic or track down security concerns with dozens of pre-built dashboards, or create your own</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-3">
+                            <a href="/arkime/"><img style='width: 19%; height: 19%; object-fit: contain' src="assets/img/Arkime_Logo_FullGradientBlack.svg#svgView(viewBox(0, 8, 80, 145))"/>
+                            <h3>Arkime</h3></a>
+                            <p class="lead mb-0">Delve into session details including full packet payloads</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                            <a href="/netbox/"><img style='max-width: 35%; height: auto; object-fit: contain' src="assets/img/netbox_icon.svg"/>
+                            <h3>NetBox</h3></a>
+                            <p class="lead mb-0">Model and document your network infrastructure</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                            <a href="/arkime/cyberchef/"><img style='max-width: 35%; height: auto; object-fit: contain' src="assets/img/cyberchef.svg"/>
+                            <h3>CyberChef</h3></a>
+                            <p class="lead mb-0">Slice and dice data with this web app for encryption, encoding, compression and data analysis</p>
+                        </div>
                     </div>
                 </div>
-                <div class="card bg-dark">
-                    <img src="assets/imgs/users-group.svg" alt="Auth" class="image" style="width:100%;filter: invert(1)">
-                    <div class="middle">
-                        <a href="/auth/" class="btn btn-primary" target="_blank">Local Account Management</a>
-                    </div>                
-                </div>
-                <div class="card bg-dark">
-                    <img src="assets/imgs/cyberchef.svg" alt="Auth" class="image" style="width:100%">
-                    <div class="middle">
-                        <a href="/arkime/cyberchef/" class="btn btn-primary" target="_blank">CyberChef</a>
-                    </div>                
-                </div>
-                <div class="card bg-dark">    
-                    <img src="assets/imgs/api.svg" alt="API" class="image" style="width:100%;filter: invert(1)">
-                    <div class="middle">
-                        <a href="/mapi/" class="btn btn-primary" target="_blank">API</a>
-                    </div>             
-                </div>
-            </div>
-        </div>
-        <br />
-
-        <div class="container">
-            <h3 style="color:white">External Links</h3>
-            <div class="card-group">
-                <div class="card bg-dark">
-                    <img src="assets/imgs/GitHub-Mark-Light-120px-plus.png" alt="Auth" class="image" style="width:100%">
-                    <div class="middle">
-                        <a href="https://github.com/idaholab/Malcolm" class="btn btn-primary" target="_blank">GitHub</a>
-                    </div>                
-                </div>
-                <div class="card bg-dark">             
-                </div>
-                <div class="card bg-dark">             
-                </div>
-                <div class="card bg-dark">             
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                            <a href="/readme/"><div class="features-icons-icon d-flex"><i class="bi-journal-richtext m-auto text-primary"></i></div>
+                            <h3>Documentation</h3></a>
+                            <p class="lead mb-0">Read the Malcolm user guide</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                            <a href="/upload/"><div class="features-icons-icon d-flex"><i class="bi-upload m-auto text-primary"></i></div>
+                            <h3>Artifact Upload</h3></a>
+                            <p class="lead mb-0">Upload previously-captured PCAP files or archived Zeek logs for analysis</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-5 mb-lg-0 mb-lg-3">
+                            <a href="/auth/"><div class="features-icons-icon d-flex"><i class="bi-person m-auto text-primary"></i></div>
+                            <h3>Local Account Management</h3></a>
+                            <p class="lead mb-0">Manage the local user accounts maintained by Malcolm</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="features-icons-item mx-auto mb-0 mb-lg-3">
+                            <a href="/mapi/"><div class="features-icons-icon d-flex"><i class="bi-gear m-auto text-primary"></i></div>
+                            <h3>API</h3></a>
+                            <p class="lead mb-0">Interface with Malcolm's underlying data via a REST API</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
+                        <p class="text-muted small mb-4 mb-lg-0">
+                        &copy; 2024 Battelle Energy Alliance, LLC; developed at INL and released through the cooperation of the
+                        Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.</p>
+                    </div>
+                    <div class="col-lg-6 h-100 text-center text-lg-end my-auto">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item">
+                                <a href="https://github.com/idaholab/Malcolm"><i class="bi-github fs-3"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
     </body>
 </html>
