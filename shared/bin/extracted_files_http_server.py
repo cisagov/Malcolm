@@ -74,7 +74,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             SimpleHTTPRequestHandler.do_GET(self)
 
         else:
-            if recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
+            if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
                 for root, dirs, files in os.walk(os.path.dirname(fullpath)):
                     if fileBaseName in files:
                         fullpath = os.path.join(root, fileBaseName)
