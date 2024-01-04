@@ -233,7 +233,9 @@ RUN set -x ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_substitutions_filter_module-master.tar.gz; \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf && \
+  find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; && \
+  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \;
 
 COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
 COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
@@ -245,8 +247,8 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/supervisord.conf /etc/
-ADD docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
-ADD docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png
+COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
+COPY --chmod=644 docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

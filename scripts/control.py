@@ -455,7 +455,7 @@ def printURLs():
     else:
         myIp = get_primary_ip()
 
-    print("\nMalcolm services can be accessed at https://{myIp}/")
+    print(f"\nMalcolm services can be accessed at https://{myIp}/")
     print("------------------------------------------------------------------------------")
 
 
