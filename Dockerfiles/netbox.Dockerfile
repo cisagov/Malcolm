@@ -71,7 +71,7 @@ RUN apt-get -q update && \
       supervisor \
       tini && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
-      'git+https://github.com/tobiasge/netbox-initializers@v3.6.0' \
+      'git+https://github.com/tobiasge/netbox-initializers@04fbb73' \
       psycopg2 \
       pynetbox \
       python-magic \
