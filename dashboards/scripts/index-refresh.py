@@ -410,14 +410,10 @@ def main():
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'(^zeek\.files\.extracted$)', field['name'], re.IGNORECASE) is not None:
-                    # add download for extracted/quarantined zeek files
+                    # add download for extracted zeek files
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/quarantine/{{value}}'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if quarantined)'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/preserved/{{value}}'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if preserved)'
+                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/{{value}}'
+                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 drilldownInfoParams = {}
