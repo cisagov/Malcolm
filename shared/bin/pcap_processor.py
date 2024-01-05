@@ -166,11 +166,11 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         )
                         logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-                        # if this is a "live" rotated PCAP captured by netsniff-ng or tcpdump,
-                        #   append -live to the node name used (which originates from PCAP_NODE_NAME)
+                        # if this is an uploaded PCAP (not captured "live"")
+                        #   append -upload to the node name used (which originates from PCAP_NODE_NAME)
                         tmpNodeName = fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName
-                        if (FILE_INFO_DICT_LIVE in fileInfo) and fileInfo[FILE_INFO_DICT_LIVE]:
-                            tmpNodeName = tmpNodeName + '-live'
+                        if (not (FILE_INFO_DICT_LIVE in fileInfo)) or (not fileInfo[FILE_INFO_DICT_LIVE]):
+                            tmpNodeName = tmpNodeName + '-upload'
 
                         # put together arkime execution command
                         cmd = [
