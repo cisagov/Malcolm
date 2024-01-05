@@ -2,6 +2,8 @@
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
+# note: when setting the node name, the docker_entrypoint.sh script around
+#   MALCOLM_PCAP_NODE_NAME as it gets written into config.ini needs to match
 [[ "${ARKIME_LIVE_CAPTURE:-false}" == "true" ]] && NODE_NAME_FLAG= || NODE_NAME_FLAG=-upload
 
 while true; do
