@@ -153,6 +153,12 @@ if [ -d "$WORKDIR" ]; then
   mv "$SCRIPT_PATH/yara"/*.deb ./config/packages.chroot/
   docker rmi -f yara-build:latest
 
+  # clone and build htpdate .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/htpdate/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/htpdate:/build htpdate-build:latest -o /build
+  mv "$SCRIPT_PATH/htpdate"/*.deb ./config/packages.chroot/
+  docker rmi -f htpdate-build:latest
+
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"
   pushd "$SCRIPT_PATH/arkime/etc"
