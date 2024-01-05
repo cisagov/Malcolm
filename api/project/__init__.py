@@ -356,6 +356,65 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     return list(set(translated))
 
 
+def doctype_from_args(args):
+    """returns the value of the doctype field in the args dictionary
+
+    Parameters
+    ----------
+    args : dict
+        The dictionary which should contain 'doctype' value. Missing
+        key returns value of app.config["DOCTYPE_DEFAULT"]
+
+    Returns
+    -------
+    return doctype
+        network|host
+    """
+    return deep_get(args, ["doctype"], app.config["DOCTYPE_DEFAULT"])
+
+
+def index_from_args(args):
+    """returns the appropriate index for searching the document type
+    in the args dictionary
+
+    Parameters
+    ----------
+    args : dict
+        The dictionary which should contain 'doctype' value. Missing
+        key returns value of app.config["ARKIME_INDEX_PATTERN"]
+
+    Returns
+    -------
+    return index
+        app.config["ARKIME_INDEX_PATTERN"] or app.config["BEATS_INDEX_PATTERN"]
+    """
+    return (
+        app.config["BEATS_INDEX_PATTERN"] if doctype_from_args(args) == 'host' else app.config["ARKIME_INDEX_PATTERN"]
+    )
+
+
+def timefield_from_args(args):
+    """returns the appropriate time field for searching the document type
+    in the args dictionary
+
+    Parameters
+    ----------
+    args : dict
+        The dictionary which should contain 'doctype' value. Missing
+        key returns value of app.config["ARKIME_INDEX_TIME_FIELD"]
+
+    Returns
+    -------
+    return index
+        app.config["ARKIME_INDEX_TIME_FIELD"] or app.config["BEATS_INDEX_TIME_FIELD"]
+    """
+    return (
+        app.config["BEATS_INDEX_TIME_FIELD"]
+        if doctype_from_args(args) == 'host'
+        else app.config["ARKIME_INDEX_TIME_FIELD"]
+    )
+
+
 def filtertime(search, args, default_from="1 day ago", default_to="now"):
     """Applies a time filter (inclusive; extracted from request arguments) to an OpenSearch query and
     returns the range as a tuple of integers representing the milliseconds since EPOCH. If
@@ -367,7 +426,7 @@ def filtertime(search, args, default_from="1 day ago", default_to="now"):
     search : opensearchpy.Search
         The object representing the OpenSearch Search query
     args : dict
-        The dictionary which should contain 'from' and 'to' times (see gettimes)
+        The dictionary which should contain 'from' and 'to' times (see gettimes) and 'doctype'
 
     Returns
     -------
@@ -390,7 +449,7 @@ def filtertime(search, args, default_from="1 day ago", default_to="now"):
         search.filter(
             "range",
             **{
-                app.config["ARKIME_INDEX_TIME_FIELD"]: {
+                timefield_from_args(args): {
                     "gte": start_time_ms,
                     "lte": end_time_ms,
                     "format": "epoch_millis",
@@ -460,7 +519,7 @@ def bucketfield(fieldname, current_request, urls=None):
         The name of the field(s) on which to perform the aggregation
     current_request : Request
         The flask Request object being processed (see gettimes/filtertime and getfilters/filtervalues)
-        Uses 'from', 'to', 'limit', and 'filter' from current_request arguments
+        Uses 'from', 'to', 'limit', 'filter', and 'doctype' from current_request arguments
 
     Returns
     -------
@@ -476,11 +535,11 @@ def bucketfield(fieldname, current_request, urls=None):
     global databaseClient
     global SearchClass
 
+    args = get_request_arguments(current_request)
     s = SearchClass(
         using=databaseClient,
-        index=app.config["ARKIME_INDEX_PATTERN"],
+        index=index_from_args(args),
     ).extra(size=0)
-    args = get_request_arguments(current_request)
     start_time_ms, end_time_ms, s = filtertime(s, args)
     filters, s = filtervalues(s, args)
     bucket_limit = int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
@@ -548,22 +607,15 @@ def aggregate(fieldname):
 
 @app.route(
     f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/document",
-    defaults={'index': app.config["ARKIME_INDEX_PATTERN"]},
     methods=['GET', 'POST'],
 )
-@app.route(
-    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/document/<index>",
-    methods=['GET', 'POST'],
-)
-def document(index):
+def document():
     """Returns the matching document(s) from the specified index
 
     Parameters
     ----------
-    index : string
-        the name of the index from which to retrieve the document (defaults: arkime_sessions3-*)
     request : Request
-        Uses 'from', 'to', 'limit', and 'filter' from request arguments
+        Uses 'from', 'to', 'limit', 'filter', and 'doctype' from request arguments
 
     Returns
     -------
@@ -578,7 +630,7 @@ def document(index):
     args = get_request_arguments(request)
     s = SearchClass(
         using=databaseClient,
-        index=index,
+        index=index_from_args(args),
     ).extra(size=int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"])))
     start_time_ms, end_time_ms, s = filtertime(s, args, default_from="1970-1-1", default_to="now")
     filters, s = filtervalues(s, args)
@@ -619,7 +671,8 @@ def indices():
 
 
 @app.route(
-    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/fields", methods=['GET']
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/fields",
+    methods=['GET', 'POST'],
 )
 def fields():
     """Provide a list of fields Malcolm "knows about" merged from Arkime's field table, Malcolm's
@@ -629,7 +682,7 @@ def fields():
     ----------
     request : Request
         template - template name (default is app.config["MALCOLM_TEMPLATE"])
-        pattern - index pattern name (default is app.config["ARKIME_INDEX_PATTERN"])
+        doctype - network|host
     Returns
     -------
     fields
@@ -640,9 +693,8 @@ def fields():
 
     args = get_request_arguments(request)
 
-    templateName = args['template'] if 'template' in args else app.config["MALCOLM_TEMPLATE"]
-    pattern = args['pattern'] if 'pattern' in args else app.config["ARKIME_INDEX_PATTERN"]
-    arkimeFields = (templateName == app.config["MALCOLM_TEMPLATE"]) and (pattern == app.config["ARKIME_INDEX_PATTERN"])
+    templateName = deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
+    arkimeFields = (templateName == app.config["MALCOLM_TEMPLATE"]) and (doctype_from_args(args) == 'network')
 
     fields = defaultdict(dict)
 
@@ -651,7 +703,7 @@ def fields():
             # get fields from Arkime's fields table
             s = SearchClass(
                 using=databaseClient,
-                index=app.config["ARKIME_FIELDS_INDEX"],
+                index=index_from_args(args),
             ).extra(size=5000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
                 if (fieldname := deep_get(hit, ['dbField2'])) and (fieldname not in fields):
@@ -716,7 +768,7 @@ def fields():
         for field in requests.get(
             f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
             params={
-                'pattern': pattern,
+                'pattern': index_from_args(args),
                 'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
             },
             auth=opensearchReqHttpAuth,
