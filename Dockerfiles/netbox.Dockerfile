@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v3.7.0
+FROM netboxcommunity/netbox:v3.6.7
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -29,6 +29,8 @@ ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$
 ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
+
+ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
 
 ENV YQ_VERSION "4.33.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
@@ -73,7 +75,7 @@ RUN apt-get -q update && \
       supervisor \
       tini && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
-      'git+https://github.com/tobiasge/netbox-initializers@v3.7.0' \
+      "git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}" \
       psycopg2 \
       pynetbox \
       python-magic \
