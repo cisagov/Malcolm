@@ -16,7 +16,7 @@ event file_sniff(f: fa_file, meta: fa_metadata) {
       ((! meta?$mime_type) && extractor_always_extract_unknown) ||
       # we only want to extract knowns and we know the mime type OR
       ((extractor_extract_mode == extractor_extract_known) && meta?$mime_type) ||
-      # we only want to extract mime->extension mapped files, we know the mimetype, and the mime type is mapped
+      # we only want to extract mime->extension mapped files, we know the mimetype, and the mime type is mapped OR
       ((extractor_extract_mode == extractor_extract_mapped) && meta?$mime_type && (meta$mime_type in extractor_mime_to_ext_map)) ||
       # we want to extract everything except common plain-text mimes, and either there's no mime type or the mime type isn't one of those
       ((extractor_extract_mode == extractor_extract_notcommtxt) && ((! meta?$mime_type) || (meta$mime_type !in plain_text_mimes)))) {
