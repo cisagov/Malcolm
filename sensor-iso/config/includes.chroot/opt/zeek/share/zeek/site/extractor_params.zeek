@@ -15,6 +15,7 @@ export {
 
   const plain_text_mimes : set[string] = {
     "application/json",
+    "application/soap+xml",
     "application/x-x509-ca-cert",
     "application/x-x509-user-cert",
     "application/xml",
