@@ -98,6 +98,7 @@ export {
     ["application/x-shockwave-flash"]= "swf",
     ["application/x-zip-compressed"]= "zip",
     ["application/zip"]= "zip",
+    ["text/javascript"]= "js",
     ["text/jscript"]= "jsx",
     ["text/rtf"]= "rtf",
     ["text/vbscript"]= "vbs"
