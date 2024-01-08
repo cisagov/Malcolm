@@ -160,6 +160,7 @@ Enable file extraction with Zeek? (y / N): y
 3: mapped
 4: all
 5: interesting
+6: notcommtxt
 Select file extraction behavior (none): 5
 
 1: quarantined

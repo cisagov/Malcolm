@@ -1184,7 +1184,14 @@ class Installer(object):
         )
 
         # input file extraction parameters
-        allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
+        allowedFileCarveModes = {
+            'none': 'No file extraction',
+            'known': 'Extract recognized MIME types',
+            'mapped': 'Extract MIME types for which file extensions are known',
+            'all': 'Extract all files',
+            'interesting': 'Extract MIME types of common attack vectors',
+            'notcommtxt': 'Extract all except common plain text files',
+        }
         allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
         fileCarveMode = None
@@ -1202,12 +1209,16 @@ class Installer(object):
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=bool(fileCarveModeDefault)):
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file extraction behavior')
-            while fileCarveMode not in allowedFileCarveModes and loopBreaker.increment():
+            while fileCarveMode not in allowedFileCarveModes.keys() and loopBreaker.increment():
                 fileCarveMode = InstallerChooseOne(
                     'Select file extraction behavior',
                     choices=[
-                        (x, '', x == fileCarveModeDefault if fileCarveModeDefault else allowedFileCarveModes[0])
-                        for x in allowedFileCarveModes
+                        (
+                            x,
+                            allowedFileCarveModes[x],
+                            x == fileCarveModeDefault if fileCarveModeDefault else 'none',
+                        )
+                        for x in allowedFileCarveModes.keys()
                     ],
                 )
             if fileCarveMode and (fileCarveMode != 'none'):
@@ -1256,9 +1267,9 @@ class Installer(object):
                         'Download updated file scanner signatures periodically?', default=args.fileScanRuleUpdate
                     )
 
-        if fileCarveMode not in allowedFileCarveModes:
-            fileCarveMode = allowedFileCarveModes[0]
-        if filePreserveMode not in allowedFileCarveModes:
+        if fileCarveMode not in allowedFileCarveModes.keys():
+            fileCarveMode = 'none'
+        if filePreserveMode not in allowedFilePreserveModes:
             filePreserveMode = allowedFilePreserveModes[0]
         if (vtotApiKey is None) or (len(vtotApiKey) <= 1):
             vtotApiKey = '0'
@@ -3685,7 +3696,7 @@ def main():
         '--file-extraction',
         dest='fileCarveMode',
         required=False,
-        metavar='<none|known|mapped|all|interesting>',
+        metavar='<none|known|mapped|all|interesting|notcommtxt>',
         type=str,
         default='none',
         help='Zeek file extraction behavior',

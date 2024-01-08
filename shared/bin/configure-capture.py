@@ -48,6 +48,7 @@ class Constants:
     ZEEK_FILE_CARVING_KNOWN = 'known'
     ZEEK_FILE_CARVING_MAPPED = 'mapped'
     ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT = 'mapped (except common plain text files)'
+    ZEEK_FILE_CARVING_NOTCOMMTXT = 'notcommtxt'
     ZEEK_FILE_CARVING_INTERESTING = 'interesting'
     ZEEK_FILE_CARVING_CUSTOM = 'custom'
     ZEEK_FILE_CARVING_CUSTOM_MIME = 'custom (mime-sorted)'
@@ -56,13 +57,6 @@ class Constants:
     ZEEK_FILE_CARVING_OVERRIDE_FILE = '/opt/sensor/sensor_ctl/extractor_override.zeek'
     ZEEK_FILE_CARVING_OVERRIDE_INTERESTING_FILE = '/opt/sensor/sensor_ctl/zeek/extractor_override.interesting.zeek'
     ZEEK_FILE_CARVING_OVERRIDE_FILE_MAP_NAME = 'extractor_mime_to_ext_map'
-    ZEEK_FILE_CARVING_PLAIN_TEXT_MIMES = {
-        "application/json",
-        "application/x-x509-ca-cert",
-        "application/xml",
-        "text/plain",
-        "text/xml",
-    }
 
     FILEBEAT = 'filebeat'
     MISCBEAT = 'miscbeat'
@@ -594,7 +588,7 @@ def main():
                         (
                             Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT,
                             'Carve files with recognized mime types (except common plain text files)',
-                            False,
+                            (capture_config_dict["ZEEK_EXTRACTOR_MODE"] == Constants.ZEEK_FILE_CARVING_NOTCOMMTXT),
                         ),
                         (
                             Constants.ZEEK_FILE_CARVING_KNOWN,
@@ -633,45 +627,32 @@ def main():
                 capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = ""
                 zeek_carved_file_preservation = PRESERVE_NONE
 
-                if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM) or zeek_carve_mode.startswith(
-                    Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT
-                ):
+                if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM):
                     # get all known mime-to-extension mappings into a dictionary
                     all_mime_maps = mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_DEFAULTS)
 
-                    if zeek_carve_mode == Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT:
-                        # all mime types minus common text mime types
-                        mime_tags.extend(
-                            [
-                                mime
-                                for mime in all_mime_maps.keys()
-                                if mime not in Constants.ZEEK_FILE_CARVING_PLAIN_TEXT_MIMES
-                            ]
-                        )
-
+                    # select mimes to carve (pre-selecting items previously in the override file)
+                    if zeek_carve_mode == Constants.ZEEK_FILE_CARVING_CUSTOM_EXT:
+                        mime_choices = [
+                            (
+                                pair[0],
+                                pair[1],
+                                pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE),
+                            )
+                            for pair in sorted(all_mime_maps.items(), key=lambda x: x[1].lower())
+                        ]
                     else:
-                        # select mimes to carve (pre-selecting items previously in the override file)
-                        if zeek_carve_mode == Constants.ZEEK_FILE_CARVING_CUSTOM_EXT:
-                            mime_choices = [
-                                (
-                                    pair[0],
-                                    pair[1],
-                                    pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE),
-                                )
-                                for pair in sorted(all_mime_maps.items(), key=lambda x: x[1].lower())
-                            ]
-                        else:
-                            mime_choices = [
-                                (
-                                    pair[0],
-                                    pair[1],
-                                    pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE),
-                                )
-                                for pair in sorted(all_mime_maps.items(), key=lambda x: x[0].lower())
-                            ]
-                        code, mime_tags = d.checklist(Constants.MSG_CONFIG_ZEEK_CARVING_MIMES, choices=mime_choices)
-                        if code == Dialog.CANCEL or code == Dialog.ESC:
-                            raise CancelledError
+                        mime_choices = [
+                            (
+                                pair[0],
+                                pair[1],
+                                pair[0] in mime_to_extension_mappings(Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE),
+                            )
+                            for pair in sorted(all_mime_maps.items(), key=lambda x: x[0].lower())
+                        ]
+                    code, mime_tags = d.checklist(Constants.MSG_CONFIG_ZEEK_CARVING_MIMES, choices=mime_choices)
+                    if code == Dialog.CANCEL or code == Dialog.ESC:
+                        raise CancelledError
 
                     mime_tags.sort()
                     if len(mime_tags) == 0:
@@ -690,6 +671,9 @@ def main():
                     )
                     zeek_carve_mode = Constants.ZEEK_FILE_CARVING_MAPPED
                     capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = Constants.ZEEK_FILE_CARVING_OVERRIDE_FILE
+
+                elif zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_MAPPED_MINUS_TEXT):
+                    zeek_carve_mode = Constants.ZEEK_FILE_CARVING_NOTCOMMTXT
 
                 # what to do with carved files
                 if zeek_carve_mode != Constants.ZEEK_FILE_CARVING_NONE:

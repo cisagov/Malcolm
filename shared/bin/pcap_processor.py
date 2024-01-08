@@ -60,6 +60,7 @@ ZEEK_PATH = "/opt/zeek/bin/zeek-offline"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
 ZEEK_EXTRACTOR_MODE_MAPPED = 'mapped'
 ZEEK_EXTRACTOR_MODE_NONE = 'none'
+ZEEK_EXTRACTOR_MODE_NOTCOMMTXT = 'notcommtxt'
 ZEEK_EXTRACTOR_SCRIPT = "extractor.zeek"
 ZEEK_EXTRACTOR_SCRIPT_INTERESTING = "extractor_override.interesting.zeek"
 ZEEK_LOCAL_SCRIPT = 'local'
@@ -640,7 +641,7 @@ def main():
             '--extract',
             dest='zeekExtractFileMode',
             help='Zeek file carving mode',
-            metavar=f'{ZEEK_EXTRACTOR_MODE_INTERESTING}|{ZEEK_EXTRACTOR_MODE_MAPPED}|{ZEEK_EXTRACTOR_MODE_NONE}',
+            metavar=f'{ZEEK_EXTRACTOR_MODE_INTERESTING}|{ZEEK_EXTRACTOR_MODE_MAPPED}|{ZEEK_EXTRACTOR_MODE_NONE}|{ZEEK_EXTRACTOR_MODE_NOTCOMMTXT}',
             type=str,
             default=ZEEK_EXTRACTOR_MODE_NONE,
         )

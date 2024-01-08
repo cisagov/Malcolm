@@ -228,6 +228,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + `mapped`: extraction of files with recognized mime types
         + `known`: extraction of files for which any mime type can be determined
         + `all`: extract all files
+        + `notcommtxt`: extract all files except common plain text files
 * **Select file preservation behavior**
     - This determines the behavior for preservation of Zeek-extracted files:
         +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`

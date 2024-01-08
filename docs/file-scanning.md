@@ -6,6 +6,7 @@ To specify which files should be extracted, the following values are acceptable 
 
 * `none`: no file extraction
 * `interesting`: extraction of files with mime types of common attack vectors
+* `notcommtxt`: extraction of all files except common plain text files
 * `mapped`: extraction of files with recognized mime types
 * `known`: extraction of files for which any mime type can be determined
 * `all`: extract all files
