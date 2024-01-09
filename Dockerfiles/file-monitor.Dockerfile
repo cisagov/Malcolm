@@ -256,6 +256,9 @@ CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 ARG BUILD_DATE
 ARG MALCOLM_VERSION
 ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION
