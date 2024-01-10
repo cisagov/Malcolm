@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.11.1"
+BEATS_VER="8.11.3"
 BEATS_OSS="-oss"
 
 BUILD_ERROR_CODE=1
@@ -106,12 +106,13 @@ if [ -d "$WORKDIR" ]; then
   # replace capture interface for now, it'll need to be automatically detected/configured on boot
   sed -i "s/CAPTURE_INTERFACE=.*/CAPTURE_INTERFACE=xxxx/g" ./config/includes.chroot/opt/sensor/sensor_ctl/control_vars.conf
 
-  # copy shared scripts
+  # copy shared scripts and files
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   mkdir -p ./config/includes.chroot/opt/zeek/bin/
   mv ./config/includes.chroot/usr/local/bin/zeekdeploy.sh ./config/includes.chroot/opt/zeek/bin/
   ln -s -r ./config/includes.chroot/usr/local/bin/malcolm_utils.py ./config/includes.chroot/opt/zeek/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/zeek/bin/
+  rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info
@@ -167,7 +168,7 @@ if [ -d "$WORKDIR" ]; then
     fi
   fi
   curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-  curl -s -S -L -o oui.txt "https://gitlab.com/wireshark/wireshark/raw/release-4.0/manuf"
+  curl -s -S -L -o oui.txt "https://www.wireshark.org/download/automated/data/manuf"
   popd >/dev/null 2>&1
 
   # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)

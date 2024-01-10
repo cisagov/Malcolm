@@ -49,14 +49,16 @@ spec:
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.0
+        image: ghcr.io/idaholab/malcolm/logstash-oss:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true
         securityContext:
           capabilities:
             add:
+              # IPC_LOCK - to lock memory, preventing swapping
               - IPC_LOCK
+              # SYS_RESOURCE - for increasing memlock limits
               - SYS_RESOURCE
         ports:
           - name: lumberjack
@@ -113,7 +115,7 @@ spec:
             subPath: "logstash"
       initContainers:
       - name: logstash-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:23.12.0
+        image: ghcr.io/idaholab/malcolm/dirinit:23.12.1
         imagePullPolicy: Always
         stdin: false
         tty: true

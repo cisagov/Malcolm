@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # some environment variables needed for build
 export CCACHE_DIR="/var/spool/ccache"
@@ -224,9 +224,9 @@ freshclam --stdout --quiet --no-warnings
 
 # set up capabilities for network-related tools
 chown root:netdev /usr/sbin/netsniff-ng && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
 chown root:netdev "${ZEEK_DIR}"/bin/zeek && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' "${ZEEK_DIR}"/bin/zeek
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek
 chown root:netdev /sbin/ethtool && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool
 chown root:netdev "${ZEEK_DIR}"/bin/capstats && \
@@ -236,7 +236,7 @@ chown root:netdev /usr/bin/tcpdump && \
 chown root:netdev /usr/bin/suricata && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata
 chown root:netdev /opt/arkime/bin/capture && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /opt/arkime/bin/capture
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/arkime/bin/capture
 
 ln -s -f "${ZEEK_DIR}"/bin/zeek /usr/local/bin/
 ln -s -f /usr/sbin/netsniff-ng /usr/local/bin/

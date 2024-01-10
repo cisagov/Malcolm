@@ -12,8 +12,10 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r /usr/local/bin/suricata_config_populate.py
     [[ ! -f "$SUPERVISOR_PATH"/suricata/update.yaml ]] && cp "$(dpkg -L suricata-update | grep 'update\.yaml' | head -n 1)" "$SUPERVISOR_PATH"/suricata/update.yaml
 
     # specify the custom rules and configuration directories relative to the supervisor path
+    SURICATA_DEFAULT_RULES_DIR="$SUPERVISOR_PATH"/suricata/rules-default
     SURICATA_CUSTOM_RULES_DIR="$SUPERVISOR_PATH"/suricata/rules
     SURICATA_CUSTOM_CONFIG_DIR="$SUPERVISOR_PATH"/suricata/include-configs
+    [[ -d "$SURICATA_DEFAULT_RULES_DIR" ]] && export SURICATA_DEFAULT_RULES_DIR
     [[ -d "$SURICATA_CUSTOM_RULES_DIR" ]] && export SURICATA_CUSTOM_RULES_DIR
     [[ -d "$SURICATA_CUSTOM_CONFIG_DIR" ]] && export SURICATA_CUSTOM_CONFIG_DIR
 

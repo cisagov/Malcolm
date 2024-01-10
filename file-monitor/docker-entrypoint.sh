@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [[ -z $EXTRACTED_FILE_ENABLE_CLAMAV ]]; then
   EXTRACTED_FILE_ENABLE_CLAMAV=false

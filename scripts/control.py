@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import sys
 
@@ -843,15 +843,13 @@ def stop(wipe=False):
         if wipe:
             # there is some overlap here among some of these containers, but it doesn't matter
             boundPathsToWipe = (
-                BoundPath("arkime", "/opt/arkime/logs", True, None, None),
-                BoundPath("arkime", "/opt/arkime/raw", True, None, None),
                 BoundPath("filebeat", "/zeek", True, None, None),
                 BoundPath("file-monitor", "/zeek/logs", True, None, None),
                 BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
                 BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
                 BoundPath("netbox-redis", "/data", True, None, ["."]),
                 BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
-                BoundPath("pcap-monitor", "/pcap", True, ["processed", "upload"], None),
+                BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                 BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
                 BoundPath(
                     "upload",
@@ -995,8 +993,6 @@ def start():
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # make sure some directories exist before we start
         boundPathsToCreate = (
-            BoundPath("arkime", "/opt/arkime/logs", False, None, None),
-            BoundPath("arkime", "/opt/arkime/raw", False, None, None),
             BoundPath("file-monitor", "/zeek/logs", False, None, None),
             BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
             BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
@@ -1004,7 +1000,7 @@ def start():
             BoundPath("netbox-redis", "/data", False, None, None),
             BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
             BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
-            BoundPath("pcap-monitor", "/pcap", False, ["processed", "upload"], None),
+            BoundPath("pcap-monitor", "/pcap", False, ["arkime-live", "processed", "upload"], None),
             BoundPath("suricata", "/var/log/suricata", False, ["live"], None),
             BoundPath(
                 "upload",

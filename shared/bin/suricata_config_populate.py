@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # modify suricata.yaml according to many environment variables
 
@@ -13,7 +13,7 @@
 
 import argparse
 import contextlib
-import fnmatch
+import glob
 import logging
 import os
 import sys
@@ -271,8 +271,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'dnp3': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['DNP3_ENABLED']),
-            val2bool(DEFAULT_VARS['DNP3_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['DNP3_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['DNP3_EVE_ENABLED']),
             True,
             DEFAULT_VARS['DNP3_PORTS'],
             None,
@@ -287,8 +287,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'enip': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['ENIP_ENABLED']),
-            val2bool(DEFAULT_VARS['ENIP_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['ENIP_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['ENIP_EVE_ENABLED']),
             False,
             DEFAULT_VARS['ENIP_PORTS'],
             DEFAULT_VARS['ENIP_PORTS'],
@@ -359,8 +359,8 @@ PROTOCOL_CONFIGS.update(
         ),
         'modbus': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['MODBUS_ENABLED']),
-            val2bool(DEFAULT_VARS['MODBUS_EVE_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['MODBUS_ENABLED']),
+            (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL'])) and val2bool(DEFAULT_VARS['MODBUS_EVE_ENABLED']),
             False,
             DEFAULT_VARS['MODBUS_PORTS'],
             None,
@@ -503,39 +503,83 @@ DECODER_CONFIGS.update(
 
 
 ###################################################################################################
-def GetRuleSources(requireRulesExist=False):
+def GetRuleFiles():
     global DEFAULT_VARS
 
-    ruleSources = []
+    ruleFiles = []
 
     if not val2bool(DEFAULT_VARS['CUSTOM_RULES_ONLY']):
-        ruleSources.append('suricata.rules')
+        # built-in suricata rules
+        ruleFiles.append('suricata.rules')
 
-    customRuleFiles = (
-        fnmatch.filter(os.listdir(DEFAULT_VARS['CUSTOM_RULES_DIR']), '*.rules')
-        if DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None
+        # Malcolm's default IT rules
+        ruleFiles.extend(
+            sorted(
+                list(
+                    glob.iglob(
+                        os.path.join(
+                            os.path.join(os.path.join(DEFAULT_VARS['DEFAULT_RULES_DIR'], 'IT'), '**'), '*.rules'
+                        ),
+                        recursive=True,
+                    )
+                )
+            )
+            if os.path.isdir(str(DEFAULT_VARS['DEFAULT_RULES_DIR']))
+            else []
+        )
+
+        # Malcolm's default OT rules
+        ruleFiles.extend(
+            sorted(
+                list(
+                    glob.iglob(
+                        os.path.join(
+                            os.path.join(os.path.join(DEFAULT_VARS['DEFAULT_RULES_DIR'], 'OT'), '**'), '*.rules'
+                        ),
+                        recursive=True,
+                    )
+                )
+            )
+            if (
+                os.path.isdir(str(DEFAULT_VARS['DEFAULT_RULES_DIR']))
+                and (not val2bool(DEFAULT_VARS['DISABLE_ICS_ALL']))
+            )
+            else []
+        )
+
+    # User's custom rules
+    ruleFiles.extend(
+        sorted(
+            list(
+                glob.iglob(
+                    os.path.join(os.path.join(DEFAULT_VARS['CUSTOM_RULES_DIR'], '**'), '*.rules'),
+                    recursive=True,
+                )
+            )
+        )
+        if os.path.isdir(str(DEFAULT_VARS['CUSTOM_RULES_DIR']))
         else []
     )
 
-    if (DEFAULT_VARS['CUSTOM_RULES_DIR'] is not None) and ((not requireRulesExist) or (len(customRuleFiles) > 0)):
-        ruleSources.append(os.path.join(DEFAULT_VARS['CUSTOM_RULES_DIR'], '*.rules'))
-
-    return ruleSources
+    return ruleFiles
 
 
 ###################################################################################################
 def GetIncludeConfigSources():
     global DEFAULT_VARS
 
-    configSources = list(
-        [
-            os.path.join(DEFAULT_VARS['CUSTOM_CONFIG_DIR'], x)
-            for x in fnmatch.filter(os.listdir(DEFAULT_VARS['CUSTOM_CONFIG_DIR']), '*.yaml')
-        ]
-        if DEFAULT_VARS['CUSTOM_CONFIG_DIR'] is not None
+    configSources = (
+        sorted(
+            list(
+                glob.iglob(
+                    os.path.join(os.path.join(DEFAULT_VARS['CUSTOM_CONFIG_DIR'], '**'), '*.yaml'),
+                    recursive=True,
+                )
+            )
+        )
+        if os.path.isdir(str(DEFAULT_VARS['CUSTOM_CONFIG_DIR']))
         else []
     )
-
     return configSources
 
 
@@ -627,7 +671,8 @@ def main():
     if os.path.isfile(args.output) and os.path.samefile(args.input, args.output):
         backupFile = inFileParts[0] + "_bak_" + str(int(round(time.time()))) + inFileParts[1]
         CopyFile(args.input, backupFile)
-        backupFiles = sorted(fnmatch.filter(os.listdir(os.path.dirname(backupFile)), '*_bak_*'))
+        backupFiles = sorted(list(glob.glob(os.path.join(os.path.dirname(backupFile), '*_bak_*'))))
+
         while len(backupFiles) > BACKUP_FILES_MAX:
             toDeleteFileName = os.path.join(os.path.dirname(backupFile), backupFiles.pop(0))
             logging.debug(f'Removing old backup file "{toDeleteFileName}"')
@@ -1080,7 +1125,7 @@ def main():
             deep_set(cfg, ['stats', 'enabled'], True)
 
             cfg.pop('rule-files', None)
-            deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=True))
+            deep_set(cfg, ['rule-files'], GetRuleFiles())
 
             # Hackety-hack, don't talk back! Despite the "Including multiple files" section of
             #   https://docs.suricata.io/en/latest/configuration/includes.html#including-multiple-files
@@ -1127,7 +1172,7 @@ def main():
     # final tweaks
     deep_set(cfg, ['stats', 'enabled'], False)
     cfg.pop('rule-files', None)
-    deep_set(cfg, ['rule-files'], GetRuleSources(requireRulesExist=False))
+    deep_set(cfg, ['rule-files'], GetRuleFiles())
 
     # see note on 'include' above
     cfg.pop('include', None)
