@@ -62,7 +62,7 @@ def main():
         dest='index',
         metavar='<str>',
         type=str,
-        default='arkime_sessions3-*',
+        default=os.getenv('MALCOLM_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
         help='Index Pattern Name',
     )
     parser.add_argument(

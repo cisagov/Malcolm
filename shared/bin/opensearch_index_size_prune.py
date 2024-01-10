@@ -39,6 +39,7 @@ def main():
         default=str2bool(os.getenv('OPENSEARCH_INDEX_SIZE_PRUNE_DEBUG', default='False')),
         help="Verbose output",
     )
+    # TODO: allow specifying two indices (e.g., MALCOLM_NETWORK_INDEX_PATTERN may be different than ARKIME_NETWORK_INDEX_PATTERN)
     parser.add_argument(
         '-i',
         '--index',

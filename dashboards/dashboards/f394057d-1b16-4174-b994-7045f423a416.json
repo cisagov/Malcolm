@@ -122,17 +122,17 @@
         {
           "name": "control_0_index_pattern",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         },
         {
           "name": "control_1_index_pattern",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         },
         {
           "name": "control_2_index_pattern",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -199,7 +199,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

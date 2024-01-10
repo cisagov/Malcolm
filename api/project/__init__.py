@@ -381,16 +381,24 @@ def index_from_args(args):
     ----------
     args : dict
         The dictionary which should contain 'doctype' value. Missing
-        key returns value of app.config["ARKIME_INDEX_PATTERN"]
+        key returns value of app.config["MALCOLM_NETWORK_INDEX_PATTERN"]
 
     Returns
     -------
     return index
-        app.config["ARKIME_INDEX_PATTERN"] or app.config["BEATS_INDEX_PATTERN"]
+        app.config["MALCOLM_OTHER_INDEX_PATTERN"],
+        app.config["ARKIME_NETWORK_INDEX_PATTERN"],
+        app.config["MALCOLM_NETWORK_INDEX_PATTERN"],
     """
-    return (
-        app.config["BEATS_INDEX_PATTERN"] if doctype_from_args(args) == 'host' else app.config["ARKIME_INDEX_PATTERN"]
-    )
+    index = None
+    if dtype := str(doctype_from_args(args)).lower():
+        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+            index = app.config["MALCOLM_OTHER_INDEX_PATTERN"]
+        elif dtype.startswith('arkime') or dtype.startswith('session'):
+            index = app.config["ARKIME_NETWORK_INDEX_PATTERN"]
+        else:
+            index = app.config["MALCOLM_NETWORK_INDEX_PATTERN"]
+    return index
 
 
 def timefield_from_args(args):
@@ -401,18 +409,24 @@ def timefield_from_args(args):
     ----------
     args : dict
         The dictionary which should contain 'doctype' value. Missing
-        key returns value of app.config["ARKIME_INDEX_TIME_FIELD"]
+        key returns value of app.config["MALCOLM_NETWORK_INDEX_PATTERN"]
 
     Returns
     -------
-    return index
-        app.config["ARKIME_INDEX_TIME_FIELD"] or app.config["BEATS_INDEX_TIME_FIELD"]
+    timefield index
+        app.config["MALCOLM_OTHER_INDEX_TIME_FIELD"],
+        app.config["ARKIME_NETWORK_INDEX_TIME_FIELD"],
+        app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"],
     """
-    return (
-        app.config["BEATS_INDEX_TIME_FIELD"]
-        if doctype_from_args(args) == 'host'
-        else app.config["ARKIME_INDEX_TIME_FIELD"]
-    )
+    timefield = None
+    if dtype := str(doctype_from_args(args)).lower():
+        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+            timefield = app.config["MALCOLM_OTHER_INDEX_TIME_FIELD"]
+        elif dtype.startswith('arkime') or dtype.startswith('session'):
+            timefield = app.config["ARKIME_NETWORK_INDEX_TIME_FIELD"]
+        else:
+            timefield = app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]
+    return timefield
 
 
 def filtertime(search, args, default_from="1 day ago", default_to="now"):
@@ -860,8 +874,7 @@ def ping():
 )
 def event():
     """Webhook that accepts alert data (like that from the OpenSearch Alerting API) to be
-    reindexed into OpenSearch as session records (e.g., arkime_sessions3-*) for viewing
-    in Malcolm's default visualizations.
+    reindexed into OpenSearch as session records for viewing in Malcolm's default visualizations.
 
     See Malcolm's malcolm_api_loopback_monitor.json and malcolm_api_loopback_destination.json
     for formatting template examples.
@@ -921,7 +934,7 @@ def event():
     data = get_request_arguments(request)
     nowTimeStr = datetime.now().astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')
     if 'alert' in data:
-        alert['@timestamp'] = deep_get(
+        alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]] = deep_get(
             data,
             [
                 'alert',
@@ -930,7 +943,7 @@ def event():
             ],
             nowTimeStr,
         )
-        alert['firstPacket'] = alert['@timestamp']
+        alert['firstPacket'] = alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]]
         alert['lastPacket'] = deep_get(
             data,
             [
@@ -1012,9 +1025,9 @@ def event():
                 if hitCount := deep_get(alertResults[0], ['hits', 'total', 'value'], 0):
                     alert['event']['hits'] = hitCount
 
-        docDateStr = dateparser.parse(alert['@timestamp']).strftime('%y%m%d')
+        docDateStr = dateparser.parse(alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]]).strftime('%y%m%d')
         idxResponse = databaseClient.index(
-            index=f"{app.config['ARKIME_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
+            index=f"{app.config['MALCOLM_NETWORK_INDEX_PATTERN'].rstrip('*')}{docDateStr}",
             id=f"{docDateStr}-{alert['event']['id']}",
             body=alert,
         )

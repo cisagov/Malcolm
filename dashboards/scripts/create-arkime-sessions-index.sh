@@ -6,9 +6,8 @@ set -euo pipefail
 shopt -s nocasematch
 
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
-INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
-INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
-INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
+INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
 
@@ -26,7 +25,7 @@ OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
-  # give OpenSearch time to start and Arkime to get its template created before configuring dashboards
+  # give OpenSearch time to start and Arkime to get its own template created before configuring dashboards
   /data/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
 
   for LOOP in primary secondary; do
@@ -79,7 +78,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
 
       # have we not not already created the index pattern?
-      if [[ "$LOOP" != "primary" ]] || ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
+      if [[ "$LOOP" != "primary" ]] || ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN" ; then
 
         echo "$DATASTORE_TYPE ($LOOP) is running at \"${OPENSEARCH_URL_TO_USE}\"!"
 
@@ -171,7 +170,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # From https://github.com/elastic/kibana/issues/3709
           # Create index pattern
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
+            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN" \
             -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
 
           echo "Setting default index pattern..."
@@ -179,7 +178,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # Make it the default index
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
-            -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
+            -d"{\"value\":\"$INDEX_PATTERN\"}" || true
 
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
             IDX_ID="$(echo "$i" | cut -d';' -f1)"
@@ -240,7 +239,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             # enable in-session storage
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d '{"value":true}'
 
-            # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
+            # before we go on to create the anomaly detectors, we need to wait for actual network log documents
             /data/opensearch_status.sh -w >/dev/null 2>&1
             sleep 60
 

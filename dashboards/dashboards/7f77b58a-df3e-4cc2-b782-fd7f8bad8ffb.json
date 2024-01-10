@@ -658,7 +658,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -700,7 +700,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "arkime_sessions3-*"
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
