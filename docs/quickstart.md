@@ -88,9 +88,12 @@ instance, wipe the database and restore Malcolm to a fresh state, etc.
 
 A few minutes after starting Malcolm (probably 5 or so for Logstash to be completely loaded, depending on the system), the following services will be accessible:
 
-* [Arkime](https://arkime.com/): **https://localhost**
+* Malcolm Landing Page: **https://localhost/**
+* [Arkime](https://arkime.com/): **https://localhost/arkime/**
 * [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/): **https://localhost/dashboards/**
 * [Network Traffic Artifact Upload (Web)](upload.md#Upload): **https://localhost/upload/**
 * [Network Traffic Artifact Upload (SFTP)](upload.md#Upload): `sftp://<username>@127.0.0.1:8022/files`
 * [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis): **https://localhost/netbox/**
 * [Account Management](authsetup.md#AuthBasicAccountManagement): **https://localhost/auth/**
+
+![Malcolm Landing Page](./images/malcolm_landing_page.png)

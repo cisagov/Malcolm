@@ -316,3 +316,5 @@ malcolm-logstash-1  | [2022-07-27T20:27:52,056][INFO ][logstash.agent           
 ```
 
 The [Malcolm user interfaces](quickstart.md#UserInterfaceURLs) may be accessed via a web browser.
+
+![Malcolm Landing Page](./images/malcolm_landing_page.png)
