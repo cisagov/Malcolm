@@ -818,17 +818,20 @@ def version():
     """
     global databaseClient
 
+    opensearchStats = requests.get(
+        opensearchUrl,
+        auth=opensearchReqHttpAuth,
+        verify=opensearchSslVerify,
+    ).json()
+    if isinstance(opensearchStats, dict):
+        opensearchStats['health'] = dict(databaseClient.cluster.health())
+
     return jsonify(
         version=app.config["MALCOLM_VERSION"],
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
         mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
-        opensearch=requests.get(
-            opensearchUrl,
-            auth=opensearchReqHttpAuth,
-            verify=opensearchSslVerify,
-        ).json(),
-        opensearch_health=dict(databaseClient.cluster.health()),
+        opensearch=opensearchStats,
     )
 
 
