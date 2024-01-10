@@ -8,8 +8,6 @@ KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
 ARKIME_PACKET_THREADS=${ARKIME_PACKET_THREADS:-1}
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
-NODE_NAME=${PCAP_NODE_NAME:-"malcolm"}
-NODE_HOST=${ARKIME_LIVE_NODE_HOST:-""}
 
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
@@ -24,6 +22,12 @@ if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMA
 else
   CURL_CONFIG_PARAMS=()
 fi
+
+NODE_NAME=${PCAP_NODE_NAME:-""}
+NODE_HOST=${ARKIME_LIVE_NODE_HOST:-""}
+NODE_ARGS=()
+[[ -n "$NODE_NAME" ]] && NODE_ARGS+=( --node ) && NODE_ARGS+=( "$NODE_NAME" )
+[[ -n "$NODE_HOST" ]] && NODE_ARGS+=( --host ) && NODE_ARGS+=( "$NODE_HOST" )
 
 rm -f /var/run/arkime/initialized /var/run/arkime/runwise
 
@@ -61,12 +65,10 @@ touch /var/run/arkime/initialized
 echo "Arkime is initialized!"
 echo
 
-"${ARKIME_DIR}"/bin/capture --insecure \
+"${ARKIME_DIR}"/bin/capture --insecure "${NODE_ARGS[@]}" \
   -c "${ARKIME_DIR}"/etc/config.ini \
   -o pcapDir=/data/pcap/arkime-live \
   -o dropUser=${PUSER} \
   -o dropGroup=${PGROUP} \
   -o ecsEventProvider=arkime \
-  -o ecsEventDataset=session \
-  --node "${NODE_NAME}" \
-  --host "${NODE_HOST}"
+  -o ecsEventDataset=session
