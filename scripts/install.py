@@ -612,7 +612,7 @@ class Installer(object):
                 databaseModeChoice = InstallerChooseOne(
                     'Select primary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal])
+                        (x, allowedDatabaseModes[x][1], x == args.opensearchPrimaryMode)
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
@@ -3488,16 +3488,6 @@ def main():
         const=True,
         default=False,
         help="Expose Filebeat TCP port to external hosts",
-    )
-    openPortsArgGroup.add_argument(
-        '--arkime-viewer-expose',
-        dest='exposeArkimeViewer',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Expose Arkime viewer to external hosts for PCAP payload retrieval",
     )
     openPortsArgGroup.add_argument(
         '--sftp-expose',
