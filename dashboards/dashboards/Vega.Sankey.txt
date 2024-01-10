@@ -9,7 +9,7 @@
       name: rawData
       url: {
         %context%: true
-        %timefield%: firstPacket
+        %timefield%: MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER
         index: MALCOLM_NETWORK_INDEX_PATTERN_REPLACER
         body: {
           size: 0

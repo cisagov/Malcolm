@@ -13,7 +13,7 @@
         "title": "Modbus",
         "hits": 0,
         "description": "Dashboard for the Modbus Protocol",
-        "panelsJSON": "[{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":18,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":23,\"w\":8,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":40,\"y\":23,\"w\":8,\"h\":18,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":23,\"w\":11,\"h\":18,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":11,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{\"legendOpen\":true,\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":23,\"i\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\"},\"panelIndex\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":23,\"i\":\"218010cf-a0d9-4864-815b-f562bb67949d\"},\"panelIndex\":\"218010cf-a0d9-4864-815b-f562bb67949d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":23,\"w\":13,\"h\":18,\"i\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\"},\"panelIndex\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":41,\"w\":16,\"h\":26,\"i\":\"f8941a7d-be4b-4782-b72b-808645d02139\"},\"panelIndex\":\"f8941a7d-be4b-4782-b72b-808645d02139\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":16,\"y\":41,\"w\":16,\"h\":26,\"i\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\"},\"panelIndex\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":41,\"w\":16,\"h\":26,\"i\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\"},\"panelIndex\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":5,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":67,\"w\":16,\"h\":18,\"i\":\"a3049ec4-3c48-4a43-9899-99c018670773\"},\"panelIndex\":\"a3049ec4-3c48-4a43-9899-99c018670773\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":16,\"y\":67,\"w\":32,\"h\":18,\"i\":\"7efb9ae4-4913-4ae3-a945-0d83e27377d3\"},\"panelIndex\":\"7efb9ae4-4913-4ae3-a945-0d83e27377d3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":103,\"w\":48,\"h\":23,\"i\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\"},\"panelIndex\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\",\"embeddableConfig\":{\"sort\":[[\"firstPacket\",\"asc\"]]},\"panelRefName\":\"panel_14\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":126,\"w\":48,\"h\":15,\"i\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\"},\"panelIndex\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":141,\"w\":48,\"h\":15,\"i\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\"},\"panelIndex\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":156,\"w\":48,\"h\":19,\"i\":\"3711221b-ce64-447a-886b-6ad2c50322f9\"},\"panelIndex\":\"3711221b-ce64-447a-886b-6ad2c50322f9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"}]",
+        "panelsJSON": "[{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":30,\"i\":\"2\"},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":18,\"i\":\"14\"},\"panelIndex\":\"14\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":23,\"w\":8,\"h\":18,\"i\":\"15\"},\"panelIndex\":\"15\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_2\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":40,\"y\":23,\"w\":8,\"h\":18,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":23,\"w\":11,\"h\":18,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":30,\"w\":8,\"h\":11,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{\"legendOpen\":true,\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":23,\"i\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\"},\"panelIndex\":\"90799aa8-a1f5-4f22-8ebd-fcc89d16f6de\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":23,\"i\":\"218010cf-a0d9-4864-815b-f562bb67949d\"},\"panelIndex\":\"218010cf-a0d9-4864-815b-f562bb67949d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":19,\"y\":23,\"w\":13,\"h\":18,\"i\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\"},\"panelIndex\":\"5fd617f5-e213-4c2b-ae10-7a1643e739a7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":41,\"w\":16,\"h\":26,\"i\":\"f8941a7d-be4b-4782-b72b-808645d02139\"},\"panelIndex\":\"f8941a7d-be4b-4782-b72b-808645d02139\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":16,\"y\":41,\"w\":16,\"h\":26,\"i\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\"},\"panelIndex\":\"c0d7fb2c-a651-4054-b4cd-026d9f34ad44\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":32,\"y\":41,\"w\":16,\"h\":26,\"i\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\"},\"panelIndex\":\"502f22a6-2e5c-44dd-afa8-39309464f3f2\",\"embeddableConfig\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":5,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_11\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":67,\"w\":16,\"h\":18,\"i\":\"a3049ec4-3c48-4a43-9899-99c018670773\"},\"panelIndex\":\"a3049ec4-3c48-4a43-9899-99c018670773\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":16,\"y\":67,\"w\":32,\"h\":18,\"i\":\"7efb9ae4-4913-4ae3-a945-0d83e27377d3\"},\"panelIndex\":\"7efb9ae4-4913-4ae3-a945-0d83e27377d3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":103,\"w\":48,\"h\":23,\"i\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\"},\"panelIndex\":\"1d1b2b12-c510-4b9e-9fbe-b65a2946fe13\",\"embeddableConfig\":{\"sort\":[[\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"asc\"]]},\"panelRefName\":\"panel_14\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":126,\"w\":48,\"h\":15,\"i\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\"},\"panelIndex\":\"99311c07-fbae-4197-ab3f-f8ddf89deefc\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":141,\"w\":48,\"h\":15,\"i\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\"},\"panelIndex\":\"f50e3c18-31ce-482f-b6a0-c99215b5b5e9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"2.8.0\",\"gridData\":{\"x\":0,\"y\":156,\"w\":48,\"h\":19,\"i\":\"3711221b-ce64-447a-886b-6ad2c50322f9\"},\"panelIndex\":\"3711221b-ce64-447a-886b-6ad2c50322f9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"}]",
         "optionsJSON": "{\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
@@ -165,7 +165,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -344,7 +344,7 @@
       "version": "WzE0MCwxXQ==",
       "attributes": {
         "title": "Modbus - Logs Over Time",
-        "visState": "{\"title\":\"Modbus - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:33:54.363Z\",\"max\":\"2021-01-14T16:33:54.363Z\"}},\"label\":\"firstPacket per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"firstPacket\",\"timeRange\":{\"from\":\"now-50y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
+        "visState": "{\"title\":\"Modbus - Logs Over Time\",\"type\":\"histogram\",\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"\"}}],\"seriesParams\":[{\"show\":\"true\",\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"dimensions\":{\"x\":{\"accessor\":0,\"format\":{\"id\":\"date\",\"params\":{\"pattern\":\"YYYY\"}},\"params\":{\"date\":true,\"interval\":\"P365D\",\"intervalESValue\":365,\"intervalESUnit\":\"d\",\"format\":\"YYYY\",\"bounds\":{\"min\":\"1971-01-14T16:33:54.363Z\",\"max\":\"2021-01-14T16:33:54.363Z\"}},\"label\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER per 365 days\",\"aggType\":\"date_histogram\"},\"y\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"label\":\"Count\",\"aggType\":\"count\"}],\"series\":[{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"drilldown\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"label\":\"Log Type\",\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"timeRange\":{\"from\":\"now-50y\",\"to\":\"now\"},\"useNormalizedEsInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\" \"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"event.dataset\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Log Type\"}}]}",
         "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
         "description": "Modbus Logs over Time",
         "version": 1,
@@ -567,7 +567,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -611,7 +611,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -656,7 +656,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -704,7 +704,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -743,7 +743,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
@@ -827,7 +827,7 @@
         ],
         "sort": [
           [
-            "firstPacket",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],

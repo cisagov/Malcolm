@@ -8,6 +8,8 @@ shopt -s nocasematch
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
+OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
+OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
 
@@ -21,6 +23,19 @@ ISM_SNAPSHOT_COMPRESSED=${ISM_SNAPSHOT_COMPRESSED:-"false"}
 
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
+
+function DoReplacersInFile() {
+  # Index pattern and time field name may be specified via environment variable, but need
+  #   to be reflected in dashboards, templates, anomaly detectors, etc.
+  # This function takes a file and performs that replacement.
+  REPLFILE="$1"
+  if [[ -n "$REPLFILE" ]] && [[ -f "$REPLFILE" ]]; then
+    sed -i "s/MALCOLM_NETWORK_INDEX_PATTERN_REPLACER/${INDEX_PATTERN}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER/${INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_PATTERN_REPLACER/${OTHER_INDEX_PATTERN}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER/${OTHER_INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+  fi
+}
 
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
@@ -92,9 +107,16 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             || true
         fi
 
+        TEMPLATES_IMPORT_DIR="$(mktemp -d -t templates-XXXXXX)"
+        rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
+        while IFS= read -r fname; do
+            DoReplacersInFile "$fname"
+        done < <( find "$TEMPLATES_IMPORT_DIR"/ -type f 2>/dev/null )
+        MALCOLM_TEMPLATE_FILE_ORIG_TMP="$(echo "$MALCOLM_TEMPLATE_FILE_ORIG" | sed "s@$MALCOLM_TEMPLATES_DIR@$TEMPLATES_IMPORT_DIR@")"
+
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
         # we need to do this import (mostly useful for the secondary loop)
-        TEMPLATE_HASH="$(find "$ECS_TEMPLATES_DIR"/composable "$MALCOLM_TEMPLATES_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
+        TEMPLATE_HASH="$(find "$ECS_TEMPLATES_DIR"/composable "$TEMPLATES_IMPORT_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
 
         # get the previous stored template hash (if any) to avoid importing if it's already been imported
         set +e
@@ -118,9 +140,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             done
           fi
 
-          if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
+          if [[ -d "$TEMPLATES_IMPORT_DIR"/composable/component ]]; then
             echo "Importing custom ECS composable templates..."
-            for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
+            for i in "$TEMPLATES_IMPORT_DIR"/composable/component/*.json; do
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing custom ECS composable template $TEMP_FILENAME ..."
@@ -130,8 +152,8 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
           echo "Importing malcolm_template ($TEMPLATE_HASH)..."
 
-          if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
-            cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
+          if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG_TMP" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
+            cp "$MALCOLM_TEMPLATE_FILE_ORIG_TMP" "$MALCOLM_TEMPLATE_FILE"
           fi
 
           # store the TEMPLATE_HASH we calculated earlier as the _meta.hash for the malcolm template
@@ -146,7 +168,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
           # import other templates as well (and get info for creating their index patterns)
-          for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
+          for i in "$TEMPLATES_IMPORT_DIR"/*.json; do
             TEMP_BASENAME="$(basename "$i")"
             TEMP_FILENAME="${TEMP_BASENAME%.*}"
             if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
@@ -163,6 +185,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           echo "malcolm_template ($TEMPLATE_HASH) already exists ($LOOP) at \"${OPENSEARCH_URL_TO_USE}\""
 
         fi # TEMPLATE_HASH check
+        rm -rf "${TEMPLATES_IMPORT_DIR}"
 
         if [[ "$LOOP" == "primary" ]]; then
           echo "Importing index pattern..."
@@ -202,17 +225,22 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
               # take care of a few other substitutions
               sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
             fi
+            DoReplacersInFile "$i"
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
           rm -rf "${DASHBOARDS_IMPORT_DIR}"
 
-          # beats will no longer import its dashbaords into OpenSearch
+          # beats will no longer import its dashboards into OpenSearch
           # (see opensearch-project/OpenSearch-Dashboards#656 and
           # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
           # manually add load our dashboards in /opt/dashboards/beats as well.
-          for i in /opt/dashboards/beats/*.json; do
+          BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -d -t beats-XXXXXX)"
+          cp /opt/dashboards/beats/*.json "${BEATS_DASHBOARDS_IMPORT_DIR}"/
+          for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
+            DoReplacersInFile "$i"
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
+          rm -rf "${BEATS_DASHBOARDS_IMPORT_DIR}"
 
           echo "$DATASTORE_TYPE Dashboards saved objects import complete!"
 
@@ -246,9 +274,13 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             echo "Creating $DATASTORE_TYPE anomaly detectors..."
 
             # Create anomaly detectors here
-            for i in /opt/anomaly_detectors/*.json; do
+            ANOMALY_IMPORT_DIR="$(mktemp -d -t anomaly-XXXXXX)"
+            cp /opt/anomaly_detectors/*.json "${ANOMALY_IMPORT_DIR}"/
+            for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
+              DoReplacersInFile "$i"
               curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
             done
+            rm -rf "${ANOMALY_IMPORT_DIR}"
 
             # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
             # see:
@@ -283,9 +315,13 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             done
 
             # monitors
-            for i in /opt/alerting/monitors/*.json; do
+            ALERTING_IMPORT_DIR="$(mktemp -d -t alerting-XXXXXX)"
+            cp /opt/alerting/monitors/*.json "${ALERTING_IMPORT_DIR}"/
+            for i in "${ALERTING_IMPORT_DIR}"/*.json; do
+              DoReplacersInFile "$i"
               curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
             done
+            rm -rf "${ALERTING_IMPORT_DIR}"
 
             echo "$DATASTORE_TYPE alerting objects creation complete!"
 
