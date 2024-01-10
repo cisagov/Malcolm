@@ -96,4 +96,4 @@ A few minutes after starting Malcolm (probably 5 or so for Logstash to be comple
 * [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis): **https://localhost/netbox/**
 * [Account Management](authsetup.md#AuthBasicAccountManagement): **https://localhost/auth/**
 
-![Malcolm Landing Page](./images/malcolm_landing_page.png)
+![Malcolm Landing Page](./images/screenshots/malcolm_landing_page.png)
