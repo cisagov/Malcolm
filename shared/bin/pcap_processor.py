@@ -170,7 +170,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         # if this is an uploaded PCAP (not captured "live"")
                         #   append -upload to the node name used (which originates from PCAP_NODE_NAME)
                         tmpNodeName = fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName
-                        if (not (FILE_INFO_DICT_LIVE in fileInfo)) or (not fileInfo[FILE_INFO_DICT_LIVE]):
+                        if tmpNodeName and (
+                            (not (FILE_INFO_DICT_LIVE in fileInfo)) or (not fileInfo[FILE_INFO_DICT_LIVE])
+                        ):
                             tmpNodeName = tmpNodeName + '-upload'
 
                         # put together arkime execution command
@@ -178,8 +180,6 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             arkimeBin,
                             '--quiet',
                             '--insecure',
-                            '--node',
-                            tmpNodeName,
                             '-o',
                             f'ecsEventProvider={arkimeProvider}',
                             '-o',
@@ -187,6 +187,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             '-r',
                             fileInfo[FILE_INFO_DICT_NAME],
                         ]
+                        if tmpNodeName:
+                            cmd.append('--node')
+                            cmd.append(tmpNodeName)
                         if nodeHost:
                             cmd.append('--host')
                             cmd.append(nodeHost)
