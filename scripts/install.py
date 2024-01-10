@@ -1395,20 +1395,6 @@ class Installer(object):
                 f"Enter this node's hostname or IP to associate with network traffic metadata",
                 default=args.liveArkimeNodeHost,
             )
-            if (
-                (not liveArkimeNodeHost)
-                and (not args.acceptDefaultsNonInteractive)
-                and (
-                    not InstallerYesOrNo(
-                        f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
-                        default=False,
-                    )
-                )
-            ):
-                liveArkimeNodeHost = InstallerAskForString(
-                    f"Enter this node's hostname or IP to associate with network traffic metadata",
-                    default=args.liveArkimeNodeHost,
-                )
 
         if (
             (malcolmProfile == PROFILE_HEDGEHOG)
