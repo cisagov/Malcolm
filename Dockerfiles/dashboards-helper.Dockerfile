@@ -84,7 +84,15 @@ RUN apk update --no-cache && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
       rm -rf /opt/ecs && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/ecs-templates-os /opt/maps /data/init /opt/anomaly_detectors && \
+    chown -R ${PUSER}:${PGROUP} /data/init \
+                                /opt/alerting \
+                                /opt/anomaly_detectors \
+                                /opt/dashboards \
+                                /opt/ecs-templates \
+                                /opt/ecs-templates-os \
+                                /opt/maps \
+                                /opt/notifications \
+                                /opt/templates && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
     (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index 'malcolm_beats_*' --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
