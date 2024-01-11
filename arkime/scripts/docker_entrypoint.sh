@@ -13,6 +13,7 @@ ARKIME_RULES_DIR=${ARKIME_RULES_DIR:-"/opt/arkime/rules"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
+ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
 LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
 VIEWER_PORT=${ARKIME_VIEWER_PORT:-8005}
@@ -58,6 +59,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(rotateIndex=\).*/\1"${ARKIME_ROTATE_INDEX}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
     # note: when setting the node name, the viewer_service.sh script needs to match
