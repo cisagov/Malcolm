@@ -49,6 +49,14 @@ def filter(event)
     tstamp = Time.now.utc
   end
 
+  prefix_resolved = @prefix.delete_suffix('*')
+  if prefix_resolved[-1].count("^a-z0-9").zero? then
+    suffix_separator = ''
+  else
+    suffix_separator = prefix_resolved[-1]
+    prefix_resolved = prefix_resolved[0..-2]
+  end
+
   suffix_resolved = @suffix
   if parts = @suffix.scan(/(%{([^}]+)})/) then
       if parts.kind_of?(Array) then
@@ -69,7 +77,7 @@ def filter(event)
     end
   end
 
-  event.set("#{@target}", @prefix.sub(/[\*_-]*$/, '') + String(midfix_first) + suffix_resolved)
+  event.set("#{@target}", prefix_resolved + String(midfix_first) + suffix_separator + suffix_resolved)
 
   [event]
 end
