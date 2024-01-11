@@ -1416,21 +1416,14 @@ class Installer(object):
 
         # modify values in .env files in args.configDir
 
-        # first, if the args.configDir is completely empty, then populate from defaults
-        examplesConfigDir = os.path.join(malcolm_install_path, 'config')
-        if (
-            os.path.isdir(examplesConfigDir)
-            and (not same_file_or_dir(examplesConfigDir, args.configDir))
-            and (not os.listdir(args.configDir))
-        ):
-            for defaultEnvExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
-                shutil.copy2(defaultEnvExampleFile, args.configDir)
-
-        # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-        for envExampleFile in glob.glob(os.path.join(args.configDir, '*.env.example')):
-            envFile = envExampleFile[: -len('.example')]
-            if not os.path.isfile(envFile):
-                shutil.copyfile(envExampleFile, envFile)
+        # if a specific *.env file doesn't exist, use the config/*.example.env files as defaults
+        if os.path.isdir(examplesConfigDir := os.path.join(malcolm_install_path, 'config')):
+            for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
+                envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
+                if not os.path.isfile(envFile):
+                    if args.debug:
+                        eprint(f"Creating {envFile} from {envExampleFile}")
+                    shutil.copyfile(envExampleFile, envFile)
 
         # define environment variables to be set in .env files
         EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
