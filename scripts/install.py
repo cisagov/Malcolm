@@ -612,7 +612,7 @@ class Installer(object):
                 databaseModeChoice = InstallerChooseOne(
                     'Select primary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal])
+                        (x, allowedDatabaseModes[x][1], x == args.opensearchPrimaryMode)
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
@@ -1011,12 +1011,6 @@ class Installer(object):
         indexPruneNameSort = False
         arkimeManagePCAP = False
         arkimeFreeSpaceG = '10%'
-        ilmPolicy = False
-        ilmOptimizationTimePeriod = '30d'
-        ilmReplicas = 0
-        ilmHistoryInWeeks = 13
-        ilmSpiDataRetention = '90d'
-        ilmOptimizeSessionSegments = 1
 
         if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
             loopBreaker = CountUntilException(
@@ -1025,27 +1019,44 @@ class Installer(object):
             )
             ilmPolicy =  InstallerYesOrNo(
                     f'Should Arkime leverage Index Lifecycle Management (ILM) to manage volume?',
-                    default=False,
+                    default=args.ilmPolicy
             )
             if ilmPolicy:
                 InstallerDisplayMessage(
                     f'You must configure "hot" and "warm" nodes types in the remote Elasticsearch instance.'
                 )
                 while loopBreaker.increment():
-                    # Time in hours/days before (moving to warm) and force merge (number followed by h or d)
-                    ilmOptimizationTimePeriod = InstallerAskForString("How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)")
-                    # Time in hours/days before deleting index (number followed by h orilmSd)
-                    ilmSpiDataRetention = InstallerAskForString("How long should Arkime retain SPI data before deletiting it? (e.g. 25h, 90d, etc.)")
-                    # Number of segments to optimize sessions to
-                    segments = InstallerAskForString("How many segments should Arkime use to optimize?")
-                    # Number of replicas for older sessions indices
-                    ilmReplicas = InstallerAskForString("How many replicas should Arkime maintain for older session indices?")
-                    # Number of replicas for older sessions indices
-                    ilmHistoryInWeeks = InstallerAskForString("How many weeks of history should Arkime keep?")
+                    # Time in hours/days before (moving Arkime indexes to warm) and force merge (number followed by h or d), default 30d
+                    ilmOptimizationTimePeriod = InstallerAskForString(
+                        "How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)",
+                        default=args.ilmOptimizationTimePeriod
+                    )
+                    # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90d
+                    ilmSpiDataRetention = InstallerAskForString(
+                        "How long should Arkime retain SPI data before deletiting it? (e.g. 25h, 90d, etc.)",
+                        default=args.ilmSpiDataRetention
+                    )
+                    # Number of segments to optimize sessions to in the ILM policy, default 1
+                    ilmOptimizeSessionSegments = InstallerAskForString(
+                        "How many segments should Arkime use to optimize?",
+                        default=args.ilmOptimizeSessionSegments    
+                    )
+                    # Number of replicas for older sessions indices in the ILM policy, default 0
+                    ilmReplicas = InstallerAskForString(
+                        "How many replicas should Arkime maintain for older session indices?",
+                        default=args.ilmReplicas
+                    )
+                    # Number of weeks of history to keep, default 13
+                    ilmHistoryInWeeks = InstallerAskForString(
+                        "How many weeks of history should Arkime keep?",
+                        default=args.ilmHistoryInWeeks
+                    )
                     if (len(ilmOptimizationTimePeriod) > 1) and (len(ilmSpiDataRetention)) > 1 and str(ilmOptimizeSessionSegments).isdigit() and str(ilmReplicas).isdigit() and str(ilmHistoryInWeeks).isdigit():
                         break
+        else:
+            # Ensure ILM policy is not enabled if the primary mode is opensearch
+            ilmPolicy = False 
  
-   
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
             if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
@@ -1503,37 +1514,37 @@ class Installer(object):
                 'ARKIME_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoArkime),
             ),
-            # whether or not Elasticsearch ILM is enabled
+            # Should Arkime use an ILM policy?
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_ENABLED',
                 ilmPolicy,
             ),
-            # time in hours/days before (moving to warm) and force merge (number followed by h or d)
+            # Time in hours/days before moving (Arkime indexes to warm) and force merge (number followed by h or d), default 30
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD',
                 ilmOptimizationTimePeriod,
             ),
-            # time in hours/days before deleting index (number followed by h or d)
+            # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_RETENTION_TIME',
                 ilmSpiDataRetention,
             ),
-            # number of replicas for older sessions indices, default 0
+            # Number of replicas for older sessions indices in the ILM policy, default 0
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS',
                 ilmReplicas,
             ),
-            # number of weeks of history to keep, default 13
+            # Number of weeks of history to keep, default 13
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS',
                 ilmHistoryInWeeks,
             ),
-            # number of segments to optimize sessions to, default 1
+            # Number of segments to optimize sessions to in the ILM policy, default 1
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_SEGMENTS',
@@ -3667,8 +3678,8 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default='',
-        help=f'Time in hours/days before (moving Arkime indexes to warm) and force merge (number followed by h or d)'
+        default='30d',
+        help=f'Time in hours/days before (moving Arkime indexes to warm) and force merge (number followed by h or d), default 30d'
     )
     storageArgGroup.add_argument(
         '--ilm-spi-data-retention',
@@ -3676,12 +3687,12 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default='',
-        help=f'Time in hours/days before deleting Arkime indexes  (number followed by h or d)'
+        default='90d',
+        help=f'Time in hours/days before deleting Arkime indexes  (number followed by h or d), default 90d'
     )
     storageArgGroup.add_argument(
         '--ilm-replicas',
-        dest='ilmReplicals',
+        dest='ilmReplicas',
         required=False,
         metavar='<integer>',
         type=int,
