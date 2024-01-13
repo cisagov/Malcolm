@@ -1,0 +1,59 @@
+#!/bin/sh
+set -e
+
+#
+# List the soft prerequisites here.  This is a space separated list of
+# names, of scripts that are in the same directory as this one, that
+# must be run before this one can be.
+#
+PREREQS=""
+case $1 in
+    prereqs) echo "$PREREQS"; exit 0;;
+esac
+
+. /scripts/functions
+
+# Given the root partition, get the underlying device and partition number
+rootpart=$(realpath "$ROOT")
+rootpart_nr=$(blkid -sPART_ENTRY_NUMBER -o value -p "$rootpart")
+rootdev="/dev/$(lsblk -no pkname "$rootpart")"
+
+# Parted will detect if the GPT label is messed up and fix it
+# automatically, we just need to tell it to do so.
+parted -s "$rootdev" print 2>&1 | grep -z "fix the GPT" && {
+    echo "Fix" | parted ---pretend-input-tty "$rootdev" print
+}
+
+# Check if there's free space at the end of the device
+free_space="$(parted -m -s "$rootdev" print free | tail -n1 | grep free)"
+if test -z "$free_space"; then
+    # Great, we already resized; nothing left to do!
+    exit 0
+fi
+
+log_begin_msg "$0 resizing $ROOT"
+
+# Unmount for safety; fail if unset or empty (shellcheck SC2154)
+umount "${rootmnt:?}"
+
+# Expand the partition size to fill the entire device
+parted -s "$rootdev" resizepart "$rootpart_nr" 100%
+
+wait_for_udev 5
+
+# Now resize the filesystem
+partprobe "$rootdev"
+resize2fs "$rootpart"
+
+# After resizing, (re)check the root partition's filesystem
+fsck "$rootpart"
+
+# Remount root
+# Don't quote ${ROOTFLAGS} as that results in an extra (empty) argument
+# to 'mount', which in turn causes a boot failure
+# shellcheck disable=SC2086
+if ! mount -r ${FSTYPE:+-t "${FSTYPE}"} ${ROOTFLAGS} "${ROOT}" "${rootmnt?}"; then
+    panic "Failed to mount ${ROOT} as root file system."
+fi
+
+log_end_msg

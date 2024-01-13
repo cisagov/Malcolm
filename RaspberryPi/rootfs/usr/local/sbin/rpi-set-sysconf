@@ -1,0 +1,157 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use IO::File;
+use IO::Pipe;
+use feature 'switch';
+
+my ($filename, $conf);
+
+$filename = '/boot/firmware/sysconf.txt';
+
+logger('info', "Reading the system configuration settings from $filename");
+$conf = read_conf($filename);
+
+if (my $pass = delete($conf->{root_pw})) {
+    my $pipe;
+    logger('debug', 'Resetting root password');
+    unless (open($pipe, '|-', '/usr/sbin/chpasswd')) {
+	my $err = $!;
+	logger('error', "Could not run chpasswd: $err");
+	die $err;
+    }
+    $pipe->print("root:$pass");
+    close($pipe);
+}
+
+if (my $root_authorized_key = delete($conf->{root_authorized_key})) {
+    my $fh;
+    logger('debug', "Adding key to root's authorized_keys");
+    if(! -d "/root/.ssh") {
+        if(!mkdir("/root/.ssh", 0700)) {
+            my $err = sprintf("Could not create /root/.ssh directory: %s", $!);
+            logger('error', $err);
+            die $err;
+        }
+    }
+
+    unless ($fh = IO::File->new('/root/.ssh/authorized_keys', 'w', 0600)) {
+        my $err = $!;
+        logger('error', "Could not write /root/.ssh/authorized_keys: $err");
+        die $err;
+    }
+    $fh->print($root_authorized_key);
+    $fh->close;
+}
+
+if (my $name = delete($conf->{hostname})) {
+    my $fh;
+    logger('debug', "Setting hostname to '$name'");
+    unless ($fh = IO::File->new('/etc/hostname', 'w')) {
+	my $err = $!;
+	logger('error', "Could not write hostname '$name': $err");
+	die $err;
+    }
+    $fh->print($name);
+    $fh->close;
+    system('hostname', '--file', '/etc/hostname');
+}
+
+rewrite_conf_file($filename, $conf);
+
+exit 0;
+
+sub read_conf {
+    my ($file, $conf, $fh);
+    $file = shift;
+
+    $conf = {};
+    unless ($fh = IO::File->new($filename, 'r')) {
+	my $err = $!;
+	logger('error', "Could not read from configuration file '$filename': $err");
+	# Not finding the config file is not fatal: there is just
+	# nothing to configure!
+	return $conf;
+    }
+    while (my $line = $fh->getline) {
+	my ($key, $value);
+	# Allow for comments, and properly ignore them
+	$line =~ s/#.+//;
+	if ( ($key, $value) = ($line =~ m/^\s*([^=]+)\s*=\s*(.*)\s*$/)) {
+	    $key = lc($key);
+	    if (exists($conf->{$key})) {
+		logger('warn',
+		       "Repeated configuration key: $key. " .
+		       "Overwriting with new value ($value)");
+	    }
+	    $conf->{$key} = $value;
+	}
+    }
+    $fh->close;
+
+    return $conf;
+}
+
+sub logger {
+    my ($prio, $msg) = @_;
+    system('logger', '-p', "daemon.$prio",
+	   '-t', 'rpi-set-sysconf', $msg);
+}
+
+sub rewrite_conf_file {
+    my ($filename, $conf) = @_;
+    my $fh;
+    unless ($fh = IO::File->new($filename, 'w')) {
+	my $err = $!;
+	logger('error', "Could not write to configuration file '$filename': $err");
+	die $err;
+    }
+    $fh->print(
+q(# This file will be automatically evaluated and installed at next boot
+# time, and regenerated (to avoid leaking passwords and such information).
+#
+# To force it to be evaluated immediately, you can run (as root):
+#
+#     /usr/local/sbin/rpi-set-sysconf
+#
+# You can disable the file evaluation by disabling the rpi-set-sysconf
+# service in systemd:
+#
+#     systemctl disable rpi-set-sysconf
+#
+# Comments (all portions of a line following a '#' character) are
+# ignored. This file is read line by line. Valid
+# configuration lines are of the form 'key=value'. Whitespace around
+# 'key' and 'value' is ignored. This file will be _regenerated_ every
+# time it is evaluated.
+#
+# We follow the convention to indent with one space comments, and
+# leave no space to indicate the line is an example that could be
+# uncommented.
+
+# root_pw - Set a password for the root user (by default, it allows
+# for a passwordless login)
+#root_pw=FooBar
+
+# root_authorized_key - Set an authorized key for a root ssh login
+#root_authorized_key=
+
+# hostname - Set the system hostname.
+#hostname=rpi
+));
+
+    if (scalar keys %$conf) {
+	logger('warn', 'Unprocessed keys left in $filename: ' .
+	       join(', ', sort keys %$conf));
+	$fh->print(
+q(
+# We found the following unhandled keys - That means, the
+# configuration script does not know how to handle them. Please
+# double-check them!
+));
+	$fh->print(join('', map {sprintf("%s=%s\n", $_, $conf->{$_})} sort keys %$conf));
+    }
+    $fh->close;
+}
+
+

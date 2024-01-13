@@ -1,0 +1,8 @@
+# To enable wireless networking, uncomment the following lines and -naturally-
+# replace with your network's details.
+#
+# allow-hotplug wlan0
+# iface wlan0 inet dhcp
+# iface wlan0 inet6 dhcp
+#     wpa-ssid my-network-ssid
+#     wpa-psk s3kr3t_P4ss

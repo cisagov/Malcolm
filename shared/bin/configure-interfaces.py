@@ -66,7 +66,7 @@ class Constants:
     MSG_CONFIG_SSH = ('SSH Authentication', 'Configure SSH authentication')
     MSG_CONFIG_STATIC_TITLE = 'Provide the values for static IP configuration'
     MSG_ERR_ROOT_REQUIRED = 'Elevated privileges required, run as root'
-    MSG_ERR_BAD_HOST = 'Invalid host or port'
+    MSG_ERR_BAD_HOST = 'Invalid method, host, or port'
     MSG_MESSAGE_DHCP = 'Configuring for DHCP provided address...'
     MSG_MESSAGE_ERROR = 'Error: {}\n\nPlease try again.'
     MSG_MESSAGE_STATIC = 'Configuring for static IP address...'
@@ -298,30 +298,33 @@ def main():
                 elif time_sync_mode == Constants.TIME_SYNC_HTPDATE:
                     # sync time via htpdate, run via cron
 
+                    http_method = ''
                     http_host = ''
                     http_port = ''
                     while True:
                         # host/port for htpdate
                         code, values = d.form(
                             Constants.MSG_TIME_SYNC_HTPDATE_CONFIG,
-                            [('Host', 1, 1, '', 1, 25, 30, 255), ('Port', 2, 1, '9200', 2, 25, 6, 5)],
+                            [('Method', 1, 1, 'http', 1, 25, 30, 255), ('Host', 2, 1, '', 2, 25, 30, 255), ('Port', 3, 1, '9200', 3, 25, 6, 5)],
                         )
                         values = [x.strip() for x in values]
 
+                        print
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
 
-                        elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
+                        elif (len(values[0]) <= 0) or ((values[0].lower() != 'http') and (values[0].lower() != 'https')) or (len(values[1]) <= 0) or (len(values[2]) <= 0) or (not values[2].isnumeric()):
                             code = d.msgbox(text=Constants.MSG_ERR_BAD_HOST)
 
                         else:
-                            http_host = values[0]
-                            http_port = values[1]
+                            http_method = values[0].lower()
+                            http_host = values[1]
+                            http_port = values[2]
                             break
 
                     # test with htpdate to see if we can connect
                     ecode, test_output = run_subprocess(
-                        f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_host}:{http_port}"
+                        f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_method}://{http_host}:{http_port}"
                     )
                     if ecode == 0:
                         emsg_str = '\n'.join(test_output)
@@ -353,13 +356,13 @@ def main():
                         f.write('PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n')
                         f.write('\n')
                         f.write(
-                            f'*/{htpdate_interval} * * * * root {Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}\n'
+                            f'*/{htpdate_interval} * * * * root {Constants.TIME_SYNC_HTPDATE_COMMAND} {http_method}://{http_host}:{http_port}\n'
                         )
                         f.write('\n')
 
                     # now actually do the sync "for real" one time (so we can get in sync before waiting for the interval)
                     ecode, sync_output = run_subprocess(
-                        f"{Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}"
+                        f"{Constants.TIME_SYNC_HTPDATE_COMMAND} {http_method}://{http_host}:{http_port}"
                     )
                     emsg_str = '\n'.join(sync_output)
                     code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS if (ecode == 0) else ''}{emsg_str}")
@@ -480,7 +483,7 @@ def main():
                 if code != Dialog.OK:
                     raise CancelledError
 
-                # which interface are wer configuring?
+                # which interface are we configuring?
                 selected_iface = tag
 
                 # check if selected_iface already has entry in system configuration

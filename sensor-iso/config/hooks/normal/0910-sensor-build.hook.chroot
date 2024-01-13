@@ -12,6 +12,8 @@ export CXX="$CMAKE_CXX_COMPILER"
 export CXXFLAGS="-stdlib=libc++ -lc++abi"
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
+ARCH=$(dpkg --print-architecture)
+
 
 cat > /etc/environment << EOF
 CMAKE_C_COMPILER="clang-14"
@@ -189,9 +191,41 @@ mv ./yara-rules-src-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 
 # capa
 cd /tmp
-curl -o ./capa.zip "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CAPA_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("-linux\\.zip$")) | .browser_download_url' | tr -d '"')"
-unzip ./capa.zip
-mv ./capa /usr/local/bin/capa
+
+capa_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CAPA_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+
+if [ "${ARCH,,}" == 'arm64' ] || [ "${ARCH,,}" == 'arm' ]; then
+	#Build from source for ARM...
+	#Not sure if there is an easier way to get the latest release tag
+	capa_latest_ver=$(curl "${GITHUB_API_CURL_ARGS[@]}" "$capa_assets_url" | jq ".[] | select(.name | contains(\"-linux.zip\")) | .name")
+	# Retrieves strings like "capa-v6.1.0-linux.zip"; below trims out the x.x.x
+	capa_latest_ver=$(echo ${capa_latest_ver#*v})
+	capa_latest_ver=$(echo ${capa_latest_ver%%-*})
+	capa_latest_src_url="https://github.com/mandiant/capa/archive/refs/tags/v${capa_latest_ver}.zip"
+
+	python3 -m venv capa
+	source capa/bin/activate
+	cd capa
+
+	curl "${GITHUB_API_CURL_ARGS[@]}" "${capa_latest_src_url}" -o capa.zip
+	unzip -q capa.zip
+
+	cd capa-${capa_latest_ver}
+	pip install -e .[build]
+	python scripts/cache-ruleset.py rules/ cache/
+	pyinstaller .github/pyinstaller/pyinstaller.spec
+	mv dist/capa /usr/local/bin/capa
+
+	deactivate
+else
+	# Assume 64-bit Linux otherwise
+	capa_zip_url=$(curl "${GITHUB_API_CURL_ARGS[@]}" "$capa_assets_url" | jq ".[] | select(.browser_download_url | contains(\"-linux.zip\")) | .browser_download_url" | tr -d '"')
+	curl -o capa.zip "${GITHUB_API_CURL_ARGS[@]}" "${capa_zip_url}"
+	unzip ./capa.zip
+	mv ./capa /usr/local/bin/capa
+
+fi
+
 chmod 755 /usr/local/bin/capa
 rm -rf /tmp/capa*
 
@@ -200,19 +234,28 @@ cp /usr/local/bin/capa /opt/hedgehog_install_artifacts/
 
 # yq
 cd /tmp
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YQ_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("linux_amd64\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar zxvf - ./yq_linux_amd64
-mv ./yq_linux_amd64 /usr/bin/yq
+yq_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$YQ_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+yq_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$yq_assets_url" | jq ".[] | select(.browser_download_url | contains(\"yq_linux_${ARCH}.tar.gz\")) | .browser_download_url" | tr -d '"')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "${yq_tar_url}" | tar -xzf - ./yq_linux_${ARCH}
+
+mv ./yq_linux_${ARCH} /usr/bin/yq
 chmod 755 /usr/bin/yq
 ###
 
 # supercronic
-curl -o /usr/local/bin/supercronic "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$SUPERCRONIC_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("-linux-amd64$")) | .browser_download_url' | tr -d '"')"
+supercronic_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$SUPERCRONIC_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+supercronic_bin_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$supercronic_assets_url" | jq ".[] | select(.browser_download_url | contains(\"supercronic-linux-${ARCH}\")) | .browser_download_url" | tr -d '"')"
+curl -o /usr/local/bin/supercronic "${GITHUB_API_CURL_ARGS[@]}" "$supercronic_bin_url"
+
 chmod 755 /usr/local/bin/supercronic
 ###
 
 # croc
 cd /tmp
-curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CROC_RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq '.[] | select(.browser_download_url|test("Linux-64bit\\.tar\\.gz$")) | .browser_download_url' | tr -d '"')" | tar zxvf - croc
+croc_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CROC_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+croc_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$croc_assets_url" | jq ".[] | select(.browser_download_url | contains(\"_Linux-${ARCH^^}.tar.gz\")) | .browser_download_url" | tr -d '"')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "${croc_tar_url}" | tar -xzf - croc
+
 mv ./croc /usr/local/bin/croc
 chmod 755 /usr/local/bin/croc
 ###

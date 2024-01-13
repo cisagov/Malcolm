@@ -1,0 +1,181 @@
+---
+# See https://wiki.debian.org/RaspberryPi3 for known issues and more details.
+# image.yml based on revision: __GITCOMMIT__
+
+steps:
+  - mkimg: "{{ output }}"
+    size: 20480M
+
+  - mklabel: msdos
+    device: "{{ output }}"
+
+  - mkpart: primary
+    fs-type: 'fat32'
+    device: "{{ output }}"
+    start: 4MiB
+    end: 512MiB
+    tag: tag-firmware
+
+  - mkpart: primary
+    device: "{{ output }}"
+    start: 512MiB
+    end: 100%
+    tag: tag-root
+
+  - kpartx: "{{ output }}"
+
+  - mkfs: vfat
+    partition: tag-firmware
+    label: RASPIFIRM
+
+  - mkfs: ext4
+    partition: tag-root
+    label: RASPIROOT
+
+  - mount: tag-root
+
+  - mount: tag-firmware
+    mount-on: tag-root
+    dirname: '/boot/firmware'
+
+  - unpack-rootfs: tag-root
+
+  - qemu-debootstrap: __RELEASE__
+    mirror: http://deb.debian.org/debian
+    target: tag-root
+    arch: __ARCH__
+    components:
+      - main
+      - __FIRMWARE_COMPONENT__
+      - __FIRMWARE_COMPONENT_OLD__
+    unless: rootfs_unpacked
+
+  - create-file: /etc/apt/sources.list
+    contents: |+
+      deb http://deb.debian.org/debian __RELEASE__ main contrib __FIRMWARE_COMPONENT__ __FIRMWARE_COMPONENT_OLD__
+      deb http://deb.debian.org/debian __RELEASE__-updates main contrib __FIRMWARE_COMPONENT__ __FIRMWARE_COMPONENT_OLD__
+      deb http://security.debian.org/debian-security __RELEASE__-security main contrib __FIRMWARE_COMPONENT__ __FIRMWARE_COMPONENT_OLD__
+      __BACKPORTS__
+
+    unless: rootfs_unpacked
+
+  - copy-file: /etc/initramfs-tools/hooks/rpi-resizerootfs
+    src: rootfs/etc/initramfs-tools/hooks/rpi-resizerootfs
+    perm: 0755
+    unless: rootfs_unpacked
+
+  - copy-file: /etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs
+    src: rootfs/etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs
+    perm: 0755
+    unless: rootfs_unpacked
+
+  - apt: install
+    packages:
+      - aide
+      - aide-common
+      - curl
+      - dosfstools
+      - clamav
+      - clamav-daemon
+      - clamav-freshclam
+      - iw
+      - gpg
+      - parted
+      - ssh
+      - wpasupplicant
+      - systemd-timesyncd
+      - __LINUX_IMAGE__
+      - raspi-firmware
+      - __WIRELESS_FIRMWARE__
+      - __BLUETOOTH_FIRMWARE__
+    tag: tag-root
+    unless: rootfs_unpacked
+
+  - cache-rootfs: tag-root
+    unless: rootfs_unpacked
+
+  - shell: |
+      echo "__HOST__-$(date +%Y%m%d)" > "${ROOT?}/etc/hostname"
+
+      # Allow root logins locally with no password
+      sed -i 's,root:[^:]*:,root::,' "${ROOT?}/etc/shadow"
+
+      install -m 644 -o root -g root rootfs/etc/fstab "${ROOT?}/etc/fstab"
+
+      install -m 644 -o root -g root rootfs/etc/network/interfaces.d/eth0 "${ROOT?}/etc/network/interfaces.d/eth0"
+      install -m 600 -o root -g root rootfs/etc/network/interfaces.d/wlan0 "${ROOT?}/etc/network/interfaces.d/wlan0"
+
+      install -m 755 -o root -g root rootfs/usr/local/sbin/rpi-set-sysconf "${ROOT?}/usr/local/sbin/rpi-set-sysconf"
+      install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/"
+      install -m 644 -o root -g root rootfs/boot/firmware/sysconf.txt "${ROOT?}/boot/firmware/sysconf.txt"
+      mkdir -p "${ROOT?}/etc/systemd/system/basic.target.requires/"
+      ln -s /etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/basic.target.requires/rpi-set-sysconf.service"
+
+      # Resize script is now in the initrd for first boot; no need to ship it.
+      rm -f "${ROOT?}/etc/initramfs-tools/hooks/rpi-resizerootfs"
+      rm -f "${ROOT?}/etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs"
+
+      install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/"
+      mkdir -p "${ROOT?}/etc/systemd/system/multi-user.target.requires/"
+      ln -s /etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-reconfigure-raspi-firmware.service"
+
+      install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-generate-ssh-host-keys.service "${ROOT?}/etc/systemd/system/"
+      ln -s /etc/systemd/system/rpi-generate-ssh-host-keys.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-generate-ssh-host-keys.service"
+      rm -f "${ROOT?}"/etc/ssh/ssh_host_*_key*
+
+      __EXTRA_ROOT_SHELL_CMDS__
+    root-fs: tag-root
+
+  # Copy the relevant device tree files to the boot partition
+  - chroot: tag-root
+    shell: |
+      install -m 644 -o root -g root __DTB__ /boot/firmware/
+
+  # Clean up archive cache (likely not useful) and lists (likely outdated) to
+  # reduce image size by several hundred megabytes.
+  - chroot: tag-root
+    shell: |
+      apt-get clean
+      rm -rf /var/lib/apt/lists
+
+  # Modify the kernel commandline we take from the firmware to boot from
+  # the partition labeled raspiroot instead of forcing it to mmcblk0p2.
+  # Also insert the serial console right before the root= parameter.
+  #
+  # These changes will be overwritten after the hardware is probed
+  # after dpkg reconfigures raspi-firmware (upon first boot), so make
+  # sure we don't lose label-based booting.
+  - chroot: tag-root
+    shell: |
+      sed -i 's/root=/console=__SERIAL_CONSOLE__ root=/' /boot/firmware/cmdline.txt
+      sed -i 's#root=/dev/mmcblk0p2#root=LABEL=RASPIROOT#' /boot/firmware/cmdline.txt
+      sed -i 's/^#ROOTPART=.*/ROOTPART=LABEL=RASPIROOT/' /etc/default/raspi*-firmware
+
+      __EXTRA_CHROOT_SHELL_CMDS__
+
+  # TODO(https://github.com/larswirzenius/vmdb2/issues/24): remove once vmdb
+  # clears /etc/resolv.conf on its own.
+  - shell: |
+      rm "${ROOT?}/etc/resolv.conf"
+    root-fs: tag-root
+
+  # Clear /etc/machine-id and /var/lib/dbus/machine-id, as both should
+  # be auto-generated upon first boot. From the manpage
+  # (machine-id(5)):
+  #
+  #   For normal operating system installations, where a custom image is
+  #   created for a specific machine, /etc/machine-id should be
+  #   populated during installation.
+  #
+  # Note this will also trigger ConditionFirstBoot=yes for systemd.
+  # On Buster, /etc/machine-id should be an emtpy file, not an absent file
+  # On Bullseye, /etc/machine-id should not exist in an image
+  - chroot: tag-root
+    shell: |
+      rm -f /etc/machine-id /var/lib/dbus/machine-id
+      echo "uninitialized" > /etc/machine-id
+
+  # Create /etc/raspi-image-id to know, from what commit the image was built
+  - chroot: tag-root
+    shell: |
+      echo "Image built on __BUILDTIME__ (UTC)" > "/etc/raspi-image-id"
