@@ -1,5 +1,6 @@
 ---
 name: Feature/enhancement request
+projects: 'github/1'
 about: Suggest an idea for Malcolm
 title: ''
 labels: enhancement

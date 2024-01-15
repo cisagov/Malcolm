@@ -1,5 +1,6 @@
 ---
 name: Training
+projects: 'github/24'
 about: Propose a subject for training topics
 title: ''
 labels: training
