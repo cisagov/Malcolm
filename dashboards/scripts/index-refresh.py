@@ -191,6 +191,10 @@ def main():
     if debug:
         eprint('OpenSearch version is {}'.format(opensearchVersion))
 
+    # if they actually just specified the name of the environment variable, resolve that for the index name
+    if args.index.startswith('MALCOLM_'):
+        args.index = os.getenv(args.index, '')
+
     # find the ID of the index name (probably will be the same as the name)
     getIndexInfoResponse = requests.get(
         '{}/{}'.format(args.dashboardsUrl, GET_INDEX_PATTERN_INFO_URI),
