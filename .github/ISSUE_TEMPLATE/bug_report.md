@@ -1,6 +1,6 @@
 ---
 name: Bug report
-projects: 'github/1'
+projects: 'idaholab/1'
 about: Something isn't working correctly
 title: ''
 labels: bug
