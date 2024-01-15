@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: pcap-monitor-container
-        image: ghcr.io/mmguero-dev/malcolm/pcap-monitor:development
+        image: ghcr.io/idaholab/malcolm/pcap-monitor:24.01.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -70,7 +70,7 @@ spec:
             name: pcap-monitor-zeek-volume
       initContainers:
       - name: pcap-monitor-dirinit-container
-        image: ghcr.io/mmguero-dev/malcolm/dirinit:development
+        image: ghcr.io/idaholab/malcolm/dirinit:24.01.0
         imagePullPolicy: Always
         stdin: false
         tty: true
