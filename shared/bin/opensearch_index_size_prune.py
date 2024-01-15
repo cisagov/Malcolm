@@ -14,7 +14,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile
+from malcolm_utils import eprint, str2bool, ParseCurlFile, get_iterable
 
 ###################################################################################################
 debug = False
@@ -44,10 +44,13 @@ def main():
         '-i',
         '--index',
         dest='index',
-        metavar='<str>',
         type=str,
-        default=os.getenv('OPENSEARCH_INDEX_SIZE_PRUNE_INDEX', 'arkime_sessions3-*'),
-        help='Index pattern',
+        nargs='*',
+        default=[
+            os.getenv('MALCOLM_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
+            os.getenv('ARKIME_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
+        ],
+        help='Index pattern(s)',
     )
     parser.add_argument(
         '-o',
@@ -152,7 +155,11 @@ def main():
         sys.tracebacklimit = 0
 
     # short-circuit without printing anything else
-    if (args.limit == '0') or (args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote):
+    if (
+        (args.limit == '0')
+        or (not args.index)
+        or (args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote)
+    ):
         return
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
@@ -179,6 +186,9 @@ def main():
     opensearchVersion = osInfo['version']['number']
     if debug:
         eprint(f'OpenSearch version is {opensearchVersion}')
+
+    # as mulitple index patterns may be specified, deduplicate
+    args.index = list(set(get_iterable(args.index)))
 
     totalIndices = 0
     limitMegabytes = None
@@ -255,20 +265,23 @@ def main():
             f'Index limit for {args.index} is {humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))}'
         )
 
-    # now determine the total size of the indices from the index pattern
-    osInfoResponse = requests.get(
-        f'{args.opensearchUrl}/{args.index}/_stats/store',
-        auth=opensearchReqHttpAuth,
-        verify=args.opensearchSslVerify,
-    )
-    osInfo = osInfoResponse.json()
-    try:
-        totalSizeInMegabytes = (
-            osInfo['_all']['primaries' if args.primaryTotals else 'total']['store']['size_in_bytes'] // 1000000
+    # now determine the total size of the indices from the index pattern(s)
+    totalSizeInMegabytes = 0
+    totalIndices = 0
+    for idx in get_iterable(args.index):
+        osInfoResponse = requests.get(
+            f'{args.opensearchUrl}/{idx}/_stats/store',
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
         )
-        totalIndices = len(osInfo["indices"])
-    except Exception as e:
-        raise Exception(f'Error getting {args.index} size_in_bytes: {e}')
+        osInfo = osInfoResponse.json()
+        try:
+            totalSizeInMegabytes = totalSizeInMegabytes + (
+                osInfo['_all']['primaries' if args.primaryTotals else 'total']['store']['size_in_bytes'] // 1000000
+            )
+            totalIndices = totalIndices + len(osInfo["indices"])
+        except Exception as e:
+            raise Exception(f'Error getting {idx} size_in_bytes: {e}')
     if debug:
         eprint(
             f'Total {args.index} megabytes: is {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))}'
@@ -282,14 +295,18 @@ def main():
                 f'{len(osInfo)} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
             )
 
-        # get list of indexes in index pattern and sort by creation date
-        osInfoResponse = requests.get(
-            f'{args.opensearchUrl}/_cat/indices/{args.index}',
-            params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        osInfo = sorted(osInfoResponse.json(), key=lambda k: k['i' if args.nameSorted else 'creation.date'])
+        # get list of indexes in index pattern(s) and sort by creation date
+        osInfo = []
+        for idx in args.index:
+            osInfo.extend(
+                requests.get(
+                    f'{args.opensearchUrl}/_cat/indices/{idx}',
+                    params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+                    auth=opensearchReqHttpAuth,
+                    verify=args.opensearchSslVerify,
+                ).json()
+            )
+        osInfo = sorted(osInfo, key=lambda k: k['i' if args.nameSorted else 'creation.date'])
 
         # determine how many megabytes need to be deleted and which of the oldest indices will cover that
         indicesToDelete = []
