@@ -1038,7 +1038,7 @@ class Installer(object):
                         'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
                     )
                 indexPruneNameSort = InstallerYesOrNo(
-                    'Determine oldest indices by name (instead of creation time)?', default=True
+                    'Determine oldest indices by name (instead of creation time)?', default=False
                 )
 
             # let Arkime delete old PCAP files based on available storage

@@ -39,7 +39,6 @@ def main():
         default=str2bool(os.getenv('OPENSEARCH_INDEX_SIZE_PRUNE_DEBUG', default='False')),
         help="Verbose output",
     )
-    # TODO: allow specifying two indices (e.g., MALCOLM_NETWORK_INDEX_PATTERN may be different than ARKIME_NETWORK_INDEX_PATTERN)
     parser.add_argument(
         '-i',
         '--index',
@@ -49,6 +48,7 @@ def main():
         default=[
             os.getenv('MALCOLM_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
             os.getenv('ARKIME_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
+            os.getenv('MALCOLM_OTHER_INDEX_PATTERN', 'malcolm_beats_*'),
         ],
         help='Index pattern(s)',
     )
@@ -280,6 +280,9 @@ def main():
                 osInfo['_all']['primaries' if args.primaryTotals else 'total']['store']['size_in_bytes'] // 1000000
             )
             totalIndices = totalIndices + len(osInfo["indices"])
+        except KeyError:
+            # just means there aren't any indices of this type yet, ignore it
+            pass
         except Exception as e:
             raise Exception(f'Error getting {idx} size_in_bytes: {e}')
     if debug:
