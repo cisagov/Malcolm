@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.19
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -63,7 +63,7 @@ RUN apk update --no-cache && \
     apk upgrade --no-cache && \
     apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm rsync shadow jq tini && \
     npm install -g http-server && \
-    pip3 install supervisor humanfriendly requests && \
+    pip3 install --break-system-packages supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

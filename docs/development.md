@@ -52,7 +52,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 
 * `ghcr.io/idaholab/malcolm/api` (based on `python:3-slim`)
 * `ghcr.io/idaholab/malcolm/arkime` (based on `debian:12-slim`)
-* `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `alpine:3.18`)
+* `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `alpine:3.19`)
 * `ghcr.io/idaholab/malcolm/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `ghcr.io/idaholab/malcolm/file-monitor` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/file-upload` (based on `debian:12-slim`)
@@ -61,7 +61,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
-* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.18`)
+* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.19`)
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:12-slim`)
