@@ -295,7 +295,7 @@ def main():
 
         if debug:
             eprint(
-                f'{len(osInfo)} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
+                f'{totalIndices} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
             )
 
         # get list of indexes in index pattern(s) and sort by creation date
