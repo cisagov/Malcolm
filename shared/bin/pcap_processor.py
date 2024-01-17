@@ -23,6 +23,7 @@ import time
 import zmq
 
 from pcap_utils import (
+    FILE_INFO_DICT_LIVE,
     FILE_INFO_DICT_NAME,
     FILE_INFO_DICT_NODE,
     FILE_INFO_DICT_SIZE,
@@ -59,6 +60,7 @@ ZEEK_PATH = "/opt/zeek/bin/zeek-offline"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
 ZEEK_EXTRACTOR_MODE_MAPPED = 'mapped'
 ZEEK_EXTRACTOR_MODE_NONE = 'none'
+ZEEK_EXTRACTOR_MODE_NOTCOMMTXT = 'notcommtxt'
 ZEEK_EXTRACTOR_SCRIPT = "extractor.zeek"
 ZEEK_EXTRACTOR_SCRIPT_INTERESTING = "extractor_override.interesting.zeek"
 ZEEK_LOCAL_SCRIPT = 'local'
@@ -165,13 +167,19 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         )
                         logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
+                        # if this is an uploaded PCAP (not captured "live"")
+                        #   append -upload to the node name used (which originates from PCAP_NODE_NAME)
+                        tmpNodeName = fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName
+                        if tmpNodeName and (
+                            (not (FILE_INFO_DICT_LIVE in fileInfo)) or (not fileInfo[FILE_INFO_DICT_LIVE])
+                        ):
+                            tmpNodeName = tmpNodeName + '-upload'
+
                         # put together arkime execution command
                         cmd = [
                             arkimeBin,
                             '--quiet',
                             '--insecure',
-                            '--node',
-                            fileInfo[FILE_INFO_DICT_NODE] if (FILE_INFO_DICT_NODE in fileInfo) else nodeName,
                             '-o',
                             f'ecsEventProvider={arkimeProvider}',
                             '-o',
@@ -179,6 +187,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             '-r',
                             fileInfo[FILE_INFO_DICT_NAME],
                         ]
+                        if tmpNodeName:
+                            cmd.append('--node')
+                            cmd.append(tmpNodeName)
                         if nodeHost:
                             cmd.append('--host')
                             cmd.append(nodeHost)
@@ -633,7 +644,7 @@ def main():
             '--extract',
             dest='zeekExtractFileMode',
             help='Zeek file carving mode',
-            metavar=f'{ZEEK_EXTRACTOR_MODE_INTERESTING}|{ZEEK_EXTRACTOR_MODE_MAPPED}|{ZEEK_EXTRACTOR_MODE_NONE}',
+            metavar=f'{ZEEK_EXTRACTOR_MODE_INTERESTING}|{ZEEK_EXTRACTOR_MODE_MAPPED}|{ZEEK_EXTRACTOR_MODE_NONE}|{ZEEK_EXTRACTOR_MODE_NOTCOMMTXT}',
             type=str,
             default=ZEEK_EXTRACTOR_MODE_NONE,
         )

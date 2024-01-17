@@ -30,12 +30,16 @@ ENV SUPERCRONIC "supercronic-linux-amd64"
 ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
+
 ENV YQ_VERSION "4.33.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
 ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
 
-ARG NETBOX_DEVICETYPE_LIBRARY_PATH="/opt/netbox-devicetype-library"
+ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
+
 ARG NETBOX_DEFAULT_SITE=Malcolm
 ARG NETBOX_CRON=true
 ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
@@ -43,7 +47,7 @@ ARG NETBOX_PRELOAD_PREFIXES=false
 
 ENV NETBOX_PATH /opt/netbox
 ENV BASE_PATH netbox
-ENV NETBOX_DEVICETYPE_LIBRARY_PATH $NETBOX_DEVICETYPE_LIBRARY_PATH
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH $NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
 ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
@@ -71,7 +75,7 @@ RUN apt-get -q update && \
       supervisor \
       tini && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
-      'git+https://github.com/tobiasge/netbox-initializers' \
+      "git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}" \
       psycopg2 \
       pynetbox \
       python-magic \
@@ -87,15 +91,21 @@ RUN apt-get -q update && \
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch gcc git libpq-dev python3-dev && \
+    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev && \
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_PATH}" && \
+    mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
-    cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" && \
-        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_PATH}")" --strip-components 1 && \
+    cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
+        curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
+    cd "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" && \
+      "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r ./requirements.txt && \
+      sed -i "s/self.pull_repo()/pass/g" ./repo.py && \
+      mkdir -p ./repo && \
+      curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
+      rm -rf ./repo/device-types/WatchGuard && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
@@ -128,7 +138,6 @@ CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/bin/supervisord", "-c", "/etc/sup
 ARG BUILD_DATE
 ARG MALCOLM_VERSION
 ARG VCS_REVISION
-
 ENV BUILD_DATE $BUILD_DATE
 ENV MALCOLM_VERSION $MALCOLM_VERSION
 ENV VCS_REVISION $VCS_REVISION

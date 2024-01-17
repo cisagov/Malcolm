@@ -49,7 +49,16 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
 1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
     * to do an in-depth comparison of the previous version's settings with the new setings:
         + using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file backed up in Step 3, and manually migrate over any customizations in file
-        + compare the contents of each  `.env` file  Malcolm's `./config/` directory with its corresponding `.env.example` file
+        + compare the contents of each  `.env` file  Malcolm's `./config/` directory with its corresponding `.env.example` file. the author uses this command which uses [difftastic](https://github.com/Wilfred/difftastic), [bat](https://github.com/sharkdp/bat), [unbuffer](https://manpages.debian.org/stretch/expect/unbuffer.1.en.html), and [cmp](https://en.wikipedia.org/wiki/Cmp_(Unix)).
+        ```bash
+        for FILE in *.env; do \
+            cmp -s ../config/"$FILE.example" "$FILE" || \
+            unbuffer difft --display side-by-side-show-both \
+                           --tab-width 4 --strip-cr \
+                           --syntax-highlight on --ignore-comments \
+                           ../config/"$FILE.example" "$FILE"; \
+        done | bat --color=always
+        ```
 1. pull the new docker images (this will take a while)
     * `docker compose --profile malcolm pull` to pull them from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or `docker compose load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` if an offline tarball of the Malcolm docker images is available
 1. start Malcolm

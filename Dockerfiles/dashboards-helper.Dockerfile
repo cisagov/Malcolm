@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.19
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -20,30 +20,18 @@ ENV PUSER_PRIV_DROP true
 
 ENV TERM xterm
 
-ARG ARKIME_INDEX_PATTERN="arkime_sessions3-*"
-ARG ARKIME_INDEX_PATTERN_ID="arkime_sessions3-*"
-ARG ARKIME_INDEX_TIME_FIELD="firstPacket"
 ARG CREATE_OS_ARKIME_SESSION_INDEX="true"
-ARG OPENSEARCH_URL="http://opensearch:9200"
-ARG OPENSEARCH_PRIMARY="opensearch-local"
 ARG ISM_SNAPSHOT_COMPRESSED=false
 ARG ISM_SNAPSHOT_REPO=logs
 ARG OFFLINE_REGION_MAPS_PORT="28991"
 ARG OPENSEARCH_DEFAULT_DASHBOARD="0ad3d7c2-3441-485e-9dfe-dbb22e84e576"
-ARG DASHBOARDS_URL="http://dashboards:5601/dashboards"
 ARG DASHBOARDS_DARKMODE="true"
 
-ENV ARKIME_INDEX_PATTERN $ARKIME_INDEX_PATTERN
-ENV ARKIME_INDEX_PATTERN_ID $ARKIME_INDEX_PATTERN_ID
-ENV ARKIME_INDEX_TIME_FIELD $ARKIME_INDEX_TIME_FIELD
 ENV CREATE_OS_ARKIME_SESSION_INDEX $CREATE_OS_ARKIME_SESSION_INDEX
-ENV OPENSEARCH_URL $OPENSEARCH_URL
-ENV OPENSEARCH_PRIMARY $OPENSEARCH_PRIMARY
 ENV ISM_SNAPSHOT_COMPRESSED $ISM_SNAPSHOT_COMPRESSED
 ENV ISM_SNAPSHOT_REPO $ISM_SNAPSHOT_REPO
 ENV OFFLINE_REGION_MAPS_PORT $OFFLINE_REGION_MAPS_PORT
 ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
-ENV DASHBOARDS_URL $DASHBOARDS_URL
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
@@ -75,7 +63,7 @@ RUN apk update --no-cache && \
     apk upgrade --no-cache && \
     apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm rsync shadow jq tini && \
     npm install -g http-server && \
-    pip3 install supervisor humanfriendly requests && \
+    pip3 install --break-system-packages supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -96,10 +84,18 @@ RUN apk update --no-cache && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
       rm -rf /opt/ecs && \
-    chown -R ${PUSER}:${PGROUP} /opt/dashboards /opt/templates /opt/ecs-templates /opt/ecs-templates-os /opt/maps /data/init /opt/anomaly_detectors && \
+    chown -R ${PUSER}:${PGROUP} /data/init \
+                                /opt/alerting \
+                                /opt/anomaly_detectors \
+                                /opt/dashboards \
+                                /opt/ecs-templates \
+                                /opt/ecs-templates-os \
+                                /opt/maps \
+                                /opt/notifications \
+                                /opt/templates && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index 'malcolm_beats_*' --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo -e "*/2 * * * * /data/create-arkime-sessions-index.sh\n0 10 * * * /data/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
@@ -117,6 +113,9 @@ VOLUME ["/data/init"]
 ARG BUILD_DATE
 ARG MALCOLM_VERSION
 ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

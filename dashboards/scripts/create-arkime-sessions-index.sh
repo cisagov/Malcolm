@@ -6,9 +6,10 @@ set -euo pipefail
 shopt -s nocasematch
 
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
-INDEX_PATTERN=${ARKIME_INDEX_PATTERN:-"arkime_sessions3-*"}
-INDEX_PATTERN_ID=${ARKIME_INDEX_PATTERN_ID:-"arkime_sessions3-*"}
-INDEX_TIME_FIELD=${ARKIME_INDEX_TIME_FIELD:-"firstPacket"}
+INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
+OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
+OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
 
@@ -23,10 +24,32 @@ ISM_SNAPSHOT_COMPRESSED=${ISM_SNAPSHOT_COMPRESSED:-"false"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
 
+function DoReplacersInFile() {
+  # Index pattern and time field name may be specified via environment variable, but need
+  #   to be reflected in dashboards, templates, anomaly detectors, etc.
+  # This function takes a file and performs that replacement.
+  REPLFILE="$1"
+  if [[ -n "$REPLFILE" ]] && [[ -f "$REPLFILE" ]]; then
+    sed -i "s/MALCOLM_NETWORK_INDEX_PATTERN_REPLACER/${INDEX_PATTERN}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER/${INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_PATTERN_REPLACER/${OTHER_INDEX_PATTERN}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER/${OTHER_INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+  fi
+}
+
+function DoReplacersForDir() {
+  REPLDIR="$1"
+  if [[ -n "$REPLDIR" ]] && [[ -d "$REPLDIR" ]]; then
+    while IFS= read -r fname; do
+        DoReplacersInFile "$fname"
+    done < <( find "$REPLDIR"/ -type f 2>/dev/null )
+  fi
+}
+
 # is the argument to automatically create this index enabled?
 if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
-  # give OpenSearch time to start and Arkime to get its template created before configuring dashboards
+  # give OpenSearch time to start and Arkime to get its own template created before configuring dashboards
   /data/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
 
   for LOOP in primary secondary; do
@@ -79,7 +102,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
     if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
 
       # have we not not already created the index pattern?
-      if [[ "$LOOP" != "primary" ]] || ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" ; then
+      if [[ "$LOOP" != "primary" ]] || ! curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --fail -XGET "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN" ; then
 
         echo "$DATASTORE_TYPE ($LOOP) is running at \"${OPENSEARCH_URL_TO_USE}\"!"
 
@@ -93,9 +116,14 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             || true
         fi
 
+        TEMPLATES_IMPORT_DIR="$(mktemp -d -t templates-XXXXXX)"
+        rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
+        DoReplacersForDir "$TEMPLATES_IMPORT_DIR"
+        MALCOLM_TEMPLATE_FILE_ORIG_TMP="$(echo "$MALCOLM_TEMPLATE_FILE_ORIG" | sed "s@$MALCOLM_TEMPLATES_DIR@$TEMPLATES_IMPORT_DIR@")"
+
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
         # we need to do this import (mostly useful for the secondary loop)
-        TEMPLATE_HASH="$(find "$ECS_TEMPLATES_DIR"/composable "$MALCOLM_TEMPLATES_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
+        TEMPLATE_HASH="$(find "$ECS_TEMPLATES_DIR"/composable "$TEMPLATES_IMPORT_DIR" -type f -name "*.json" -size +2c 2>/dev/null | sort | xargs -r cat | sha256sum | awk '{print $1}')"
 
         # get the previous stored template hash (if any) to avoid importing if it's already been imported
         set +e
@@ -119,9 +147,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             done
           fi
 
-          if [[ -d "$MALCOLM_TEMPLATES_DIR"/composable/component ]]; then
+          if [[ -d "$TEMPLATES_IMPORT_DIR"/composable/component ]]; then
             echo "Importing custom ECS composable templates..."
-            for i in "$MALCOLM_TEMPLATES_DIR"/composable/component/*.json; do
+            for i in "$TEMPLATES_IMPORT_DIR"/composable/component/*.json; do
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing custom ECS composable template $TEMP_FILENAME ..."
@@ -131,8 +159,8 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
           echo "Importing malcolm_template ($TEMPLATE_HASH)..."
 
-          if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
-            cp "$MALCOLM_TEMPLATE_FILE_ORIG" "$MALCOLM_TEMPLATE_FILE"
+          if [[ -f "$MALCOLM_TEMPLATE_FILE_ORIG_TMP" ]] && [[ ! -f "$MALCOLM_TEMPLATE_FILE" ]]; then
+            cp "$MALCOLM_TEMPLATE_FILE_ORIG_TMP" "$MALCOLM_TEMPLATE_FILE"
           fi
 
           # store the TEMPLATE_HASH we calculated earlier as the _meta.hash for the malcolm template
@@ -147,7 +175,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
           # import other templates as well (and get info for creating their index patterns)
-          for i in "$MALCOLM_TEMPLATES_DIR"/*.json; do
+          for i in "$TEMPLATES_IMPORT_DIR"/*.json; do
             TEMP_BASENAME="$(basename "$i")"
             TEMP_FILENAME="${TEMP_BASENAME%.*}"
             if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
@@ -164,6 +192,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           echo "malcolm_template ($TEMPLATE_HASH) already exists ($LOOP) at \"${OPENSEARCH_URL_TO_USE}\""
 
         fi # TEMPLATE_HASH check
+        rm -rf "${TEMPLATES_IMPORT_DIR}"
 
         if [[ "$LOOP" == "primary" ]]; then
           echo "Importing index pattern..."
@@ -171,7 +200,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # From https://github.com/elastic/kibana/issues/3709
           # Create index pattern
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN_ID" \
+            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN" \
             -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
 
           echo "Setting default index pattern..."
@@ -179,7 +208,7 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           # Make it the default index
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
-            -d"{\"value\":\"$INDEX_PATTERN_ID\"}" || true
+            -d"{\"value\":\"$INDEX_PATTERN\"}" || true
 
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
             IDX_ID="$(echo "$i" | cut -d';' -f1)"
@@ -195,11 +224,12 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
 
           # install default dashboards
           DASHBOARDS_IMPORT_DIR="$(mktemp -d -t dashboards-XXXXXX)"
-          cp /opt/dashboards/*.json "${DASHBOARDS_IMPORT_DIR}"/
+          rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
+          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR"/
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
             if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
               # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
-              sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/sessions)//' "$i"
+              sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/arkime)//' "$i"
               # take care of a few other substitutions
               sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
             fi
@@ -207,13 +237,17 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           done
           rm -rf "${DASHBOARDS_IMPORT_DIR}"
 
-          # beats will no longer import its dashbaords into OpenSearch
+          # beats will no longer import its dashboards into OpenSearch
           # (see opensearch-project/OpenSearch-Dashboards#656 and
           # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
           # manually add load our dashboards in /opt/dashboards/beats as well.
-          for i in /opt/dashboards/beats/*.json; do
+          BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -d -t beats-XXXXXX)"
+          rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
+          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR"
+          for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
+          rm -rf "${BEATS_DASHBOARDS_IMPORT_DIR}"
 
           echo "$DATASTORE_TYPE Dashboards saved objects import complete!"
 
@@ -240,16 +274,20 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             # enable in-session storage
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d '{"value":true}'
 
-            # before we go on to create the anomaly detectors, we need to wait for actual arkime_sessions3-* documents
+            # before we go on to create the anomaly detectors, we need to wait for actual network log documents
             /data/opensearch_status.sh -w >/dev/null 2>&1
             sleep 60
 
             echo "Creating $DATASTORE_TYPE anomaly detectors..."
 
             # Create anomaly detectors here
-            for i in /opt/anomaly_detectors/*.json; do
+            ANOMALY_IMPORT_DIR="$(mktemp -d -t anomaly-XXXXXX)"
+            rsync -a /opt/anomaly_detectors/ "$ANOMALY_IMPORT_DIR"/
+            DoReplacersForDir "$ANOMALY_IMPORT_DIR"
+            for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
               curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
             done
+            rm -rf "${ANOMALY_IMPORT_DIR}"
 
             # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
             # see:
@@ -284,9 +322,13 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
             done
 
             # monitors
-            for i in /opt/alerting/monitors/*.json; do
+            ALERTING_IMPORT_DIR="$(mktemp -d -t alerting-XXXXXX)"
+            rsync -a /opt/alerting/monitors/ "$ALERTING_IMPORT_DIR"/
+            DoReplacersForDir "$ALERTING_IMPORT_DIR"
+            for i in "${ALERTING_IMPORT_DIR}"/*.json; do
               curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
             done
+            rm -rf "${ALERTING_IMPORT_DIR}"
 
             echo "$DATASTORE_TYPE alerting objects creation complete!"
 

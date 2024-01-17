@@ -13,7 +13,7 @@
     {
       "search": {
         "indices": [
-          "arkime_sessions3-*"
+          "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
         ],
         "query": {
           "size": 0,
@@ -22,7 +22,7 @@
               "filter": [
                 {
                   "range": {
-                    "firstPacket": {
+                    "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER": {
                       "from": "{{period_end}}||-10m",
                       "to": "{{period_end}}",
                       "include_lower": true,

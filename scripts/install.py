@@ -612,7 +612,7 @@ class Installer(object):
                 databaseModeChoice = InstallerChooseOne(
                     'Select primary Malcolm document store',
                     choices=[
-                        (x, allowedDatabaseModes[x][1], x == DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal])
+                        (x, allowedDatabaseModes[x][1], x == args.opensearchPrimaryMode)
                         for x in list(allowedDatabaseModes.keys())
                     ],
                 )
@@ -1038,7 +1038,7 @@ class Installer(object):
                         'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)', default=args.indexPruneSizeLimit
                     )
                 indexPruneNameSort = InstallerYesOrNo(
-                    'Determine oldest indices by name (instead of creation time)?', default=True
+                    'Determine oldest indices by name (instead of creation time)?', default=False
                 )
 
             # let Arkime delete old PCAP files based on available storage
@@ -1184,7 +1184,14 @@ class Installer(object):
         )
 
         # input file extraction parameters
-        allowedFileCarveModes = ('none', 'known', 'mapped', 'all', 'interesting')
+        allowedFileCarveModes = {
+            'none': 'No file extraction',
+            'known': 'Extract recognized MIME types',
+            'mapped': 'Extract MIME types for which file extensions are known',
+            'all': 'Extract all files',
+            'interesting': 'Extract MIME types of common attack vectors',
+            'notcommtxt': 'Extract all except common plain text files',
+        }
         allowedFilePreserveModes = ('quarantined', 'all', 'none')
 
         fileCarveMode = None
@@ -1197,16 +1204,21 @@ class Installer(object):
         clamAvScan = False
         fileScanRuleUpdate = False
         fileCarveHttpServer = False
+        fileCarveHttpServerZip = False
         fileCarveHttpServeEncryptKey = ''
 
         if InstallerYesOrNo('Enable file extraction with Zeek?', default=bool(fileCarveModeDefault)):
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file extraction behavior')
-            while fileCarveMode not in allowedFileCarveModes and loopBreaker.increment():
+            while fileCarveMode not in allowedFileCarveModes.keys() and loopBreaker.increment():
                 fileCarveMode = InstallerChooseOne(
                     'Select file extraction behavior',
                     choices=[
-                        (x, '', x == fileCarveModeDefault if fileCarveModeDefault else allowedFileCarveModes[0])
-                        for x in allowedFileCarveModes
+                        (
+                            x,
+                            allowedFileCarveModes[x],
+                            x == fileCarveModeDefault if fileCarveModeDefault else 'none',
+                        )
+                        for x in allowedFileCarveModes.keys()
                     ],
                 )
             if fileCarveMode and (fileCarveMode != 'none'):
@@ -1229,8 +1241,13 @@ class Installer(object):
                     'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
                 if fileCarveHttpServer:
+                    fileCarveHttpServerZip = InstallerYesOrNo(
+                        'ZIP downloaded preserved files?', default=args.fileCarveHttpServerZip
+                    )
                     fileCarveHttpServeEncryptKey = InstallerAskForString(
-                        'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
+                        'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
+                        if fileCarveHttpServerZip
+                        else 'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
                         default=args.fileCarveHttpServeEncryptKey,
                     )
                 if fileCarveMode is not None:
@@ -1250,9 +1267,9 @@ class Installer(object):
                         'Download updated file scanner signatures periodically?', default=args.fileScanRuleUpdate
                     )
 
-        if fileCarveMode not in allowedFileCarveModes:
-            fileCarveMode = allowedFileCarveModes[0]
-        if filePreserveMode not in allowedFileCarveModes:
+        if fileCarveMode not in allowedFileCarveModes.keys():
+            fileCarveMode = 'none'
+        if filePreserveMode not in allowedFilePreserveModes:
             filePreserveMode = allowedFilePreserveModes[0]
         if (vtotApiKey is None) or (len(vtotApiKey) <= 1):
             vtotApiKey = '0'
@@ -1378,20 +1395,6 @@ class Installer(object):
                 f"Enter this node's hostname or IP to associate with network traffic metadata",
                 default=args.liveArkimeNodeHost,
             )
-            if (
-                (not liveArkimeNodeHost)
-                and (not args.acceptDefaultsNonInteractive)
-                and (
-                    not InstallerYesOrNo(
-                        f'With live Arkime capture node hostname or IP is required for viewer session retrieval. Are you sure?',
-                        default=False,
-                    )
-                )
-            ):
-                liveArkimeNodeHost = InstallerAskForString(
-                    f"Enter this node's hostname or IP to associate with network traffic metadata",
-                    default=args.liveArkimeNodeHost,
-                )
 
         if (
             (malcolmProfile == PROFILE_HEDGEHOG)
@@ -1413,21 +1416,14 @@ class Installer(object):
 
         # modify values in .env files in args.configDir
 
-        # first, if the args.configDir is completely empty, then populate from defaults
-        examplesConfigDir = os.path.join(malcolm_install_path, 'config')
-        if (
-            os.path.isdir(examplesConfigDir)
-            and (not same_file_or_dir(examplesConfigDir, args.configDir))
-            and (not os.listdir(args.configDir))
-        ):
-            for defaultEnvExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
-                shutil.copy2(defaultEnvExampleFile, args.configDir)
-
-        # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-        for envExampleFile in glob.glob(os.path.join(args.configDir, '*.env.example')):
-            envFile = envExampleFile[: -len('.example')]
-            if not os.path.isfile(envFile):
-                shutil.copyfile(envExampleFile, envFile)
+        # if a specific *.env file doesn't exist, use the config/*.example.env files as defaults
+        if os.path.isdir(examplesConfigDir := os.path.join(malcolm_install_path, 'config')):
+            for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
+                envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
+                if not os.path.isfile(envFile):
+                    if args.debug:
+                        eprint(f"Creating {envFile} from {envExampleFile}")
+                    shutil.copyfile(envExampleFile, envFile)
 
         # define environment variables to be set in .env files
         EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
@@ -1774,11 +1770,11 @@ class Installer(object):
                 'EXTRACTED_FILE_HTTP_SERVER_ENABLE',
                 TrueOrFalseNoQuote(fileCarveHttpServer),
             ),
-            # encrypt HTTP server for extracted files
+            # ZIP HTTP server for extracted files
             EnvValue(
                 os.path.join(args.configDir, 'zeek.env'),
-                'EXTRACTED_FILE_HTTP_SERVER_ENCRYPT',
-                TrueOrFalseNoQuote(fileCarveHttpServer and (len(fileCarveHttpServeEncryptKey) > 0)),
+                'EXTRACTED_FILE_HTTP_SERVER_ZIP',
+                TrueOrFalseNoQuote(fileCarveHttpServerZip),
             ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
@@ -3487,16 +3483,6 @@ def main():
         help="Expose Filebeat TCP port to external hosts",
     )
     openPortsArgGroup.add_argument(
-        '--arkime-viewer-expose',
-        dest='exposeArkimeViewer',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Expose Arkime viewer to external hosts for PCAP payload retrieval",
-    )
-    openPortsArgGroup.add_argument(
         '--sftp-expose',
         dest='exposeSFTP',
         type=str2bool,
@@ -3679,7 +3665,7 @@ def main():
         '--file-extraction',
         dest='fileCarveMode',
         required=False,
-        metavar='<none|known|mapped|all|interesting>',
+        metavar='<none|known|mapped|all|interesting|notcommtxt>',
         type=str,
         default='none',
         help='Zeek file extraction behavior',
@@ -3704,13 +3690,23 @@ def main():
         help='Expose web interface for downloading preserved files',
     )
     fileCarveArgGroup.add_argument(
+        '--extracted-file-server-zip',
+        dest='fileCarveHttpServerZip',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help='ZIP downloaded preserved files',
+    )
+    fileCarveArgGroup.add_argument(
         '--extracted-file-server-password',
         dest='fileCarveHttpServeEncryptKey',
         required=False,
         metavar='<string>',
         type=str,
         default='',
-        help='AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
+        help='ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)',
     )
     fileCarveArgGroup.add_argument(
         '--extracted-file-clamav',

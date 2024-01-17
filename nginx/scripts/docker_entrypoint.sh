@@ -26,6 +26,8 @@ if [ "$socketMissing" = 1 -a "$1" = 'supervisord' -a "$2" = '-c' -a "$3" = '/etc
   exit 1
 fi
 
+NGINX_LANDING_INDEX_HTML=/usr/share/nginx/html/index.html
+
 # set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
 
 # "include" file that sets 'ssl on' and indicates the locations of the PEM files
@@ -243,6 +245,8 @@ if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; t
   [[ -n ${PGID} ]] && chown -f :${PGID} /etc/nginx/auth/htpasswd
   rm -rf /tmp/auth/* || true
 fi
+
+[[ -f "${NGINX_LANDING_INDEX_HTML}" ]] && sed -i "s/MALCOLM_VERSION_REPLACER/v${MALCOLM_VERSION:-unknown} (${VCS_REVISION:-} @ ${BUILD_DATE:-})/g" "${NGINX_LANDING_INDEX_HTML}"
 
 rm -rf /var/log/nginx/* || true
 

@@ -8,7 +8,7 @@ index 84b28a45..7a414ca2 100644
          Arkime v{{ version }} |
 -        <a href="https://arkime.com">arkime.com</a>
 +        <a href="https://arkime.com">arkime.com 🦉</a>
-+        | <a href="/readme/">Malc⦿lm 📄</a>
++        | <a href="/">Malc⦿lm 📄</a>
 +        | <a href="/dashboards">Dashboards 📊</a>
 +        | <a href="/netbox/">NetBox 💻</a>
          <span v-if="responseTime && !loadingData">

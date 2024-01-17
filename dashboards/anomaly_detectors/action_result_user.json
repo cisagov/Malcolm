@@ -1,9 +1,9 @@
 {
   "name": "action_result_user",
   "description": "Detect anomalies in action (event.action), result (event.result) and user (related.user) within application protocols (network.protocol)",
-  "time_field": "firstPacket",
+  "time_field": "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
   "indices": [
-    "arkime_sessions3-*"
+    "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
   ],
   "category_field": [
     "network.protocol"
