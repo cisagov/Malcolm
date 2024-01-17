@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=cisagov
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.11.3"
+BEATS_VER="8.11.4"
 BEATS_OSS="-oss"
 
 BUILD_ERROR_CODE=1
@@ -152,6 +152,12 @@ if [ -d "$WORKDIR" ]; then
   docker run --rm -v "$SCRIPT_PATH"/yara:/build yara-build:latest -o /build
   mv "$SCRIPT_PATH/yara"/*.deb ./config/packages.chroot/
   docker rmi -f yara-build:latest
+
+  # clone and build htpdate .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/htpdate/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/htpdate:/build htpdate-build:latest -o /build
+  mv "$SCRIPT_PATH/htpdate"/*.deb ./config/packages.chroot/
+  docker rmi -f htpdate-build:latest
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p "$SCRIPT_PATH/arkime/etc"

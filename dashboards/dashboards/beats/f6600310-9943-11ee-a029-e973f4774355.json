@@ -240,7 +240,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

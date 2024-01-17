@@ -2210,10 +2210,9 @@ class MalcolmSource extends WISESource {
     var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
     this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
-    // add right-click for extracted/quarantined files from zeek
+    // add right-click for extracted files from zeek
     var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download (if quarantined)", url: "/dl-extracted-files/quarantine/%TEXT%", fields: carvedFieldsStr });
-    this.api.addValueAction("malcolm_carved_file_preserved", { name: "Download (if preserved)", url: "/dl-extracted-files/preserved/%TEXT%", fields: carvedFieldsStr });
+    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download", url: "/dl-extracted-files/%TEXT%", fields: carvedFieldsStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";

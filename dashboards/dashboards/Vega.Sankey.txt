@@ -9,8 +9,8 @@
       name: rawData
       url: {
         %context%: true
-        %timefield%: firstPacket
-        index: arkime_sessions3-*
+        %timefield%: MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER
+        index: MALCOLM_NETWORK_INDEX_PATTERN_REPLACER
         body: {
           size: 0
           aggs: {
@@ -407,7 +407,7 @@
         {
           // Clicking groupMark sets this signal to the filter values
           events: @groupMark:click!
-          update: "datum.stack=='stk1' ? opensearchDashboardsAddFilter({\"match_phrase\": { \"source.ip\": datum.grpId } }, 'arkime_sessions3-*') : opensearchDashboardsAddFilter({\"match_phrase\": { \"destination.ip\": datum.grpId } }, 'arkime_sessions3-*')"
+          update: "datum.stack=='stk1' ? opensearchDashboardsAddFilter({\"match_phrase\": { \"source.ip\": datum.grpId } }, 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER') : opensearchDashboardsAddFilter({\"match_phrase\": { \"destination.ip\": datum.grpId } }, 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER')"
         }
         {
           // Clicking "show all" button, or double-clicking anywhere resets it

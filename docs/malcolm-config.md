@@ -11,6 +11,7 @@ Although the configuration script automates many of the following configuration 
 * **`arkime.env`** and **`arkime-secret.env`** - settings for [Arkime](https://arkime.com/)
     - `ARKIME_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Arkime for analyzing PCAP files (default `1`)
     - `ARKIME_PASSWORD_SECRET` - the password hash secret for the Arkime viewer cluster (see `passwordSecret` in [Arkime INI Settings](https://arkime.com/settings)) used to secure the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface
+    - `ARKIME_ROTATE_INDEX` - how often (based on network traffic timestamp) to [create a new index](https://arkime.com/settings#rotateIndex) in OpenSearch
     - `MANAGE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will be marked as available for deletion by Arkime if available storage space becomes too low (default `false`)
     - `MAXMIND_GEOIP_DB_LICENSE_KEY` - Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). The license key can be specified here for GeoIP database downloads during build- and run-time.
 * **`auth-common.env`** - [authentication](authsetup.md)-related settings
@@ -50,6 +51,14 @@ Although the configuration script automates many of the following configuration 
     - `OPENSEARCH_SECONDARY` - one of `opensearch-local`, `opensearch-remote`, `elasticsearch-remote`, or blank (unset) to indicate that Malcolm should forward logs to a secondary remote OpenSearch instance in addition to the primary OpenSearch instance (default is unset)
     - `OPENSEARCH_SECONDARY_URL` - when forwarding to a secondary remote OpenSearch instance (i.e., `OPENSEARCH_SECONDARY` is set) this value specifies the secondary remote instance URL in the format `protocol://host:port`
     - `OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION` - if set to `true`, connections to the secondary remote OpenSearch instance will require full TLS certificate validation (this may fail if using self-signed certificates) (default `false`)
+    - The following variables control the OpenSearch indices to which network traffic metadata are written. Changing them from their defaults may cause logs from non-Arkime data sources (i.e., Zeek, Suricata) to not show up correctly in Arkime.
+        + `MALCOLM_NETWORK_INDEX_PATTERN` - Index pattern for network traffic logs written via Logstash (default is `arkime_sessions3-*`)
+        + `MALCOLM_NETWORK_INDEX_TIME_FIELD` - Default time field to use for network traffic logs in Logstash and Dashboards (default is `firstPacket`)
+        + `MALCOLM_NETWORK_INDEX_SUFFIX` - Suffix used to create index to which network traffic logs are written (supports [Ruby `strftime`](https://docs.ruby-lang.org/en/3.2/strftime_formatting_rdoc.html) strings in `％{}`) (default is `％{％y％m％d}`)
+    - The following variables control the OpenSearch indices to which other logs ([third-party logs](third-party-logs.md#ThirdPartyLogs), resource utilization reports from network sensors, etc.) are written.
+        + `MALCOLM_OTHER_INDEX_PATTERN` - Index pattern for other logs written via Logstash (default is `malcolm_beats_*`)
+        + `MALCOLM_OTHER_INDEX_TIME_FIELD` - Default time field to use for other logs in Logstash and Dashboards (default is `@timestamp`)
+        + `MALCOLM_OTHER_INDEX_SUFFIX` - Suffix used to create index to which other logs are written (supports [Ruby `strftime`](https://docs.ruby-lang.org/en/3.2/strftime_formatting_rdoc.html) strings in `％{}`) (default is `％{％y％m％d}`)
 * **`pcap-capture.env`** - settings specific to capturing traffic for [live traffic analysis](live-analysis.md#LocalPCAP)
     - `PCAP_ENABLE_NETSNIFF` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [netsniff-ng](http://netsniff-ng.org/)
     - `PCAP_ENABLE_TCPDUMP` – if set to `true`, Malcolm will capture network traffic on the local network interface(s) indicated in `PCAP_IFACE` using [tcpdump](https://www.tcpdump.org/); there is no reason to enable *both* `PCAP_ENABLE_NETSNIFF` and `PCAP_ENABLE_TCPDUMP`
@@ -81,8 +90,8 @@ Although the configuration script automates many of the following configuration 
     - `EXTRACTED_FILE_ENABLE_CLAMAV` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [ClamAV](https://www.clamav.net/)
     - `EXTRACTED_FILE_ENABLE_YARA` – if set to `true`, [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be scanned with [Yara](https://github.com/VirusTotal/yara)
     - `EXTRACTED_FILE_HTTP_SERVER_ENABLE` – if set to `true`, the directory containing [Zeek-extracted files](file-scanning.md#ZeekFileExtraction) will be served over HTTP at `./extracted-files/` (e.g., **https://localhost/extracted-files/** if connecting locally)
-    - `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT` – if to `true`, the Zeek-extracted files will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
-    - `EXTRACTED_FILE_HTTP_SERVER_KEY` – specifies the AES-256-CBC decryption password for encrypted Zeek-extracted files; used in conjunction with `EXTRACTED_FILE_HTTP_SERVER_ENCRYPT`
+    - `EXTRACTED_FILE_HTTP_SERVER_ZIP` – if to `true`, the Zeek-extracted files will be archived in a ZIP file upon download
+    - `EXTRACTED_FILE_HTTP_SERVER_KEY` – specifies the password for the ZIP archive if `EXTRACTED_FILE_HTTP_SERVER_ZIP` is `true`; otherwise, this specifies the decryption password for encrypted Zeek-extracted files in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`)
     - `EXTRACTED_FILE_IGNORE_EXISTING` – if set to `true`, files extant in `./zeek-logs/extract_files/`  directory will be ignored on startup rather than scanned
     - `EXTRACTED_FILE_PRESERVATION` – determines behavior for preservation of [Zeek-extracted files](file-scanning.md#ZeekFileExtraction)
     - `EXTRACTED_FILE_UPDATE_RULES` – if set to `true`, file scanner engines (e.g., ClamAV, Capa, Yara) will periodically update their rule definitions (default `false`)

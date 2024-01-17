@@ -199,3 +199,16 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+
+
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

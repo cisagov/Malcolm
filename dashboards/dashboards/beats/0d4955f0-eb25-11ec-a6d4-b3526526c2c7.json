@@ -74,7 +74,7 @@
         {
           "name": "control_0_index_pattern",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -133,7 +133,7 @@
         {
           "name": "control_0_index_pattern",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -198,7 +198,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

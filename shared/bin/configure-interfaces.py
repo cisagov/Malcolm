@@ -66,7 +66,7 @@ class Constants:
     MSG_CONFIG_SSH = ('SSH Authentication', 'Configure SSH authentication')
     MSG_CONFIG_STATIC_TITLE = 'Provide the values for static IP configuration'
     MSG_ERR_ROOT_REQUIRED = 'Elevated privileges required, run as root'
-    MSG_ERR_BAD_HOST = 'Invalid host or port'
+    MSG_ERR_BAD_HOST = 'Invalid host/URL or port'
     MSG_MESSAGE_DHCP = 'Configuring for DHCP provided address...'
     MSG_MESSAGE_ERROR = 'Error: {}\n\nPlease try again.'
     MSG_MESSAGE_STATIC = 'Configuring for static IP address...'
@@ -304,7 +304,7 @@ def main():
                         # host/port for htpdate
                         code, values = d.form(
                             Constants.MSG_TIME_SYNC_HTPDATE_CONFIG,
-                            [('Host', 1, 1, '', 1, 25, 30, 255), ('Port', 2, 1, '9200', 2, 25, 6, 5)],
+                            [('URL', 1, 1, '', 1, 25, 30, 255), ('Port', 2, 1, '443', 2, 25, 6, 5)],
                         )
                         values = [x.strip() for x in values]
 
