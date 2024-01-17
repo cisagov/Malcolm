@@ -9,7 +9,7 @@ ENCODING="utf-8"
 # options
 # -v       (verbose)
 # -t <str> (wait not only for "up" status, but also wait for specified index template ot exist
-# -w       (wait not only for "up" status, but also wait for actual arkime_sessions3-* logs to exist)
+# -w       (wait not only for "up" status, but also wait for actual network traffic logs to exist)
 #
 # opensearch connection parameters are read from environment variables
 
@@ -44,6 +44,8 @@ shift "$(($OPTIND -1))"
 
 OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
+MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+ARKIME_NETWORK_INDEX_PATTERN=${ARKIME_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
@@ -100,14 +102,20 @@ if (( $WAIT_FOR_LOG_DATA == 1 )); then
 
   echo "Waiting until $OPENSEARCH_PRIMARY has logs..." >&2
 
-  # wait until at least one arkime_sessions3-* index exists
-  until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/arkime_sessions3-*" 2>/dev/null | wc -l) > 0 )) ; do
-    sleep 5
+  # wait until at least one network traffic log index exists
+  FOUND_INDEX=
+  while true; do
+    if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN" 2>/dev/null | wc -l) > 0 )); then
+      FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
+    elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN" 2>/dev/null | wc -l) > 0 )); then
+      FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
+    fi
+    [[ -n "$FOUND_INDEX" ]] && break || sleep 5
   done
   echo "Log indices exist." >&2
 
   # wait until at least one record with @timestamp exists
-  until curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XPOST "$OPENSEARCH_URL/arkime_sessions3-*/_search" -d'{ "sort": { "@timestamp" : "desc" }, "size" : 1 }' >/dev/null 2>&1 ; do
+  until curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XPOST "$OPENSEARCH_URL/$FOUND_INDEX/_search" -d'{ "sort": { "@timestamp" : "desc" }, "size" : 1 }' >/dev/null 2>&1 ; do
     sleep 5
   done
   echo "Logs exist." >&2

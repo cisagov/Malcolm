@@ -132,7 +132,7 @@
       "version": "WzkyNCwxXQ==",
       "attributes": {
         "title": "Malcolm Sensor Audit Logs - Logs Over Time by Type",
-        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Logs Over Time by Type\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"miscbeat.auditlog.type\",\"terms_size\":\"20\",\"hide_in_legend\":0,\"label\":\"\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"filter\":{\"query\":\"event.module:auditlog AND miscbeat.auditlog:*\",\"language\":\"kuery\"},\"legend_position\":\"right\"}}",
+        "visState": "{\"title\":\"Malcolm Sensor Audit Logs - Logs Over Time by Type\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"miscbeat.auditlog.type\",\"terms_size\":\"20\",\"hide_in_legend\":0,\"label\":\"\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"MALCOLM_NETWORK_INDEX_PATTERN_REPLACER\",\"default_timefield\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"isModelInvalid\":false,\"filter\":{\"query\":\"event.module:auditlog AND miscbeat.auditlog:*\",\"language\":\"kuery\"},\"legend_position\":\"right\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -267,7 +267,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

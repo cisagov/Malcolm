@@ -78,6 +78,11 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # how often OpenSearch/Elasticsearch should create a new index
+  if [[ -n $ARKIME_ROTATE_INDEX ]]; then
+    sed -r -i "s/(rotateIndex)\s*=\s*.*/\1=$ARKIME_ROTATE_INDEX/" "$ARKIME_CONFIG_FILE"
+  fi
+
   # identify node in session metadata for PCAP reachback
   PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
   export ARKIME_NODE_NAME="$(hostname --long)"

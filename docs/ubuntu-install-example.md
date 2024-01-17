@@ -160,6 +160,7 @@ Enable file extraction with Zeek? (y / N): y
 3: mapped
 4: all
 5: interesting
+6: notcommtxt
 Select file extraction behavior (none): 5
 
 1: quarantined
@@ -169,7 +170,9 @@ Select file preservation behavior (quarantined): 1
 
 Expose web interface for downloading preserved files? (y / N): y
 
-Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted): decryptme
+ZIP downloaded preserved files? (y / N): y
+
+Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected): infected
 
 Scan extracted files with ClamAV? (y / N): y
 
@@ -252,39 +255,32 @@ Pulling zeek              ... done
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/api                                   23.12.1           xxxxxxxxxxxx   3 days ago   158MB
-ghcr.io/idaholab/malcolm/arkime                                23.12.1           xxxxxxxxxxxx   3 days ago   816MB
-ghcr.io/idaholab/malcolm/dashboards                            23.12.1           xxxxxxxxxxxx   3 days ago   1.02GB
-ghcr.io/idaholab/malcolm/dashboards-helper                     23.12.1           xxxxxxxxxxxx   3 days ago   184MB
-ghcr.io/idaholab/malcolm/file-monitor                          23.12.1           xxxxxxxxxxxx   3 days ago   588MB
-ghcr.io/idaholab/malcolm/file-upload                           23.12.1           xxxxxxxxxxxx   3 days ago   259MB
-ghcr.io/idaholab/malcolm/filebeat-oss                          23.12.1           xxxxxxxxxxxx   3 days ago   624MB
-ghcr.io/idaholab/malcolm/freq                                  23.12.1           xxxxxxxxxxxx   3 days ago   132MB
-ghcr.io/idaholab/malcolm/htadmin                               23.12.1           xxxxxxxxxxxx   3 days ago   242MB
-ghcr.io/idaholab/malcolm/logstash-oss                          23.12.1           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/netbox                                23.12.1           xxxxxxxxxxxx   3 days ago   1.01GB
-ghcr.io/idaholab/malcolm/nginx-proxy                           23.12.1           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/opensearch                            23.12.1           xxxxxxxxxxxx   3 days ago   1.17GB
-ghcr.io/idaholab/malcolm/pcap-capture                          23.12.1           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/pcap-monitor                          23.12.1           xxxxxxxxxxxx   3 days ago   213MB
-ghcr.io/idaholab/malcolm/postgresql                            23.12.1           xxxxxxxxxxxx   3 days ago   268MB
-ghcr.io/idaholab/malcolm/redis                                 23.12.1           xxxxxxxxxxxx   3 days ago   34.2MB
-ghcr.io/idaholab/malcolm/suricata                              23.12.1           xxxxxxxxxxxx   3 days ago   278MB
-ghcr.io/idaholab/malcolm/zeek                                  23.12.1           xxxxxxxxxxxx   3 days ago   1GB
+ghcr.io/idaholab/malcolm/api                                   24.01.0           xxxxxxxxxxxx   3 days ago   158MB
+ghcr.io/idaholab/malcolm/arkime                                24.01.0           xxxxxxxxxxxx   3 days ago   816MB
+ghcr.io/idaholab/malcolm/dashboards                            24.01.0           xxxxxxxxxxxx   3 days ago   1.02GB
+ghcr.io/idaholab/malcolm/dashboards-helper                     24.01.0           xxxxxxxxxxxx   3 days ago   184MB
+ghcr.io/idaholab/malcolm/file-monitor                          24.01.0           xxxxxxxxxxxx   3 days ago   588MB
+ghcr.io/idaholab/malcolm/file-upload                           24.01.0           xxxxxxxxxxxx   3 days ago   259MB
+ghcr.io/idaholab/malcolm/filebeat-oss                          24.01.0           xxxxxxxxxxxx   3 days ago   624MB
+ghcr.io/idaholab/malcolm/freq                                  24.01.0           xxxxxxxxxxxx   3 days ago   132MB
+ghcr.io/idaholab/malcolm/htadmin                               24.01.0           xxxxxxxxxxxx   3 days ago   242MB
+ghcr.io/idaholab/malcolm/logstash-oss                          24.01.0           xxxxxxxxxxxx   3 days ago   1.35GB
+ghcr.io/idaholab/malcolm/netbox                                24.01.0           xxxxxxxxxxxx   3 days ago   1.01GB
+ghcr.io/idaholab/malcolm/nginx-proxy                           24.01.0           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/opensearch                            24.01.0           xxxxxxxxxxxx   3 days ago   1.17GB
+ghcr.io/idaholab/malcolm/pcap-capture                          24.01.0           xxxxxxxxxxxx   3 days ago   121MB
+ghcr.io/idaholab/malcolm/pcap-monitor                          24.01.0           xxxxxxxxxxxx   3 days ago   213MB
+ghcr.io/idaholab/malcolm/postgresql                            24.01.0           xxxxxxxxxxxx   3 days ago   268MB
+ghcr.io/idaholab/malcolm/redis                                 24.01.0           xxxxxxxxxxxx   3 days ago   34.2MB
+ghcr.io/idaholab/malcolm/suricata                              24.01.0           xxxxxxxxxxxx   3 days ago   278MB
+ghcr.io/idaholab/malcolm/zeek                                  24.01.0           xxxxxxxxxxxx   3 days ago   1GB
 ```
 
 Finally, start Malcolm. When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.
 ```
 user@host:~/Malcolm$ ./scripts/start
-In a few minutes, Malcolm services will be accessible via the following URLs:
+Malcolm services can be accessed at https://localhost/
 ------------------------------------------------------------------------------
-  - Arkime: https://localhost/
-  - OpenSearch Dashboards: https://localhost/dashboards/
-  - PCAP upload (web): https://localhost/upload/
-  - PCAP upload (sftp): sftp://username@127.0.0.1:8022/files/
-  - NetBox: https://localhost/netbox/  
-  - Account management: https://localhost/auth/
-  - Documentation: https://localhost/readme/
 
 NAME                           COMMAND                  SERVICE              STATUS               PORTS
 malcolm-api-1                  "/usr/local/bin/dock…"   api                  running (starting)   …
@@ -320,3 +316,5 @@ malcolm-logstash-1  | [2022-07-27T20:27:52,056][INFO ][logstash.agent           
 ```
 
 The [Malcolm user interfaces](quickstart.md#UserInterfaceURLs) may be accessed via a web browser.
+
+![Malcolm Landing Page](./images/screenshots/malcolm_landing_page.png)

@@ -27,7 +27,6 @@ from collections.abc import Iterable
 from distutils.dir_util import copy_tree
 from datetime import datetime
 from slugify import slugify
-from netbox_library_import import import_library
 
 ###################################################################################################
 args = None
@@ -233,9 +232,9 @@ def main():
         '--library',
         dest='libraryDir',
         type=str,
-        default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_PATH', '/opt/netbox-devicetype-library'),
+        default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH', '/opt/netbox-devicetype-library-import'),
         required=False,
-        help="Directory containing NetBox device type library",
+        help="Directory containing NetBox Device-Type-Library-Import project and library repo",
     )
     parser.add_argument(
         '-p',
@@ -882,11 +881,22 @@ def main():
             except Exception as e:
                 logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")
 
-        # ###### Library ###############################################################################################
+        # ######  Device-Type-Library-Import ###########################################################################
         if os.path.isdir(args.libraryDir):
             try:
-                counter = import_library(nb, args.libraryDir)
-                logging.debug(f"import library results: { counter }")
+                with malcolm_utils.pushd(args.libraryDir):
+                    osEnv = os.environ.copy()
+                    osEnv['NETBOX_URL'] = args.netboxUrl
+                    osEnv['NETBOX_TOKEN'] = args.netboxToken
+                    osEnv['REPO_URL'] = 'local'
+                    cmd = [netboxVenvPy, 'nb-dt-import.py']
+                    err, results = malcolm_utils.run_process(
+                        cmd,
+                        logger=logging,
+                        env=osEnv,
+                    )
+                    if (err != 0) or (not results):
+                        logging.error(f"{err} running nb-dt-import.py: {results}")
 
             except Exception as e:
                 logging.error(f"{type(e).__name__} processing library: {e}")

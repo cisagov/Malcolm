@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.11.3
+FROM docker.elastic.co/logstash/logstash-oss:8.11.4
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -143,6 +143,9 @@ CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 ARG BUILD_DATE
 ARG MALCOLM_VERSION
 ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

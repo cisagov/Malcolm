@@ -62,7 +62,7 @@ def main():
         dest='index',
         metavar='<str>',
         type=str,
-        default='arkime_sessions3-*',
+        default=os.getenv('MALCOLM_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*'),
         help='Index Pattern Name',
     )
     parser.add_argument(
@@ -190,6 +190,10 @@ def main():
     opensearchVersion = opensearchInfo['version']['number']
     if debug:
         eprint('OpenSearch version is {}'.format(opensearchVersion))
+
+    # if they actually just specified the name of the environment variable, resolve that for the index name
+    if args.index.startswith('MALCOLM_'):
+        args.index = os.getenv(args.index, '')
 
     # find the ID of the index name (probably will be the same as the name)
     getIndexInfoResponse = requests.get(
@@ -410,14 +414,10 @@ def main():
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'(^zeek\.files\.extracted$)', field['name'], re.IGNORECASE) is not None:
-                    # add download for extracted/quarantined zeek files
+                    # add download for extracted zeek files
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/quarantine/{{value}}'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if quarantined)'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/preserved/{{value}}'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download (if preserved)'
+                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/{{value}}'
+                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 drilldownInfoParams = {}

@@ -77,7 +77,7 @@ read -p "Malcolm Docker images will now be built and/or pulled, force full clean
 CONFIRMATION=${CONFIRMATION:-N}
 
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-MALCOLM_VERSION="$($GREP -P "^\s+image:\s*malcolm" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+MALCOLM_VERSION="$($GREP -P "^\s+image:.*/malcolm/" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 GITHUB_API_TOKEN="${GITHUB_TOKEN:-}"
 
@@ -119,7 +119,7 @@ FILES_IN_IMAGES=(
   "/opt/arkime/etc/ipv4-address-space.csv;arkime"
   "/opt/arkime/etc/oui.txt;arkime"
   "/opt/arkime/bin/capture;arkime"
-  "/opt/netbox-devicetype-library/schema/components.json;netbox"
+  "/opt/netbox-devicetype-library-import/repo/schema/components.json;netbox"
   "/opt/zeek/bin/zeek;zeek"
   "/opt/zeek/bin/spicyz;zeek"
   "/usr/share/nginx/html/index.html;nginx-proxy"

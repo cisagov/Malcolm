@@ -553,7 +553,6 @@ function InstallMalcolm {
         "EXTRACTED_FILE_ENABLE_CLAMAV:'true'"
         "EXTRACTED_FILE_ENABLE_YARA:'true'"
         "EXTRACTED_FILE_HTTP_SERVER_ENABLE:'true'"
-        "EXTRACTED_FILE_HTTP_SERVER_ENCRYPT:'false'"
         "EXTRACTED_FILE_IGNORE_EXISTING:'true'"
         "EXTRACTED_FILE_PRESERVATION:'all'"
         "FREQ_LOOKUP:'true'"
