@@ -261,13 +261,7 @@ To start, stop, restart, etc. Malcolm:
    - wipe          (stop Malcolm and clear its database)
    - auth_setup    (change authentication-related settings)
 
-A minute or so after starting Malcolm, the following services will be accessible:
-  - Arkime: https://<IP or hostname>/
-  - OpenSearch Dashboards: https://<IP or hostname>/dashboards/
-  - PCAP upload (web): https://<IP or hostname>/upload/
-  - NetBox: https://<IP or hostname>/netbox/
-  - Account management: https://<IP or hostname>/auth/
-  - Documentation: https://<IP or hostname>/readme/
+Malcolm services can be accessed at https://<IP or hostname>/
 
 EOT
 fi
