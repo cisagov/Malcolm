@@ -1,0 +1,4 @@
+# The root file system has fs_passno=1 as per fstab(5) for automatic fsck.
+LABEL=RASPIROOT / ext4 rw 0 1
+# All other file systems have fs_passno=2 as per fstab(5) for automatic fsck.
+LABEL=RASPIFIRM /boot/firmware vfat rw 0 2

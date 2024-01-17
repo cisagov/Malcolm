@@ -1,0 +1,9 @@
+[Unit]
+Description=Set up system configuration
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rpi-set-sysconf
+
+[Install]
+RequiredBy=basic.target

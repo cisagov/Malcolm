@@ -1,0 +1,10 @@
+[Unit]
+Description=generate SSH host keys
+ConditionPathExistsGlob=!/etc/ssh/ssh_host_*_key
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/dpkg-reconfigure -fnoninteractive openssh-server
+
+[Install]
+RequiredBy=multi-user.target

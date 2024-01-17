@@ -1,0 +1,14 @@
+[Unit]
+Description=Reconfigure raspi-firmware to regenerate config.txt matching actual hardware
+Before=sysinit.target
+DefaultDependencies=no
+RequiresMountsFor=/boot/firmware
+
+[Service]
+Type=oneshot
+TimeoutSec=infinity
+ExecStart=/usr/sbin/dpkg-reconfigure raspi-firmware
+ExecStart=/bin/systemctl --no-reload disable %n
+
+[Install]
+RequiredBy=sysinit.target

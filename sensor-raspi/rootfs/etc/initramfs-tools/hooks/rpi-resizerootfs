@@ -1,0 +1,52 @@
+#!/bin/sh
+set -e
+
+#
+# List the soft prerequisites here.  This is a space separated list of
+# names, of scripts that are in the same directory as this one, that
+# must be run before this one can be.
+#
+PREREQS=""
+case $1 in
+    prereqs) echo "$PREREQS"; exit 0;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+# List ALL the programs we need, because we explicitly call them
+# Don't *assume* it will be included!
+# The update-initramfs script will figure out any dependencies
+# that also need to be included, so lets not do that
+#
+# Find the path as used by the package itself; usrmerge may not be used
+
+# from coreutils
+copy_exec /usr/bin/realpath
+copy_exec /usr/bin/tail
+copy_exec /usr/bin/test
+
+# from dosfstools
+copy_exec /sbin/fsck.vfat
+
+# from e2fsprogs
+copy_exec /sbin/resize2fs
+copy_exec /sbin/fsck.ext4
+
+# from grep
+copy_exec /bin/grep
+
+# from logsave
+copy_exec /sbin/logsave
+
+# from mount
+copy_exec /bin/mount
+copy_exec /bin/umount
+
+# from parted
+copy_exec /sbin/parted
+copy_exec /sbin/partprobe
+
+# from util-linux
+copy_exec /bin/lsblk
+copy_exec /sbin/blkid
+copy_exec /sbin/fsck
