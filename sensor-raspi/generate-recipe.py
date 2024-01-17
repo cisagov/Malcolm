@@ -5,9 +5,10 @@ import sys
 import subprocess
 import os
 
-SCRIPT_DIR = os.getcwd()
-MALCOLM_DIR = os.path.split(SCRIPT_DIR)[-2]
-SENSOR_DIR = MALCOLM_DIR + "/sensor-iso"
+SCRIPT_NAME = os.path.basename(__file__)
+SCRIPT_DIR = os.path.dirname(SCRIPT_NAME)
+MALCOLM_DIR = os.path.dirname(SCRIPT_DIR)
+SENSOR_DIR = os.path.join(MALCOLM_DIR, 'sensor-iso')
 
 # pylint: disable=invalid-name
 
@@ -91,29 +92,31 @@ hostname = 'Hedgehog-rpi-%s' % version
 
 # Nothing yet!
 extra_root_shell_cmds = [
-'cp sensor_install.sh "${ROOT?}/root/"',
-'/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{deps,hooks,patches,sensor,arkime/etc,zeek/bin}\'',
-'cp "%s/arkime/arkime_patch/"* "${ROOT?}/opt/patches/" || true' % SENSOR_DIR,
-'cp "%s/arkime/arkime_etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
-'cp -r "%s/interface/"* "${ROOT?}/opt/sensor"' % SENSOR_DIR,
-'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
-'cp "%s/scripts/malcolm_utils.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
-'cp "%s/config/archives/beats.list.chroot" "${ROOT?}/etc/apt/sources.list.d/beats.list"' % SENSOR_DIR,
-'cp "%s/config/archives/beats.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
-'cp "%s/config/archives/fluentbit.list.chroot" "${ROOT?}/etc/apt/sources.list.d/fluentbit.list"' % SENSOR_DIR,
-'cp "%s/config/archives/fluentbit.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
-'cp -r "%s/config/includes.chroot/"* "${ROOT?}/"' % SENSOR_DIR,
-'rm -r "${ROOT?}/etc/live"',
-'cp -r "%s/config/hooks/normal/"* "${ROOT?}/opt/hooks/"' % SENSOR_DIR,
-'cp -r "%s/config/package-lists/"* "${ROOT?}/opt/deps/"' % SENSOR_DIR,
-'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
+    'cp sensor_install.sh "${ROOT?}/root/"',
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{deps,hooks,patches,sensor,arkime/etc,zeek/bin}\'',
+    'cp "%s/arkime/arkime_patch/"* "${ROOT?}/opt/patches/" || true' % SENSOR_DIR,
+    'cp "%s/arkime/arkime_etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
+    'cp -r "%s/interface/"* "${ROOT?}/opt/sensor"' % SENSOR_DIR,
+    'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
+    'cp "%s/scripts/malcolm_utils.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
+    'cp "%s/config/archives/beats.list.chroot" "${ROOT?}/etc/apt/sources.list.d/beats.list"' % SENSOR_DIR,
+    'cp "%s/config/archives/beats.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
+    'cp "%s/config/archives/fluentbit.list.chroot" "${ROOT?}/etc/apt/sources.list.d/fluentbit.list"' % SENSOR_DIR,
+    'cp "%s/config/archives/fluentbit.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
+    'cp -r "%s/config/includes.chroot/"* "${ROOT?}/"' % SENSOR_DIR,
+    'rm -r "${ROOT?}/etc/live"',
+    'cp -r "%s/config/hooks/normal/"* "${ROOT?}/opt/hooks/"' % SENSOR_DIR,
+    'cp -r "%s/config/package-lists/"* "${ROOT?}/opt/deps/"' % SENSOR_DIR,
+    'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
 ]
 
 # Extend list just in case version is 4
-extra_chroot_shell_cmds.extend ([
-'chmod 755 /root/sensor_install.sh',
-'/root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
-])
+extra_chroot_shell_cmds.extend(
+    [
+        'chmod 755 /root/sensor_install.sh',
+        '/root/sensor_install.sh 2>&1 | tee -a /root/sensor_install_debug',
+    ]
+)
 
 ### The following prepares substitutions based on variables set earlier
 
@@ -122,19 +125,27 @@ if backports_enable:
     backports_stanza = """
 %s
 deb http://deb.debian.org/debian/ %s main %s
-""" % (backports_enable, backports_suite, firmware_component)
+""" % (
+        backports_enable,
+        backports_suite,
+        firmware_component,
+    )
 else:
     # ugh
     backports_stanza = """
 # Backports are _not_ enabled by default.
 # Enable them by uncommenting the following line:
 # deb http://deb.debian.org/debian %s main %s
-""" % (backports_suite, firmware_component)
+""" % (
+        backports_suite,
+        firmware_component,
+    )
 
-#gitcommit = subprocess.getoutput("git show -s --pretty='format:%C(auto)%h (%s, %ad)' --date=short ")
+# gitcommit = subprocess.getoutput("git show -s --pretty='format:%C(auto)%h (%s, %ad)' --date=short ")
 buildtime = subprocess.getoutput("date --utc +'%Y-%m-%d %H:%M'")
 
 ### Write results:
+
 
 def align_replace(text, pattern, replacement):
     """
@@ -152,26 +163,27 @@ def align_replace(text, pattern, replacement):
                 lines.insert(i, '%s%s' % (indent, r))
                 i = i + 1
             break
-    return '\n'. join(lines) + '\n'
+    return '\n'.join(lines) + '\n'
 
 
 with open('raspi_master.yaml', 'r') as in_file:
     with open(target_yaml, 'w') as out_file:
         in_text = in_file.read()
-        out_text = in_text \
-            .replace('__RELEASE__', suite) \
-            .replace('__ARCH__', arch) \
-            .replace('__FIRMWARE_COMPONENT__', firmware_component) \
-            .replace('__FIRMWARE_COMPONENT_OLD__', firmware_component_old) \
-            .replace('__LINUX_IMAGE__', linux) \
-            .replace('__DTB__', dtb) \
-            .replace('__WIRELESS_FIRMWARE__', wireless_firmware) \
-            .replace('__BLUETOOTH_FIRMWARE__', bluetooth_firmware) \
-            .replace('__SERIAL_CONSOLE__', serial) \
-            .replace('__HOST__', hostname) \
+        out_text = (
+            in_text.replace('__RELEASE__', suite)
+            .replace('__ARCH__', arch)
+            .replace('__FIRMWARE_COMPONENT__', firmware_component)
+            .replace('__FIRMWARE_COMPONENT_OLD__', firmware_component_old)
+            .replace('__LINUX_IMAGE__', linux)
+            .replace('__DTB__', dtb)
+            .replace('__WIRELESS_FIRMWARE__', wireless_firmware)
+            .replace('__BLUETOOTH_FIRMWARE__', bluetooth_firmware)
+            .replace('__SERIAL_CONSOLE__', serial)
+            .replace('__HOST__', hostname)
             .replace('__BUILDTIME__', buildtime)
-#            .replace('__GITCOMMIT__', gitcommit) \
-#            .replace('__BUILDTIME__', buildtime)
+        )
+        #            .replace('__GITCOMMIT__', gitcommit) \
+        #            .replace('__BUILDTIME__', buildtime)
 
         out_text = align_replace(out_text, '__EXTRA_ROOT_SHELL_CMDS__', extra_root_shell_cmds)
         out_text = align_replace(out_text, '__EXTRA_CHROOT_SHELL_CMDS__', extra_chroot_shell_cmds)
@@ -179,7 +191,5 @@ with open('raspi_master.yaml', 'r') as in_file:
 
         # Try not to keep lines where the placeholder was replaced
         # with nothing at all (including on a "list item" line):
-        filtered = [x for x in out_text.splitlines()
-                    if not re.match(r'^\s+$', x)
-                    and not re.match(r'^\s+-\s*$', x)]
+        filtered = [x for x in out_text.splitlines() if not re.match(r'^\s+$', x) and not re.match(r'^\s+-\s*$', x)]
         out_file.write('\n'.join(filtered) + "\n")

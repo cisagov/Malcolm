@@ -31,7 +31,7 @@ DEPS_DIR='/opt/deps'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-BEATS_VER="8.11.3"
+BEATS_VER="8.12.0"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -214,7 +214,7 @@ build_zeek_src() {
 	export PYTHONUNBUFFERED=1
 
 	zeek_url=https://github.com/zeek/zeek.git
-	zeek_version=6.0.1
+	zeek_version=6.1.0
 	zeek_release=1
 	zeek_dir=/opt/zeek
 	# Zeek's build eats a ton of resources; prevent OOM from the killing build process
