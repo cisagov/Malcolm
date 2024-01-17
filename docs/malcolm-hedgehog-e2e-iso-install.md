@@ -228,6 +228,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + `mapped`: extraction of files with recognized mime types
         + `known`: extraction of files for which any mime type can be determined
         + `all`: extract all files
+        + `notcommtxt`: extract all files except common plain text files
 * **Select file preservation behavior**
     - This determines the behavior for preservation of Zeek-extracted files:
         +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
@@ -235,8 +236,10 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + `none`: preserve no extracted files
 * **Expose web interface for downloading preserved files?**
     - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
-* **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
-    - If a password is specified here, Zeek-extracted files downloaded as described under the previous question will be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
+* **ZIP downloaded preserved files?**
+    - Answering **Y** will cause that Zeek-extracted files downloaded as described under the previous question will be archived using the ZIP file format.
+* **Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)** and **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
+    - A non-blank value will be used as either the ZIP archive file password (if the previous question was answered **Y**) or as the encryption key for the file to be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
 * **Scan extracted files with ClamAV?**
     - Answer **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
 * **Scan extracted files with Yara?**

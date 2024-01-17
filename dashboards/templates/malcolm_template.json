@@ -1,5 +1,5 @@
 {
-  "index_patterns" : ["arkime_sessions3-*"],
+  "index_patterns" : ["MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"],
   "composed_of": [
     "ecs_base",
     "ecs_ecs",

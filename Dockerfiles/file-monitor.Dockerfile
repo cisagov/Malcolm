@@ -49,8 +49,9 @@ ARG EXTRACTED_FILE_ENABLE_CAPA=false
 ARG EXTRACTED_FILE_CAPA_VERBOSE=false
 ARG EXTRACTED_FILE_HTTP_SERVER_DEBUG=false
 ARG EXTRACTED_FILE_HTTP_SERVER_ENABLE=false
-ARG EXTRACTED_FILE_HTTP_SERVER_ENCRYPT=false
-ARG EXTRACTED_FILE_HTTP_SERVER_KEY=quarantined
+ARG EXTRACTED_FILE_HTTP_SERVER_ZIP=true
+ARG EXTRACTED_FILE_HTTP_SERVER_KEY=infected
+ARG EXTRACTED_FILE_HTTP_SERVER_RECURSIVE=true
 ARG EXTRACTED_FILE_HTTP_SERVER_PORT=8440
 
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
@@ -89,8 +90,9 @@ ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
 ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
-ENV EXTRACTED_FILE_HTTP_SERVER_ENCRYPT $EXTRACTED_FILE_HTTP_SERVER_ENCRYPT
+ENV EXTRACTED_FILE_HTTP_SERVER_ZIP $EXTRACTED_FILE_HTTP_SERVER_ZIP
 ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
+ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENV SUPERCRONIC_VERSION "0.2.29"
@@ -137,7 +139,15 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       python3-requests \
       python3-zmq \
       rsync && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir clamd supervisor yara-python python-magic psutil pycryptodome watchdog && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
+      clamd \
+      psutil \
+      pycryptodome \
+      python-magic \
+      stream-zip \
+      supervisor \
+      watchdog \
+      yara-python && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -207,6 +217,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
+COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
 COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
@@ -245,6 +256,9 @@ CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 ARG BUILD_DATE
 ARG MALCOLM_VERSION
 ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
 
 LABEL org.opencontainers.image.created=$BUILD_DATE
 LABEL org.opencontainers.image.version=$MALCOLM_VERSION

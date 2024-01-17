@@ -90,7 +90,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -119,7 +119,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {
@@ -172,7 +172,7 @@
         "title": "nginx Response Codes Over Time",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"bar\",\"split_filters\":[{\"color\":\"#68BC00\",\"filter\":{\"query\":\"http.response.status_code:[200 TO 299]\",\"language\":\"lucene\"},\"label\":\"200s\",\"id\":\"5acdc750-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(252,196,0,1)\",\"filter\":{\"query\":\"http.response.status_code:[300 TO 399]\",\"language\":\"lucene\"},\"label\":\"300s\",\"id\":\"6efd2ae0-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(211,49,21,1)\",\"filter\":{\"query\":\"http.response.status_code:[400 TO 499]\",\"language\":\"lucene\"},\"label\":\"400s\",\"id\":\"76089a90-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(171,20,158,1)\",\"filter\":{\"query\":\"http.response.status_code:[500 TO 599]\",\"language\":\"lucene\"},\"label\":\"500s\",\"id\":\"7c7929d0-a29d-11e7-a062-a1c3587f4874\"}],\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"label\":\"\",\"axis_position\":\"right\",\"split_mode\":\"filters\",\"fill\":0.5,\"stacked\":\"stacked\",\"terms_field\":\"http.response.status_code\",\"color\":\"#68BC00\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Response Codes Over Time\"}"
+        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"bar\",\"split_filters\":[{\"color\":\"#68BC00\",\"filter\":{\"query\":\"http.response.status_code:[200 TO 299]\",\"language\":\"lucene\"},\"label\":\"200s\",\"id\":\"5acdc750-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(252,196,0,1)\",\"filter\":{\"query\":\"http.response.status_code:[300 TO 399]\",\"language\":\"lucene\"},\"label\":\"300s\",\"id\":\"6efd2ae0-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(211,49,21,1)\",\"filter\":{\"query\":\"http.response.status_code:[400 TO 499]\",\"language\":\"lucene\"},\"label\":\"400s\",\"id\":\"76089a90-a29d-11e7-a062-a1c3587f4874\"},{\"color\":\"rgba(171,20,158,1)\",\"filter\":{\"query\":\"http.response.status_code:[500 TO 599]\",\"language\":\"lucene\"},\"label\":\"500s\",\"id\":\"7c7929d0-a29d-11e7-a062-a1c3587f4874\"}],\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"label\":\"\",\"axis_position\":\"right\",\"split_mode\":\"filters\",\"fill\":0.5,\"stacked\":\"stacked\",\"terms_field\":\"http.response.status_code\",\"color\":\"#68BC00\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Response Codes Over Time\"}"
       },
       "references": [],
       "migrationVersion": {
@@ -195,7 +195,7 @@
         "title": "nginx Top Pages",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"line\",\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"value_template\":\"\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"axis_position\":\"right\",\"split_mode\":\"terms\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"url.original\",\"color\":\"#68BC00\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"top_n\",\"index_pattern\":\"malcolm_beats_*\",\"axis_position\":\"left\",\"bar_color_rules\":[{\"id\":\"6252c320-a1f5-11e7-92ba-5d0b8663aece\"}],\"interval\":\"auto\"},\"aggs\":[],\"title\":\"nginx Top Pages\"}"
+        "visState": "{\"type\":\"metrics\",\"params\":{\"axis_formatter\":\"number\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"line\",\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"value_template\":\"\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"axis_position\":\"right\",\"split_mode\":\"terms\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"url.original\",\"color\":\"#68BC00\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"top_n\",\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"axis_position\":\"left\",\"bar_color_rules\":[{\"id\":\"6252c320-a1f5-11e7-92ba-5d0b8663aece\"}],\"interval\":\"auto\"},\"aggs\":[],\"title\":\"nginx Top Pages\"}"
       },
       "references": [],
       "migrationVersion": {
@@ -218,7 +218,7 @@
         "title": "nginx Errors Over Time",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"bar\",\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"axis_position\":\"right\",\"split_mode\":\"terms\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"log.level\",\"color\":\"rgba(211,49,21,1)\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:error\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Errors Over Time\"}"
+        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"series\":[{\"formatter\":\"number\",\"chart_type\":\"bar\",\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"count\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\"}],\"axis_position\":\"right\",\"split_mode\":\"terms\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"log.level\",\"color\":\"rgba(211,49,21,1)\",\"line_width\":1,\"terms_order_by\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module:nginx AND fileset.name:error\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Errors Over Time\"}"
       },
       "references": [],
       "migrationVersion": {
@@ -241,7 +241,7 @@
         "title": "nginx Data Volume",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"malcolm_beats_*\",\"series\":[{\"formatter\":\"bytes\",\"chart_type\":\"line\",\"split_filters\":[{\"color\":\"#68BC00\",\"filter\":{\"query\":\"http.response.status_code:[200 TO 299]\",\"language\":\"lucene\"},\"label\":\"200s\",\"id\":\"7c343c20-a29e-11e7-a062-a1c3587f4874\"}],\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"sum\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"field\":\"http.response.body.bytes\"}],\"label\":\"\",\"axis_position\":\"right\",\"split_mode\":\"everything\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":null,\"color\":\"#68BC00\",\"line_width\":1,\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module: nginx AND fileset.name: access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Data Volume\"}"
+        "visState": "{\"type\":\"metrics\",\"params\":{\"index_pattern\":\"MALCOLM_OTHER_INDEX_PATTERN_REPLACER\",\"series\":[{\"formatter\":\"bytes\",\"chart_type\":\"line\",\"split_filters\":[{\"color\":\"#68BC00\",\"filter\":{\"query\":\"http.response.status_code:[200 TO 299]\",\"language\":\"lucene\"},\"label\":\"200s\",\"id\":\"7c343c20-a29e-11e7-a062-a1c3587f4874\"}],\"seperate_axis\":0,\"point_size\":1,\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"metrics\":[{\"type\":\"sum\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"field\":\"http.response.body.bytes\"}],\"label\":\"\",\"axis_position\":\"right\",\"split_mode\":\"everything\",\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":null,\"color\":\"#68BC00\",\"line_width\":1,\"split_color_mode\":\"gradient\"}],\"time_field\":\"@timestamp\",\"filter\":{\"query\":\"event.module: nginx AND fileset.name: access\",\"language\":\"lucene\"},\"show_grid\":1,\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"show_legend\":1,\"type\":\"timeseries\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"interval\":\"auto\",\"legend_position\":\"bottom\"},\"aggs\":[],\"title\":\"nginx Data Volume\"}"
       },
       "references": [],
       "migrationVersion": {
@@ -305,7 +305,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

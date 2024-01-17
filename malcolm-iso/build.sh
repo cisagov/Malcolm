@@ -178,6 +178,12 @@ if [ -d "$WORKDIR" ]; then
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
 
+  # clone and build htpdate .deb package in its own clean environment (rather than in hooks/)
+  bash "$SCRIPT_PATH/htpdate/build-docker-image.sh"
+  docker run --rm -v "$SCRIPT_PATH"/htpdate:/build htpdate-build:latest -o /build
+  mv "$SCRIPT_PATH/htpdate"/*.deb ./config/packages.chroot/
+  docker rmi -f htpdate-build:latest
+
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/

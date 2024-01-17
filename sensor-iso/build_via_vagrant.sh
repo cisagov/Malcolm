@@ -29,7 +29,8 @@ function cleanup_shared_and_docs {
          "$SCRIPT_PATH"/_layouts \
          "$SCRIPT_PATH"/Gemfile \
          "$SCRIPT_PATH"/README.md \
-         "$SCRIPT_PATH"/suricata
+         "$SCRIPT_PATH"/suricata \
+         "$SCRIPT_PATH"/htpdate
 }
 
 unset FORCE_PROVISION
@@ -85,6 +86,7 @@ cp -r "$SCRIPT_PATH"/../shared \
       "$SCRIPT_PATH"/../_includes \
       "$SCRIPT_PATH"/../_layouts \
       "$SCRIPT_PATH"/../Gemfile \
+      "$SCRIPT_PATH"/../malcolm-iso/htpdate \
       "$SCRIPT_PATH"/../README.md "$SCRIPT_PATH"/
 cp "$SCRIPT_PATH"/../scripts/documentation_build.sh "$SCRIPT_PATH"/docs/
 cp "$SCRIPT_PATH"/../scripts/malcolm_utils.py "$SCRIPT_PATH"/shared/bin/
