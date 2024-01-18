@@ -81,14 +81,15 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
-# tweak some stuff for aide
-chmod a-x /etc/cron.daily/aide
-chattr +i /etc/cron.daily/aide
-mkdir -p /etc/aide/aide.conf.d /var/lib/aide
-touch /var/lib/aide/aide.db
-chmod 600 /var/lib/aide/aide.db
-sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
-cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
+if [ "${ARCH,,}" != 'arm64' ] && [ "${ARCH,,}" != 'arm' ]; then
+	# tweak some stuff for aide
+	chmod a-x /etc/cron.daily/aide
+	chattr +i /etc/cron.daily/aide
+	mkdir -p /etc/aide/aide.conf.d /var/lib/aide
+	touch /var/lib/aide/aide.db
+	chmod 600 /var/lib/aide/aide.db
+	sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
+	cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/at\.allow$ f Full-n-c-m
 /etc/clamav/.+\.conf$ f VarFile-n-c-m
 /etc/clamav$ d VarDir-n-c-m
@@ -165,6 +166,7 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/var/tmp(/|$)
 
 EOF
+fi
 ###
 
 # update suricata rules
@@ -217,6 +219,7 @@ if [ "${ARCH,,}" == 'arm64' ] || [ "${ARCH,,}" == 'arm' ]; then
 	mv dist/capa /usr/local/bin/capa
 
 	deactivate
+
 else
 	# Assume 64-bit Linux otherwise
 	capa_zip_url=$(curl "${GITHUB_API_CURL_ARGS[@]}" "$capa_assets_url" | jq ".[] | select(.browser_download_url | contains(\"-linux.zip\")) | .browser_download_url" | tr -d '"')
