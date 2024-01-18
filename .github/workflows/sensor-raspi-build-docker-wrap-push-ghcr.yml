@@ -80,6 +80,12 @@ jobs:
         name: Build image
         run: |
           pushd ./sensor-raspi
+          mkdir -p ./shared
+          echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
+          echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
+          echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
+          echo "BUILD_JOBS=2" > ./shared/environment.chroot
           sudo make raspi_4_bookworm.img
           sudo chmod 644 ./raspi_4_bookworm*.*
           popd
