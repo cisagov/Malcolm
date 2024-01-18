@@ -16,7 +16,7 @@ ifeq ($(shell id -u),0)
 as_root =
 else ifneq (, $(shell which fakemachine))
 $(warning "This should normally be run as root, but found 'fakemachine', so using that.")
-as_root = fakemachine -v $(CURDIR) -- env --chdir $(CURDIR)
+as_root = fakemachine -v $(abspath $(CURDIR)/..) -- env --chdir $(abspath $(CURDIR))
 else
 $(error "This must be run as root")
 endif
