@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - rpi_merge
     paths:
       - 'sensor-raspi/**'
       - '.github/workflows/sensor-raspi-build-docker-wrap-push-ghcr.yml'
