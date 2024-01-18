@@ -100,6 +100,17 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
   fi # if/else OpenSearch database initialized
 
+  if [[ -n $ELASTICSEARCH_ILM_ENABLED ]]; then
+    if [[ -n $ELASTICSEARCH_ILM_HOT_WARM_ENABLED ]]; then
+      # set up Elasticsearch ILM Policy
+      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ilm "${ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD}" "${ELASTICSEARCH_ILM_RETENTION_TIME}" --hotwarm --segments "${ELASTICSEARCH_ILM_SEGMENTS}" --replicas "${ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS}" --history "${ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS}"
+    else
+      $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ilm "${ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD}" "${ELASTICSEARCH_ILM_RETENTION_TIME}" --segments "${ELASTICSEARCH_ILM_SEGMENTS}" --replicas "${ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS}" --history "${ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS}"
+    fi
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --ilm
+    echo "ILM created"
+  fi 
+
   # increase OpenSearch max shards per node from default if desired
   if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
     # see https://github.com/elastic/elasticsearch/issues/40803

@@ -644,8 +644,7 @@ class Installer(object):
                 dashboardsUrl = InstallerAskForString(
                     f'Enter Kibana connection URL (e.g., https://192.168.1.123:5601)',
                     default=args.dashboardsUrl,
-                )
-
+                ) 
         if malcolmProfile != PROFILE_MALCOLM:
             loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid Logstash host and port')
             logstashHost = ''
@@ -704,6 +703,7 @@ class Installer(object):
             InstallerDisplayMessage(
                 f'You must run auth_setup after {ScriptName} to store data store connection credentials.',
             )
+        
 
         if malcolmProfile == PROFILE_MALCOLM:
             loopBreaker = CountUntilException(
@@ -1012,6 +1012,57 @@ class Installer(object):
         arkimeManagePCAP = False
         arkimeFreeSpaceG = '10%'
 
+        if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
+            loopBreaker = CountUntilException(
+                MaxAskForValueCount,
+                f'Invalid ILM setting(s)',
+            )
+            ilmPolicy =  InstallerYesOrNo(
+                    f'Should Arkime leverage Index Lifecycle Management (ILM) to manage volume?',
+                    default=args.ilmPolicy
+            )
+            if ilmPolicy:
+                while loopBreaker.increment():
+                    # Set 'hot' for 'node.attr.molochtype' on new indices, warm on non sessions indices
+                    ilmHotWarm =  InstallerYesOrNo(
+                        f'Should Arkime use a hot/warm design in which non-session data is stored in a warm index?',
+                        default=args.ilmHotWarm
+                    )
+                    if ilmHotWarm:
+                        InstallerDisplayMessage(
+                            f'You must configure "hot" and "warm" nodes types in the remote Elasticsearch instance (https://arkime.com/faq#ilm)'
+                        )
+                    # Time in hours/days before (moving Arkime indexes to warm) and force merge (number followed by h or d), default 30d
+                    ilmOptimizationTimePeriod = InstallerAskForString(
+                        "How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)",
+                        default=args.ilmOptimizationTimePeriod
+                    )
+                    # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90d
+                    ilmSpiDataRetention = InstallerAskForString(
+                        "How long should Arkime retain SPI data before deleting it? (e.g. 25h, 90d, etc.)",
+                        default=str(args.ilmSpiDataRetention)
+                    )
+                    # Number of segments to optimize sessions to in the ILM policy, default 1
+                    ilmOptimizeSessionSegments = InstallerAskForString(
+                        "How many segments should Arkime use to optimize?",
+                        default=str(args.ilmOptimizeSessionSegments) 
+                    )
+                    # Number of replicas for older sessions indices in the ILM policy, default 0
+                    ilmReplicas = InstallerAskForString(
+                        "How many replicas should Arkime maintain for older session indices?",
+                        default=str(args.ilmReplicas)
+                    )
+                    # Number of weeks of history to keep, default 13
+                    ilmHistoryInWeeks = InstallerAskForString(
+                        "How many weeks of history should Arkime keep?",
+                        default=str(args.ilmHistoryInWeeks)
+                    )
+                    if (len(ilmOptimizationTimePeriod) > 1) and (len(ilmSpiDataRetention) > 1) and str(ilmOptimizeSessionSegments).isdigit() and str(ilmReplicas).isdigit() and str(ilmHistoryInWeeks).isdigit():
+                        break
+        else:
+            # Ensure ILM policy is not enabled if the primary mode is opensearch
+            ilmPolicy = False 
+ 
         if InstallerYesOrNo(
             'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
             if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
@@ -1386,7 +1437,7 @@ class Installer(object):
             pcapIface = ''
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
             while (len(pcapIface) <= 0) and loopBreaker.increment():
-                pcapIface = InstallerAskForString(
+                pcapIface = InstallerAskForString(  
                     'Specify capture interface(s) (comma-separated)', default=args.pcapIface
                 )
 
@@ -1464,6 +1515,47 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime-offline.env'),
                 'ARKIME_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoArkime),
+            ),
+            # Should Arkime use an ILM policy?
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_ENABLED',
+                ilmPolicy,
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_HOT_WARM_ENABLED',
+                ilmHotWarm,
+            ),
+            # Time in hours/days before moving (Arkime indexes to warm) and force merge (number followed by h or d), default 30
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD',
+                ilmOptimizationTimePeriod,
+            ),
+            # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_RETENTION_TIME',
+                ilmSpiDataRetention,
+            ),
+            # Number of replicas for older sessions indices in the ILM policy, default 0
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS',
+                ilmReplicas,
+            ),
+            # Number of weeks of history to keep, default 13
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS',
+                ilmHistoryInWeeks,
+            ),
+            # Number of segments to optimize sessions to in the ILM policy, default 1
+            EnvValue(
+                os.path.join(args.configDir, 'arkime.env'),
+                'ELASTICSEARCH_ILM_SEGMENTS',
+                ilmOptimizeSessionSegments,
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
@@ -3567,7 +3659,72 @@ def main():
         default='',
         help=f'Delete the oldest indices when the database exceeds this threshold (e.g., 250GB, 1TB, 60٪, etc.)',
     )
-
+    storageArgGroup.add_argument(
+        '--ilm-enable',
+        dest='ilmPolicy',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Should Arkime use an ILM policy? (see https://https://arkime.com/faq#ilm)",
+    )
+    storageArgGroup.add_argument(
+        '--ilm-hot-warm-enable',
+        dest='ilmHotWarm',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="'Should Arkime use a hot/warm design in which non-session data is stored in a warm index? (see https://https://arkime.com/faq#ilm)",
+    )
+    storageArgGroup.add_argument(
+        '--ilm-optimization-time-period',
+        dest='ilmOptimizationTimePeriod',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='30d',
+        help=f'Time in hours/days before (moving Arkime indexes to warm) and force merge (number followed by h or d), default 30d'
+    )
+    storageArgGroup.add_argument(
+        '--ilm-spi-data-retention',
+        dest='ilmSpiDataRetention',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='90d',
+        help=f'Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90d'
+    )
+    storageArgGroup.add_argument(
+        '--ilm-replicas',
+        dest='ilmReplicas',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=0,
+        help='Number of replicas for older sessions indices in the ILM policy, default 0',
+    )
+    storageArgGroup.add_argument(
+        '--ilm-weeks-of-history',
+        dest='ilmHistoryInWeeks',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=13,
+        help='Number of weeks of history to keep, default 13',
+    )
+    storageArgGroup.add_argument(
+        '--ilm-segments',
+        dest='ilmOptimizeSessionSegments',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=1,
+        help='Number of segments to optimize sessions to in the ILM policy, default 1',
+    )
+    
     analysisArgGroup = parser.add_argument_group('Analysis options')
     analysisArgGroup.add_argument(
         '--auto-arkime',
