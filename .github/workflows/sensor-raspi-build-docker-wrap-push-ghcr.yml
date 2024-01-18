@@ -8,6 +8,7 @@ on:
       - rpi_merge
     paths:
       - 'sensor-raspi/**'
+      - '.trigger_raspi_workflow_build'
       - '.github/workflows/sensor-raspi-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
