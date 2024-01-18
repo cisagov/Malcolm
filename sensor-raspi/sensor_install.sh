@@ -72,6 +72,10 @@ build_arkime_src(){
 	mkdir -p "${WORK_DIR}/arkime" && cd "$_"
 	git clone --recurse-submodules --branch="v${arkime_ver}" "$arkime_repo" ./
 
+	for patch_file in /opt/patches/*; do
+		patch -p 1 -r - --no-backup-if-mismatch < $patch_file || true
+	done
+
 	export PATH="${arkime_dir}/bin:${WORK_DIR}/arkime/node_modules/.bin:${PATH}"
 
 	sed -i "s/MAKE=make/MAKE='make -j${build_jobs}'/" easybutton-build.sh
@@ -264,7 +268,7 @@ clean_up() {
 	rm -f /root/sensor_install*
 
 	# Remove extra installation files
-	rm -rf /opt/hooks $WORK_DIR /tmp/* /opt/deps /root/.wget-hsts /root/.bash_history
+	rm -rf /opt/hooks /opt/patches $WORK_DIR /tmp/* /opt/deps /root/.wget-hsts /root/.bash_history
 
 	# Remove unnecessary build components
 	apt remove $BUILD_DEPS -y
