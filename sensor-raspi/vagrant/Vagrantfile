@@ -1,0 +1,57 @@
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+
+unless Vagrant.has_plugin?("vagrant-sshfs")
+  raise 'vagrant-sshfs plugin is not installed!'
+end
+
+# hack: https://github.com/hashicorp/vagrant/issues/8878#issuecomment-345112810
+class VagrantPlugins::ProviderVirtualBox::Action::Network
+  def dhcp_server_matches_config?(dhcp_server, config)
+    true
+  end
+end
+
+Vagrant.configure("2") do |config|
+
+  config.vm.define "vagrant-hedgehog-raspi-build"
+  config.vm.box = "bento/debian-12"
+
+  config.vm.network "private_network", type: "dhcp"
+  config.ssh.config = "ssh_config"
+
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.synced_folder "../..", "/Malcolm", type: "sshfs", disabled: false
+
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "8192"
+    vb.cpus = 2
+  end
+
+  config.vm.provider "libvirt" do |lv|
+    lv.memory = "8192"
+    lv.cpus = 4
+  end
+
+  config.vm.provision "shell", inline: <<-STEP1
+    dpkg-reconfigure debconf -f noninteractive -p critical
+    export DEBIAN_FRONTEND=noninteractive
+    sed -i "s/main/main contrib non-free non-free-firmware/g" /etc/apt/sources.list
+    apt-get -qqy update
+    apt-get -y install \
+      binfmt-support \
+      bmap-tools \
+      ca-certificates \
+      debootstrap \
+      dosfstools \
+      kpartx \
+      python3 \
+      qemu-user-static \
+      qemu-utils \
+      time \
+      vmdb2
+  STEP1
+end

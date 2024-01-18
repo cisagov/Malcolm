@@ -28,10 +28,12 @@ config.*/
 .envrc
 .direnv
 .vagrant
+.fuse_*
 malcolm_*images.tar.gz
 malcolm_*images.tar.xz
 malcolm_netbox_backup_*.gz
 *.iso
+*.img
 *-build.log
 Gemfile.lock
 _site
