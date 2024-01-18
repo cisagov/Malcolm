@@ -52,6 +52,7 @@ Vagrant.configure("2") do |config|
       qemu-user-static \
       qemu-utils \
       time \
-      vmdb2
+      vmdb2 \
+      zerofree
   STEP1
 end

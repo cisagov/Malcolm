@@ -115,14 +115,14 @@ if [ -d "$WORKDIR" ]; then
   rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/
 
   # write out some version stuff specific to this installation version
-  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT_ID=\"hedgehog-sensor\""                                           >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "ID_LIKE=\"debian\""                                                       >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "HOME_URL=\"https://malcolm.fyi\""                                         >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""                      >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                                       > ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT_ID=\"hedgehog-sensor\""                                                         >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "ID_LIKE=\"debian\""                                                                     >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                              >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""                >> ./config/includes.chroot/opt/sensor/.os-info
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \

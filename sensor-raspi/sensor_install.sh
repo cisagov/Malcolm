@@ -151,7 +151,8 @@ build_interface() {
 	fi
 
 	sed -i 's/CAPTURE_INTERFACE=.*/CAPTURE_INTERFACE=xxxx/g' "${interface_dir}/sensor_ctl/control_vars.conf"
-
+	rm -f "${interface_dir}/sensor_ctl/supervisor.d/fluentbit-aide.conf"
+	sed -i '/_AIDE/d' "${interface_dir}/sensor_ctl/control_vars.conf"
 }
 
 build_yara_src() {
@@ -320,9 +321,10 @@ install_deps() {
 	# Remove Sensor-ISO packages not relevant to RPI
 	# Rar is excluded because Debian doesn't have an ARM package
 	# htpdate removed because repo version doesn't support https
-	declare -a graphical_deps=( efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb gparted gdebi )
-	graphical_deps+=( google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x hfsplus )
-	graphical_deps+=( hfsprogs hfsutils htpdate libgtk2.0-bin menu neofetch pmount rar samba-libs )
+	# aide is removed as we're not applying the same hardening requirements ot the rpi image
+	declare -a graphical_deps=( aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb )
+	graphical_deps+=( gparted gdebi  google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x )
+	graphical_deps+=( hfsplus hfsprogs hfsutils htpdate libgtk2.0-bin menu neofetch pmount rar samba-libs )
 	graphical_deps+=( ssh-askpass tmux udisks2 upower user-setup xbitmaps zenity zenity-common )
 
 	deps=$(echo ${deps} ${graphical_deps[@]} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' ')
@@ -341,20 +343,17 @@ install_files() {
 	# Shared Scripts setup
 	ln -s /usr/local/bin/malcolm_utils.py "/opt/zeek/bin/"
 	mv /usr/local/bin/zeekdeploy.sh "/opt/zeek/bin/"
+	rm -rf /usr/local/bin/aide_integrity_check.sh
 
 	# Setup OS information
 	echo "BUILD_ID=\"$(date +\'%Y-%m-%d\')-${IMAGE_VERSION}\""   > "$sensor_ver_file"
 	echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\"" >> "$sensor_ver_file"
 	echo "VARIANT_ID=\"hedgehog-sensor\"" >> "$sensor_ver_file"
 	echo "ID_LIKE=\"debian\"" >> "$sensor_ver_file"
-	echo "HOME_URL=\"https://malcolm.fyi\"" >> "$sensor_ver_file"
-	echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\"" >> "$sensor_ver_file"
+	echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\"" >> "$sensor_ver_file"
+	echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\"" >> "$sensor_ver_file"
 	echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\"" >> "$sensor_ver_file"
 	echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\"" >> "$sensor_ver_file"
-
-#####################################################
-# NEED TO FIND OUT WHERE THE MM FILE COMES FROM!!!! #
-#####################################################
 
 	# Setup MaxMind Geo IP info
 	MAXMIND_GEOIP_DB_LICENSE_KEY=""
@@ -407,6 +406,7 @@ install_hooks() {
 	if [[ $BUILD_GUI -eq 0 ]]; then
 		rm -f "${hooks_dir}"/*firefox-install.hook.chroot
 		rm -f "${hooks_dir}"/*login.hook.chroot
+		rm -f "${hooks_dir}"/*stig-scripts.hook.chroot
 	fi
 
 	for file in ${hooks_dir}/*.hook.chroot; do

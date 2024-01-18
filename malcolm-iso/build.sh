@@ -168,8 +168,8 @@ if [ -d "$WORKDIR" ]; then
   echo "VARIANT=\"Hedgehog Linux (Malcolm) v${IMAGE_VERSION}\""                   >> "$MALCOLM_DEST_DIR"/.os-info
   echo "VARIANT_ID=\"hedgehog-malcolm\""                                          >> "$MALCOLM_DEST_DIR"/.os-info
   echo "ID_LIKE=\"debian\""                                                       >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "HOME_URL=\"https://malcolm.fyi\""                                         >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/documentation/\""                 >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""       >> "$MALCOLM_DEST_DIR"/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
   echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
 

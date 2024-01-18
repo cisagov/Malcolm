@@ -602,8 +602,6 @@ function InstallMalcolm {
     mkdir -p "$ARTIFACTS_PATH"
     pushd "$ARTIFACTS_PATH" >/dev/null 2>&1
     curl -sSL -J -O https://malcolm.fyi/examples/Cyberville.pcap
-    curl -sSL -J -O https://malcolm.fyi/examples/net-map.json
-    cp -f ./net-map.json "$MALCOLM_PATH"/
     popd >/dev/null 2>&1
   fi
 }
