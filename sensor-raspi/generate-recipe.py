@@ -94,7 +94,6 @@ extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
     '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{deps,hooks,patches,sensor,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
-    'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
     'cp -r "%s/interface/"* "${ROOT?}/opt/sensor"' % SENSOR_DIR,
     'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
     'cp "%s/scripts/malcolm_utils.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
