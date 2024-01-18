@@ -5,8 +5,7 @@ import sys
 import subprocess
 import os
 
-SCRIPT_NAME = os.path.basename(__file__)
-SCRIPT_DIR = os.path.dirname(SCRIPT_NAME)
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 MALCOLM_DIR = os.path.dirname(SCRIPT_DIR)
 SENSOR_DIR = os.path.join(MALCOLM_DIR, 'sensor-iso')
 
