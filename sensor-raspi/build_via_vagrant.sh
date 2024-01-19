@@ -45,6 +45,10 @@ while getopts 'fi:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
+pushd "$SCRIPT_PATH"/ >/dev/null 2>&1
+make clean >/dev/null 2>&1
+popd >/dev/null 2>&1
+
 pushd "$SCRIPT_PATH"/vagrant
 
 VM_NAME="$(grep "config.vm.box" Vagrantfile | tr -d "[:space:]" | sed "s/.*=//")"
