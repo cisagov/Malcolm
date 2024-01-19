@@ -28,6 +28,7 @@ BUILD_GUI=0
 RUN_PATH="(pwd)"
 DEBS_DIR="${HOME}/debs"
 DEPS_DIR='/opt/deps'
+SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
@@ -266,13 +267,14 @@ clean_up() {
 
     # Remove extra installation files
     rm -rf $WORK_DIR \
-    		  /opt/deps \
-    		  /opt/hedgehog_install_artifacts \
-    		  /opt/hooks \
-    		  /opt/patches \
-    		  /root/.bash_history \
-    		  /root/.wget-hsts \
-    		  /tmp/*
+           $SHARED_DIR \
+		   /opt/deps \
+		   /opt/hedgehog_install_artifacts \
+		   /opt/hooks \
+		   /opt/patches \
+		   /root/.bash_history \
+		   /root/.wget-hsts \
+		   /tmp/*
 
     # Remove unnecessary build components
     apt-get remove $BUILD_DEPS -y
@@ -346,14 +348,19 @@ install_deps() {
 
 install_files() {
 
-    sensor_ver_file="${SENSOR_DIR}/.os-info"
-
     # Shared Scripts setup
     ln -s /usr/local/bin/malcolm_utils.py "/opt/zeek/bin/"
     mv /usr/local/bin/zeekdeploy.sh "/opt/zeek/bin/"
     rm -rf /usr/local/bin/aide_integrity_check.sh
 
     # Setup OS information
+    sensor_ver_file="${SENSOR_DIR}/.os-info"
+
+    if [[ -f "$SHARED_DIR/version.txt" ]]; then
+      SHARED_IMAGE_VERSION="$(cat "$SHARED_DIR/version.txt" | head -n 1)"
+      [[ -n $SHARED_IMAGE_VERSION ]] && IMAGE_VERSION="$SHARED_IMAGE_VERSION"
+    fi
+
     echo "BUILD_ID=\"$(date +\'%Y-%m-%d\')-${IMAGE_VERSION}\""   > "$sensor_ver_file"
     echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\"" >> "$sensor_ver_file"
     echo "VARIANT_ID=\"hedgehog-sensor\"" >> "$sensor_ver_file"
@@ -366,8 +373,8 @@ install_files() {
     # Setup MaxMind Geo IP info
     MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
-    if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
-    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
+    if [[ -f "$SHARED_DIR/maxmind_license.txt" ]]; then
+    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SHARED_DIR/maxmind_license.txt" | head -n 1)"
         if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
             for DB in ASN Country City; do
             curl -s -S -L -o "/opt/arkime/GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
@@ -433,6 +440,10 @@ mount -t devtmpfs /dev /dev
 mount -t devpts /dev/pts /dev/pts
 mount -t sysfs /sys /sys
 mount -t tmpfs /run /run
+
+
+[[ -f "$SHARED_DIR/environment.chroot" ]] && \
+  . "$SHARED_DIR/environment.chroot"
 
 install_files
 install_deps
