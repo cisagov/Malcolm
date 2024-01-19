@@ -45,6 +45,26 @@ function CleanDefaultAccounts() {
   chmod 700 "/etc/cron.hourly" "/etc/cron.daily" "/etc/cron.weekly" "/etc/cron.monthly" "/etc/cron.d" >/dev/null 2>&1 || true
 }
 
+# disable automatic running of some services
+function DisableServices() {
+  for SERVICE in apt-daily-upgrade.service \
+                 apt-daily-upgrade.timer \
+                 apt-daily.service \
+                 apt-daily.timer \
+                 clamav-daemon.service \
+                 clamav-freshclam.service \
+                 ctrl-alt-del.target \
+                 filebeat.service \
+                 fluent-bit.service \
+                 htpdate.service \
+                 supervisor.service \
+                 suricata.service; do
+    for ACTION in stop disable; do
+      systemctl "$ACTION" "$SERVICE" >/dev/null 2>&1 || true
+    done
+  done
+}
+
 # setup initially-created user's directory based on /etc/skel
 function InjectSkeleton() {
   if [ -n "$1" ]; then

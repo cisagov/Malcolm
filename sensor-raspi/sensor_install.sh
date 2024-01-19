@@ -41,16 +41,13 @@ BUILD_YARA_FROM_SOURCE=1
 BUILD_ZEEK_FROM_SOURCE=0
 
 # Build time dependencies for arkime, htpdate, capa, and yara
-BUILD_DEPS='build-essential meson ninja-build patch python3-dev python3-pip python3-setuptools '
-BUILD_DEPS+='ruby ruby-dev ruby-rubygems wget automake checkinstall flex gcc libjansson-dev '
-BUILD_DEPS+='libmagic-dev libssl-dev libtool make pkg-config libnl-genl-3-dev python3-venv '
+BUILD_DEPS='automake checkinstall libjansson-dev libmagic-dev libnl-genl-3-dev libtool '
+BUILD_DEPS+='meson ninja-build python3-dev ruby ruby-dev ruby-rubygems '
 
-# Build time dependencies for zeek when built from source
-if [ $BUILD_ZEEK_FROM_SOURCE -ne 0 ]; then
-    BUILD_DEPS+='ccache clang cmake git libc++-dev libc++abi-dev libfl-dev libgoogle-perftools-dev '
-    BUILD_DEPS+='libgoogle-perftools4 libkrb5-3 libkrb5-dev libmaxminddb-dev libpcap-dev '
-    BUILD_DEPS+='libtcmalloc-minimal4 python3-git python3-semantic-version swig zlib1g-dev '
-fi
+# Build dependencies we're leaving in place after installation (for building new Zeek plugins in the wild, mostly)
+BUILD_DEPS_KEEP='build-essential ccache clang cmake flex gcc git libc++-dev libc++abi-dev libfl-dev libgoogle-perftools-dev'
+BUILD_DEPS_KEEP+='libgoogle-perftools4 libkrb5-3 libkrb5-dev libmaxminddb-dev libpcap-dev libssl-dev libtcmalloc-minimal4 '
+BUILD_DEPS_KEEP+='make patch pkg-config python3-git python3-pip python3-semantic-version python3-setuptools python3-venv swig wget zlib1g-dev '
 
 BUILD_ERROR_CODE=1
 
@@ -65,7 +62,7 @@ build_arkime_src(){
     arkime_dir='/opt/arkime'
     build_jobs=$((PROC_CNT/2))
 
-    apt-get install $BUILD_DEPS -y --no-install-suggests
+    apt-get install $BUILD_DEPS $BUILD_DEPS_KEEP -y --no-install-suggests
 
     gem install --no-document fpm
 
@@ -112,7 +109,7 @@ build_htpdate() {
     htpdate_vers="$(curl -sqI $htpdate_url/releases/latest | awk -F '/' '/^location/ {print substr($NF,2,length($NF)-2)}')"
     htpdate_release=1
 
-    apt-get install $BUILD_DEPS -y --no-install-suggests
+    apt-get install $BUILD_DEPS $BUILD_DEPS_KEEP -y --no-install-suggests
 
     mkdir -p "${WORK_DIR}"/htpdate && cd "$_"
     curl -sSL "$htpdate_url/tarball/v$htpdate_vers" | tar xzf - --strip-components=1
@@ -159,7 +156,7 @@ build_yara_src() {
 
     # Build Yara from source code
 
-    apt-get install $BUILD_DEPS -y --no-install-suggests
+    apt-get install $BUILD_DEPS $BUILD_DEPS_KEEP -y --no-install-suggests
 
     yara_url="https://github.com/VirusTotal/YARA"
     yara_ver="$(curl -sqI ${yara_url}/releases/latest | awk -F '/' '/^location/ {print substr($NF,2,length($NF)-2)}')"

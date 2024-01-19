@@ -213,7 +213,7 @@ if [ "${ARCH,,}" == 'arm64' ] || [ "${ARCH,,}" == 'arm' ]; then
 	unzip -q capa.zip
 
 	cd capa-${capa_latest_ver}
-	pip install -e .[build]
+	python3 -m pip install -e .[build]
 	python scripts/cache-ruleset.py rules/ cache/
 	pyinstaller .github/pyinstaller/pyinstaller.spec
 	mv dist/capa /usr/local/bin/capa

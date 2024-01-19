@@ -130,6 +130,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     FixPermissions "$MAIN_USER"
   fi
 
+  # disable automatic running of some services
+  DisableServices
+
   # block some call-homes
   BadTelemetry
 

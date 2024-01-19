@@ -38,6 +38,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
   InitializeAggregatorNetworking
 
+  # disable automatic running of some services
+  DisableServices
+
   # block some call-homes
   BadTelemetry
 
