@@ -253,9 +253,9 @@ clean_up() {
     # Set Hedgehog banner
     mv /root/hedgehog-ascii-text.txt /etc/issue
 
-    # Remove network interface files left by installation
+    # Remove ethernet interface files left by installation
     # Sensor setup will create necessary files when user runs setup
-    rm -f /etc/network/interfaces.d/*
+    rm -f /etc/network/interfaces.d/eth0
 
     # Ensure user network conf goes into proper file
     touch /etc/network/interfaces.d/sensor
