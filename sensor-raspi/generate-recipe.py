@@ -95,7 +95,8 @@ extra_root_shell_cmds = [
     '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
     'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
-    'cp "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true' % MALCOLM_DIR,
+    'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
+    % MALCOLM_DIR,
     'cp -r shared/* "${ROOT?}/opt/buildshared"',
     'cp -r "%s/interface/"* "${ROOT?}/opt/sensor"' % SENSOR_DIR,
     'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
