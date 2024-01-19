@@ -12,6 +12,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   # remove default accounts/groups we don't want, create/set directories for non-user users for stig to not complain
   CleanDefaultAccounts
 
+  FIRST_RUN=0
   MAIN_USER="$(id -nu 1000)"
   if [[ -n $MAIN_USER ]]; then
 
@@ -24,6 +25,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     # if Malcolm's config file has never been touched, configure it now
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
+      FIRST_RUN=1
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --restart-malcolm
       fi
@@ -39,7 +41,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   InitializeAggregatorNetworking
 
   # disable automatic running of some services
-  DisableServices
+  [[ "$FIRST_RUN" == 1 ]] && DisableServices
 
   # block some call-homes
   BadTelemetry

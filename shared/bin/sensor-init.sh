@@ -7,6 +7,7 @@ SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 echo "sensor" > /etc/installer
 
 MAIN_USER="$(id -nu 1000)"
+FIRST_RUN=0
 
 if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   . "$SCRIPT_PATH"/common-init.sh
@@ -42,6 +43,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     fi
 
     [[ -d /opt/sensor/sensor_ctl/arkime/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/arkime/config.ini
+
+    [[ -f /opt/sensor/firstrun ]] && FIRST_RUN=1 && rm -f /opt/sensor/firstrun
 
   fi
 
@@ -131,7 +134,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   fi
 
   # disable automatic running of some services
-  DisableServices
+  [[ "$FIRST_RUN" == 1 ]] && DisableServices
 
   # block some call-homes
   BadTelemetry

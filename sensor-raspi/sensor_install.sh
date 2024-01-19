@@ -282,7 +282,7 @@ clean_up() {
     apt-get clean
 
     # Ensure locale and term are set
-    echo 'TERM=xterm-256color' > /etc/environment
+    echo 'TERM=xterm-256color' >> /etc/environment
     locale-gen en_US.UTF-8 en.UTF-8
     update-locale LANG=en_US.UTF-8 LANGUAGE=en.UTF-8
 
@@ -410,6 +410,8 @@ install_files() {
     # Add RPI hostname to /etc/hosts
     echo "127.0.0.1 $(hostname)" >> /etc/hosts
 
+    # mark as first run
+    touch "${SENSOR_DIR}"/firstrun
 }
 
 install_hooks() {

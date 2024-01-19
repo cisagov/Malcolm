@@ -57,6 +57,7 @@ function DisableServices() {
                  filebeat.service \
                  fluent-bit.service \
                  htpdate.service \
+                 ntpsec.service \
                  supervisor.service \
                  suricata.service; do
     for ACTION in stop disable; do
