@@ -28,7 +28,7 @@ Debian Bullseye (11), Devuan Daedalus (5), or higher system:
 * time
 * vmdb2 (>= 0.17)
 * python3
-* zerofree
+* zerofree (because of [#1021341](https://bugs.debian.org/1021341))
 
 To install these (as root):
 ```shell
@@ -101,7 +101,7 @@ Alternatively, if you don't have `bmap-tools` installed, you can use
 `dd` with the compressed image:
 
 ```shell
-xzcat raspi_3_bullseye.img | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+xzcat raspi_3_bullseye.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Or with the uncompressed image:

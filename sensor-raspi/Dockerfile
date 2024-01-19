@@ -16,5 +16,10 @@ ARG QEMU_RAM=4096
 ENV QEMU_CPU $QEMU_CPU
 ENV QEMU_RAM $QEMU_RAM
 
+# just using the base to serve the .img for download, not actually run it in qemu
+ENV NOVNC_START false
+ENV QEMU_RESTART false
+ENV QEMU_START false
+
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/hedgehog/logo/favicon.ico /image/favicon.ico
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} raspi_4_bookworm*.* /image/

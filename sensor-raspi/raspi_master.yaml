@@ -40,7 +40,8 @@ steps:
 
   - unpack-rootfs: tag-root
 
-  - qemu-debootstrap: __RELEASE__
+  - debootstrap: __RELEASE__
+    require_empty_target: false
     mirror: http://deb.debian.org/debian
     target: tag-root
     arch: __ARCH__
