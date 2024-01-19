@@ -46,7 +46,7 @@ BUILD_DEPS='automake checkinstall libjansson-dev libmagic-dev libnl-genl-3-dev l
 BUILD_DEPS+='meson ninja-build python3-dev ruby ruby-dev ruby-rubygems '
 
 # Build dependencies we're leaving in place after installation (for building new Zeek plugins in the wild, mostly)
-BUILD_DEPS_KEEP='build-essential ccache clang cmake flex gcc git libc++-dev libc++abi-dev libfl-dev libgoogle-perftools-dev'
+BUILD_DEPS_KEEP='build-essential ccache clang cmake flex gcc git libc++-dev libc++abi-dev libfl-dev libgoogle-perftools-dev '
 BUILD_DEPS_KEEP+='libgoogle-perftools4 libkrb5-3 libkrb5-dev libmaxminddb-dev libpcap-dev libssl-dev libtcmalloc-minimal4 '
 BUILD_DEPS_KEEP+='make patch pkg-config python3-git python3-pip python3-semantic-version python3-setuptools python3-venv swig wget zlib1g-dev '
 
