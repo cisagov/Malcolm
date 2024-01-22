@@ -1,65 +1,3 @@
-FROM debian:12-slim as build
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-
-# for build
-ARG ZEEK_VERSION=6.1.0
-ENV ZEEK_VERSION $ZEEK_VERSION
-ARG ZEEK_DBG=0
-ENV ZEEK_DBG $ZEEK_DBG
-ARG BUILD_JOBS=4
-ENV BUILD_JOBS $BUILD_JOBS
-ENV CCACHE_DIR "/var/spool/ccache"
-ENV CCACHE_COMPRESS 1
-ENV CMAKE_C_COMPILER clang-14
-ENV CMAKE_CXX_COMPILER clang++-14
-ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y --no-install-recommends \
-        bison \
-        ca-certificates \
-        ccache \
-        clang \
-        cmake \
-        curl \
-        flex \
-        git \
-        libc++-dev \
-        libc++abi-dev \
-        libfl-dev \
-        libgoogle-perftools-dev \
-        libgoogle-perftools4 \
-        libkrb5-3 \
-        libkrb5-dev \
-        libmaxminddb-dev \
-        libpcap-dev \
-        libssl-dev \
-        libtcmalloc-minimal4 \
-        make \
-        ninja-build \
-        python3 \
-        python3-dev \
-        python3-git \
-        python3-semantic-version \
-        sudo \
-        swig \
-        zlib1g-dev && \
-    mkdir -p /usr/share/src/zeek "${CCACHE_DIR}" && \
-        cd /usr/share/src && \
-        ( curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C ./zeek --strip-components 1 ) && \
-        cd /usr/share/src/zeek && \
-        [ "$ZEEK_DBG" = "1" ] && \
-            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools --enable-debug || \
-            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools && \
-        ninja -C build -j "${BUILD_JOBS}" && \
-        cd ./build && \
-        cpack -G DEB
-
 FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
@@ -100,7 +38,7 @@ ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for download and install
-ARG ZEEK_VERSION=6.1.0
+ARG ZEEK_VERSION=6.1.1-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
@@ -114,9 +52,8 @@ ENV CMAKE_C_COMPILER clang-14
 ENV CMAKE_CXX_COMPILER clang++-14
 ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
-COPY --from=build /usr/share/src/zeek/build/*.deb /tmp/zeekdebs/
-
-# add script for building 3rd-party plugins
+# add script for downloading zeek and building 3rd-party plugins
+ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
@@ -179,8 +116,10 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       vim-tiny \
       xxd \
       zlib1g-dev && \
-    dpkg -i /tmp/zeekdebs/*.deb && \
     python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    mkdir -p /tmp/zeek-packages && \
+      bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
+      dpkg -i /tmp/zeek-packages/*.deb && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \

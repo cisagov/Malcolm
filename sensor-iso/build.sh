@@ -184,11 +184,8 @@ if [ -d "$WORKDIR" ]; then
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
   docker rmi -f arkime-build:latest
 
-  # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build -j "${BUILD_JOBS:-0}"
-  mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
-  docker rmi -f zeek-build:latest
+  # download Zeek .deb packages
+  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/
 
   # reclaim some space
   docker system prune --volumes --force

@@ -183,23 +183,10 @@ build_yara_src() {
 }
 
 build_zeek() {
-
-    # Build zeek from lts debs from OpenSUSE
-
-    zeek_repo='https://download.opensuse.org/repositories/security:/zeek/Debian_12/'
-    zeek_gpg_key=/etc/apt/keyrings/zeek-lts.gpg
-    zeek_apt_file=/etc/apt/sources.list.d/zeek.list
-    zeek_ver='lts'
-    zeek_dir=/opt/zeek
-
-    curl -L "${zeek_repo}/Release.key" | gpg --dearmor --batch --yes -o "$zeek_gpg_key"
-
-    echo "#This is an unofficial build of Zeek LTS" > "$zeek_apt_file"
-    echo "deb [signed-by=${zeek_gpg_key}] $zeek_repo ./" >> "$zeek_apt_file"
-
-    apt-get update
-    apt-get install zeek-${zeek_ver} -y --no-install-suggests
-
+    # install zeek from debs from OpenSUSE
+    mkdir -p /tmp/zeek-debs
+    /bin/bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-debs
+    dpkg -i /tmp/zeek-debs/*.deb
 }
 
 build_zeek_src() {
