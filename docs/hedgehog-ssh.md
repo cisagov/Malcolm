@@ -1,4 +1,4 @@
-# <a name="HedgehogConfigSSH"></a>Appendix B - Configuring SSH access
+# <a name="HedgehogConfigSSH"></a>Appendix C - Configuring SSH access
 
 SSH access to the sensor's non-privileged sensor account is only available using secure key-based authentication which can be enabled by adding a public SSH key to the **/home/sensor/.ssh/authorized_keys** file as illustrated below:
 
