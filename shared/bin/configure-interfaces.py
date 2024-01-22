@@ -76,7 +76,7 @@ class Constants:
     MSG_NETWORK_STOP_ERROR = 'Error occured while bringing down the network interface!\n\n'
     MSG_NETWORK_STOP_SUCCESS = 'Brought down the network interface successfully!\n\n'
     MSG_TIME_SYNC_TYPE = 'Select time synchronization method'
-    MSG_TIME_SYNC_HTPDATE_CONFIG = 'Provide values for HTTP/HTTPS Server'
+    MSG_TIME_SYNC_HTPDATE_CONFIG = 'Provide URL for HTTP/HTTPS Server Time Sync'
     MSG_TIME_SYNC_TEST_SUCCESS = 'Server time retrieved successfully!\n\n'
     MSG_TIME_SYNC_CONFIG_SUCCESS = 'Time synchronization configured successfully!\n\n'
     MSG_TIME_SYNC_TEST_FAILURE = 'Server time could not be retrieved. Ignore error?\n\n'
@@ -298,31 +298,27 @@ def main():
                 elif time_sync_mode == Constants.TIME_SYNC_HTPDATE:
                     # sync time via htpdate, run via cron
 
-                    http_host = ''
-                    http_port = ''
+                    http_url = ''
                     while True:
-                        # host/port for htpdate
+                        # http/https URL for for htpdate
                         code, values = d.form(
                             Constants.MSG_TIME_SYNC_HTPDATE_CONFIG,
-                            [('URL', 1, 1, '', 1, 25, 30, 255), ('Port', 2, 1, '443', 2, 25, 6, 5)],
+                            [('URL', 1, 1, 'https://1.1.1.1:443', 1, 25, 30, 255)],
                         )
                         values = [x.strip() for x in values]
 
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
 
-                        elif (len(values[0]) <= 0) or (len(values[1]) <= 0) or (not values[1].isnumeric()):
+                        elif len(values[0]) <= 0:
                             code = d.msgbox(text=Constants.MSG_ERR_BAD_HOST)
 
                         else:
-                            http_host = values[0]
-                            http_port = values[1]
+                            http_url = values[0]
                             break
 
                     # test with htpdate to see if we can connect
-                    ecode, test_output = run_subprocess(
-                        f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_host}:{http_port}"
-                    )
+                    ecode, test_output = run_subprocess(f"{Constants.TIME_SYNC_HTPDATE_TEST_COMMAND} {http_url}")
                     if ecode == 0:
                         emsg_str = '\n'.join(test_output)
                         code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_TEST_SUCCESS}{emsg_str}")
@@ -352,15 +348,11 @@ def main():
                         f.write('SHELL=/bin/bash\n')
                         f.write('PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n')
                         f.write('\n')
-                        f.write(
-                            f'*/{htpdate_interval} * * * * root {Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}\n'
-                        )
+                        f.write(f'*/{htpdate_interval} * * * * root {Constants.TIME_SYNC_HTPDATE_COMMAND} {http_url}\n')
                         f.write('\n')
 
                     # now actually do the sync "for real" one time (so we can get in sync before waiting for the interval)
-                    ecode, sync_output = run_subprocess(
-                        f"{Constants.TIME_SYNC_HTPDATE_COMMAND} {http_host}:{http_port}"
-                    )
+                    ecode, sync_output = run_subprocess(f"{Constants.TIME_SYNC_HTPDATE_COMMAND} {http_url}")
                     emsg_str = '\n'.join(sync_output)
                     code = d.msgbox(text=f"{Constants.MSG_TIME_SYNC_CONFIG_SUCCESS if (ecode == 0) else ''}{emsg_str}")
 
