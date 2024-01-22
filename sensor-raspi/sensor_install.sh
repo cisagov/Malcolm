@@ -263,6 +263,8 @@ clean_up() {
 		   /root/.bash_history \
 		   /root/.wget-hsts \
 		   /tmp/*
+    find /var/log/ -type f -print0 2>/dev/null | \
+        xargs -0 -r -I XXX bash -c "file 'XXX' | grep -q text && > 'XXX'"
 
     # Remove unnecessary build components
     apt-get remove $BUILD_DEPS -y
