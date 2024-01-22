@@ -149,7 +149,8 @@ build_interface() {
     fi
 
     sed -i 's/CAPTURE_INTERFACE=.*/CAPTURE_INTERFACE=xxxx/g' "${interface_dir}/sensor_ctl/control_vars.conf"
-    rm -f "${interface_dir}/sensor_ctl/supervisor.d/fluentbit-aide.conf"
+    rm -f "${interface_dir}/sensor_ctl/supervisor.d/fluentbit-aide.conf" \
+          "${interface_dir}/sensor_ctl/supervisor.d/documentation.conf"
     sed -i '/_AIDE/d' "${interface_dir}/sensor_ctl/control_vars.conf"
 }
 
