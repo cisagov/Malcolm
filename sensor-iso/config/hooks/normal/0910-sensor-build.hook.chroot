@@ -270,7 +270,7 @@ freshclam --stdout --quiet --no-warnings
 
 # set up capabilities for network-related tools
 chown root:netdev /usr/sbin/netsniff-ng && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
 chown root:netdev "${ZEEK_DIR}"/bin/zeek && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek
 chown root:netdev /sbin/ethtool && \

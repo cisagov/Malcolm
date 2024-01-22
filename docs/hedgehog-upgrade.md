@@ -208,7 +208,7 @@ commands:
 
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
 chown root:netdev /opt/zeek/bin/zeek && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
 chown root:netdev /sbin/ethtool && \
