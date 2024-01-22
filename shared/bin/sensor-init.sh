@@ -56,8 +56,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   if [[ -d /opt/zeek.orig ]]; then
     # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
     # regenerated when we are about to deploy zeek itself
-    [[ -d /opt/zeek ]] && rm -rf /opt/zeek
-    rsync -a /opt/zeek.orig/ /opt/zeek
+    mkdir -p /opt/zeek/
+    rsync --archive --delete --force /opt/zeek.orig/ /opt/zeek/
   fi
   if [[ -d /opt/zeek ]]; then
     chown -R 1000:1000 /opt/zeek/*
