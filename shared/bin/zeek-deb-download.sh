@@ -23,7 +23,7 @@ if [[ -n $VERBOSE ]]; then
   set -x
 fi
 
-DEB_URL="https://download.zeek.org/binary-packages/${DISTRO}"
+DEB_URL="https://downloadcontentcdn.opensuse.org/repositories/security:/zeek/${DISTRO}"
 
 pushd "$OUTPUT_DIR" >/dev/null 2>&1
 curl --fail-early -fsSL --remote-name-all \
