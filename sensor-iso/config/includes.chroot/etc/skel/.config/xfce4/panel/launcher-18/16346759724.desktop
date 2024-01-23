@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Sensor README
-Exec=/opt/firefox/firefox --setDefaultBrowser http://localhost:8420/docs/hedgehog.html
+Exec=/usr/bin/firefox --setDefaultBrowser http://localhost:8420/docs/hedgehog.html
 Terminal=false
 X-MultipleArgs=false
 Type=Application

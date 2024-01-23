@@ -415,7 +415,6 @@ install_hooks() {
     local hooks_dir='/opt/hooks'
 
     if [[ $BUILD_GUI -eq 0 ]]; then
-        rm -f "${hooks_dir}"/*firefox-install.hook.chroot
         rm -f "${hooks_dir}"/*login.hook.chroot
         rm -f "${hooks_dir}"/*stig-scripts.hook.chroot
     fi

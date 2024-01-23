@@ -2,6 +2,7 @@ apache2-utils
 ca-certificates
 curl
 ethtool
+firefox
 iproute2
 iputils-arping
 iputils-ping
