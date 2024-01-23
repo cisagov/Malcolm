@@ -1,11 +1,10 @@
 bison
 ccache
 checkinstall
-clang
 cmake
+gcc
+g++
 git
-libc++-dev
-libc++abi-dev
 libfl-dev
 libgoogle-perftools-dev
 libjansson-dev

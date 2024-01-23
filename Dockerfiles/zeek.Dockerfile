@@ -48,9 +48,6 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 # for build
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
-ENV CMAKE_C_COMPILER clang-14
-ENV CMAKE_CXX_COMPILER clang++-14
-ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
 # add script for downloading zeek and building 3rd-party plugins
 ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
@@ -66,19 +63,18 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       bison \
       ca-certificates \
       ccache \
-      clang \
       cmake \
       curl \
       file \
       flex \
+      g++ \
+      gcc \
       git \
       gnupg2 \
       iproute2 \
       jq \
       less \
       libatomic1 \
-      libc++-dev \
-      libc++abi-dev \
       libcap2-bin \
       libfl-dev \
       libfl2 \
@@ -169,15 +165,6 @@ ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SP
 ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 25
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-22954/main|cve-2022-26809/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
-RUN mkdir -p /tmp/logs && \
-    cd /tmp/logs && \
-    "$ZEEK_DIR"/bin/zeek -NN local >zeeknn.log 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
-    "$ZEEK_DIR"/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
-    cd /tmp && \
-    rm -rf /tmp/logs /tmp/pcaps
-
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
@@ -189,6 +176,15 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
     ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
+
+RUN mkdir -p /tmp/logs && \
+    cd /tmp/logs && \
+    "$ZEEK_DIR"/bin/zeek-offline -NN local >zeeknn.log 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+    "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+    cd /tmp && \
+    rm -rf /tmp/logs /tmp/pcaps
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
