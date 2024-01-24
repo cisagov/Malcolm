@@ -561,17 +561,20 @@ def aggfields(fieldnames, current_request, urls=None):
     aggCount = 0
     for fname in get_iterable(fieldnames):
         aggCount += 1
+        # TODO: missing string needs to match the type of the field
+        # "error": "RequestError: RequestError(400, 'search_phase_execution_exception', \"'__missing__' is not an IP string literal.\")"
         last_bucket = last_bucket.bucket(
             f"values_{aggCount}",
             "terms",
             field=fname,
             size=bucket_limit,
+            missing="__missing__",
         )
 
     response = s.execute()
     if (urls is not None) and (len(urls) > 0):
         return jsonify(
-            values=response.aggregations.to_dict().get("values", {}),
+            values=response.aggregations.to_dict().get("values_1", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
             fields=get_iterable(fieldnames),
@@ -579,7 +582,7 @@ def aggfields(fieldnames, current_request, urls=None):
         )
     else:
         return jsonify(
-            values=response.aggregations.to_dict().get("values", {}),
+            values=response.aggregations.to_dict().get("values_1", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
             fields=get_iterable(fieldnames),
