@@ -39,6 +39,10 @@ apt-get -y --purge remove \
 apt-get -y autoremove
 apt-get clean
 
+# hold packages we don't want to update with an apt-get upgrade
+# we built htpdate from source for HTTPS support, so leave it
+dpkg -s htpdate >/dev/null 2>&1 && apt-mark hold htpdate
+
 # remove any residual configs
 dpkg -l | awk '/^rc/ { print $2 }' | xargs -r -l dpkg --purge
 
