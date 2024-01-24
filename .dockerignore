@@ -29,6 +29,7 @@ arkime-raw
 kubernetes
 malcolm-iso
 sensor-iso
+sensor-raspi
 nginx/nginx_ldap*.conf
 pcap
 _site
