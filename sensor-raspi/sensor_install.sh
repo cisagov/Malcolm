@@ -324,7 +324,7 @@ install_deps() {
     declare -a graphical_deps=( aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb )
     graphical_deps+=( gparted gdebi  google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x )
     graphical_deps+=( hfsplus hfsprogs hfsutils htpdate libgtk2.0-bin menu neofetch pmount rar )
-    graphical_deps+=( ssh-askpass tmux udisks2 upower user-setup xbitmaps zenity zenity-common )
+    graphical_deps+=( ssh-askpass udisks2 upower user-setup xbitmaps zenity zenity-common )
     graphical_deps+=( libsmbclient samba-common samba-common-bin samba-dsdb-modules samba-libs smbclient )
 
     deps=$(echo ${deps} ${graphical_deps[@]} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' ')
