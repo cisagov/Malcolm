@@ -1011,6 +1011,14 @@ class Installer(object):
         indexPruneNameSort = False
         arkimeManagePCAP = False
         arkimeFreeSpaceG = '10%'
+        ilmPolicy = False
+        ilmHotWarm = False
+        ilmOptimizationTimePeriod = '30d'
+        ilmSpiDataRetention = '90d'
+        ilmReplicas = 1
+        ilmHistoryInWeeks = 13
+        ilmOptimizeSessionSegments = 1
+
 
         if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
             loopBreaker = CountUntilException(
@@ -1520,12 +1528,13 @@ class Installer(object):
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_ENABLED',
-                ilmPolicy,
+                TrueOrFalseNoQuote(ilmPolicy),
             ),
+            # Should Arkime use a hot/warm design in which non-session data is stored in a warm index? (see https://https://arkime.com/faq#ilm)
             EnvValue(
                 os.path.join(args.configDir, 'arkime.env'),
                 'ELASTICSEARCH_ILM_HOT_WARM_ENABLED',
-                ilmHotWarm,
+                TrueOrFalseNoQuote(ilmHotWarm)s,
             ),
             # Time in hours/days before moving (Arkime indexes to warm) and force merge (number followed by h or d), default 30
             EnvValue(
@@ -3677,7 +3686,7 @@ def main():
         nargs='?',
         const=True,
         default=False,
-        help="'Should Arkime use a hot/warm design in which non-session data is stored in a warm index? (see https://https://arkime.com/faq#ilm)",
+        help="Should Arkime use a hot/warm design in which non-session data is stored in a warm index?",
     )
     storageArgGroup.add_argument(
         '--ilm-optimization-time-period',
