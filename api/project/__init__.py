@@ -524,7 +524,7 @@ def filtervalues(search, args):
     return (filters, s)
 
 
-def bucketfield(fieldname, current_request, urls=None):
+def aggfields(fieldnames, current_request, urls=None):
     """Returns a bucket aggregation for a particular field over a given time range
 
     Parameters
@@ -558,9 +558,11 @@ def bucketfield(fieldname, current_request, urls=None):
     filters, s = filtervalues(s, args)
     bucket_limit = int(deep_get(args, ["limit"], app.config["RESULT_SET_LIMIT"]))
     last_bucket = s.aggs
-    for fname in get_iterable(fieldname):
+    aggCount = 0
+    for fname in get_iterable(fieldnames):
+        aggCount += 1
         last_bucket = last_bucket.bucket(
-            "values",
+            f"values_{aggCount}",
             "terms",
             field=fname,
             size=bucket_limit,
@@ -572,7 +574,7 @@ def bucketfield(fieldname, current_request, urls=None):
             values=response.aggregations.to_dict().get("values", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
-            fields=get_iterable(fieldname),
+            fields=get_iterable(fieldnames),
             urls=urls,
         )
     else:
@@ -580,7 +582,7 @@ def bucketfield(fieldname, current_request, urls=None):
             values=response.aggregations.to_dict().get("values", {}),
             range=(start_time_ms // 1000, end_time_ms // 1000),
             filter=filters,
-            fields=get_iterable(fieldname),
+            fields=get_iterable(fieldnames),
         )
 
 
@@ -594,14 +596,14 @@ def bucketfield(fieldname, current_request, urls=None):
     methods=['GET', 'POST'],
 )
 def aggregate(fieldname):
-    """Returns the aggregated values and counts for a given field name, see bucketfield
+    """Returns the aggregated values and counts for a given field name, see aggfields
 
     Parameters
     ----------
     fieldname : string
         the name of the field(s) to be bucketed (comma-separated if multiple fields)
     request : Request
-        see bucketfield
+        see aggfields
 
     Returns
     -------
@@ -612,7 +614,7 @@ def aggregate(fieldname):
     """
     start_time, end_time = gettimes(get_request_arguments(request))
     fields = fieldname.split(",")
-    return bucketfield(
+    return aggfields(
         fields,
         request,
         urls=urls_for_field(fields, start_time=start_time, end_time=end_time),
