@@ -21,10 +21,6 @@ function vm_execute() {
   vagrant ssh --no-tty --command "$1"
 }
 
-function cleanup_shared_and_docs {
-  rm -rf "$SCRIPT_PATH"/shared
-}
-
 unset FORCE_PROVISION
 XZ_EXT=
 IMAGE=raspi_4_bookworm.img
@@ -49,6 +45,18 @@ while getopts 'fi:z' OPTION; do
   esac
 done
 shift "$(($OPTIND -1))"
+
+
+function cleanup_shared_and_docs {
+  # clean up temporary files
+  rm -rf "$SCRIPT_PATH"/shared \
+         "$SCRIPT_PATH"/.fuse_hidden*
+  # if we created an .xz, delete the original .img
+  if [[ -f "$SCRIPT_PATH/$IMAGE" ]] && [[ -n "$XZ_EXT" ]] && [[ -f "$SCRIPT_PATH/$IMAGE$XZ_EXT" ]] ; then
+    rm -f "$SCRIPT_PATH/$IMAGE"
+  fi
+}
+
 
 pushd "$SCRIPT_PATH"/ >/dev/null 2>&1
 make clean >/dev/null 2>&1
