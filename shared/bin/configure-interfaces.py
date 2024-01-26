@@ -309,7 +309,6 @@ def main():
                         )
                         values = [x.strip() for x in values]
 
-                        print
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
 

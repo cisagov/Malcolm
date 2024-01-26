@@ -274,10 +274,12 @@ clean_up() {
 	apt autoremove -y
 	apt clean
 
-	# Ensure locale and term are set
-	echo 'TERM=xterm-256color' > /etc/environment
+	# Ensure locale, term, and console are setup correct
+	echo 'TERM=linux' > /etc/environment
 	locale-gen en_US.UTF-8 en.UTF-8
 	update-locale LANG=en_US.UTF-8 LANGUAGE=en.UTF-8
+	sed -i -e 's/CHARMAP=.*/CHARMAP="UTF-8"/' -e 's/CODESET=.*/CODESET="Lat15"/' /etc/default/console-setup
+	dpkg-reconfigure console-setup
 
 	umount -A -f /dev/pts /run /dev /proc /sys
 
