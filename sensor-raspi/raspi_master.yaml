@@ -110,10 +110,6 @@ steps:
       mkdir -p "${ROOT?}/etc/systemd/system/basic.target.requires/"
       ln -s /etc/systemd/system/rpi-set-sysconf.service "${ROOT?}/etc/systemd/system/basic.target.requires/rpi-set-sysconf.service"
 
-      # Resize script is now in the initrd for first boot; no need to ship it.
-      rm -f "${ROOT?}/etc/initramfs-tools/hooks/rpi-resizerootfs"
-      rm -f "${ROOT?}/etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs"
-
       install -m 644 -o root -g root rootfs/etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/"
       mkdir -p "${ROOT?}/etc/systemd/system/multi-user.target.requires/"
       ln -s /etc/systemd/system/rpi-reconfigure-raspi-firmware.service "${ROOT?}/etc/systemd/system/multi-user.target.requires/rpi-reconfigure-raspi-firmware.service"
@@ -173,6 +169,11 @@ steps:
     shell: |
       rm -f /etc/machine-id /var/lib/dbus/machine-id
       echo "uninitialized" > /etc/machine-id
+
+      # Resize script is now in the initrd for first boot; no need to ship it.
+      # Removing here to avoid any update-initramfs triggers from removing script during build process
+      rm -f "/etc/initramfs-tools/hooks/rpi-resizerootfs"
+      rm -f "/etc/initramfs-tools/scripts/local-bottom/rpi-resizerootfs"
 
   # Create /etc/raspi-image-id to know, from what commit the image was built
   - chroot: tag-root

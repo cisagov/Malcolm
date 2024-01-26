@@ -21,13 +21,17 @@ if [ "${ARCH,,}" == 'arm' ] || [ "${ARCH,,}" == 'arm64' ]; then
 		$ufw default allow outgoing
 		for i in ${UFW_ALLOW_RULES[@]}; do $ufw allow $i; done
 		$ufw reload
+
+		# Update initramfs to remove rpi-resize script from current initramfs on first boot
+		echo "Updating initramfs to remove rpi-resize script. This may take a few minutes..." > /dev/tty0
+		/usr/sbin/update-initramfs -u
 	EOF
 
 	echo "sed -i '\|$run_once|d' /etc/rc.local" >> $run_once
 	echo -e "rm -f $run_once\nexit 0" >> $run_once
 	chmod 755 $run_once
 
-	sed -i "/exit 0/i $run_once" /etc/rc.local
+	sed -i "\|/bin/sh|a $run_once" /etc/rc.local
 
 else
 
