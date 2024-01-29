@@ -148,24 +148,14 @@ def shutdown_handler(signum, frame):
 def checkEnvFilesExist():
     global args
 
-    # first, if the configDir is completely empty, then populate from defaults
-    defaultConfigDir = os.path.join(MalcolmPath, 'config')
-    if (
-        (args.configDir is not None)
-        and os.path.isdir(args.configDir)
-        and os.path.isdir(defaultConfigDir)
-        and (not same_file_or_dir(defaultConfigDir, args.configDir))
-        and (not os.listdir(args.configDir))
-    ):
-        for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
-            shutil.copy2(defaultEnvExampleFile, args.configDir)
-
     # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-    envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
-    for envExampleFile in envExampleFiles:
-        envFile = envExampleFile[: -len('.example')]
-        if not os.path.isfile(envFile):
-            shutil.copyfile(envExampleFile, envFile)
+    if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
+        for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
+            envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
+            if not os.path.isfile(envFile):
+                if args.debug:
+                    eprint(f"Creating {envFile} from {envExampleFile}")
+                shutil.copyfile(envExampleFile, envFile)
 
 
 ###################################################################################################
