@@ -3,10 +3,10 @@
 Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/sensor-raspi) for the Raspberry Pi platform, although this capability is still considered experimental.
 
 * [Building the Image](#HedgehogRaspiBuild)
-    - [Writing the Image to Flash Media](#HedgehogRaspiBurn)
-    - [Setting the `root` and `sensor` Passwords](#HedgehogRaspiPassword)
-    - [Configuration](#HedgehogRaspiConfig)
-    - [Performance Considerations](#HedgehogRaspiPerformance)
+* [Writing the Image to Flash Media](#HedgehogRaspiBurn)
+* [Setting the `root` and `sensor` Passwords](#HedgehogRaspiPassword)
+* [Configuration](#HedgehogRaspiConfig)
+* [Performance Considerations](#HedgehogRaspiPerformance)
 
 ## Building the Image
 
