@@ -271,8 +271,7 @@ clean_up() {
     apt-get autoremove -y
     apt-get clean
 
-    # Ensure locale, term, and console are setup correct
-    echo 'TERM=linux' >> /etc/environment
+    # Ensure locale and console are setup correctly
     locale-gen en_US.UTF-8 en.UTF-8
     update-locale LANG=en_US.UTF-8 LANGUAGE=en.UTF-8
     sed -i -e 's/CHARMAP=.*/CHARMAP="UTF-8"/' -e 's/CODESET=.*/CODESET="Lat15"/' /etc/default/console-setup
