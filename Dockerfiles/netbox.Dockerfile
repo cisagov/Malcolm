@@ -31,6 +31,7 @@ ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
+ENV DDDC_NETBOX_PLUGIN_VERSION "91f0780"
 
 ENV YQ_VERSION "4.33.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
@@ -81,6 +82,14 @@ RUN apt-get -q update && \
       python-magic \
       python-slugify \
       randomcolor && \
+    cd /tmp && \
+      git clone --single-branch --recurse-submodules --shallow-submodules "https://github.com/DINA-community/DDDC-Netbox-plugin" && \
+      cd ./DDDC-Netbox-plugin && \
+      git reset --hard "$DDDC_NETBOX_PLUGIN_VERSION" && \
+      "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir ./plugins && \
+      D3C_DATA_DIR="$(${NETBOX_PATH}/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')"/d3c/data/ && \
+      mkdir -p "$D3C_DATA_DIR" && \
+      install -m 644 ./plugins/d3c/data/synonym_list.xlsx "$D3C_DATA_DIR"/ && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSLO "${SUPERCRONIC_URL}" && \

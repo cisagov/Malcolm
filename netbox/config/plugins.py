@@ -6,6 +6,7 @@
 
 PLUGINS = [
     'netbox_initializers',
+    'd3c',
 ]
 
 # PLUGINS_CONFIG = {
