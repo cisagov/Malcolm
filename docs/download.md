@@ -28,6 +28,14 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 |---|---|
 | [hedgehog-24.02.0.iso](/iso/hedgehog-24.02.0.iso) (2.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.02.0.iso.sha256.txt) |
 
+### Raspberry Pi 4 Image
+
+[Instructions are provided](hedgehog-raspi-build.md#HedgehogRaspiBuild) to generate the Hedgehog Linux Raspberry Pi image from source. While official downloads of the Hedgehog Linux image are not provided, an **unofficial build** of the image for the latest stable release is available for download here. This image is compatible with Raspberry Pi 4 models.
+
+| Image | SHA256 |
+|---|---|
+| [raspi_4_bookworm.img.xz](/iso/raspi_4_bookworm.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/raspi_4_bookworm.img.xz.sha256.txt) |
+
 ## Warning
 
 Please check any files you may have downloaded from the links on this page against the SHA256 sums provided to verify the integrity of the downloads.
