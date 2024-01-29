@@ -1,6 +1,14 @@
 # <a name="HedgehogRaspiBuild"></a>Appendix B - Generating a Raspberry Pi Image
 
-Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/sensor-raspi) for the Raspberry Pi platform. While these instructions will build an image for various Raspberry Pi models, Hedgehog Linux resource requirements will likely only be satisfied by the 8GB versions of the Raspberry Pi model 4 and higher. The resulting image is still considered experimental.
+Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/sensor-raspi) for the Raspberry Pi platform, although this capability is still considered experimental.
+
+* [Building the Image](#HedgehogRaspiBuild)
+    - [Writing the Image to Flash Media](#HedgehogRaspiBurn)
+    - [Setting the `root` and `sensor` Passwords](#HedgehogRaspiPassword)
+    - [Configuration](#HedgehogRaspiConfig)
+    - [Performance Considerations](#HedgehogRaspiPerformance)
+
+## Building the Image
 
 Official downloads of the Hedgehog Linux Raspberry Pi image are not provided: however, it can be built easily on an internet-connected Linux host with Vagrant:
 
@@ -35,8 +43,75 @@ As this build process is cross-compiling for the ARM64 architecture, building th
 …
 ```
 
+## <a name="HedgehogRaspiBurn"></a>Writing the Image to Flash Media
+
 The resulting `.img.xz` file can be written to a microSD card using the [Raspberry Pi Imager](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager) or `dd`.
+
+![Using the Raspberry Pi Imager](./images/screenshots/raspi_imager_hedgehog.png)
+
+## <a name="HedgehogRaspiPassword"></a>Setting the `root` and `sensor` Passwords
 
 The provided image will allow login (requiring physical access) with the `sensor` account using a default password of `Hedgehog_Linux` or the `root` account with a default password of `Hedgehog_Linux_Root`. It is **highly** recommended for users to use the `passwd` utility to change both of these passwords prior to configuring networking on the device.
 
+```
+
+                       ,cc:,..           .:'
+                      :dddddddoc,.  ;,.  oddo:.   .c;.
+                      :dddddddddddo;:ddc:dddddd;  ldddl,
+                      .dddddddddddddddddxdddddddo:odddddo'  cl;.
+            ........   :ddddddddddddddddOkdddddddddxdddddd;,dddd'
+        .;lddddddddddolcddddddddddddddddk0kddddddddOxdddddddddddo.
+       'dddddddddddddddddxkdddddddddddddx00xdddddddxkddddddoodddd,
+       .odddddddddddddddddO0OxdddddddddddO0Oddddddddoccloddc':xxd;
+        .:dddddddddddddddddxO00kdddddddddx00kdddddo;'....',;,'dddc.    .,;,.
+          .cdddxOkkxdddddddddxO00kddddddddO00ddddo,..cxxxl'...........;O0000:
+   .',,,,,,':ddddkO00OxddddddddxO00kdddddddOOddddc...l0000l............',o0c
+   cddddddddddddddddxO00kddddddddx000xdddddddddddo'...:dxo,..............''
+    'lddddddddddddddddxO0Odddddddddk00xdddddddddddc'......................
+      'lddddddddddddddddddddddddddddxkdddddddddddddl,.............':lc:;.
+        .:dxkkkxxddddddddddddddddddddocc:;;;;;;;::cll,............,:,...
+    ;clooooddxkOOOdddoc:;,'''',:ooc;'.................................
+    odddddddddddddl:,...........'...................................
+     cdddddddddl:'.............................................
+      .,coddoc,...........................................
+           .'...........................................
+           ............................................
+           .................    .............  ........
+          ..................       ..........   .......
+         ..........  ......          ........    ......
+        ........     .....             ......     ....
+        .....        ....                ....       ..
+
+     HH   HH   EEEE  DDDDD    GGGGG    EEEE  HH   HH   OOOO    GGGGG
+     HH   HH  EE     DD  DD  GG       EE     HH   HH  OO  OO  GG
+     HHHHHHH  EEEEE  DD   DD GGGGGGG  EEEEE  HHHHHHH OO    OO GGGGGGG
+     HH   HH  EE     DD  DD  GG   GG  EE     HH   HH  OO  OO  GG   GG
+     HH   HH   EEEE  DDDDD    GGGGGG   EEEE  HH   HH   OOOO    GGGGGG
+
+                LL      II   NN  NN   UU  UU   XX XX
+                LL      II   NNN NN   UU  UU    XXX
+                LL      II   NN NNN   UU  UU    XXX
+                LLLLL   II   NN  NN    UUUU    XX XX
+
+Hedgehog-rpi-4 login: sensor
+Password:
+
+sensor@Hedgehog-rpi-4:~$ su -
+Password:
+root@Hedgehog-rpi-4:~# passwd
+New password:
+Retype new password:
+passwd: password updated successfully
+root@Hedgehog-rpi-4:~# passwd sensor
+New password:
+Retype new password:
+passwd: password updated successfully
+```
+
+## <a name="HedgehogRaspiConfig"></a>Configuration
+
 Once Hedgehog Linux has booted, [configuration](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig) can proceed as usual using the `configure-interfaces` and `configure-capture` tools.
+
+## <a name="HedgehogRaspiPerformance"></a>Performance Considerations
+
+While these instructions will build an image for various Raspberry Pi models, Hedgehog Linux resource requirements will likely only be satisfied by the 8GB versions of the Raspberry Pi model 4 and higher.
