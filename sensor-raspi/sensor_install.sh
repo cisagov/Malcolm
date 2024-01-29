@@ -404,7 +404,7 @@ install_files() {
     echo 'ipv6.disable=1' > /etc/default/raspi-extra-cmdline
 
     # Add RPI hostname to /etc/hosts
-    echo "127.0.0.1 $(hostname)" >> /etc/hosts
+    echo "127.0.1.1 $(head -n 1 /etc/hostname)" >> /etc/hosts
 
     # mark as first run
     touch "${SENSOR_DIR}"/firstrun
