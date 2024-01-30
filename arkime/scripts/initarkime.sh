@@ -100,10 +100,11 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
   fi # if/else OpenSearch database initialized
 
-  if [[ "${ELASTICSEARCH_ILM_ENABLED:-false}" == "true" ]]; then
-    [[ "${ELASTICSEARCH_ILM_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
-    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ilm "${ELASTICSEARCH_ILM_OPTIMIZATION_PERIOD}" "${ELASTICSEARCH_ILM_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${ELASTICSEARCH_ILM_SEGMENTS}" --replicas "${ELASTICSEARCH_ILM_OLDER_SESSION_REPLICAS}" --history "${ELASTICSEARCH_ILM_HISTORY_RETENTION_WEEKS}"
-    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --ilm
+  if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
+    [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
+    [[ "${OPENSEARCH_PRIMARY}" == "elasticsearch-remote" ]] && LIFECYCLE_POLCY=ilm || LIFECYCLE_POLCY=ism
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ${LIFECYCLE_POLCY} "${INDEX_MANAGEMENT_OPTIMIZATION_PERIOD}" "${INDEX_MANAGEMENT_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${INDEX_MANAGEMENT_SEGMENTS}" --replicas "${INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS}" --history "${INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS}"
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --${LIFECYCLE_POLCY}
     echo "ILM created"
   fi 
 
