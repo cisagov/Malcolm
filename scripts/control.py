@@ -525,6 +525,7 @@ def netboxBackup(backupFileName=None):
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if podsResults := PodExec(
             service='netbox-postgres',
+            container='netbox-postgres-container',
             namespace=args.namespace,
             command=[
                 'pg_dump',
