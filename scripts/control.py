@@ -381,9 +381,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             service,
             args.namespace,
             [x for x in cmd if x],
-            stdin=run_process_kwargs['stdin']
-            if ('stdin' in run_process_kwargs and run_process_kwargs['stdin'])
-            else None,
+            stdin=(
+                run_process_kwargs['stdin'] if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else None
+            ),
         )
 
         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
@@ -645,18 +645,21 @@ def netboxRestore(backupFileName=None):
         elif orchMode is OrchestrationFramework.KUBERNETES:
             # copy database backup and media backup to remote temporary directory
             try:
+                service_name = "netbox"
+                container_name = "netbox-container"
                 tmpRestoreDir = '/tmp'
                 tmpRestoreFile = os.path.join(
                     tmpRestoreDir, os.path.splitext(os.path.basename(backupFileName))[0] + '.txt'
                 )
                 with gzip.open(backupFileName, 'rt') as f:
                     if podsResults := PodExec(
-                        service='netbox',
+                        service=service_name,
                         namespace=args.namespace,
                         command=['tee', tmpRestoreFile],
                         stdout=False,
                         stderr=True,
                         stdin=f.read(),
+                        container=container_name,
                     ):
                         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                         results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -670,7 +673,7 @@ def netboxRestore(backupFileName=None):
 
                 # perform the restore inside the container
                 if podsResults := PodExec(
-                    service='netbox',
+                    service=service_name,
                     namespace=args.namespace,
                     command=[
                         '/opt/netbox/venv/bin/python',
@@ -678,6 +681,7 @@ def netboxRestore(backupFileName=None):
                         '--preload-backup',
                         tmpRestoreFile,
                     ],
+                    container=container_name,
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                     results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -692,13 +696,14 @@ def netboxRestore(backupFileName=None):
             finally:
                 # cleanup on other side
                 PodExec(
-                    service='netbox',
+                    service=service_name,
                     namespace=args.namespace,
                     command=[
                         'bash',
                         '-c',
                         f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
                     ],
+                    container=container_name,
                 )
 
         else:
@@ -757,9 +762,11 @@ def logs():
                 "--color",
                 'auto' if coloramaImported else 'never',
                 "--template",
-                '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
-                if args.debug
-                else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}',
+                (
+                    '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
+                    if args.debug
+                    else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
+                ),
                 '--tail',
                 str(args.logLineCount) if args.logLineCount else '-1',
             ]

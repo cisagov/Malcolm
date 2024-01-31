@@ -452,9 +452,9 @@ def PodExec(
     stdin=None,
     timeout=180,
     maxPodsToExec=1,
+    container=None,
 ):
     results = {}
-
     if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
         podsNames = GetPodNamesForService(service, namespace)
 
@@ -469,17 +469,31 @@ def PodExec(
                     )
                     if resp.status.phase != 'Pending':
                         break
-                resp = kubeImported.stream.stream(
-                    client.connect_get_namespaced_pod_exec,
-                    podName,
-                    namespace,
-                    command=get_iterable(command),
-                    stdout=stdout,
-                    stderr=stderr,
-                    stdin=stdin is not None,
-                    tty=False,
-                    _preload_content=False,
-                )
+                if container:
+                    resp = kubeImported.stream.stream(
+                        client.connect_get_namespaced_pod_exec,
+                        podName,
+                        namespace,
+                        container=container,
+                        command=get_iterable(command),
+                        stdout=stdout,
+                        stderr=stderr,
+                        stdin=stdin is not None,
+                        tty=False,
+                        _preload_content=False,
+                    )
+                else:
+                    resp = kubeImported.stream.stream(
+                        client.connect_get_namespaced_pod_exec,
+                        podName,
+                        namespace,
+                        command=get_iterable(command),
+                        stdout=stdout,
+                        stderr=stderr,
+                        stdin=stdin is not None,
+                        tty=False,
+                        _preload_content=False,
+                    )
                 rawOutput = StringIO('')
                 rawErrput = StringIO('')
                 stdinRemaining = (
@@ -847,12 +861,12 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
             # apply the manifests in this YAML file, otherwise skip it
             if containerBelongsInProfile:
                 try:
-                    results_dict['create_from_yaml']['result'][
-                        os.path.basename(yamlName)
-                    ] = kubeImported.utils.create_from_yaml(
-                        apiClient,
-                        yamlName,
-                        namespace=namespace,
+                    results_dict['create_from_yaml']['result'][os.path.basename(yamlName)] = (
+                        kubeImported.utils.create_from_yaml(
+                            apiClient,
+                            yamlName,
+                            namespace=namespace,
+                        )
                     )
                 except kubeImported.client.rest.ApiException as x:
                     if x.status != 409:
