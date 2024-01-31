@@ -452,9 +452,9 @@ def PodExec(
     stdin=None,
     timeout=180,
     maxPodsToExec=1,
+    container_name=None
 ):
     results = {}
-
     if namespace and (kubeImported := KubernetesDynamic()) and (client := kubeImported.client.CoreV1Api()):
         podsNames = GetPodNamesForService(service, namespace)
 
@@ -469,17 +469,31 @@ def PodExec(
                     )
                     if resp.status.phase != 'Pending':
                         break
-                resp = kubeImported.stream.stream(
-                    client.connect_get_namespaced_pod_exec,
-                    podName,
-                    namespace,
-                    command=get_iterable(command),
-                    stdout=stdout,
-                    stderr=stderr,
-                    stdin=stdin is not None,
-                    tty=False,
-                    _preload_content=False,
-                )
+                if container_name is not None:
+                    resp = kubeImported.stream.stream(
+                        client.connect_get_namespaced_pod_exec,
+                        podName,
+                        namespace,
+                        container=container_name,
+                        command=get_iterable(command),
+                        stdout=stdout,
+                        stderr=stderr,
+                        stdin=stdin is not None,
+                        tty=False,
+                        _preload_content=False,
+                    )
+                else:
+                    resp = kubeImported.stream.stream(
+                        client.connect_get_namespaced_pod_exec,
+                        podName,
+                        namespace,
+                        command=get_iterable(command),
+                        stdout=stdout,
+                        stderr=stderr,
+                        stdin=stdin is not None,
+                        tty=False,
+                        _preload_content=False,
+                    )
                 rawOutput = StringIO('')
                 rawErrput = StringIO('')
                 stdinRemaining = (

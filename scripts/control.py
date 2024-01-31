@@ -632,6 +632,7 @@ def netboxRestore(backupFileName=None):
         elif orchMode is OrchestrationFramework.KUBERNETES:
             # copy database backup and media backup to remote temporary directory
             try:
+                container_name = "netbox-container"
                 tmpRestoreDir = '/tmp'
                 tmpRestoreFile = os.path.join(
                     tmpRestoreDir, os.path.splitext(os.path.basename(backupFileName))[0] + '.txt'
@@ -644,6 +645,7 @@ def netboxRestore(backupFileName=None):
                         stdout=False,
                         stderr=True,
                         stdin=f.read(),
+                        container_name=container_name
                     ):
                         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                         results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -665,6 +667,7 @@ def netboxRestore(backupFileName=None):
                         '--preload-backup',
                         tmpRestoreFile,
                     ],
+                    container_name=container_name
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                     results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -686,6 +689,7 @@ def netboxRestore(backupFileName=None):
                         '-c',
                         f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
                     ],
+                    container_name=container_name
                 )
 
         else:
