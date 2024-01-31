@@ -59,6 +59,10 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
+              name: opensearch-env
+          - configMapRef:
+              name: dashboards-env
+          - configMapRef:
               name: auth-common-env
           - configMapRef:
               name: nginx-env

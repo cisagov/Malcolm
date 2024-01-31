@@ -700,6 +700,8 @@ services:
     env_file:
       - ./config/process.env
       - ./config/ssl.env
+      - ./config/opensearch.env
+      - ./config/dashboards.env
       - ./config/auth-common.env
       - ./config/nginx.env
     depends_on:

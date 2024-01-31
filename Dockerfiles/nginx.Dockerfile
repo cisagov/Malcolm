@@ -4,7 +4,6 @@
 # thanks to:  nginx                       -  https://github.com/nginxinc/docker-nginx/blob/master/mainline/alpine/Dockerfile
 #             kvspb/nginx-auth-ldap       -  https://github.com/kvspb/nginx-auth-ldap
 #             tiredofit/docker-nginx-ldap -  https://github.com/tiredofit/docker-nginx-ldap/blob/master/Dockerfile
-#             jwilder/nginx-proxy         -  https://github.com/jwilder/nginx-proxy/blob/master/Dockerfile.alpine
 
 ####################################################################################
 
@@ -201,7 +200,7 @@ RUN set -x ; \
   make -j$(getconf _NPROCESSORS_ONLN) ; \
   make install ; \
   rm -rf /etc/nginx/html/ ; \
-  mkdir -p /etc/nginx/conf.d/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
+  mkdir -p /etc/nginx/conf.d/ /etc/nginx/templates/ /etc/nginx/auth/ /usr/share/nginx/html/ ; \
   install -m644 html/50x.html /usr/share/nginx/html/ ; \
   install -m755 objs/nginx-debug /usr/sbin/nginx-debug ; \
   install -m755 objs/ngx_http_xslt_filter_module-debug.so /usr/lib/nginx/modules/ngx_http_xslt_filter_module-debug.so ; \
@@ -227,7 +226,7 @@ RUN set -x ; \
       | xargs -r apk info --installed \
       | sort -u \
   )" ; \
-  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash wget openssl apache2-utils openldap shadow stunnel supervisor tini tzdata; \
+  apk add --no-cache --virtual .nginx-rundeps $runDeps ca-certificates bash jq wget openssl apache2-utils openldap shadow stunnel supervisor tini tzdata; \
   update-ca-certificates; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
@@ -237,15 +236,13 @@ RUN set -x ; \
   find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; && \
   find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \;
 
-COPY --from=jwilder/nginx-proxy:alpine /app/nginx.tmpl /etc/nginx/
-COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/network_internal.conf /etc/nginx/
-COPY --from=jwilder/nginx-proxy:alpine /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
 ADD nginx/landingpage /usr/share/nginx/html
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
+ADD nginx/templates /etc/nginx/templates/
 ADD nginx/supervisord.conf /etc/
 COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
 COPY --chmod=644 docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png

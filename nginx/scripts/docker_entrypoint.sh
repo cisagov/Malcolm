@@ -1,32 +1,10 @@
 #!/bin/bash
 set -e
 
-# Warn if the DOCKER_HOST socket does not exist
-if [[ $DOCKER_HOST = unix://* ]]; then
-  socket_file=${DOCKER_HOST#unix://}
-  if ! [ -S $socket_file ]; then
-    cat >&2 <<-EOT
-  ERROR: you need to share your Docker host socket with a volume at $socket_file
-  Typically you should run your container with: \`-v /var/run/docker.sock:$socket_file:ro\`
-  See the jwilder/nginx-proxy documentation at http://git.io/vZaGJ
-EOT
-    socketMissing=1
-  fi
-fi
-
-# Compute the DNS resolvers for use in the templates - if the IP contains ":", it's IPv6 and must be enclosed in []
-export RESOLVERS=$(awk '$1 == "nameserver" {print ($2 ~ ":")? "["$2"]": $2}' ORS=' ' /etc/resolv.conf | sed 's/ *$//g')
-if [ "x$RESOLVERS" = "x" ]; then
-    echo "Warning: unable to determine DNS resolvers for nginx" >&2
-    unset RESOLVERS
-fi
-
-# If the user has run the default command and the socket doesn't exist, fail
-if [ "$socketMissing" = 1 -a "$1" = 'supervisord' -a "$2" = '-c' -a "$3" = '/etc/supervisord.conf' ]; then
-  exit 1
-fi
-
 NGINX_LANDING_INDEX_HTML=/usr/share/nginx/html/index.html
+
+NGINX_TEMPLATES_DIR=/etc/nginx/templates
+NGINX_CONFD_DIR=/etc/nginx/conf.d
 
 # set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
 
@@ -57,6 +35,11 @@ NGINX_RUNTIME_AUTH_CONF=/etc/nginx/nginx_auth_rt.conf
 
 # runtime "include" file for ldap config (link to either NGINX_BLANK_CONF or (possibly modified) NGINX_LDAP_USER_CONF)
 NGINX_RUNTIME_LDAP_CONF=/etc/nginx/nginx_ldap_rt.conf
+
+# "include" files for idark2dash rewrite using opensearch dashboards, kibana, and runtime copy, respectively
+NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_dashboards.conf
+NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_kibana.conf
+NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_rt.conf
 
 # config file for stunnel if using stunnel to issue LDAP StartTLS function
 STUNNEL_CONF=/etc/stunnel/stunnel.conf
@@ -239,6 +222,7 @@ EOF
 
 fi # basic vs. ldap
 
+# if the runtime htpasswd file doesn't exist but the "preseed" does, copy the preseed over for runtime
 if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
   cp /tmp/auth/default/htpasswd /etc/nginx/auth/htpasswd
   [[ -n ${PUID} ]] && chown -f ${PUID} /etc/nginx/auth/htpasswd
@@ -246,8 +230,75 @@ if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; t
   rm -rf /tmp/auth/* || true
 fi
 
-[[ -f "${NGINX_LANDING_INDEX_HTML}" ]] && sed -i "s/MALCOLM_VERSION_REPLACER/v${MALCOLM_VERSION:-unknown} (${VCS_REVISION:-} @ ${BUILD_DATE:-})/g" "${NGINX_LANDING_INDEX_HTML}"
+# do environment variable substitutions from $NGINX_TEMPLATES_DIR to $NGINX_CONFD_DIR
+# NGINX_DASHBOARDS_... are a special case as they have to be crafted a bit based on a few variables
+set +e
 
+[[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]] && \
+  ln -sf "$NGINX_KIBANA_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF" || \
+  ln -sf "$NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF"
+
+# first parse DASHBOARDS_URL and assign the resultant urlsplit named tuple to an associative array
+#   going to use Python to do so as urllib will do a better job at parsing DASHBOARDS_URL than bash
+DASHBOARDS_URL_PARSED="$( ( /usr/bin/env python3 -c "import sys; import json; from urllib.parse import urlsplit; [ sys.stdout.write(json.dumps(urlsplit(line)._asdict()) + '\n') for line in sys.stdin ]" 2>/dev/null <<< "${DASHBOARDS_URL:-http://dashboards:5601/dashboards}" ) | head -n 1 )"
+declare -A DASHBOARDS_URL_DICT
+for KEY in $(jq -r 'keys[]' 2>/dev/null <<< $DASHBOARDS_URL_PARSED); do
+  DASHBOARDS_URL_DICT["$KEY"]=$(jq -r ".$KEY" 2>/dev/null <<< $DASHBOARDS_URL_PARSED)
+done
+
+# the "path" from the parsed URL is the dashboards prefix
+[[ -z "${NGINX_DASHBOARDS_PREFIX:-}" ]] && \
+  [[ -v DASHBOARDS_URL_DICT[path] ]] && \
+  NGINX_DASHBOARDS_PREFIX="${DASHBOARDS_URL_DICT[path]}"
+# if we failed to get it, use the default
+[[ -z "${NGINX_DASHBOARDS_PREFIX:-}" ]] && \
+  [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "elasticsearch-remote" ]] && \
+  NGINX_DASHBOARDS_PREFIX=/dashboards
+
+# the "path" from the parsed URL is the dashboards prefix
+if [[ -z "${NGINX_DASHBOARDS_PROXY_PASS:-}" ]]; then
+  # if Malcolm is running in anything other than "elasticsearch-remote" mode, then
+  #   the dashboards service is already defined in the upstream
+  if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]] && [[ -v DASHBOARDS_URL_DICT[scheme] ]] && [[ -v DASHBOARDS_URL_DICT[netloc] ]]; then
+    NGINX_DASHBOARDS_PROXY_PASS="${DASHBOARDS_URL_DICT[scheme]}://${DASHBOARDS_URL_DICT[netloc]}"
+  else
+    NGINX_DASHBOARDS_PROXY_PASS=http://dashboards
+  fi
+fi
+# if we failed to get it, use the default
+[[ -z "${NGINX_DASHBOARDS_PROXY_PASS:-}" ]] && \
+  [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "elasticsearch-remote" ]] && \
+  NGINX_DASHBOARDS_PROXY_PASS=http://dashboards
+
+export NGINX_DASHBOARDS_PREFIX
+export NGINX_DASHBOARDS_PROXY_PASS
+export NGINX_DASHBOARDS_PROXY_URL="$(echo "$(echo "$NGINX_DASHBOARDS_PROXY_PASS" | sed 's@/$@@')/$(echo "$NGINX_DASHBOARDS_PREFIX" | sed 's@^/@@')" | sed 's@/$@@')"
+
+# now process the environment variable substitutions
+for TEMPLATE in "$NGINX_TEMPLATES_DIR"/*.conf.template; do
+  DOLLAR=$ envsubst < "$TEMPLATE" > "$NGINX_CONFD_DIR/$(basename "$TEMPLATE"| sed 's/\.template$//')"
+done
+
+set -e
+
+# insert some build and runtime information into the landing page
+if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
+  if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]]; then
+    MALCOLM_DASHBOARDS_NAME=Kibana
+    MALCOLM_DASHBOARDS_URL="$NGINX_DASHBOARDS_PROXY_URL"
+    MALCOLM_DASHBOARDS_ICON=elastic.svg
+  else
+    MALCOLM_DASHBOARDS_NAME=Dashboards
+    MALCOLM_DASHBOARDS_URL="$(echo "$NGINX_DASHBOARDS_PREFIX" | sed 's@/$@@')/"
+    MALCOLM_DASHBOARDS_ICON=opensearch_mark_default.svg
+  fi
+  sed -i "s@MALCOLM_DASHBOARDS_NAME_REPLACER@${MALCOLM_DASHBOARDS_NAME}@g" "${NGINX_LANDING_INDEX_HTML}"
+  sed -i "s@MALCOLM_DASHBOARDS_URL_REPLACER@${MALCOLM_DASHBOARDS_URL}@g" "${NGINX_LANDING_INDEX_HTML}"
+  sed -i "s@MALCOLM_DASHBOARDS_ICON_REPLACER@${MALCOLM_DASHBOARDS_ICON}@g" "${NGINX_LANDING_INDEX_HTML}"
+  sed -i "s/MALCOLM_VERSION_REPLACER/v${MALCOLM_VERSION:-unknown} (${VCS_REVISION:-} @ ${BUILD_DATE:-})/g" "${NGINX_LANDING_INDEX_HTML}"
+fi
+
+# some cleanup, if necessary
 rm -rf /var/log/nginx/* || true
 
 # start supervisor (which will spawn nginx, stunnel, etc.) or whatever the default command is
