@@ -26,6 +26,7 @@ from dominate.tags import *
 from malcolm_utils import (
     str2bool,
     eprint,
+    remove_prefix,
     temporary_filename,
     EVP_KEY_SIZE,
     PKCS5_SALT_LEN,
@@ -69,14 +70,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         path = SimpleHTTPRequestHandler.translate_path(self, path)
         relpath = os.path.relpath(path, os.getcwd())
         fullpath = os.path.join(self.server.base_path, relpath)
-        return fullpath
+        return fullpath, relpath
 
     # override do_GET so that files are encrypted, if requested
     def do_GET(self):
         global debug
         global args
 
-        fullpath = self.translate_path(self.path)
+        fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
 
         carvedFileRegex = re.compile(
@@ -86,7 +87,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         if os.path.isdir(fullpath):
             # directory listing
-            # SimpleHTTPRequestHandler.do_GET(self)
             self.send_response(200)
             self.send_header('Content-type', "text/html")
             self.end_headers()
@@ -96,6 +96,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
             with doc.head:
                 meta(charset="utf-8")
+                link(rel="icon", href=f"{args.assetsDirReplacer}favicon.ico", type="image/x-icon")
+                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/bootstrap-icons.css", type="text/css")
+                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/google-fonts.css", type="text/css")
+                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/styles.css", type="text/css")
+                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/bootstrap.bundle.min.js")
+                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/scripts.js")
 
             with doc:
                 h1(pageTitle)
@@ -177,55 +183,79 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             self.wfile.write(str.encode(str(doc)))
 
         else:
-            if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
-                for root, dirs, files in os.walk(os.path.dirname(fullpath)):
-                    if fileBaseName in files:
-                        fullpath = os.path.join(root, fileBaseName)
-                        break
+            satisfied = False
+            tmpPath = os.path.join('/', relpath)
+            if (
+                (not os.path.isfile(fullpath))
+                and (not os.path.islink(fullpath))
+                and tmpPath.startswith(args.assetsDirReplacer)
+                and os.path.isdir(str(args.assetsDir))
+            ):
+                if (
+                    fullpath := os.path.join(args.assetsDir, remove_prefix(tmpPath, args.assetsDirReplacer))
+                ) and os.path.isfile(fullpath):
+                    satisfied = True
+                    ctype = self.guess_type(fullpath)
+                    with open(fullpath, 'rb') as fhandle:
+                        fs = os.fstat(fhandle.fileno())
+                        self.send_response(200)
+                        self.send_header('Content-type', self.guess_type(fullpath))
+                        self.send_header("Content-Length", str(fs[6]))
+                        self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+                        self.end_headers()
+                        while chunk := fhandle.read(1024):
+                            self.wfile.write(chunk)
 
-            if os.path.isfile(fullpath) or os.path.islink(fullpath):
-                if args.zip:
-                    # ZIP file (streamed, AES-encrypted with password or unencrypted)
-                    self.send_response(200)
-                    self.send_header('Content-type', "application/zip")
-                    self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.zip')
-                    self.end_headers()
+            if not satisfied:
+                if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
+                    for root, dirs, files in os.walk(os.path.dirname(fullpath)):
+                        if fileBaseName in files:
+                            fullpath = os.path.join(root, fileBaseName)
+                            break
 
-                    for chunk in stream_zip(LocalFilesForZip([fullpath]), password=args.key if args.key else None):
-                        self.wfile.write(chunk)
+                if os.path.isfile(fullpath) or os.path.islink(fullpath):
+                    if args.zip:
+                        # ZIP file (streamed, AES-encrypted with password or unencrypted)
+                        self.send_response(200)
+                        self.send_header('Content-type', "application/zip")
+                        self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.zip')
+                        self.end_headers()
 
-                elif args.key:
-                    # openssl-compatible encrypted file
-                    self.send_response(200)
-                    self.send_header('Content-type', 'application/octet-stream')
-                    self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.encrypted')
-                    self.end_headers()
-                    salt = os.urandom(PKCS5_SALT_LEN)
-                    key, iv = EVP_BytesToKey(
-                        EVP_KEY_SIZE, AES.block_size, hashlib.sha256, salt, args.key.encode('utf-8')
-                    )
-                    cipher = AES.new(key, AES.MODE_CBC, iv)
-                    encrypted = b""
-                    encrypted += OPENSSL_ENC_MAGIC
-                    encrypted += salt
-                    self.wfile.write(encrypted)
-                    with open(fullpath, 'rb') as f:
-                        padding = b''
-                        while True:
-                            chunk = f.read(cipher.block_size)
-                            if len(chunk) < cipher.block_size:
-                                remaining = cipher.block_size - len(chunk)
-                                padding = bytes([remaining] * remaining)
-                            self.wfile.write(cipher.encrypt(chunk + padding))
-                            if padding:
-                                break
+                        for chunk in stream_zip(LocalFilesForZip([fullpath]), password=args.key if args.key else None):
+                            self.wfile.write(chunk)
+
+                    elif args.key:
+                        # openssl-compatible encrypted file
+                        self.send_response(200)
+                        self.send_header('Content-type', 'application/octet-stream')
+                        self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.encrypted')
+                        self.end_headers()
+                        salt = os.urandom(PKCS5_SALT_LEN)
+                        key, iv = EVP_BytesToKey(
+                            EVP_KEY_SIZE, AES.block_size, hashlib.sha256, salt, args.key.encode('utf-8')
+                        )
+                        cipher = AES.new(key, AES.MODE_CBC, iv)
+                        encrypted = b""
+                        encrypted += OPENSSL_ENC_MAGIC
+                        encrypted += salt
+                        self.wfile.write(encrypted)
+                        with open(fullpath, 'rb') as f:
+                            padding = b''
+                            while True:
+                                chunk = f.read(cipher.block_size)
+                                if len(chunk) < cipher.block_size:
+                                    remaining = cipher.block_size - len(chunk)
+                                    padding = bytes([remaining] * remaining)
+                                self.wfile.write(cipher.encrypt(chunk + padding))
+                                if padding:
+                                    break
+
+                    else:
+                        # original file, unencrypted
+                        SimpleHTTPRequestHandler.do_GET(self)
 
                 else:
-                    # original file, unencrypted
-                    SimpleHTTPRequestHandler.do_GET(self)
-
-            else:
-                self.send_error(404, "Not Found")
+                    self.send_error(404, "Not Found")
 
 
 ###################################################################################################
@@ -259,6 +289,8 @@ def main():
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
+    defaultAssetsDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
+    defaultAssetsDirReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/assets')
 
     parser = argparse.ArgumentParser(
         description=script_name, add_help=False, usage='{} <arguments>'.format(script_name)
@@ -291,6 +323,23 @@ def main():
         metavar='<directory>',
         type=str,
         default=defaultDir,
+    )
+    parser.add_argument(
+        '-a',
+        '--assets-directory',
+        dest='assetsDir',
+        help=f'Directory hosting assets ({defaultAssetsDir})',
+        metavar='<directory>',
+        type=str,
+        default=defaultAssetsDir,
+    )
+    parser.add_argument(
+        '--assets-directory-replacer',
+        dest='assetsDirReplacer',
+        help=f'Virtual directory name to redirect to assets directory ({defaultAssetsDirReplacer})',
+        metavar='<string>',
+        type=str,
+        default=defaultAssetsDirReplacer,
     )
     parser.add_argument(
         '-m',
@@ -358,6 +407,9 @@ def main():
         eprint("Arguments: {}".format(args))
     else:
         sys.tracebacklimit = 0
+
+    if args.assetsDirReplacer:
+        args.assetsDirReplacer = os.path.join(args.assetsDirReplacer, '')
 
     Thread(target=serve_on_port, args=[args.serveDir, args.port]).start()
 

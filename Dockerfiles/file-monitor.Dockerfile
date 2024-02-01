@@ -88,6 +88,7 @@ ENV CAPA_VERSION "7.0.0"
 ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
 ENV CAPA_DIR "/opt/capa"
 ENV CAPA_BIN "${CAPA_DIR}/capa"
+ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
 ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
 ENV EXTRACTED_FILE_HTTP_SERVER_ZIP $EXTRACTED_FILE_HTTP_SERVER_ZIP
@@ -154,7 +155,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       chmod +x "$SUPERCRONIC" && \
       mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
       ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
-    mkdir -p "${SRC_BASE_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    mkdir -p "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" "${SRC_BASE_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
       cd "./yara-${YARA_VERSION}" && \
@@ -215,6 +216,18 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB}
 
+ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
+ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
+ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff2"
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff"
+
+COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
