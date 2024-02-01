@@ -100,8 +100,6 @@ ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /us
 ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
 ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
 ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientBlack.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/arkime/arkime/main/assets/Arkime_Logo_FullGradientWhite.svg /usr/share/nginx/html/assets/img/
 ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
 ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
