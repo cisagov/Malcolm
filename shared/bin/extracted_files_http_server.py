@@ -79,6 +79,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         fullpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
 
+        carvedFileRegex = re.compile(
+            r'^(?P<source>[^-]+)-(?P<fuid>F[a-zA-Z0-9]+|unknown)-(?P<uid>C[a-zA-Z0-9]+|unknown)-(?P<timestamp>\d+)(?P<ext>\..+)?$'
+        )
+        carvedFileRegexAlt = re.compile(r'^(?P<uid>C[a-zA-Z0-9]+)_(?P<fuid>F[a-zA-Z0-9]+)')
+
         if os.path.isdir(fullpath):
             # directory listing
             # SimpleHTTPRequestHandler.do_GET(self)
@@ -97,39 +102,69 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 hr()
                 with div(id='listing'):
                     with table().add(tbody()):
-                        tr().add(th("Name"), th("Type" if args.magic else "Extension"), th("Size"))
+                        t = tr()
+                        t.add(th("Name"), th("Type" if args.magic else "Extension"), th("Size"))
+                        if args.malcolm:
+                            t.add(
+                                th("Source", style="text-align: center;"),
+                                th("UID", style="text-align: center;"),
+                                th("FUID", style="text-align: center;"),
+                                th("Timestamp", style="text-align: center;"),
+                            )
                         if fileBaseName != '.':
                             tr().add(
                                 td(a('..', href=f'..')),
-                                td("Directory"),
+                                td("Directory", style="text-align: center;"),
                                 td(''),
                             )
                         for dirpath, dirnames, filenames in os.walk(fullpath):
                             for dirname in sorted(dirnames, key=natural_sort_key):
                                 try:
+                                    t = tr()
                                     child = os.path.join(dirpath, dirname)
-                                    tr().add(
+                                    t.add(
                                         td(a(dirname, href=f'{dirname}/')),
                                         td("Directory"),
                                         td(''),
                                     )
-                                except:
-                                    pass
+                                except Exception as e:
+                                    eprint(f'Error with directory "{dirname}"": {e}')
                             for filename in sorted(filenames, key=natural_sort_key):
                                 try:
+                                    t = tr()
                                     child = os.path.join(dirpath, filename)
                                     fileinfo = (
                                         magic.from_file(child, mime=True)
                                         if args.magic
                                         else os.path.splitext(filename)[1]
                                     )
-                                    tr().add(
+                                    t.add(
                                         td(a(filename, href=f'{filename}')),
                                         td(fileinfo),
-                                        td(sizeof_fmt(os.path.getsize(child))),
+                                        td(sizeof_fmt(os.path.getsize(child)), style="text-align: right;"),
                                     )
-                                except:
-                                    pass
+                                    if args.malcolm:
+                                        fmatch = carvedFileRegex.search(filename)
+                                        if fmatch is None:
+                                            fmatch = carvedFileRegexAlt.search(filename)
+                                        if fmatch is not None:
+                                            timestampStr = fmatch.groupdict().get('timestamp', '')
+                                            try:
+                                                timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S').isoformat()
+                                            except Exception as te:
+                                                if timestampStr:
+                                                    eprint(f'Error with time "{timestampStr}": {te}')
+                                                timestamp = timestampStr
+                                            t.add(
+                                                td(fmatch.groupdict().get('source', ''), style="text-align: center;"),
+                                                td(fmatch.groupdict().get('uid', '')),
+                                                td(fmatch.groupdict().get('fuid', '')),
+                                                td(timestamp, style="text-align: center;"),
+                                            )
+                                        else:
+                                            eprint(f'nope on {filename}')
+                                except Exception as e:
+                                    eprint(f'Error with file "{filename}": {e}')
                             break
                 hr()
 
@@ -214,6 +249,7 @@ def main():
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
     defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
+    defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
@@ -291,6 +327,16 @@ def main():
         default=defaultRecursive,
         metavar='true|false',
         help=f"Recursively look for requested file if not found",
+    )
+    parser.add_argument(
+        '--malcolm',
+        dest='malcolm',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultMalcolm,
+        metavar='true|false',
+        help=f"Include columns for Zeek-extracted files in Malcolm",
     )
     try:
         parser.error = parser.exit
