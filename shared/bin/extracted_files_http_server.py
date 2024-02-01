@@ -140,7 +140,13 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     )
                                     t.add(
                                         td(a(filename, href=f'{filename}')),
-                                        td(fileinfo),
+                                        td(
+                                            a(
+                                                fileinfo,
+                                                href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
+                                            ),
+                                            ' ⤤',
+                                        ),
                                         td(sizeof_fmt(os.path.getsize(child)), style="text-align: right;"),
                                     )
                                     if args.malcolm:
