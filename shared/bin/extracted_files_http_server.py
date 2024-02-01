@@ -8,8 +8,11 @@
 #   openssl enc -aes-256-cbc -d -in encrypted.data -out decrypted.data
 
 import argparse
+import dominate
 import hashlib
+import magic
 import os
+import re
 import sys
 from Crypto.Cipher import AES
 from datetime import datetime
@@ -18,7 +21,7 @@ from socketserver import ThreadingMixIn
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
 from threading import Thread
-
+from dominate.tags import *
 
 from malcolm_utils import (
     str2bool,
@@ -28,6 +31,7 @@ from malcolm_utils import (
     PKCS5_SALT_LEN,
     OPENSSL_ENC_MAGIC,
     EVP_BytesToKey,
+    sizeof_fmt,
 )
 
 ###################################################################################################
@@ -36,6 +40,12 @@ debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+
+
+###################################################################################################
+#
+def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
+    return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(s)]
 
 
 ###################################################################################################
@@ -71,7 +81,59 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         if os.path.isdir(fullpath):
             # directory listing
-            SimpleHTTPRequestHandler.do_GET(self)
+            # SimpleHTTPRequestHandler.do_GET(self)
+            self.send_response(200)
+            self.send_header('Content-type', "text/html")
+            self.end_headers()
+
+            pageTitle = f"Directory listing for {fileBaseName if fileBaseName != '.' else '/'}"
+            doc = dominate.document(title=pageTitle)
+
+            with doc.head:
+                meta(charset="utf-8")
+
+            with doc:
+                h1(pageTitle)
+                hr()
+                with div(id='listing'):
+                    with table().add(tbody()):
+                        tr().add(th("Name"), th("Type" if args.magic else "Extension"), th("Size"))
+                        if fileBaseName != '.':
+                            tr().add(
+                                td(a('..', href=f'..')),
+                                td("Directory"),
+                                td(''),
+                            )
+                        for dirpath, dirnames, filenames in os.walk(fullpath):
+                            for dirname in sorted(dirnames, key=natural_sort_key):
+                                try:
+                                    child = os.path.join(dirpath, dirname)
+                                    tr().add(
+                                        td(a(dirname, href=f'{dirname}/')),
+                                        td("Directory"),
+                                        td(''),
+                                    )
+                                except:
+                                    pass
+                            for filename in sorted(filenames, key=natural_sort_key):
+                                try:
+                                    child = os.path.join(dirpath, filename)
+                                    fileinfo = (
+                                        magic.from_file(child, mime=True)
+                                        if args.magic
+                                        else os.path.splitext(filename)[1]
+                                    )
+                                    tr().add(
+                                        td(a(filename, href=f'{filename}')),
+                                        td(fileinfo),
+                                        td(sizeof_fmt(os.path.getsize(child))),
+                                    )
+                                except:
+                                    pass
+                            break
+                hr()
+
+            self.wfile.write(str.encode(str(doc)))
 
         else:
             if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
@@ -151,6 +213,7 @@ def main():
     defaultDebug = os.getenv('EXTRACTED_FILE_HTTP_SERVER_DEBUG', 'false')
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
+    defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
@@ -186,6 +249,17 @@ def main():
         metavar='<directory>',
         type=str,
         default=defaultDir,
+    )
+    parser.add_argument(
+        '-m',
+        '--magic',
+        dest='magic',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultMagic,
+        metavar='true|false',
+        help=f"Get file MIME type ({defaultMagic})",
     )
     parser.add_argument(
         '-k',

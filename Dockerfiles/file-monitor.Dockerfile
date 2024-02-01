@@ -141,6 +141,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       rsync && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
       clamd \
+      dominate \
       psutil \
       pycryptodome \
       python-magic \
