@@ -100,10 +100,10 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             with doc.head:
                 meta(charset="utf-8")
                 meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-                link(rel="icon", href=f"{args.assetsDirReplacer}favicon.ico", type="image/x-icon")
-                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/bootstrap-icons.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/google-fonts.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/styles.css", type="text/css")
+                link(rel="icon", href=f"{args.assetsDirRespReplacer}favicon.ico", type="image/x-icon")
+                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/bootstrap-icons.css", type="text/css")
+                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/google-fonts.css", type="text/css")
+                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/styles.css", type="text/css")
 
             # <body>
             with doc:
@@ -242,8 +242,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                             i(cls="bi-github fs-3")
                         )
 
-                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/bootstrap.bundle.min.js")
-                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/scripts.js")
+                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
+                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/scripts.js")
 
             # send directory listing HTML to web client
             self.wfile.write(str.encode(str(doc)))
@@ -257,12 +257,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             if (
                 (not os.path.isfile(fullpath))
                 and (not os.path.islink(fullpath))
-                and tmpPath.startswith(args.assetsDirReplacer)
+                and tmpPath.startswith(args.assetsDirReqReplacer)
                 and os.path.isdir(str(args.assetsDir))
             ):
                 # an asset was requested, so translate it into the real asset's path
                 if (
-                    (fullpath := os.path.join(args.assetsDir, remove_prefix(tmpPath, args.assetsDirReplacer)))
+                    (fullpath := os.path.join(args.assetsDir, remove_prefix(tmpPath, args.assetsDirReqReplacer)))
                     and os.path.isfile(fullpath)
                     and (args.links or (not os.path.islink(fullpath)))
                 ):
@@ -365,7 +365,8 @@ def main():
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
     defaultAssetsDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
-    defaultAssetsDirReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/assets')
+    defaultAssetsDirReqReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR_REQ_REPLACER', '/assets')
+    defaultAssetsDirRespReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR_RESP_REPLACER', '/assets')
 
     parser = argparse.ArgumentParser(
         description=script_name, add_help=False, usage='{} <arguments>'.format(script_name)
@@ -409,12 +410,20 @@ def main():
         default=defaultAssetsDir,
     )
     parser.add_argument(
-        '--assets-directory-replacer',
-        dest='assetsDirReplacer',
-        help=f'Virtual directory name to redirect to assets directory ({defaultAssetsDirReplacer})',
+        '--assets-directory-req-replacer',
+        dest='assetsDirReqReplacer',
+        help=f'Virtual directory name for requests to redirect to assets directory ({defaultAssetsDirReqReplacer})',
         metavar='<string>',
         type=str,
-        default=defaultAssetsDirReplacer,
+        default=defaultAssetsDirReqReplacer,
+    )
+    parser.add_argument(
+        '--assets-directory-resp-replacer',
+        dest='assetsDirRespReplacer',
+        help=f'Virtual directory name for responses to indicate files in the assets directory ({defaultAssetsDirRespReplacer})',
+        metavar='<string>',
+        type=str,
+        default=defaultAssetsDirRespReplacer,
     )
     parser.add_argument(
         '-m',
@@ -494,8 +503,10 @@ def main():
     else:
         sys.tracebacklimit = 0
 
-    if args.assetsDirReplacer:
-        args.assetsDirReplacer = os.path.join(args.assetsDirReplacer, '')
+    if args.assetsDirReqReplacer:
+        args.assetsDirReqReplacer = os.path.join(args.assetsDirReqReplacer, '')
+    if args.assetsDirRespReplacer:
+        args.assetsDirRespReplacer = os.path.join(args.assetsDirRespReplacer, '')
 
     Thread(target=serve_on_port, args=[args.serveDir, args.port]).start()
 
