@@ -1068,7 +1068,7 @@ class Installer(object):
                     "How many weeks of history should Arkime keep?",
                     default=str(args.indexManagementHistoryInWeeks)
                 )
-                if (len(indexManagementOptimizationTimePeriod) > 1) and (len(indexManagementSpiDataRetention) > 1) and str(indexManagementOptimizeSessionSegments).isdigit() and str(indexManagementReplicas).isdigit() and str(indexManagementHistoryInWeeks).isdigit():
+                if (re.match(r"\d+(h|d)", indexManagementOptimizationTimePeriod)) and (re.match(r"\d+(h|d)", indexManagementSpiDataRetention)) and str(indexManagementOptimizeSessionSegments).isdigit() and str(indexManagementReplicas).isdigit() and str(indexManagementHistoryInWeeks).isdigit():
                     break
  
         if InstallerYesOrNo(
