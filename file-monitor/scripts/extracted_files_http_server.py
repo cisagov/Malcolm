@@ -121,7 +121,9 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 # header row
                                 t = tr(style="text-align: center")
                                 t.add(
-                                    th("Download"),
+                                    th(
+                                        f"Download{' (AE-2 zipped)' if (args.zip and args.key) else ' (zipped)' if args.zip else ' (encrypted)' if args.key else ''}"
+                                    ),
                                     th("Type" if args.magic else "Extension"),
                                     th("Size"),
                                 )
