@@ -216,6 +216,12 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB}
 
+USER ${PUSER}
+
+RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
+
+USER root
+
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
@@ -231,19 +237,13 @@ COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSE
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
-COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
+COPY --chmod=755 file-monitor/scripts/*.py /usr/local/bin/
 COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --chmod=755 file-monitor/*update.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-
-USER ${PUSER}
-
-RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
-
-USER root
 
 WORKDIR /zeek/extract_files
 
