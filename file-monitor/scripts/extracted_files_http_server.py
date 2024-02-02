@@ -176,12 +176,17 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td(a(filename, href=f'{filename}')),
                                                     (
                                                         td(
+                                                            fileinfo,
                                                             a(
-                                                                fileinfo,
+                                                                " ",
+                                                                i(cls="bi bi-bar-chart-line"),
+                                                                href=f'/arkime/idark2dash/filter?field=file.mime_type&value={fileinfo}',
+                                                            ),
+                                                            a(
+                                                                " ",
+                                                                i(cls="bi bi-box-arrow-right"),
                                                                 href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
                                                             ),
-                                                            " ",
-                                                            i(cls="bi bi-box-arrow-right"),
                                                         )
                                                         if args.magic
                                                         else td(fileinfo)
