@@ -119,17 +119,17 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         with div(cls='container').add(div(cls="row")).add(div(cls="col-lg-12")):
                             with table(cls='table-bordered', width='100%').add(tbody()):
                                 # header row
-                                t = tr()
+                                t = tr(style="text-align: center")
                                 t.add(
-                                    th("Name"),
+                                    th("Download"),
                                     th("Type" if args.magic else "Extension"),
                                     th("Size"),
                                 )
                                 if args.malcolm:
                                     t.add(
-                                        th("Source", style="text-align: center"),
-                                        th("IDs", style="text-align: center"),
-                                        th("Timestamp", style="text-align: center"),
+                                        th("Source"),
+                                        th("IDs"),
+                                        th("Timestamp"),
                                     )
                                 if fileBaseName != '.':
                                     t = tr()
@@ -248,7 +248,15 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                             ],
                                                             style="text-align: center",
                                                         ),
-                                                        td(timestampStr, style="text-align: center"),
+                                                        td(
+                                                            (
+                                                                timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                                                                if timestamp
+                                                                else timestampStr
+                                                            ),
+                                                            title=timestampStr,
+                                                            style="text-align: center",
+                                                        ),
                                                     )
                                                 else:
                                                     # file name format was not recognized, so extra columns are empty
