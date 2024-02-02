@@ -2224,6 +2224,11 @@ class MalcolmSource extends WISESource {
     var apiURL = "mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
     this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, all: true });
 
+    // add rick-click for extracted-files
+    var extractedFilesLabel = "Browse Extracted Files";
+    var extractedFilesURL = "extracted-files";
+    this.api.addFieldAction("malcolm_mapi_field_extracted_files", { name: extractedFilesLabel, url: extractedFilesURL, fields: carvedFieldsStr });
+
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
