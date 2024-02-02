@@ -224,6 +224,7 @@ USER root
 
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
+ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
 ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
 ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
 ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
