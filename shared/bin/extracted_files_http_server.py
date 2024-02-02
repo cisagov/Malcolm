@@ -16,23 +16,23 @@ import re
 import sys
 from Crypto.Cipher import AES
 from datetime import datetime
+from dominate.tags import *
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
 from threading import Thread
-from dominate.tags import *
 
 from malcolm_utils import (
-    str2bool,
     eprint,
-    remove_prefix,
-    temporary_filename,
-    EVP_KEY_SIZE,
-    PKCS5_SALT_LEN,
-    OPENSSL_ENC_MAGIC,
     EVP_BytesToKey,
+    EVP_KEY_SIZE,
+    OPENSSL_ENC_MAGIC,
+    PKCS5_SALT_LEN,
+    remove_prefix,
     sizeof_fmt,
+    str2bool,
+    temporary_filename,
 )
 
 ###################################################################################################
@@ -44,13 +44,13 @@ orig_path = os.getcwd()
 
 
 ###################################################################################################
-#
+# a function for performing "natural" (case insensitive) sort
 def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
     return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(s)]
 
 
 ###################################################################################################
-#
+# return the names and flags for Zipping a list of files
 def LocalFilesForZip(names):
     now = datetime.now()
 
@@ -63,7 +63,7 @@ def LocalFilesForZip(names):
 
 
 ###################################################################################################
-#
+# a simple HTTP request handler for listing directories of files and serving those files for download
 class HTTPHandler(SimpleHTTPRequestHandler):
     # return full path based on server base path and requested path
     def translate_path(self, path):
@@ -72,7 +72,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         fullpath = os.path.join(self.server.base_path, relpath)
         return fullpath, relpath
 
-    # override do_GET so that files are encrypted, if requested
+    # override do_GET for fancy directory listing and so that files are encrypted/zipped, if requested
     def do_GET(self):
         global debug
         global args
@@ -80,12 +80,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
 
+        # HTTP-FUID-UID-TIMESTAMP.ext
         carvedFileRegex = re.compile(
             r'^(?P<source>[^-]+)-(?P<fuid>F[a-zA-Z0-9]+|unknown)-(?P<uid>C[a-zA-Z0-9]+|unknown)-(?P<timestamp>\d+)(?P<ext>\..+)?$'
         )
+        # UID-FUID-whatever
         carvedFileRegexAlt = re.compile(r'^(?P<uid>C[a-zA-Z0-9]+)_(?P<fuid>F[a-zA-Z0-9]+)')
 
-        if os.path.isdir(fullpath):
+        if os.path.isdir(fullpath) and (args.links or (not os.path.islink(fullpath))):
             # directory listing
             self.send_response(200)
             self.send_header('Content-type', "text/html")
@@ -94,95 +96,146 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             pageTitle = f"Directory listing for {fileBaseName if fileBaseName != '.' else '/'}"
             doc = dominate.document(title=pageTitle)
 
+            # <head>
             with doc.head:
                 meta(charset="utf-8")
+                meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
                 link(rel="icon", href=f"{args.assetsDirReplacer}favicon.ico", type="image/x-icon")
                 link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/bootstrap-icons.css", type="text/css")
                 link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/google-fonts.css", type="text/css")
                 link(rel="stylesheet", href=f"{args.assetsDirReplacer}css/styles.css", type="text/css")
-                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/bootstrap.bundle.min.js")
-                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/scripts.js")
 
+            # <body>
             with doc:
-                h1(pageTitle)
-                hr()
-                with div(id='listing'):
-                    with table().add(tbody()):
-                        t = tr()
-                        t.add(th("Name"), th("Type" if args.magic else "Extension"), th("Size"))
-                        if args.malcolm:
-                            t.add(
-                                th("Source", style="text-align: center;"),
-                                th("UID", style="text-align: center;"),
-                                th("FUID", style="text-align: center;"),
-                                th("Timestamp", style="text-align: center;"),
-                            )
-                        if fileBaseName != '.':
-                            tr().add(
-                                td(a('..', href=f'..')),
-                                td("Directory", style="text-align: center;"),
-                                td(''),
-                            )
-                        for dirpath, dirnames, filenames in os.walk(fullpath):
-                            for dirname in sorted(dirnames, key=natural_sort_key):
-                                try:
-                                    t = tr()
-                                    child = os.path.join(dirpath, dirname)
+                with nav(cls='navbar navbar-light bg-light static-top'):
+                    div(cls='container')
+                header(cls='masthead')
+                with section():
+                    with div(cls='container'):
+                        h1(pageTitle, cls='mb-5', style='text-align: center')
+                        with div(cls='container'):
+                            with table(cls='table-bordered').add(tbody()):
+                                # header row
+                                t = tr()
+                                t.add(
+                                    th("Name"),
+                                    th("Type" if args.magic else "Extension"),
+                                    th("Size"),
+                                )
+                                if args.malcolm:
                                     t.add(
-                                        td(a(dirname, href=f'{dirname}/')),
+                                        th("Source", style="text-align: center"),
+                                        th("UID", style="text-align: center"),
+                                        th("FUID", style="text-align: center"),
+                                        th("Timestamp", style="text-align: center"),
+                                    )
+                                if fileBaseName != '.':
+                                    t = tr()
+                                    t.add(
+                                        td(a('..', href=f'..')),
                                         td("Directory"),
                                         td(''),
                                     )
-                                except Exception as e:
-                                    eprint(f'Error with directory "{dirname}"": {e}')
-                            for filename in sorted(filenames, key=natural_sort_key):
-                                try:
-                                    t = tr()
-                                    child = os.path.join(dirpath, filename)
-                                    fileinfo = (
-                                        magic.from_file(child, mime=True)
-                                        if args.magic
-                                        else os.path.splitext(filename)[1]
-                                    )
-                                    t.add(
-                                        td(a(filename, href=f'{filename}')),
-                                        td(
-                                            a(
-                                                fileinfo,
-                                                href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
-                                            ),
-                                            ' ⤤',
-                                        ),
-                                        td(sizeof_fmt(os.path.getsize(child)), style="text-align: right;"),
-                                    )
                                     if args.malcolm:
-                                        fmatch = carvedFileRegex.search(filename)
-                                        if fmatch is None:
-                                            fmatch = carvedFileRegexAlt.search(filename)
-                                        if fmatch is not None:
-                                            timestampStr = fmatch.groupdict().get('timestamp', '')
-                                            try:
-                                                timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S').isoformat()
-                                            except Exception as te:
-                                                if timestampStr:
-                                                    eprint(f'Error with time "{timestampStr}": {te}')
-                                                timestamp = timestampStr
-                                            t.add(
-                                                td(fmatch.groupdict().get('source', ''), style="text-align: center;"),
-                                                td(fmatch.groupdict().get('uid', '')),
-                                                td(fmatch.groupdict().get('fuid', '')),
-                                                td(timestamp, style="text-align: center;"),
-                                            )
-                                        else:
-                                            eprint(f'nope on {filename}')
-                                except Exception as e:
-                                    eprint(f'Error with file "{filename}": {e}')
-                            break
-                hr()
+                                        t.add(th(), th(), th(), th())
 
+                                # content rows (files and directories)
+                                for dirpath, dirnames, filenames in os.walk(fullpath):
+
+                                    # list directories first
+                                    for dirname in sorted(dirnames, key=natural_sort_key):
+                                        try:
+                                            child = os.path.join(dirpath, dirname)
+                                            if args.links or (not os.path.islink(child)):
+                                                t = tr()
+                                                t.add(
+                                                    td(a(dirname, href=f'{dirname}/')),
+                                                    td("Directory"),
+                                                    td(''),
+                                                )
+                                                if args.malcolm:
+                                                    t.add(th(), th(), th(), th())
+                                        except Exception as e:
+                                            eprint(f'Error with directory "{dirname}"": {e}')
+
+                                    # list files after directories
+                                    for filename in sorted(filenames, key=natural_sort_key):
+                                        try:
+                                            child = os.path.join(dirpath, filename)
+                                            if args.links or (not os.path.islink(child)):
+                                                t = tr()
+
+                                                # only request mime type for files if specified in arguments
+                                                fileinfo = (
+                                                    magic.from_file(os.path.realpath(child), mime=True)
+                                                    if args.magic
+                                                    else os.path.splitext(filename)[1]
+                                                )
+
+                                                # show filename, file type (with link to IANA if MIME type is shown), and file size
+                                                t.add(
+                                                    td(a(filename, href=f'{filename}')),
+                                                    (
+                                                        td(
+                                                            a(
+                                                                fileinfo,
+                                                                href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
+                                                            ),
+                                                            ' ⤤',
+                                                        )
+                                                        if args.magic
+                                                        else td(fileinfo)
+                                                    ),
+                                                    td(sizeof_fmt(os.path.getsize(child)), style="text-align: right"),
+                                                )
+
+                                                # show special malcolm columns if requested
+                                                if args.malcolm:
+                                                    # determine if filename is in a pattern we recognize
+                                                    fmatch = carvedFileRegex.search(filename)
+                                                    if fmatch is None:
+                                                        fmatch = carvedFileRegexAlt.search(filename)
+                                                    if fmatch is not None:
+                                                        # format timestamp as ISO date/time
+                                                        timestampStr = fmatch.groupdict().get('timestamp', '')
+                                                        try:
+                                                            timestamp = datetime.strptime(
+                                                                timestampStr, '%Y%m%d%H%M%S'
+                                                            ).isoformat()
+                                                        except Exception as te:
+                                                            if timestampStr:
+                                                                eprint(f'Error with time "{timestampStr}": {te}')
+                                                            timestamp = timestampStr
+                                                        # list carve source, UID, FUID, and timestamp
+                                                        t.add(
+                                                            td(
+                                                                fmatch.groupdict().get('source', ''),
+                                                                style="text-align: center",
+                                                            ),
+                                                            td(fmatch.groupdict().get('uid', '')),
+                                                            td(fmatch.groupdict().get('fuid', '')),
+                                                            td(timestamp, style="text-align: center"),
+                                                        )
+                                                    else:
+                                                        # file name format was not recognized, so extra columns are empty
+                                                        t.add(th(), th(), th(), th())
+
+                                        except Exception as e:
+                                            eprint(f'Error with file "{filename}": {e}')
+
+                                    # our "walk" is not recursive right now, we only need to go one level deep
+                                    break
+
+                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/bootstrap.bundle.min.js")
+                script(type="text/javascript", src=f"{args.assetsDirReplacer}js/scripts.js")
+
+            # send directory listing HTML to web client
             self.wfile.write(str.encode(str(doc)))
 
         else:
+            # serve a file for download
+
+            # handle special case of requesting assets (css, js, etc.)
             satisfied = False
             tmpPath = os.path.join('/', relpath)
             if (
@@ -191,9 +244,13 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 and tmpPath.startswith(args.assetsDirReplacer)
                 and os.path.isdir(str(args.assetsDir))
             ):
+                # an asset was requested, so translate it into the real asset's path
                 if (
-                    fullpath := os.path.join(args.assetsDir, remove_prefix(tmpPath, args.assetsDirReplacer))
-                ) and os.path.isfile(fullpath):
+                    (fullpath := os.path.join(args.assetsDir, remove_prefix(tmpPath, args.assetsDirReplacer)))
+                    and os.path.isfile(fullpath)
+                    and (args.links or (not os.path.islink(fullpath)))
+                ):
+                    # serve the asset file
                     satisfied = True
                     ctype = self.guess_type(fullpath)
                     with open(fullpath, 'rb') as fhandle:
@@ -206,21 +263,23 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         while chunk := fhandle.read(1024):
                             self.wfile.write(chunk)
 
+            # handle regular file downloads
             if not satisfied:
+
+                # if the file doesn't exist as specified but recursive is enabled, go deeper to find the file
                 if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
                     for root, dirs, files in os.walk(os.path.dirname(fullpath)):
                         if fileBaseName in files:
                             fullpath = os.path.join(root, fileBaseName)
                             break
 
-                if os.path.isfile(fullpath) or os.path.islink(fullpath):
+                if os.path.isfile(fullpath) and (args.links or (not os.path.islink(fullpath))):
                     if args.zip:
                         # ZIP file (streamed, AES-encrypted with password or unencrypted)
                         self.send_response(200)
                         self.send_header('Content-type', "application/zip")
                         self.send_header('Content-Disposition', f'attachment; filename={fileBaseName}.zip')
                         self.end_headers()
-
                         for chunk in stream_zip(LocalFilesForZip([fullpath]), password=args.key if args.key else None):
                             self.wfile.write(chunk)
 
@@ -285,6 +344,7 @@ def main():
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
     defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
+    defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
     defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
@@ -381,7 +441,18 @@ def main():
         const=True,
         default=defaultRecursive,
         metavar='true|false',
-        help=f"Recursively look for requested file if not found",
+        help=f"Recursively look for requested file if not found ({defaultRecursive})",
+    )
+    parser.add_argument(
+        '-l',
+        '--links',
+        dest='links',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultLinks,
+        metavar='true|false',
+        help=f"Serve symlinks in addition to regular files ({defaultLinks})",
     )
     parser.add_argument(
         '--malcolm',
@@ -391,7 +462,7 @@ def main():
         const=True,
         default=defaultMalcolm,
         metavar='true|false',
-        help=f"Include columns for Zeek-extracted files in Malcolm",
+        help=f"Include columns for Zeek-extracted files in Malcolm ({defaultMalcolm})",
     )
     try:
         parser.error = parser.exit

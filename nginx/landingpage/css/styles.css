@@ -325,6 +325,11 @@ th {
   text-align: -webkit-match-parent;
 }
 
+td,
+th {
+  padding: 0.5rem;
+}
+
 thead,
 tbody,
 tfoot,

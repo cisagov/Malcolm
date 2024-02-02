@@ -218,14 +218,14 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
 
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
-ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff2"
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
+ADD --chmod=644 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff2"
+ADD --chmod=644 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff"
 
 COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
