@@ -132,7 +132,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 if fileBaseName != '.':
                                     t = tr()
                                     t.add(
-                                        td(a('..', href=f'..')),
+                                        td(a(i(cls="bi bi-arrow-90deg-up"), href=f'..')),
                                         td("Directory"),
                                         td(''),
                                     )
@@ -141,7 +141,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                                 # content rows (files and directories)
                                 for dirpath, dirnames, filenames in os.walk(fullpath):
-
                                     # list directories first
                                     for dirname in sorted(dirnames, key=natural_sort_key):
                                         try:
@@ -181,7 +180,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                                 fileinfo,
                                                                 href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
                                                             ),
-                                                            ' ⤤',
+                                                            " ",
+                                                            i(cls="bi bi-box-arrow-right"),
                                                         )
                                                         if args.magic
                                                         else td(fileinfo)
@@ -226,6 +226,22 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     # our "walk" is not recursive right now, we only need to go one level deep
                                     break
 
+                with footer(cls='footer bg-light').add(div(cls='container')).add(div(cls='row')):
+                    with div(cls="col-lg-6 h-100 text-center text-lg-start my-auto"):
+                        p(
+                            "Malcolm © 2024 Battelle Energy Alliance, LLC; developed at INL and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.",
+                            cls="text-muted small mb-4 mb-lg-0",
+                        )
+
+                    with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
+                        li(cls="list-inline-item").add(a(href=f'/readme/')).add(i(cls="bi bi-question-circle fs-3"))
+                        li(cls="list-inline-item").add(
+                            a(href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714')
+                        ).add(i(cls="bi bi-bar-chart-line fs-3"))
+                        li(cls="list-inline-item").add(a(href=f'https://github.com/idaholab/Malcolm/')).add(
+                            i(cls="bi-github fs-3")
+                        )
+
                 script(type="text/javascript", src=f"{args.assetsDirReplacer}js/bootstrap.bundle.min.js")
                 script(type="text/javascript", src=f"{args.assetsDirReplacer}js/scripts.js")
 
@@ -265,7 +281,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
             # handle regular file downloads
             if not satisfied:
-
                 # if the file doesn't exist as specified but recursive is enabled, go deeper to find the file
                 if args.recursive and (not os.path.isfile(fullpath)) and (not os.path.islink(fullpath)):
                     for root, dirs, files in os.walk(os.path.dirname(fullpath)):
