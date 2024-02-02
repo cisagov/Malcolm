@@ -15,7 +15,7 @@ import os
 import re
 import sys
 from Crypto.Cipher import AES
-from datetime import datetime
+from datetime import datetime, UTC
 from dominate.tags import *
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -41,6 +41,7 @@ debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
+filename_truncate_len = 20
 
 
 ###################################################################################################
@@ -52,7 +53,7 @@ def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
 ###################################################################################################
 # return the names and flags for Zipping a list of files
 def LocalFilesForZip(names):
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     def contents(name):
         with open(name, 'rb') as f:
@@ -79,6 +80,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
+
+        nowStr = datetime.now(UTC).isoformat()
 
         # HTTP-FUID-UID-TIMESTAMP.ext
         carvedFileRegex = re.compile(
@@ -110,11 +113,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 with nav(cls='navbar navbar-light bg-light static-top'):
                     div(cls='container')
                 header(cls='masthead')
-                with section():
+                with section(cls="features-icons bg-light"):
                     with div(cls='container'):
                         h1(pageTitle, cls='mb-5', style='text-align: center')
-                        with div(cls='container'):
-                            with table(cls='table-bordered').add(tbody()):
+                        with div(cls='container').add(div(cls="row")).add(div(cls="col-lg-12")):
+                            with table(cls='table-bordered', width='100%').add(tbody()):
                                 # header row
                                 t = tr()
                                 t.add(
@@ -125,8 +128,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 if args.malcolm:
                                     t.add(
                                         th("Source", style="text-align: center"),
-                                        th("UID", style="text-align: center"),
-                                        th("FUID", style="text-align: center"),
+                                        th("IDs", style="text-align: center"),
                                         th("Timestamp", style="text-align: center"),
                                     )
                                 if fileBaseName != '.':
@@ -137,7 +139,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         td(''),
                                     )
                                     if args.malcolm:
-                                        t.add(th(), th(), th(), th())
+                                        t.add(th(), th(), th())
 
                                 # content rows (files and directories)
                                 for dirpath, dirnames, filenames in os.walk(fullpath):
@@ -153,7 +155,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td(''),
                                                 )
                                                 if args.malcolm:
-                                                    t.add(th(), th(), th(), th())
+                                                    t.add(th(), th(), th())
                                         except Exception as e:
                                             eprint(f'Error with directory "{dirname}"": {e}')
 
@@ -164,6 +166,37 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                             if args.links or (not os.path.islink(child)):
                                                 t = tr()
 
+                                                # calculate some of the stuff for representing Malcolm files
+                                                timestamp = None
+                                                timestampStr = ''
+                                                fmatch = None
+                                                fsource = ''
+                                                fids = list()
+                                                if args.malcolm:
+                                                    # determine if filename is in a pattern we recognize
+                                                    fmatch = carvedFileRegex.search(filename)
+                                                    if fmatch is None:
+                                                        fmatch = carvedFileRegexAlt.search(filename)
+                                                    if fmatch is not None:
+                                                        # format timestamp as ISO date/time
+                                                        timestampStr = fmatch.groupdict().get('timestamp', '')
+                                                        try:
+                                                            timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
+                                                            timestampStr = timestamp.isoformat()
+                                                        except Exception as te:
+                                                            if timestampStr:
+                                                                eprint(f'Error with time "{str(timestampStr)}": {te}')
+                                                        fsource = fmatch.groupdict().get('source', '')
+                                                        fids = list(
+                                                            filter(
+                                                                None,
+                                                                [
+                                                                    fmatch.groupdict().get('uid', ''),
+                                                                    fmatch.groupdict().get('fuid', ''),
+                                                                ],
+                                                            )
+                                                        )
+
                                                 # only request mime type for files if specified in arguments
                                                 fileinfo = (
                                                     magic.from_file(os.path.realpath(child), mime=True)
@@ -173,18 +206,21 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                                                 # show filename, file type (with link to IANA if MIME type is shown), and file size
                                                 t.add(
-                                                    td(a(filename, href=f'{filename}')),
+                                                    td(
+                                                        a(
+                                                            (
+                                                                (filename[:filename_truncate_len] + '...')
+                                                                if len(filename) > filename_truncate_len
+                                                                else filename
+                                                            ),
+                                                            href=f'{filename}',
+                                                        ),
+                                                        title=filename,
+                                                    ),
                                                     (
                                                         td(
-                                                            fileinfo,
                                                             a(
-                                                                " ",
-                                                                i(cls="bi bi-bar-chart-line"),
-                                                                href=f'/arkime/idark2dash/filter?field=file.mime_type&value={fileinfo}',
-                                                            ),
-                                                            a(
-                                                                " ",
-                                                                i(cls="bi bi-box-arrow-right"),
+                                                                fileinfo,
                                                                 href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
                                                             ),
                                                         )
@@ -195,35 +231,28 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 )
 
                                                 # show special malcolm columns if requested
-                                                if args.malcolm:
-                                                    # determine if filename is in a pattern we recognize
-                                                    fmatch = carvedFileRegex.search(filename)
-                                                    if fmatch is None:
-                                                        fmatch = carvedFileRegexAlt.search(filename)
-                                                    if fmatch is not None:
-                                                        # format timestamp as ISO date/time
-                                                        timestampStr = fmatch.groupdict().get('timestamp', '')
-                                                        try:
-                                                            timestamp = datetime.strptime(
-                                                                timestampStr, '%Y%m%d%H%M%S'
-                                                            ).isoformat()
-                                                        except Exception as te:
-                                                            if timestampStr:
-                                                                eprint(f'Error with time "{timestampStr}": {te}')
-                                                            timestamp = timestampStr
-                                                        # list carve source, UID, FUID, and timestamp
-                                                        t.add(
-                                                            td(
-                                                                fmatch.groupdict().get('source', ''),
-                                                                style="text-align: center",
-                                                            ),
-                                                            td(fmatch.groupdict().get('uid', '')),
-                                                            td(fmatch.groupdict().get('fuid', '')),
-                                                            td(timestamp, style="text-align: center"),
-                                                        )
-                                                    else:
-                                                        # file name format was not recognized, so extra columns are empty
-                                                        t.add(th(), th(), th(), th())
+                                                if args.malcolm and fmatch is not None:
+                                                    # list carve source, IDs, and timestamp
+                                                    t.add(
+                                                        td(
+                                                            fmatch.groupdict().get('source', ''),
+                                                            style="text-align: center",
+                                                        ),
+                                                        td(
+                                                            [
+                                                                a(
+                                                                    fid,
+                                                                    href=f'/arkime/idark2dash/filter?start={timestampStr}&stop={nowStr}&field=event.id&value={fid}',
+                                                                )
+                                                                for fid in fids
+                                                            ],
+                                                            style="text-align: center",
+                                                        ),
+                                                        td(timestampStr, style="text-align: center"),
+                                                    )
+                                                else:
+                                                    # file name format was not recognized, so extra columns are empty
+                                                    t.add(th(), th(), th())
 
                                         except Exception as e:
                                             eprint(f'Error with file "{filename}": {e}')
