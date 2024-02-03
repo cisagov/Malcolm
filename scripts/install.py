@@ -1021,10 +1021,10 @@ class Installer(object):
 
         loopBreaker = CountUntilException(
             MaxAskForValueCount,
-            f'Invalid ILM setting(s)',
+            f'Invalid ILM/ISM setting(s)',
         )
         indexManagementPolicy =  InstallerYesOrNo(
-                f'Should Arkime leverage Index Lifecycle Management (ILM) to manage volume?',
+                f'Should Arkime leverage index management policies (ILM/ISM) to manage volume?',
                 default=args.indexManagementPolicy
         )
         if indexManagementPolicy:
@@ -3676,7 +3676,7 @@ def main():
         nargs='?',
         const=True,
         default=False,
-        help="Should Arkime use an ILM policy? (see https://https://arkime.com/faq#ilm)",
+        help="Should Arkime leverage index management policies (ILM/ISM) to manage volume? (see https://https://arkime.com/faq#ilm)",
     )
     storageArgGroup.add_argument(
         '--index-management-hot-warm-enable',
@@ -3713,7 +3713,7 @@ def main():
         metavar='<integer>',
         type=int,
         default=0,
-        help='Number of replicas for older sessions indices in the ILM policy, default 0',
+        help='Number of replicas for older sessions indices in the ILM/ISM policy, default 0',
     )
     storageArgGroup.add_argument(
         '--index-management-weeks-of-history',
@@ -3731,7 +3731,7 @@ def main():
         metavar='<integer>',
         type=int,
         default=1,
-        help='Number of segments to optimize sessions to in the ILM policy, default 1',
+        help='Number of segments to optimize sessions to in the ILM/ISM policy, default 1',
     )
     
     analysisArgGroup = parser.add_argument_group('Analysis options')
