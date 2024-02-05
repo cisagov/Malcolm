@@ -297,12 +297,18 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         )
 
                     with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
-                        li(cls="list-inline-item").add(a(href=f'/readme/')).add(i(cls="bi bi-question-circle fs-3"))
+                        li(cls="list-inline-item").add(a(href=f'/')).add(i(cls="bi bi-house fs-3", title="Malcolm"))
+                        li(cls="list-inline-item").add(a(href=f'/readme/')).add(
+                            i(cls="bi bi-question-circle fs-3", title="Documentation")
+                        )
                         li(cls="list-inline-item").add(
                             a(href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714')
-                        ).add(i(cls="bi bi-bar-chart-line fs-3"))
+                        ).add(i(cls="bi bi-bar-chart-line fs-3", title="Dashboards"))
+                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/')).add(
+                            i(cls="bi bi-table fs-3", title="Arkime")
+                        )
                         li(cls="list-inline-item").add(a(href=f'https://github.com/idaholab/Malcolm/')).add(
-                            i(cls="bi-github fs-3")
+                            i(cls="bi-github fs-3", title="GitHub")
                         )
 
                 script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
