@@ -15,7 +15,7 @@ import os
 import re
 import sys
 from Crypto.Cipher import AES
-from datetime import datetime, UTC
+from datetime import datetime, timedelta, UTC
 from dominate.tags import *
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -81,7 +81,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
 
-        nowStr = datetime.now(UTC).isoformat()
+        tomorrowStr = (datetime.now(UTC) + timedelta(days=1)).isoformat().split('.')[0]
 
         # HTTP-FUID-UID-TIMESTAMP.ext
         carvedFileRegex = re.compile(
@@ -89,6 +89,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         )
         # UID-FUID-whatever
         carvedFileRegexAlt = re.compile(r'^(?P<uid>C[a-zA-Z0-9]+)_(?P<fuid>F[a-zA-Z0-9]+)')
+        # XOR decrypted from FEieEe1f1SI6YJk4H5
+        xorRegex = re.compile(r'^(?P<source>XOR) decrypted from (?P<fuid>F[a-zA-Z0-9]+)')
 
         if os.path.isdir(fullpath) and (args.links or (not os.path.islink(fullpath))):
             # directory listing
@@ -110,6 +112,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
             # <body>
             with doc:
+                # header decoration
                 with nav(cls='navbar navbar-light bg-light static-top'):
                     div(cls='container')
                 header(cls='masthead')
@@ -171,6 +174,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 # calculate some of the stuff for representing Malcolm files
                                                 timestamp = None
                                                 timestampStr = ''
+                                                timestampStartFilterStr = ''
                                                 fmatch = None
                                                 fsource = ''
                                                 fids = list()
@@ -185,19 +189,33 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                         try:
                                                             timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
                                                             timestampStr = timestamp.isoformat()
+                                                            timestampStartFilterStr = (
+                                                                (timestamp - timedelta(days=1))
+                                                                .isoformat()
+                                                                .split('.')[0]
+                                                            )
                                                         except Exception as te:
                                                             if timestampStr:
                                                                 eprint(f'Error with time "{str(timestampStr)}": {te}')
-                                                        fsource = fmatch.groupdict().get('source', '')
+                                                        # put UIDs and FUIDs into a single event.id-filterable column
                                                         fids = list(
-                                                            filter(
-                                                                None,
-                                                                [
+                                                            [
+                                                                x
+                                                                for x in [
                                                                     fmatch.groupdict().get('uid', ''),
                                                                     fmatch.groupdict().get('fuid', ''),
-                                                                ],
-                                                            )
+                                                                ]
+                                                                if x and x != 'unknown'
+                                                            ]
                                                         )
+                                                        # massage source a little bit (remove '<error>' and handle
+                                                        #   'XOR decrypted from...')
+                                                        fsource = fmatch.groupdict().get('source', '')
+                                                        if fsource == '<error>':
+                                                            fsource = ''
+                                                        elif xorMatch := xorRegex.search(fsource):
+                                                            fsource = xorMatch.groupdict().get('source', '')
+                                                            fids.append(xorMatch.groupdict().get('fuid', ''))
 
                                                 # only request mime type for files if specified in arguments
                                                 fileinfo = (
@@ -237,14 +255,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     # list carve source, IDs, and timestamp
                                                     t.add(
                                                         td(
-                                                            fmatch.groupdict().get('source', ''),
+                                                            fsource,
                                                             style="text-align: center",
                                                         ),
                                                         td(
                                                             [
                                                                 a(
                                                                     fid,
-                                                                    href=f'/arkime/idark2dash/filter?start={timestampStr}&stop={nowStr}&field=event.id&value={fid}',
+                                                                    href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
                                                                 )
                                                                 for fid in fids
                                                             ],
@@ -270,6 +288,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     # our "walk" is not recursive right now, we only need to go one level deep
                                     break
 
+                # footer decoration
                 with footer(cls='footer bg-light').add(div(cls='container')).add(div(cls='row')):
                     with div(cls="col-lg-6 h-100 text-center text-lg-start my-auto"):
                         p(
