@@ -2,6 +2,14 @@
   slug: access-point
   color: Pink
   vm_role: true
+- name: Active Directory
+  slug: active-directory
+  description: Central authentication in a network
+  vm_role: true
+- name: Actuator
+  slug: actuator
+  description: Impact the physical process with standardized signals
+  vm_role: true
 - name: Application server
   slug: application-server
   color: Green
@@ -24,11 +32,6 @@
   slug: bridge
   color: Pink
   vm_role: true
-- name: CNC
-  slug: cnc
-  description: Computer numerical control
-  color: Indigo
-  vm_role: true
 - name: Camera
   slug: camera
   color: Amber
@@ -37,8 +40,17 @@
   slug: cloud-server
   color: Green
   vm_role: true
+- name: CNC
+  slug: cnc
+  description: Computer numerical control
+  color: Indigo
+  vm_role: true
 - name: Collaboration server
   slug: collaboration-server
+  color: Green
+  vm_role: true
+- name: Database server
+  slug: database-server
   color: Green
   vm_role: true
 - name: DCS
@@ -56,10 +68,6 @@
   description: Domain name system server
   color: Dark Green
   vm_role: true
-- name: Database server
-  slug: database-server
-  color: Green
-  vm_role: true
 - name: Domain controller
   slug: domain-controller
   color: Dark Green
@@ -68,6 +76,10 @@
   slug: eacs
   description: Electronic access control
   color: Amber
+  vm_role: true
+- name: EWS
+  slug: ews
+  description: Engineering Workstaion
   vm_role: true
 - name: Fax
   slug: fax
@@ -80,28 +92,34 @@
 - name: Firewall
   slug: firewall
   color: Dark Red
+  description: Monitors and controls incoming and outgoing network traffic
   vm_role: true
 - name: Gateway
   slug: gateway
   color: Pink
   vm_role: true
-- name: HMI
-  slug: hmi
-  description: Human machine interface
-  color: Purple
-  vm_role: true
-- name: HVAC
-  slug: hvac
-  description: Heating, ventilation and air conditioning
-  color: Amber
+- name: Gateway Coupler
+  slug: gateway-coupler
+  description: Handles data transmission between different protocols
   vm_role: true
 - name: Historian
   slug: historian
+  color: Purple
+  description: Stores process values
+  vm_role: true
+- name: HMI
+  slug: hmi
+  description: Human machine interface for field operation
   color: Purple
   vm_role: true
 - name: Hub
   slug: hub
   color: Grey
+  vm_role: true
+- name: HVAC
+  slug: hvac
+  description: Heating, ventilation and air conditioning
+  color: Amber
   vm_role: true
 - name: Hypervisor
   slug: hypervisor
@@ -112,28 +130,32 @@
   description: Intrusion detection system
   color: Fuchsia
   vm_role: true
+- name: IED
+  slug: ied
+  description: Intelligent Electronic Device
+  vm_role: true
 - name: IIoT
   slug: iiot
   description: Industrial internet of things device
   color: Purple
-  vm_role: true
-- name: IPS
-  slug: ips
-  description: Intrusion prevention system
-  color: Fuchsia
   vm_role: true
 - name: IoT
   slug: iot
   description: Internet of things device
   color: Light Blue
   vm_role: true
-- name: KVM
-  slug: kvm
-  description: Keyboard, video and mouse switch
-  color: Light Blue
+- name: IPS
+  slug: ips
+  description: Intrusion prevention system
+  color: Fuchsia
   vm_role: true
 - name: Kiosk
   slug: kiosk
+  color: Light Blue
+  vm_role: true
+- name: KVM
+  slug: kvm
+  description: Keyboard, video and mouse switch
   color: Light Blue
   vm_role: true
 - name: Lighting
@@ -145,11 +167,6 @@
   slug: load-balancer
   color: Pink
   vm_role: true
-- name: MES
-  slug: mes
-  description: Manufacturing execution system
-  color: Indigo
-  vm_role: true
 - name: Mail server
   slug: mail-server
   color: Green
@@ -157,6 +174,11 @@
 - name: Media server
   slug: media-server
   color: Green
+  vm_role: true
+- name: MES
+  slug: mes
+  description: Manufacturing execution system
+  color: Indigo
   vm_role: true
 - name: Modem
   slug: modem
@@ -167,14 +189,23 @@
   description: Network attached storage
   color: Green
   vm_role: true
+- name: Network sensor
+  slug: network-sensor
+  color: Fuchsia
+  vm_role: true
 - name: NTP server
   slug: ntp-server
   description: Network time protocol server
   color: Dark Green
   vm_role: true
-- name: Network sensor
-  slug: network-sensor
-  color: Fuchsia
+- name: Photocopier
+  slug: photocopier
+  color: Light Blue
+  vm_role: true
+- name: Physical sensor
+  slug: physical-sensor
+  color: Indigo
+  description: Used to capture physical quantities
   vm_role: true
 - name: PLC
   slug: plc
@@ -184,14 +215,6 @@
 - name: PLM
   slug: plm
   description: Product lifecycle management system
-  color: Indigo
-  vm_role: true
-- name: Photocopier
-  slug: photocopier
-  color: Light Blue
-  vm_role: true
-- name: Physical sensor
-  slug: physical-sensor
   color: Indigo
   vm_role: true
 - name: Print server
@@ -206,11 +229,6 @@
   slug: proxy-server
   color: Dark Green
   vm_role: true
-- name: RTU
-  slug: rtu
-  description: Remote terminal unit
-  color: Purple
-  vm_role: true
 - name: Real-time communication server
   slug: real-time-communication-server
   color: Dark Green
@@ -222,20 +240,24 @@
 - name: Router
   slug: router
   color: Pink
+  description: Monitors and controls incoming and outgoing network traffic
+  vm_role: true
+- name: RTU
+  slug: rtu
+  description: Remote terminal unit
+  color: Purple
+  vm_role: true
+- name: Safety automation system
+  slug: safety-automation-system
+  color: Amber
   vm_role: true
 - name: SCADA
   slug: scada
   description: Supervisory control and data acquisition
   color: Purple
   vm_role: true
-- name: SIEM
-  slug: siem
-  description: Security information and event management
-  color: Fuchsia
-  vm_role: true
-- name: Safety automation system
-  slug: safety-automation-system
-  color: Amber
+- name: SCADA client
+  slug: scada-client
   vm_role: true
 - name: Scanner
   slug: scanner
@@ -245,8 +267,22 @@
   slug: server
   color: Green
   vm_role: true
+- name: SIEM
+  slug: siem
+  description: Security information and event management
+  color: Fuchsia
+  vm_role: true
+- name: Switch L2
+  slug: switch-l2
+  description: Layer 2 switch
+  vm_role: true
+- name: Switch L3
+  slug: switch-l3
+  description: Layer 3 switch
+  vm_role: true
 - name: Switch
   slug: switch
+  description: Switch (layer unspecified)
   color: Grey
   vm_role: true
 - name: Telephony
@@ -263,6 +299,10 @@
   description: Variable frequency drive
   color: Indigo
   vm_role: true
+- name: Virtual Machine Server
+  slug: vm-server
+  color: Light Green
+  vm_role: true
 - name: VPN server
   slug: vpn-server
   description: Virtual private network server
@@ -274,9 +314,5 @@
   vm_role: true
 - name: Workstation
   slug: workstation
-  color: Light Green
-  vm_role: true
-- name: Virtual Machine Server
-  slug: vm-server
   color: Light Green
   vm_role: true
