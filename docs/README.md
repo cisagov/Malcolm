@@ -84,6 +84,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [YARA](custom-rules.md#YARA)
         + [Other Customizations](custom-rules.md#Other)
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
+        + [User interface](file-scanning.md#ZeekFileExtractionUI)
     - [OpenSearch index management](index-management.md#IndexManagement)
     - [Event severity scoring](severity.md#Severity)
         + [Customizing event severity scoring](severity.md#SeverityConfig)
