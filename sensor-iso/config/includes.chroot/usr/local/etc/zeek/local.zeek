@@ -4,6 +4,7 @@
 ##!     https://docs.zeek.org/en/stable/script-reference/scripts.html
 ##!     https://github.com/zeek/zeek/blob/master/scripts/site/local.zeek
 
+global disable_stats = (getenv("ZEEK_DISABLE_STATS") == "") ? F : T;
 global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? F : T;
 global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
 global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
@@ -77,6 +78,10 @@ redef ignore_checksums = T;
 @endif
 @if (!disable_hash_all_files)
   @load frameworks/files/hash-all-files
+@endif
+@if (!disable_stats)
+  @load policy/misc/stats
+  @load policy/misc/capture-loss
 @endif
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
