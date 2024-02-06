@@ -187,6 +187,7 @@ DEFAULT_VARS.update(
         'SSH_EVE_ENABLED': False,
         'SSH_HASSH': True,
         'SSH_PORTS': 22,
+        'STATS': False,
         'STREAM_CHECKSUM_VALIDATION': False,
         'STREAM_INLINE': 'auto',
         'STREAM_MEMCAP': '64mb',
@@ -1170,7 +1171,7 @@ def main():
                 logging.error(output)
 
     # final tweaks
-    deep_set(cfg, ['stats', 'enabled'], False)
+    deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS']))
     cfg.pop('rule-files', None)
     deep_set(cfg, ['rule-files'], GetRuleFiles())
 
