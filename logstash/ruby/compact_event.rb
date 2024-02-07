@@ -2,6 +2,11 @@ def concurrency
   :shared
 end
 
+def register(params)
+  _discard_zeroes_str = params["discard_zeroes"]
+  @discard_zeroes = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_discard_zeroes_str.to_s.downcase)
+end
+
 def compact(h)
   h.inject({}) do |result, (k, v)|
     case v
@@ -10,6 +15,8 @@ def compact(h)
       result[k] = c unless c.empty?
     when String
       result[k] = v unless (v.empty? || (v == "-") || (v == "?") || (v == "(empty)") || (v == "(none)") || (v == "(null)") || (v == "unset") || (v == "Nul"))
+    when Numeric
+      result[k] = v unless (@discard_zeroes && v.zero?)
     when Array
       c = v.delete_if{|e| e.nil? || (e.is_a?(String) && (e.empty? || (e == "-") || (e == "?") || (e == "(empty)") || (e == "(none)") || (e == "(null)") || (e == "unset") || (e == "Nul")))}
       result[k] = c unless c.empty?

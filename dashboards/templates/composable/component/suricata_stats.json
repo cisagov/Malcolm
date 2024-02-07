@@ -113,10 +113,15 @@
                 "detect.alert": { "type": "long" },
                 "detect.alert_queue_overflow": { "type": "long" },
                 "detect.alerts_suppressed": { "type": "long" },
-                "detect.engines.id": { "type": "long" },
-                "detect.engines.last_reload": { "type": "date" },
-                "detect.engines.rules_failed": { "type": "long" },
-                "detect.engines.rules_loaded": { "type": "long" },
+                "detect.engines": {
+                  "type": "nested",
+                  "properties": {
+                    "id": { "type": "long" },
+                    "last_reload": { "type": "date" },
+                    "rules_failed": { "type": "long" },
+                    "rules_loaded": { "type": "long" }
+                  }
+                },
                 "file_store.open_files": { "type": "long" },
                 "flow.emerg_mode_entered": { "type": "long" },
                 "flow.emerg_mode_over": { "type": "long" },
