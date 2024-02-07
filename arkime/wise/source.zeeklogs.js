@@ -2287,10 +2287,7 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.file, 'path', 'File Path', 'file.path')\n" +
       "    +arrayList(session.file, 'mime_type', 'File Magic', 'file.mime_type')\n" +
       "    +arrayList(session.file, 'source', 'File Transport', 'file.source')\n" +
-      "    +arrayList(session.related, 'hash', 'Related Hash', 'related.hash')\n" +
-
-      // ####################################################################
-      "  br\n");
+      "    +arrayList(session.related, 'hash', 'Related Hash', 'related.hash')\n");
   }
 }
 
