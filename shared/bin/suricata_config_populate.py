@@ -189,6 +189,8 @@ DEFAULT_VARS.update(
         'SSH_PORTS': 22,
         'STATS_ENABLED': False,
         'STATS_EVE_ENABLED': False,
+        'STATS_INTERVAL': 30,
+        'STATS_DECODER_EVENTS': False,
         'STREAM_CHECKSUM_VALIDATION': False,
         'STREAM_INLINE': 'auto',
         'STREAM_MEMCAP': '64mb',
@@ -455,14 +457,6 @@ PROTOCOL_CONFIGS.update(
             None,
             None,
         ),
-        # stats is not really a protocol, but it is in the alerts section so we turn it on as seuch
-        'stats': ProtocolConfig(
-            [],
-            val2bool(DEFAULT_VARS['STATS_ENABLED']),
-            val2bool(DEFAULT_VARS['STATS_EVE_ENABLED']),
-            True,
-            None,
-            None,
         'tftp': ProtocolConfig(
             [],
             val2bool(DEFAULT_VARS['TFTP_ENABLED']),
@@ -903,6 +897,17 @@ def main():
                                             deleteIfNone=True,
                                         )
 
+                                elif dumperName == 'stats':
+                                    # for some reason the "enabled:" key isn't in the default
+                                    #   yaml so we're forcing it here
+                                    for cfgKey in ([dumperName, 'enabled', 'STATS_EVE_ENABLED'],):
+                                        deep_set(
+                                            cfg['outputs'][outputIdx][name]['types'][dumperIdx],
+                                            cfgKey[:-1],
+                                            DEFAULT_VARS[cfgKey[-1]],
+                                            deleteIfNone=True,
+                                        )
+
                                 elif dumperName == 'tls':
                                     for cfgKey in (
                                         [dumperName, 'extended', 'TLS_EXTENDED'],
@@ -1183,6 +1188,8 @@ def main():
 
     # final tweaks
     deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS_ENABLED']))
+    deep_set(cfg, ['stats', 'interval'], DEFAULT_VARS['STATS_INTERVAL'])
+    deep_set(cfg, ['stats', 'decoder-events'], val2bool(DEFAULT_VARS['STATS_DECODER_EVENTS']))
     cfg.pop('rule-files', None)
     deep_set(cfg, ['rule-files'], GetRuleFiles())
 
