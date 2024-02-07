@@ -55,7 +55,7 @@ USER $ARKIME_USER
 
 RUN git clone --recursive --depth=1 --single-branch -b "$GITHUB_BRANCH" "$GITHUB_URL" "$ARKIME_DIR" && \
     cd "$ARKIME_DIR" && \
-    bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
+    bash -c 'for i in /opt/patches/*.patch; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     export PATH="$ARKIME_DIR/bin:$ARKIME_DIR/node-v10.21.0-linux-x64/bin:${PATH}" && \
     sudo ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
     sudo ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \

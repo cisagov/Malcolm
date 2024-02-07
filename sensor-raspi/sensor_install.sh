@@ -70,7 +70,7 @@ build_arkime_src(){
     mkdir -p "${WORK_DIR}/arkime" && cd "$_"
     git clone --recurse-submodules --branch="v${arkime_ver}" "$arkime_repo" ./
 
-    for patch_file in /opt/patches/*; do
+    for patch_file in /opt/patches/*.patch; do
         patch -p 1 -r - --no-backup-if-mismatch < $patch_file || true
     done
 

@@ -57,7 +57,7 @@ RUN apt-get -q update && \
   cd /opt && \
     git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
-    bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
+    bash -c 'for i in /opt/patches/*.patch; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     export PATH="$ARKIME_DIR/bin:${PATH}" && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
     ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
