@@ -2235,9 +2235,9 @@ class MalcolmSource extends WISESource {
     this.api.addView("malcolm_common",
       "if (session.event.hash)\n" +
 
-      // id information
+      // id and basic connection information
       "  div.sessionDetailMeta.bold Malcolm Common Fields\n" +
-      "  dl.sessionDetailMeta(suffix=\"IDs\")\n" +
+      "  dl.sessionDetailMeta(suffix=\"IDs and Basic Connection Info\")\n" +
       "    +arrayList(session.event, 'id', 'Log ID', 'event.id')\n" +
       "    +arrayList(session.event, 'hash', 'Log Hash', 'event.hash')\n" +
       "    +arrayList(session.network, 'community_id', 'Connection Community ID', 'network.community_id')\n" +
@@ -2245,9 +2245,6 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.event, 'dataset', 'Log Type', 'event.dataset')\n" +
       "    +arrayList(session.event, 'module', 'Data  Source Module', 'event.module')\n" +
       "    +arrayList(session.host, 'name', 'Malcolm Node', 'host.name')\n" +
-
-      // basic connection information
-      "  dl.sessionDetailMeta(suffix=\"Basic Connection Info\")\n" +
       "    +arrayList(session.network, 'transport', 'Protocol', 'network.transport')\n" +
       "    +arrayList(session.network, 'protocol', 'Service', 'network.protocol')\n" +
       "    +arrayList(session.network, 'protocol_version', 'Service Version', 'network.protocol_version')\n" +
