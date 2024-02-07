@@ -109,8 +109,8 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       fi
 
       # pcap compression
-      COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
-      COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"
+      COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-zstd}"
+      COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-3}"
       sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "${ARKIME_CONFIG_FILE}"
       if [[ "$COMPRESSION_TYPE" == "zstd" ]]; then
         sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "${ARKIME_CONFIG_FILE}"

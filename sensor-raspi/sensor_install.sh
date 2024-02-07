@@ -59,7 +59,7 @@ BUILD_ERROR_CODE=1
 build_arkime_src(){
 
     arkime_repo='https://github.com/arkime/arkime.git'
-    arkime_ver='4.6.0'
+    arkime_ver='5.0.0'
     arkime_dir='/opt/arkime'
     build_jobs=$((PROC_CNT/2))
 
@@ -78,8 +78,6 @@ build_arkime_src(){
 
     sed -i "s/MAKE=make/MAKE='make -j${build_jobs}'/" easybutton-build.sh
     ./easybutton-build.sh --dir "$arkime_dir"
-
-    npm -g config set user root
 
     make install -j${build_jobs}
 

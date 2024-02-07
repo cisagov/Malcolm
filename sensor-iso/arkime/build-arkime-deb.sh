@@ -31,8 +31,6 @@ export PATH="$ARKIME_DIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PAT
 
 ./easybutton-build.sh --dir "$ARKIME_DIR"
 
-npm -g config set user root
-
 make install
 
 cp -r ./capture/plugins/lua/samples "$ARKIME_DIR"/lua
