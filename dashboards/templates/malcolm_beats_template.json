@@ -21,7 +21,8 @@
     "ecs_url",
     "ecs_user",
     "ecs_user_agent",
-    "custom_miscbeat"
+    "custom_miscbeat",
+    "custom_zeek_diagnostic"
   ],
   "template" :{
     "settings" : {

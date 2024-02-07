@@ -187,7 +187,8 @@ DEFAULT_VARS.update(
         'SSH_EVE_ENABLED': False,
         'SSH_HASSH': True,
         'SSH_PORTS': 22,
-        'STATS': False,
+        'STATS_ENABLED': False,
+        'STATS_EVE_ENABLED': False,
         'STREAM_CHECKSUM_VALIDATION': False,
         'STREAM_INLINE': 'auto',
         'STREAM_MEMCAP': '64mb',
@@ -454,6 +455,14 @@ PROTOCOL_CONFIGS.update(
             None,
             None,
         ),
+        # stats is not really a protocol, but it is in the alerts section so we turn it on as seuch
+        'stats': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['STATS_ENABLED']),
+            val2bool(DEFAULT_VARS['STATS_EVE_ENABLED']),
+            True,
+            None,
+            None,
         'tftp': ProtocolConfig(
             [],
             val2bool(DEFAULT_VARS['TFTP_ENABLED']),
@@ -744,9 +753,11 @@ def main():
                     'cluster-id': clusterId,
                     'block-size': DEFAULT_VARS['AF_PACKET_BLOCK_SIZE'],
                     'block-timeout': DEFAULT_VARS['AF_PACKET_BLOCK_TIMEOUT'],
-                    'bpf-filter': DEFAULT_VARS['CAPTURE_FILTER']
-                    if DEFAULT_VARS['CAPTURE_FILTER'] is not None
-                    else DEFAULT_VARS['PCAP_FILTER'],
+                    'bpf-filter': (
+                        DEFAULT_VARS['CAPTURE_FILTER']
+                        if DEFAULT_VARS['CAPTURE_FILTER'] is not None
+                        else DEFAULT_VARS['PCAP_FILTER']
+                    ),
                     'buffer-size': DEFAULT_VARS['AF_PACKET_BUFFER_SIZE'],
                     'checksum-checks': DEFAULT_VARS['AF_PACKET_CHECKSUM_CHECKS'],
                     'cluster-type': DEFAULT_VARS['AF_PACKET_CLUSTER_TYPE'],
@@ -1171,7 +1182,7 @@ def main():
                 logging.error(output)
 
     # final tweaks
-    deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS']))
+    deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS_ENABLED']))
     cfg.pop('rule-files', None)
     deep_set(cfg, ['rule-files'], GetRuleFiles())
 

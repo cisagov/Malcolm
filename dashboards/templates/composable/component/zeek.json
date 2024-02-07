@@ -2,6 +2,11 @@
   "template": {
     "mappings": {
       "properties": {
+        "zeek.analyzer.cause": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "zeek.analyzer.analyzer_kind": { "type": "keyword" },
+        "zeek.analyzer.analyzer_name": { "type": "keyword" },
+        "zeek.analyzer.failure_reason": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+        "zeek.analyzer.failure_data": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.conn.conn_state": { "type": "keyword" },
         "zeek.conn.conn_state_description": { "type": "keyword" },
         "zeek.conn.duration": { "type": "float" },
