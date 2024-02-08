@@ -570,13 +570,13 @@ function InstallMalcolm {
       for i in ${CONFIG_PAIRS[@]}; do
         KEY="$(echo "$i" | cut -d':' -f1)"
         VALUE="$(echo "$i" | cut -d':' -f2)"
-        for CONFIG in docker-compose.yml docker-compose-standalone.yml; do
+        for CONFIG in docker-compose-dev.yml docker-compose.yml; do
           sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" "$CONFIG"
         done
       done
       mkdir -p ./config
       touch ./config/auth.env
-      grep image: docker-compose-standalone.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
+      grep image: docker-compose.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1
     fi
@@ -591,8 +591,8 @@ function InstallMalcolm {
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
       ((echo 'SHELL=/bin/bash') ; \
        (( crontab -l | grep . | grep -v ^SHELL= ; \
-          echo "@reboot sleep 60 && /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -r -o -n -m $MALCOLM_PATH/docker-compose-standalone.yml" ; \
-          echo "15 8 * * * /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -w -o -n -m $MALCOLM_PATH/docker-compose-standalone.yml -d yesterday $ARTIFACTS_PATH/*.pcap" ) \
+          echo "@reboot sleep 60 && /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -r -o -n -m $MALCOLM_PATH/docker-compose.yml" ; \
+          echo "15 8 * * * /bin/bash --login $LOCAL_BIN_PATH/reset_and_auto_populate.sh -w -o -n -m $MALCOLM_PATH/docker-compose.yml -d yesterday $ARTIFACTS_PATH/*.pcap" ) \
           | sort | uniq )) | crontab -
     fi
   fi

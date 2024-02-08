@@ -212,9 +212,8 @@ function InstallMalcolm {
     pushd "$MALCOLM_USER_HOME" >/dev/null 2>&1
     mkdir -p ./Malcolm
     curl -fsSL "$MALCOLM_URL" | tar xzf - -C ./Malcolm --strip-components 1
-    if [[ -s ./Malcolm/docker-compose-standalone.yml ]]; then
+    if [[ -s ./Malcolm/docker-compose.yml ]]; then
         pushd ./Malcolm >/dev/null 2>&1
-        mv docker-compose-standalone.yml docker-compose.yml
         for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
         echo "Pulling Docker images..." >&2
         docker-compose --profile malcolm pull >/dev/null 2>&1

@@ -40,15 +40,15 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
     * `tar xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz`
 1. backup current Malcolm scripts, configuration files and certificates
     * `mkdir -p ./upgrade_backup_$(date +%Y-%m-%d)`
-    * `cp -r filebeat/ htadmin/ logstash/ nginx/ config/ docker-compose.yml ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
+    * `cp -r filebeat/ htadmin/ logstash/ nginx/ config/ docker-compose*.yml ./scripts ./README.md ./upgrade_backup_$(date +%Y-%m-%d)/`
 1. replace scripts and local documentation in the existing installation with the new ones
     * `rm -rf ./scripts ./README.md`
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
-1. replace (overwrite) `docker-compose.yml` file with new version
-    * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose.yml ./docker-compose.yml`
+1. replace (overwrite) `docker-compose*.yml` file with new versions
+    * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose*.yml ./`
 1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
     * to do an in-depth comparison of the previous version's settings with the new setings:
-        + using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compare.yml` file backed up in Step 3, and manually migrate over any customizations in file
+        + using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compose.yml` files backed up in Step 3, and manually migrate over any customizations in file
         + compare the contents of each  `.env` file  Malcolm's `./config/` directory with its corresponding `.env.example` file. the author uses this command which uses [difftastic](https://github.com/Wilfred/difftastic), [bat](https://github.com/sharkdp/bat), [unbuffer](https://manpages.debian.org/stretch/expect/unbuffer.1.en.html), and [cmp](https://en.wikipedia.org/wiki/Cmp_(Unix)).
         ```bash
         for FILE in *.env; do \

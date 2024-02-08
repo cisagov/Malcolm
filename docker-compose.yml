@@ -12,9 +12,6 @@ x-logging:
 
 services:
   opensearch:
-    build:
-      context: .
-      dockerfile: Dockerfiles/opensearch.Dockerfile
     image: ghcr.io/idaholab/malcolm/opensearch:24.02.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
@@ -57,9 +54,6 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    build:
-      context: .
-      dockerfile: Dockerfiles/dashboards-helper.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards-helper:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
@@ -90,9 +84,6 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    build:
-      context: .
-      dockerfile: Dockerfiles/dashboards.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
@@ -121,9 +112,6 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    build:
-      context: .
-      dockerfile: Dockerfiles/logstash.Dockerfile
     image: ghcr.io/idaholab/malcolm/logstash-oss:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
@@ -160,10 +148,6 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
       - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.orig.yml:ro
-      - ./logstash/pipelines:/usr/share/logstash/malcolm-pipelines.available:ro
-      - ./logstash/patterns:/usr/share/logstash/malcolm-patterns:ro
-      - ./logstash/ruby:/usr/share/logstash/malcolm-ruby:ro
       - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
       - ./logstash/certs/ca.crt:/certs/ca.crt:ro
       - ./logstash/certs/server.crt:/certs/server.crt:ro
@@ -175,9 +159,6 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    build:
-      context: .
-      dockerfile: Dockerfiles/filebeat.Dockerfile
     image: ghcr.io/idaholab/malcolm/filebeat-oss:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -213,9 +194,6 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    build:
-      context: .
-      dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -232,6 +210,7 @@ services:
       - ./config/upload-common.env
       - ./config/auth.env
       - ./config/arkime.env
+      - ./config/arkime-offline.env
       - ./config/arkime-secret.env
     environment:
       VIRTUAL_HOST : 'arkime.malcolm.local'
@@ -240,11 +219,8 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./pcap:/data/pcap
       - ./arkime/rules:/opt/arkime/rules:ro
-      - ./arkime/etc/config.ini:/opt/arkime/etc/config.orig.ini:ro
-      - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
-      - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro
+      - ./pcap:/data/pcap
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s
@@ -252,9 +228,6 @@ services:
       retries: 3
       start_period: 210s
   arkime-live:
-    build:
-      context: .
-      dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -285,15 +258,9 @@ services:
     volumes:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./pcap:/data/pcap
       - ./arkime/rules:/opt/arkime/rules:ro
-      - ./arkime/etc/config.ini:/opt/arkime/etc/config.orig.ini:ro
-      - ./arkime/etc/user_settings.json:/opt/arkime/etc/user_settings.json:ro
-      - ./arkime/wise/source.zeeklogs.js:/opt/arkime/wiseService/source.zeeklogs.js:ro
+      - ./pcap:/data/pcap
   zeek:
-    build:
-      context: .
-      dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -317,7 +284,6 @@ services:
       - ./pcap:/pcap
       - ./zeek-logs/upload:/zeek/upload
       - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
       - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
     healthcheck:
@@ -327,9 +293,6 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    build:
-      context: .
-      dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -341,7 +304,7 @@ services:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
       - SYS_NICE
     env_file:
       - ./config/process.env
@@ -355,13 +318,9 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./zeek-logs/live:/zeek/live
       - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/config/local.zeek:/opt/zeek/share/zeek/site/local.zeek:ro
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
       - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
   suricata:
-    build:
-      context: .
-      dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -390,9 +349,6 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    build:
-      context: .
-      dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -408,7 +364,7 @@ services:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
       - NET_ADMIN
       - NET_RAW
-      # SYS_NICE - to set process nice values, real-timescheduling policies, I/O scheduling
+      # SYS_NICE - to set process nice values and scheduling policies for capture
       - SYS_NICE
     env_file:
       - ./config/process.env
@@ -423,9 +379,6 @@ services:
       - ./suricata/rules:/opt/suricata/rules:ro
       - ./suricata/include-configs:/opt/suricata/include-configs:ro
   file-monitor:
-    build:
-      context: .
-      dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-monitor:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -455,9 +408,6 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    build:
-      context: .
-      dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-capture:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -487,9 +437,6 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    build:
-      context: .
-      dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-monitor:24.02.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
@@ -518,9 +465,6 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    build:
-      context: .
-      dockerfile: Dockerfiles/file-upload.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-upload:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
@@ -551,9 +495,6 @@ services:
     image: ghcr.io/idaholab/malcolm/htadmin:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/htadmin.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -581,9 +522,6 @@ services:
     image: ghcr.io/idaholab/malcolm/freq:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/freq.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -608,9 +546,6 @@ services:
     image: ghcr.io/idaholab/malcolm/netbox:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/netbox.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -645,9 +580,6 @@ services:
     image: ghcr.io/idaholab/malcolm/postgresql:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/postgresql.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -674,9 +606,6 @@ services:
     image: ghcr.io/idaholab/malcolm/redis:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/redis.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -707,9 +636,6 @@ services:
     image: ghcr.io/idaholab/malcolm/redis:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/redis.Dockerfile
     restart: "no"
     stdin_open: false
     tty: true
@@ -739,9 +665,6 @@ services:
     image: ghcr.io/idaholab/malcolm/api:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging
-    build:
-      context: .
-      dockerfile: Dockerfiles/api.Dockerfile
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
@@ -766,9 +689,6 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfiles/nginx.Dockerfile
     image: ghcr.io/idaholab/malcolm/nginx-proxy:24.02.0
     profiles: ["malcolm"]
     logging: *default-logging

@@ -71,7 +71,7 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root *
 
   # configure installation options
-  YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose-standalone.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+  YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Malcolm $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -125,7 +125,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek/custom/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX/"
-  cp ./docker-compose-standalone.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
+  cp ./docker-compose.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
   cp ./net-map.json "$MALCOLM_DEST_DIR/"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"

@@ -57,7 +57,7 @@ exclude:
   - arkime-raw
   - config
   - dashboards
-  - docker-compose-standalone.yml
+  - docker-compose-dev.yml
   - docker-compose.yml
   - Dockerfiles
   - docs/images/font

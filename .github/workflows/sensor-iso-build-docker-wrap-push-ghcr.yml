@@ -88,7 +88,7 @@ jobs:
       -
         name: Extract Malcolm version
         shell: bash
-        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
+        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose-dev.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
         id: extract_malcolm_version
       -
         name: Build image
