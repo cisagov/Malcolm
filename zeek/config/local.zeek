@@ -264,11 +264,29 @@ event zeek_init() &priority=-5 {
   redef SNIFFPASS::log_password_plaintext = T;
   redef LDAP::default_capture_password = T;
 @endif
+
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
-@if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (synchrophasor_detailed))
-  redef SYNCHROPHASOR::log_data_frame = T;
-  redef SYNCHROPHASOR::log_data_detail = T;
-  redef SYNCHROPHASOR::log_cfg_detail = T;
+
+@if ((!disable_ics_all) && (!disable_ics_synchrophasor) && (!synchrophasor_detailed))
+  hook SYNCHROPHASOR::log_policy_sychrophasor_data_detail(
+    rec : SYNCHROPHASOR::Synchrophasor_Data_Detail,
+    id : Log::ID,
+    filter : Log::Filter) {
+      break;
+  }
+  hook SYNCHROPHASOR::log_policy_sychrophasor_config_detail(
+    rec : SYNCHROPHASOR::Synchrophasor_Config_Detail,
+    id : Log::ID,
+    filter : Log::Filter) {
+      break;
+  }
+
+  hook SYNCHROPHASOR::log_policy_sychrophasor_data(
+    rec : SYNCHROPHASOR::Synchrophasor_Data,
+    id : Log::ID,
+    filter : Log::Filter) {
+      break;
+  }
 @endif
