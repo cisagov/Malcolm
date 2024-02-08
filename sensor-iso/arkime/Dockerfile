@@ -23,6 +23,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     python3-pip \
     python3-setuptools \
     python3-wheel \
+    re2c \
     ruby \
     ruby-dev \
     rubygems \

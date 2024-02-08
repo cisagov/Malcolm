@@ -43,7 +43,7 @@ BUILD_ZEEK_FROM_SOURCE=0
 
 # Build time dependencies for arkime, htpdate, capa, and yara
 BUILD_DEPS='automake checkinstall libjansson-dev libmagic-dev libnl-genl-3-dev libtool '
-BUILD_DEPS+='meson ninja-build python3-dev ruby ruby-dev ruby-rubygems '
+BUILD_DEPS+='meson ninja-build python3-dev re2c ruby ruby-dev ruby-rubygems '
 
 # Build dependencies we're leaving in place after installation (for building new Zeek plugins in the wild, mostly)
 BUILD_DEPS_KEEP='build-essential ccache cmake flex gcc g++ git libfl-dev libgoogle-perftools-dev '
