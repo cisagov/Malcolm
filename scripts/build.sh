@@ -34,12 +34,11 @@ fi
 
 if [[ -f "$1" ]]; then
   CONFIG_FILE="$1"
-  DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
   shift # use remainder of arguments for services
 else
   CONFIG_FILE="docker-compose-dev.yml"
-  DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm"
 fi
+DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
 
 function filesize_in_image() {
   FILESPEC="$2"
