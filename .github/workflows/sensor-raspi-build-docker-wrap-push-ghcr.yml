@@ -1,14 +1,14 @@
 name: sensor-raspi-build-docker-wrap-push-ghcr
 
 on:
-  push:
-    branches:
-      - main
-      - development
-    paths:
-      - '.trigger_raspi_workflow_build'
+  # push:
+  #   branches:
+  #     - main
+  #     - development
+  #   paths:
+  #     - '.trigger_raspi_workflow_build'
   workflow_dispatch:
-  repository_dispatch:
+  # repository_dispatch:
 
 jobs:
   build:
