@@ -40,6 +40,10 @@ NGINX_RUNTIME_LDAP_CONF=/etc/nginx/nginx_ldap_rt.conf
 NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_dashboards.conf
 NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_kibana.conf
 NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_rt.conf
+# do the same thing for /dashboards URLs, send to kibana if they're using elasticsearch
+NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_dashboards.conf
+NGINX_KIBANA_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_kibana.conf
+NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_rt.conf
 
 # config file for stunnel if using stunnel to issue LDAP StartTLS function
 STUNNEL_CONF=/etc/stunnel/stunnel.conf
@@ -234,9 +238,13 @@ fi
 # NGINX_DASHBOARDS_... are a special case as they have to be crafted a bit based on a few variables
 set +e
 
-[[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]] && \
-  ln -sf "$NGINX_KIBANA_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF" || \
+if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]]; then
+  ln -sf "$NGINX_KIBANA_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF"
+  ln -sf "$NGINX_KIBANA_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF"
+else
   ln -sf "$NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF"
+  ln -sf "$NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF"
+fi
 
 # first parse DASHBOARDS_URL and assign the resultant urlsplit named tuple to an associative array
 #   going to use Python to do so as urllib will do a better job at parsing DASHBOARDS_URL than bash
