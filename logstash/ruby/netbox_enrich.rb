@@ -804,7 +804,6 @@ def clean_manuf_string(val)
       new_val = new_val.gsub(pat, '')
     end
     new_val = new_val.gsub(/[^A-Za-z0-9\s]/, '').gsub(/\s+/, ' ').lstrip.rstrip
-    puts("#{val} -> #{new_val}")
     new_val
 end
 
