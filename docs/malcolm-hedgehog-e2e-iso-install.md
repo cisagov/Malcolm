@@ -173,6 +173,21 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - When using LDAP authentication, this question allows users to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
 * **Store PCAP, log and index files locally under /home/user/Malcolm?**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
+* **Should Arkime leverage index management policies (ILM/ISM) to manage volume?**
+    - Choose **Y** to proceed to the following related questions about Arkime's use of ILM/ISM policies.
+    - **Should Arkime use a hot/warm design in which non-session data is stored in a warm index?**
+        - This quesion asks if users should store non-session indices (arkime-history) indices in a warm index. This requires additional configuration as demonstrated in the [Arkime documentation](https://arkime.com/faq#ilm).
+    - **How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)**
+        - This question asks how long an Arkime index should remain in the 'hot' node before moving into a 'warm' node. The default value is 30 days (30d).
+    - **How long should Arkime retain SPI data before deleting it? (e.g. 25h, 90d, etc.)**
+        - This question is used to set the maximum time  before indices are deleted. The default value is 90 days (90d).
+    - **How many segments should Arkime use to optimize?**
+        - This question asks for the number of segments to use for optimization. The default value is 1.
+    - **How many replicas should Arkime maintain for older session indices?**
+        - This defines how many additional copies of older session indices Arkime stores. This defaults to 0.
+    - **How many weeks of history should Arkime keep?",**
+        - This defines the retention time (in weeks) policy for arkime-history indices. The default is 13 weeks
+
 * **Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?**
     - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
     - **Delete the oldest indices when the database exceeds a certain size?**
