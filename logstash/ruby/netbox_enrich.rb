@@ -183,7 +183,7 @@ def register(params)
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
   if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
-    @autopopulate_fuzzy_threshold = 0.80
+    @autopopulate_fuzzy_threshold = 0.95
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
   end
@@ -207,6 +207,24 @@ def register(params)
 
   # end of autopopulation arguments
 
+  @name_cleaning_patterns = [ /\ba[sbg]\b/,
+                              /\bbeijing\b/,
+                              /\bbv\b/,
+                              /\bco(rp(oration)?)?\b/,
+                              /\bglobal\b/,
+                              /\bgmbh\b/,
+                              /\binc(orporated)?\b/,
+                              /\bkft\b/,
+                              /\blimi?ted\b/,
+                              /\bllc\b/,
+                              /\b(co)?ltda?\b/,
+                              /\bpt[ey]\b/,
+                              /\bpvt\b/,
+                              /\boo\b/,
+                              /\bsa\b/,
+                              /\bsr[ol]s?\b/,
+                              /\bshenzhen\b/,
+                              /\bsystems?\b/ ]
 end
 
 def filter(event)
@@ -401,7 +419,7 @@ def filter(event)
                                 _manufs << { :name => _tmp_name,
                                              :id => _manuf.fetch(:id, nil),
                                              :url => _manuf.fetch(:url, nil),
-                                             :match => _fuzzy_matcher.getDistance(_tmp_name.to_s.downcase, _autopopulate_oui.to_s.downcase),
+                                             :match => _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), clean_manuf_string(_autopopulate_oui.to_s)),
                                              :vm => false
                                            }
                               end
@@ -770,6 +788,22 @@ def crush(thing)
   else
     thing
   end
+end
+
+def clean_manuf_string(val)
+    # 0. downcase
+    # 1. replace commas with spaces
+    # 2. remove all punctuation (except parens)
+    # 3. squash whitespace down to one space
+    # 4. remove each of @name_cleaning_patterns (LLC, LTD, Inc., Corp., etc.)
+    # 5. remove all punctuation (even parens)
+    # 6. strip leading and trailing spaces
+    new_val = val.downcase.gsub(',', ' ').gsub(/[^\(\)A-Za-z0-9\s]/, '').gsub(/\s+/, ' ')
+    @name_cleaning_patterns.each do |pat|
+      new_val = new_val.gsub(pat, '')
+    end
+    new_val = new_val.gsub(/[^A-Za-z0-9\s]/, '').gsub(/\s+/, ' ').lstrip.rstrip
+    new_val
 end
 
 ###############################################################################
