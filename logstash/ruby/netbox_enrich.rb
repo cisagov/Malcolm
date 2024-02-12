@@ -403,6 +403,7 @@ def filter(event)
                       # looks like this is not a virtual machine (or we can't tell) so assume its' a regular device
                       _autopopulate_manuf = @manuf_hash.getset(_autopopulate_oui) {
                         _fuzzy_matcher = FuzzyStringMatch::JaroWinkler.create( :pure )
+                        _autopopulate_oui_cleaned = clean_manuf_string(_autopopulate_oui.to_s)
                         _manufs = Array.new
                         # fetch the manufacturers to do the comparison. this is a lot of work
                         # and not terribly fast but once the hash it populated it shouldn't happen too often
@@ -419,7 +420,7 @@ def filter(event)
                                 _manufs << { :name => _tmp_name,
                                              :id => _manuf.fetch(:id, nil),
                                              :url => _manuf.fetch(:url, nil),
-                                             :match => _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), clean_manuf_string(_autopopulate_oui.to_s)),
+                                             :match => _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), _autopopulate_oui_cleaned),
                                              :vm => false
                                            }
                               end
@@ -803,6 +804,7 @@ def clean_manuf_string(val)
       new_val = new_val.gsub(pat, '')
     end
     new_val = new_val.gsub(/[^A-Za-z0-9\s]/, '').gsub(/\s+/, ' ').lstrip.rstrip
+    puts("#{val} -> #{new_val}")
     new_val
 end
 
