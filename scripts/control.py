@@ -127,6 +127,11 @@ shuttingDown = [False]
 yamlImported = None
 dotenvImported = None
 MaxAskForValueCount = 100
+UsernameRegex = re.compile(r'^[a-zA-Z][a-zA-Z0-9_\-.]+$')
+UsernameMinLen = 4
+UsernameMaxLen = 32
+PasswordMinLen = 8
+PasswordMaxLen = 128
 
 ###################################################################################################
 try:
@@ -1245,28 +1250,28 @@ def authSetup():
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid administrator username')
                 while loopBreaker.increment():
                     username = AskForString(
-                        "Administrator username",
+                        f"Administrator username (between {UsernameMinLen} and {UsernameMaxLen} characters; alphanumeric, _, -, and . allowed)",
                         default=args.authUserName,
                         defaultBehavior=defaultBehavior,
                     )
-                    if len(username) > 0:
+                    if UsernameRegex.match(username) and (UsernameMinLen <= len(username) <= UsernameMaxLen):
                         break
 
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
                 while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
                     password = AskForPassword(
-                        f"{username} password: ",
+                        f"{username} password  (between {PasswordMinLen} and {PasswordMaxLen} characters): ",
                         default='',
                         defaultBehavior=defaultBehavior,
                     )
-                    passwordConfirm = AskForPassword(
-                        f"{username} password (again): ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if password and (password == passwordConfirm):
-                        break
-                    eprint("Passwords do not match")
+                    if (PasswordMinLen <= len(password) <= PasswordMaxLen):
+                        passwordConfirm = AskForPassword(
+                            f"{username} password (again): ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if password and (password == passwordConfirm):
+                            break
 
                 # get previous admin username to remove from htpasswd file if it's changed
                 authEnvFile = os.path.join(args.configDir, 'auth.env')
@@ -1396,12 +1401,12 @@ def authSetup():
                     f.write(f'admin_user = {username}\n\n')
                     f.write('; username field quality checks\n')
                     f.write(';\n')
-                    f.write('min_username_len = 4\n')
-                    f.write('max_username_len = 32\n\n')
+                    f.write(f'min_username_len = {UsernameMinLen}\n')
+                    f.write(f'max_username_len = {UsernameMaxLen}\n\n')
                     f.write('; Password field quality checks\n')
                     f.write(';\n')
-                    f.write('min_password_len = 8\n')
-                    f.write('max_password_len = 128\n\n')
+                    f.write(f'min_password_len = {PasswordMinLen}\n')
+                    f.write(f'max_password_len = {PasswordMaxLen}\n\n')
 
                 # touch the metadata file
                 open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
