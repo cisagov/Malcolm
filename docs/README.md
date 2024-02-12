@@ -85,7 +85,9 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Other Customizations](custom-rules.md#Other)
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
         + [User interface](file-scanning.md#ZeekFileExtractionUI)
-    - [OpenSearch index management](index-management.md#IndexManagement)
+    - [Index management](index-management.md#
+        + [OpenSearch index management](index-management.md#OpenSearchIndexManagement)
+        + [Using ILM/ISM with Arkime](index-management.md#ArkimeIndexPolicies)
     - [Event severity scoring](severity.md#Severity)
         + [Customizing event severity scoring](severity.md#SeverityConfig)
     - [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel)

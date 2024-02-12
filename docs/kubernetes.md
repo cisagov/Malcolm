@@ -367,7 +367,7 @@ Require encrypted HTTPS connections? (Y / n): y
 3: None
 Select authentication method (Basic): 1
 
-Should Arkime leverage index management policies (ILM/ISM) to manage volume? (y / N): n
+Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 
 Should Malcolm delete the oldest database indices and/or PCAP files based on available storage? (y / N): y
 

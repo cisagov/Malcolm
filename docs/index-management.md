@@ -1,4 +1,4 @@
-# <a name="IndexManagement"></a>OpenSearch index management
+# <a name="OpenSearchIndexManagement"></a>OpenSearch index management
 
 Malcolm releases prior to v6.2.0 used environment variables to configure OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) [policies](https://opensearch.org/docs/latest/im-plugin/ism/policies/).
 
@@ -6,6 +6,6 @@ Since then, OpenSearch Dashboards has developed and released plugins with UIs fo
 
 Note that OpenSearch index state management and snapshot management only deals with disk space consumed by OpenSearch indices: it does not have anything to do with PCAP file storage. The `MANAGE_PCAP_FILES` environment variable in the [`arkime.env` file](malcolm-config.md#MalcolmConfigEnvVars) can be used to allow Arkime to prune old PCAP files based on available disk space.
 
-# Arkime's index management
+# <a name="ArkimeIndexPolicies"></a> Using ILM/ISM with Arkime
 
-Arkime provides custom variables for setting index management policies with Arkime sessions and Arkime history indices. These Arkime configuration variables are set in the [`arkime.env` file](malcolm-config.md#MalcolmConfigEnvVars). These variables are consistent across both OpenSearch and Elaticsearch. Arkime will use these variables on start-up to set up proper indices.
+Arkime allows setting [index management policies](https://arkime.com/faq#ilm) with its sessions and history indices. The Malcolm environment variables for configuring this behavior are set in [`arkime.env`](malcolm-config.md#MalcolmConfigEnvVars). These variables can be used for both [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) (OpenSearch [Index State Management (ISM)](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Elasticsearch Index Lifecycle Management (ILM)](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-lifecycle-management.html), respectively).
