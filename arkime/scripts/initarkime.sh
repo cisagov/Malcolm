@@ -100,6 +100,14 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
   fi # if/else OpenSearch database initialized
 
+  if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
+    [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
+    [[ "${OPENSEARCH_PRIMARY}" == "elasticsearch-remote" ]] && LIFECYCLE_POLCY=ilm || LIFECYCLE_POLCY=ism
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ${LIFECYCLE_POLCY} "${INDEX_MANAGEMENT_OPTIMIZATION_PERIOD}" "${INDEX_MANAGEMENT_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${INDEX_MANAGEMENT_SEGMENTS}" --replicas "${INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS}" --history "${INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS}"
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --${LIFECYCLE_POLCY}
+    echo "ILM created"
+  fi 
+
   # increase OpenSearch max shards per node from default if desired
   if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
     # see https://github.com/elastic/elasticsearch/issues/40803
