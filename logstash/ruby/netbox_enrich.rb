@@ -209,9 +209,10 @@ def register(params)
 
   # used for massaging OUI/manufacturer names for matching
   @name_cleaning_patterns = [ /\ba[sbg]\b/,
-                              /\bbeijing\b/,
+                              /\b(beijing|shenzhen)\b/,
                               /\bbv\b/,
                               /\bco(rp(oration|orate)?)?\b/,
+                              /\b(computer|network|electronic|solution|system)s?\b/,
                               /\bglobal\b/,
                               /\bgmbh\b/,
                               /\binc(orporated)?\b/,
@@ -225,8 +226,7 @@ def register(params)
                               /\boo\b/,
                               /\bsa\b/,
                               /\bsr[ol]s?\b/,
-                              /\bshenzhen\b/,
-                              /\bsystems?\b/ ]
+                              /\btech(nolog(y|ie|iya)s?)?\b/ ]
 end
 
 def filter(event)
