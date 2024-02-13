@@ -252,11 +252,11 @@ def filter(event)
   _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
   _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
   _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
-  _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
-  _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
   _autopopulate_hostname = event.get("#{@source_hostname}")
   _autopopulate_mac = event.get("#{@source_mac}")
   _autopopulate_oui = event.get("#{@source_oui}")
+  _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
+  _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
 
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(_cache_size, _cache_ttl)
