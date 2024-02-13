@@ -207,6 +207,7 @@ def register(params)
 
   # end of autopopulation arguments
 
+  # used for massaging OUI/manufacturer names for matching
   @name_cleaning_patterns = [ /\ba[sbg]\b/,
                               /\bbeijing\b/,
                               /\bbv\b/,
@@ -214,7 +215,7 @@ def register(params)
                               /\bglobal\b/,
                               /\bgmbh\b/,
                               /\binc(orporated)?\b/,
-                              /\bintl?\b/,
+                              /\bint(ernationa)?l?\b/,
                               /\bkft\b/,
                               /\blimi?ted\b/,
                               /\bllc\b/,
