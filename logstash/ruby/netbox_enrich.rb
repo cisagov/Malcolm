@@ -440,12 +440,13 @@ def filter(event)
                           _exception_error = true
                         end
                         # return the manuf with the highest match
-                        # puts('%{key}: %{matches}' % { key: _autopopulate_oui_cleaned, matches: JSON.generate(_manufs) })
+                        # puts('0. %{key}: %{matches}' % { key: _autopopulate_oui_cleaned, matches: JSON.generate(_manufs) })-]
                         !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
                       }
                     end # virtual machine vs. regular device
                   end # _autopopulate_oui specified
 
+                  # puts('1. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
                   if !_autopopulate_manuf.is_a?(Hash)
                     # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
                     _autopopulate_manuf = { :name => _autopopulate_create_manuf ? _autopopulate_oui : _autopopulate_default_manuf,
@@ -453,6 +454,7 @@ def filter(event)
                                             :vm => false,
                                             :id => nil}
                   end
+                  # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
 
                   # make sure the site and role exists
 
@@ -564,6 +566,7 @@ def filter(event)
                              _autopopulate_manuf[:match] = 1.0
                           end
                         end
+                        # puts('3. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
 
                         if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
                           # the manufacturer is still not found, create it
@@ -575,6 +578,7 @@ def filter(event)
                              _autopopulate_manuf[:id] = _manuf_create_response.fetch(:id, nil)
                              _autopopulate_manuf[:match] = 1.0
                           end
+                          # puts('4. %{key}: %{created}' % { key: _autopopulate_manuf, created: JSON.generate(_manuf_create_response) })
                         end
 
                         # at this point we *must* have the manufacturer ID
@@ -623,12 +627,22 @@ def filter(event)
                                _autopopulate_device = _device_create_response
                             end
 
+                          else
+                            # didn't figure out the device type ID, make sure we're not setting something half-populated
+                            _autopopulate_dtype = nil
                           end # _autopopulate_dtype[:id] is valid
 
+                        else
+                          # didn't figure out the manufacturer ID, make sure we're not setting something half-populated
+                          _autopopulate_manuf = nil
                         end # _autopopulate_manuf[:id] is valid
 
                       end # virtual machine vs. regular device
 
+                    else
+                      # didn't figure out the IDs, make sure we're not setting something half-populated
+                      _autopopulate_site = nil
+                      _autopopulate_role = nil
                     end # site and role are valid
 
                   rescue Faraday::Error
@@ -637,6 +651,7 @@ def filter(event)
                   end
 
                   if !_autopopulate_device.nil?
+                    # puts('5. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
                     # we created a device, so send it back out as the result for the event as well
                     _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
                                   :id => _autopopulate_device&.fetch(:id, nil),
