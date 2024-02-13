@@ -243,6 +243,7 @@ ADD nginx/*.conf /etc/nginx/
 ADD nginx/templates /etc/nginx/templates/
 ADD nginx/supervisord.conf /etc/
 COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
+COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 COPY --chmod=644 docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
