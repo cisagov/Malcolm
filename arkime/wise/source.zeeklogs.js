@@ -142,6 +142,7 @@ class MalcolmSource extends WISESource {
       "oui.dst",
       "oui.src",
       "protocols",
+      "related.device_id",
       "related.device_name",
       "related.device_type",
       "related.hash",

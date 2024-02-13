@@ -41,6 +41,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
     - `related.device_type`
+    - `related.device_id`
     - `related.device_name`
     - `related.manufacturer`
     - `related.role`

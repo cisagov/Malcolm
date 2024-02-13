@@ -1,0 +1,10 @@
+- name: device_link_to_dashboards
+  link_text: 'Asset Interaction Analysis'
+  link_url: '/dashboards/app/dashboards#/view/677ee170-809e-11ed-8d5b-07069f823b6f?_g=(filters:!((meta:(key:related.device_id,negate:!f,params:(query:1),type:phrase),query:(match_phrase:(related.device_id:{{ object.id }})))),refreshInterval:(pause:!t,value:0))'
+  new_window: True
+  content_type: device
+- name: device_link_to_arkime
+  link_text: 'Arkime'
+  link_url: '/arkime/sessions?expression=(related.device_id %3D%3D {{ object.id }})'
+  new_window: True
+  content_type: device
