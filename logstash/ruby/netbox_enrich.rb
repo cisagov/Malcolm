@@ -210,10 +210,11 @@ def register(params)
   @name_cleaning_patterns = [ /\ba[sbg]\b/,
                               /\bbeijing\b/,
                               /\bbv\b/,
-                              /\bco(rp(oration)?)?\b/,
+                              /\bco(rp(oration|orate)?)?\b/,
                               /\bglobal\b/,
                               /\bgmbh\b/,
                               /\binc(orporated)?\b/,
+                              /\bintl?\b/,
                               /\bkft\b/,
                               /\blimi?ted\b/,
                               /\bllc\b/,
@@ -417,12 +418,15 @@ def filter(event)
                               _tmp_manufs = _manufs_response.fetch(:results, [])
                               _tmp_manufs.each do |_manuf|
                                 _tmp_name = _manuf.fetch(:name, _manuf.fetch(:display, nil))
-                                _manufs << { :name => _tmp_name,
-                                             :id => _manuf.fetch(:id, nil),
-                                             :url => _manuf.fetch(:url, nil),
-                                             :match => _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), _autopopulate_oui_cleaned),
-                                             :vm => false
-                                           }
+                                _tmp_distance = _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), _autopopulate_oui_cleaned)
+                                if (_tmp_distance >= _autopopulate_fuzzy_threshold) then
+                                  _manufs << { :name => _tmp_name,
+                                               :id => _manuf.fetch(:id, nil),
+                                               :url => _manuf.fetch(:url, nil),
+                                               :match => _tmp_distance,
+                                               :vm => false
+                                             }
+                                end
                               end
                               _query[:offset] += _tmp_manufs.length()
                               break unless (_tmp_manufs.length() >= _page_size)
@@ -435,6 +439,7 @@ def filter(event)
                           _exception_error = true
                         end
                         # return the manuf with the highest match
+                        # puts('%{key}: %{matches}' % { key: _autopopulate_oui_cleaned, matches: JSON.generate(_manufs) })
                         !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
                       }
                     end # virtual machine vs. regular device
@@ -796,7 +801,7 @@ def clean_manuf_string(val)
     # 1. replace commas with spaces
     # 2. remove all punctuation (except parens)
     # 3. squash whitespace down to one space
-    # 4. remove each of @name_cleaning_patterns (LLC, LTD, Inc., Corp., etc.)
+    # 4. remove each of @name_cleaning_patterns (LLC, LTD, Inc., etc.)
     # 5. remove all punctuation (even parens)
     # 6. strip leading and trailing spaces
     new_val = val.downcase.gsub(',', ' ').gsub(/[^\(\)A-Za-z0-9\s]/, '').gsub(/\s+/, ' ')
