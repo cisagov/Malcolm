@@ -3,11 +3,11 @@ FROM alpine:3.19
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
-LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
-LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
 LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
-LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/dirinit'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/dirinit'
 LABEL org.opencontainers.image.description='Sidecar container that ensures the creation of some volume subdirectories and does nothing else'
 
 ARG DEFAULT_UID=1000

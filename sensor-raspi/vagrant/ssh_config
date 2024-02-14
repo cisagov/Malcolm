@@ -1,0 +1,3 @@
+Host *
+  IdentitiesOnly yes
+  GSSAPIAuthentication no

@@ -183,7 +183,7 @@ def register(params)
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
   if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
-    @autopopulate_fuzzy_threshold = 0.80
+    @autopopulate_fuzzy_threshold = 0.95
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
   end
@@ -207,6 +207,26 @@ def register(params)
 
   # end of autopopulation arguments
 
+  # used for massaging OUI/manufacturer names for matching
+  @name_cleaning_patterns = [ /\ba[sbg]\b/,
+                              /\b(beijing|shenzhen)\b/,
+                              /\bbv\b/,
+                              /\bco(rp(oration|orate)?)?\b/,
+                              /\b(computer|network|electronic|solution|system)s?\b/,
+                              /\bglobal\b/,
+                              /\bgmbh\b/,
+                              /\binc(orporated)?\b/,
+                              /\bint(ernationa)?l?\b/,
+                              /\bkft\b/,
+                              /\blimi?ted\b/,
+                              /\bllc\b/,
+                              /\b(co)?ltda?\b/,
+                              /\bpt[ey]\b/,
+                              /\bpvt\b/,
+                              /\boo\b/,
+                              /\bsa\b/,
+                              /\bsr[ol]s?\b/,
+                              /\btech(nolog(y|ie|iya)s?)?\b/ ]
 end
 
 def filter(event)
@@ -232,11 +252,11 @@ def filter(event)
   _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
   _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
   _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
-  _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
-  _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
   _autopopulate_hostname = event.get("#{@source_hostname}")
   _autopopulate_mac = event.get("#{@source_mac}")
   _autopopulate_oui = event.get("#{@source_oui}")
+  _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
+  _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
 
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(_cache_size, _cache_ttl)
@@ -385,6 +405,7 @@ def filter(event)
                       # looks like this is not a virtual machine (or we can't tell) so assume its' a regular device
                       _autopopulate_manuf = @manuf_hash.getset(_autopopulate_oui) {
                         _fuzzy_matcher = FuzzyStringMatch::JaroWinkler.create( :pure )
+                        _autopopulate_oui_cleaned = clean_manuf_string(_autopopulate_oui.to_s)
                         _manufs = Array.new
                         # fetch the manufacturers to do the comparison. this is a lot of work
                         # and not terribly fast but once the hash it populated it shouldn't happen too often
@@ -398,12 +419,15 @@ def filter(event)
                               _tmp_manufs = _manufs_response.fetch(:results, [])
                               _tmp_manufs.each do |_manuf|
                                 _tmp_name = _manuf.fetch(:name, _manuf.fetch(:display, nil))
-                                _manufs << { :name => _tmp_name,
-                                             :id => _manuf.fetch(:id, nil),
-                                             :url => _manuf.fetch(:url, nil),
-                                             :match => _fuzzy_matcher.getDistance(_tmp_name.to_s.downcase, _autopopulate_oui.to_s.downcase),
-                                             :vm => false
-                                           }
+                                _tmp_distance = _fuzzy_matcher.getDistance(clean_manuf_string(_tmp_name.to_s), _autopopulate_oui_cleaned)
+                                if (_tmp_distance >= _autopopulate_fuzzy_threshold) then
+                                  _manufs << { :name => _tmp_name,
+                                               :id => _manuf.fetch(:id, nil),
+                                               :url => _manuf.fetch(:url, nil),
+                                               :match => _tmp_distance,
+                                               :vm => false
+                                             }
+                                end
                               end
                               _query[:offset] += _tmp_manufs.length()
                               break unless (_tmp_manufs.length() >= _page_size)
@@ -416,11 +440,13 @@ def filter(event)
                           _exception_error = true
                         end
                         # return the manuf with the highest match
+                        # puts('0. %{key}: %{matches}' % { key: _autopopulate_oui_cleaned, matches: JSON.generate(_manufs) })-]
                         !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
                       }
                     end # virtual machine vs. regular device
                   end # _autopopulate_oui specified
 
+                  # puts('1. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
                   if !_autopopulate_manuf.is_a?(Hash)
                     # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
                     _autopopulate_manuf = { :name => _autopopulate_create_manuf ? _autopopulate_oui : _autopopulate_default_manuf,
@@ -428,6 +454,7 @@ def filter(event)
                                             :vm => false,
                                             :id => nil}
                   end
+                  # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
 
                   # make sure the site and role exists
 
@@ -539,6 +566,7 @@ def filter(event)
                              _autopopulate_manuf[:match] = 1.0
                           end
                         end
+                        # puts('3. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
 
                         if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
                           # the manufacturer is still not found, create it
@@ -550,6 +578,7 @@ def filter(event)
                              _autopopulate_manuf[:id] = _manuf_create_response.fetch(:id, nil)
                              _autopopulate_manuf[:match] = 1.0
                           end
+                          # puts('4. %{key}: %{created}' % { key: _autopopulate_manuf, created: JSON.generate(_manuf_create_response) })
                         end
 
                         # at this point we *must* have the manufacturer ID
@@ -598,12 +627,22 @@ def filter(event)
                                _autopopulate_device = _device_create_response
                             end
 
+                          else
+                            # didn't figure out the device type ID, make sure we're not setting something half-populated
+                            _autopopulate_dtype = nil
                           end # _autopopulate_dtype[:id] is valid
 
+                        else
+                          # didn't figure out the manufacturer ID, make sure we're not setting something half-populated
+                          _autopopulate_manuf = nil
                         end # _autopopulate_manuf[:id] is valid
 
                       end # virtual machine vs. regular device
 
+                    else
+                      # didn't figure out the IDs, make sure we're not setting something half-populated
+                      _autopopulate_site = nil
+                      _autopopulate_role = nil
                     end # site and role are valid
 
                   rescue Faraday::Error
@@ -612,6 +651,7 @@ def filter(event)
                   end
 
                   if !_autopopulate_device.nil?
+                    # puts('5. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
                     # we created a device, so send it back out as the result for the event as well
                     _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
                                   :id => _autopopulate_device&.fetch(:id, nil),
@@ -770,6 +810,22 @@ def crush(thing)
   else
     thing
   end
+end
+
+def clean_manuf_string(val)
+    # 0. downcase
+    # 1. replace commas with spaces
+    # 2. remove all punctuation (except parens)
+    # 3. squash whitespace down to one space
+    # 4. remove each of @name_cleaning_patterns (LLC, LTD, Inc., etc.)
+    # 5. remove all punctuation (even parens)
+    # 6. strip leading and trailing spaces
+    new_val = val.downcase.gsub(',', ' ').gsub(/[^\(\)A-Za-z0-9\s]/, '').gsub(/\s+/, ' ')
+    @name_cleaning_patterns.each do |pat|
+      new_val = new_val.gsub(pat, '')
+    end
+    new_val = new_val.gsub(/[^A-Za-z0-9\s]/, '').gsub(/\s+/, ' ').lstrip.rstrip
+    new_val
 end
 
 ###############################################################################

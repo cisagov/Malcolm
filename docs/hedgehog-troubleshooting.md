@@ -1,4 +1,4 @@
-# <a name="HedgehogTroubleshooting"></a>Appendix C - Troubleshooting
+# <a name="HedgehogTroubleshooting"></a>Appendix D - Troubleshooting
 
 Should the sensor not function as expected, first try rebooting the device. If the behavior continues, here are a few things that may help you diagnose the problem (items which may require Linux command line use are marked with **†**)
 

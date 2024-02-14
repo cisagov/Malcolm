@@ -23,15 +23,13 @@ apt-get -q update
 cd /tmp
 git clone --recurse-submodules --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
 cd "./arkime-"$ARKIME_VERSION
-for i in /opt/patches/*; do
+for i in /opt/patches/*.patch; do
   patch -p 1 -r - --no-backup-if-mismatch < $i || true
 done
 
 export PATH="$ARKIME_DIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PATH}"
 
 ./easybutton-build.sh --dir "$ARKIME_DIR"
-
-npm -g config set user root
 
 make install
 

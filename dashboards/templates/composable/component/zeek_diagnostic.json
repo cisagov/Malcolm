@@ -1,0 +1,65 @@
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "zeek": {
+          "properties": {
+            "broker.event_type": { "type": "keyword" },
+            "broker.event_action": { "type": "keyword" },
+            "broker.peer_ip": { "type": "keyword" },
+            "broker.peer_port": { "type": "integer" },
+            "broker.peer_message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "capture_loss.ts_delta": { "type": "float" },
+            "capture_loss.peer": { "type": "keyword" },
+            "capture_loss.gaps": { "type": "long" },
+            "capture_loss.acks": { "type": "long" },
+            "capture_loss.percent_lost": { "type": "float" },
+            "cluster.node": { "type": "keyword" },
+            "cluster.node_message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "config.value_name": { "type": "keyword" },
+            "config.value_old": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "config.value_new": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "config.location": { "type": "keyword" },
+            "packet_filter.node": { "type": "keyword" },
+            "packet_filter.filter": { "type": "keyword" },
+            "packet_filter.init": { "type": "keyword" },
+            "packet_filter.success": { "type": "keyword" },
+            "packet_filter.failure_reason": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "print.vals": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "reporter.node": { "type": "keyword" },
+            "reporter.filter": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "reporter.init": { "type": "keyword" },
+            "reporter.success": { "type": "keyword" },
+            "reporter.failure_reason": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "stats.peer": { "type": "keyword" },
+            "stats.mem": { "type": "long" },
+            "stats.pkts_proc": { "type": "long" },
+            "stats.bytes_recv": { "type": "long" },
+            "stats.pkts_dropped": { "type": "long" },
+            "stats.pkts_link": { "type": "long" },
+            "stats.pkt_lag": { "type": "float" },
+            "stats.pkts_filtered": { "type": "long" },
+            "stats.events_proc": { "type": "long" },
+            "stats.events_queued": { "type": "long" },
+            "stats.active_tcp_conns": { "type": "long" },
+            "stats.active_udp_conns": { "type": "long" },
+            "stats.active_icmp_conns": { "type": "long" },
+            "stats.tcp_conns": { "type": "long" },
+            "stats.udp_conns": { "type": "long" },
+            "stats.icmp_conns": { "type": "long" },
+            "stats.timers": { "type": "long" },
+            "stats.active_timers": { "type": "long" },
+            "stats.files": { "type": "long" },
+            "stats.active_files": { "type": "long" },
+            "stats.dns_requests": { "type": "long" },
+            "stats.active_dns_requests": { "type": "long" },
+            "stats.reassem_tcp_size": { "type": "long" },
+            "stats.reassem_file_size": { "type": "long" },
+            "stats.reassem_frag_size": { "type": "long" },
+            "stats.reassem_unknown_size": { "type": "long" }
+          }
+        }
+      }
+    }
+  }
+}

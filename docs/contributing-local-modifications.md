@@ -7,7 +7,7 @@ There are several ways to customize Malcolm's runtime behavior via local changes
 Some configuration changes can be put in place by modifying local copies of configuration files and then using a [Docker bind mount](https://docs.docker.com/storage/bind-mounts/) to overlay the modified file onto the running Malcolm container. This is already done for many files and directories used to persist Malcolm configuration and data. For example, the default list of bind mounted files and directories for each Malcolm service is as follows:
 
 ```
-$ grep -P "^(      - ./|  [\w-]+:)" docker-compose-standalone.yml
+$ grep -P "^(      - ./|  [\w-]+:)" docker-compose.yml
 opensearch:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro

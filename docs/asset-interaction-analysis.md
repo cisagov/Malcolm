@@ -5,6 +5,7 @@
 * Populating the NetBox inventory
     - [Manually](#NetBoxPopManual)
     - [Via passively-gathered network traffic metadata](#NetBoxPopPassive)
+        + [Matching device manufacturers to OUIs](#NetBoxPopPassiveOUIMatch)
     - [Via active discovery](#NetBoxPopActive)
 * [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
 * [Preloading NetBox inventory](#NetBoxPreload)
@@ -40,6 +41,7 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
     - `related.device_type`
+    - `related.device_id`
     - `related.device_name`
     - `related.manufacturer`
     - `related.role`
@@ -103,6 +105,17 @@ Since device autocreation is based on IP address, information about network segm
 Although network devices can be automatically created using this method, [services](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
 
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
+
+### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs
+
+Malcolm's NetBox inventory is prepopulated with a collection of [community-sourced device type definitions](https://github.com/netbox-community/devicetype-library) which can then be augmented by users [manually](#NetBoxPopManual) or through [preloading](#NetBoxPreload). During passive autopopulation device manufacturer is inferred from organizationally unique identifiers (OUIs), which make up the first three octets of a MAC address. The IEEE Standards Association maintains the [registry of OUIs](https://standards-oui.ieee.org/), which is not necessarily very internally consistent with how organizations specify the name associated with their OUI entry. In other words, there's not a foolproof programattic way for Malcolm to map MAC address OUI organization names to NetBox manufacturer names, barring creating and maintaining a manual mapping (which would be very large and difficult to keep up-to-date).
+
+Malcolm's [NetBox lookup code]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/ruby/netbox_enrich.rb) used in the log enrichment pipeline attempts to match OUI organization names against the list of NetBox's manufacturers using ["fuzzy string matching"](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance), a technique in which two strings of characters are compared and assigned a similarity score between `0` (completely dissimilar) and `1` (identical). The `NETBOX_DEFAULT_FUZZY_THRESHOLD` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) can be used to tune the threshold for determining a match. A fairly high value is recommended (above `0.85`; `0.95` is the default) to avoid autopopulating the NetBox inventory with devices with manufacturers that don't actually exist in the network being monitored.
+
+Users may select between two behaviors for when the match threshold is not met (i.e., no manufacturer is found in the NetBox database which closely matches the OUI organization name). This behavior is specified by the `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER` [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars):
+
+* `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER=false` - the autopopulated device will be created with the manufacturer set to `Unspecified`
+* `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER=true` - the autopopulated device will be created along with a new manufacturer entry in the NetBox database set to the OUI organization name
 
 ## <a name="NetBoxPopActive"></a>Populate NetBox inventory via active discovery
 
