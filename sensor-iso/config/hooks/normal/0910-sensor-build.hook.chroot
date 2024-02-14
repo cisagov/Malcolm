@@ -9,7 +9,6 @@ export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 ARCH=$(dpkg --print-architecture)
 
-
 cat > /etc/environment << EOF
 PYTHONDONTWRITEBYTECODE=1
 PYTHONUNBUFFERED=1
@@ -71,7 +70,7 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
-if [ "${ARCH,,}" != 'arm64' ] && [ "${ARCH,,}" != 'arm' ]; then
+if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 	# tweak some stuff for aide
 	chmod a-x /etc/cron.daily/aide
 	chattr +i /etc/cron.daily/aide
@@ -186,7 +185,7 @@ cd /tmp
 
 capa_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CAPA_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
 
-if [ "${ARCH,,}" == 'arm64' ] || [ "${ARCH,,}" == 'arm' ]; then
+if [[ "${ARCH,,}" =~ ^arm ]]; then
 	#Build from source for ARM...
 	#Not sure if there is an easier way to get the latest release tag
 	capa_latest_ver=$(curl "${GITHUB_API_CURL_ARGS[@]}" "$capa_assets_url" | jq ".[] | select(.name | contains(\"-linux.zip\")) | .name")
@@ -245,8 +244,9 @@ chmod 755 /usr/local/bin/supercronic
 
 # croc
 cd /tmp
+[[ $ARCH =~ ^arm ]] && CROC_ASSET_ARCH="${ARCH^^}" || CROC_ASSET_ARCH=64bit
 croc_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$CROC_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
-croc_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$croc_assets_url" | jq ".[] | select(.browser_download_url | contains(\"_Linux-${ARCH^^}.tar.gz\")) | .browser_download_url" | tr -d '"')"
+croc_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$croc_assets_url" | jq ".[] | select(.browser_download_url | contains(\"_Linux-${CROC_ASSET_ARCH}.tar.gz\")) | .browser_download_url" | tr -d '"')"
 curl "${GITHUB_API_CURL_ARGS[@]}" "${croc_tar_url}" | tar -xzf - croc
 
 mv ./croc /usr/local/bin/croc
