@@ -10,9 +10,9 @@
 # The scripts are parsed into their constitutent records and &log fields.
 #
 # Each record is then printed out in the formats used by Malcolm for parsing and defining Zeek logs:
-# - Logstash (https://idaholab.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/11_zeek_parse.conf
-# - Arkime (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./arkime/etc/config.ini
-# - OpenSearch tndex templates (https://idaholab.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./dashboards/templates/composable/component/zeek*.json
+# - Logstash (https://cisagov.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/11_zeek_parse.conf
+# - Arkime (https://cisagov.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./arkime/etc/config.ini
+# - OpenSearch tndex templates (https://cisagov.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./dashboards/templates/composable/component/zeek*.json
 #
 # For Logstash boilerplate, pay close attention to the comment in the logstash filter:
 #    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP
@@ -170,7 +170,7 @@ def main():
         description='\n'.join(
             [
                 'Parse Zeek .script files and generate boilerplate for a Malcolm boilerplate for parsing and defining those Zeek logs.',
-                'see https://idaholab.github.io/Malcolm/docs/contributing-guide.html',
+                'see https://cisagov.github.io/Malcolm/docs/contributing-guide.html',
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,

@@ -307,7 +307,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         li(cls="list-inline-item").add(a(href=f'/arkime/sessions/')).add(
                             i(cls="bi bi-table fs-3", title="Arkime")
                         )
-                        li(cls="list-inline-item").add(a(href=f'https://github.com/idaholab/Malcolm/')).add(
+                        li(cls="list-inline-item").add(a(href=f'https://github.com/cisagov/Malcolm/')).add(
                             i(cls="bi-github fs-3", title="GitHub")
                         )
 

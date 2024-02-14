@@ -11,7 +11,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 IMAGE_NAME=hedgehog
-IMAGE_PUBLISHER=idaholab
+IMAGE_PUBLISHER=cisagov
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 

@@ -3,7 +3,7 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # set up intel files prior to running zeek
-#   - https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel
+#   - https://cisagov.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel
 #   - https://github.com/idaholab/Malcolm/issues/20
 # used as the Zeek Dockerfile's entrypoint as well
 
