@@ -56,6 +56,13 @@ BUILD_ERROR_CODE=1
 ######### Functions ############
 ################################
 
+build_arkime(){
+    mkdir -p /tmp/arkime-deb
+    arkime_ver='5.0.0-1'
+    curl -sSL -o /tmp/arkime-deb/arkime.deb "https://github.com/arkime/arkime/releases/download/v5.0.0/arkime_${arkime_ver}.ubuntu2204_arm64.deb"
+    dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
+}
+
 build_arkime_src(){
 
     arkime_repo='https://github.com/arkime/arkime.git'
@@ -69,6 +76,10 @@ build_arkime_src(){
 
     mkdir -p "${WORK_DIR}/arkime" && cd "$_"
     git clone --recurse-submodules --branch="v${arkime_ver}" "$arkime_repo" ./
+
+    # I'm getting "Client network socket disconnected before secure TLS connection was established" when building Arkime,
+    #   and this workaround seems to address it (see https://github.com/npm/cli/issues/4652)
+    for FILE in $(grep -rIcH 'npm ci' ./ | grep -v ':0$' | cut -d: -f 1); do sed -i "s/npm ci/npm ci --maxsockets 1/g" "$FILE"; done
 
     for patch_file in /opt/patches/*.patch; do
         patch -p 1 -r - --no-backup-if-mismatch < $patch_file || true
@@ -452,9 +463,7 @@ fi
 if [ $BUILD_ARKIME_FROM_SOURCE -eq 1 ]; then
     build_arkime_src
 else
-    # Not implemented currently
-    #build_arkime
-    build_arkime_src
+    build_arkime
 fi
 
 if [ $BUILD_YARA_FROM_SOURCE -eq 1 ]; then
