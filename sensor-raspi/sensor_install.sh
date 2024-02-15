@@ -99,8 +99,10 @@ build_arkime_src(){
 
     cp -r ./capture/plugins/lua/samples "${arkime_dir}"/lua
 
-    npm install license-checker
-    release/notice.txt.pl "${arkime_dir}/" NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
+    # as I said above, license-checker is hanging on me
+    #   npm install license-checker
+    #   release/notice.txt.pl "${arkime_dir}/" NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
+    cat NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
 
     rm -f $arkime_dir/etc/*.systemd.service
 
