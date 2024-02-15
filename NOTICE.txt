@@ -1,4 +1,4 @@
-This project contains code from the Cybersecurity and Infrastructure Security Agency's Malcolm Project
+This project contains code from CISA's Malcolm Project
 
 https://github.com/cisagov/Malcolm
 

@@ -8,6 +8,7 @@ import sys
 sys.dont_write_bytecode = True
 
 import argparse
+import datetime
 import errno
 import fileinput
 import getpass
@@ -126,6 +127,11 @@ shuttingDown = [False]
 yamlImported = None
 dotenvImported = None
 MaxAskForValueCount = 100
+UsernameRegex = re.compile(r'^[a-zA-Z][a-zA-Z0-9_\-.]+$')
+UsernameMinLen = 4
+UsernameMaxLen = 32
+PasswordMinLen = 8
+PasswordMaxLen = 128
 
 ###################################################################################################
 try:
@@ -145,27 +151,39 @@ def shutdown_handler(signum, frame):
 
 
 ###################################################################################################
-def checkEnvFilesExist():
+def checkEnvFilesAndValues():
     global args
-
-    # first, if the configDir is completely empty, then populate from defaults
-    defaultConfigDir = os.path.join(MalcolmPath, 'config')
-    if (
-        (args.configDir is not None)
-        and os.path.isdir(args.configDir)
-        and os.path.isdir(defaultConfigDir)
-        and (not same_file_or_dir(defaultConfigDir, args.configDir))
-        and (not os.listdir(args.configDir))
-    ):
-        for defaultEnvExampleFile in glob.glob(os.path.join(defaultConfigDir, '*.env.example')):
-            shutil.copy2(defaultEnvExampleFile, args.configDir)
+    global dotenvImported
 
     # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-    envExampleFiles = glob.glob(os.path.join(args.configDir, '*.env.example'))
-    for envExampleFile in envExampleFiles:
-        envFile = envExampleFile[: -len('.example')]
-        if not os.path.isfile(envFile):
-            shutil.copyfile(envExampleFile, envFile)
+    if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
+        for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
+            envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
+            if not os.path.isfile(envFile):
+                if args.debug:
+                    eprint(f"Creating {envFile} from {os.path.basename(envExampleFile)}")
+                shutil.copyfile(envExampleFile, envFile)
+
+        # now, example the .env and .env.example file for individual values, and create any that are
+        # in the .example file but missing in the .env file
+        for envFile in glob.glob(os.path.join(args.configDir, '*.env')):
+            envExampleFile = os.path.join(examplesConfigDir, os.path.basename(envFile) + '.example')
+            if os.path.isfile(envExampleFile):
+                envValues = dotenvImported.dotenv_values(envFile)
+                exampleValues = dotenvImported.dotenv_values(envExampleFile)
+                missingVars = list(set(exampleValues.keys()).difference(set(envValues.keys())))
+                if missingVars:
+                    if args.debug:
+                        eprint(f"Missing {missingVars} in {envFile} from {os.path.basename(envExampleFile)}")
+                    with open(envFile, "a") as envFileHandle:
+                        print('', file=envFileHandle)
+                        print('', file=envFileHandle)
+                        print(
+                            f'# missing variables created from {os.path.basename(envExampleFile)} at {str(datetime.datetime.now())}',
+                            file=envFileHandle,
+                        )
+                        for missingVar in missingVars:
+                            print(f"{missingVar}={exampleValues[missingVar]}", file=envFileHandle)
 
 
 ###################################################################################################
@@ -368,9 +386,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             service,
             args.namespace,
             [x for x in cmd if x],
-            stdin=run_process_kwargs['stdin']
-            if ('stdin' in run_process_kwargs and run_process_kwargs['stdin'])
-            else None,
+            stdin=(
+                run_process_kwargs['stdin'] if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else None
+            ),
         )
 
         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
@@ -512,6 +530,7 @@ def netboxBackup(backupFileName=None):
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if podsResults := PodExec(
             service='netbox-postgres',
+            container='netbox-postgres-container',
             namespace=args.namespace,
             command=[
                 'pg_dump',
@@ -632,18 +651,21 @@ def netboxRestore(backupFileName=None):
         elif orchMode is OrchestrationFramework.KUBERNETES:
             # copy database backup and media backup to remote temporary directory
             try:
+                service_name = "netbox"
+                container_name = "netbox-container"
                 tmpRestoreDir = '/tmp'
                 tmpRestoreFile = os.path.join(
                     tmpRestoreDir, os.path.splitext(os.path.basename(backupFileName))[0] + '.txt'
                 )
                 with gzip.open(backupFileName, 'rt') as f:
                     if podsResults := PodExec(
-                        service='netbox',
+                        service=service_name,
                         namespace=args.namespace,
                         command=['tee', tmpRestoreFile],
                         stdout=False,
                         stderr=True,
                         stdin=f.read(),
+                        container=container_name,
                     ):
                         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                         results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -657,7 +679,7 @@ def netboxRestore(backupFileName=None):
 
                 # perform the restore inside the container
                 if podsResults := PodExec(
-                    service='netbox',
+                    service=service_name,
                     namespace=args.namespace,
                     command=[
                         '/opt/netbox/venv/bin/python',
@@ -665,6 +687,7 @@ def netboxRestore(backupFileName=None):
                         '--preload-backup',
                         tmpRestoreFile,
                     ],
+                    container=container_name,
                 ):
                     err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
                     results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
@@ -679,13 +702,14 @@ def netboxRestore(backupFileName=None):
             finally:
                 # cleanup on other side
                 PodExec(
-                    service='netbox',
+                    service=service_name,
                     namespace=args.namespace,
                     command=[
                         'bash',
                         '-c',
                         f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
                     ],
+                    container=container_name,
                 )
 
         else:
@@ -744,9 +768,11 @@ def logs():
                 "--color",
                 'auto' if coloramaImported else 'never',
                 "--template",
-                '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
-                if args.debug
-                else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}',
+                (
+                    '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
+                    if args.debug
+                    else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
+                ),
                 '--tail',
                 str(args.logLineCount) if args.logLineCount else '-1',
             ]
@@ -1224,28 +1250,28 @@ def authSetup():
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid administrator username')
                 while loopBreaker.increment():
                     username = AskForString(
-                        "Administrator username",
+                        f"Administrator username (between {UsernameMinLen} and {UsernameMaxLen} characters; alphanumeric, _, -, and . allowed)",
                         default=args.authUserName,
                         defaultBehavior=defaultBehavior,
                     )
-                    if len(username) > 0:
+                    if UsernameRegex.match(username) and (UsernameMinLen <= len(username) <= UsernameMaxLen):
                         break
 
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
                 while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
                     password = AskForPassword(
-                        f"{username} password: ",
+                        f"{username} password  (between {PasswordMinLen} and {PasswordMaxLen} characters): ",
                         default='',
                         defaultBehavior=defaultBehavior,
                     )
-                    passwordConfirm = AskForPassword(
-                        f"{username} password (again): ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if password and (password == passwordConfirm):
-                        break
-                    eprint("Passwords do not match")
+                    if (PasswordMinLen <= len(password) <= PasswordMaxLen):
+                        passwordConfirm = AskForPassword(
+                            f"{username} password (again): ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if password and (password == passwordConfirm):
+                            break
 
                 # get previous admin username to remove from htpasswd file if it's changed
                 authEnvFile = os.path.join(args.configDir, 'auth.env')
@@ -1375,12 +1401,12 @@ def authSetup():
                     f.write(f'admin_user = {username}\n\n')
                     f.write('; username field quality checks\n')
                     f.write(';\n')
-                    f.write('min_username_len = 4\n')
-                    f.write('max_username_len = 32\n\n')
+                    f.write(f'min_username_len = {UsernameMinLen}\n')
+                    f.write(f'max_username_len = {UsernameMaxLen}\n\n')
                     f.write('; Password field quality checks\n')
                     f.write(';\n')
-                    f.write('min_password_len = 8\n')
-                    f.write('max_password_len = 128\n\n')
+                    f.write(f'min_password_len = {PasswordMinLen}\n')
+                    f.write(f'max_password_len = {PasswordMaxLen}\n\n')
 
                 # touch the metadata file
                 open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
@@ -2350,7 +2376,7 @@ def main():
 
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat
-        checkEnvFilesExist()
+        checkEnvFilesAndValues()
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:

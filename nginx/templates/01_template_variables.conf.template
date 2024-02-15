@@ -1,0 +1,19 @@
+map ${DOLLAR}host ${DOLLAR}sessions_index {
+  default "$MALCOLM_NETWORK_INDEX_PATTERN";
+}
+
+map ${DOLLAR}host ${DOLLAR}time_field {
+  default "$MALCOLM_NETWORK_INDEX_TIME_FIELD";
+}
+
+map ${DOLLAR}host ${DOLLAR}dashboards_prefix {
+  default "$NGINX_DASHBOARDS_PREFIX";
+}
+
+map ${DOLLAR}host ${DOLLAR}dashboards_proxy_pass {
+  default "$NGINX_DASHBOARDS_PROXY_PASS";
+}
+
+map ${DOLLAR}host ${DOLLAR}dashboards_proxy_url {
+  default "$NGINX_DASHBOARDS_PROXY_URL";
+}

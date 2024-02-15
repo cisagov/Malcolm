@@ -1,65 +1,3 @@
-FROM debian:12-slim as build
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-
-# for build
-ARG ZEEK_VERSION=6.1.0
-ENV ZEEK_VERSION $ZEEK_VERSION
-ARG ZEEK_DBG=0
-ENV ZEEK_DBG $ZEEK_DBG
-ARG BUILD_JOBS=4
-ENV BUILD_JOBS $BUILD_JOBS
-ENV CCACHE_DIR "/var/spool/ccache"
-ENV CCACHE_COMPRESS 1
-ENV CMAKE_C_COMPILER clang-14
-ENV CMAKE_CXX_COMPILER clang++-14
-ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y --no-install-recommends \
-        bison \
-        ca-certificates \
-        ccache \
-        clang \
-        cmake \
-        curl \
-        flex \
-        git \
-        libc++-dev \
-        libc++abi-dev \
-        libfl-dev \
-        libgoogle-perftools-dev \
-        libgoogle-perftools4 \
-        libkrb5-3 \
-        libkrb5-dev \
-        libmaxminddb-dev \
-        libpcap-dev \
-        libssl-dev \
-        libtcmalloc-minimal4 \
-        make \
-        ninja-build \
-        python3 \
-        python3-dev \
-        python3-git \
-        python3-semantic-version \
-        sudo \
-        swig \
-        zlib1g-dev && \
-    mkdir -p /usr/share/src/zeek "${CCACHE_DIR}" && \
-        cd /usr/share/src && \
-        ( curl -sSL "https://download.zeek.org/zeek-${ZEEK_VERSION}.tar.gz" | tar xzf - -C ./zeek --strip-components 1 ) && \
-        cd /usr/share/src/zeek && \
-        [ "$ZEEK_DBG" = "1" ] && \
-            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools --enable-debug || \
-            ./configure --prefix=/opt/zeek --generator=Ninja --ccache --enable-perftools && \
-        ninja -C build -j "${BUILD_JOBS}" && \
-        cd ./build && \
-        cpack -G DEB
-
 FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
@@ -100,7 +38,7 @@ ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 # for download and install
-ARG ZEEK_VERSION=6.1.0
+ARG ZEEK_VERSION=6.1.1-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
@@ -110,13 +48,9 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 # for build
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
-ENV CMAKE_C_COMPILER clang-14
-ENV CMAKE_CXX_COMPILER clang++-14
-ENV CXXFLAGS "-stdlib=libc++ -lc++abi"
 
-COPY --from=build /usr/share/src/zeek/build/*.deb /tmp/zeekdebs/
-
-# add script for building 3rd-party plugins
+# add script for downloading zeek and building 3rd-party plugins
+ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # build and install system packages, zeek, spicy and plugins
@@ -129,19 +63,18 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       bison \
       ca-certificates \
       ccache \
-      clang \
       cmake \
       curl \
       file \
       flex \
+      g++ \
+      gcc \
       git \
       gnupg2 \
       iproute2 \
       jq \
       less \
       libatomic1 \
-      libc++-dev \
-      libc++abi-dev \
       libcap2-bin \
       libfl-dev \
       libfl2 \
@@ -179,8 +112,10 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       vim-tiny \
       xxd \
       zlib1g-dev && \
-    dpkg -i /tmp/zeekdebs/*.deb && \
     python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    mkdir -p /tmp/zeek-packages && \
+      bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
+      dpkg -i /tmp/zeek-packages/*.deb && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
       echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
       chmod +x "$SUPERCRONIC" && \
@@ -230,15 +165,6 @@ ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SP
 ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 25
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-22954/main|cve-2022-26809/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
-RUN mkdir -p /tmp/logs && \
-    cd /tmp/logs && \
-    "$ZEEK_DIR"/bin/zeek -NN local >zeeknn.log 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
-    "$ZEEK_DIR"/bin/zeek -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
-    cd /tmp && \
-    rm -rf /tmp/logs /tmp/pcaps
-
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
@@ -250,6 +176,15 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
     ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
+
+RUN mkdir -p /tmp/logs && \
+    cd /tmp/logs && \
+    "$ZEEK_DIR"/bin/zeek-offline -NN local >zeeknn.log 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+    "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+    cd /tmp && \
+    rm -rf /tmp/logs /tmp/pcaps
 
 #Whether or not to auto-tag logs based on filename
 ARG AUTO_TAG=true
@@ -301,6 +236,7 @@ ENV PCAP_FILTER $PCAP_FILTER
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
 # environment variables for zeek runtime tweaks (used in local.zeek)
+ARG ZEEK_DISABLE_STATS=true
 ARG ZEEK_DISABLE_HASH_ALL_FILES=
 ARG ZEEK_DISABLE_LOG_PASSWORDS=
 ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
@@ -321,6 +257,7 @@ ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 ARG ZEEK_SYNCHROPHASOR_DETAILED=
 
+ENV ZEEK_DISABLE_STATS $ZEEK_DISABLE_STATS
 ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
 ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS

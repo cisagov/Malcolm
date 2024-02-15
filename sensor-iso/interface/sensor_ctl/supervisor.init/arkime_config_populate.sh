@@ -69,8 +69,8 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(freeSpaceG)\s*=\s*.*/\1=$ARKIME_FREESPACEG/" "$ARKIME_CONFIG_FILE"
   fi
   # pcap compression
-  COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-none}"
-  COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-0}"
+  COMPRESSION_TYPE="${ARKIME_COMPRESSION_TYPE:-zstd}"
+  COMPRESSION_LEVEL="${ARKIME_COMPRESSION_LEVEL:-3}"
   sed -r -i "s/(simpleCompression)\s*=\s*.*/\1=$COMPRESSION_TYPE/" "$ARKIME_CONFIG_FILE"
   if [[ "$COMPRESSION_TYPE" == "zstd" ]]; then
     sed -r -i "s/(simpleZstdLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"

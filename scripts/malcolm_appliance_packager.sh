@@ -95,7 +95,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX/"
 
   cp $VERBOSE ./config/*.example "$DESTDIR/config/"
-  cp $VERBOSE ./docker-compose-standalone.yml "$DESTDIR/docker-compose.yml"
+  cp $VERBOSE ./docker-compose.yml "$DESTDIR/docker-compose.yml"
   cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
@@ -171,14 +171,7 @@ if mkdir "$DESTDIR"; then
   echo "   - wipe        (stop Malcolm and clear its database)" | tee -a "$README"
   echo "   - auth_setup  (change authentication-related settings)" | tee -a "$README"
   echo "" | tee -a "$README"
-  echo "A minute or so after starting Malcolm, the following services will be accessible:" | tee -a "$README"
-  echo "  - Arkime: https://localhost/" | tee -a "$README"
-  echo "  - OpenSearch Dashboards: https://localhost/dashboards/" | tee -a "$README"
-  echo "  - PCAP upload (web): https://localhost/upload/" | tee -a "$README"
-  echo "  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/" | tee -a "$README"
-  echo "  - NetBox: https://localhost/netbox/" | tee -a "$README"
-  echo "  - Account management: https://localhost/auth/" | tee -a "$README"
-  echo "  - Documentation: https://localhost/readme/" | tee -a "$README"
+  echo "Malcolm services can be accessed at https://<IP or hostname>/" | tee -a "$README"
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1
   popd  >/dev/null 2>&1

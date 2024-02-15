@@ -22,6 +22,7 @@ if [ -f "$CAPTURE_STORAGE_FORMAT_FILE" ]; then
 fi
 
 # other sensor-specific initialization prior to starting capture/forwarding jobs
+echo "Running Sensor initialization" > /dev/tty0
 /usr/local/bin/sensor-init.sh
 
 # enable firewall
@@ -35,6 +36,7 @@ fi
 systemctl mask ctrl-alt-del.target
 
 if [ ! -s /var/lib/aide/aide.db ]; then
+    echo "Running Aide init" > /dev/tty0
     > /var/lib/aide/aide.db
     /usr/sbin/aideinit --yes --force
 fi
@@ -44,4 +46,4 @@ EOF
 
 sed -i "1i #!/bin/sh" /etc/rc.local
 
-chmod +x /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py
+chmod o+rx /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py

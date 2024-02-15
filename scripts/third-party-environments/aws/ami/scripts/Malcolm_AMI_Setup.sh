@@ -31,7 +31,7 @@ fi
 # -t tag      (Malcolm tag, e.g., v23.05.1)
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
-MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
+MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
 MALCOLM_TAG=${MALCOLM_TAG:-v23.10.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
@@ -212,9 +212,8 @@ function InstallMalcolm {
     pushd "$MALCOLM_USER_HOME" >/dev/null 2>&1
     mkdir -p ./Malcolm
     curl -fsSL "$MALCOLM_URL" | tar xzf - -C ./Malcolm --strip-components 1
-    if [[ -s ./Malcolm/docker-compose-standalone.yml ]]; then
+    if [[ -s ./Malcolm/docker-compose.yml ]]; then
         pushd ./Malcolm >/dev/null 2>&1
-        mv docker-compose-standalone.yml docker-compose.yml
         for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
         echo "Pulling Docker images..." >&2
         docker-compose --profile malcolm pull >/dev/null 2>&1
@@ -261,13 +260,7 @@ To start, stop, restart, etc. Malcolm:
    - wipe          (stop Malcolm and clear its database)
    - auth_setup    (change authentication-related settings)
 
-A minute or so after starting Malcolm, the following services will be accessible:
-  - Arkime: https://<IP or hostname>/
-  - OpenSearch Dashboards: https://<IP or hostname>/dashboards/
-  - PCAP upload (web): https://<IP or hostname>/upload/
-  - NetBox: https://<IP or hostname>/netbox/
-  - Account management: https://<IP or hostname>/auth/
-  - Documentation: https://<IP or hostname>/readme/
+Malcolm services can be accessed at https://<IP or hostname>/
 
 EOT
 fi

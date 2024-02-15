@@ -1,4 +1,4 @@
-# <a name="HedgehogHardening"></a>Appendix D - Hardening
+# <a name="HedgehogHardening"></a>Appendix E - Hardening
 
 Hedgehog Linux uses the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks which target the following guidelines for establishing a secure configuration posture:
 

@@ -284,12 +284,12 @@ def input_opensearch_connection_info(
         protocol=return_dict[Constants.BEAT_OS_PROTOCOL],
         host=return_dict[Constants.BEAT_OS_HOST],
         port=return_dict[Constants.BEAT_OS_PORT],
-        username=return_dict[Constants.BEAT_HTTP_USERNAME]
-        if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0)
-        else None,
-        password=return_dict[Constants.BEAT_HTTP_PASSWORD]
-        if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0)
-        else None,
+        username=(
+            return_dict[Constants.BEAT_HTTP_USERNAME] if (len(return_dict[Constants.BEAT_HTTP_USERNAME]) > 0) else None
+        ),
+        password=(
+            return_dict[Constants.BEAT_HTTP_PASSWORD] if (len(return_dict[Constants.BEAT_HTTP_PASSWORD]) > 0) else None
+        ),
         ssl_verify=return_dict[Constants.BEAT_OS_SSL_VERIFY],
     )
     if retcode == 200:
@@ -875,9 +875,11 @@ def main():
                         code, arkime_password2 = d.passwordbox(
                             f"{Constants.MSG_CONFIG_ARKIME_VIEWER_PASSWORD} (again)",
                             insecure=True,
-                            init=previous_config_values[Constants.ARKIME_PASSWORD_SECRET]
-                            if (arkime_password == previous_config_values[Constants.ARKIME_PASSWORD_SECRET])
-                            else "",
+                            init=(
+                                previous_config_values[Constants.ARKIME_PASSWORD_SECRET]
+                                if (arkime_password == previous_config_values[Constants.ARKIME_PASSWORD_SECRET])
+                                else ""
+                            ),
                         )
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
@@ -1062,9 +1064,11 @@ def main():
                                         'Logstash Port',
                                         2,
                                         1,
-                                        previous_config_values[Constants.BEAT_LS_PORT]
-                                        if Constants.BEAT_LS_PORT in previous_config_values
-                                        else "5044",
+                                        (
+                                            previous_config_values[Constants.BEAT_LS_PORT]
+                                            if Constants.BEAT_LS_PORT in previous_config_values
+                                            else "5044"
+                                        ),
                                         2,
                                         25,
                                         6,
@@ -1133,9 +1137,11 @@ def main():
                                         'SSL Certificate Authorities File',
                                         1,
                                         1,
-                                        previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
-                                        if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
-                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt",
+                                        (
+                                            previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
+                                            if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
+                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt"
+                                        ),
                                         1,
                                         35,
                                         30,
@@ -1145,9 +1151,11 @@ def main():
                                         'SSL Certificate File',
                                         2,
                                         1,
-                                        previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
-                                        if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
-                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
+                                        (
+                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
+                                            if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
+                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt"
+                                        ),
                                         2,
                                         35,
                                         30,
@@ -1157,9 +1165,11 @@ def main():
                                         'SSL Key File',
                                         3,
                                         1,
-                                        previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
-                                        if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
-                                        else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key",
+                                        (
+                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
+                                            if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
+                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key"
+                                        ),
                                         3,
                                         35,
                                         30,

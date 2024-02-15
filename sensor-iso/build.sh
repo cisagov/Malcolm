@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=cisagov
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.11.4"
+BEATS_VER="8.12.1"
 BEATS_OSS="-oss"
 
 BUILD_ERROR_CODE=1
@@ -115,14 +115,14 @@ if [ -d "$WORKDIR" ]; then
   rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/
 
   # write out some version stuff specific to this installation version
-  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "VARIANT_ID=\"hedgehog-sensor\""                                           >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "ID_LIKE=\"debian\""                                                       >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "HOME_URL=\"https://malcolm.fyi\""                                         >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "DOCUMENTATION_URL=\"https://malcolm.fyi/hedgehog/\""                      >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                                       > ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "VARIANT_ID=\"hedgehog-sensor\""                                                         >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "ID_LIKE=\"debian\""                                                                     >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                              >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\""  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""                >> ./config/includes.chroot/opt/sensor/.os-info
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
@@ -184,11 +184,8 @@ if [ -d "$WORKDIR" ]; then
   mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
   docker rmi -f arkime-build:latest
 
-  # clone and build Zeek .deb package in its own clean environment (rather than in hooks/)
-  bash "$SCRIPT_PATH/zeek/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/zeek:/build zeek-build:latest -o /build -j "${BUILD_JOBS:-0}"
-  mv "$SCRIPT_PATH/zeek"/*.deb ./config/packages.chroot/
-  docker rmi -f zeek-build:latest
+  # download Zeek .deb packages
+  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/
 
   # reclaim some space
   docker system prune --volumes --force

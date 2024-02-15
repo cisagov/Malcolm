@@ -23,7 +23,7 @@ apt-get -q update
 cd /tmp
 git clone --recurse-submodules --branch="v$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION
 cd "./arkime-"$ARKIME_VERSION
-for i in /opt/patches/*; do
+for i in /opt/patches/*.patch; do
   patch -p 1 -r - --no-backup-if-mismatch < $i || true
 done
 
@@ -31,14 +31,11 @@ export PATH="$ARKIME_DIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PAT
 
 ./easybutton-build.sh --dir "$ARKIME_DIR"
 
-npm -g config set user root
-
 make install
 
 cp -r ./capture/plugins/lua/samples "$ARKIME_DIR"/lua
 
-npm install license-checker
-release/notice.txt.pl $ARKIME_DIR NOTICE release/CAPTURENOTICE > $ARKIME_DIR/NOTICE.txt
+cat NOTICE release/CAPTURENOTICE > $ARKIME_DIR/NOTICE.txt
 
 ETC_FILES=$(shopt -s nullglob dotglob; echo /arkime-etc/*)
 if (( ${#ETC_FILES} )) ; then

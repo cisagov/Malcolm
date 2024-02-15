@@ -19,4 +19,4 @@ EOF
 
 sed -i "1i #!/bin/sh" /etc/rc.local
 
-chmod +x /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py
+chmod o+rx /etc/rc.local /usr/local/bin/*.sh /usr/local/bin/configure-*.py

@@ -7,6 +7,7 @@ SCRIPT_PATH="$(dirname $(realpath -e "${BASH_SOURCE[0]}"))"
 echo "sensor" > /etc/installer
 
 MAIN_USER="$(id -nu 1000)"
+FIRST_RUN=0
 
 if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   . "$SCRIPT_PATH"/common-init.sh
@@ -43,6 +44,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
     [[ -d /opt/sensor/sensor_ctl/arkime/config.ini ]] && chmod 600 /opt/sensor/sensor_ctl/arkime/config.ini
 
+    [[ -f /opt/sensor/firstrun ]] && FIRST_RUN=1 && rm -f /opt/sensor/firstrun
+
   fi
 
   dpkg -s fluent-bit >/dev/null 2>&1 && \
@@ -53,8 +56,8 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   if [[ -d /opt/zeek.orig ]]; then
     # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
     # regenerated when we are about to deploy zeek itself
-    [[ -d /opt/zeek ]] && rm -rf /opt/zeek
-    rsync -a /opt/zeek.orig/ /opt/zeek
+    mkdir -p /opt/zeek/
+    rsync --archive --delete --force /opt/zeek.orig/ /opt/zeek/
   fi
   if [[ -d /opt/zeek ]]; then
     chown -R 1000:1000 /opt/zeek/*
@@ -129,6 +132,9 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     # fix some permisions to make sure things belong to the right person
     FixPermissions "$MAIN_USER"
   fi
+
+  # disable automatic running of some services
+  [[ "$FIRST_RUN" == 1 ]] && DisableServices
 
   # block some call-homes
   BadTelemetry

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - Upload
-Exec=/opt/firefox/firefox https://localhost/upload/
+Exec=/usr/bin/firefox https://localhost/upload/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

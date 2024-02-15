@@ -7,7 +7,7 @@ ENCODING="utf-8"
 
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-MALCOLM_REPO_OWNER=idaholab
+MALCOLM_REPO_OWNER=cisagov
 MALCOLM_REPO_NAME=Malcolm
 MALCOLM_REPO_BRANCH=main
 GITHUB_TOKEN=${GITHUB_TOKEN:-}

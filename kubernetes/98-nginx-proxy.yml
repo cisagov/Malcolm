@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/idaholab/malcolm/nginx-proxy:24.01.0
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:24.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -58,6 +58,10 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: opensearch-env
+          - configMapRef:
+              name: dashboards-env
           - configMapRef:
               name: auth-common-env
           - configMapRef:
@@ -95,7 +99,7 @@ spec:
           subPath: "nginx"
       initContainers:
       - name: nginx-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:24.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:24.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
