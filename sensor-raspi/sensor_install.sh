@@ -77,17 +77,22 @@ build_arkime_src(){
     mkdir -p "${WORK_DIR}/arkime" && cd "$_"
     git clone --recurse-submodules --branch="v${arkime_ver}" "$arkime_repo" ./
 
-    # I'm getting "Client network socket disconnected before secure TLS connection was established" when building Arkime,
-    #   and this workaround seems to address it (see https://github.com/npm/cli/issues/4652)
-    for FILE in $(grep -rIcH 'npm ci' ./ | grep -v ':0$' | cut -d: -f 1); do sed -i "s/npm ci/npm ci --maxsockets 1/g" "$FILE"; done
-
     for patch_file in /opt/patches/*.patch; do
         patch -p 1 -r - --no-backup-if-mismatch < $patch_file || true
     done
 
     export PATH="${arkime_dir}/bin:${WORK_DIR}/arkime/node_modules/.bin:${PATH}"
 
+    # I'm getting "Client network socket disconnected before secure TLS connection was established" when building Arkime,
+    #   and this workaround seems to address it (see https://github.com/npm/cli/issues/4652)
+    for FILE in $(grep -rIcH 'npm ci' ./ | grep -v ':0$' | cut -d: -f 1); do sed -i "s/npm ci/npm ci --maxsockets 1/g" "$FILE"; done
+
+    # and this is also hanging... :(
+    sed -i '/license-checker/d' screwdriver.yaml
+
+    # configure the number of build threads
     sed -i "s/MAKE=make/MAKE='make -j${build_jobs}'/" easybutton-build.sh
+
     ./easybutton-build.sh --dir "$arkime_dir"
 
     make install -j${build_jobs}
