@@ -4,7 +4,7 @@ A new service can be added to Malcolm by following the following steps:
 
 1. Create a new subdirectory for the service (under the Malcolm working copy base directory) containing whatever source or configuration files are necessary to build and run the service
 1. Create the service's Dockerfile in the [Dockerfiles]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) directory of the Malcolm working copy
-1. Add a new section for the service under `services:` in the `docker-compose.yml` and `docker-compose-standalone.yml` files
+1. Add a new section for the service under `services:` in the `docker-compose.yml` and `docker-compose-dev.yml` files
 1. To enable automatic builds for the service on GitHub, create a new [workflow]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/), using an existing workflow as an example
 
 ## <a name="NewImageFirewall"></a>Networking and firewall

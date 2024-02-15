@@ -1,0 +1,35 @@
+# This file will be automatically evaluated and installed at next boot
+# time, and regenerated (to avoid leaking passwords and such information).
+#
+# To force it to be evaluated immediately, you can run (as root):
+#
+#     /usr/sbin/rpi-set-sysconf
+#
+# You can disable the file evaluation by disabling the rpi-set-sysconf
+# service in systemd:
+#
+#     systemctl disable rpi-set-sysconf
+#
+# Comments (all portions of a line following a '#' character) are
+# ignored. This file is read line by line. Valid
+# configuration lines are of the form 'key=value'. Whitespace around
+# 'key' and 'value' is ignored. This file will be _regenerated_ every
+# time it is evaluated.
+#
+# We follow the convention to indent with one space comments, and
+# leave no space to indicate the line is an example that could be
+# uncommented.
+
+# root_pw - Set a password for the root user (by default, it allows
+# for a passwordless login)
+#root_pw=FooBar
+
+# root_authorized_key - Set an authorized key for a root ssh login
+#root_authorized_key=
+
+# hostname - Set the system hostname.
+#hostname=rpi
+
+# We found the following unhandled keys - That means, the
+# configuration script does not know how to handle them. Please
+# double-check them!

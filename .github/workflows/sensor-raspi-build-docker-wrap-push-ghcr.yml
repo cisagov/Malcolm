@@ -1,0 +1,102 @@
+name: sensor-raspi-build-docker-wrap-push-ghcr
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #     - development
+  #   paths:
+  #     - '.trigger_raspi_workflow_build'
+  workflow_dispatch:
+  # repository_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: write
+      packages: write
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      -
+        name: Cancel previous run in progress
+        uses: styfle/cancel-workflow-action@0.12.0
+        with:
+          ignore_sha: true
+          all_but_latest: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:master
+      -
+        name: Build environment setup
+        run: |
+          sudo apt-get -q update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
+            binfmt-support \
+            bmap-tools \
+            ca-certificates \
+            debootstrap \
+            dosfstools \
+            kpartx \
+            python3 \
+            qemu-user-static \
+            qemu-utils \
+            time \
+            vmdb2 \
+            zerofree
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Extract branch name
+        shell: bash
+        run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
+      -
+        name: Extract commit SHA
+        shell: bash
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        id: extract_commit_sha
+      -
+        name: Extract Malcolm version
+        shell: bash
+        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose-dev.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
+        id: extract_malcolm_version
+      -
+        name: Build image
+        run: |
+          pushd ./sensor-raspi
+          mkdir -p ./shared
+          echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
+          echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
+          echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
+          echo "BUILD_JOBS=2" > ./shared/environment.chroot
+          sudo make raspi_4_bookworm.img
+          sudo chmod 644 ./raspi_4_bookworm*.*
+          popd
+      -
+        name: ghcr.io login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Build and push IMG image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./sensor-raspi
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog-raspi:${{ steps.extract_branch.outputs.branch }}

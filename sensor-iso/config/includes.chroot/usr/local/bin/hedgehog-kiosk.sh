@@ -7,4 +7,4 @@ grep -q boot=live /proc/cmdline && exit 0
 grep -q CAPTURE_INTERFACE=lo /opt/sensor/sensor_ctl/control_vars.conf && exit 0
 
 # start firefox in kiosk mode and load the performance metrics dashboard
-/opt/firefox/firefox --setDefaultBrowser --no-remote --private --kiosk http://127.0.0.1:5000
+/usr/bin/firefox --setDefaultBrowser --no-remote --private --kiosk http://127.0.0.1:5000

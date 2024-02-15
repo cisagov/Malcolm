@@ -1,5 +1,8 @@
 # <a name="ZeekFileExtraction"></a>Automatic file extraction and scanning
 
+* [Automatic file extraction and scanning](#ZeekFileExtraction)
+    - [User interface](#ZeekFileExtractionUI)
+
 Malcolm can leverage Zeek's knowledge of network protocols to automatically detect file transfers and extract those files from PCAPs as Zeek processes them. This behavior can be enabled globally by modifying the `ZEEK_EXTRACTOR_MODE` [variable in `zeek.env`](malcolm-config.md#MalcolmConfigEnvVars), or on a per-upload basis for PCAP files uploaded via the [browser-based upload form](upload.md#Upload) when **Analyze with Zeek** is selected.
 
 To specify which files should be extracted, the following values are acceptable in `ZEEK_EXTRACTOR_MODE`:
@@ -44,3 +47,19 @@ The `EXTRACTED_FILE_HTTP_SERVER_…` [environment variables in `zeek.env` and `z
     - downloaded files are downloaded as-is, without archival or compression:
         + `EXTRACTED_FILE_HTTP_SERVER_ZIP=false`
         + `EXTRACTED_FILE_HTTP_SERVER_KEY=`
+
+## <a name="ZeekFileExtractionUI"></a>User interface
+
+The files extracted by Zeek and the data about those files can be accessed through several of Malcolm's user interfaces.
+
+* The [Files dashboard](dashboards.md#PrebuiltVisualizations) summarizes the file transfers observed in network traffic:
+
+![The files dashboard displays metrics about the files transferred over the network](./images/screenshots/dashboards_files_source.png)
+
+* Viewing logs from Zeek's `files.log` (e.g., `event.provider == zeek && event.dataset == files`), the Arkime [session](arkime.md#ArkimeSessions) detail's **Extracted Filename** field can be clicked for a context menu item to **Download** the extracted file, if it was preserved as described above.
+
+![Arkime's session details for files.log entries](./images/screenshots/arkime_sessions_files_log_dl.png)
+
+* Malcolm provides an extracted files directory listing to browse and download Zeek-extracted files. This interface is available at at **https://localhost/extracted-files/** if connecting locally. The Zeek `uid` and `fuid` values associated with these files and the sessions from which they were extracted are listed in the **IDs** column as filter links back into Dashboards.
+
+![The extracted files directory interface](./images/screenshots/extracted_files_dl_ui.png)

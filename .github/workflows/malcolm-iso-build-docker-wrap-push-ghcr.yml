@@ -92,12 +92,12 @@ jobs:
       -
         name: Extract Malcolm version
         shell: bash
-        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
+        run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose-dev.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
         id: extract_malcolm_version
       -
         name: Build image
         run: |
-          IMAGES=( $(grep image: docker-compose.yml | awk '{print $2}' | sort -u) )
+          IMAGES=( $(grep image: docker-compose-dev.yml | awk '{print $2}' | sort -u) )
           for IMAGE in "${IMAGES[@]}"; do
             REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
             docker pull "$REPO_IMAGE" && \

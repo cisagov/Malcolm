@@ -187,6 +187,10 @@ DEFAULT_VARS.update(
         'SSH_EVE_ENABLED': False,
         'SSH_HASSH': True,
         'SSH_PORTS': 22,
+        'STATS_ENABLED': False,
+        'STATS_EVE_ENABLED': False,
+        'STATS_INTERVAL': 30,
+        'STATS_DECODER_EVENTS': False,
         'STREAM_CHECKSUM_VALIDATION': False,
         'STREAM_INLINE': 'auto',
         'STREAM_MEMCAP': '64mb',
@@ -743,9 +747,11 @@ def main():
                     'cluster-id': clusterId,
                     'block-size': DEFAULT_VARS['AF_PACKET_BLOCK_SIZE'],
                     'block-timeout': DEFAULT_VARS['AF_PACKET_BLOCK_TIMEOUT'],
-                    'bpf-filter': DEFAULT_VARS['CAPTURE_FILTER']
-                    if DEFAULT_VARS['CAPTURE_FILTER'] is not None
-                    else DEFAULT_VARS['PCAP_FILTER'],
+                    'bpf-filter': (
+                        DEFAULT_VARS['CAPTURE_FILTER']
+                        if DEFAULT_VARS['CAPTURE_FILTER'] is not None
+                        else DEFAULT_VARS['PCAP_FILTER']
+                    ),
                     'buffer-size': DEFAULT_VARS['AF_PACKET_BUFFER_SIZE'],
                     'checksum-checks': DEFAULT_VARS['AF_PACKET_CHECKSUM_CHECKS'],
                     'cluster-type': DEFAULT_VARS['AF_PACKET_CLUSTER_TYPE'],
@@ -884,6 +890,17 @@ def main():
                                         [dumperName, 'custom', 'SMTP_CUSTOM'],
                                         [dumperName, 'md5', 'SMTP_MD5'],
                                     ):
+                                        deep_set(
+                                            cfg['outputs'][outputIdx][name]['types'][dumperIdx],
+                                            cfgKey[:-1],
+                                            DEFAULT_VARS[cfgKey[-1]],
+                                            deleteIfNone=True,
+                                        )
+
+                                elif dumperName == 'stats':
+                                    # for some reason the "enabled:" key isn't in the default
+                                    #   yaml so we're forcing it here
+                                    for cfgKey in ([dumperName, 'enabled', 'STATS_EVE_ENABLED'],):
                                         deep_set(
                                             cfg['outputs'][outputIdx][name]['types'][dumperIdx],
                                             cfgKey[:-1],
@@ -1170,7 +1187,9 @@ def main():
                 logging.error(output)
 
     # final tweaks
-    deep_set(cfg, ['stats', 'enabled'], False)
+    deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS_ENABLED']))
+    deep_set(cfg, ['stats', 'interval'], DEFAULT_VARS['STATS_INTERVAL'])
+    deep_set(cfg, ['stats', 'decoder-events'], val2bool(DEFAULT_VARS['STATS_DECODER_EVENTS']))
     cfg.pop('rule-files', None)
     deep_set(cfg, ['rule-files'], GetRuleFiles())
 

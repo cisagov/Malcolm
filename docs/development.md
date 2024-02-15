@@ -37,8 +37,8 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 
 and the following files of special note:
 
-* `docker-compose.yml` - the configuration file used by `docker compose` to build, start, and stop an instance of the Malcolm appliance
-* `docker-compose-standalone.yml` - similar to `docker-compose.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
+* `docker-compose-dev.yml` - the configuration file used by `docker compose` to build, start, and stop an instance of the Malcolm appliance
+* `docker-compose.yml` - similar to `docker-compose-dev.yml`, only used for the ["packaged"](#Packager) installation of Malcolm
 
 ## <a name="Build"></a>Building from source
 
@@ -121,14 +121,7 @@ To start, stop, restart, etc. Malcolm:
    - wipe          (stop Malcolm and clear its database)
    - auth_setup    (change authentication-related settings)
 
-A minute or so after starting Malcolm, the following services will be accessible:
-  - Arkime: https://localhost/
-  - OpenSearch Dashboards: https://localhost/dashboards/
-  - PCAP upload (web): https://localhost/upload/
-  - PCAP upload (sftp): sftp://USERNAME@127.0.0.1:8022/files/
-  - NetBox: https://localhost/netbox/
-  - Account management: https://localhost/auth/
-  - Documentation: https://localhost/readme/
+Malcolm services can be accessed at https://<IP or hostname>/
 ```
 
 The above example will result in the following artifacts for distribution as explained in the script's output:

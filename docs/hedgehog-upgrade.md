@@ -1,4 +1,4 @@
-# <a name="HedgehogUpgradePlan"></a>Appendix E - Upgrades
+# <a name="HedgehogUpgradePlan"></a>Appendix F - Upgrades
 
 At this time there is not an "official" upgrade procedure to get from one release of Hedgehog Linux to the next. Upgrading the underlying operating system packages is generally straightforward, but not all of the Hedgehog Linux components are packaged into .deb archives yet as they should be, so for now it's a manual (and kind of nasty) process to Frankenstein an upgrade into existance. The author of this project intends to remedy this at some future point when time and resources allow.
 
@@ -208,7 +208,7 @@ commands:
 
 ```
 chown root:netdev /usr/sbin/netsniff-ng && \
-  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/sbin/netsniff-ng
+  setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip CAP_SYS_ADMIN+eip' /usr/sbin/netsniff-ng
 chown root:netdev /opt/zeek/bin/zeek && \
   setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /opt/zeek/bin/zeek
 chown root:netdev /sbin/ethtool && \

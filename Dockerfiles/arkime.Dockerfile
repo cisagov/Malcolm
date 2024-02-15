@@ -7,7 +7,7 @@ ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-ENV ARKIME_VERSION "v4.6.0"
+ENV ARKIME_VERSION "v5.0.0"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -49,6 +49,7 @@ RUN apt-get -q update && \
         python3-pip \
         python3-setuptools \
         python3-wheel \
+        re2c \
         sudo \
         swig \
         wget \
@@ -57,7 +58,7 @@ RUN apt-get -q update && \
   cd /opt && \
     git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
     cd "./arkime-"$ARKIME_VERSION && \
-    bash -c 'for i in /opt/patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
+    bash -c 'for i in /opt/patches/*.patch; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     export PATH="$ARKIME_DIR/bin:${PATH}" && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
     ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
@@ -69,7 +70,6 @@ RUN apt-get -q update && \
     sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
     sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
     ./easybutton-build.sh && \
-    npm -g config set user root && \
     make install && \
     npm cache clean --force && \
     rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \

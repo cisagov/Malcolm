@@ -1,0 +1,43 @@
+---
+stages:
+  # Garbage in is garbage out, so verify our input
+  - check input
+  - build
+
+variables:
+  DEBIAN_FRONTEND: "noninteractive"
+  # At https://salsa.debian.org/salsa-ci-team/pipeline/container_registry one can see which images are available
+  SALSA_CI_IMAGES: registry.salsa.debian.org/salsa-ci-team/pipeline
+  BASE_CI_IMAGES: ${SALSA_CI_IMAGES}/base
+
+yamllint:
+  stage: check input
+  image: $BASE_CI_IMAGES:unstable
+  dependencies: []
+  script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y yamllint
+    - yamllint -c debian/yamllint.yml .
+
+shellcheck:
+  stage: check input
+  image: $BASE_CI_IMAGES:unstable
+  dependencies: []
+  script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y shellcheck
+    - shellcheck -e SC1090,SC1091 -s dash $(find rootfs/etc/initramfs-tools -type f -executable  | xargs grep -l '^#!/bin/sh')
+
+build yamls:
+  stage: build
+  image: $BASE_CI_IMAGES:unstable
+  dependencies: []
+  script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y python3 make git
+    - make yaml
+    - mkdir build
+    - cp raspi*.yaml build/
+  artifacts:
+    paths:
+      - build/

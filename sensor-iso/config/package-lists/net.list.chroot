@@ -1,6 +1,7 @@
 apache2-utils
 ca-certificates
 curl
+dnsutils
 ethtool
 iproute2
 iputils-arping
