@@ -35,8 +35,7 @@ make install
 
 cp -r ./capture/plugins/lua/samples "$ARKIME_DIR"/lua
 
-npm install license-checker
-release/notice.txt.pl $ARKIME_DIR NOTICE release/CAPTURENOTICE > $ARKIME_DIR/NOTICE.txt
+cat NOTICE release/CAPTURENOTICE > $ARKIME_DIR/NOTICE.txt
 
 ETC_FILES=$(shopt -s nullglob dotglob; echo /arkime-etc/*)
 if (( ${#ETC_FILES} )) ; then

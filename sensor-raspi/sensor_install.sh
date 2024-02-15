@@ -87,9 +87,6 @@ build_arkime_src(){
     #   and this workaround seems to address it (see https://github.com/npm/cli/issues/4652)
     for FILE in $(grep -rIcH 'npm ci' ./ | grep -v ':0$' | cut -d: -f 1); do sed -i "s/npm ci/npm ci --maxsockets 1/g" "$FILE"; done
 
-    # and this is also hanging... :(
-    sed -i '/license-checker/d' screwdriver.yaml
-
     # configure the number of build threads
     sed -i "s/MAKE=make/MAKE='make -j${build_jobs}'/" easybutton-build.sh
 
@@ -99,9 +96,6 @@ build_arkime_src(){
 
     cp -r ./capture/plugins/lua/samples "${arkime_dir}"/lua
 
-    # as I said above, license-checker is hanging on me
-    #   npm install license-checker
-    #   release/notice.txt.pl "${arkime_dir}/" NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
     cat NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
 
     rm -f $arkime_dir/etc/*.systemd.service
