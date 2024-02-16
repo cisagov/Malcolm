@@ -303,15 +303,16 @@ create_user() {
 
     # Set defaults but it is STRONGLY recommended that these be changed before deploying Sensor
     local user='sensor'
+    local group='sensor'
     local pass='Hedgehog_Linux'
     local root_pass='Hedgehog_Linux_Root'
 
     groupadd "$user"
-    useradd -m -g sensor -u 1000 -s /bin/bash "$user"
+    useradd -m -g "$group" -u 1000 -s /bin/bash "$user"
+    usermod -a -G netdev "$user"
 
     echo -n "${user}:${pass}" | chpasswd --crypt-method YESCRYPT
     echo -n "root:${root_pass}" | chpasswd --crypt-method YESCRYPT
-
 }
 
 install_deps() {
@@ -373,7 +374,7 @@ install_files() {
 
     # Setup MaxMind Geo IP info
     mkdir -p /opt/arkime/etc
-    pushd /opt/arkime >/dev/null 2>&1
+    pushd /opt/arkime/etc >/dev/null 2>&1
     MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
     if [[ -f "$SHARED_DIR/maxmind_license.txt" ]]; then
@@ -388,8 +389,8 @@ install_files() {
             done
         fi
     fi
-    curl -s -S -L -o ./etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
-    curl -s -S -L -o ./etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
+    curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
+    curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
     popd >/dev/null 2>&1
 
     # Prepare Fluentbit and Beats repo GPG keys
