@@ -34,7 +34,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | Image | SHA256 |
 |---|---|
-| [raspi_4_bookworm.img.xz](/iso/hedgehog-24.02.0_raspi_4.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.02.0_raspi_4.img.xz.sha256.txt) |
+| [hedgehog-24.02.0_raspi_4.img.xz](/iso/hedgehog-24.02.0_raspi_4.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.02.0_raspi_4.img.xz.sha256.txt) |
 
 ## Warning
 
