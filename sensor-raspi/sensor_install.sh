@@ -303,15 +303,16 @@ create_user() {
 
     # Set defaults but it is STRONGLY recommended that these be changed before deploying Sensor
     local user='sensor'
+    local group='sensor'
     local pass='Hedgehog_Linux'
     local root_pass='Hedgehog_Linux_Root'
 
     groupadd "$user"
-    useradd -m -g sensor -u 1000 -s /bin/bash "$user"
+    useradd -m -g "$group" -u 1000 -s /bin/bash "$user"
+    usermod -a -G netdev "$user"
 
     echo -n "${user}:${pass}" | chpasswd --crypt-method YESCRYPT
     echo -n "root:${root_pass}" | chpasswd --crypt-method YESCRYPT
-
 }
 
 install_deps() {
