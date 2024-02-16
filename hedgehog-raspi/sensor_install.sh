@@ -329,7 +329,7 @@ install_deps() {
         deps+=$(tr '\n' ' ' < "$file")
     done
 
-    # Remove Sensor-ISO packages not relevant to RPI
+    # Remove hedgehog-iso packages not relevant to RPI
     # Rar is excluded because Debian doesn't have an ARM package
     # htpdate removed because repo version doesn't support https
     # aide is removed as we're not applying the same hardening requirements ot the rpi image

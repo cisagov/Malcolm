@@ -1,6 +1,6 @@
 # <a name="HedgehogRaspiBuild"></a>Appendix B - Generating a Raspberry Pi Image
 
-Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/sensor-raspi) for the Raspberry Pi platform, although this capability is still considered experimental.
+Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-raspi) for the Raspberry Pi platform, although this capability is still considered experimental.
 
 * [Building the Image](#HedgehogRaspiBuild)
 * [Writing the Image to Flash Media](#HedgehogRaspiBurn)
@@ -27,7 +27,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
 To perform a clean build the Hedgehog Linux Raspberry Pi image, navigate to your local [Malcolm]({{ site.github.repository_url }}/) working copy and run:
 
 ```
-$ ./sensor-raspi/build_via_vagrant.sh -f -z
+$ ./hedgehog-raspi/build_via_vagrant.sh -f -z
 …
 Starting build machine...
 Bringing machine 'vagrant-hedgehog-raspi-build' up with 'virtualbox' provider...
