@@ -103,6 +103,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
             # <head>
             with doc.head:
+                base(target="_blank")
                 meta(charset="utf-8")
                 meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
                 link(rel="icon", href=f"{args.assetsDirRespReplacer}favicon.ico", type="image/x-icon")
