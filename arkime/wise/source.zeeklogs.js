@@ -2105,6 +2105,7 @@ class MalcolmSource extends WISESource {
       "zeek.uid",
       "zeek.weird.addl",
       "zeek.weird.notice",
+      "zeek.weird.source",
       "zeek.wireguard.established",
       "zeek.wireguard.initiations",
       "zeek.wireguard.receiver_index",
