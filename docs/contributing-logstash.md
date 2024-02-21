@@ -38,8 +38,8 @@ The following modifications must be made in order for Malcolm to parse new Zeek 
     * Follow patterns for existing log files as an example
     * For common Zeek fields such as the `id` four-tuple, timestamp, etc., use the same convention used by existing Zeek logs in that file (e.g., `ts`, `uid`, `orig_h`, `orig_p`, `resp_h`, `resp_p`)
     * Take care, especially when copy-pasting filter code, the Zeek delimiter isn't modified from a tab character to a space character (see "*zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP*" warnings in that file)
-1. If necessary, perform log normalization in [`logstash/pipelines/zeek/12_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/12_zeek_normalize.conf) for values such as action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
-1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/11_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/14_zeek_convert.conf)
+1. If necessary, perform log normalization in [`logstash/pipelines/zeek/13_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/13_zeek_normalize.conf) for values such as action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
+1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/14_zeek_convert.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/14_zeek_convert.conf)
 1. Identify the new fields and add them as described in [Adding new log fields](contributing-new-log-fields.md#NewFields)
 
 The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/zeek_script_to_malcolm_boilerplate.py) may help by autogenerating these filters.
