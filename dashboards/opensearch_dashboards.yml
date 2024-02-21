@@ -18,8 +18,8 @@ opensearchDashboards.branding:
   applicationTitle: "Malcolm Dashboards"
   useExpandedHeader: false
   logo:
-   defaultUrl: "/assets/img/Malcolm.svg"
-   darkModeUrl: "/assets/img/malcolm_logo.svg"
+   defaultUrl: "/assets/img/Malcolm_outline_banner_dark.png"
+   darkModeUrl: "/assets/img/Malcolm_outline_banner_dark.png"
   mark:
    defaultUrl: "/assets/img/icon.png"
    darkModeUrl: "/assets/img/icon_dark.png"
