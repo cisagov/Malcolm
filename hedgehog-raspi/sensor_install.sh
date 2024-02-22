@@ -32,7 +32,7 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-BEATS_VER="8.12.2"
+BEATS_VER="8.12.1"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
