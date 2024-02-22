@@ -103,7 +103,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
             # <head>
             with doc.head:
-                base(target="_blank")
                 meta(charset="utf-8")
                 meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
                 link(rel="icon", href=f"{args.assetsDirRespReplacer}favicon.ico", type="image/x-icon")
@@ -243,6 +242,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                             a(
                                                                 fileinfo,
                                                                 href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
+                                                                target="_blank",
                                                             ),
                                                         )
                                                         if args.magic
@@ -264,6 +264,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                                 a(
                                                                     fid,
                                                                     href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
+                                                                    target="_blank",
                                                                 )
                                                                 for fid in fids
                                                             ],
@@ -298,19 +299,24 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         )
 
                     with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
-                        li(cls="list-inline-item").add(a(href=f'/')).add(i(cls="bi bi-house fs-3", title="Malcolm"))
-                        li(cls="list-inline-item").add(a(href=f'/readme/')).add(
+                        li(cls="list-inline-item").add(a(href=f'/', target="_blank")).add(
+                            i(cls="bi bi-house fs-3", title="Malcolm")
+                        )
+                        li(cls="list-inline-item").add(a(href=f'/readme/', target="_blank")).add(
                             i(cls="bi bi-question-circle fs-3", title="Documentation")
                         )
                         li(cls="list-inline-item").add(
-                            a(href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714')
+                            a(
+                                href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714',
+                                target="_blank",
+                            )
                         ).add(i(cls="bi bi-bar-chart-line fs-3", title="Dashboards"))
-                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/')).add(
+                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/', target="_blank")).add(
                             i(cls="bi bi-table fs-3", title="Arkime")
                         )
-                        li(cls="list-inline-item").add(a(href=f'https://github.com/idaholab/Malcolm/')).add(
-                            i(cls="bi-github fs-3", title="GitHub")
-                        )
+                        li(cls="list-inline-item").add(
+                            a(href=f'https://github.com/idaholab/Malcolm/', target="_blank")
+                        ).add(i(cls="bi-github fs-3", title="GitHub"))
 
                 script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
                 script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/scripts.js")
