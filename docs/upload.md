@@ -15,6 +15,7 @@ The types of files supported are:
 * PCAP files (of mime type `application/vnd.tcpdump.pcap` or `application/x-pcapng`)
     - PCAPNG files are *partially* supported: Zeek is able to process PCAPNG files, but not all of Arkime's packet examination features work correctly
 * Zeek logs in archive files (`application/gzip`, `application/x-gzip`, `application/x-7z-compressed`, `application/x-bzip2`, `application/x-cpio`, `application/x-lzip`, `application/x-lzma`, `application/x-rar-compressed`, `application/x-tar`, `application/x-xz`, or `application/zip`)
+    - because log fields may differ depending on Zeek's configuration, users are recommended to use [Zeek JSON format logs](https://docs.zeek.org/en/master/log-formats.html#zeek-json-format-logs) when generating Zeek logs outside of Malcolm to later be uploaded to Malcolm for procesing
     - where the Zeek logs are found in the internal directory structure in the archive file does not matter
 
 Files uploaded via these methods are monitored and moved automatically to other directories for processing, generally within 1 minute of completion of the upload.
