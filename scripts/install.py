@@ -89,8 +89,8 @@ MAC_BREW_DOCKER_PACKAGE = 'docker'
 MAC_BREW_DOCKER_COMPOSE_PACKAGE = 'docker-compose'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
-OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms10g -Xmx10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx2500m -Xms2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xmx10g -Xms10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
