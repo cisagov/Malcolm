@@ -31,7 +31,7 @@ ENV PHP_VERSION $PHP_VERSION
 ENV MCRYPT_VERSION $MCRYPT_VERSION
 ENV BOOTSTRAP_VERSION $BOOTSTRAP_VERSION
 
-ENV HTADMIN_URL "https://codeload.github.com/mmguero-dev/htadmin/tar.gz/master"
+ENV HTADMIN_URL "https://codeload.github.com/mmguero-dev/htadmin/tar.gz/newlinefix"
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
