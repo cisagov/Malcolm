@@ -61,6 +61,7 @@
 "pe": ["file"]
 "profinet": ["ot", "network"]
 "profinet_dce_rpc": ["ot", "network"]
+"profinet_io_cm": ["ot", "network"]
 "radius": ["authentication", "iam", "network"]
 "rdp": ["network"]
 "rfb": ["network"]
