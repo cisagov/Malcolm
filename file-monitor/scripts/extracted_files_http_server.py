@@ -344,15 +344,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 ):
                     # serve the asset file
                     satisfied = True
-                    ctype = self.guess_type(fullpath)
-                    with open(fullpath, 'rb') as fhandle:
-                        fs = os.fstat(fhandle.fileno())
+                    with open(fullpath, 'rb') as f:
+                        fs = os.fstat(f.fileno())
                         self.send_response(200)
                         self.send_header('Content-type', self.guess_type(fullpath))
                         self.send_header("Content-Length", str(fs[6]))
                         self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
                         self.end_headers()
-                        while chunk := fhandle.read(1024):
+                        while chunk := f.read(1024):
                             self.wfile.write(chunk)
 
             # handle regular file downloads
@@ -402,7 +401,15 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                     else:
                         # original file, unencrypted
-                        SimpleHTTPRequestHandler.do_GET(self)
+                        with open(fullpath, 'rb') as f:
+                            fs = os.fstat(f.fileno())
+                            self.send_response(200)
+                            self.send_header('Content-type', self.guess_type(fullpath))
+                            self.send_header("Content-Length", str(fs[6]))
+                            self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+                            self.end_headers()
+                            while chunk := f.read(1024):
+                                self.wfile.write(chunk)
 
                 else:
                     self.send_error(404, "Not Found")
