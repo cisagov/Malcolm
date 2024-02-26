@@ -416,7 +416,7 @@ def main():
                 elif re.search(r'(^zeek\.files\.extracted$)', field['name'], re.IGNORECASE) is not None:
                     # add download for extracted zeek files
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/dl-extracted-files/{{value}}'
+                    drilldownInfoParamsUrlTemplateValues['url'] = '/extracted-files/{{value}}'
                     drilldownInfoParamsUrlTemplateValues['label'] = 'Download'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 

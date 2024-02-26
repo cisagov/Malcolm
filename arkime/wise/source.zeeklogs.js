@@ -2219,7 +2219,7 @@ class MalcolmSource extends WISESource {
 
     // add right-click for extracted files from zeek
     var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download", url: "/dl-extracted-files/%TEXT%", fields: carvedFieldsStr });
+    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download", url: "/extracted-files/%TEXT%", fields: carvedFieldsStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
