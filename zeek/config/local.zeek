@@ -301,3 +301,36 @@ redef CVE_2021_44228::log = F;
       break;
   }
 @endif
+
+##! Other logs we're just disabling unilaterally
+
+# amzn/zeek-plugin-profinet's profinet_dce_rpc.log is covered by cisagov/icsnpp-profinet-io-cm
+hook Profinet::log_policy_profinet_dce_rpc(
+  rec: Profinet::Profinet_DCE_RPC,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+# we're not tracking the BSAP "unknown" logs
+hook Bsap::log_policy_bsap_ip_unknown(
+  rec: Bsap::BSAP_IP_UNKNOWN,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+hook Bsap::log_policy_bsap_serial_unknown(
+  rec: Bsap::BSAP_SERIAL_UNKNOWN,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+# all ARP traffic is logged by the ethercat parser, which is overkill
+hook PacketAnalyzer::ECAT::log_policy_ecat_arp(
+  rec: PacketAnalyzer::ECAT::ECAT_ARP_INFO,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
