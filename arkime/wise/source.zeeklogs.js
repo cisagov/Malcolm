@@ -1738,7 +1738,7 @@ class MalcolmSource extends WISESource {
       "zeek.profinet_io_cm.interface_uuid",
       "zeek.profinet_io_cm.activity_uuid",
       "zeek.profinet_io_cm.server_boot_time",
-      "zeek.profinet_io_cm.interface_version",
+      "zeek.profinet_io_cm.uuid_version",
       "zeek.profinet_io_cm.sequence_num",
       "zeek.profinet_io_cm.operation_num",
       "zeek.profinet_io_cm.interface_hint",

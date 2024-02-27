@@ -710,7 +710,7 @@
         "zeek.profinet_io_cm.interface_uuid": { "type": "keyword" },
         "zeek.profinet_io_cm.activity_uuid": { "type": "keyword" },
         "zeek.profinet_io_cm.server_boot_time": { "type": "long" },
-        "zeek.profinet_io_cm.interface_version": { "type": "keyword" },
+        "zeek.profinet_io_cm.uuid_version": { "type": "keyword" },
         "zeek.profinet_io_cm.sequence_num": { "type": "long" },
         "zeek.profinet_io_cm.operation": { "type": "keyword" },
         "zeek.profinet_io_cm.interface_hint": { "type": "long" },
