@@ -34,6 +34,7 @@ import json
 import os
 import re
 import requests
+import urllib3
 
 from malcolm_utils import base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson
 
@@ -110,6 +111,8 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "url": "URL",
     "x509-fingerprint-sha1": "CERT_HASH",
 }
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 # get URL directory listing
@@ -555,13 +558,14 @@ class FeedParserZeekPrinter(object):
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
-    inputQueue, zeekPrinter, since, defaultNow, workerThreadCount, logger = (
+    inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, logger = (
         threatInputWorkerArgs[0],
         threatInputWorkerArgs[1],
         threatInputWorkerArgs[2],
         threatInputWorkerArgs[3],
         threatInputWorkerArgs[4],
         threatInputWorkerArgs[5],
+        threatInputWorkerArgs[6],
     )
 
     with workerThreadCount as workerId:
@@ -626,7 +630,8 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
                                 # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
                                 # - a directory listing of misc. JSON files without a manifest.json
-                                mispResponse = mispSession.get(mispUrl)
+                                # - an array of attributes returned for a request via the MISP Automation API to an /attributes endpoint
+                                mispResponse = mispSession.get(mispUrl, verify=sslVerify)
                                 mispResponse.raise_for_status()
                                 if mispJson := LoadStrIfJson(mispResponse.content):
                                     # the contents are JSON. determine if this is a manifest or a single event
@@ -652,7 +657,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     else defaultNow
                                                 )
                                                 if (since is None) or (eventTime >= since):
-                                                    mispObjectReponse = mispSession.get(newUrl)
+                                                    mispObjectReponse = mispSession.get(newUrl, verify=sslVerify)
                                                     mispObjectReponse.raise_for_status()
                                                     zeekPrinter.ProcessMISP(
                                                         mispObjectReponse.json(),
@@ -679,7 +684,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         # retrieve it, then loop over it and retrieve and process the MISP events it references
                                         for url in manifestPaths:
                                             try:
-                                                mispManifestResponse = mispSession.get(url)
+                                                mispManifestResponse = mispSession.get(url, verify=sslVerify)
                                                 mispManifestResponse.raise_for_status()
                                                 mispManifest = mispManifestResponse.json()
                                                 for uri in mispManifest:
@@ -693,7 +698,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         )
                                                         if (since is None) or (eventTime >= since):
                                                             newUrl = f'{mispUrl.strip("/")}/{uri}.json'
-                                                            mispObjectReponse = mispSession.get(newUrl)
+                                                            mispObjectReponse = mispSession.get(
+                                                                newUrl, verify=sslVerify
+                                                            )
                                                             mispObjectReponse.raise_for_status()
                                                             zeekPrinter.ProcessMISP(
                                                                 mispObjectReponse.json(),
@@ -713,7 +720,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         # just loop over, retrieve and process the .json files in this directory
                                         for url in paths:
                                             try:
-                                                mispObjectReponse = mispSession.get(url)
+                                                mispObjectReponse = mispSession.get(url, verify=sslVerify)
                                                 mispObjectReponse.raise_for_status()
                                                 zeekPrinter.ProcessMISP(
                                                     mispObjectReponse.json(),
@@ -755,9 +762,13 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
 
                             # connect to the server with the appropriate API for the TAXII version
                             if taxiiVersion == '2.0':
-                                server = TaxiiServer_v20(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
+                                server = TaxiiServer_v20(
+                                    taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword, verify=sslVerify
+                                )
                             elif taxiiVersion == '2.1':
-                                server = TaxiiServer_v21(taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword)
+                                server = TaxiiServer_v21(
+                                    taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword, verify=sslVerify
+                                )
                             else:
                                 raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
 
@@ -776,9 +787,13 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             # connect to and retrieve indicator STIX objects from the collection URL(s)
                             for title, info in collectionUrls.items():
                                 collection = (
-                                    TaxiiCollection_v21(info['url'], user=taxiiUsername, password=taxiiPassword)
+                                    TaxiiCollection_v21(
+                                        info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify
+                                    )
                                     if taxiiVersion == '2.1'
-                                    else TaxiiCollection_v20(info['url'], user=taxiiUsername, password=taxiiPassword)
+                                    else TaxiiCollection_v20(
+                                        info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify
+                                    )
                                 )
                                 try:
                                     # loop over paginated results
