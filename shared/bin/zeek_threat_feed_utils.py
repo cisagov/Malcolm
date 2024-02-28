@@ -36,7 +36,7 @@ import re
 import requests
 import urllib3
 
-from malcolm_utils import base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson
+from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson
 
 # keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
@@ -125,11 +125,11 @@ def get_url_paths_from_response(response_text, parent_url='', ext=''):
     ]
 
 
-def get_url_paths(url, session=None, ext='', params={}):
+def get_url_paths(url, session=None, ssl_verify=False, ext='', params={}):
     response = (
-        requests.get(url, params=params, allow_redirects=True)
+        requests.get(url, params=params, allow_redirects=True, verify=ssl_verify)
         if session is None
-        else session.get(url, params=params, allow_redirects=True)
+        else session.get(url, params=params, allow_redirects=True, verify=ssl_verify)
     )
     if response.ok:
         response_text = response.text
@@ -139,12 +139,12 @@ def get_url_paths(url, session=None, ext='', params={}):
 
 
 # download to file
-def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, logger=None):
+def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, ssl_verify=False, logger=None):
     tmpDownloadedFileSpec = local_filename if local_filename else os.path.basename(urlparse(url).path)
     r = (
-        requests.get(url, stream=True, allow_redirects=True)
+        requests.get(url, stream=True, allow_redirects=True, verify=ssl_verify)
         if session is None
-        else session.get(url, stream=True, allow_redirects=True)
+        else session.get(url, stream=True, allow_redirects=True, verify=ssl_verify)
     )
     with open(tmpDownloadedFileSpec, "wb") as f:
         for chunk in r.iter_content(chunk_size=chunk_bytes):
@@ -498,63 +498,86 @@ class FeedParserZeekPrinter(object):
         source: Union[Tuple[str], None] = None,
         url: Union[str, None] = None,
     ):
-        try:
-            event = MISPEvent()
-            event.from_dict(**toParse)
+        if isinstance(toParse, dict):
+            try:
+                # determine if we're processing an event or an attribute
+                if 'info' in toParse:
+                    # this is an event, which contains an array of attributes
+                    attr = None
+                    event = MISPEvent()
+                    event.from_dict(**toParse)
 
-            if source is None:
-                source = []
+                    if source is None:
+                        source = []
 
-            if event.Orgc is not None:
-                source.append(event.Orgc.name)
+                    if event.Orgc is not None:
+                        source.append(event.Orgc.name)
 
-            description = event.info
+                    description = event.info
 
-            if (event.Tag is not None) and (len(event.Tag) > 0):
-                tags = [
-                    x.name
-                    for x in event.Tag
-                    if not x.name.startswith('osint:certainty')
-                    and not x.name.startswith('type:')
-                    and not x.name.startswith('source:')
-                ]
-                # TODO: 'slice' object is not subscriptable
-                source.extend([x.name[7:] for x in event.Tag if x.name.startswith('source:')])
-                certaintyTags = [x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')]
-                try:
-                    certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
-                except ValueError:
+                    if (event.Tag is not None) and (len(event.Tag) > 0):
+                        tags = [
+                            x.name
+                            for x in event.Tag
+                            if not x.name.startswith('osint:certainty')
+                            and not x.name.startswith('type:')
+                            and not x.name.startswith('source:')
+                        ]
+                        source.extend([x.name[7:] for x in event.Tag if x.name.startswith('source:')])
+                        certaintyTags = [
+                            x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')
+                        ]
+                        try:
+                            certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
+                        except ValueError:
+                            certainty = None
+                    else:
+                        tags = []
+                        certainty = None
+
+                elif ('id' in toParse) and ('type' in toParse):
+                    # processing a single attribute
+                    event = None
+                    attr = MISPAttribute()
+                    attr.from_dict(**toParse)
+                    # TODO: figure out what to put for description, tags, certainty, etc.?
+                    description = ''
+                    tags = []
                     certainty = None
-            else:
-                tags = []
-                certainty = None
 
-            for attribute in event.attributes:
-                # map event attribute to Zeek value(s)
-                if (
-                    ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
-                    and ((self.since is None) or (event.timestamp >= self.since) or (attribute.timestamp >= self.since))
-                    and (
-                        vals := map_misp_attribute_to_zeek(
-                            attribute=attribute,
-                            source=source,
-                            url=url,
-                            description=f"{description}{'. '+attribute.comment if attribute.comment else ''}",
-                            tags=tags,
-                            confidence=certainty,
-                            logger=self.logger,
+                for attribute in event.attributes if event else [attr]:
+                    # map attribute to Zeek value(s)
+                    if (
+                        ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
+                        and (
+                            (self.since is None)
+                            or (event and hasattr(event, 'timestamp') and (event.timestamp >= self.since))
+                            or (attribute and hasattr(attribute, 'timestamp') and attribute.timestamp >= self.since)
                         )
-                    )
-                ):
-                    for val in vals:
-                        self.PrintHeader()
-                        with self.lock:
-                            # print the intelligence item fields according to the columns in 'fields'
-                            print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+                        and (
+                            vals := map_misp_attribute_to_zeek(
+                                attribute=attribute,
+                                source=source,
+                                url=url,
+                                description=f"{description}{'. '+attribute.comment if (hasattr(attribute, 'comment') and attribute.comment) else ''}",
+                                tags=tags,
+                                confidence=certainty,
+                                logger=self.logger,
+                            )
+                        )
+                    ):
+                        for val in vals:
+                            self.PrintHeader()
+                            with self.lock:
+                                # print the intelligence item fields according to the columns in 'fields'
+                                print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
 
-        except Exception as e:
-            if self.logger is not None:
-                self.logger.warning(e, exc_info=True)
+            except Exception as e:
+                if self.logger is not None:
+                    self.logger.warning(e, exc_info=True)
+
+        elif self.logger is not None:
+            self.logger.warning(f"Unknown MISP object format '{json.dumps(toParse)}'")
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
@@ -621,6 +644,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             mispUrl = mispConnInfo[0]
                             if len(mispConnInfo) >= 2:
                                 mispAuthKey = mispConnInfo[1]
+                            reqHeaders = {'Accept': 'application/json, text/plain, text/html'}
 
                             with requests.Session() as mispSession:
                                 if mispAuthKey is not None:
@@ -631,20 +655,51 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
                                 # - a directory listing of misc. JSON files without a manifest.json
                                 # - an array of attributes returned for a request via the MISP Automation API to an /attributes endpoint
-                                mispResponse = mispSession.get(mispUrl, verify=sslVerify)
+                                mispResponse = mispSession.get(
+                                    mispUrl,
+                                    headers=reqHeaders,
+                                    allow_redirects=True,
+                                    verify=sslVerify,
+                                )
                                 mispResponse.raise_for_status()
                                 if mispJson := LoadStrIfJson(mispResponse.content):
-                                    # the contents are JSON. determine if this is a manifest or a single event
+                                    # the contents are JSON. determine if this is:
+                                    #   - a manifest
+                                    #   - an array of Attributes
+                                    #   - a single Event
 
-                                    if (len(mispJson.keys()) == 1) and ('Event' in mispJson):
-                                        # TODO: is this always the case? anything other than "Event", or multiple objects?
+                                    if (
+                                        isinstance(mispJson, dict)
+                                        and (len(mispJson.keys()) == 1)
+                                        and ('Event' in mispJson)
+                                    ):
                                         # this is a MISP event, process it
                                         zeekPrinter.ProcessMISP(
                                             mispJson,
                                             url=mispUrl,
                                         )
 
-                                    else:
+                                    elif isinstance(mispJson, list):
+                                        # this is an array of attributes
+                                        for attr in mispJson:
+                                            if isinstance(attr, dict) and ('id' in attr) and ('type' in attr):
+                                                try:
+                                                    zeekPrinter.ProcessMISP(
+                                                        attr,
+                                                        url=mispUrl,
+                                                    )
+                                                except Exception as e:
+                                                    if logger is not None:
+                                                        logger.warning(
+                                                            f"{type(e).__name__} for MISP attribute '{json.dumps(attr)}': {e}"
+                                                        )
+                                            else:
+                                                if logger is not None:
+                                                    logger.warning(
+                                                        f"Unknown MISP attribute format '{json.dumps(attr)}'"
+                                                    )
+
+                                    elif isinstance(mispJson, dict):
                                         # this is a manifest, loop over, retrieve and process the MISP events it references
                                         for uri in mispJson:
                                             try:
@@ -657,7 +712,12 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     else defaultNow
                                                 )
                                                 if (since is None) or (eventTime >= since):
-                                                    mispObjectReponse = mispSession.get(newUrl, verify=sslVerify)
+                                                    mispObjectReponse = mispSession.get(
+                                                        newUrl,
+                                                        headers=reqHeaders,
+                                                        allow_redirects=True,
+                                                        verify=sslVerify,
+                                                    )
                                                     mispObjectReponse.raise_for_status()
                                                     zeekPrinter.ProcessMISP(
                                                         mispObjectReponse.json(),
@@ -668,6 +728,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     logger.warning(
                                                         f"{type(e).__name__} for MISP object at '{newUrl}': {e}"
                                                     )
+
+                                    else:
+                                        raise Exception(f"Unknown MISP format '{type(mispJson)}'")
 
                                 else:
                                     # the contents are NOT JSON, it's probably an HTML-formatted directory listing
@@ -684,7 +747,12 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         # retrieve it, then loop over it and retrieve and process the MISP events it references
                                         for url in manifestPaths:
                                             try:
-                                                mispManifestResponse = mispSession.get(url, verify=sslVerify)
+                                                mispManifestResponse = mispSession.get(
+                                                    url,
+                                                    headers=reqHeaders,
+                                                    allow_redirects=True,
+                                                    verify=sslVerify,
+                                                )
                                                 mispManifestResponse.raise_for_status()
                                                 mispManifest = mispManifestResponse.json()
                                                 for uri in mispManifest:
@@ -699,7 +767,10 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         if (since is None) or (eventTime >= since):
                                                             newUrl = f'{mispUrl.strip("/")}/{uri}.json'
                                                             mispObjectReponse = mispSession.get(
-                                                                newUrl, verify=sslVerify
+                                                                newUrl,
+                                                                headers=reqHeaders,
+                                                                allow_redirects=True,
+                                                                verify=sslVerify,
                                                             )
                                                             mispObjectReponse.raise_for_status()
                                                             zeekPrinter.ProcessMISP(
@@ -720,7 +791,12 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         # just loop over, retrieve and process the .json files in this directory
                                         for url in paths:
                                             try:
-                                                mispObjectReponse = mispSession.get(url, verify=sslVerify)
+                                                mispObjectReponse = mispSession.get(
+                                                    url,
+                                                    headers=reqHeaders,
+                                                    allow_redirects=True,
+                                                    verify=sslVerify,
+                                                )
                                                 mispObjectReponse.raise_for_status()
                                                 zeekPrinter.ProcessMISP(
                                                     mispObjectReponse.json(),

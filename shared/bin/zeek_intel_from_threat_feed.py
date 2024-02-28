@@ -172,6 +172,7 @@ def main():
                         with malcolm_utils.temporary_filename(suffix='.txt') as tmpFileName:
                             dlFileName = zeek_threat_feed_utils.download_to_file(
                                 infileArg,
+                                ssl_verify=args.sslVerify,
                                 local_filename=tmpFileName,
                                 logger=logging,
                             )
