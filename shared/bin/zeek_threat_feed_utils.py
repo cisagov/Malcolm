@@ -12,7 +12,7 @@ from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
 from datetime import datetime
 from multiprocessing import RawValue
-from pymisp import MISPEvent, MISPAttribute
+from pymisp import MISPEvent, MISPAttribute, PyMISP
 from pytz import utc as UTCTimeZone
 from stix2 import parse as STIXParse
 from stix2.exceptions import STIXError
@@ -30,6 +30,7 @@ from threading import Lock
 from time import sleep, mktime
 from typing import Tuple, Union
 from urllib.parse import urljoin, urlparse
+from logging import DEBUG as LOGGING_DEBUG
 import json
 import os
 import re
@@ -54,6 +55,7 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 TAXII_INDICATOR_FILTER = {'type': 'indicator'}
 TAXII_PAGE_SIZE = 50
+MISP_PAGE_SIZE = 60
 ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
 
 
@@ -500,77 +502,85 @@ class FeedParserZeekPrinter(object):
     ):
         if isinstance(toParse, dict):
             try:
+                attr = None
+                event = None
+                description = ''
+                if source is None:
+                    source = []
+                tags = []
+                certainty = None
+
                 # determine if we're processing an event or an attribute
                 if 'info' in toParse:
                     # this is an event, which contains an array of attributes
-                    attr = None
                     event = MISPEvent()
                     event.from_dict(**toParse)
 
-                    if source is None:
-                        source = []
-
-                    if event.Orgc is not None:
-                        source.append(event.Orgc.name)
-
-                    description = event.info
-
-                    if (event.Tag is not None) and (len(event.Tag) > 0):
-                        tags = [
-                            x.name
-                            for x in event.Tag
-                            if not x.name.startswith('osint:certainty')
-                            and not x.name.startswith('type:')
-                            and not x.name.startswith('source:')
-                        ]
-                        source.extend([x.name[7:] for x in event.Tag if x.name.startswith('source:')])
-                        certaintyTags = [
-                            x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')
-                        ]
-                        try:
-                            certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
-                        except ValueError:
-                            certainty = None
-                    else:
-                        tags = []
-                        certainty = None
-
                 elif ('id' in toParse) and ('type' in toParse):
                     # processing a single attribute
-                    event = None
                     attr = MISPAttribute()
                     attr.from_dict(**toParse)
-                    # TODO: figure out what to put for description, tags, certainty, etc.?
-                    description = ''
-                    tags = []
-                    certainty = None
+                    event = MISPEvent()
+                    event.from_dict(**attr.Event)
 
-                for attribute in event.attributes if event else [attr]:
-                    # map attribute to Zeek value(s)
-                    if (
-                        ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
-                        and (
-                            (self.since is None)
-                            or (event and hasattr(event, 'timestamp') and (event.timestamp >= self.since))
-                            or (attribute and hasattr(attribute, 'timestamp') and attribute.timestamp >= self.since)
-                        )
-                        and (
-                            vals := map_misp_attribute_to_zeek(
-                                attribute=attribute,
-                                source=source,
-                                url=url,
-                                description=f"{description}{'. '+attribute.comment if (hasattr(attribute, 'comment') and attribute.comment) else ''}",
-                                tags=tags,
-                                confidence=certainty,
-                                logger=self.logger,
+                if attr or event:
+                    if event:
+                        # format the descriptive info for the Zeek intel item
+                        if hasattr(event, 'Orgc') and event.Orgc:
+                            source.append(event.Orgc.name)
+                        elif hasattr(event, 'orgc') and event.orgc:
+                            source.append(event.orgc.name)
+
+                        if hasattr(event, 'info') and event.info:
+                            description = event.info
+
+                        if hasattr(event, 'Tag') and (event.Tag is not None) and (len(event.Tag) > 0):
+                            tags = [
+                                x.name
+                                for x in event.Tag
+                                if not x.name.startswith('osint:certainty')
+                                and not x.name.startswith('type:')
+                                and not x.name.startswith('source:')
+                            ]
+                            source.extend([x.name[7:] for x in event.Tag if x.name.startswith('source:')])
+                            certaintyTags = [
+                                x.name.replace('"', '') for x in event.Tag if x.name.startswith('osint:certainty')
+                            ]
+                            try:
+                                certainty = float(certaintyTags[0].split('=')[-1]) if len(certaintyTags) > 0 else None
+                            except ValueError:
+                                certainty = None
+
+                    # loop through and process the attribute(s)
+                    for attribute in [attr] if attr else event.attributes:
+                        # map attribute to Zeek value(s)
+                        if (
+                            ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
+                            and (
+                                (self.since is None)
+                                or (event and hasattr(event, 'timestamp') and (event.timestamp >= self.since))
+                                or (attribute and hasattr(attribute, 'timestamp') and attribute.timestamp >= self.since)
                             )
-                        )
-                    ):
-                        for val in vals:
-                            self.PrintHeader()
-                            with self.lock:
-                                # print the intelligence item fields according to the columns in 'fields'
-                                print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+                            and (
+                                vals := map_misp_attribute_to_zeek(
+                                    attribute=attribute,
+                                    source=source,
+                                    url=url,
+                                    description=f"{description}{'. '+attribute.comment if (hasattr(attribute, 'comment') and attribute.comment) else ''}",
+                                    tags=tags,
+                                    confidence=certainty,
+                                    logger=self.logger,
+                                )
+                            )
+                        ):
+                            for val in vals:
+                                self.PrintHeader()
+                                with self.lock:
+                                    # print the intelligence item fields according to the columns in 'fields'
+                                    print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+
+                elif self.logger is not None:
+                    self.logger.warning(f"Unknown MISP object format '{json.dumps(toParse)}'")
 
             except Exception as e:
                 if self.logger is not None:
@@ -609,21 +619,22 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             # JSON FILE (STIX or MISP)
 
                             if infileJson := LoadFileIfJson(infile):
-                                if 'type' in infileJson and 'id' in infileJson:
-                                    # STIX input file
-                                    zeekPrinter.ProcessSTIX(
-                                        infileJson,
-                                        source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                    )
+                                if isinstance(infileJson, dict):
+                                    if 'type' in infileJson and 'id' in infileJson:
+                                        # STIX input file
+                                        zeekPrinter.ProcessSTIX(
+                                            infileJson,
+                                            source=[os.path.splitext(os.path.basename(inarg))[0]],
+                                        )
 
-                                elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
-                                    # TODO: is this always the case? anything other than "Event", or multiple objects?
-                                    # MISP input file
-                                    zeekPrinter.ProcessMISP(
-                                        infileJson,
-                                        source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                    )
-
+                                    elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
+                                        # MISP input file containing "Event"
+                                        zeekPrinter.ProcessMISP(
+                                            infileJson,
+                                            source=[os.path.splitext(os.path.basename(inarg))[0]],
+                                        )
+                                    else:
+                                        raise Exception(f"Could not identify content in '{inarg}'")
                                 else:
                                     raise Exception(f"Could not identify content in '{inarg}'")
                             else:
@@ -644,9 +655,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             mispUrl = mispConnInfo[0]
                             if len(mispConnInfo) >= 2:
                                 mispAuthKey = mispConnInfo[1]
-                            reqHeaders = {'Accept': 'application/json, text/plain, text/html'}
 
                             with requests.Session() as mispSession:
+                                mispSession.headers.update({'Accept': 'application/json, text/plain, text/html'})
                                 if mispAuthKey is not None:
                                     mispSession.headers.update({'Authorization': mispAuthKey})
 
@@ -657,7 +668,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 # - an array of attributes returned for a request via the MISP Automation API to an /attributes endpoint
                                 mispResponse = mispSession.get(
                                     mispUrl,
-                                    headers=reqHeaders,
                                     allow_redirects=True,
                                     verify=sslVerify,
                                 )
@@ -680,24 +690,61 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         )
 
                                     elif isinstance(mispJson, list):
-                                        # this is an array of attributes
-                                        for attr in mispJson:
-                                            if isinstance(attr, dict) and ('id' in attr) and ('type' in attr):
-                                                try:
-                                                    zeekPrinter.ProcessMISP(
-                                                        attr,
-                                                        url=mispUrl,
-                                                    )
-                                                except Exception as e:
-                                                    if logger is not None:
-                                                        logger.warning(
-                                                            f"{type(e).__name__} for MISP attribute '{json.dumps(attr)}': {e}"
-                                                        )
-                                            else:
-                                                if logger is not None:
-                                                    logger.warning(
-                                                        f"Unknown MISP attribute format '{json.dumps(attr)}'"
-                                                    )
+                                        # this is an array of attributes. rather than handling it via
+                                        #   additional calls with request, let's use the MISP API
+                                        #   to do the searching/pulling (yeah, we're duplicating
+                                        #   the effort of pulling the first page, but meh, who cares?)
+                                        if mispObject := PyMISP(
+                                            mispUrl,
+                                            mispAuthKey,
+                                            sslVerify,
+                                            debug=logger and (LOGGING_DEBUG >= logger.root.level),
+                                        ):
+                                            # search, looping over the pages MISP_PAGE_SIZE at a time
+                                            mispPage = 1
+                                            while True:
+                                                attrResults = mispObject.search(
+                                                    controller='attributes',
+                                                    return_format='json',
+                                                    limit=MISP_PAGE_SIZE,
+                                                    page=mispPage,
+                                                    type_attribute=list(MISP_ZEEK_INTEL_TYPE_MAP.keys()),
+                                                    event_timestamp=since,
+                                                )
+                                                if (
+                                                    attrResults
+                                                    and isinstance(attrResults, dict)
+                                                    and ('Attribute' in attrResults)
+                                                    and isinstance(attrResults['Attribute'], list)
+                                                ):
+                                                    mispPage += 1
+                                                    for attr in attrResults['Attribute']:
+                                                        if (
+                                                            isinstance(attr, dict)
+                                                            and ('id' in attr)
+                                                            and ('type' in attr)
+                                                        ):
+                                                            try:
+                                                                zeekPrinter.ProcessMISP(
+                                                                    attr,
+                                                                    url=mispUrl,
+                                                                )
+                                                            except Exception as e:
+                                                                if logger is not None:
+                                                                    logger.warning(
+                                                                        f"{type(e).__name__} for MISP attribute '{json.dumps(attr)}': {e}"
+                                                                    )
+                                                        else:
+                                                            if logger is not None:
+                                                                logger.warning(
+                                                                    f"Unknown MISP attribute format '{json.dumps(attr)}'"
+                                                                )
+                                                else:
+                                                    # error or unrecognized results, set this to short circuit
+                                                    attrResults = None
+
+                                                if not attrResults or (len(attrResults['Attribute']) < MISP_PAGE_SIZE):
+                                                    break
 
                                     elif isinstance(mispJson, dict):
                                         # this is a manifest, loop over, retrieve and process the MISP events it references
@@ -714,7 +761,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                 if (since is None) or (eventTime >= since):
                                                     mispObjectReponse = mispSession.get(
                                                         newUrl,
-                                                        headers=reqHeaders,
                                                         allow_redirects=True,
                                                         verify=sslVerify,
                                                     )
@@ -749,7 +795,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             try:
                                                 mispManifestResponse = mispSession.get(
                                                     url,
-                                                    headers=reqHeaders,
                                                     allow_redirects=True,
                                                     verify=sslVerify,
                                                 )
@@ -768,7 +813,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                             newUrl = f'{mispUrl.strip("/")}/{uri}.json'
                                                             mispObjectReponse = mispSession.get(
                                                                 newUrl,
-                                                                headers=reqHeaders,
                                                                 allow_redirects=True,
                                                                 verify=sslVerify,
                                                             )
@@ -793,7 +837,6 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             try:
                                                 mispObjectReponse = mispSession.get(
                                                     url,
-                                                    headers=reqHeaders,
                                                     allow_redirects=True,
                                                     verify=sslVerify,
                                                 )
