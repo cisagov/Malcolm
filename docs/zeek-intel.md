@@ -56,6 +56,7 @@ For example:
 misp|https://example.com/data/feed-osint/manifest.json|df97338db644c64fbfd90f3e03ba8870
 misp|https://example.com/doc/misp/|
 misp|https://example.com/attributes|a943f5ff506ee6198e996333e0b672b1
+misp|https://example.com/events|a943f5ff506ee6198e996333e0b672b1
 …
 ```
 
@@ -66,6 +67,7 @@ Upon Malcolm connects to the URLs for the MISP feeds in `.misp_input.txt`, it wi
 * a manifest JSON file
 * a directory listing containing a file named `manifest.json`
 * a directory listing of JSON files without a `manifest.json` file
-* an array of [attributes](https://www.misp-project.org/openapi/#tag/Attributes) returned for a request via the [MISP Automation API](https://www.misp-project.org/openapi/) made to a MISP platform's `/attributes` endpoint
+* a list of [Events](https://www.misp-project.org/openapi/#tag/Events) returned for a request via the [MISP Automation API](https://www.misp-project.org/openapi/) made to a MISP platform's [`/events` endpoint](https://www.misp-project.org/openapi/#tag/Events/operation/restSearchEvents)
+* a list of [Attributes](https://www.misp-project.org/openapi/#tag/Attributes) returned for a request via the [MISP Automation API](https://www.misp-project.org/openapi/) made to a MISP platform's [`/attributes` endpoint](https://www.misp-project.org/openapi/#tag/Attributes/operation/restSearchAttributes)
 
 Note that only a subset of MISP [attribute types](https://www.misp-project.org/datamodels/#attribute-categories-vs-types) can be expressed with the Zeek intelligence [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type). MISP attributes with other types will be silently ignored.

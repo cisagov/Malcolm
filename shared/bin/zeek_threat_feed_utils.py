@@ -55,7 +55,8 @@ ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 TAXII_INDICATOR_FILTER = {'type': 'indicator'}
 TAXII_PAGE_SIZE = 50
-MISP_PAGE_SIZE = 60
+MISP_PAGE_SIZE_ATTRIBUTES = 60
+MISP_PAGE_SIZE_EVENTS = 10
 ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
 
 
@@ -512,7 +513,7 @@ class FeedParserZeekPrinter(object):
 
                 # determine if we're processing an event or an attribute
                 if 'info' in toParse:
-                    # this is an event, which contains an array of attributes
+                    # this is an event, which may contain an array of attributes
                     event = MISPEvent()
                     event.from_dict(**toParse)
 
@@ -580,14 +581,14 @@ class FeedParserZeekPrinter(object):
                                     print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
 
                 elif self.logger is not None:
-                    self.logger.warning(f"Unknown MISP object format '{json.dumps(toParse)}'")
+                    self.logger.warning("Unknown MISP object format (could not determine Attribute vs. Event)")
 
             except Exception as e:
                 if self.logger is not None:
                     self.logger.warning(e, exc_info=True)
 
         elif self.logger is not None:
-            self.logger.warning(f"Unknown MISP object format '{json.dumps(toParse)}'")
+            self.logger.warning(f"Unknown MISP object format ('{type(toParse)}')")
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
@@ -603,7 +604,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
 
     with workerThreadCount as workerId:
         if logger is not None:
-            logger.debug(f"[{workerId}]:started")
+            logger.debug(f"[{workerId}]: started")
 
         # the queue was fully populated before we started, so we can run until there are no more elements
         while len(inputQueue) > 0:
@@ -665,7 +666,8 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
                                 # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
                                 # - a directory listing of misc. JSON files without a manifest.json
-                                # - an array of attributes returned for a request via the MISP Automation API to an /attributes endpoint
+                                # - an array of Attributes returned for a request via the MISP Automation API to an /attributes endpoint
+                                # - an array of Events returned for a request via the MISP Automation API to an /events endpoint
                                 mispResponse = mispSession.get(
                                     mispUrl,
                                     allow_redirects=True,
@@ -674,77 +676,115 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 mispResponse.raise_for_status()
                                 if mispJson := LoadStrIfJson(mispResponse.content):
                                     # the contents are JSON. determine if this is:
-                                    #   - a manifest
-                                    #   - an array of Attributes
                                     #   - a single Event
+                                    #   - an array of Events
+                                    #   - an array of Attributes
+                                    #   - a manifest
 
                                     if (
                                         isinstance(mispJson, dict)
                                         and (len(mispJson.keys()) == 1)
                                         and ('Event' in mispJson)
                                     ):
-                                        # this is a MISP event, process it
+                                        # this is a single MISP Event, process it
                                         zeekPrinter.ProcessMISP(
                                             mispJson,
                                             url=mispUrl,
                                         )
 
-                                    elif isinstance(mispJson, list):
-                                        # this is an array of attributes. rather than handling it via
-                                        #   additional calls with request, let's use the MISP API
-                                        #   to do the searching/pulling (yeah, we're duplicating
-                                        #   the effort of pulling the first page, but meh, who cares?)
-                                        if mispObject := PyMISP(
-                                            mispUrl,
-                                            mispAuthKey,
-                                            sslVerify,
-                                            debug=logger and (LOGGING_DEBUG >= logger.root.level),
+                                    elif isinstance(mispJson, list) and (len(mispJson) > 0):
+                                        # are these Attributes or Events?
+                                        if (
+                                            isinstance(mispJson[0], dict)
+                                            and ('id' in mispJson[0])
+                                            and ('type' in mispJson[0])
                                         ):
-                                            # search, looping over the pages MISP_PAGE_SIZE at a time
-                                            mispPage = 1
-                                            while True:
-                                                attrResults = mispObject.search(
-                                                    controller='attributes',
-                                                    return_format='json',
-                                                    limit=MISP_PAGE_SIZE,
-                                                    page=mispPage,
-                                                    type_attribute=list(MISP_ZEEK_INTEL_TYPE_MAP.keys()),
-                                                    event_timestamp=since,
-                                                )
-                                                if (
-                                                    attrResults
-                                                    and isinstance(attrResults, dict)
-                                                    and ('Attribute' in attrResults)
-                                                    and isinstance(attrResults['Attribute'], list)
-                                                ):
+                                            controllerType = 'attributes'
+                                            resultKey = 'Attribute'
+                                            pageSize = MISP_PAGE_SIZE_ATTRIBUTES
+                                        elif isinstance(mispJson[0], dict) and ('info' in mispJson[0]):
+                                            controllerType = 'events'
+                                            resultKey = 'Event'
+                                            pageSize = MISP_PAGE_SIZE_EVENTS
+                                        else:
+                                            controllerType = None
+                                            resultKey = None
+                                            pageSize = None
+
+                                        if controllerType:
+                                            # this is an array of either Attributes or Events.
+                                            #   rather than handling it via additional calls with request,
+                                            #   let's use the MISP API to do the searching/pulling
+                                            #   (yeah, we're duplicating the effort of pulling the
+                                            #   first page, but meh, who cares?)
+                                            if mispObject := PyMISP(
+                                                mispUrl,
+                                                mispAuthKey,
+                                                sslVerify,
+                                                debug=logger and (LOGGING_DEBUG >= logger.root.level),
+                                            ):
+                                                # search, looping over the pages pageSize at a time
+                                                mispPage = 0
+                                                while True:
                                                     mispPage += 1
-                                                    for attr in attrResults['Attribute']:
-                                                        if (
-                                                            isinstance(attr, dict)
-                                                            and ('id' in attr)
-                                                            and ('type' in attr)
-                                                        ):
+                                                    resultCount = 0
+                                                    mispResults = mispObject.search(
+                                                        controller=controllerType,
+                                                        return_format='json',
+                                                        limit=pageSize,
+                                                        page=mispPage,
+                                                        type_attribute=list(MISP_ZEEK_INTEL_TYPE_MAP.keys()),
+                                                        timestamp=since,
+                                                    )
+                                                    if (
+                                                        mispResults
+                                                        and isinstance(mispResults, dict)
+                                                        and (resultKey in mispResults)
+                                                    ):
+                                                        # Attributes results
+                                                        resultCount = len(mispResults[resultKey])
+                                                        for item in mispResults[resultKey]:
                                                             try:
                                                                 zeekPrinter.ProcessMISP(
-                                                                    attr,
+                                                                    item,
                                                                     url=mispUrl,
                                                                 )
                                                             except Exception as e:
                                                                 if logger is not None:
                                                                     logger.warning(
-                                                                        f"{type(e).__name__} for MISP attribute '{json.dumps(attr)}': {e}"
+                                                                        f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
                                                                     )
-                                                        else:
-                                                            if logger is not None:
-                                                                logger.warning(
-                                                                    f"Unknown MISP attribute format '{json.dumps(attr)}'"
-                                                                )
-                                                else:
-                                                    # error or unrecognized results, set this to short circuit
-                                                    attrResults = None
 
-                                                if not attrResults or (len(attrResults['Attribute']) < MISP_PAGE_SIZE):
-                                                    break
+                                                    elif mispResults and isinstance(mispResults, list):
+                                                        # Events results
+                                                        resultCount = len(mispResults)
+                                                        for item in mispResults:
+                                                            if item and isinstance(item, dict) and (resultKey in item):
+                                                                try:
+                                                                    zeekPrinter.ProcessMISP(
+                                                                        item[resultKey],
+                                                                        url=mispUrl,
+                                                                    )
+                                                                except Exception as e:
+                                                                    if logger is not None:
+                                                                        logger.warning(
+                                                                            f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
+                                                                        )
+
+                                                    else:
+                                                        # error or unrecognized results, set this to short circuit
+                                                        resultCount = 0
+
+                                                    if logger is not None:
+                                                        logger.debug(
+                                                            f"[{workerId}]: MISP search page {mispPage} returned {resultCount}"
+                                                        )
+                                                    if not mispResults or (resultCount < pageSize):
+                                                        break
+
+                                        else:
+                                            # not an Event or an Attribute? what the heck are we even doing?
+                                            raise Exception(f"Unknown MISP object '{json.dumps(mispJson)}'")
 
                                     elif isinstance(mispJson, dict):
                                         # this is a manifest, loop over, retrieve and process the MISP events it references
@@ -772,7 +812,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             except Exception as e:
                                                 if logger is not None:
                                                     logger.warning(
-                                                        f"{type(e).__name__} for MISP object at '{newUrl}': {e}"
+                                                        f"[{workerId}]: {type(e).__name__} for MISP object at '{newUrl}': {e}"
                                                     )
 
                                     else:
@@ -824,11 +864,13 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     except Exception as e:
                                                         if logger is not None:
                                                             logger.warning(
-                                                                f"{type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
+                                                                f"[{workerId}]: {type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
                                                             )
                                             except Exception as e:
                                                 if logger is not None:
-                                                    logger.warning(f"{type(e).__name__} for manifest at '{url}': {e}")
+                                                    logger.warning(
+                                                        f"[{workerId}]: {type(e).__name__} for manifest at '{url}': {e}"
+                                                    )
 
                                     else:
                                         # the manifest.json does not exist!
@@ -848,7 +890,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             except Exception as e:
                                                 if logger is not None:
                                                     logger.warning(
-                                                        f"{type(e).__name__} for MISP object at '{url}': {e}"
+                                                        f"[{workerId}]: {type(e).__name__} for MISP object at '{url}': {e}"
                                                     )
 
                         elif inarg.lower().startswith('taxii'):
@@ -936,11 +978,13 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
 
                                 except Exception as e:
                                     if logger is not None:
-                                        logger.warning(f"{type(e).__name__} for object of collection '{title}': {e}")
+                                        logger.warning(
+                                            f"[{workerId}]: {type(e).__name__} for object of collection '{title}': {e}"
+                                        )
 
                 except Exception as e:
                     if logger is not None:
-                        logger.warning(f"{type(e).__name__} for '{inarg}': {e}")
+                        logger.warning(f"[{workerId}]: {type(e).__name__} for '{inarg}': {e}")
 
         if logger is not None:
             logger.debug(f"[{workerId}]: finished")
