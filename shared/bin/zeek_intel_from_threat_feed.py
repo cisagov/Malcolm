@@ -143,8 +143,8 @@ def main():
     logging.info(os.path.join(script_path, script_name))
     logging.info("Arguments: {}".format(sys.argv[1:]))
     logging.info("Arguments: {}".format(args))
-    # if args.verbose > logging.DEBUG:
-    #     sys.tracebacklimit = 0
+    if args.verbose > logging.DEBUG:
+        sys.tracebacklimit = 0
 
     if args.input is None:
         args.input = []
