@@ -33,6 +33,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
             * [LDAP connection security](authsetup.md#AuthLDAPSecurity)
         + [TLS certificates](authsetup.md#TLSCerts)
         + [Command-line arguments](authsetup.md#CommandLineConfig)
+    - [Log Out of Malcolm](authsetup.md#LoggingOut)
     - [Platform-specific Configuration](host-config.md#HostSystemConfig)
         + [Linux host system configuration](host-config-linux.md#HostSystemConfigLinux)
         + [macOS host system configuration](host-config-macos.md#HostSystemConfigMac)
