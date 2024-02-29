@@ -81,10 +81,6 @@ RUN apt-get -q update && \
       python-magic \
       python-slugify \
       randomcolor && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
-      cryptography \
-      GitPython \
-      pillow && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSLO "${SUPERCRONIC_URL}" && \
@@ -110,6 +106,10 @@ RUN apt-get -q update && \
       mkdir -p ./repo && \
       curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
       rm -rf ./repo/device-types/WatchGuard && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
+      cryptography \
+      GitPython \
+      pillow && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
