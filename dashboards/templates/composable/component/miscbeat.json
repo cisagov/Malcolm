@@ -93,6 +93,33 @@
               "properties": {
               }
             },
+            "kmsg": {
+              "properties": {
+                "priority": { "type": "integer" },
+                "sequence": { "type": "long" },
+                "sec": { "type": "long" },
+                "usec": { "type": "integer" }
+              }
+            },
+            "proc": {
+              "properties": {
+                "alive": { "type": "keyword" },
+                "proc_name": { "type": "keyword" },
+                "pid": { "type": "long" },
+                "mem.VmPeak": { "type": "long" },
+                "mem.VmSize": { "type": "long" },
+                "mem.VmLck": { "type": "long" },
+                "mem.VmHWM": { "type": "long" },
+                "mem.VmRSS": { "type": "long" },
+                "mem.VmData": { "type": "long" },
+                "mem.VmStk": { "type": "long" },
+                "mem.VmExe": { "type": "long" },
+                "mem.VmLib": { "type": "long" },
+                "mem.VmPTE": { "type": "long" },
+                "mem.VmSwap": { "type": "long" },
+                "fd": { "type": "integer" }
+              }
+            },
             "systemd": {
               "properties": {
                 "audit_loginuid": { "type": "integer" },
