@@ -26,7 +26,7 @@ opensearchDashboards.branding:
   loadingLogo:
    defaultUrl: "/assets/img/icon.png"
    darkModeUrl: "/assets/img/icon_dark.png"
-  faviconUrl: "/assets/favicon.ico"
+  faviconUrl: "/assets/img/favicon32.png"
 
 map.regionmap:
   includeOpenSearchMapsService: false
