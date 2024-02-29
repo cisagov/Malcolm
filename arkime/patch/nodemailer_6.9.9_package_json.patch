@@ -1,0 +1,38 @@
+[1mdiff --git a/package-lock.json b/package-lock.json[m
+[1mindex a1298740..858b0b13 100644[m
+[1m--- a/package-lock.json[m
+[1m+++ b/package-lock.json[m
+[36m@@ -6817,7 +6817,7 @@[m
+        "form-data": "4.0.0",[m
+        "https-proxy-agent": "5.0.0",[m
+        "node-fetch": "2.6.7",[m
+        "nodemailer": "6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m",
+        "web-push": "3.4.5",[m
+        "winston": "3.3.3"[m
+      }[m
+[36m@@ -16961,8 +16961,8 @@[m
+      "dev": true[m
+    },[m
+    "node_modules/nodemailer": {[m
+      "version": "6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m",
+      "resolved": "https://registry.npmjs.org/nodemailer/-/nodemailer-6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m.tgz",
+      "integrity": "sha512-YSzu7TLbI+bsjCis/TZlAXBoM4y93HhlIgo0P5oiA2ua9Z4k+E2Fod//ybIzdJxOlXGRcHIh/WaeCBehvxZb/Q==",[m
+      "engines": {[m
+        "node": ">=6.0.0"[m
+[36m@@ -28601,7 +28601,7 @@[m
+        "form-data": "4.0.0",[m
+        "https-proxy-agent": "5.0.0",[m
+        "node-fetch": "2.6.7",[m
+        "nodemailer": "6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m",
+        "web-push": "3.4.5",[m
+        "winston": "3.3.3"[m
+      }[m
+[36m@@ -36321,8 +36321,8 @@[m
+      "dev": true[m
+    },[m
+    "nodemailer": {[m
+      "version": "6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m",
+      "resolved": "https://registry.npmjs.org/nodemailer/-/nodemailer-6.[31m[-6-][m[32m{+9+}[m.[31m[-2-][m[32m{+9+}[m.tgz",
+      "integrity": "sha512-YSzu7TLbI+bsjCis/TZlAXBoM4y93HhlIgo0P5oiA2ua9Z4k+E2Fod//ybIzdJxOlXGRcHIh/WaeCBehvxZb/Q=="[m
+    },[m
+    "nodemon": {[m

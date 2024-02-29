@@ -109,6 +109,9 @@ RUN apt-get -q update && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
       cryptography \
       GitPython \
+      Jinja2 \
+      "Django>=4.2.10,<5" \
+      paramiko \
       pillow && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
