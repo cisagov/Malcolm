@@ -32,7 +32,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
 
-ENV YQ_VERSION "4.33.3"
+ENV YQ_VERSION "4.42.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
@@ -82,7 +82,9 @@ RUN apt-get -q update && \
       python-slugify \
       randomcolor && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
-      cryptography && \
+      cryptography \
+      GitPython \
+      pillow && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSLO "${SUPERCRONIC_URL}" && \
