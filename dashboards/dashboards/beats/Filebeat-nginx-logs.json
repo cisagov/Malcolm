@@ -19,7 +19,7 @@
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"version\":true,\"highlightAll\":true,\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"version\":true,\"highlightAll\":false,\"filter\":[]}"
         }
       },
       "references": [
@@ -64,7 +64,7 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"query\":\"event.module:nginx AND error.message:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":false,\"query\":{\"query\":\"event.module:nginx AND error.message:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [
           [
@@ -104,7 +104,7 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"query\":\"event.module:nginx AND url.original:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":false,\"query\":{\"query\":\"event.module:nginx AND url.original:*\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [
           [

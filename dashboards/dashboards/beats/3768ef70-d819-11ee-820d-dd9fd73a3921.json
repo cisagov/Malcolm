@@ -12,7 +12,7 @@
       "attributes": {
         "title": "Linux Kernel Messages",
         "hits": 0,
-        "description": "",
+        "description": "Linux kernel messages (kmsg), including from Malcolm sensors and aggregators",
         "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"1c0ec894-1fd1-4a1a-8aa1-730e651ecca8\",\"w\":14,\"x\":0,\"y\":0},\"panelIndex\":\"1c0ec894-1fd1-4a1a-8aa1-730e651ecca8\",\"version\":\"2.12.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"d395e5d6-8064-4226-b4bd-7c21db0d6cf5\",\"w\":34,\"x\":14,\"y\":0},\"panelIndex\":\"d395e5d6-8064-4226-b4bd-7c21db0d6cf5\",\"version\":\"2.12.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"4178095b-48cb-4ce8-b79c-eea288285dd5\",\"w\":48,\"x\":0,\"y\":16},\"panelIndex\":\"4178095b-48cb-4ce8-b79c-eea288285dd5\",\"version\":\"2.12.0\",\"panelRefName\":\"panel_2\"}]",
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
