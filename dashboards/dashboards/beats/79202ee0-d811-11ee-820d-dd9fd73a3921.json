@@ -7,18 +7,18 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2024-03-01T21:33:15.446Z",
-      "version": "Wzk5MywxXQ==",
+      "updated_at": "2024-03-01T22:00:38.756Z",
+      "version": "WzEwOTUsMV0=",
       "attributes": {
         "title": "Windows Events",
         "hits": 0,
         "description": "",
-        "panelsJSON": "[{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":15,\"i\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\"},\"panelIndex\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_0\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":15,\"i\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\"},\"panelIndex\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":30,\"h\":36,\"i\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\"},\"panelIndex\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":30,\"y\":15,\"w\":18,\"h\":15,\"i\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\"},\"panelIndex\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":30,\"y\":30,\"w\":18,\"h\":21,\"i\":\"5566d8f7-5c04-4f92-acf3-5af407b28b0d\"},\"panelIndex\":\"5566d8f7-5c04-4f92-acf3-5af407b28b0d\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_4\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":51,\"w\":48,\"h\":30,\"i\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\"},\"panelIndex\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
+        "panelsJSON": "[{\"version\":\"2.12.0\",\"gridData\":{\"h\":15,\"i\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\",\"w\":18,\"x\":0,\"y\":0},\"panelIndex\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_0\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":15,\"i\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\",\"w\":30,\"x\":18,\"y\":0},\"panelIndex\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":36,\"i\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\",\"w\":30,\"x\":0,\"y\":15},\"panelIndex\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":15,\"i\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\",\"w\":18,\"x\":30,\"y\":15},\"panelIndex\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":21,\"i\":\"5566d8f7-5c04-4f92-acf3-5af407b28b0d\",\"w\":18,\"x\":30,\"y\":30},\"panelIndex\":\"5566d8f7-5c04-4f92-acf3-5af407b28b0d\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":0,\"direction\":\"asc\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":30,\"i\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\",\"w\":48,\"x\":0,\"y\":66},\"panelIndex\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":25,\"i\":\"0249a576-f162-4bf9-aa2d-bf85552665c7\",\"w\":48,\"x\":0,\"y\":96},\"panelIndex\":\"0249a576-f162-4bf9-aa2d-bf85552665c7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.12.0\",\"gridData\":{\"h\":15,\"i\":\"65476182-297e-4bbf-a7af-b0ff0584eeb0\",\"w\":24,\"x\":0,\"y\":51},\"panelIndex\":\"65476182-297e-4bbf-a7af-b0ff0584eeb0\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_7\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":24,\"y\":51,\"w\":24,\"h\":15,\"i\":\"0bf80b0d-91f3-47ca-b2a3-ea6844c9727a\"},\"panelIndex\":\"0bf80b0d-91f3-47ca-b2a3-ea6844c9727a\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_8\"}]",
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
         "timeRestore": false,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         }
       },
       "references": [
@@ -51,6 +51,21 @@
           "name": "panel_5",
           "type": "search",
           "id": "be2f24d0-d809-11ee-820d-dd9fd73a3921"
+        },
+        {
+          "name": "panel_6",
+          "type": "search",
+          "id": "3770db80-d815-11ee-820d-dd9fd73a3921"
+        },
+        {
+          "name": "panel_7",
+          "type": "visualization",
+          "id": "7e9a8500-d816-11ee-820d-dd9fd73a3921"
+        },
+        {
+          "name": "panel_8",
+          "type": "visualization",
+          "id": "008fb710-d817-11ee-820d-dd9fd73a3921"
         }
       ],
       "migrationVersion": {
@@ -243,6 +258,91 @@
       ],
       "migrationVersion": {
         "search": "7.9.3"
+      }
+    },
+    {
+      "id": "3770db80-d815-11ee-820d-dd9fd73a3921",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-01T21:46:53.112Z",
+      "version": "WzEwMDQsMV0=",
+      "attributes": {
+        "title": "Windows Resource Utilization",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "miscbeat.winstat.cpu_utilization",
+          "miscbeat.winstat.physical_total",
+          "miscbeat.winstat.physical_used",
+          "miscbeat.winstat.physical_available",
+          "miscbeat.winstat.processes",
+          "miscbeat.winstat.threads",
+          "miscbeat.winstat.handles"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.module:winstat\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"fixed_interval\":\"30s\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "7e9a8500-d816-11ee-820d-dd9fd73a3921",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-01T21:56:02.000Z",
+      "version": "WzEwNjEsMV0=",
+      "attributes": {
+        "title": "Windows RAM Usage",
+        "visState": "{\"title\":\"Windows RAM Usage\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"gauge\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"miscbeat.winstat.physical_used\",\"order_by\":\"@timestamp\"},{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"e4b6eb90-d815-11ee-a6da-0f56a6d37163\",\"type\":\"top_hit\",\"field\":\"miscbeat.winstat.physical_total\",\"order_by\":\"@timestamp\"},{\"id\":\"fe21e0d0-d815-11ee-a6da-0f56a6d37163\",\"type\":\"math\",\"variables\":[{\"id\":\"01e57880-d816-11ee-a6da-0f56a6d37163\",\"name\":\"used\",\"field\":\"61ca57f2-469d-11e7-af02-69e470af7417\"},{\"id\":\"082756a0-d816-11ee-a6da-0f56a6d37163\",\"name\":\"total\",\"field\":\"e4b6eb90-d815-11ee-a6da-0f56a6d37163\"}],\"script\":\"(params.used/params.total)*100\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"00.\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"terms_field\":\"host.name\",\"label\":\"RAM Usage\",\"terms_order_by\":\"_count\",\"value_template\":\"{{value}}%\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"gauge_color_rules\":[{\"id\":\"8db33970-d815-11ee-a6da-0f56a6d37163\"}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"filter\":{\"query\":\"event.module:winstat\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\",\"gauge_max\":\"100\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "008fb710-d817-11ee-820d-dd9fd73a3921",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-01T21:59:40.033Z",
+      "version": "WzEwOTIsMV0=",
+      "attributes": {
+        "title": "Windows CPU Usage",
+        "visState": "{\"title\":\"Windows CPU Usage\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"gauge\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"noop\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"miscbeat.winstat.cpu_utilization\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"00\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"CPU Usage\",\"value_template\":\"{{value}}%\",\"filter\":{\"query\":\"event.module:winstat\",\"language\":\"kuery\"},\"terms_field\":\"host.name\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"gauge_color_rules\":[{\"id\":\"a50173c0-d816-11ee-a6da-0f56a6d37163\"}],\"gauge_width\":10,\"gauge_inner_width\":10,\"gauge_style\":\"half\",\"gauge_max\":\"100\",\"time_range_mode\":\"entire_time_range\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
       }
     }
   ]
