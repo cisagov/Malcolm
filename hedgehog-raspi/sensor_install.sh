@@ -270,8 +270,12 @@ clean_up() {
 		   /opt/hedgehog_install_artifacts \
 		   /opt/hooks \
 		   /opt/patches \
-		   /root/.bash_history \
-		   /root/.wget-hsts \
+           /root/.bash_history \
+           /root/.wget-hsts \
+           /root/.cache \
+           /root/.local/share/gem \
+           /root/.npm \
+           "${DEBS_DIR}" \
 		   /tmp/*
     find /var/log/ -type f -print0 2>/dev/null | \
         xargs -0 -r -I XXX bash -c "file 'XXX' | grep -q text && > 'XXX'"
