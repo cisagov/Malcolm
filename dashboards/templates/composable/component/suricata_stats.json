@@ -169,6 +169,7 @@
                 "ftp.memuse": { "type": "long" },
                 "http.memcap": { "type": "long" },
                 "http.memuse": { "type": "long" },
+                "pkts_dropped": { "type": "long" },
                 "tcp.insert_data_normal_fail": { "type": "long" },
                 "tcp.insert_data_overlap_fail": { "type": "long" },
                 "tcp.insert_list_fail": { "type": "long" },
