@@ -31,7 +31,7 @@ def main():
             [
                 'Outputs a Zeek intelligence framework file from various formats used to represent threat information:',
                 ' - "Indicator" objects in STIX™ v2.0/v2.1 JSON files',
-                ' - MISP core format JSON files',
+                ' - MISP attributes or core format JSON files',
                 '',
                 'See:',
                 ' - Malcolm documentation: https://cisagov.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',
@@ -44,6 +44,7 @@ def main():
                 ' - MISP communities: https://www.misp-project.org/communities/',
                 ' - MISP default feeds: https://www.misp-project.org/feeds/',
                 ' - Managing MISP feeds: https://misp.gitbooks.io/misp-book/content/managing-feeds/',
+                ' - Expand MISP usage: https://github.com/idaholab/Malcolm/issues/336',
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
                 'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
@@ -53,30 +54,40 @@ def main():
         add_help=False,
         usage='{} <arguments>'.format(script_name),
     )
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
     parser.add_argument(
-        '--notice', dest='notice', action='store_true', help='Add fields for policy/frameworks/intel/do_notice.zeek'
+        '--verbose',
+        '-v',
+        action='count',
+        default=1,
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
-        '--no-notice',
+        '--notice',
         dest='notice',
-        action='store_false',
-        help='Do not add fields for policy/frameworks/intel/do_notice.zeek',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=True,
+        help='Add fields for policy/frameworks/intel/do_notice.zeek',
     )
-    parser.set_defaults(notice=True)
     parser.add_argument(
         '--cif',
         dest='cif',
-        action='store_true',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=True,
         help='Add fields for policy/integration/collective-intel/main.zeek',
     )
     parser.add_argument(
-        '--no-cif',
-        dest='cif',
-        action='store_false',
-        help='Do not add fields for policy/integration/collective-intel/main.zeek',
+        '--ssl-verify',
+        dest='sslVerify',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Require TLS connections to verify certificates',
     )
-    parser.set_defaults(cif=True)
     parser.add_argument(
         '-i',
         '--input',
@@ -161,6 +172,7 @@ def main():
                         with malcolm_utils.temporary_filename(suffix='.txt') as tmpFileName:
                             dlFileName = zeek_threat_feed_utils.download_to_file(
                                 infileArg,
+                                ssl_verify=args.sslVerify,
                                 local_filename=tmpFileName,
                                 logger=logging,
                             )
@@ -190,6 +202,7 @@ def main():
                     inputQueue,
                     zeekPrinter,
                     since,
+                    args.sslVerify,
                     defaultNow,
                     workerThreadCount,
                     logging,

@@ -84,7 +84,7 @@ exclude:
   - pcap-capture
   - pcap-monitor
   - scripts
-  - sensor-iso
+  - hedgehog-iso
   - shared
   - suricata
   - suricata-logs

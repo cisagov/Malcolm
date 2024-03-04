@@ -1,4 +1,4 @@
-name: sensor-iso-build-docker-wrap-push-ghcr
+name: hedgehog-iso-build-docker-wrap-push-ghcr
 
 on:
   push:
@@ -6,10 +6,10 @@ on:
       - main
       - development
     paths:
-      - 'sensor-iso/**'
+      - 'hedgehog-iso/**'
       - 'shared/bin/*'
       - '.trigger_iso_workflow_build'
-      - '.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml'
+      - '.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
 
@@ -93,13 +93,13 @@ jobs:
       -
         name: Build image
         run: |
-          cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./malcolm-iso/htpdate ./sensor-iso
-          cp ./scripts/malcolm_utils.py ./sensor-iso/shared/bin/
-          cp ./scripts/documentation_build.sh ./sensor-iso/docs/
-          cp -r ./arkime/patch ./sensor-iso/shared/arkime_patch
-          mkdir -p ./sensor-iso/suricata
-          cp -r ./suricata/rules-default ./sensor-iso/suricata/
-          pushd ./sensor-iso
+          cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./malcolm-iso/htpdate ./hedgehog-iso
+          cp ./scripts/malcolm_utils.py ./hedgehog-iso/shared/bin/
+          cp ./scripts/documentation_build.sh ./hedgehog-iso/docs/
+          cp -r ./arkime/patch ./hedgehog-iso/shared/arkime_patch
+          mkdir -p ./hedgehog-iso/suricata
+          cp -r ./suricata/rules-default ./hedgehog-iso/suricata/
+          pushd ./hedgehog-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
@@ -115,7 +115,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
-          scan-ref: './sensor-iso'
+          scan-ref: './hedgehog-iso'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
@@ -140,6 +140,6 @@ jobs:
         name: Build and push ISO image
         uses: docker/build-push-action@v5
         with:
-          context: ./sensor-iso
+          context: ./hedgehog-iso
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}

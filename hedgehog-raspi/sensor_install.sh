@@ -58,7 +58,7 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    arkime_ver='5.0.0-1'
+    arkime_ver='5.0.1-1'
     curl -sSL -o /tmp/arkime-deb/arkime.deb "https://github.com/arkime/arkime/releases/download/v5.0.0/arkime_${arkime_ver}.ubuntu2204_arm64.deb"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
@@ -66,7 +66,7 @@ build_arkime(){
 build_arkime_src(){
 
     arkime_repo='https://github.com/arkime/arkime.git'
-    arkime_ver='5.0.0'
+    arkime_ver='5.0.1'
     arkime_dir='/opt/arkime'
     build_jobs=$((PROC_CNT/2))
 
@@ -329,7 +329,7 @@ install_deps() {
         deps+=$(tr '\n' ' ' < "$file")
     done
 
-    # Remove Sensor-ISO packages not relevant to RPI
+    # Remove hedgehog-iso packages not relevant to RPI
     # Rar is excluded because Debian doesn't have an ARM package
     # htpdate removed because repo version doesn't support https
     # aide is removed as we're not applying the same hardening requirements ot the rpi image

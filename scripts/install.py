@@ -89,8 +89,8 @@ MAC_BREW_DOCKER_PACKAGE = 'docker'
 MAC_BREW_DOCKER_COMPOSE_PACKAGE = 'docker-compose'
 MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/settings.json'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xms2500m -Xmx2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
-OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xms10g -Xmx10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx2500m -Xms2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xmx10g -Xms10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
 ScriptName = os.path.basename(__file__)
@@ -420,10 +420,6 @@ class Installer(object):
                 if os.path.isfile(os.path.join(installPath, "docker-compose.yml")):
                     eprint(f"Malcolm runtime files extracted to {installPath}")
                     result = True
-                    with open(os.path.join(installPath, "install_source.txt"), 'w') as f:
-                        f.write(
-                            f'{os.path.basename(malcolm_install_file)} (installed {str(datetime.datetime.now())})\n'
-                        )
                 else:
                     eprint(f"Malcolm install file extracted to {installPath}, but missing runtime files?")
 
@@ -711,9 +707,11 @@ class Installer(object):
             )
             while (
                 not InstallerYesOrNo(
-                    f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
-                    if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
-                    else f'Setting {lsMemory} for Logstash. Is this OK?',
+                    (
+                        f'Setting {osMemory} for OpenSearch and {lsMemory} for Logstash. Is this OK?'
+                        if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
+                        else f'Setting {lsMemory} for Logstash. Is this OK?'
+                    ),
                     default=True,
                 )
                 and loopBreaker.increment()
@@ -976,6 +974,7 @@ class Installer(object):
 
             # make sure paths specified (and their necessary children) exist
             for pathToCreate in (
+                malcolm_install_path,
                 indexDirFull,
                 indexSnapshotDirFull,
                 os.path.join(pcapDirFull, 'arkime-live'),
@@ -1075,9 +1074,11 @@ class Installer(object):
                     break
 
         if InstallerYesOrNo(
-            'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
-            if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
-            else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
+            (
+                'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
+                if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
+                else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?'
+            ),
             default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
         ):
             # delete oldest indexes based on index pattern size
@@ -1292,9 +1293,11 @@ class Installer(object):
                             (
                                 x,
                                 '',
-                                x == filePreserveModeDefault
-                                if filePreserveModeDefault
-                                else allowedFilePreserveModes[0],
+                                (
+                                    x == filePreserveModeDefault
+                                    if filePreserveModeDefault
+                                    else allowedFilePreserveModes[0]
+                                ),
                             )
                             for x in allowedFilePreserveModes
                         ],
@@ -1307,9 +1310,11 @@ class Installer(object):
                         'ZIP downloaded preserved files?', default=args.fileCarveHttpServerZip
                     )
                     fileCarveHttpServeEncryptKey = InstallerAskForString(
-                        'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
-                        if fileCarveHttpServerZip
-                        else 'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)',
+                        (
+                            'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
+                            if fileCarveHttpServerZip
+                            else 'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
+                        ),
                         default=args.fileCarveHttpServeEncryptKey,
                     )
                 if fileCarveMode is not None:

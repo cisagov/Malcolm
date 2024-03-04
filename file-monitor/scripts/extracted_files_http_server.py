@@ -242,6 +242,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                             a(
                                                                 fileinfo,
                                                                 href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
+                                                                target="_blank",
                                                             ),
                                                         )
                                                         if args.magic
@@ -263,6 +264,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                                 a(
                                                                     fid,
                                                                     href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
+                                                                    target="_blank",
                                                                 )
                                                                 for fid in fids
                                                             ],
@@ -297,19 +299,24 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         )
 
                     with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
-                        li(cls="list-inline-item").add(a(href=f'/')).add(i(cls="bi bi-house fs-3", title="Malcolm"))
-                        li(cls="list-inline-item").add(a(href=f'/readme/')).add(
+                        li(cls="list-inline-item").add(a(href=f'/', target="_blank")).add(
+                            i(cls="bi bi-house fs-3", title="Malcolm")
+                        )
+                        li(cls="list-inline-item").add(a(href=f'/readme/', target="_blank")).add(
                             i(cls="bi bi-question-circle fs-3", title="Documentation")
                         )
                         li(cls="list-inline-item").add(
-                            a(href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714')
+                            a(
+                                href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714',
+                                target="_blank",
+                            )
                         ).add(i(cls="bi bi-bar-chart-line fs-3", title="Dashboards"))
-                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/')).add(
+                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/', target="_blank")).add(
                             i(cls="bi bi-table fs-3", title="Arkime")
                         )
-                        li(cls="list-inline-item").add(a(href=f'https://github.com/cisagov/Malcolm/')).add(
-                            i(cls="bi-github fs-3", title="GitHub")
-                        )
+                        li(cls="list-inline-item").add(
+                            a(href=f'https://github.com/cisagov/Malcolm/', target="_blank")
+                        ).add(i(cls="bi-github fs-3", title="GitHub"))
 
                 script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
                 script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/scripts.js")
@@ -337,15 +344,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 ):
                     # serve the asset file
                     satisfied = True
-                    ctype = self.guess_type(fullpath)
-                    with open(fullpath, 'rb') as fhandle:
-                        fs = os.fstat(fhandle.fileno())
+                    with open(fullpath, 'rb') as f:
+                        fs = os.fstat(f.fileno())
                         self.send_response(200)
                         self.send_header('Content-type', self.guess_type(fullpath))
                         self.send_header("Content-Length", str(fs[6]))
                         self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
                         self.end_headers()
-                        while chunk := fhandle.read(1024):
+                        while chunk := f.read(1024):
                             self.wfile.write(chunk)
 
             # handle regular file downloads
@@ -395,7 +401,15 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                     else:
                         # original file, unencrypted
-                        SimpleHTTPRequestHandler.do_GET(self)
+                        with open(fullpath, 'rb') as f:
+                            fs = os.fstat(f.fileno())
+                            self.send_response(200)
+                            self.send_header('Content-type', self.guess_type(fullpath))
+                            self.send_header("Content-Length", str(fs[6]))
+                            self.send_header("Last-Modified", self.date_time_string(fs.st_mtime))
+                            self.end_headers()
+                            while chunk := f.read(1024):
+                                self.wfile.write(chunk)
 
                 else:
                     self.send_error(404, "Not Found")

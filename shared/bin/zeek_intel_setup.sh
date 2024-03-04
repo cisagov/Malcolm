@@ -15,6 +15,7 @@ SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
+ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION=${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION:-false}
 ZEEK_INTEL_REFRESH_THREADS=${ZEEK_INTEL_REFRESH_THREADS:-"2"}
 INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
 INTEL_PRESEED_DIR=${INTEL_PRESEED_DIR:-"${ZEEK_DIR}/share/zeek/site/intel-preseed"}
@@ -92,6 +93,7 @@ EOF
         # process STIX and MISP inputs by converting them to Zeek intel format
         if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
+                --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \
                 --output ./.threat_autogen.zeek.new \
