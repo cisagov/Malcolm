@@ -27,7 +27,7 @@
             "packet_filter.failure_reason": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
             "print.vals": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
             "reporter.level": { "type": "keyword" },
-            "reporter.message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "reporter.msg": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
             "reporter.location": { "type": "keyword" },
             "stats.peer": { "type": "keyword" },
             "stats.mem": { "type": "long" },
