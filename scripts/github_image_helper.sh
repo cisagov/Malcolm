@@ -184,6 +184,7 @@ trap "_cleanup" EXIT
 FUNCTIONS=($(declare -F | awk '{print $NF}' | sort -f | egrep -v "^_"))
 
 # present the menu to our customer and get their selection
+printf "%s\t%s\n" "0" "pull and extract everything"
 for i in "${!FUNCTIONS[@]}"; do
   ((IPLUS=i+1))
   printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}"
@@ -191,7 +192,13 @@ done
 echo -n "Operation:"
 [[ -n "${1-}" ]] && USER_FUNCTION_IDX="$1" || read USER_FUNCTION_IDX
 
-if (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
+if (( $USER_FUNCTION_IDX == 0 )); then
+  PullAndTagGithubWorkflowISOImages
+  ExtractAndLoadImagesFromGithubWorkflowBuildISO
+  ExtractISOsFromGithubWorkflowBuilds
+  PullAndTagGithubWorkflowImages
+
+elif (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
   # execute one function, à la carte
   USER_FUNCTION="${FUNCTIONS[((USER_FUNCTION_IDX-1))]}"
   echo $USER_FUNCTION
