@@ -10,16 +10,15 @@
       "updated_at": "2022-06-01T19:41:23.453Z",
       "version": "Wzg0NywxXQ==",
       "attributes": {
-        "description": "Overview of logs from Malcolm's own nginx instance",
+        "description": "nginx logs, including from Malcolm's own nginx instance",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"version\":true,\"highlightAll\":true}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"version\":true,\"highlightAll\":false}"
         },
         "optionsJSON": "{\"darkTheme\": false}",
         "panelsJSON": "[{\"panelIndex\":\"3\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\",\"gridData\":{\"x\":36,\"y\":44,\"w\":12,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{}},{\"panelIndex\":\"4\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\",\"gridData\":{\"x\":24,\"y\":44,\"w\":12,\"h\":12,\"i\":\"4\"},\"embeddableConfig\":{\"vis\":{\"legendOpen\":true}}},{\"panelIndex\":\"8\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\",\"gridData\":{\"x\":0,\"y\":4,\"w\":48,\"h\":16,\"i\":\"8\"},\"embeddableConfig\":{\"mapZoom\":2,\"mapBounds\":{\"bottom_right\":{\"lat\":-7.362466865535738,\"lon\":245.39062500000003},\"top_left\":{\"lat\":77.07878389624943,\"lon\":-245.74218750000003}},\"mapCenter\":[50.51342652633956,-0.17578125],\"mapCollar\":{\"bottom_right\":{\"lat\":-49.583095,\"lon\":180},\"zoom\":2,\"top_left\":{\"lat\":90,\"lon\":-180}}}},{\"panelIndex\":\"13\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\",\"gridData\":{\"x\":0,\"y\":20,\"w\":48,\"h\":12,\"i\":\"13\"},\"embeddableConfig\":{}},{\"panelIndex\":\"14\",\"panelRefName\":\"panel_4\",\"version\":\"7.3.0\",\"gridData\":{\"x\":24,\"y\":32,\"w\":24,\"h\":12,\"i\":\"14\"},\"embeddableConfig\":{}},{\"panelIndex\":\"15\",\"panelRefName\":\"panel_5\",\"version\":\"7.3.0\",\"gridData\":{\"x\":0,\"y\":32,\"w\":24,\"h\":12,\"i\":\"15\"},\"embeddableConfig\":{}},{\"panelIndex\":\"16\",\"panelRefName\":\"panel_6\",\"version\":\"7.3.0\",\"gridData\":{\"x\":0,\"y\":44,\"w\":24,\"h\":12,\"i\":\"16\"},\"embeddableConfig\":{}},{\"panelIndex\":\"17\",\"panelRefName\":\"panel_7\",\"version\":\"7.3.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"17\"},\"embeddableConfig\":{}}]",
         "timeRestore": false,
-        "title": "Malcolm nginx Overview",
-        "description": "Overview of Malcolm's own nginx instance",
+        "title": "nginx Overview",
         "version": 1
       },
       "references": [
@@ -290,7 +289,7 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"query\":\"event.module:nginx\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"filter\":[],\"highlightAll\":false,\"query\":{\"query\":\"event.module:nginx\",\"language\":\"kuery\"},\"version\":true,\"highlight\":{\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"pre_tags\":[\"@kibana-highlighted-field@\"],\"require_field_match\":false,\"fragment_size\":2147483647},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [
           [

@@ -12,7 +12,7 @@
       "attributes": {
         "title": "Malcolm Sensor File/Directory Integrity",
         "hits": 0,
-        "description": "",
+        "description": "AIDE file/directory integrity report for Malcolm sensors and aggregators",
         "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":18,\"h\":7,\"i\":\"1b520d1b-b30e-4216-8c83-3eff88564503\"},\"panelIndex\":\"1b520d1b-b30e-4216-8c83-3eff88564503\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":14,\"i\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\"},\"panelIndex\":\"1a09a091-d27c-48df-a145-5a33ecc33ffb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":7,\"w\":18,\"h\":28,\"i\":\"4c570390-7394-4129-b637-81e58e3fa066\"},\"panelIndex\":\"4c570390-7394-4129-b637-81e58e3fa066\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":18,\"y\":14,\"w\":30,\"h\":21,\"i\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\"},\"panelIndex\":\"3e3af3d3-f0e6-4472-b27a-a0cc71db516b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":48,\"h\":22,\"i\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\"},\"panelIndex\":\"93ccff9d-7037-4a11-9478-ee6f5341831e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
         "version": 1,
@@ -195,7 +195,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"event.module:aide\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.module:aide\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

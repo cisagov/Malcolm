@@ -1,4 +1,4 @@
-name: sensor-raspi-build-docker-wrap-push-ghcr
+name: hedgehog-raspi-build-docker-wrap-push-ghcr
 
 on:
   # push:
@@ -76,7 +76,7 @@ jobs:
       -
         name: Build image
         run: |
-          pushd ./sensor-raspi
+          pushd ./hedgehog-raspi
           mkdir -p ./shared
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
@@ -97,6 +97,6 @@ jobs:
         name: Build and push IMG image
         uses: docker/build-push-action@v5
         with:
-          context: ./sensor-raspi
+          context: ./hedgehog-raspi
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog-raspi:${{ steps.extract_branch.outputs.branch }}

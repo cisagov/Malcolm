@@ -28,8 +28,8 @@ arkime-logs
 arkime-raw
 kubernetes
 malcolm-iso
-sensor-iso
-sensor-raspi
+hedgehog-iso
+hedgehog-raspi
 nginx/nginx_ldap*.conf
 pcap
 _site
