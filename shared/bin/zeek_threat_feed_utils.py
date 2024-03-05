@@ -512,7 +512,9 @@ class FeedParserZeekPrinter(object):
                 certainty = None
 
                 # determine if we're processing an event or an attribute
-                if 'info' in toParse:
+                if (('Event' in toParse) and isinstance(toParse['Event'], dict) and ('info' in toParse['Event'])) or (
+                    'info' in toParse
+                ):
                     # this is an event, which may contain an array of attributes
                     event = MISPEvent()
                     event.from_dict(**toParse)
