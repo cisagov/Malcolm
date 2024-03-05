@@ -18,8 +18,6 @@ LOCKDIR="/tmp/zeek-beats-process-folder"
 
 export SCRIPT_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export ZEEK_LOG_FIELD_BITMAP_SCRIPT="$SCRIPT_DIR/zeek-log-field-bitmap.py"
-
 export ZEEK_LOG_AUTO_TAG=${AUTO_TAG:-"true"}
 
 ZEEK_LOGS_DIR=${FILEBEAT_ZEEK_DIR:-/zeek/}
@@ -81,13 +79,8 @@ if mkdir $LOCKDIR; then
       do
         PROCESS_TIME=$(date +%s%N)
         TAGS_JOINED=$(printf "%s," "${TAGS[@]}")${PROCESS_TIME}
-        FIELDS_BITMAP="$($ZEEK_LOG_FIELD_BITMAP_SCRIPT "$LOGFILE" | head -n 1)"
         LINKNAME_BASE="$(basename "$LOGFILE" .log)"
-        if [[ -n $FIELDS_BITMAP ]]; then
-          LINKNAME="${LINKNAME_BASE}(${TAGS_JOINED},${FIELDS_BITMAP}).log"
-        else
-          LINKNAME="${LINKNAME_BASE}(${TAGS_JOINED}).log"
-        fi
+        LINKNAME="${LINKNAME_BASE}(${TAGS_JOINED}).log"
         touch "$LOGFILE"
         ln -sfr "$LOGFILE" "$LINKDIR/$LINKNAME"
       done

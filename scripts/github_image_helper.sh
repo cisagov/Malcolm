@@ -1,5 +1,21 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+
+if [ -z "$BASH_VERSION" ]; then
+  echo "Wrong interpreter, please run \"$0\" with bash"
+  exit 1
+fi
+
+[[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
+[[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
+[[ "$(uname -s)" = 'Darwin' ]] && GREP=ggrep || GREP=grep
+if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP" && type git) > /dev/null; then
+  echo "$(basename "${BASH_SOURCE[0]}") requires $REALPATH and $DIRNAME and $GREP and git"
+  exit 1
+fi
+SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
+
 set -uo pipefail
 shopt -s nocasematch
 ENCODING="utf-8"
@@ -32,32 +48,42 @@ function _cols() {
 
 # get the current git working copy's branch (e.g., main)
 function _gitbranch() {
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   git rev-parse --abbrev-ref HEAD
+  popd >/dev/null 2>&1
 }
 
 # get the current git working copy's remote name (e.g., origin)
 function _gitremote() {
-  git branch -vv | grep "^\*" | cut -d "[" -f2 | cut -d "]" -f1 | cut -d "/" -f1
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
+  git branch -vv | $GREP "^\*" | cut -d "[" -f2 | cut -d "]" -f1 | cut -d "/" -f1
+  popd >/dev/null 2>&1
 }
 
 # get the current git working copy's top-level directory
 function _gittoplevel() {
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   git rev-parse --show-toplevel
+  popd >/dev/null 2>&1
 }
 
 # get the current git working copy's remote "owner" (github user or organization, e.g., johndoe)
 function _gitowner() {
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   git remote get-url "$(_gitremote)" | sed 's@.*github\.com/@@' | cut -d'/' -f1
+  popd >/dev/null 2>&1
 }
 
 # get the current git working copy's remote repository name (e.g., malcolm)
 function _gitreponame() {
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   git remote get-url "$(_gitremote)" | sed 's@.*github\.com/@@' | cut -d'/' -f2
+  popd >/dev/null 2>&1
 }
 
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
-  grep -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
+  $GREP -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
 }
 
 ################################################################################
@@ -88,7 +114,7 @@ function PullAndTagGithubWorkflowImages() {
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
   echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
-  for IMG in $(grep image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
+  for IMG in $($GREP image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
   echo "done"
@@ -180,10 +206,14 @@ function GithubTriggerPackagesBuild () {
 
 trap "_cleanup" EXIT
 
+# force-navigate to Malcolm base directory (parent of scripts/ directory)
+pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
+
 # get a list of all the "public" functions (not starting with _)
 FUNCTIONS=($(declare -F | awk '{print $NF}' | sort -f | egrep -v "^_"))
 
 # present the menu to our customer and get their selection
+printf "%s\t%s\n" "0" "pull and extract everything"
 for i in "${!FUNCTIONS[@]}"; do
   ((IPLUS=i+1))
   printf "%s\t%s\n" "$IPLUS" "${FUNCTIONS[$i]}"
@@ -191,7 +221,13 @@ done
 echo -n "Operation:"
 [[ -n "${1-}" ]] && USER_FUNCTION_IDX="$1" || read USER_FUNCTION_IDX
 
-if (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
+if (( $USER_FUNCTION_IDX == 0 )); then
+  PullAndTagGithubWorkflowISOImages
+  ExtractAndLoadImagesFromGithubWorkflowBuildISO
+  ExtractISOsFromGithubWorkflowBuilds
+  PullAndTagGithubWorkflowImages
+
+elif (( $USER_FUNCTION_IDX > 0 )) && (( $USER_FUNCTION_IDX <= "${#FUNCTIONS[@]}" )); then
   # execute one function, à la carte
   USER_FUNCTION="${FUNCTIONS[((USER_FUNCTION_IDX-1))]}"
   echo $USER_FUNCTION

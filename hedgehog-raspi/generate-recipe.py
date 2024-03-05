@@ -7,7 +7,7 @@ import os
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 MALCOLM_DIR = os.path.dirname(SCRIPT_DIR)
-SENSOR_DIR = os.path.join(MALCOLM_DIR, 'sensor-iso')
+SENSOR_DIR = os.path.join(MALCOLM_DIR, 'hedgehog-iso')
 
 # pylint: disable=invalid-name
 

@@ -18,7 +18,7 @@ The build should work with either the [VirtualBox](https://www.virtualbox.org/) 
 To perform a clean build the Hedgehog Linux installer ISO, navigate to your local [Malcolm]({{ site.github.repository_url }}/) working copy and run:
 
 ```
-$ ./sensor-iso/build_via_vagrant.sh -f
+$ ./hedgehog-iso/build_via_vagrant.sh -f
 …
 Starting build machine...
 Bringing machine 'default' up with 'virtualbox' provider...
@@ -29,8 +29,8 @@ Building the ISO may take 90 minutes or more depending on your system. As the bu
 
 ```
 …
-Finished, created "/sensor-build/hedgehog-24.02.0.iso"
+Finished, created "/sensor-build/hedgehog-24.03.0.iso"
 …
 ```
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided which contain instructions for GitHub to build the docker images and Hedgehog and [Malcolm]({{ site.github.repository_url }}) installer ISOs, specifically [`sensor-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/sensor-iso-build-docker-wrap-push-ghcr.yml) for the Hedgehog ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.
+Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided which contain instructions for GitHub to build the docker images and Hedgehog and [Malcolm]({{ site.github.repository_url }}) installer ISOs, specifically [`hedgehog-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml) for the Hedgehog ISO. The resulting ISO file is wrapped in a Docker image that provides an HTTP server from which the ISO may be downloaded.

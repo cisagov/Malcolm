@@ -1,0 +1,550 @@
+{
+  "version": "2.12.0",
+  "objects": [
+    {
+      "id": "4ca94c70-d7da-11ee-9ed3-e7afff29e59a",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg4NCwxXQ==",
+      "attributes": {
+        "title": "Packet Capture Statistics",
+        "hits": 0,
+        "description": "Statistics and diagnostics for packet capture from Zeek and Suricata",
+        "panelsJSON": "[{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":13,\"h\":15,\"i\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\"},\"panelIndex\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":13,\"y\":0,\"w\":35,\"h\":15,\"i\":\"b483d809-a528-4280-b79e-aa7ada17d275\"},\"panelIndex\":\"b483d809-a528-4280-b79e-aa7ada17d275\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_1\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":13,\"h\":10,\"i\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\"},\"panelIndex\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_2\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":13,\"y\":15,\"w\":13,\"h\":10,\"i\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\"},\"panelIndex\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_3\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":26,\"y\":15,\"w\":22,\"h\":20,\"i\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\"},\"panelIndex\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\",\"embeddableConfig\":{\"columns\":[\"@timestamp\",\"host.name\",\"zeek.capture_loss.peer\",\"zeek.capture_loss.acks\",\"zeek.capture_loss.gaps\",\"zeek.capture_loss.percent_lost\"]},\"panelRefName\":\"panel_4\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":25,\"w\":13,\"h\":10,\"i\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\"},\"panelIndex\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_5\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":13,\"y\":25,\"w\":13,\"h\":10,\"i\":\"687597e3-4848-4629-8b85-45c0773efb79\"},\"panelIndex\":\"687597e3-4848-4629-8b85-45c0773efb79\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_6\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":15,\"i\":\"0174654c-2010-463a-b49e-fa5759b61b9c\"},\"panelIndex\":\"0174654c-2010-463a-b49e-fa5759b61b9c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":50,\"w\":48,\"h\":21,\"i\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\"},\"panelIndex\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":71,\"w\":48,\"h\":21,\"i\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\"},\"panelIndex\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":92,\"w\":13,\"h\":20,\"i\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\"},\"panelIndex\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":13,\"y\":92,\"w\":35,\"h\":20,\"i\":\"f15e46fe-040f-4602-ad13-01aab36b372a\"},\"panelIndex\":\"f15e46fe-040f-4602-ad13-01aab36b372a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":0,\"y\":112,\"w\":16,\"h\":17,\"i\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\"},\"panelIndex\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":16,\"y\":112,\"w\":32,\"h\":17,\"i\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\"},\"panelIndex\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\",\"embeddableConfig\":{\"columns\":[\"@timestamp\",\"host.name\",\"zeek.reporter.level\",\"zeek.reporter.msg\",\"zeek.reporter.location\"]},\"panelRefName\":\"panel_13\"},{\"version\":\"2.12.0\",\"gridData\":{\"x\":24,\"y\":35,\"w\":24,\"h\":15,\"i\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\"},\"panelIndex\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"}]",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "a1480cb0-d7ff-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "611a3e20-d7e0-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "13facbf0-d7e5-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "8051d2c0-d7e6-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_4",
+          "type": "search",
+          "id": "991158b0-d7d9-11ee-9ed3-e7afff29e59a"
+        },
+        {
+          "name": "panel_5",
+          "type": "visualization",
+          "id": "cc976b70-d7fc-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_6",
+          "type": "visualization",
+          "id": "9833e6a0-d7fd-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_7",
+          "type": "visualization",
+          "id": "6b7b9a40-faa1-11e6-86b1-cd7735ff7e23-ecs"
+        },
+        {
+          "name": "panel_8",
+          "type": "search",
+          "id": "9c6a1610-d7d8-11ee-9ed3-e7afff29e59a"
+        },
+        {
+          "name": "panel_9",
+          "type": "search",
+          "id": "b0aabf40-d7fa-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_10",
+          "type": "visualization",
+          "id": "abcfca50-d7dd-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_11",
+          "type": "search",
+          "id": "351ef380-d7d9-11ee-9ed3-e7afff29e59a"
+        },
+        {
+          "name": "panel_12",
+          "type": "visualization",
+          "id": "c75b6df0-d7e3-11ee-b25e-e793ed358448"
+        },
+        {
+          "name": "panel_13",
+          "type": "search",
+          "id": "17619ea0-d7da-11ee-9ed3-e7afff29e59a"
+        },
+        {
+          "name": "panel_14",
+          "type": "visualization",
+          "id": "089b85d0-1b16-11e7-b09e-037021c4f8df-ecs"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "a1480cb0-d7ff-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg4NSwxXQ==",
+      "attributes": {
+        "title": "Last Capture Metric Timestamp by Host",
+        "visState": "{\"title\":\"Last Capture Metric Timestamp by Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"@timestamp\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Last Metric Timestamp\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Capture Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.provider\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":5,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Other\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.kind:metric\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "611a3e20-d7e0-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:07:41.024Z",
+      "version": "Wzk5OSwxXQ==",
+      "attributes": {
+        "title": "Zeek and Suricata Capture Measurements ",
+        "visState": "{\"title\":\"Zeek and Suricata Capture Measurements \",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"32d1fca0-d7e1-11ee-ad81-217e54128a4b\",\"color\":\"rgba(33,150,243,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"32d1fca1-d7e1-11ee-ad81-217e54128a4b\",\"type\":\"sum\",\"field\":\"zeek.stats.pkts_link\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"0\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Zeek: packets seen\",\"type\":\"timeseries\",\"terms_field\":\"host.name\",\"terms_size\":\"25\",\"terms_order_by\":\"32d1fca1-d7e1-11ee-ad81-217e54128a4b\",\"split_color_mode\":\"opensearchDashboards\"},{\"id\":\"02bbf6a0-d7fb-11ee-a5f1-9ff9da698a18\",\"color\":\"rgba(84,179,153,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"unit\":\"\",\"id\":\"02bbf6a1-d7fb-11ee-a5f1-9ff9da698a18\",\"type\":\"positive_rate\",\"field\":\"suricata.stats.capture.kernel_packets\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"0\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Suricata: packets seen\",\"type\":\"timeseries\"},{\"id\":\"e4143600-d7e0-11ee-ad81-217e54128a4b\",\"color\":\"rgba(229,115,115,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"e4143601-d7e0-11ee-ad81-217e54128a4b\",\"type\":\"sum\",\"field\":\"zeek.stats.pkts_dropped\"},{\"id\":\"f6df2790-d7e0-11ee-ad81-217e54128a4b\",\"type\":\"math\",\"variables\":[{\"id\":\"f8ee0a60-d7e0-11ee-ad81-217e54128a4b\",\"name\":\"packets\",\"field\":\"e4143601-d7e0-11ee-ad81-217e54128a4b\"}],\"script\":\"params.packets*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"0\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Zeek: packets dropped\",\"type\":\"timeseries\",\"terms_field\":\"host.name\",\"terms_size\":\"25\",\"terms_order_by\":\"e4143601-d7e0-11ee-ad81-217e54128a4b\",\"split_color_mode\":\"opensearchDashboards\"},{\"id\":\"20b9a420-d7df-11ee-ad81-217e54128a4b\",\"color\":\"rgba(211,96,134,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"20b9a421-d7df-11ee-ad81-217e54128a4b\",\"type\":\"sum\",\"field\":\"zeek.capture_loss.gaps\"},{\"id\":\"9a3afce0-d7df-11ee-ad81-217e54128a4b\",\"type\":\"math\",\"variables\":[{\"id\":\"9dece150-d7df-11ee-ad81-217e54128a4b\",\"name\":\"gaps\",\"field\":\"20b9a421-d7df-11ee-ad81-217e54128a4b\"}],\"script\":\"params.gaps*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"0\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Zeek: ACKS missed\",\"type\":\"timeseries\",\"terms_field\":\"host.name\",\"terms_size\":\"25\",\"terms_order_by\":\"20b9a421-d7df-11ee-ad81-217e54128a4b\",\"split_color_mode\":\"opensearchDashboards\"},{\"id\":\"cad40600-d7fb-11ee-a5f1-9ff9da698a18\",\"color\":\"rgba(255,171,145,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"unit\":\"\",\"id\":\"cad40601-d7fb-11ee-a5f1-9ff9da698a18\",\"type\":\"positive_rate\",\"field\":\"suricata.stats.pkts_dropped\"},{\"id\":\"f5352cd0-d7fb-11ee-a5f1-9ff9da698a18\",\"type\":\"math\",\"variables\":[{\"id\":\"f79def70-d7fb-11ee-a5f1-9ff9da698a18\",\"name\":\"packets\",\"field\":\"cad40601-d7fb-11ee-a5f1-9ff9da698a18\"}],\"script\":\"params.packets*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"0\",\"point_size\":\"0\",\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Suricata: packets dropped\",\"type\":\"timeseries\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"filter\":{\"query\":\"(event.provider:zeek OR event.provider:suricata) AND event.kind:metric\",\"language\":\"kuery\"},\"legend_position\":\"right\",\"background_color\":null}}",
+        "uiStateJSON": "{}",
+        "description": "Positive values on the y-axis represent observed packets while negative values represent missing dropped packets and missing ACKs.\n\nThis data is logged by Zeek in stats.log (https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and capture_loss.log (https://docs.zeek.org/en/master/scripts/policy/misc/capture-loss.zeek.html#type-CaptureLoss::Info), and by Suricata (https://docs.suricata.io/en/suricata-6.0.0/performance/statistics.html).",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "13facbf0-d7e5-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg4NywxXQ==",
+      "attributes": {
+        "title": "Zeek Stats - Packets and Bytes",
+        "visState": "{\"title\":\"Zeek Stats - Packets and Bytes\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"everything\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"zeek.stats.pkts_link\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Packets Seen\"},{\"id\":\"bd4560e0-d7e4-11ee-ad81-217e54128a4b\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"bd4560e1-d7e4-11ee-ad81-217e54128a4b\",\"type\":\"sum\",\"field\":\"zeek.stats.bytes_recv\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Bytes Seen\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"28bcc800-d7e4-11ee-ad81-217e54128a4b\"}],\"filter\":{\"query\":\"event.provider:zeek AND event.dataset:stats\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "8051d2c0-d7e6-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg4OCwxXQ==",
+      "attributes": {
+        "title": "Zeek Stats - Capture Loss",
+        "visState": "{\"title\":\"Zeek Stats - Capture Loss\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"everything\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"zeek.stats.pkts_dropped\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Packets Dropped\"},{\"id\":\"bd4560e0-d7e4-11ee-ad81-217e54128a4b\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"bd4560e1-d7e4-11ee-ad81-217e54128a4b\",\"type\":\"sum\",\"field\":\"zeek.capture_loss.gaps\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"ACKs Missed\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"28bcc800-d7e4-11ee-ad81-217e54128a4b\"}],\"filter\":{\"query\":\"event.provider:zeek AND event.dataset:(stats OR capture_loss)\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "991158b0-d7d9-11ee-9ed3-e7afff29e59a",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg4OSwxXQ==",
+      "attributes": {
+        "title": "Packet Capture - Zeek capture_loss.log",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "zeek.capture_loss.ts_delta",
+          "host.name",
+          "zeek.capture_loss.peer",
+          "zeek.capture_loss.acks",
+          "zeek.capture_loss.gaps",
+          "zeek.capture_loss.percent_lost"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek and event.dataset:capture_loss\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"fixed_interval\":\"30s\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "cc976b70-d7fc-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5MCwxXQ==",
+      "attributes": {
+        "title": "Suricata Stats - Packets and Bytes",
+        "visState": "{\"title\":\"Suricata Stats - Packets and Bytes\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"everything\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"unit\":\"\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"suricata.stats.capture.kernel_packets\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Packets Seen\"},{\"id\":\"bd4560e0-d7e4-11ee-ad81-217e54128a4b\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"bd4560e1-d7e4-11ee-ad81-217e54128a4b\",\"type\":\"top_hit\",\"field\":\"suricata.stats.decoder.bytes\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Bytes Seen\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"28bcc800-d7e4-11ee-ad81-217e54128a4b\"}],\"filter\":{\"query\":\"event.provider:suricata AND event.kind:metric\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9833e6a0-d7fd-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:07:12.009Z",
+      "version": "Wzk5NiwxXQ==",
+      "attributes": {
+        "title": "Suricata Stats - Capture Loss",
+        "visState": "{\"title\":\"Suricata Stats - Capture Loss\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"everything\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"suricata.stats.pkts_dropped\",\"order_by\":\"@timestamp\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Packets Dropped\"}],\"time_field\":\"@timestamp\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"28bcc800-d7e4-11ee-ad81-217e54128a4b\"}],\"filter\":{\"query\":\"event.provider:suricata AND event.kind:metric\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "6b7b9a40-faa1-11e6-86b1-cd7735ff7e23-ecs",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:59.817Z",
+      "version": "Wzk0MCwxXQ==",
+      "attributes": {
+        "title": "Network Traffic (Packets)",
+        "visState": "{\"title\":\"Network Traffic (Packets)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"language\":\"lucene\",\"query\":\"\"},\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,133,255,1)\",\"fill\":\"1\",\"formatter\":\"'0a'\",\"id\":\"49931900-ebf3-11ec-a401-f5db2d59e6af\",\"label\":\"Inbound\",\"line_width\":1,\"metrics\":[{\"unit\":\"1s\",\"id\":\"49931901-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.packets.rx\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"type\":\"timeseries\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"_count\",\"value_template\":\"{{value}}/s\",\"split_color_mode\":\"gradient\"},{\"id\":\"75fba890-ebf3-11ec-a401-f5db2d59e6af\",\"color\":\"rgba(13,212,26,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"unit\":\"1s\",\"id\":\"75fba891-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.packets.tx\"},{\"id\":\"96daba60-ebf3-11ec-a401-f5db2d59e6af\",\"type\":\"math\",\"variables\":[{\"id\":\"98e138c0-ebf3-11ec-a401-f5db2d59e6af\",\"name\":\"rate\",\"field\":\"75fba891-ebf3-11ec-a401-f5db2d59e6af\"}],\"script\":\"params.rate*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"'0a'\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"none\",\"label\":\"Outbound\",\"type\":\"timeseries\",\"terms_size\":\"3\",\"terms_field\":\"miscbeat.network.interface\",\"terms_order_by\":\"_count\",\"split_color_mode\":\"gradient\",\"value_template\":\"{{value}}/s\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"timeseries\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9c6a1610-d7d8-11ee-9ed3-e7afff29e59a",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5MywxXQ==",
+      "attributes": {
+        "title": "Packet Capture - Zeek stats.log",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "zeek.stats.peer",
+          "zeek.stats.mem",
+          "zeek.stats.pkts_link",
+          "zeek.stats.pkts_proc",
+          "zeek.stats.pkts_dropped",
+          "zeek.stats.bytes_recv",
+          "zeek.stats.tcp_conns",
+          "zeek.stats.udp_conns",
+          "zeek.stats.icmp_conns",
+          "zeek.stats.files"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek and event.dataset:stats\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"fixed_interval\":\"30s\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "b0aabf40-d7fa-11ee-b25e-e793ed358448",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5NCwxXQ==",
+      "attributes": {
+        "title": "Packet Capture - Suricata Stats",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "suricata.stats.capture.kernel_packets",
+          "suricata.stats.pkts_dropped",
+          "suricata.stats.capture.errors",
+          "suricata.stats.decoder.bytes",
+          "suricata.stats.decoder.ethernet",
+          "suricata.stats.decoder.ipv4",
+          "suricata.stats.decoder.ipv6",
+          "suricata.stats.detect.engines.rules_loaded",
+          "suricata.stats.detect.alert"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:suricata AND event.kind:metric\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"fixed_interval\":\"30m\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "abcfca50-d7dd-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5NSwxXQ==",
+      "attributes": {
+        "title": "Zeek Analyzer Messages",
+        "visState": "{\"title\":\"Zeek Analyzer Messages\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.analyzer.cause\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Cause\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.analyzer.analyzer_kind\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Class\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.analyzer.analyzer_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Analyzer\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "351ef380-d7d9-11ee-9ed3-e7afff29e59a"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "351ef380-d7d9-11ee-9ed3-e7afff29e59a",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5NiwxXQ==",
+      "attributes": {
+        "title": "Packet Capture - Zeek analyzer.log",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "zeek.analyzer.analyzer_kind",
+          "zeek.analyzer.analyzer_name",
+          "zeek.analyzer.cause",
+          "zeek.analyzer.failure_reason",
+          "source.ip",
+          "destination.ip",
+          "event.id"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek and event.dataset:analyzer\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"firstPacket\",\"fixed_interval\":\"30s\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "arkime_sessions3-*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "c75b6df0-d7e3-11ee-b25e-e793ed358448",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5NywxXQ==",
+      "attributes": {
+        "title": "Zeek - Reporter Categories",
+        "visState": "{\"title\":\"Zeek - Reporter Categories\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.reporter.level\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":false,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "17619ea0-d7da-11ee-9ed3-e7afff29e59a"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "17619ea0-d7da-11ee-9ed3-e7afff29e59a",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:53.644Z",
+      "version": "Wzg5OCwxXQ==",
+      "attributes": {
+        "title": "Packet Capture - Zeek reporter.log",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "host.name",
+          "zeek.reporter.level",
+          "zeek.reporter.location",
+          "zeek.reporter.msg"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek and event.dataset:reporter\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"fixed_interval\":\"30d\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "malcolm_beats_*"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    },
+    {
+      "id": "089b85d0-1b16-11e7-b09e-037021c4f8df-ecs",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-03-04T21:05:59.817Z",
+      "version": "Wzk0MSwxXQ==",
+      "attributes": {
+        "title": "Network Traffic (Bytes)",
+        "visState": "{\"title\":\"Network Traffic (Bytes)\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"default_index_pattern\":\"arkime_sessions3-*\",\"default_timefield\":\"firstPacket\",\"filter\":{\"language\":\"lucene\",\"query\":\"\"},\"id\":\"da1046f0-faa0-11e6-86b1-cd7735ff7e23\",\"index_pattern\":\"malcolm_beats_*\",\"interval\":\"auto\",\"isModelInvalid\":false,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"rgba(0,133,255,1)\",\"fill\":\"1\",\"formatter\":\"bytes\",\"id\":\"6d8b8ab0-ebf1-11ec-a401-f5db2d59e6af\",\"line_width\":1,\"metrics\":[{\"unit\":\"1s\",\"id\":\"6d8b8ab1-ebf1-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.bytes.rx\"}],\"point_size\":1,\"separate_axis\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"label\":\"Inbound\",\"type\":\"timeseries\",\"terms_field\":\"miscbeat.network.interface\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\",\"value_template\":\"{{value}}/s\",\"split_color_mode\":\"gradient\"},{\"id\":\"b5977de0-ebf2-11ec-a401-f5db2d59e6af\",\"color\":\"rgba(13,212,26,1)\",\"split_mode\":\"terms\",\"metrics\":[{\"unit\":\"1s\",\"id\":\"b5977de1-ebf2-11ec-a401-f5db2d59e6af\",\"type\":\"positive_rate\",\"field\":\"miscbeat.network.bytes.tx\"},{\"id\":\"cdfb1540-ebf2-11ec-a401-f5db2d59e6af\",\"type\":\"math\",\"variables\":[{\"id\":\"d1b9caf0-ebf2-11ec-a401-f5db2d59e6af\",\"name\":\"rate\",\"field\":\"b5977de1-ebf2-11ec-a401-f5db2d59e6af\"}],\"script\":\"params.rate*-1\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":\"1\",\"stacked\":\"none\",\"label\":\"Outbound\",\"split_color_mode\":\"gradient\",\"type\":\"timeseries\",\"terms_size\":\"3\",\"terms_order_by\":\"_key\",\"terms_field\":\"miscbeat.network.interface\",\"value_template\":\"{{value}}/s\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"@timestamp\",\"tooltip_mode\":\"show_all\",\"type\":\"timeseries\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    }
+  ]
+}

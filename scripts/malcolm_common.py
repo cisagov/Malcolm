@@ -259,9 +259,11 @@ def AskForString(
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.inputbox(
             question,
-            init=default
-            if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
-            else "",
+            init=(
+                default
+                if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+                else ""
+            ),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise RuntimeError("Operation cancelled")

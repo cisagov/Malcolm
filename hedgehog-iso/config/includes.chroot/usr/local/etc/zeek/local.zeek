@@ -4,45 +4,53 @@
 ##!     https://docs.zeek.org/en/stable/script-reference/scripts.html
 ##!     https://github.com/zeek/zeek/blob/master/scripts/site/local.zeek
 
-global disable_stats = (getenv("ZEEK_DISABLE_STATS") == "") ? F : T;
-global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == "") ? F : T;
-global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == "") ? F : T;
-global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == "") ? F : T;
-global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == "") ? F : T;
-global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == "") ? F : T;
-global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == "") ? F : T;
+global true_regex: pattern = /^\s*(?i:t(rue)?|y(es)?|on|1)\s*$/;
+
+global disable_stats = (getenv("ZEEK_DISABLE_STATS") == true_regex) ? T : F;
+global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == true_regex) ? T : F;
+global disable_log_passwords = (getenv("ZEEK_DISABLE_LOG_PASSWORDS") == true_regex) ? T : F;
+global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") == true_regex) ? T : F;
+global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == true_regex) ? T : F;
+global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == true_regex) ? T : F;
+global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_regex) ? T : F;
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
 global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
-global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == "") ? F : T;
-global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == "") ? F : T;
-global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == "") ? F : T;
-global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == "") ? F : T;
-global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == "") ? F : T;
-global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == "") ? F : T;
-global disable_spicy_quic = (getenv("ZEEK_DISABLE_SPICY_QUIC") == "") ? F : T;
-global disable_spicy_stun = (getenv("ZEEK_DISABLE_SPICY_STUN") == "") ? F : T;
-global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == "") ? F : T;
-global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == "") ? F : T;
-global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == "") ? F : T;
+global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == true_regex) ? T : F;
+global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == true_regex) ? T : F;
+global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == true_regex) ? T : F;
+global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == true_regex) ? T : F;
+global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == true_regex) ? T : F;
+global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == true_regex) ? T : F;
+global disable_spicy_quic = (getenv("ZEEK_DISABLE_SPICY_QUIC") == true_regex) ? T : F;
+global disable_spicy_stun = (getenv("ZEEK_DISABLE_SPICY_STUN") == true_regex) ? T : F;
+global disable_spicy_tailscale = (getenv("ZEEK_DISABLE_SPICY_TAILSCALE") == true_regex) ? T : F;
+global disable_spicy_tftp = (getenv("ZEEK_DISABLE_SPICY_TFTP") == true_regex) ? T : F;
+global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == true_regex) ? T : F;
 
-global disable_ics_all = (getenv("ZEEK_DISABLE_ICS_ALL") == "") ? F : T;
-global disable_ics_bacnet = (getenv("ZEEK_DISABLE_ICS_BACNET") == "") ? F : T;
-global disable_ics_bsap = (getenv("ZEEK_DISABLE_ICS_BSAP") == "") ? F : T;
-global disable_ics_dnp3 = (getenv("ZEEK_DISABLE_ICS_DNP3") == "") ? F : T;
-global disable_ics_enip = (getenv("ZEEK_DISABLE_ICS_ENIP") == "") ? F : T;
-global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == "") ? F : T;
-global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == "") ? F : T;
-global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == "") ? F : T;
-global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == "") ? F : T;
-global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == "") ? F : T;
-global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == "") ? F : T;
-global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == "") ? F : T;
+global disable_ics_all = (getenv("ZEEK_DISABLE_ICS_ALL") == true_regex) ? T : F;
+global disable_ics_bacnet = (getenv("ZEEK_DISABLE_ICS_BACNET") == true_regex) ? T : F;
+global disable_ics_bsap = (getenv("ZEEK_DISABLE_ICS_BSAP") == true_regex) ? T : F;
+global disable_ics_dnp3 = (getenv("ZEEK_DISABLE_ICS_DNP3") == true_regex) ? T : F;
+global disable_ics_enip = (getenv("ZEEK_DISABLE_ICS_ENIP") == true_regex) ? T : F;
+global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex) ? T : F;
+global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == true_regex) ? T : F;
+global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
+global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
+global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
+global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
+global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
+global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
+
+global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
+@if (json_format)
+  redef LogAscii::use_json = T;
+@endif
 
 @load tuning/defaults
 @load frameworks/software/vulnerable
@@ -138,6 +146,9 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_profinet) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_PROFINET);
+  }
+  if (disable_ics_all || disable_ics_profinet_io_cm) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_PROFINET_IO_CM);
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);
@@ -290,3 +301,36 @@ redef CVE_2021_44228::log = F;
       break;
   }
 @endif
+
+##! Other logs we're just disabling unilaterally
+
+# amzn/zeek-plugin-profinet's profinet_dce_rpc.log is covered by cisagov/icsnpp-profinet-io-cm
+hook Profinet::log_policy_profinet_dce_rpc(
+  rec: Profinet::Profinet_DCE_RPC,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+# we're not tracking the BSAP "unknown" logs
+hook Bsap::log_policy_bsap_ip_unknown(
+  rec: Bsap::BSAP_IP_UNKNOWN,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+hook Bsap::log_policy_bsap_serial_unknown(
+  rec: Bsap::BSAP_SERIAL_UNKNOWN,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
+
+# all ARP traffic is logged by the ethercat parser, which is overkill
+hook PacketAnalyzer::ECAT::log_policy_ecat_arp(
+  rec: PacketAnalyzer::ECAT::ECAT_ARP_INFO,
+  id: Log::ID,
+  filter: Log::Filter) {
+  break;
+}
