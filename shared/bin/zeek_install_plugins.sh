@@ -76,6 +76,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-genisys"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
+  "https://github.com/cisagov/icsnpp-profinet-io-cm"
   "https://github.com/cisagov/icsnpp-s7comm"
   "https://github.com/cisagov/icsnpp-synchrophasor"
   "https://github.com/corelight/callstranger-detector"

@@ -102,7 +102,7 @@ YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-co
 echo "VCS_REVSION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
 trap cleanup_shared_and_docs EXIT
 
-vm_execute "sudo bash -c \"whoami && cd /Malcolm/sensor-raspi && pwd && make ${IMAGE}${XZ_EXT}\""
+vm_execute "sudo bash -c \"whoami && cd /Malcolm/hedgehog-raspi && pwd && make ${IMAGE}${XZ_EXT}\""
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2

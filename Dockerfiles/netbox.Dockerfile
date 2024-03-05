@@ -32,7 +32,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
 
-ENV YQ_VERSION "4.33.3"
+ENV YQ_VERSION "4.42.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
@@ -106,6 +106,13 @@ RUN apt-get -q update && \
       mkdir -p ./repo && \
       curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
       rm -rf ./repo/device-types/WatchGuard && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
+      cryptography \
+      GitPython \
+      Jinja2 \
+      "Django>=4.2.10,<5" \
+      paramiko \
+      pillow && \
     mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" && \
       mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \

@@ -11,7 +11,7 @@ clone this repository:
 
 ```shell
 git clone https://github.com/cisagov/Malcolm.git
-cd Malcolm/sensor-raspi
+cd Malcolm/hedgehog-raspi
 ```
 
 For this you will first need to install the following packages on a

@@ -232,7 +232,9 @@ RUN set -x ; \
   rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /nginx.tar.gz /nginx-auth-ldap.tar.gz /ngx_http_substitutions_filter_module-master.tar.gz; \
   touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf && \
   find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; && \
-  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \;
+  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; && \
+  cd /usr/share/nginx/html/assets/img && \
+  ln -s ./Malcolm_background.png ./bg-masthead.png
 
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
@@ -242,9 +244,13 @@ ADD nginx/scripts /usr/local/bin/
 ADD nginx/*.conf /etc/nginx/
 ADD nginx/templates /etc/nginx/templates/
 ADD nginx/supervisord.conf /etc/
+COPY --chmod=644 docs/images/favicon/*.png /usr/share/nginx/html/assets/img/
+COPY --chmod=644 docs/images/icon/*.png /usr/share/nginx/html/assets/img/
+COPY --chmod=644 docs/images/icon/*.svg /usr/share/nginx/html/assets/img/
 COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
 COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
-COPY --chmod=644 docs/images/logo/Malcolm_background.png /usr/share/nginx/html/assets/img/bg-masthead.png
+COPY --chmod=644 docs/images/logo/*.png /usr/share/nginx/html/assets/img/
+COPY --chmod=644 docs/images/logo/*.svg /usr/share/nginx/html/assets/img/
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

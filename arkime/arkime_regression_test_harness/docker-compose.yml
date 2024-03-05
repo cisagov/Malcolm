@@ -7,7 +7,7 @@ services:
     environment:
       logger.level : 'INFO'
       bootstrap.memory_lock : 'true'
-      OPENSEARCH_JAVA_OPTS : '-Xms4g -Xmx4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
+      OPENSEARCH_JAVA_OPTS : '-Xmx4g -Xms4g -Xss256k -Djava.security.egd=file:/dev/./urandom'
       discovery.type : 'single-node'
       cluster.routing.allocation.disk.threshold_enabled : 'false'
       cluster.routing.allocation.node_initial_primaries_recoveries : 8
