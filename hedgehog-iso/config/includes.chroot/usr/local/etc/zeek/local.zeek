@@ -94,6 +94,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load policy/protocols/conn/vlan-logging
 @load policy/protocols/conn/mac-logging
 @load policy/protocols/modbus/known-masters-slaves
+@load policy/frameworks/notice/community-id
 @load ./login.zeek
 
 @if (!disable_best_guess_ics)

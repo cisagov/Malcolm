@@ -93,7 +93,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/pingback"
   "https://github.com/corelight/ripple20"
   "https://github.com/corelight/SIGRed"
-  "https://github.com/corelight/zeek-community-id"
   "https://github.com/corelight/zeek-spicy-ipsec"
   "https://github.com/corelight/zeek-spicy-openvpn"
   "https://github.com/corelight/zeek-spicy-ospf"
