@@ -16,7 +16,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [malcolm-24.03.0.iso](/iso/malcolm-24.03.0.iso) (5.1GiB) |  [`f2e15167a3bed28cc6ec5af727d2eecdc5e7b58ef5325f4e1db84b8d8a2da2b5`](/iso/malcolm-24.03.0.iso.sha256.txt) |
+| [malcolm-24.03.1.iso](/iso/malcolm-24.03.1.iso) (5.1GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/malcolm-24.03.1.iso.sha256.txt) |
 
 ## Hedgehog Linux
 
@@ -26,7 +26,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | ISO | SHA256 |
 |---|---|
-| [hedgehog-24.03.0.iso](/iso/hedgehog-24.03.0.iso) (2.5GiB) |  [`d849ab533ea1f3c37c87f6b4064ddff31e1ac40a060d36f120b9fefe229577ae`](/iso/hedgehog-24.03.0.iso.sha256.txt) |
+| [hedgehog-24.03.1.iso](/iso/hedgehog-24.03.1.iso) (2.5GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.03.1.iso.sha256.txt) |
 
 ### Raspberry Pi 4 Image
 
@@ -34,7 +34,7 @@ While official downloads of the Malcolm installer ISO are not provided, an **uno
 
 | Image | SHA256 |
 |---|---|
-| [hedgehog-24.03.0_raspi_4.img.xz](/iso/hedgehog-24.03.0_raspi_4.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.03.0_raspi_4.img.xz.sha256.txt) |
+| [hedgehog-24.03.1_raspi_4.img.xz](/iso/hedgehog-24.03.1_raspi_4.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.03.1_raspi_4.img.xz.sha256.txt) |
 
 ## Warning
 
