@@ -37,7 +37,6 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
-    * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
     * Corelight's [DCE/RPC remote code execution vulnerability (CVE-2022-26809)](https://github.com/corelight/cve-2022-26809) plugin
     * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
     * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
