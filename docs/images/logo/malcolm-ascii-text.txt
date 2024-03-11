@@ -1,0 +1,9 @@
+
+MMMM        MMMMM                    lll                     x;+x;;;;      lll
+MMMMM       MMMMM                    lll                   ;        ;; ;   lll
+MMMMMM     MMMMMM      aaaaaaaaaa    lll      cccccccc    ;       xx;;  ;  lll    mmmmmmmmm mmmmmmm
+MMM MMM   MMM MMM    aaaa    aaaa    lll    cccc    ccc  ;;x;;;+;x;;x    ; lll    mmmm   mmmm   mmmm
+MMM  MM  MMM  MMM   aaaa      aaa    lll   ccc           ;+     ;X; x    + lll    mmm    mmm     mmm
+MMM  MMM MM   MMM   aaaa      aaa    lll   cccc           ;$     x;     ;  lll    mmm    mmm     mmm
+MMM   MMMMM   MMM    aaaa    aaaa    lll    cccc   cccc   x;      ;;;;;x   lll    mmm    mmm     mmm
+MMM    MMM    MMM      aaaaaaaaaa    lll      cccccccc      ^-;;x$x;;^`    lll    mmm    mmm     mmm
