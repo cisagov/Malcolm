@@ -97,5 +97,5 @@ else
   SHA_FILE="$(basename "${1}").sha"
   sha256sum --binary "${1}" | head --bytes=64 | tee "${SHA_FILE}"
   echo "  $(basename "${1}")" | tee --append "${SHA_FILE}"
-  split --suffix-length=2 --bytes=2000000000 --numeric-suffixes=1 "${1}" "$(basename "${1}")."
+  split --bytes=2000000000 --numeric-suffixes=1 --suffix-length=2 "${1}" "$(basename "${1}")."
 fi
