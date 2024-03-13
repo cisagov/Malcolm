@@ -2,12 +2,16 @@
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
+# release_cleaver.sh
+# Split and join large files into 2 gigabyte chunks. sha256 sum is
+#   also calculated and saved on split and checked on join.
+
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
   exit 1
 fi
 
-if ! (type basename && type sha256sum && type split && type cat) > /dev/null; then
+if ! (command -v basename && command -v sha256sum && command -v split && command -v cat) >/dev/null 2>&1; then
   echo "${BASH_SOURCE[0]} requires split, cat, and sha256sum" >&2
   exit 1
 fi
@@ -19,7 +23,6 @@ function base () { echo "${1%.*}" ; }
 function ext () { echo "${1##*.}" ; }
 
 if (( "$#" <= 0 )); then
-  # output script usage, used for splitting or joining release files
   echo "Usage:" >&2
   echo "  $(basename "${BASH_SOURCE[0]}") <file_to_split>" >&2
   echo "OR" >&2
