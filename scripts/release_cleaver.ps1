@@ -70,6 +70,29 @@ function Split-BinaryFile {
     }
 }
 
+function Concatenate-BinaryFiles {
+    param (
+        [string[]]$FilePaths,
+        [string]$OutputFile
+    )
+
+    try {
+        $outputFileStream = [System.IO.File]::Create($OutputFile)
+
+        foreach ($filePath in $FilePaths) {
+            $inputFileStream = [System.IO.File]::OpenRead($filePath)
+            try {
+                $inputFileStream.CopyTo($outputFileStream)
+            } finally {
+                $inputFileStream.Close()
+            }
+        }
+    }
+    finally {
+        $outputFileStream.Close()
+    }
+}
+
 
 if ($args.Count -eq 0) {
     Write-Host "Usage:"
@@ -79,6 +102,8 @@ if ($args.Count -eq 0) {
     exit 1
 
 } elseif ($args.Count -gt 1) {
+    # TODO:
+    # Concatenate-BinaryFiles -FilePaths $args[0..($args.Length - 1)] -OutputFile $args[-1]
 
 } else {
     Write-Host "Splitting..."
