@@ -11,6 +11,8 @@ Malcolm operates as a cluster of Docker containers, isolated sandboxes which eac
 
 ## <a name="DownloadISOs"></a> Installer ISOs
 
+* [Latest release]({{ site.github.repository_url }}/releases/latest)
+
 Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
 
 Malcolm can be packaged into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
