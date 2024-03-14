@@ -239,7 +239,14 @@ def register(params)
                               /\boo\b/,
                               /\bsa\b/,
                               /\bsr[ol]s?\b/,
-                              /\btech(nolog(y|ie|iya)s?)?\b/ ]
+                              /\btech(nolog(y|ie|iya)s?)?\b/ ].freeze
+
+  @private_ip_subnets = [
+    IPAddr.new('10.0.0.0/8'),
+    IPAddr.new('172.16.0.0/12'),
+    IPAddr.new('192.168.0.0/16'),
+  ].freeze
+
 end
 
 def filter(event)
@@ -270,6 +277,7 @@ def filter(event)
   _autopopulate_oui = event.get("#{@source_oui}")
   _autopopulate_fuzzy_threshold = @autopopulate_fuzzy_threshold
   _autopopulate_create_manuf = @autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
+  _autopopulate_create_prefix = @autopopulate_create_prefix
 
   _result = @cache_hash.getset(_lookup_type){
               LruRedux::TTL::ThreadSafeCache.new(_cache_size, _cache_ttl)
@@ -723,6 +731,22 @@ def filter(event)
                 rescue Faraday::Error
                   # give up aka do nothing
                   _exception_error = true
+                end
+                if _prefixes.empty? && !_key_ip&.ipv6? && _key_ip&.private? && _autopopulate_create_prefix
+                  # we didn't find a prefix containing this private-space IPv4 address and auto-create prefixes is turned on
+                  # TODO: ipv6?
+                  _private_ip_subnet = @private_ip_subnets.find { |subnet| subnet.include?(_key_ip) }
+                  if !_private_ip_subnet.nil?
+                    _new_subnet_ip = _key_ip.mask([_private_ip_subnet.prefix() + 8, 24].min)
+                    _new_subnet_name = _new_subnet_ip
+                    if !_new_subnet_name.to_s.include?('/')
+                      _new_subnet_name += '/' + newip.prefix().to_s
+                    end
+                    _prefix_data = { :prefix => _new_subnet_name,
+                                     :description => _new_subnet_name,
+                                     # TODO :site => "",
+                                     :status => "active" }
+                  end
                 end
                 _prefixes = collect_values(crush(_prefixes))
                 _lookup_result = _prefixes unless (_lookup_type != :ip_prefix)
