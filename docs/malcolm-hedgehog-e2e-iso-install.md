@@ -34,11 +34,9 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
-Malcolm can be [packaged](malcolm-iso.md#ISOBuild) into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
+Please see [**Downloading Malcolm**](download.md#DownloadMalcolm) for instructions on how to obtain the Malcolm and Hedgehog Linux installation ISOs.
 
-Similar instructions exist for generating the [installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) for [Hedgehog Linux](hedgehog.md), Malcolm's dedicated network sensor appliance OS.
-
-While official downloads of the Malcolm installer ISO are not provided, an **unofficial build** of the ISO installer for the [latest stable release]({{ site.github.repository_url }}/releases) is available for [download here]({{ site.external_download_url }}). If downloading the unofficial builds, be sure to verify the integrity of ISO files against the SHA256 sums provided on the download page.
+As an alternative to the official release ISOs, instructions are provided for building the [Malcolm insaller ISO](malcolm-iso.md#ISOBuild) and [Hedgehog Linux installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) (Malcolm's dedicated [network sensor appliance OS](hedgehog.md)) from scratch.
 
 ## <a name="ISOBurning"></a> "Burning" the Installation ISOs to USB Flash Drive
 

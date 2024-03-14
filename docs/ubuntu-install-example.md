@@ -6,9 +6,9 @@ For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linu
 
 The commands in this example should be executed as a non-root user.
 
-Use `git` to clone Malcolm into a local working copy, or download and extract the artifacts from the [latest release]({{ site.github.repository_url }}/releases).
+Use `git` to clone Malcolm into a local working copy, or download and extract the artifacts from the [latest release]({{ site.github.repository_url }}/releases/latest).
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases) and download at a minimum the files ending in `.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to the downloads directory:
+To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases/latest) and download at a minimum the files ending in `.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to the downloads directory:
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
