@@ -15,13 +15,13 @@ Malcolm operates as a cluster of Docker containers, isolated sandboxes which eac
 
 Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
 
-Malcolm can be packaged into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
+Malcolm is also packaged into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
 
 ### <a name="JoinISOs"></a> Joining split ISOs
 
 ISOs can be downloaded from [Malcolm's releases page]({{ site.github.repository_url }}/releases/latest) on GitHub. Due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, these ISO files have been split into 2GB chunks and can be reassembled with scripts provided for both Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1)).
 
-For example, having downloaded the following files from the GitHub release page for Malcolm, the script will join the component files and check the resulting ISO's SHA256 sum:
+For example, having downloaded the following files from Malcolm's releases page on GitHub, the script will join the component files and check the resulting ISOs SHA256 sum:
 
 ```bash
 $ ls -l
@@ -67,4 +67,4 @@ Mode                 LastWriteTime         Length Name
 
 ### <a name="ISOsWarning"></a> Warning
 
-Read carefully the installation documentation for [Malcolm](malcolm-iso.md#ISOInstallation) and/or [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation). The ISO media boot on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+Users should carefully read the installation documentation for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation). The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.

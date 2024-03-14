@@ -58,7 +58,7 @@ Alternatively, the ISO images could be burned to writable optical media (e.g., D
 
 ## <a name="BootUSB"></a> Booting the Installation Media
 
-The ISO installers boot on systems that support EFI-mode and legacy (BIOS) booting. The procedure for configuring a system's firmware to allow booting from USB or optical media varies from manufacturer to manufacturer. Manufacturers typically provide a "one-time boot" menu upon a specific keypress (e.g., F12 for Dell, F9 for HP, etc.). If needed, consult the documentation provided by the hardware manufacturer on how to access the boot options menu and boot from the newly-burned USB flash media or DVD±R.
+The ISO installers are compatible with systems that support EFI-mode and legacy (BIOS) booting. The procedure for configuring a system's firmware to allow booting from USB or optical media varies from manufacturer to manufacturer. Manufacturers typically provide a "one-time boot" menu upon a specific keypress (e.g., F12 for Dell, F9 for HP, etc.). If needed, consult the documentation provided by the hardware manufacturer on how to access the boot options menu and boot from the newly-burned USB flash media or DVD±R.
 
 ![EFI Boot Manager](./images/screenshots/iso_install_boot_menu_efi.png)
 
