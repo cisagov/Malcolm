@@ -132,7 +132,7 @@ if ($allFileArgs.Count -eq 0) {
 
     # don't overwrite an existing file
     if (Test-Path $outFile -PathType Leaf) {
-        Write-Host """$($outFile)"" already exists"
+        Write-Host "Output file ""$($outFile)"" already exists"
         exit 1
     }
 
@@ -195,4 +195,6 @@ if ($allFileArgs.Count -eq 0) {
 
     # split the file into its parts
     Split-BinaryFile $fileToSplit (Get-Location)
+
+    Get-Content $shaFile | Write-Host
 }
