@@ -36,7 +36,7 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
 
 Please see [**Downloading Malcolm**](download.md#DownloadMalcolm) for instructions on how to obtain the Malcolm and Hedgehog Linux installation ISOs.
 
-As an alternative to the official release ISOs, instructions are provided for building the [Malcolm insaller ISO](malcolm-iso.md#ISOBuild) and [Hedgehog Linux installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) (Malcolm's dedicated [network sensor appliance OS](hedgehog.md)) from scratch.
+As an alternative to the official release ISOs, instructions are provided for building the [Malcolm installer ISO](malcolm-iso.md#ISOBuild) and [Hedgehog Linux installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) (Malcolm's dedicated [network sensor appliance OS](hedgehog.md)) from scratch.
 
 ## <a name="ISOBurning"></a> "Burning" the Installation ISOs to USB Flash Drive
 
