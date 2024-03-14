@@ -19,7 +19,7 @@ Please see the [NetBox page on GitHub](https://github.com/netbox-community/netbo
 
 ## <a name="NetBoxEnrichment"></a>Enriching network traffic metadata via NetBox lookups
 
-As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBOX_ENRICHMENT` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`), the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/) for more information.
+As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHMENT` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`), the NetBox API will be queried for the associated hosts' information. If found, the information retrieved by NetBox will be used to enrich these logs through the creation of the following new fields. See [the NetBox API](https://demo.netbox.dev/api/docs/) documentation and [the NetBox documentation](https://demo.netbox.dev/static/docs/introduction/) for more information.
 
 * `destination.…`
     - `destination.device.cluster` (`/virtualization/clusters/`) (for [Virtual Machine](https://demo.netbox.dev/static/docs/coe-functionality/virtualization/) device types)
@@ -31,13 +31,13 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `LOGSTASH_NETBO
     - [`destination.device.service`](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) (`/ipam/services/`)
     - `destination.device.site` (`/dcim/sites/`)
     - `destination.device.url` (`/dcim/devices/`)
-    - `destination.device.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
+    - `destination.device.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
     - `destination.segment.id` (`/ipam/prefixes/{id}`)
     - `destination.segment.name` (`/ipam/prefixes/{description}`)
     - `destination.segment.site` (`/dcim/sites/`)
     - `destination.segment.tenant` (`/tenancy/tenants/`)
     - `destination.segment.url` (`/ipam/prefixes/`)
-    - `destination.segment.details` (full JSON object, [only with `LOGSTASH_NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
+    - `destination.segment.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
     - `related.device_type`
@@ -94,7 +94,7 @@ The following elements of the NetBox data model are used by Malcolm for Asset In
 
 ## <a name="NetBoxPopPassive"></a>Populate NetBox inventory via passively-gathered network traffic metadata
 
-If the `LOGSTASH_NETBOX_AUTO_POPULATE` [environment variable in `./config/logstash.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, [uninventoried](#NetBoxCompare) devices with private IP addresses (as defined in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) and [RFC 4193](https://datatracker.ietf.org/doc/html/rfc4193)) observed in known network segments will be automatically created in the NetBox inventory based on the information available. This value is set to `true` by answering **Y** to "Should Malcolm automatically populate NetBox inventory based on observed network traffic?" during [configuration](malcolm-config.md#ConfigAndTuning).
+If the `NETBOX_AUTO_POPULATE` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, [uninventoried](#NetBoxCompare) devices with private IP addresses (as defined in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) and [RFC 4193](https://datatracker.ietf.org/doc/html/rfc4193)) observed in known network segments will be automatically created in the NetBox inventory based on the information available. This value is set to `true` by answering **Y** to "Should Malcolm automatically populate NetBox inventory based on observed network traffic?" during [configuration](malcolm-config.md#ConfigAndTuning).
 
 However, careful consideration should be made before enabling this feature: the purpose of an asset management system is to document the intended state of a network: with Malcolm configured to populate NetBox with the live network state, a network misconfiguration fault could result in an **incorrect documented configuration**.
 

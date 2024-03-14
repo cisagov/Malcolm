@@ -246,16 +246,6 @@ def main():
         help="Directory containing netbox-initializers files to preload",
     )
     parser.add_argument(
-        '--preload-prefixes',
-        dest='preloadPrefixes',
-        type=malcolm_utils.str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=malcolm_utils.str2bool(os.getenv('NETBOX_PRELOAD_PREFIXES', default='False')),
-        help="Preload IPAM IP Prefixes for private IP space",
-    )
-    parser.add_argument(
         '--preload-backup',
         dest='preloadBackupFile',
         type=str,
@@ -847,22 +837,6 @@ def main():
                     # make a local copy of the YMLs to preload
                     with tempfile.TemporaryDirectory() as tmpPreloadDir:
                         copy_tree(args.preloadDir, tmpPreloadDir)
-
-                        # only preload catch-all IP Prefixes if explicitly specified and they don't already exist
-                        if args.preloadPrefixes:
-                            defaultSiteName = next(iter([x for x in args.netboxSites]), None)
-                            for loadType in ('vrfs', 'prefixes'):
-                                defaultFileName = os.path.join(tmpPreloadDir, f'{loadType}_defaults.yml')
-                                loadFileName = os.path.join(tmpPreloadDir, f'{loadType}.yml')
-                                if os.path.isfile(defaultFileName) and (not os.path.isfile(loadFileName)):
-                                    try:
-                                        with open(defaultFileName, 'r') as infile:
-                                            with open(loadFileName, 'w') as outfile:
-                                                for line in infile:
-                                                    outfile.write(line.replace("NETBOX_DEFAULT_SITE", defaultSiteName))
-                                    except Exception:
-                                        pass
-
                         retcode, output = malcolm_utils.run_process(
                             [
                                 netboxVenvPy,

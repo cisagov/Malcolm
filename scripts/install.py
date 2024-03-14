@@ -1350,17 +1350,17 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=args.netboxLogstashEnrich,
         )
-        netboxLogstashAutoPopulate = (
+        netboxAutoPopulate = (
             netboxEnabled
             and InstallerYesOrNo(
                 'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
-                default=args.netboxLogstashAutoPopulate,
+                default=args.netboxAutoPopulate,
             )
             and (
                 args.acceptDefaultsNonInteractive
                 or InstallerYesOrNo(
                     "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                    default=args.netboxLogstashAutoPopulate,
+                    default=args.netboxAutoPopulate,
                 )
             )
         )
@@ -1374,9 +1374,9 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
-        netboxPreloadPrefixes = netboxEnabled and InstallerYesOrNo(
-            'Should Malcolm create "catch-all" prefixes for private IP address space?',
-            default=args.netboxPreloadPrefixes,
+        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
+            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
+            default=args.netboxLogstashAutoSubnets,
         )
 
         # input packet capture parameters
@@ -1676,18 +1676,6 @@ class Installer(object):
                 'LOGSTASH_OUI_LOOKUP',
                 TrueOrFalseNoQuote(autoOui),
             ),
-            # enrich network traffic metadata via NetBox API calls
-            EnvValue(
-                os.path.join(args.configDir, 'logstash.env'),
-                'LOGSTASH_NETBOX_ENRICHMENT',
-                TrueOrFalseNoQuote(netboxLogstashEnrich),
-            ),
-            # populate the NetBox inventory based on observed network traffic
-            EnvValue(
-                os.path.join(args.configDir, 'logstash.env'),
-                'LOGSTASH_NETBOX_AUTO_POPULATE',
-                TrueOrFalseNoQuote(netboxLogstashAutoPopulate),
-            ),
             # logstash pipeline workers
             EnvValue(
                 os.path.join(args.configDir, 'logstash.env'),
@@ -1700,6 +1688,24 @@ class Installer(object):
                 'FREQ_LOOKUP',
                 TrueOrFalseNoQuote(autoFreq),
             ),
+            # enrich network traffic metadata via NetBox API calls
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_ENRICHMENT',
+                TrueOrFalseNoQuote(netboxLogstashEnrich),
+            ),
+            # create missing NetBox subnet prefixes based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_AUTOCREATE_PREFIX',
+                TrueOrFalseNoQuote(netboxLogstashAutoSubnets),
+            ),
+            # populate the NetBox inventory based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_AUTO_POPULATE',
+                TrueOrFalseNoQuote(netboxAutoPopulate),
+            ),
             # NetBox default site name
             EnvValue(
                 os.path.join(args.configDir, 'netbox-common.env'),
@@ -1711,11 +1717,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
-            ),
-            EnvValue(
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_PRELOAD_PREFIXES',
-                TrueOrFalseNoQuote(netboxPreloadPrefixes),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
@@ -3955,7 +3956,7 @@ def main():
     )
     netboxArgGroup.add_argument(
         '--netbox-autopopulate',
-        dest='netboxLogstashAutoPopulate',
+        dest='netboxAutoPopulate',
         type=str2bool,
         metavar="true|false",
         nargs='?',
@@ -3964,14 +3965,14 @@ def main():
         help="Automatically populate NetBox inventory based on observed network traffic",
     )
     netboxArgGroup.add_argument(
-        '--netbox-preload-prefixes',
-        dest='netboxPreloadPrefixes',
+        '--netbox-auto-prefixes',
+        dest='netboxLogstashAutoSubnets',
         type=str2bool,
         metavar="true|false",
         nargs='?',
         const=True,
         default=False,
-        help="Preload NetBox IPAM IP Prefixes for private IP space",
+        help="Automatically create missing NetBox subnet prefixes based on observed network traffic",
     )
     netboxArgGroup.add_argument(
         '--netbox-site-name',

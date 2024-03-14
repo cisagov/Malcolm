@@ -12,9 +12,14 @@ def register(params)
   require 'psych'
   require 'stringex_lite'
 
-  # global enable/disable for this plugin based on environment variable(s)
-  @netbox_enabled = (not [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["NETBOX_DISABLED"].to_s.downcase)) &&
-                    [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["LOGSTASH_NETBOX_ENRICHMENT"].to_s.downcase)
+  # enable/disable based on script parameters and global environment variable
+  _enabled_str = params["enabled"]
+  _enabled_env = params["enabled_env"]
+  if _enabled_str.nil? && !_enabled_env.nil?
+    _enabled_str = ENV[_enabled_env]
+  end
+  @netbox_enabled = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_enabled_str.to_s.downcase) &&
+                    (not [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["NETBOX_DISABLED"].to_s.downcase))
 
   # source field containing lookup value
   @source = params["source"]
@@ -195,6 +200,14 @@ def register(params)
     _autopopulate_create_manuf_str = ENV[_autopopulate_create_manuf_env]
   end
   @autopopulate_create_manuf = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_manuf_str.to_s.downcase)
+
+  # if the prefix is not found, should we create one?
+  _autopopulate_create_prefix_str = params["auto_prefix"]
+  _autopopulate_create_prefix_env = params["auto_prefix_env"]
+  if _autopopulate_create_prefix_str.nil? && !_autopopulate_create_prefix_env.nil?
+    _autopopulate_create_prefix_str = ENV[_autopopulate_create_prefix_env]
+  end
+  @autopopulate_create_prefix = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_prefix_str.to_s.downcase)
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048), @cache_ttl)
