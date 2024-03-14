@@ -20,7 +20,7 @@ function Split-BinaryFile {
         [string]$FilePath,
         [string]$OutDir,
         [int64]$ChunkSize = 2000000000,
-        [int64]$BufferSize = 1MB
+        [int64]$BufferSize = 1000000
     )
 
     $fileStream = [System.IO.File]::OpenRead($FilePath)
@@ -63,9 +63,8 @@ function Concatenate-BinaryFiles {
         [string]$OutputFile
     )
 
+    $outputFileStream = [System.IO.File]::Create($OutputFile)
     try {
-        $outputFileStream = [System.IO.File]::Create($OutputFile)
-
         foreach ($filePath in $FilePaths) {
             $inputFileStream = [System.IO.File]::OpenRead($filePath)
             try {
@@ -128,11 +127,12 @@ if ($allFileArgs.Count -eq 0) {
             $prevBase = $curBase
         }
     }
-    $outFile = $prevBase
+    $outFileBase = $prevBase
+    $outFile = Join-Path -Path (Get-Location) -ChildPath (Split-Path -Path $outFileBase -Leaf)
 
     # don't overwrite an existing file
     if (Test-Path $outFile -PathType Leaf) {
-        Write-Host "Output file ""$($outFile)"" already exists"
+        Write-Host "Output file ""$($outFileBase)"" already exists"
         exit 1
     }
 
@@ -144,7 +144,7 @@ if ($allFileArgs.Count -eq 0) {
         $outFileItem = Get-Item $outFile
         if ($outFileItem.Length -gt 0) {
             if ($shaFiles.Count -ne 1) {
-                Write-Host "Files joined to ""$($outFile)"", but could not verify file integrity"
+                Write-Host "Files joined to ""$($outFileBase)"", but could not verify file integrity"
                 exit 1
 
             } else {
@@ -165,21 +165,21 @@ if ($allFileArgs.Count -eq 0) {
 
                 # compare the joined file and hash from the sha file
                 if ($shaFileContents[0] -eq $outFileHashSha256.ToLower()) {
-                    Write-Host """$($outFile)"" OK"
+                    Write-Host """$($outFileBase)"" OK"
 
                 } else {
-                    Write-Host """$($outFile)"" SHA256 hash mismatch ($($shaFileContents[0]) vs $($outFileHashSha256))"
+                    Write-Host """$($outFileBase)"" SHA256 hash mismatch ($($shaFileContents[0]) vs $($outFileHashSha256))"
                     exit 1
                 }
             }
 
         } else {
-            Write-Host "Attempted to join files to ""$($outFile)"", but an empty file resulted"
+            Write-Host "Attempted to join files to ""$($outFileBase)"", but an empty file resulted"
             exit 1
         }
 
     } else {
-        Write-Host "Attempted to join files to ""$($outFile)"", but could not create the file"
+        Write-Host "Attempted to join files to ""$($outFileBase)"", but could not create the file"
         exit 1
     }
 
