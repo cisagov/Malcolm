@@ -49,7 +49,7 @@ Although the configuration script automates many of the following configuration 
     - `NETBOX_ENRICHMENT` - if set to `true`, Logstash will [enrich network traffic metadata](asset-interaction-analysis.md#NetBoxEnrichment) via NetBox API calls
     - `NETBOX_DEFAULT_SITE` - specifies the default NetBox [site name](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/) for use when [enriching network traffic metadata via NetBox lookups](asset-interaction-analysis.md#NetBoxEnrichment) (default `Malcolm`)
     - `NETBOX_AUTO_POPULATE` - if set to `true`, Logstash will [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic
-    - `NETBOX_AUTOCREATE_PREFIX` - if set to `true`, Logstash will automatically create private subnet prefixes in the [NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic
+    - `NETBOX_AUTO_CREATE_PREFIX` - if set to `true`, Logstash will automatically create private subnet prefixes in the [NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic
     - `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER` - if set to `true`, new manufacturer entries will be created in the NetBox database when [matching device manufacturers to OUIs](asset-interaction-analysis.md#NetBoxPopPassiveOUIMatch) (default `true`)
     - `NETBOX_DEFAULT_FUZZY_THRESHOLD` - fuzzy-matching threshold for [matching device manufacturers to OUIs](asset-interaction-analysis.md#NetBoxPopPassiveOUIMatch) (default `0.95`)
 * **`nginx.env`** - settings specific to Malcolm's nginx reverse proxy

@@ -1697,7 +1697,7 @@ class Installer(object):
             # create missing NetBox subnet prefixes based on observed network traffic
             EnvValue(
                 os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_AUTOCREATE_PREFIX',
+                'NETBOX_AUTO_CREATE_PREFIX',
                 TrueOrFalseNoQuote(netboxLogstashAutoSubnets),
             ),
             # populate the NetBox inventory based on observed network traffic

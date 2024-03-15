@@ -478,42 +478,7 @@ def filter(event)
                   # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
 
                   # make sure the site and role exists
-
-                  _autopopulate_site = @site_hash.getset(_autopopulate_default_site) {
-                    begin
-                      _site = nil
-
-                      # look it up first
-                      _query = { :offset => 0,
-                                 :limit => 1,
-                                 :name => _autopopulate_default_site }
-                      if (_sites_response = _nb.get('dcim/sites/', _query).body) &&
-                         _sites_response.is_a?(Hash) &&
-                         (_tmp_sites = _sites_response.fetch(:results, [])) &&
-                         (_tmp_sites.length() > 0)
-                      then
-                         _site = _tmp_sites.first
-                      end
-
-                      if _site.nil?
-                        # the device site is not found, create it
-                        _site_data = { :name => _autopopulate_default_site,
-                                       :slug => _autopopulate_default_site.to_url,
-                                       :status => "active" }
-                        if (_site_create_response = _nb.post('dcim/sites/', _site_data.to_json, _nb_headers).body) &&
-                           _site_create_response.is_a?(Hash) &&
-                           _site_create_response.has_key?(:id)
-                        then
-                           _site = _site_create_response
-                        end
-                      end
-
-                    rescue Faraday::Error
-                      # give up aka do nothing
-                      _exception_error = true
-                    end
-                    _site
-                  }
+                  _autopopulate_site = lookup_autopopulate_site(_autopopulate_default_site, _nb, _nb_headers)
 
                   _autopopulate_role = @role_hash.getset(_autopopulate_default_role) {
                     begin
@@ -732,22 +697,43 @@ def filter(event)
                   # give up aka do nothing
                   _exception_error = true
                 end
+
+                                       # TODO: ipv6?
                 if _prefixes.empty? && !_key_ip&.ipv6? && _key_ip&.private? && _autopopulate_create_prefix
-                  # we didn't find a prefix containing this private-space IPv4 address and auto-create prefixes is turned on
-                  # TODO: ipv6?
+                  # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
                   _private_ip_subnet = @private_ip_subnets.find { |subnet| subnet.include?(_key_ip) }
                   if !_private_ip_subnet.nil?
-                    _new_subnet_ip = _key_ip.mask([_private_ip_subnet.prefix() + 8, 24].min)
-                    _new_subnet_name = _new_subnet_ip
-                    if !_new_subnet_name.to_s.include?('/')
-                      _new_subnet_name += '/' + newip.prefix().to_s
+                    _new_prefix_ip = _key_ip.mask([_private_ip_subnet.prefix() + 8, 24].min)
+                    _new_prefix_name = _new_prefix_ip.to_s
+                    if !_new_prefix_name.to_s.include?('/')
+                      _new_prefix_name += '/' + _new_prefix_ip.prefix().to_s
                     end
-                    _prefix_data = { :prefix => _new_subnet_name,
-                                     :description => _new_subnet_name,
-                                     # TODO :site => "",
+                    _autopopulate_site = lookup_autopopulate_site(_autopopulate_default_site, _nb, _nb_headers)
+                    _prefix_data = { :prefix => _new_prefix_name,
+                                     :description => _new_prefix_name,
+                                     :site => _autopopulate_site&.fetch(:id, nil),
                                      :status => "active" }
+                    begin
+                      _new_prefix_create_response = _nb.post('ipam/prefixes/', _prefix_data.to_json, _nb_headers).body
+                      if _new_prefix_create_response &&
+                         _new_prefix_create_response.is_a?(Hash) &&
+                         _new_prefix_create_response.has_key?(:id)
+                      then
+                          _prefixes << { :name => _new_prefix_name,
+                                         :id => _new_prefix_create_response.fetch(:id, nil),
+                                         :site => ((_site = _new_prefix_create_response.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                                         :tenant => ((_tenant = _new_prefix_create_response.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
+                                         :url => _new_prefix_create_response.fetch(:url, _new_prefix_create_response.fetch(:url, nil)),
+                                         :details => _verbose ? _new_prefix_create_response : nil }
+                      end
+                    rescue Faraday::Error
+                      # give up aka do nothing
+                      puts('exception')
+                      _exception_error = true
+                    end
                   end
-                end
+                end # if auto-create prefix
+
                 _prefixes = collect_values(crush(_prefixes))
                 _lookup_result = _prefixes unless (_lookup_type != :ip_prefix)
               end # _lookup_type == :ip_prefix
@@ -863,6 +849,43 @@ def clean_manuf_string(val)
     end
     new_val = new_val.gsub(/[^A-Za-z0-9\s]/, '').gsub(/\s+/, ' ').lstrip.rstrip
     new_val
+end
+
+def lookup_autopopulate_site(default_site, nb, nb_headers)
+  @site_hash.getset(default_site) {
+    begin
+      _site = nil
+
+      # look it up first
+      _query = { :offset => 0,
+                 :limit => 1,
+                 :name => default_site }
+      if (_sites_response = nb.get('dcim/sites/', _query).body) &&
+         _sites_response.is_a?(Hash) &&
+         (_tmp_sites = _sites_response.fetch(:results, [])) &&
+         (_tmp_sites.length() > 0)
+      then
+         _site = _tmp_sites.first
+      end
+
+      if _site.nil?
+        # the device site is not found, create it
+        _site_data = { :name => default_site,
+                       :slug => default_site.to_url,
+                       :status => "active" }
+        if (_site_create_response = nb.post('dcim/sites/', _site_data.to_json, nb_headers).body) &&
+           _site_create_response.is_a?(Hash) &&
+           _site_create_response.has_key?(:id)
+        then
+           _site = _site_create_response
+        end
+      end
+
+    rescue Faraday::Error
+      # give up aka do nothing
+    end
+    _site
+  }
 end
 
 ###############################################################################
