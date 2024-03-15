@@ -6,7 +6,7 @@ unset VERBOSE
 command -v dpkg >/dev/null 2>&1 && ARCH="$(dpkg --print-architecture)" || ARCH=amd64
 DISTRO=Debian_12
 OUTPUT_DIR=/tmp
-ZEEK_VERSION=6.1.1-0
+ZEEK_VERSION=6.2.0-0
 
 while getopts a:d:o:vz: opts; do
    case ${opts} in
