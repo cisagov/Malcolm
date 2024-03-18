@@ -72,7 +72,7 @@ filebeat.inputs:
 #-------------------------- Suricata EVE JSON logs -----------------------------
 - type: log
   paths:
-    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/eve-*.json
+    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/eve*.json
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_upload"]
@@ -88,7 +88,7 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/live/eve.json
+    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/live/eve*.json
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_live"]
