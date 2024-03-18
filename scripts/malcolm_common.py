@@ -32,6 +32,7 @@ try:
 except ImportError:
     getpwuid = None
 
+Dialog = None
 MainDialog = None
 
 try:
@@ -64,13 +65,16 @@ PLATFORM_LINUX_UBUNTU = 'ubuntu'
 
 
 def DialogInit():
+    global Dialog
     global MainDialog
     try:
-        from dialog import Dialog
+        if not Dialog:
+            from dialog import Dialog
 
         if not MainDialog:
             MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
     except ImportError:
+        Dialog = none
         MainDialog = None
 
 
@@ -190,6 +194,9 @@ def YesOrNo(
     yesLabel='Yes',
     noLabel='No',
 ):
+    global Dialog
+    global MainDialog
+
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
         and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
@@ -258,6 +265,9 @@ def AskForString(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
         and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
@@ -305,6 +315,9 @@ def AskForPassword(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
         and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
@@ -341,6 +354,9 @@ def ChooseOne(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
     defaulted = next(iter([x for x in validChoices if x[2] is True]), None)
 
@@ -402,6 +418,9 @@ def ChooseMultiple(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     validChoices = [x for x in choices if len(x) == 3 and isinstance(x[0], str) and isinstance(x[2], bool)]
     defaulted = [x[0] for x in validChoices if x[2] is True]
 
@@ -468,6 +487,9 @@ def DisplayMessage(
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     reply = False
 
     if (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept) and (
@@ -503,6 +525,9 @@ def DisplayProgramBox(
     text=None,
     clearScreen=False,
 ):
+    global Dialog
+    global MainDialog
+
     reply = False
 
     if MainDialog is not None:
