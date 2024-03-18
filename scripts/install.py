@@ -36,6 +36,7 @@ from malcolm_common import (
     ChooseMultiple,
     ChooseOne,
     DetermineYamlFileFormat,
+    DialogInit,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
     DOCKER_INSTALL_URLS,
@@ -2492,9 +2493,31 @@ class LinuxInstaller(Installer):
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
         if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
-            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog', 'xz-utils'])
+            self.requiredPackages.extend(
+                [
+                    'apache2-utils',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-yaml',
+                    'xz-utils',
+                ]
+            )
         elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog', 'xz'])
+            self.requiredPackages.extend(
+                [
+                    'httpd-tools',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-yaml',
+                    'xz',
+                ]
+            )
 
         # on Linux this script requires root, or sudo, unless we're in local configuration-only mode
         if os.getuid() == 0:
@@ -4099,6 +4122,30 @@ def main():
     else:
         sys.tracebacklimit = 0
 
+    orchMode = OrchestrationFramework.UNKNOWN
+    if args.configFile and os.path.isfile(args.configFile):
+        if not (
+            (orchMode := DetermineYamlFileFormat(args.configFile)) and (orchMode in OrchestrationFrameworksSupported)
+        ):
+            raise Exception(f'{args.configFile} must be a docker-compose or kubeconfig YAML file')
+    else:
+        orchMode = OrchestrationFramework.DOCKER_COMPOSE
+
+    installPath = None
+
+    installerPlatform = platform.system()
+    if installerPlatform == PLATFORM_LINUX:
+        installer = LinuxInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+    elif installerPlatform == PLATFORM_MAC:
+        installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+    elif installerPlatform == PLATFORM_WINDOWS:
+        raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
+        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+
+    if (not args.configOnly) and hasattr(installer, 'install_required_packages'):
+        installer.install_required_packages()
+
+    DialogInit()
     requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
@@ -4108,15 +4155,6 @@ def main():
         eprint(f"Imported dotenv: {dotenv_imported}")
     if (not requests_imported) or (not yaml_imported) or (not dotenv_imported):
         exit(2)
-
-    orchMode = OrchestrationFramework.UNKNOWN
-    if args.configFile and os.path.isfile(args.configFile):
-        if not (
-            (orchMode := DetermineYamlFileFormat(args.configFile)) and (orchMode in OrchestrationFrameworksSupported)
-        ):
-            raise Exception(f'{args.configFile} must be a docker-compose or kubeconfig YAML file')
-    else:
-        orchMode = OrchestrationFramework.DOCKER_COMPOSE
 
     # If Malcolm and images tarballs are provided, we will use them.
     # If they are not provided, look in the pwd first, then in the script directory, to see if we
@@ -4151,29 +4189,15 @@ def main():
             eprint(f"Malcolm install file: {malcolmFile}")
             eprint(f"Docker images file: {imageFile}")
 
-    installerPlatform = platform.system()
-    if installerPlatform == PLATFORM_LINUX:
-        installer = LinuxInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-    elif installerPlatform == PLATFORM_MAC:
-        installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-    elif installerPlatform == PLATFORM_WINDOWS:
-        raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
-        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-
-    success = False
-    installPath = None
-
     if not args.configOnly:
-        if hasattr(installer, 'install_required_packages'):
-            success = installer.install_required_packages()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker'):
-            success = installer.install_docker()
+            installer.install_docker()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_compose'):
-            success = installer.install_docker_compose()
+            installer.install_docker_compose()
         if hasattr(installer, 'tweak_system_files'):
-            success = installer.tweak_system_files()
+            installer.tweak_system_files()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
-            success, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
+            _, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
     # if .env directory is unspecified, use the default ./config directory
     if args.configDir is None:
@@ -4218,7 +4242,6 @@ def main():
                     installPath = testPath
                     break
 
-        success = (installPath is not None) and os.path.isdir(installPath)
         if args.debug:
             eprint(f"Malcolm installation detected at {installPath}")
 
@@ -4231,7 +4254,7 @@ def main():
             and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
             and hasattr(installer, 'install_docker_images')
         ):
-            success = installer.install_docker_images(imageFile, installPath)
+            installer.install_docker_images(imageFile, installPath)
 
         InstallerDisplayMessage(
             f"Malcolm has been installed to {installPath}. See README.md for more information.\nScripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."

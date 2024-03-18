@@ -32,13 +32,7 @@ try:
 except ImportError:
     getpwuid = None
 
-try:
-    from dialog import Dialog
-
-    MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
-except ImportError:
-    Dialog = None
-    MainDialog = None
+MainDialog = None
 
 try:
     from colorama import init as ColoramaInit, Fore, Back, Style
@@ -67,6 +61,20 @@ PLATFORM_LINUX_CENTOS = 'centos'
 PLATFORM_LINUX_DEBIAN = 'debian'
 PLATFORM_LINUX_FEDORA = 'fedora'
 PLATFORM_LINUX_UBUNTU = 'ubuntu'
+
+
+def DialogInit():
+    global MainDialog
+    try:
+        from dialog import Dialog
+
+        if not MainDialog:
+            MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
+    except ImportError:
+        MainDialog = None
+
+
+DialogInit()
 
 
 class UserInputDefaultsBehavior(IntFlag):
