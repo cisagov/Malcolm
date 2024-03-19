@@ -101,7 +101,7 @@ DEFAULT_VARS.update(
         'ENIP_EVE_ENABLED': False,
         'ENIP_PORTS': 44818,
         'EVE_FILENAME_PATTERN': 'eve-%Y%m%d_%H%M%S.json',
-        'EVE_ROTATE_INTERVAL': '300s',
+        'EVE_ROTATE_INTERVAL': '1h',
         'EVE_THREADED': False,
         'EXTERNAL_NET': '!$HOME_NET',
         'FILE_DATA_PORTS': "[$HTTP_PORTS,110,143]",
