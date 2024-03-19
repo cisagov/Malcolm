@@ -231,7 +231,7 @@ def main():
                 if 'index_templates' in getTemplateResponseJson:
                     for template in getTemplateResponseJson['index_templates']:
                         templateFields = malcolm_utils.deep_get(
-                            template, ['index_template', 'template', 'mappings', 'properties'], default=[]
+                            template, ['index_template', 'template', 'mappings', 'properties'], default={}
                         )
 
                         # also include fields from component templates into templateFields before processing
