@@ -15,6 +15,7 @@ on:
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
+      - '!shared/bin/suricata*'
       - '!shared/bin/zeek*.sh'
       - '.trigger_workflow_build'
   workflow_dispatch:

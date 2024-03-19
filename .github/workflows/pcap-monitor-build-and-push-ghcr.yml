@@ -16,6 +16,7 @@ on:
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
       - '!shared/bin/zeek*'
+      - '!shared/bin/suricata*'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:
