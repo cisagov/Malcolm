@@ -74,7 +74,7 @@ def DialogInit():
         if not MainDialog:
             MainDialog = Dialog(dialog='dialog', autowidgetsize=True)
     except ImportError:
-        Dialog = none
+        Dialog = None
         MainDialog = None
 
 
