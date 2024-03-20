@@ -5,8 +5,8 @@ logging.metrics.enabled: false
 filebeat.inputs:
 - type: log
   paths:
-    - ${BEAT_LOG_PATTERN:/home/sensor/bro_logs/*.log}
-    - ${BEAT_STATIC_LOG_PATTERN:/home/sensor/bro_logs/static/*.log}
+    - ${BEAT_LOG_PATTERN:/home/sensor/zeek_logs/*.log}
+    - ${BEAT_STATIC_LOG_PATTERN:/home/sensor/zeek_logs/static/*.log}
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek_hedgehog_live"]
@@ -24,7 +24,7 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${BEAT_SURICATA_LOG_PATTERN:/home/sensor/bro_logs/suricata/eve*.json}
+    - ${BEAT_SURICATA_LOG_PATTERN:/home/sensor/zeek_logs/suricata/eve*.json}
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata_hedgehog_live"]

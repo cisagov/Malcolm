@@ -3,10 +3,10 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [[ -z "$ZEEK_CAPTURE_PATH" ]]; then
-  ZEEK_CAPTURE_PATH="$HOME/bro_logs"
+  ZEEK_CAPTURE_PATH="$HOME/zeek_logs"
 fi
 if [[ -z "$SURICATA_CAPTURE_PATH" ]]; then
-  SURICATA_CAPTURE_PATH="$HOME/bro_logs/suricata"
+  SURICATA_CAPTURE_PATH="$HOME/zeek_logs/suricata"
 fi
 export ZEEK_CAPTURE_PATH
 export SURICATA_CAPTURE_PATH

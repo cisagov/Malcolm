@@ -27,7 +27,7 @@ OS_MODE_HEDGEHOG = 'hedgehog'
 OS_MODE_MALCOLM = 'malcolm'
 
 HEDGEHOG_PCAP_DIR = "pcap"
-HEDGEHOG_ZEEK_DIR = "bro"
+HEDGEHOG_ZEEK_DIR = "zeek"
 MALCOLM_DB_DIR = "datastore"
 MALCOLM_PCAP_DIR = "pcap"
 MALCOLM_LOGS_DIR = "logs"
@@ -204,7 +204,7 @@ def main():
         nargs='?',
         const=True,
         default=False,
-        help="Unmount capture directories before determining candidate drives",
+        help="Unmount storage directories before determining candidate drives",
     )
     parser.add_argument(
         '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
@@ -250,9 +250,9 @@ def main():
 
     # unmount existing mounts if requested
     if args.umount and (not args.dryrun):
-        if (not args.interactive) or YesOrNo('Unmount any mounted capture path(s)?'):
+        if (not args.interactive) or YesOrNo('Unmount any mounted storage path(s)?'):
             if debug:
-                eprint("Attempting unmount of capture path(s)...")
+                eprint("Attempting unmount of storage path(s)...")
             for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                 run_subprocess(f"umount {os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir)}")
             run_subprocess(f"umount {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
@@ -271,7 +271,7 @@ def main():
                         eprint(f"\t{line}")
             _, reloadOut = run_subprocess("systemctl daemon-reload")
 
-    # check existing mounts, if the capture path(s) are already mounted, then abort
+    # check existing mounts, if the path(s) are already mounted, then abort
     with open('/proc/mounts', 'r') as f:
         for line in f.readlines():
             mountDetails = line.split()
@@ -366,7 +366,7 @@ def main():
 
     if len(candidateDevs) > 0:
         if args.encrypt:
-            # create keyfile (will be on the encrypted system drive, and used to automatically unlock the encrypted capture drives)
+            # create keyfile (will be on the encrypted system drive, and used to automatically unlock the encrypted drives)
             with open(OS_PARAMS[osMode][CRYPT_KEYFILE], 'wb') as f:
                 f.write(os.urandom(4096))
             os.chown(OS_PARAMS[osMode][CRYPT_KEYFILE], 0, 0)
@@ -574,17 +574,17 @@ def main():
         # reload tab files with systemctl
         _, reloadOut = run_subprocess("systemctl daemon-reload")
 
-        # get the GID of the group of the user(s) that will be doing the capture
+        # get the GID of the group of the user(s) under which the processes will be run
         try:
             ecode, guidGetOut = run_subprocess(
                 f"getent group {OS_PARAMS[osMode][GROUP_OWNER]}", stdout=True, stderr=True
             )
             if (ecode == 0) and (len(guidGetOut) > 0):
-                netdevGuid = int(guidGetOut[0].split(':')[2])
+                ownerGuid = int(guidGetOut[0].split(':')[2])
             else:
-                netdevGuid = -1
+                ownerGuid = -1
         except Exception:
-            netdevGuid = -1
+            ownerGuid = -1
 
         # rmdir any mount directories that might be interfering from previous configurations
         if os.path.isdir(OS_PARAMS[osMode][MOUNT_ROOT_PATH]):
@@ -599,7 +599,7 @@ def main():
             if debug:
                 eprint(f"Creating {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
             os.makedirs(OS_PARAMS[osMode][MOUNT_ROOT_PATH], exist_ok=True)
-            os.chown(OS_PARAMS[osMode][MOUNT_ROOT_PATH], -1, netdevGuid)
+            os.chown(OS_PARAMS[osMode][MOUNT_ROOT_PATH], -1, ownerGuid)
             os.chmod(OS_PARAMS[osMode][MOUNT_ROOT_PATH], OS_PARAMS[osMode][DIR_PERMS])
 
         # add crypttab entries
@@ -656,23 +656,23 @@ def main():
                     for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                         userDirs.append(os.path.join(par.mount, subdir))
                 else:
-                    # we're mounted somewhere *underneath* /capture, so create a user-writeable subdirectory where we are
+                    # we're mounted somewhere *underneath* /{MOUNT_ROOT_PATH}, so create a user-writeable subdirectory where we are
                     userDirs.append(os.path.join(par.mount, OS_PARAMS[osMode][MOUNT_ROOT_PATH].strip(os.path.sep)))
 
                 # set permissions on user dirs
                 createdUserDirs = defaultdict(lambda: None)
                 for userDir in userDirs:
                     os.makedirs(userDir, exist_ok=True)
-                    os.chown(userDir, OS_PARAMS[osMode][USER_UID], netdevGuid)
+                    os.chown(userDir, OS_PARAMS[osMode][USER_UID], ownerGuid)
                     os.chmod(userDir, OS_PARAMS[osMode][SUBDIR_PERMS])
                     if debug:
-                        eprint(f'Created "{userDir}" for writing by capture user')
+                        eprint(f'Created "{userDir}" for writing by unprivileged user')
                     for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                         if f"{os.path.sep}{subdir}{os.path.sep}" in userDir:
                             createdUserDirs[subDir] = userDir
                             break
 
-                # replace capture paths in-place in control_vars.conf
+                # replace paths in-place in control_vars.conf
                 if (osMode == OS_MODE_HEDGEHOG) and os.path.isfile(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE]):
                     capture_re = re.compile(r"\b(?P<key>PCAP_PATH|ZEEK_LOG_PATH)\s*=\s*.*?$")
                     with fileinput.FileInput(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE], inplace=True, backup='.bak') as f:
