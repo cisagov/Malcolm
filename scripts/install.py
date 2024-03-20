@@ -874,7 +874,7 @@ class Installer(object):
                     diskFormatInfo = LoadFileIfJson(f)
         except Exception:
             pass
-        diskFormatInfo = {k: v for k, v in diskFormatInfo.iteritems() if os.path.isdir(v)}
+        diskFormatInfo = {k: v for k, v in diskFormatInfo.items() if os.path.isdir(v)}
 
         if MALCOLM_DB_DIR in diskFormatInfo:
             for subDir in ['opensearch', 'opensearch-backup']:
