@@ -877,10 +877,10 @@ class Installer(object):
         diskFormatInfo = {k: v for k, v in diskFormatInfo.iteritems() if os.path.isdir(v)}
 
         if MALCOLM_DB_DIR in diskFormatInfo:
-            for subDir in ['opensearch', 'opensearch-backup']: do
+            for subDir in ['opensearch', 'opensearch-backup']:
                 pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], subDir)).mkdir(parents=False, exist_ok=True)
         if MALCOLM_LOGS_DIR in diskFormatInfo:
-            for subDir in ['zeek-logs', 'suricata-logs']: do
+            for subDir in ['zeek-logs', 'suricata-logs']:
                 pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], subDir)).mkdir(parents=False, exist_ok=True)
 
         if args.indexDir:
