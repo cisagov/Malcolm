@@ -943,7 +943,7 @@ class Installer(object):
         zeekLogDirFull = os.path.realpath(zeekLogDirDefault)
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            if (not diskFormatInfo) or not InstallerYesOrNo(
+            if diskFormatInfo or not InstallerYesOrNo(
                 f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files in {malcolm_install_path}?',
                 default=not args.acceptDefaultsNonInteractive,
             ):
