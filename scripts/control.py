@@ -253,6 +253,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 err, out = run_process(
                     [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q', service],
                     env=osEnv,
+                    stderr=False,
                     debug=args.debug,
                 )
                 out[:] = [x for x in out if x]
@@ -1264,7 +1265,7 @@ def authSetup():
                         default='',
                         defaultBehavior=defaultBehavior,
                     )
-                    if (PasswordMinLen <= len(password) <= PasswordMaxLen):
+                    if PasswordMinLen <= len(password) <= PasswordMaxLen:
                         passwordConfirm = AskForPassword(
                             f"{username} password (again): ",
                             default='',
