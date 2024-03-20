@@ -886,7 +886,7 @@ class Installer(object):
         if args.indexDir:
             indexDirDefault = args.indexDir
         else:
-            indexDir = 'opensearch'
+            indexDir = './opensearch'
             if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
                 os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
             ):
@@ -899,7 +899,7 @@ class Installer(object):
         if args.indexSnapshotDir:
             indexSnapshotDirDefault = args.indexSnapshotDir
         else:
-            indexSnapshotDir = 'opensearch-backup'
+            indexSnapshotDir = './opensearch-backup'
             if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
                 os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
             ):
@@ -911,7 +911,7 @@ class Installer(object):
         if args.pcapDir:
             pcapDirDefault = args.pcapDir
         else:
-            pcapDir = 'pcap'
+            pcapDir = './pcap'
             if MALCOLM_PCAP_DIR in diskFormatInfo:
                 pcapDirDefault = diskFormatInfo[MALCOLM_PCAP_DIR]
             else:
@@ -921,7 +921,7 @@ class Installer(object):
         if args.suricataLogDir:
             suricataLogDirDefault = args.suricataLogDir
         else:
-            suricataLogDir = 'suricata-logs'
+            suricataLogDir = './suricata-logs'
             if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
                 os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
             ):
@@ -933,7 +933,7 @@ class Installer(object):
         if args.zeekLogDir:
             zeekLogDirDefault = args.zeekLogDir
         else:
-            zeekLogDir = 'zeek-logs'
+            zeekLogDir = './zeek-logs'
             if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
                 os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
             ):
