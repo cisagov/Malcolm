@@ -887,7 +887,9 @@ class Installer(object):
             indexDirDefault = args.indexDir
         else:
             indexDir = 'opensearch'
-            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)):
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
+            ):
                 indexDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
             else:
                 indexDirDefault = os.path.join(malcolm_install_path, indexDir)
@@ -896,9 +898,11 @@ class Installer(object):
         indexSnapshotCompressed = False
         if args.indexSnapshotDir:
             indexSnapshotDirDefault = args.indexSnapshotDir
-        else
+        else:
             indexSnapshotDir = 'opensearch-backup'
-            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)):
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
+            ):
                 indexSnapshotDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
             else:
                 indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
@@ -908,7 +912,7 @@ class Installer(object):
             pcapDirDefault = args.pcapDir
         else:
             pcapDir = 'pcap'
-            if (MALCOLM_PCAP_DIR in diskFormatInfo):
+            if MALCOLM_PCAP_DIR in diskFormatInfo:
                 pcapDirDefault = diskFormatInfo[MALCOLM_PCAP_DIR]
             else:
                 pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
@@ -918,7 +922,9 @@ class Installer(object):
             suricataLogDirDefault = args.suricataLogDir
         else:
             suricataLogDir = 'suricata-logs'
-            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)):
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
+            ):
                 suricataLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
             else:
                 suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
@@ -928,7 +934,9 @@ class Installer(object):
             zeekLogDirDefault = args.zeekLogDir
         else:
             zeekLogDir = 'zeek-logs'
-            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)):
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
+            ):
                 zeekLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
             else:
                 zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
@@ -1000,7 +1008,9 @@ class Installer(object):
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch index directory')
                         while loopBreaker.increment():
-                            indexDir = InstallerAskForString('Enter OpenSearch index directory', default=indexDirDefault)
+                            indexDir = InstallerAskForString(
+                                'Enter OpenSearch index directory', default=indexDirDefault
+                            )
                             if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                 indexDirFull = os.path.realpath(indexDir)
                                 indexDir = (
