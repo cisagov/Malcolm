@@ -12,6 +12,7 @@
 ###################################################################################################
 
 import os
+import json
 import re
 import glob
 import sys
@@ -21,16 +22,20 @@ import fileinput
 from collections import defaultdict
 from fstab import Fstab
 
-from malcolm_utils import remove_prefix, str2bool, sizeof_fmt, run_subprocess, eprint
+from malcolm_utils import (
+    remove_prefix,
+    str2bool,
+    sizeof_fmt,
+    run_subprocess,
+    eprint,
+    OS_MODE_HEDGEHOG,
+    OS_MODE_MALCOLM,
+    HEDGEHOG_ZEEK_DIR,
+    MALCOLM_DB_DIR,
+    MALCOLM_PCAP_DIR,
+    MALCOLM_LOGS_DIR,
+)
 
-OS_MODE_HEDGEHOG = 'hedgehog'
-OS_MODE_MALCOLM = 'malcolm'
-
-HEDGEHOG_PCAP_DIR = "pcap"
-HEDGEHOG_ZEEK_DIR = "zeek"
-MALCOLM_DB_DIR = "datastore"
-MALCOLM_PCAP_DIR = "pcap"
-MALCOLM_LOGS_DIR = "logs"
 
 OS_PARAMS = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
@@ -49,6 +54,7 @@ OS_PARAMS[OS_MODE_HEDGEHOG].update(
         SYSTEM_CONFIG_FILE: '/opt/sensor/sensor_ctl/control_vars.conf',
         CRYPT_KEYFILE: '/etc/capture_crypt.key',
         CRYPT_KEYFILE_PERMS: 0o600,
+        OTHER_FILE_PERMS: 0o600,
         CRYPT_DEV_PREFIX: 'capture_vault_',
     }
 )
@@ -65,6 +71,7 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
         SUBDIR_PERMS: 0o770,
         CRYPT_KEYFILE: '/etc/capture_crypt.key',
         CRYPT_KEYFILE_PERMS: 0o600,
+        OTHER_FILE_PERMS: 0o600,
         CRYPT_DEV_PREFIX: 'malcolm_vault_',
     }
 )
@@ -577,7 +584,7 @@ def main():
         # get the GID of the group of the user(s) under which the processes will be run
         try:
             ecode, guidGetOut = run_subprocess(
-                f"getent group {OS_PARAMS[osMode][GROUP_OWNER]}", stdout=True, stderr=True
+                f"getent group {OS_PARAMS[osMode][GROUP_OWNER]}", stdout=True, stderr=False
             )
             if (ecode == 0) and (len(guidGetOut) > 0):
                 ownerGuid = int(guidGetOut[0].split(':')[2])
@@ -585,6 +592,16 @@ def main():
                 ownerGuid = -1
         except Exception:
             ownerGuid = -1
+
+        # get home directory for USER_UID
+        try:
+            ecode, getentOut = run_subprocess(f"getent passwd {OS_PARAMS[osMode][USER_UID]}", stdout=True, stderr=False)
+            if (ecode == 0) and (len(getentOut) > 0):
+                ownerHome = getentOut[0].split(':')[5]
+            else:
+                ownerHome = ''
+        except Exception:
+            ownerHome = ''
 
         # rmdir any mount directories that might be interfering from previous configurations
         if os.path.isdir(OS_PARAMS[osMode][MOUNT_ROOT_PATH]):
@@ -672,8 +689,8 @@ def main():
                             createdUserDirs[subDir] = userDir
                             break
 
-                # replace paths in-place in control_vars.conf
                 if (osMode == OS_MODE_HEDGEHOG) and os.path.isfile(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE]):
+                    # replace paths in-place in control_vars.conf
                     capture_re = re.compile(r"\b(?P<key>PCAP_PATH|ZEEK_LOG_PATH)\s*=\s*.*?$")
                     with fileinput.FileInput(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE], inplace=True, backup='.bak') as f:
                         for line in f:
@@ -692,6 +709,15 @@ def main():
                                     print(line)
                             else:
                                 print(line)
+
+                elif (osMode == OS_MODE_MALCOLM) and os.path.isdir(os.path.join(ownerHome, 'Malcolm')):
+                    # write .os_disk_config_defaults for to be picked up by install.py
+                    configFileFull = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os_disk_config_defaults')
+                    with open(configFileFull, 'w') as f:
+                        f.write(json.dumps(createdUserDirs), indent=4)
+                    if os.path.isfile(configFileFull):
+                        os.chown(configFileFull, OS_PARAMS[osMode][USER_UID], ownerGuid)
+                        os.chmod(configFileFull, OS_PARAMS[osMode][CRYPT_KEYFILE_PERMS])
 
             else:
                 eprint(f"Error {ecode} mounting {par.partition}")

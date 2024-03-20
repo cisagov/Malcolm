@@ -71,9 +71,13 @@ from malcolm_utils import (
     DatabaseMode,
     DATABASE_MODE_LABELS,
     DATABASE_MODE_ENUMS,
+    MALCOLM_DB_DIR,
+    MALCOLM_PCAP_DIR,
+    MALCOLM_LOGS_DIR,
     deep_get,
     eprint,
     flatten,
+    LoadFileIfJson,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -857,40 +861,92 @@ class Installer(object):
                 pass
 
         # directories for data volume mounts (PCAP storage, Zeek log storage, OpenSearch indexes, etc.)
-        indexDir = './opensearch'
-        indexDirDefault = os.path.join(malcolm_install_path, indexDir)
+
+        # if the file .os_disk_config_defaults was created by the environment (os-disk-config.py)
+        #   we'll use those as defaults, otherwise base things underneath the malcolm_install_path
+        diskFormatInfo = {}
+        try:
+            diskFormatInfoFile = os.path.join(
+                os.path.realpath(os.path.join(ScriptPath, "..")), ".os_disk_config_defaults"
+            )
+            if os.path.isfile(diskFormatInfoFile):
+                with open(diskFormatInfoFile) as f:
+                    diskFormatInfo = LoadFileIfJson(f)
+        except Exception:
+            pass
+        diskFormatInfo = {k: v for k, v in diskFormatInfo.iteritems() if os.path.isdir(v)}
+
+        if MALCOLM_DB_DIR in diskFormatInfo:
+            for subDir in ['opensearch', 'opensearch-backup']: do
+                pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], subDir)).mkdir(parents=False, exist_ok=True)
+        if MALCOLM_LOGS_DIR in diskFormatInfo:
+            for subDir in ['zeek-logs', 'suricata-logs']: do
+                pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], subDir)).mkdir(parents=False, exist_ok=True)
+
+        if args.indexDir:
+            indexDirDefault = args.indexDir
+        else:
+            indexDir = 'opensearch'
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)):
+                indexDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
+            else:
+                indexDirDefault = os.path.join(malcolm_install_path, indexDir)
         indexDirFull = os.path.realpath(indexDirDefault)
 
         indexSnapshotCompressed = False
-        indexSnapshotDir = './opensearch-backup'
-        indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
+        if args.indexSnapshotDir:
+            indexSnapshotDirDefault = args.indexSnapshotDir
+        else
+            indexSnapshotDir = 'opensearch-backup'
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)):
+                indexSnapshotDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
+            else:
+                indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
         indexSnapshotDirFull = os.path.realpath(indexSnapshotDirDefault)
 
-        pcapDir = './pcap'
-        pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
+        if args.pcapDir:
+            pcapDirDefault = args.pcapDir
+        else:
+            pcapDir = 'pcap'
+            if (MALCOLM_PCAP_DIR in diskFormatInfo):
+                pcapDirDefault = diskFormatInfo[MALCOLM_PCAP_DIR]
+            else:
+                pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
         pcapDirFull = os.path.realpath(pcapDirDefault)
 
-        suricataLogDir = './suricata-logs'
-        suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
+        if args.suricataLogDir:
+            suricataLogDirDefault = args.suricataLogDir
+        else:
+            suricataLogDir = 'suricata-logs'
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)):
+                suricataLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
+            else:
+                suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
         suricataLogDirFull = os.path.realpath(suricataLogDirDefault)
 
-        zeekLogDir = './zeek-logs'
-        zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
+        if args.zeekLogDir:
+            zeekLogDirDefault = args.zeekLogDir
+        else:
+            zeekLogDir = 'zeek-logs'
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)):
+                zeekLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
+            else:
+                zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
         zeekLogDirFull = os.path.realpath(zeekLogDirDefault)
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            if not InstallerYesOrNo(
-                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files locally under {malcolm_install_path}?',
+            if (not diskFormatInfo) or not InstallerYesOrNo(
+                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files in {malcolm_install_path}?',
                 default=not args.acceptDefaultsNonInteractive,
             ):
                 # PCAP directory
                 if not InstallerYesOrNo(
-                    'Store PCAP files locally in {}?'.format(pcapDirDefault),
+                    'Store PCAP files in {}?'.format(pcapDirDefault),
                     default=not bool(args.pcapDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP directory')
                     while loopBreaker.increment():
-                        pcapDir = InstallerAskForString('Enter PCAP directory', default=args.pcapDir)
+                        pcapDir = InstallerAskForString('Enter PCAP directory', default=pcapDirDefault)
                         if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
                             pcapDirFull = os.path.realpath(pcapDir)
                             pcapDir = (
@@ -902,12 +958,12 @@ class Installer(object):
 
                 # Zeek log directory
                 if not InstallerYesOrNo(
-                    'Store Zeek logs locally in {}?'.format(zeekLogDirDefault),
+                    'Store Zeek logs in {}?'.format(zeekLogDirDefault),
                     default=not bool(args.zeekLogDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Zeek directory')
                     while loopBreaker.increment():
-                        zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=args.zeekLogDir)
+                        zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=zeekLogDirDefault)
                         if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
                             zeekLogDirFull = os.path.realpath(zeekLogDir)
                             zeekLogDir = (
@@ -919,13 +975,13 @@ class Installer(object):
 
                 # Suricata log directory
                 if not InstallerYesOrNo(
-                    'Store Suricata logs locally in {}?'.format(suricataLogDirDefault),
+                    'Store Suricata logs in {}?'.format(suricataLogDirDefault),
                     default=not bool(args.suricataLogDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Suricata directory')
                     while loopBreaker.increment():
                         suricataLogDir = InstallerAskForString(
-                            'Enter Suricata log directory', default=args.suricataLogDir
+                            'Enter Suricata log directory', default=suricataLogDirDefault
                         )
                         if (len(suricataLogDir) > 1) and os.path.isdir(suricataLogDir):
                             suricataLogDirFull = os.path.realpath(suricataLogDir)
@@ -939,12 +995,12 @@ class Installer(object):
                 if (malcolmProfile == PROFILE_MALCOLM) and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal):
                     # opensearch index directory
                     if not InstallerYesOrNo(
-                        'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
+                        'Store OpenSearch indices in {}?'.format(indexDirDefault),
                         default=not bool(args.indexDir),
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch index directory')
                         while loopBreaker.increment():
-                            indexDir = InstallerAskForString('Enter OpenSearch index directory', default=args.indexDir)
+                            indexDir = InstallerAskForString('Enter OpenSearch index directory', default=indexDirDefault)
                             if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                 indexDirFull = os.path.realpath(indexDir)
                                 indexDir = (
@@ -956,13 +1012,13 @@ class Installer(object):
 
                     # opensearch snapshot repository directory and compression
                     if not InstallerYesOrNo(
-                        'Store OpenSearch index snapshots locally in {}?'.format(indexSnapshotDirDefault),
+                        'Store OpenSearch index snapshots in {}?'.format(indexSnapshotDirDefault),
                         default=not bool(args.indexSnapshotDir),
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch snapshots directory')
                         while loopBreaker.increment():
                             indexSnapshotDir = InstallerAskForString(
-                                'Enter OpenSearch index snapshot directory', default=args.indexSnapshotDir
+                                'Enter OpenSearch index snapshot directory', default=indexSnapshotDirDefault
                             )
                             if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
                                 indexSnapshotDirFull = os.path.realpath(indexSnapshotDir)

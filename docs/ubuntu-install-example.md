@@ -130,7 +130,7 @@ Specify external Docker network name (or leave blank for default networking) ():
 3: None
 Select authentication method (Basic): 1
 
-Store PCAP, log and index files locally under /home/user/Malcolm? (Y / n): y
+Store PCAP, log and index files in /home/user/Malcolm? (Y / n): y
 
 Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 

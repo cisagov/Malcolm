@@ -169,7 +169,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - This question allows users to specify Microsoft Active Directory compatibility (**winldap**) or generic LDAP compatibility (**openldap**, for OpenLDAP, glauth, etc.) when using [LDAP authentication](authsetup.md#AuthLDAP)
 * **Use StartTLS (rather than LDAPS) for LDAP connection security?**
     - When using LDAP authentication, this question allows users to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
-* **Store PCAP, log and index files locally under /home/user/Malcolm?**
+* **Store PCAP, log and index files in /home/user/Malcolm?**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
 * **Enable index management policies (ILM/ISM) in Arkime?**
     - Choose **Y** to proceed to the following related questions about [using ILM/ISM with Arkime](index-management.md#ArkimeIndexPolicies).
