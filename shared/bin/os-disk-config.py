@@ -31,11 +31,27 @@ from malcolm_utils import (
     OS_MODE_HEDGEHOG,
     OS_MODE_MALCOLM,
     HEDGEHOG_ZEEK_DIR,
+    HEDGEHOG_PCAP_DIR,
     MALCOLM_DB_DIR,
     MALCOLM_PCAP_DIR,
     MALCOLM_LOGS_DIR,
 )
 
+
+MINIMUM_DEVICE_BYTES = 'minimum_device_bytes'
+MOUNT_ROOT_PATH = 'mount_root_path'
+MOUNT_DIRS = 'mount_dirs'
+FSTAB_FILE = 'fstab_file'
+CRYPTTAB_FILE = 'crypttab_file'
+GROUP_OWNER = 'group_owner'
+USER_UID = 'user_uid'
+DIR_PERMS = 'dir_perms'
+SUBDIR_PERMS = 'subdir_perms'
+SYSTEM_CONFIG_FILE = 'system_config_file'
+CRYPT_KEYFILE = 'crypt_keyfile'
+CRYPT_KEYFILE_PERMS = 'crypt_keyfile_perms'
+OTHER_FILE_PERMS = 'other_file_perms'
+CRYPT_DEV_PREFIX = 'crypt_dev_prefix'
 
 OS_PARAMS = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
@@ -686,7 +702,7 @@ def main():
                         eprint(f'Created "{userDir}" for writing by unprivileged user')
                     for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                         if f"{os.path.sep}{subdir}{os.path.sep}" in userDir:
-                            createdUserDirs[subDir] = userDir
+                            createdUserDirs[subdir] = userDir
                             break
 
                 if (osMode == OS_MODE_HEDGEHOG) and os.path.isfile(OS_PARAMS[osMode][SYSTEM_CONFIG_FILE]):
