@@ -727,8 +727,8 @@ def main():
                                 print(line)
 
                 elif (osMode == OS_MODE_MALCOLM) and os.path.isdir(os.path.join(ownerHome, 'Malcolm')):
-                    # write .os_disk_config_defaults for to be picked up by install.py
-                    configFilePath = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os_disk_config_defaults')
+                    # write .os-disk-config-defaults for to be picked up by install.py
+                    configFilePath = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os-disk-config-defaults')
                     createdUserDirsFull = None
                     if os.path.isfile(configFilePath):
                         with open(configFilePath, 'r') as f:

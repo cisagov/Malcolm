@@ -862,12 +862,12 @@ class Installer(object):
 
         # directories for data volume mounts (PCAP storage, Zeek log storage, OpenSearch indexes, etc.)
 
-        # if the file .os_disk_config_defaults was created by the environment (os-disk-config.py)
+        # if the file .os-disk-config-defaults was created by the environment (os-disk-config.py)
         #   we'll use those as defaults, otherwise base things underneath the malcolm_install_path
         diskFormatInfo = {}
         try:
             diskFormatInfoFile = os.path.join(
-                os.path.realpath(os.path.join(ScriptPath, "..")), ".os_disk_config_defaults"
+                os.path.realpath(os.path.join(ScriptPath, "..")), ".os-disk-config-defaults"
             )
             if os.path.isfile(diskFormatInfoFile):
                 with open(diskFormatInfoFile) as f:
