@@ -23,18 +23,19 @@ from collections import defaultdict
 from fstab import Fstab
 
 from malcolm_utils import (
-    remove_prefix,
-    str2bool,
-    sizeof_fmt,
-    run_subprocess,
     eprint,
+    HEDGEHOG_PCAP_DIR,
+    HEDGEHOG_ZEEK_DIR,
+    LoadFileIfJson,
+    MALCOLM_DB_DIR,
+    MALCOLM_LOGS_DIR,
+    MALCOLM_PCAP_DIR,
     OS_MODE_HEDGEHOG,
     OS_MODE_MALCOLM,
-    HEDGEHOG_ZEEK_DIR,
-    HEDGEHOG_PCAP_DIR,
-    MALCOLM_DB_DIR,
-    MALCOLM_PCAP_DIR,
-    MALCOLM_LOGS_DIR,
+    remove_prefix,
+    run_subprocess,
+    sizeof_fmt,
+    str2bool,
 )
 
 
@@ -398,7 +399,7 @@ def main():
         # partition/format each candidate device
         for device in candidateDevs:
             # we only need at most len(OS_PARAMS[osMode][MOUNT_DIRS]), or at least one
-            if len(formattedDevs) >= 2:
+            if len(formattedDevs) >= len(OS_PARAMS[osMode][MOUNT_DIRS]):
                 break
 
             if (not args.interactive) or YesOrNo(
@@ -559,13 +560,12 @@ def main():
 
         # now that we have formatted our device(s), decide where they're going to mount (these are already sorted)
         devIdx = 0
-        if len(formattedDevs) >= len(OS_PARAMS[osMode][MOUNT_DIRS]):
-            for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
+        for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
+            if devIdx < len(formattedDevs):
                 formattedDevs[devIdx].mount = os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir)
                 devIdx += 1
-
-        elif len(formattedDevs) == 1:
-            formattedDevs[devIdx].mount = OS_PARAMS[osMode][MOUNT_ROOT_PATH]
+            else:
+                break
 
         if debug:
             eprint(formattedDevs)
@@ -728,12 +728,19 @@ def main():
 
                 elif (osMode == OS_MODE_MALCOLM) and os.path.isdir(os.path.join(ownerHome, 'Malcolm')):
                     # write .os_disk_config_defaults for to be picked up by install.py
-                    configFileFull = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os_disk_config_defaults')
-                    with open(configFileFull, 'w') as f:
-                        f.write(json.dumps(createdUserDirs), indent=4)
-                    if os.path.isfile(configFileFull):
-                        os.chown(configFileFull, OS_PARAMS[osMode][USER_UID], ownerGuid)
-                        os.chmod(configFileFull, OS_PARAMS[osMode][CRYPT_KEYFILE_PERMS])
+                    configFilePath = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os_disk_config_defaults')
+                    createdUserDirsFull = None
+                    if os.path.isfile(configFilePath):
+                        with open(configFilePath, 'r') as f:
+                            createdUserDirsFull = LoadFileIfJson(f)
+                    if createdUserDirsFull is None:
+                        createdUserDirsFull = {}
+                    createdUserDirsFull.update(createdUserDirs)
+                    with open(configFilePath, 'w') as f:
+                        f.write(json.dumps(createdUserDirsFull, indent=4))
+                    if os.path.isfile(configFilePath):
+                        os.chown(configFilePath, OS_PARAMS[osMode][USER_UID], ownerGuid)
+                        os.chmod(configFilePath, OS_PARAMS[osMode][CRYPT_KEYFILE_PERMS])
 
             else:
                 eprint(f"Error {ecode} mounting {par.partition}")
