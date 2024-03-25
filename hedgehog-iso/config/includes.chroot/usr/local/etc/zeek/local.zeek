@@ -306,7 +306,7 @@ redef CVE_2021_44228::log = F;
 ##! Other logs we're just disabling unilaterally
 
 # amzn/zeek-plugin-profinet's profinet_dce_rpc.log is covered by cisagov/icsnpp-profinet-io-cm
-hook Profinet::log_policy_profinet_dce_rpc(
+hook Profinet::log_policy_dce_rpc(
   rec: Profinet::Profinet_DCE_RPC,
   id: Log::ID,
   filter: Log::Filter) {
