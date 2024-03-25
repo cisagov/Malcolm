@@ -7,9 +7,9 @@ ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-ENV ARKIME_VERSION "v5.0.1_search_indices"
+ENV ARKIME_VERSION "v5.0.1"
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_URL "https://github.com/mmguero-dev/arkime.git"
+ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
 
