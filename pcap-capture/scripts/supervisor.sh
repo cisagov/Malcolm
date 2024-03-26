@@ -19,7 +19,7 @@ function SetCaptureCapabilities() {
 
 # Create config files for each capture interface for the various capture programs (tcpdump, netsniff)
 # so that supervisord can manage instances of each of these programs for each interface.
-# bro is now managed by broctl (via brodeploy.sh) rather than individually by supervisord so that
+# zeek is now managed by zeekctl (via zeekdeploy.sh) rather than individually by supervisord so that
 # we can use pf_ring
 function CreateCaptureConfigs() {
 

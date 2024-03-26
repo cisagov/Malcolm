@@ -34,11 +34,9 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
-Malcolm can be [packaged](malcolm-iso.md#ISOBuild) into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
+Please see [**Downloading Malcolm**](download.md#DownloadMalcolm) for instructions on how to obtain the Malcolm and Hedgehog Linux installation ISOs.
 
-Similar instructions exist for generating the [installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) for [Hedgehog Linux](hedgehog.md), Malcolm's dedicated network sensor appliance OS.
-
-While official downloads of the Malcolm installer ISO are not provided, an **unofficial build** of the ISO installer for the [latest stable release]({{ site.github.repository_url }}/releases) is available for [download here]({{ site.external_download_url }}). If downloading the unofficial builds, be sure to verify the integrity of ISO files against the SHA256 sums provided on the download page.
+As an alternative to the official release ISOs, instructions are provided for building the [Malcolm installer ISO](malcolm-iso.md#ISOBuild) and [Hedgehog Linux installer ISO](hedgehog-iso-build.md#HedgehogISOBuild) (Malcolm's dedicated [network sensor appliance OS](hedgehog.md)) from scratch.
 
 ## <a name="ISOBurning"></a> "Burning" the Installation ISOs to USB Flash Drive
 
@@ -60,7 +58,7 @@ Alternatively, the ISO images could be burned to writable optical media (e.g., D
 
 ## <a name="BootUSB"></a> Booting the Installation Media
 
-The ISO installers boot on systems that support EFI-mode and legacy (BIOS) booting. The procedure for configuring a system's firmware to allow booting from USB or optical media varies from manufacturer to manufacturer. Manufacturers typically provide a "one-time boot" menu upon a specific keypress (e.g., F12 for Dell, F9 for HP, etc.). If needed, consult the documentation provided by the hardware manufacturer on how to access the boot options menu and boot from the newly-burned USB flash media or DVD±R.
+The ISO installers are compatible with systems that support EFI-mode and legacy (BIOS) booting. The procedure for configuring a system's firmware to allow booting from USB or optical media varies from manufacturer to manufacturer. Manufacturers typically provide a "one-time boot" menu upon a specific keypress (e.g., F12 for Dell, F9 for HP, etc.). If needed, consult the documentation provided by the hardware manufacturer on how to access the boot options menu and boot from the newly-burned USB flash media or DVD±R.
 
 ![EFI Boot Manager](./images/screenshots/iso_install_boot_menu_efi.png)
 
@@ -171,7 +169,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - This question allows users to specify Microsoft Active Directory compatibility (**winldap**) or generic LDAP compatibility (**openldap**, for OpenLDAP, glauth, etc.) when using [LDAP authentication](authsetup.md#AuthLDAP)
 * **Use StartTLS (rather than LDAPS) for LDAP connection security?**
     - When using LDAP authentication, this question allows users to configure [LDAP connection security](authsetup.md#AuthLDAPSecurity)
-* **Store PCAP, log and index files locally under /home/user/Malcolm?**
+* **Store PCAP, log and index files in /home/user/Malcolm?**
     - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
 * **Enable index management policies (ILM/ISM) in Arkime?**
     - Choose **Y** to proceed to the following related questions about [using ILM/ISM with Arkime](index-management.md#ArkimeIndexPolicies).
@@ -465,7 +463,7 @@ To specify which files should be extracted, specify the Zeek file carving mode:
 
 If unsure what mode to choose, both **mapped (except common plain text files)** (to carve and scan almost all files) and **interesting** (to only carve and scan files with [mime types of common attack vectors]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/zeek/extractor_override.interesting.zeek)) are probably good choices.
 
-Next, specify which carved files to preserve (saved on the sensor under `/capture/bro/capture/extract_files/quarantine` by default). In order to not consume all the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#HedgehogConfigAutostart) section.
+Next, specify which carved files to preserve (saved on the sensor under `/capture/zeek/capture/extract_files/quarantine` by default). In order to not consume all the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#HedgehogConfigAutostart) section.
 
 Users will prompted to specify which engine(s) to use to analyze extracted files. Extracted files can be examined through any of three methods:
 

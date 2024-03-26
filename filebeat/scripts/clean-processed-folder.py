@@ -16,16 +16,20 @@ import re
 from subprocess import Popen, PIPE
 
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
-zeekDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
 fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry/filebeat/data.json")
-currentDir = zeekDir + "current/"
-processedDir = zeekDir + "processed/"
-liveDir = zeekDir + "live/logs/"
+
+zeekDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
+zeekLiveDir = zeekDir + "live/logs/"
+zeekCurrentDir = zeekDir + "current/"
+zeekProcessedDir = zeekDir + "processed/"
+
+suricataDir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"), '')
+suricataLiveDir = suricataDir + "live/"
 
 nowTime = time.time()
-logMimeType = "text/plain"
+logMimeTypeRegex = re.compile(r"(text/plain|application/(x-nd)?json)")
 archiveMimeTypeRegex = re.compile(
     r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)"
 )
@@ -74,7 +78,7 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
 
             # get the file type
             fileType = magic.from_file(filename, mime=True)
-            if (checkLogs is True) and (cleanLogSeconds > 0) and (fileType == logMimeType):
+            if (checkLogs is True) and (cleanLogSeconds > 0) and logMimeTypeRegex.match(fileType) is not None:
                 cleanSeconds = cleanLogSeconds
             elif (checkArchives is True) and (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
                 cleanSeconds = cleanZipSeconds
@@ -100,14 +104,16 @@ def pruneFiles():
         # disabled, don't do anything
         return
 
-    # look for regular files in the processed/ directory
-    foundFiles = [
-        (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(processedDir) for filename in filenames
+    # look for regular Zeek files in the processed/ directory
+    zeekFoundFiles = [
+        (os.path.join(root, filename))
+        for root, dirnames, filenames in os.walk(zeekProcessedDir)
+        for filename in filenames
     ]
 
     # look for rotated files from live zeek instance
-    rotatedFiles = [
-        (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(liveDir) for filename in filenames
+    zeekRotatedFiles = [
+        (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(zeekLiveDir) for filename in filenames
     ]
 
     # look up the filebeat registry file and try to read it
@@ -117,22 +123,22 @@ def pruneFiles():
             fbReg = json.load(f)
 
     # see if the files we found are in use and old enough to be pruned
-    for file in foundFiles:
+    for file in zeekFoundFiles:
         checkFile(file, filebeatReg=fbReg, checkLogs=True, checkArchives=True)
-    for file in rotatedFiles:
+    for file in zeekRotatedFiles:
         checkFile(file, filebeatReg=None, checkLogs=False, checkArchives=True)
 
-    # clean up any broken symlinks in the current/ directory
-    for current in os.listdir(currentDir):
-        currentFileSpec = os.path.join(currentDir, current)
+    # clean up any broken symlinks in the Zeek current/ directory
+    for current in os.listdir(zeekCurrentDir):
+        currentFileSpec = os.path.join(zeekCurrentDir, current)
         if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
             print('removing dead symlink "{}"'.format(currentFileSpec))
             silentRemove(currentFileSpec)
 
-    # clean up any old and empty directories in processed/ directory
+    # clean up any old and empty directories in Zeek processed/ directory
     cleanDirSeconds = min(i for i in (cleanLogSeconds, cleanZipSeconds) if i > 0)
     candidateDirs = []
-    for root, dirs, files in os.walk(processedDir, topdown=False):
+    for root, dirs, files in os.walk(zeekProcessedDir, topdown=False):
         if root and dirs:
             candidateDirs += [os.path.join(root, tmpDir) for tmpDir in dirs]
     candidateDirs = list(set(candidateDirs))
@@ -147,6 +153,13 @@ def pruneFiles():
                 print('removed empty directory "{}" (used {} seconds ago)'.format(dirToRm, dirAge))
             except OSError:
                 pass
+
+    # check the suricata logs (live and otherwise) as well
+    for surDir in [suricataDir, suricataLiveDir]:
+        for eve in os.listdir(surDir):
+            eveFile = os.path.join(surDir, eve)
+            if os.path.isfile(eveFile):
+                checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
 
 
 def main():

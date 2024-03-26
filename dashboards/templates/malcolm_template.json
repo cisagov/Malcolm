@@ -25,7 +25,8 @@
     "custom_arkime",
     "custom_suricata",
     "custom_zeek",
-    "custom_zeek_ot"
+    "custom_zeek_ot",
+    "custom_malcolm_common"
   ],
   "template" :{
     "settings" : {
@@ -33,82 +34,6 @@
         "mapping.total_fields.limit" : "5000",
         "mapping.nested_fields.limit" : "250",
         "max_docvalue_fields_search" : "200"
-      }
-    },
-    "mappings": {
-      "properties": {
-        "destination.ip_reverse_dns": { "type": "keyword" },
-        "destination.oui": { "type": "keyword" },
-        "destination.device": {
-          "properties": {
-            "cluster": { "type": "keyword" },
-            "device_type": { "type": "keyword" },
-            "id": { "type": "integer" },
-            "manufacturer": { "type": "keyword" },
-            "name": { "type": "keyword" },
-            "role": { "type": "keyword" },
-            "service": { "type": "keyword" },
-            "site": { "type": "keyword" },
-            "url": { "type": "keyword" },
-            "details": { "type": "nested" }
-          }
-        },
-        "destination.segment": {
-          "properties": {
-            "id": { "type": "integer" },
-            "name": { "type": "keyword" },
-            "site": { "type": "keyword" },
-            "tenant": { "type": "keyword" },
-            "url": { "type": "keyword" },
-            "details": { "type": "nested" }
-          }
-        },
-        "event.freq_score_v1": { "type": "float" },
-        "event.freq_score_v2": { "type": "float" },
-        "event.hits": { "type": "long" },
-        "event.result": { "type": "keyword" },
-        "event.severity_tags": { "type": "keyword" },
-        "file.source": { "type": "keyword" },
-        "network.is_orig": { "type": "keyword" },
-        "network.protocol_version": { "type": "keyword" },
-        "related.mac": { "type": "keyword" },
-        "related.oui": { "type": "keyword" },
-        "related.password": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
-        "related.device_id": { "type": "integer" },
-        "related.device_name": { "type": "keyword" },
-        "related.device_type": { "type": "keyword" },
-        "related.manufacturer": { "type": "keyword" },
-        "related.role": { "type": "keyword" },
-        "related.service": { "type": "keyword" },
-        "related.site": { "type": "keyword" },
-        "source.ip_reverse_dns": { "type": "keyword" },
-        "source.oui": { "type": "keyword" },
-        "source.device": {
-          "properties": {
-            "cluster": { "type": "keyword" },
-            "device_type": { "type": "keyword" },
-            "id": { "type": "integer" },
-            "manufacturer": { "type": "keyword" },
-            "name": { "type": "keyword" },
-            "role": { "type": "keyword" },
-            "service": { "type": "keyword" },
-            "site": { "type": "keyword" },
-            "url": { "type": "keyword" },
-            "details": { "type": "nested" }
-          }
-        },
-        "source.segment": {
-          "properties": {
-            "id": { "type": "integer" },
-            "name": { "type": "keyword" },
-            "site": { "type": "keyword" },
-            "tenant": { "type": "keyword" },
-            "url": { "type": "keyword" },
-            "details": { "type": "nested" }
-          }
-        },
-        "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-        "tls.server.ja3s_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
       }
     }
   }

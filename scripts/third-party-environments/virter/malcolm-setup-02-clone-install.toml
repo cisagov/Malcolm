@@ -50,16 +50,19 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
     python3 ./scripts/configure \
         --defaults \
         --restart-malcolm \
+        --auto-arkime \
         --auto-suricata \
         --auto-zeek \
         --zeek-ics \
         --zeek-ics-best-guess \
         --auto-oui \
         --auto-freq \
-        --file-extraction interesting \
+        --file-extraction notcommtxt \
         --file-preservation quarantined \
         --extracted-file-server \
         --extracted-file-server-password infected \
+        --extracted-file-server-zip \
+        --extracted-file-capa \
         --extracted-file-clamav \
         --extracted-file-yara \
         --netbox \

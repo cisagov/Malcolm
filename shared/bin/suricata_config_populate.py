@@ -100,6 +100,9 @@ DEFAULT_VARS.update(
         'ENIP_ENABLED': True,
         'ENIP_EVE_ENABLED': False,
         'ENIP_PORTS': 44818,
+        'EVE_FILENAME_PATTERN': 'eve-%Y%m%d_%H%M%S.json',
+        'EVE_ROTATE_INTERVAL': '1h',
+        'EVE_THREADED': False,
         'EXTERNAL_NET': '!$HOME_NET',
         'FILE_DATA_PORTS': "[$HTTP_PORTS,110,143]",
         'FILES_ENABLED': True,
@@ -134,6 +137,7 @@ DEFAULT_VARS.update(
         'IMAP_EVE_ENABLED': False,
         'KRB5_ENABLED': True,
         'KRB5_EVE_ENABLED': False,
+        'LIVE_CAPTURE': False,
         'MANAGED_RULES_DIR': '/var/lib/suricata/rules',
         'MAX_PENDING_PACKETS': 1024,
         'MODBUS_ENABLED': True,
@@ -719,6 +723,7 @@ def main():
         deep_set(cfg, ['vars', 'port-groups', portKey], DEFAULT_VARS[portKey])
 
     # capture parameters
+    liveCapture = val2bool(DEFAULT_VARS['LIVE_CAPTURE'])
     for cfgKey in (
         ['capture', 'disable-offloading', 'CAPTURE_DISABLE_OFFLOADING'],
         ['capture', 'checksum-validation', 'CAPTURE_CHECKSUM_VALIDATION'],
@@ -776,7 +781,13 @@ def main():
                 # enable community-id for easier cross-referencing and pcap-file for
                 # tying back to the original PCAP filename
                 cfg['outputs'][outputIdx][name]['community-id'] = True
-                cfg['outputs'][outputIdx][name]['pcap-file'] = True
+
+                # some options make sense for live capture but not PCAP processing
+                cfg['outputs'][outputIdx][name]['pcap-file'] = not liveCapture
+                if liveCapture:
+                    cfg['outputs'][outputIdx][name]['filename'] = DEFAULT_VARS['EVE_FILENAME_PATTERN']
+                    cfg['outputs'][outputIdx][name]['threaded'] = DEFAULT_VARS['EVE_THREADED']
+                    cfg['outputs'][outputIdx][name]['rotate-interval'] = DEFAULT_VARS['EVE_ROTATE_INTERVAL']
 
                 # configure the various different output types belonging to eve-log
                 if 'types' in cfg['outputs'][outputIdx][name]:
