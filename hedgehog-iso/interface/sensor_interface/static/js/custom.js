@@ -28,7 +28,7 @@ function stop_all() {
 
 }
 
-function start_bro() {
+function start_zeek() {
     var xhttp = new XMLHttpRequest();
     loadingBar('on');
     xhttp.onreadystatechange = function () {
@@ -41,7 +41,7 @@ function start_bro() {
     xhttp.send();
 }
 
-function stop_bro() {
+function stop_zeek() {
     var xhttp = new XMLHttpRequest();
     loadingBar('on');
     xhttp.onreadystatechange = function () {
