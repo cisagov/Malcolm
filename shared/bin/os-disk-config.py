@@ -82,7 +82,7 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
         MOUNT_DIRS: [MALCOLM_DB_DIR, MALCOLM_PCAP_DIR, MALCOLM_LOGS_DIR],
         FSTAB_FILE: "/etc/fstab",
         CRYPTTAB_FILE: "/etc/crypttab",
-        GROUP_OWNER: "docker",
+        GROUP_OWNER: 1000,
         USER_UID: 1000,
         DIR_PERMS: 0o750,
         SUBDIR_PERMS: 0o770,
