@@ -31,30 +31,20 @@ urllib3.disable_warnings()
 
 
 ###################################################################################################
-# print to stderr
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-
-###################################################################################################
-# convenient boolean argument parsing
-def str2bool(v):
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-###################################################################################################
 # main
 def main():
     global debug
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
     parser.add_argument(
-        '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
+        '-v',
+        '--verbose',
+        dest='debug',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Verbose output",
     )
     parser.add_argument(
         '-i',
@@ -95,10 +85,10 @@ def main():
     parser.add_argument(
         '--opensearch-ssl-verify',
         dest='opensearchSslVerify',
-        type=str2bool,
+        type=malcolm_utils.str2bool,
         nargs='?',
         const=True,
-        default=str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
+        default=malcolm_utils.str2bool(os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', default='False')),
         help="Verify SSL certificates for OpenSearch",
     )
     parser.add_argument(
@@ -128,14 +118,21 @@ def main():
         '-u',
         '--unassigned',
         dest='fixUnassigned',
-        type=str2bool,
+        type=malcolm_utils.str2bool,
         nargs='?',
         const=True,
         default=False,
         help="Set number_of_replicas for unassigned index shards to 0",
     )
     parser.add_argument(
-        '-n', '--dry-run', dest='dryrun', type=str2bool, nargs='?', const=True, default=False, help="Dry run (no PUT)"
+        '-n',
+        '--dry-run',
+        dest='dryrun',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Dry run (no PUT)",
     )
     try:
         parser.error = parser.exit
@@ -146,9 +143,9 @@ def main():
 
     debug = args.debug
     if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("Arguments: {}".format(sys.argv[1:]))
-        eprint("Arguments: {}".format(args))
+        malcolm_utils.eprint(os.path.join(scriptPath, scriptName))
+        malcolm_utils.eprint("Arguments: {}".format(sys.argv[1:]))
+        malcolm_utils.eprint("Arguments: {}".format(args))
     else:
         sys.tracebacklimit = 0
 
@@ -179,7 +176,7 @@ def main():
     statusInfo = statusInfoResponse.json()
     dashboardsVersion = statusInfo['version']['number']
     if debug:
-        eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
+        malcolm_utils.eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
 
     opensearchInfoResponse = requests.get(
         args.opensearchUrl,
@@ -189,7 +186,7 @@ def main():
     opensearchInfo = opensearchInfoResponse.json()
     opensearchVersion = opensearchInfo['version']['number']
     if debug:
-        eprint('OpenSearch version is {}'.format(opensearchVersion))
+        malcolm_utils.eprint('OpenSearch version is {}'.format(opensearchVersion))
 
     # if they actually just specified the name of the environment variable, resolve that for the index name
     if args.index.startswith('MALCOLM_'):
@@ -206,7 +203,7 @@ def main():
     getIndexInfo = getIndexInfoResponse.json()
     indexId = getIndexInfo['saved_objects'][0]['id'] if (len(getIndexInfo['saved_objects']) > 0) else None
     if debug:
-        eprint('Index ID for {} is {}'.format(args.index, indexId))
+        malcolm_utils.eprint('Index ID for {} is {}'.format(args.index, indexId))
 
     if indexId is not None:
         # get the current fields list
@@ -233,15 +230,14 @@ def main():
                 getTemplateResponseJson = getTemplateResponse.json()
                 if 'index_templates' in getTemplateResponseJson:
                     for template in getTemplateResponseJson['index_templates']:
-                        templateFields = template['index_template']['template']['mappings']['properties']
+                        templateFields = malcolm_utils.deep_get(
+                            template, ['index_template', 'template', 'mappings', 'properties'], default={}
+                        )
 
                         # also include fields from component templates into templateFields before processing
                         # https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
-                        composedOfList = (
-                            template['index_template']['composed_of']
-                            if 'composed_of' in template['index_template']
-                            else []
-                        )
+                        composedOfList = malcolm_utils.deep_get(template, ['index_template', 'composed_of'], default=[])
+
                         for componentName in composedOfList:
                             getComponentResponse = requests.get(
                                 '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName),
@@ -252,9 +248,13 @@ def main():
                             getComponentResponseJson = getComponentResponse.json()
                             if 'component_templates' in getComponentResponseJson:
                                 for component in getComponentResponseJson['component_templates']:
-                                    templateFields.update(
-                                        component['component_template']['template']['mappings']['properties']
+                                    properties = malcolm_utils.deep_get(
+                                        component,
+                                        ['component_template', 'template', 'mappings', 'properties'],
+                                        default=None,
                                     )
+                                    if properties:
+                                        templateFields.update(properties)
 
                         # a field should be merged if it's not already in the list we have from Dashboards, and it's
                         # in the list of types we're merging (leave more complex types like nested and geolocation
@@ -290,13 +290,13 @@ def main():
                                 getFieldsList.append(mergedFieldInfo)
 
                             # elif debug:
-                            #   eprint('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
+                            #   malcolm_utils.eprint('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
 
             except Exception as e:
-                eprint('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
+                malcolm_utils.eprint('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
 
         if debug:
-            eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
+            malcolm_utils.eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
         # define field formatting map for Dashboards -> Arkime drilldown and other URL drilldowns
         #
@@ -342,18 +342,18 @@ def main():
                 if (field['type'] == 'ip') or (re.search(r'[_\.-](h|ip)$', field['name'], re.IGNORECASE) is not None):
                     # add drilldown for searching IANA for IP addresses
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.virustotal.com/en/ip-address/{{value}}/information/'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.virustotal.com/en/ip-address/{{value}}/information/'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'(^|[\b_\.-])(md5|sha(1|256|384|512))\b', field['name'], re.IGNORECASE) is not None:
                     # add drilldown for searching VirusTotal for hash signatures
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.virustotal.com/gui/file/{{value}}/detection'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.virustotal.com/gui/file/{{value}}/detection'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
@@ -370,36 +370,36 @@ def main():
                 ):
                     # add drilldown for searching IANA for ports
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'^(protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
                     # add drilldown for searching IANA for services
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'^(network\.transport|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
                     # add URL link for assigned transport protocol numbers
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'Protocol Registry'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
                 elif re.search(r'(as\.number|(src|dst)ASN|asn\.(src|dst))$', field['name'], re.IGNORECASE) is not None:
                     # add drilldown for searching ARIN for ASN
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://search.arin.net/rdap/?query={{value}}&searchFilter=asn'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://search.arin.net/rdap/?query={{value}}&searchFilter=asn'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
@@ -407,9 +407,9 @@ def main():
                     # add drilldown for searching mime/media/content types
                     # TODO: '/' in URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
                     drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues[
-                        'url'
-                    ] = 'https://www.iana.org/assignments/media-types/{{value}}'
+                    drilldownInfoParamsUrlTemplateValues['url'] = (
+                        'https://www.iana.org/assignments/media-types/{{value}}'
+                    )
                     drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
                     drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 

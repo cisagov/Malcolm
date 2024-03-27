@@ -114,7 +114,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
-        (echo "*/5 * * * * /usr/local/bin/eve-clean-logs.sh\n0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
+        (echo "0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
     mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
         chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
@@ -136,7 +136,6 @@ COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
-COPY --chmod=755 suricata/scripts/eve-clean-logs.sh /usr/local/bin/
 COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
 COPY --chmod=u=rwX,go=rX suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
 
@@ -148,7 +147,6 @@ ARG SURICATA_CRON=true
 ARG SURICATA_AUTO_ANALYZE_PCAP_FILES=false
 ARG SURICATA_CUSTOM_RULES_ONLY=false
 ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=1
-ARG LOG_CLEANUP_MINUTES=30
 ARG SURICATA_UPDATE_RULES=false
 ARG SURICATA_UPDATE_DEBUG=false
 ARG SURICATA_UPDATE_ETOPEN=true
@@ -168,7 +166,6 @@ ENV SURICATA_CRON $SURICATA_CRON
 ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 ENV SURICATA_CUSTOM_RULES_ONLY $SURICATA_CUSTOM_RULES_ONLY
-ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
 ENV SURICATA_UPDATE_RULES $SURICATA_UPDATE_RULES
 ENV SURICATA_UPDATE_DEBUG $SURICATA_UPDATE_DEBUG
 ENV SURICATA_UPDATE_ETOPEN $SURICATA_UPDATE_ETOPEN

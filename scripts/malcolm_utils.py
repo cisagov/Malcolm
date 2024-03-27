@@ -50,6 +50,15 @@ DATABASE_MODE_ENUMS['opensearch-local'] = DatabaseMode.OpenSearchLocal
 DATABASE_MODE_ENUMS['opensearch-remote'] = DatabaseMode.OpenSearchRemote
 DATABASE_MODE_ENUMS['elasticsearch-remote'] = DatabaseMode.ElasticsearchRemote
 
+OS_MODE_HEDGEHOG = 'hedgehog'
+OS_MODE_MALCOLM = 'malcolm'
+
+HEDGEHOG_PCAP_DIR = "pcap"
+HEDGEHOG_ZEEK_DIR = "zeek"
+MALCOLM_DB_DIR = "datastore"
+MALCOLM_PCAP_DIR = "pcap"
+MALCOLM_LOGS_DIR = "logs"
+
 
 def DatabaseModeEnumToStr(val):
     return DATABASE_MODE_LABELS[val]

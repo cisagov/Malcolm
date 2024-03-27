@@ -52,7 +52,7 @@
       "version": "WzExMDgsMV0=",
       "attributes": {
         "title": "Linux Kernel Messages by Host",
-        "visState": "{\"title\":\"Linux Kernel Messages by Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":50,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"@timestamp\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Last Kernel Message\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "visState": "{\"title\":\"Linux Kernel Messages by Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Host\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"@timestamp\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"@timestamp\",\"sortOrder\":\"desc\",\"customLabel\":\"Last Kernel Message\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
         "uiStateJSON": "{}",
         "description": "",
         "version": 1,
@@ -130,7 +130,7 @@
         {
           "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
           "type": "index-pattern",
-          "id": "malcolm_beats_*"
+          "id": "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
         }
       ],
       "migrationVersion": {

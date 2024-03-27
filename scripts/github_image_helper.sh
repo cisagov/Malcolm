@@ -182,7 +182,7 @@ function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
     else
       echo "Failed to extract ISO file" 2>&1
     fi
-    popd "$WORKDIR" >/dev/null 2>&1
+    popd >/dev/null 2>&1
   fi
 }
 

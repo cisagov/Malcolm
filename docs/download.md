@@ -1,47 +1,70 @@
-# Downloads
+# <a name="DownloadMalcolm"></a> Downloading Malcolm
 
-## Malcolm
+* [Docker images](#DownloadDockerImages)
+* [Installer ISOs](#DownloadISOs)
+    - [Joining split ISOs](#JoinISOs)
+    - [Warning](#ISOsWarning)
 
-### Docker images
+## <a name="DownloadDockerImages"></a> Docker images
 
-Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. Its Docker images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) or built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
+Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. These Docker images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) by running `docker compose --profile malcolm pull` from within the Malcolm installation directory, or they can be built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
 
-### Installer ISO
+## <a name="DownloadISOs"></a> Installer ISOs
+
+* [Latest release]({{ site.github.repository_url }}/releases/latest)
 
 Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
 
-Malcolm can be [packaged](malcolm-iso.md#ISOBuild) into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
+Malcolm is also packaged into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
 
-While official downloads of the Malcolm installer ISO are not provided, an **unofficial build** of the ISO installer for the [latest stable release]({{ site.github.repository_url }}/releases/latest) is available for download here.
+### <a name="JoinISOs"></a> Joining split ISOs
 
-| ISO | SHA256 |
-|---|---|
-| [malcolm-24.03.0.iso](/iso/malcolm-24.03.0.iso) (5.1GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/malcolm-24.03.0.iso.sha256.txt) |
+ISOs can be downloaded from [Malcolm's releases page]({{ site.github.repository_url }}/releases/latest) on GitHub. Due to [limits on individual files](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas) in GitHub releases, these ISO files have been split into 2GB chunks and can be reassembled with scripts provided for both Bash ([release_cleaver.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.sh)) and PowerShell ([release_cleaver.ps1]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/release_cleaver.ps1)).
 
-## Hedgehog Linux
+For example, having downloaded the following files from Malcolm's releases page on GitHub, the script will join the component files and check the resulting ISOs SHA256 sum:
 
-### Installer ISO
+```bash
+$ ls -l
+total 5446119424
+-rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-24.03.0.iso.01
+-rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-24.03.0.iso.02
+-rw-r--r-- 1 user user 1446103040 Mar 14 20:03 malcolm-24.03.0.iso.03
+-rw-r--r-- 1 user user         86 Mar 14 20:03 malcolm-24.03.0.iso.sha
+-rwxr-xr-x 1 user user       3133 Mar 14 20:02 release_cleaver.sh
 
-[Instructions are provided](hedgehog-iso-build.md#HedgehogISOBuild) to generate the Hedgehog Linux ISO from source. While official downloads of the Hedgehog Linux ISO are not provided, an **unofficial build** of the ISO installer for the latest stable release is available for download here.
+$ ./release_cleaver.sh malcolm-24.03.0.iso.*
+Joining...
+malcolm-24.03.0.iso: OK
 
-| ISO | SHA256 |
-|---|---|
-| [hedgehog-24.03.0.iso](/iso/hedgehog-24.03.0.iso) (2.5GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.03.0.iso.sha256.txt) |
+$ ls -l *.iso
+-rw-r--r-- 1 user user 5446103040 Mar 14 20:04 malcolm-24.03.0.iso
+```
 
-### Raspberry Pi 4 Image
+Similarly, in Microsoft Windows using PowerShell:
 
-[Instructions are provided](hedgehog-raspi-build.md#HedgehogRaspiBuild) to generate the Hedgehog Linux Raspberry Pi image from source. While official downloads of the Hedgehog Linux image are not provided, an **unofficial build** of the image for the latest stable release is available for download here. This image is compatible with Raspberry Pi 4 models.
+```powershell
+PS C:\Download> dir
 
-| Image | SHA256 |
-|---|---|
-| [hedgehog-24.03.0_raspi_4.img.xz](/iso/hedgehog-24.03.0_raspi_4.img.xz) (1.4GiB) |  [`xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`](/iso/hedgehog-24.03.0_raspi_4.img.xz.sha256.txt) |
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         3/14/2024   2:16 PM     2000000000 malcolm-24.03.0.iso.01
+-a----         3/14/2024   2:16 PM     2000000000 malcolm-24.03.0.iso.02
+-a----         3/14/2024   2:16 PM     1446103040 malcolm-24.03.0.iso.03
+-a----         3/14/2024   2:16 PM            176 malcolm-24.03.0.iso.sha
+-a----         3/14/2024   2:00 PM           6806 release_cleaver.ps1
 
-## Warning
 
-Please check any files you may have downloaded from the links on this page against the SHA256 sums provided to verify the integrity of the downloads.
+PS C:\Download> .\release_cleaver.ps1 .\malcolm-24.03.0.iso.*
+Joining...
+"malcolm-24.03.0.iso" OK
 
-Read carefully the installation documentation for [Malcolm](malcolm-iso.md#ISOInstallation) and/or [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation). The ISO media boot on systems that support EFI-mode booting. The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
+PS C:\Download> dir *.iso
 
-## Disclaimer
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         3/14/2024   2:17 PM     5446103040 malcolm-24.03.0.iso
+```
 
-The terms of [Malcolm's license]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/LICENSE.txt) and [release notice]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/NOTICE.txt) also apply to these unofficial builds of the Malcolm and Hedgehog Linux installer ISOs: neither the organizations funding Malcolm's development, its developers nor the maintainer of this site makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness or usefulness of any data, apparatus or process disclosed therein.
+### <a name="ISOsWarning"></a> Warning
+
+Users should carefully read the installation documentation for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation). The installer is designed to require as little user input as possible. For this reason, there are NO user prompts and confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
