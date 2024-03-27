@@ -37,8 +37,8 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
     * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
     * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
-    * Corelight's [community ID](https://github.com/corelight/zeek-community-id) flow hashing plugin
     * Corelight's [DCE/RPC remote code execution vulnerability (CVE-2022-26809)](https://github.com/corelight/cve-2022-26809) plugin
+    * Corelight's [HASSH](https://github.com/corelight/hassh) SSH fingerprinting plugin
     * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
     * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
     * Corelight's [OpenSSL RCE buffer overrun vulnerability (CVE-2022-3602)](https://github.com/corelight/CVE-2022-3602) plugin
@@ -53,7 +53,6 @@ Malcolm leverages the following excellent open source tools, among others.
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
-    * Salesforce's [HASSH](https://github.com/salesforce/hassh) SSH fingerprinting plugin
     * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)

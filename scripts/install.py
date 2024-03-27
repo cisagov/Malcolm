@@ -36,6 +36,7 @@ from malcolm_common import (
     ChooseMultiple,
     ChooseOne,
     DetermineYamlFileFormat,
+    DialogInit,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
     DOCKER_INSTALL_URLS,
@@ -70,9 +71,13 @@ from malcolm_utils import (
     DatabaseMode,
     DATABASE_MODE_LABELS,
     DATABASE_MODE_ENUMS,
+    MALCOLM_DB_DIR,
+    MALCOLM_PCAP_DIR,
+    MALCOLM_LOGS_DIR,
     deep_get,
     eprint,
     flatten,
+    LoadFileIfJson,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -856,40 +861,110 @@ class Installer(object):
                 pass
 
         # directories for data volume mounts (PCAP storage, Zeek log storage, OpenSearch indexes, etc.)
-        indexDir = './opensearch'
-        indexDirDefault = os.path.join(malcolm_install_path, indexDir)
+
+        # if the file .os-disk-config-defaults was created by the environment (os-disk-config.py)
+        #   we'll use those as defaults, otherwise base things underneath the malcolm_install_path
+        diskFormatInfo = {}
+        try:
+            diskFormatInfoFile = os.path.join(
+                os.path.realpath(os.path.join(ScriptPath, "..")), ".os-disk-config-defaults"
+            )
+            if os.path.isfile(diskFormatInfoFile):
+                with open(diskFormatInfoFile) as f:
+                    diskFormatInfo = LoadFileIfJson(f)
+        except Exception:
+            pass
+        diskFormatInfo = {k: v for k, v in diskFormatInfo.items() if os.path.isdir(v)}
+
+        if MALCOLM_DB_DIR in diskFormatInfo:
+            for subDir in ['opensearch', 'opensearch-backup']:
+                pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_DB_DIR], subDir)).mkdir(parents=False, exist_ok=True)
+        if MALCOLM_LOGS_DIR in diskFormatInfo:
+            for subDir in ['zeek-logs', 'suricata-logs']:
+                pathlib.Path(os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], subDir)).mkdir(parents=False, exist_ok=True)
+
+        if args.indexDir:
+            indexDirDefault = args.indexDir
+            indexDir = indexDirDefault
+        else:
+            indexDir = './opensearch'
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
+            ):
+                indexDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexDir)
+                indexDir = indexDirDefault
+            else:
+                indexDirDefault = os.path.join(malcolm_install_path, indexDir)
         indexDirFull = os.path.realpath(indexDirDefault)
 
         indexSnapshotCompressed = False
-        indexSnapshotDir = './opensearch-backup'
-        indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
+        if args.indexSnapshotDir:
+            indexSnapshotDirDefault = args.indexSnapshotDir
+            indexSnapshotDir = indexSnapshotDirDefault
+        else:
+            indexSnapshotDir = './opensearch-backup'
+            if (MALCOLM_DB_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
+            ):
+                indexSnapshotDirDefault = os.path.join(diskFormatInfo[MALCOLM_DB_DIR], indexSnapshotDir)
+                indexSnapshotDir = indexSnapshotDirDefault
+            else:
+                indexSnapshotDirDefault = os.path.join(malcolm_install_path, indexSnapshotDir)
         indexSnapshotDirFull = os.path.realpath(indexSnapshotDirDefault)
 
-        pcapDir = './pcap'
-        pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
+        if args.pcapDir:
+            pcapDirDefault = args.pcapDir
+            pcapDir = pcapDirDefault
+        else:
+            if MALCOLM_PCAP_DIR in diskFormatInfo:
+                pcapDirDefault = diskFormatInfo[MALCOLM_PCAP_DIR]
+                pcapDir = pcapDirDefault
+            else:
+                pcapDir = './pcap'
+                pcapDirDefault = os.path.join(malcolm_install_path, pcapDir)
         pcapDirFull = os.path.realpath(pcapDirDefault)
 
-        suricataLogDir = './suricata-logs'
-        suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
+        if args.suricataLogDir:
+            suricataLogDirDefault = args.suricataLogDir
+            suricataLogDir = suricataLogDirDefault
+        else:
+            suricataLogDir = './suricata-logs'
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
+            ):
+                suricataLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], suricataLogDir)
+                suricataLogDir = suricataLogDirDefault
+            else:
+                suricataLogDirDefault = os.path.join(malcolm_install_path, suricataLogDir)
         suricataLogDirFull = os.path.realpath(suricataLogDirDefault)
 
-        zeekLogDir = './zeek-logs'
-        zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
+        if args.zeekLogDir:
+            zeekLogDirDefault = args.zeekLogDir
+            zeekLogDir = zeekLogDirDefault
+        else:
+            zeekLogDir = './zeek-logs'
+            if (MALCOLM_LOGS_DIR in diskFormatInfo) and os.path.isdir(
+                os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
+            ):
+                zeekLogDirDefault = os.path.join(diskFormatInfo[MALCOLM_LOGS_DIR], zeekLogDir)
+                zeekLogDir = zeekLogDirDefault
+            else:
+                zeekLogDirDefault = os.path.join(malcolm_install_path, zeekLogDir)
         zeekLogDirFull = os.path.realpath(zeekLogDirDefault)
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            if not InstallerYesOrNo(
-                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files locally under {malcolm_install_path}?',
+            if diskFormatInfo or not InstallerYesOrNo(
+                f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files in {malcolm_install_path}?',
                 default=not args.acceptDefaultsNonInteractive,
             ):
                 # PCAP directory
                 if not InstallerYesOrNo(
-                    'Store PCAP files locally in {}?'.format(pcapDirDefault),
+                    'Store PCAP files in {}?'.format(pcapDirDefault),
                     default=not bool(args.pcapDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP directory')
                     while loopBreaker.increment():
-                        pcapDir = InstallerAskForString('Enter PCAP directory', default=args.pcapDir)
+                        pcapDir = InstallerAskForString('Enter PCAP directory', default=pcapDirDefault)
                         if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
                             pcapDirFull = os.path.realpath(pcapDir)
                             pcapDir = (
@@ -901,12 +976,12 @@ class Installer(object):
 
                 # Zeek log directory
                 if not InstallerYesOrNo(
-                    'Store Zeek logs locally in {}?'.format(zeekLogDirDefault),
+                    'Store Zeek logs in {}?'.format(zeekLogDirDefault),
                     default=not bool(args.zeekLogDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Zeek directory')
                     while loopBreaker.increment():
-                        zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=args.zeekLogDir)
+                        zeekLogDir = InstallerAskForString('Enter Zeek log directory', default=zeekLogDirDefault)
                         if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
                             zeekLogDirFull = os.path.realpath(zeekLogDir)
                             zeekLogDir = (
@@ -918,13 +993,13 @@ class Installer(object):
 
                 # Suricata log directory
                 if not InstallerYesOrNo(
-                    'Store Suricata logs locally in {}?'.format(suricataLogDirDefault),
+                    'Store Suricata logs in {}?'.format(suricataLogDirDefault),
                     default=not bool(args.suricataLogDir),
                 ):
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Suricata directory')
                     while loopBreaker.increment():
                         suricataLogDir = InstallerAskForString(
-                            'Enter Suricata log directory', default=args.suricataLogDir
+                            'Enter Suricata log directory', default=suricataLogDirDefault
                         )
                         if (len(suricataLogDir) > 1) and os.path.isdir(suricataLogDir):
                             suricataLogDirFull = os.path.realpath(suricataLogDir)
@@ -938,12 +1013,14 @@ class Installer(object):
                 if (malcolmProfile == PROFILE_MALCOLM) and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal):
                     # opensearch index directory
                     if not InstallerYesOrNo(
-                        'Store OpenSearch indices locally in {}?'.format(indexDirDefault),
+                        'Store OpenSearch indices in {}?'.format(indexDirDefault),
                         default=not bool(args.indexDir),
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch index directory')
                         while loopBreaker.increment():
-                            indexDir = InstallerAskForString('Enter OpenSearch index directory', default=args.indexDir)
+                            indexDir = InstallerAskForString(
+                                'Enter OpenSearch index directory', default=indexDirDefault
+                            )
                             if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                 indexDirFull = os.path.realpath(indexDir)
                                 indexDir = (
@@ -955,13 +1032,13 @@ class Installer(object):
 
                     # opensearch snapshot repository directory and compression
                     if not InstallerYesOrNo(
-                        'Store OpenSearch index snapshots locally in {}?'.format(indexSnapshotDirDefault),
+                        'Store OpenSearch index snapshots in {}?'.format(indexSnapshotDirDefault),
                         default=not bool(args.indexSnapshotDir),
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid OpenSearch snapshots directory')
                         while loopBreaker.increment():
                             indexSnapshotDir = InstallerAskForString(
-                                'Enter OpenSearch index snapshot directory', default=args.indexSnapshotDir
+                                'Enter OpenSearch index snapshot directory', default=indexSnapshotDirDefault
                             )
                             if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
                                 indexSnapshotDirFull = os.path.realpath(indexSnapshotDir)
@@ -1350,17 +1427,17 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=args.netboxLogstashEnrich,
         )
-        netboxLogstashAutoPopulate = (
+        netboxAutoPopulate = (
             netboxEnabled
             and InstallerYesOrNo(
                 'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
-                default=args.netboxLogstashAutoPopulate,
+                default=args.netboxAutoPopulate,
             )
             and (
                 args.acceptDefaultsNonInteractive
                 or InstallerYesOrNo(
                     "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                    default=args.netboxLogstashAutoPopulate,
+                    default=args.netboxAutoPopulate,
                 )
             )
         )
@@ -1374,9 +1451,9 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
-        netboxPreloadPrefixes = netboxEnabled and InstallerYesOrNo(
-            'Should Malcolm create "catch-all" prefixes for private IP address space?',
-            default=args.netboxPreloadPrefixes,
+        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
+            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
+            default=args.netboxLogstashAutoSubnets,
         )
 
         # input packet capture parameters
@@ -1676,18 +1753,6 @@ class Installer(object):
                 'LOGSTASH_OUI_LOOKUP',
                 TrueOrFalseNoQuote(autoOui),
             ),
-            # enrich network traffic metadata via NetBox API calls
-            EnvValue(
-                os.path.join(args.configDir, 'logstash.env'),
-                'LOGSTASH_NETBOX_ENRICHMENT',
-                TrueOrFalseNoQuote(netboxLogstashEnrich),
-            ),
-            # populate the NetBox inventory based on observed network traffic
-            EnvValue(
-                os.path.join(args.configDir, 'logstash.env'),
-                'LOGSTASH_NETBOX_AUTO_POPULATE',
-                TrueOrFalseNoQuote(netboxLogstashAutoPopulate),
-            ),
             # logstash pipeline workers
             EnvValue(
                 os.path.join(args.configDir, 'logstash.env'),
@@ -1700,6 +1765,24 @@ class Installer(object):
                 'FREQ_LOOKUP',
                 TrueOrFalseNoQuote(autoFreq),
             ),
+            # enrich network traffic metadata via NetBox API calls
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_ENRICHMENT',
+                TrueOrFalseNoQuote(netboxLogstashEnrich),
+            ),
+            # create missing NetBox subnet prefixes based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_AUTO_CREATE_PREFIX',
+                TrueOrFalseNoQuote(netboxLogstashAutoSubnets),
+            ),
+            # populate the NetBox inventory based on observed network traffic
+            EnvValue(
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_AUTO_POPULATE',
+                TrueOrFalseNoQuote(netboxAutoPopulate),
+            ),
             # NetBox default site name
             EnvValue(
                 os.path.join(args.configDir, 'netbox-common.env'),
@@ -1711,11 +1794,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
-            ),
-            EnvValue(
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_PRELOAD_PREFIXES',
-                TrueOrFalseNoQuote(netboxPreloadPrefixes),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
@@ -2491,9 +2569,31 @@ class LinuxInstaller(Installer):
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
         if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
-            self.requiredPackages.extend(['apache2-utils', 'make', 'openssl', 'python3-dialog', 'xz-utils'])
+            self.requiredPackages.extend(
+                [
+                    'apache2-utils',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-yaml',
+                    'xz-utils',
+                ]
+            )
         elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
-            self.requiredPackages.extend(['httpd-tools', 'make', 'openssl', 'python3-dialog', 'xz'])
+            self.requiredPackages.extend(
+                [
+                    'httpd-tools',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-yaml',
+                    'xz',
+                ]
+            )
 
         # on Linux this script requires root, or sudo, unless we're in local configuration-only mode
         if os.getuid() == 0:
@@ -3955,7 +4055,7 @@ def main():
     )
     netboxArgGroup.add_argument(
         '--netbox-autopopulate',
-        dest='netboxLogstashAutoPopulate',
+        dest='netboxAutoPopulate',
         type=str2bool,
         metavar="true|false",
         nargs='?',
@@ -3964,14 +4064,14 @@ def main():
         help="Automatically populate NetBox inventory based on observed network traffic",
     )
     netboxArgGroup.add_argument(
-        '--netbox-preload-prefixes',
-        dest='netboxPreloadPrefixes',
+        '--netbox-auto-prefixes',
+        dest='netboxLogstashAutoSubnets',
         type=str2bool,
         metavar="true|false",
         nargs='?',
         const=True,
         default=False,
-        help="Preload NetBox IPAM IP Prefixes for private IP space",
+        help="Automatically create missing NetBox subnet prefixes based on observed network traffic",
     )
     netboxArgGroup.add_argument(
         '--netbox-site-name',
@@ -4098,6 +4198,30 @@ def main():
     else:
         sys.tracebacklimit = 0
 
+    orchMode = OrchestrationFramework.UNKNOWN
+    if args.configFile and os.path.isfile(args.configFile):
+        if not (
+            (orchMode := DetermineYamlFileFormat(args.configFile)) and (orchMode in OrchestrationFrameworksSupported)
+        ):
+            raise Exception(f'{args.configFile} must be a docker-compose or kubeconfig YAML file')
+    else:
+        orchMode = OrchestrationFramework.DOCKER_COMPOSE
+
+    installPath = None
+
+    installerPlatform = platform.system()
+    if installerPlatform == PLATFORM_LINUX:
+        installer = LinuxInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+    elif installerPlatform == PLATFORM_MAC:
+        installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+    elif installerPlatform == PLATFORM_WINDOWS:
+        raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
+        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+
+    if (not args.configOnly) and hasattr(installer, 'install_required_packages'):
+        installer.install_required_packages()
+
+    DialogInit()
     requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
     dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
@@ -4107,15 +4231,6 @@ def main():
         eprint(f"Imported dotenv: {dotenv_imported}")
     if (not requests_imported) or (not yaml_imported) or (not dotenv_imported):
         exit(2)
-
-    orchMode = OrchestrationFramework.UNKNOWN
-    if args.configFile and os.path.isfile(args.configFile):
-        if not (
-            (orchMode := DetermineYamlFileFormat(args.configFile)) and (orchMode in OrchestrationFrameworksSupported)
-        ):
-            raise Exception(f'{args.configFile} must be a docker-compose or kubeconfig YAML file')
-    else:
-        orchMode = OrchestrationFramework.DOCKER_COMPOSE
 
     # If Malcolm and images tarballs are provided, we will use them.
     # If they are not provided, look in the pwd first, then in the script directory, to see if we
@@ -4150,29 +4265,15 @@ def main():
             eprint(f"Malcolm install file: {malcolmFile}")
             eprint(f"Docker images file: {imageFile}")
 
-    installerPlatform = platform.system()
-    if installerPlatform == PLATFORM_LINUX:
-        installer = LinuxInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-    elif installerPlatform == PLATFORM_MAC:
-        installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-    elif installerPlatform == PLATFORM_WINDOWS:
-        raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
-        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
-
-    success = False
-    installPath = None
-
     if not args.configOnly:
-        if hasattr(installer, 'install_required_packages'):
-            success = installer.install_required_packages()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker'):
-            success = installer.install_docker()
+            installer.install_docker()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_compose'):
-            success = installer.install_docker_compose()
+            installer.install_docker_compose()
         if hasattr(installer, 'tweak_system_files'):
-            success = installer.tweak_system_files()
+            installer.tweak_system_files()
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
-            success, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
+            _, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
     # if .env directory is unspecified, use the default ./config directory
     if args.configDir is None:
@@ -4217,7 +4318,6 @@ def main():
                     installPath = testPath
                     break
 
-        success = (installPath is not None) and os.path.isdir(installPath)
         if args.debug:
             eprint(f"Malcolm installation detected at {installPath}")
 
@@ -4230,7 +4330,7 @@ def main():
             and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
             and hasattr(installer, 'install_docker_images')
         ):
-            success = installer.install_docker_images(imageFile, installPath)
+            installer.install_docker_images(imageFile, installPath)
 
         InstallerDisplayMessage(
             f"Malcolm has been installed to {installPath}. See README.md for more information.\nScripts for starting and stopping Malcolm and changing authentication-related settings can be found in {os.path.join(installPath, 'scripts')}."

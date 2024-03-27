@@ -129,6 +129,20 @@ elif grep --quiet ^MailTo ./zeekctl.cfg; then
 else
   echo "SendMail =" >> ./zeekctl.cfg
 fi
+if [ $AF_PACKET_SUPPORT -gt 0 ]; then
+  if grep --quiet '^lb_custom\.InterfacePrefix' ./zeekctl.cfg; then
+    sed -r -i 's/(lb_custom\.InterfacePrefix)[[:space:]]*=.*/\1=af_packet::/g' ./zeekctl.cfg
+  else
+    echo >> ./zeekctl.cfg
+    echo "# InterfacePrefix=af_packet:: for interfaces using lb_method=custom  " >> ./zeekctl.cfg
+    echo "lb_custom.InterfacePrefix=af_packet::" >> ./zeekctl.cfg
+  fi
+else
+  # no af_packet support, so remove InterfacePrefix=af_packet
+  sed -r -i '/InterfacePrefix[[:space:]]*=[[:space:]]*af_packet/d'  ./zeekctl.cfg
+fi
+
+
 
 # completely rewrite node.cfg for one worker per interface
 # see idaholab/Malcolm#36 for details on fine-tuning

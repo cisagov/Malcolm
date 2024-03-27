@@ -49,12 +49,6 @@ rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch
 rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__
 find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded
 
-cat << 'EOF' >> "${ZEEK_DIR}"/etc/zeekctl.cfg
-# all interfaces using lb_method=custom should use AF_PACKET
-lb_custom.InterfacePrefix=af_packet::
-
-EOF
-
 # set up default zeek local policy and sensor-related directories
 cp -f /usr/local/etc/zeek/*.zeek /usr/local/etc/zeek/*.txt "${ZEEK_DIR}"/share/zeek/site/
 mkdir -p /opt/sensor/sensor_ctl/zeek/custom /opt/sensor/sensor_ctl/zeek/intel/STIX /opt/sensor/sensor_ctl/zeek/intel/MISP /opt/sensor/sensor_ctl/fluentbit

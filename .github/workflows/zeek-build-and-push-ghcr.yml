@@ -12,9 +12,11 @@ on:
       - '!shared/bin/agg-init.sh'
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
+      - '!shared/bin/os-disk-config.py'
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'
+      - '!shared/bin/suricata*'
       - '.trigger_workflow_build'
   workflow_dispatch:
   repository_dispatch:

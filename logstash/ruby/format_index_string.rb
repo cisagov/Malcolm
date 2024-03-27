@@ -77,7 +77,7 @@ def filter(event)
     end
   end
 
-  event.set("#{@target}", prefix_resolved + String(midfix_first) + suffix_separator + suffix_resolved)
+  event.set("#{@target}", (prefix_resolved + String(midfix_first) + suffix_separator + suffix_resolved).downcase)
 
   [event]
 end

@@ -17,7 +17,7 @@ The Arkime interface will be accessible over HTTPS on port 443 at the docker hos
 
 ## <a name="ArkimeZeek"></a>Zeek log integration
 
-A stock installation of Arkime extracts all its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek (formerly Bro) generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Arkime session database schema for equivalent fields, and by creating new "native" Arkime database fields for all other Zeek log values for which there is not currently an equivalent in Arkime:
+A stock installation of Arkime extracts all its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Arkime session database schema for equivalent fields, and by creating new "native" Arkime database fields for all other Zeek log values for which there is not currently an equivalent in Arkime:
 
 ![Zeek log session record](./images/screenshots/arkime_session_zeek.png)
 
