@@ -1,7 +1,5 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-version: '3.7'
-
 x-logging:
   &default-logging
   driver: local
