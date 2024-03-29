@@ -448,6 +448,7 @@ def main():
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
     defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
+    defaultTls = os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS', 'false')
     defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
     defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
@@ -487,7 +488,7 @@ def main():
         type=str2bool,
         nargs='?',
         const=True,
-        default=defaultMagic,
+        default=defaultTls,
         metavar='true|false',
         help=f"Serve with TLS (must specify --tls-keyfile and --tls-certfile)",
     )
@@ -497,7 +498,7 @@ def main():
         help=f'TLS Key File',
         metavar='<filename>',
         type=str,
-        default=None,
+        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_KEYFILE', None),
     )
     parser.add_argument(
         '--tls-certfile',
@@ -505,7 +506,7 @@ def main():
         help=f'TLS Certificate File',
         metavar='<filename>',
         type=str,
-        default=None,
+        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_CERTFILE', None),
     )
     parser.add_argument(
         '-d',
