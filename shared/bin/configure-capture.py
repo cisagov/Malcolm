@@ -77,9 +77,10 @@ class Constants:
     BEAT_LS_HOST = 'BEAT_LS_HOST'
     BEAT_LS_PORT = 'BEAT_LS_PORT'
     BEAT_LS_SSL = 'BEAT_LS_SSL'
-    BEAT_LS_SSL_CA_CRT = 'BEAT_LS_SSL_CA_CRT'
-    BEAT_LS_SSL_CLIENT_CRT = 'BEAT_LS_SSL_CLIENT_CRT'
-    BEAT_LS_SSL_CLIENT_KEY = 'BEAT_LS_SSL_CLIENT_KEY'
+    BEAT_LS_SSL_PREFIX = 'BEAT_LS_SSL_'
+    BEAT_LS_SSL_CA_CRT = f'{BEAT_LS_SSL_PREFIX}CA_CRT'
+    BEAT_LS_SSL_CLIENT_CRT = f'{BEAT_LS_SSL_PREFIX}CLIENT_CRT'
+    BEAT_LS_SSL_CLIENT_KEY = f'{BEAT_LS_SSL_PREFIX}CLIENT_KEY'
     BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
     BEAT_LS_CERT_DIR_DEFAULT = "/opt/sensor/sensor_ctl/logstash-client-certificates"
 
@@ -182,6 +183,20 @@ class Constants:
 # the main dialog window used for the duration of this tool
 d = Dialog(dialog='dialog', autowidgetsize=True)
 d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
+
+
+###################################################################################################
+def rewrite_dict_to_file(vals_dict, config_file_name, backup='.bak'):
+    if vals_dict and os.path.isfile(config_file_name):
+        values_re = re.compile(r"\b(" + '|'.join(list(vals_dict.keys())) + r")\s*=\s*.*?$")
+        with fileinput.FileInput(config_file_name, inplace=True, backup=backup) as file:
+            for line in file:
+                line = line.rstrip("\n")
+                key_match = values_re.search(line)
+                if key_match is not None:
+                    print(values_re.sub(r"\1=%s" % vals_dict[key_match.group(1)], line))
+                else:
+                    print(line)
 
 
 ###################################################################################################
@@ -364,30 +379,19 @@ def main():
                     if len(line.strip()) > 0:
                         name, var = remove_prefix(line, "export").partition("=")[::2]
                         capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
-            if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and (
-                "OS_HOST" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["OS_HOST"]
-            if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and (
-                "OS_PORT" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_OS_PORT] = capture_config_dict["OS_PORT"]
-            if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and (
-                "OS_USERNAME" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["OS_USERNAME"]
-            if (Constants.MALCOLM_REQUEST_ACL not in previous_config_values.keys()) and (
-                "MALCOLM_REQUEST_ACL" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.MALCOLM_REQUEST_ACL] = capture_config_dict[
-                    Constants.MALCOLM_REQUEST_ACL
-                ]
-            if (Constants.ARKIME_PASSWORD_SECRET not in previous_config_values.keys()) and (
-                "ARKIME_PASSWORD_SECRET" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.ARKIME_PASSWORD_SECRET] = capture_config_dict[
-                    Constants.ARKIME_PASSWORD_SECRET
-                ]
+
+            for key, value in {
+                Constants.BEAT_OS_HOST: "OS_HOST",
+                Constants.BEAT_OS_PORT: "OS_PORT",
+                Constants.BEAT_HTTP_USERNAME: "OS_USERNAME",
+                Constants.MALCOLM_REQUEST_ACL: Constants.MALCOLM_REQUEST_ACL,
+                Constants.ARKIME_PASSWORD_SECRET: Constants.ARKIME_PASSWORD_SECRET,
+                Constants.BEAT_LS_SSL_CA_CRT: Constants.BEAT_LS_SSL_CA_CRT,
+                Constants.BEAT_LS_SSL_CLIENT_CRT: Constants.BEAT_LS_SSL_CLIENT_CRT,
+                Constants.BEAT_LS_SSL_CLIENT_KEY: Constants.BEAT_LS_SSL_CLIENT_KEY,
+            }.items():
+                if (key not in previous_config_values.keys()) and (value in capture_config_dict.keys()):
+                    previous_config_values[key] = capture_config_dict[value]
 
             code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
             if code == Dialog.CANCEL or code == Dialog.ESC:
@@ -973,21 +977,7 @@ def main():
                     previous_config_values = opensearch_config_dict.copy()
 
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    opensearch_values_re = re.compile(
-                        r"\b(" + '|'.join(list(arkime_config_dict.keys())) + r")\s*=\s*.*?$"
-                    )
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            opensearch_key_match = opensearch_values_re.search(line)
-                            if opensearch_key_match is not None:
-                                print(
-                                    opensearch_values_re.sub(
-                                        r"\1=%s" % arkime_config_dict[opensearch_key_match.group(1)], line
-                                    )
-                                )
-                            else:
-                                print(line)
+                    rewrite_dict_to_file(arkime_config_dict, Constants.SENSOR_CAPTURE_CONFIG)
 
                     # hooray
                     code = d.msgbox(
@@ -1139,10 +1129,8 @@ def main():
                                         'SSL Certificate Authorities File',
                                         1,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
-                                            if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CA_CRT, f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt"
                                         ),
                                         1,
                                         35,
@@ -1153,10 +1141,9 @@ def main():
                                         'SSL Certificate File',
                                         2,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
-                                            if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CLIENT_CRT,
+                                            f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
                                         ),
                                         2,
                                         35,
@@ -1167,10 +1154,9 @@ def main():
                                         'SSL Key File',
                                         3,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
-                                            if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CLIENT_KEY,
+                                            f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key",
                                         ),
                                         3,
                                         35,
@@ -1256,6 +1242,16 @@ def main():
                         # keystore list failed
                         raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
 
+                    # also write the TLS files back out to the config file
+                    rewrite_dict_to_file(
+                        {
+                            k: v
+                            for (k, v) in forwarder_dict.items()
+                            if k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))
+                        },
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
+
                 elif (fwd_mode == Constants.TX_RX_SECURE) and txRxScript:
                     # use tx-rx-secure.sh (via croc) to get certs from Malcolm
                     code = d.msgbox(text='Run auth_setup on Malcolm "Transfer self-signed client certificates..."')
@@ -1311,6 +1307,19 @@ def main():
                             raise RuntimeError("Operation cancelled")
 
                         p.poll()
+
+                    keyFiles = {
+                        Constants.BEAT_LS_SSL_CA_CRT: os.path.join(Constants.BEAT_LS_CERT_DIR_DEFAULT, 'ca.crt'),
+                        Constants.BEAT_LS_SSL_CLIENT_CRT: os.path.join(
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT, 'client.crt'
+                        ),
+                        Constants.BEAT_LS_SSL_CLIENT_KEY: os.path.join(
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT, 'client.key'
+                        ),
+                    }
+                    if all([os.path.isfile(v) for (k, v) in keyFiles.items()]):
+                        # also write the TLS files back out to the config file
+                        rewrite_dict_to_file(keyFiles, Constants.SENSOR_CAPTURE_CONFIG)
 
                 else:
                     # we're here without a valid forwarding type selection?!?
