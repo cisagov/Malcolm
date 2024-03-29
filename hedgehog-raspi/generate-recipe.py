@@ -110,8 +110,8 @@ extra_root_shell_cmds = [
     'cp -r "%s/config/hooks/normal/"* "${ROOT?}/opt/hooks/"' % SENSOR_DIR,
     'cp -r "%s/config/package-lists/"* "${ROOT?}/opt/deps/"' % SENSOR_DIR,
     'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
-    'cp -r "%s/nginx/css/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/nginx/js/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/nginx/landingpage/css/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/nginx/landingpage/js/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
     'cp -r "%s/docs/images/icon/favicon.ico" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
     'cp -r "%s/docs/images/logo/Malcolm_background.png" "${ROOT?}/opt/sensor/assets/img/bg-masthead.png"' % MALCOLM_DIR,
 ]

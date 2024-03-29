@@ -221,7 +221,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
   apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
   apt-get clean && \
-  rm -rf /var/lib/apt/lists/* /tmp/* && \
+  rm -rf /var/lib/apt/lists/* /tmp/*
 
 USER ${PUSER}
 
