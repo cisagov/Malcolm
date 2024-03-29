@@ -112,7 +112,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   fi
 
   # update the firewall ACL (via ufw) to allow retrieval of packets
-  sudo --non-interactive /usr/local/bin/ufw_allow_viewer.sh
+  sudo --non-interactive /usr/local/bin/ufw_allow_requests.sh
 
   # make sure interface flags are set appropriately for capture
   if [[ -n $CAPTURE_INTERFACE ]]; then

@@ -397,6 +397,10 @@ install_files() {
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
     popd >/dev/null 2>&1
 
+    # download assets for extracted file server
+    /usr/local/bin/web-ui-asset-download.sh -o /opt/sensor/assets/css
+    find /opt/sensor/assets -type f
+
     # Prepare Fluentbit and Beats repo GPG keys
     local apt_lists='/etc/apt/sources.list.d'
     local apt_keys='/etc/apt/keyrings'

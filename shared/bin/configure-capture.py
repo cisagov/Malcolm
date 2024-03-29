@@ -105,7 +105,7 @@ class Constants:
 
     # specific to arkime
     ARKIME_PASSWORD_SECRET = "ARKIME_PASSWORD_SECRET"
-    ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
+    MALCOLM_REQUEST_ACL = "MALCOLM_REQUEST_ACL"
     ARKIME_COMPRESSION_TYPE = "ARKIME_COMPRESSION_TYPE"
     ARKIME_COMPRESSION_LEVEL = "ARKIME_COMPRESSION_LEVEL"
     ARKIME_COMPRESSION_TYPES = (
@@ -376,10 +376,12 @@ def main():
                 "OS_USERNAME" in capture_config_dict.keys()
             ):
                 previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["OS_USERNAME"]
-            if (Constants.ARKIME_PACKET_ACL not in previous_config_values.keys()) and (
-                "ARKIME_PACKET_ACL" in capture_config_dict.keys()
+            if (Constants.MALCOLM_REQUEST_ACL not in previous_config_values.keys()) and (
+                "MALCOLM_REQUEST_ACL" in capture_config_dict.keys()
             ):
-                previous_config_values[Constants.ARKIME_PACKET_ACL] = capture_config_dict[Constants.ARKIME_PACKET_ACL]
+                previous_config_values[Constants.MALCOLM_REQUEST_ACL] = capture_config_dict[
+                    Constants.MALCOLM_REQUEST_ACL
+                ]
             if (Constants.ARKIME_PASSWORD_SECRET not in previous_config_values.keys()) and (
                 "ARKIME_PASSWORD_SECRET" in capture_config_dict.keys()
             ):
@@ -894,14 +896,14 @@ def main():
                         arkime_config_dict[Constants.ARKIME_PASSWORD_SECRET] = arkime_password
 
                     # get list of IP addresses allowed for packet payload retrieval
-                    lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
+                    lines = previous_config_values[Constants.MALCOLM_REQUEST_ACL].split(",")
                     lines.append(opensearch_config_dict[Constants.BEAT_OS_HOST])
                     code, lines = d.editbox_str(
                         "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL
                     )
                     if code != Dialog.OK:
                         raise CancelledError
-                    arkime_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join(
+                    arkime_config_dict[Constants.MALCOLM_REQUEST_ACL] = ','.join(
                         [
                             ip
                             for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))

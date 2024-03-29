@@ -7,21 +7,23 @@
 # be aes-256-cbc encrypted in a way that's compatible with:
 #   openssl enc -aes-256-cbc -d -in encrypted.data -out decrypted.data
 
+import atexit
 import argparse
 import dominate
+import functools
 import hashlib
 import magic
 import os
 import re
+import ssl
 import sys
+import time
 from Crypto.Cipher import AES
 from datetime import datetime, timedelta, UTC
 from dominate.tags import *
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-from socketserver import ThreadingMixIn
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
-from threading import Thread
 
 from malcolm_utils import (
     eprint,
@@ -70,7 +72,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         path = SimpleHTTPRequestHandler.translate_path(self, path)
         relpath = os.path.relpath(path, os.getcwd())
-        fullpath = os.path.join(self.server.base_path, relpath)
+        fullpath = os.path.join(self.directory, relpath)
         return fullpath, relpath
 
     # override do_GET for fancy directory listing and so that files are encrypted/zipped, if requested
@@ -417,17 +419,21 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
 ###################################################################################################
 #
-class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
-    def __init__(self, base_path, server_address, RequestHandlerClass=HTTPHandler):
-        self.base_path = base_path
-        HTTPServer.__init__(self, server_address, RequestHandlerClass)
-
-
-###################################################################################################
-#
-def serve_on_port(path: str, port: int):
-    server = ThreadingHTTPServer(path, ("", port))
-    print(f"serving {path} at port {port}")
+def serve_on_port(
+    path,
+    port,
+    tls=False,
+    tls_key_file=None,
+    tls_cert_file=None,
+    server_class=ThreadingHTTPServer,
+    handler_class=HTTPHandler,
+):
+    server = server_class(("", port), functools.partial(handler_class, directory=path))
+    if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
+        ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
+        server.socket = ctx.wrap_socket(server.socket, server_side=True)
+    print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
     server.serve_forever()
 
 
@@ -473,6 +479,33 @@ def main():
         metavar='<port>',
         type=int,
         default=defaultPort,
+    )
+    parser.add_argument(
+        '-t',
+        '--tls',
+        dest='tls',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultMagic,
+        metavar='true|false',
+        help=f"Serve with TLS (must specify --tls-keyfile and --tls-certfile)",
+    )
+    parser.add_argument(
+        '--tls-keyfile',
+        dest='tlsKeyFile',
+        help=f'TLS Key File',
+        metavar='<filename>',
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        '--tls-certfile',
+        dest='tlsCertFile',
+        help=f'TLS Certificate File',
+        metavar='<filename>',
+        type=str,
+        default=None,
     )
     parser.add_argument(
         '-d',
@@ -591,7 +624,13 @@ def main():
     if args.assetsDirRespReplacer:
         args.assetsDirRespReplacer = os.path.join(args.assetsDirRespReplacer, '')
 
-    Thread(target=serve_on_port, args=[args.serveDir, args.port]).start()
+    serve_on_port(
+        path=args.serveDir,
+        port=args.port,
+        tls=args.tls,
+        tls_key_file=args.tlsKeyFile,
+        tls_cert_file=args.tlsCertFile,
+    )
 
 
 ###################################################################################################
