@@ -232,7 +232,7 @@ USER root
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
-COPY --chmod=644 shared/bin/extracted_files_http_server.py /usr/local/bin/
+COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
 COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
