@@ -46,6 +46,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
 filename_truncate_len_malcolm = 20
 filename_truncate_len = 32
+malcolm_forward_header = 'X-Malcolm-Forward'
 
 
 ###################################################################################################
@@ -82,6 +83,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         global debug
         global args
 
+        assetsDirRespReplacer = f"{str(dict(self.headers).get(malcolm_forward_header, ''))}{args.assetsDirRespReplacer}"
+
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
         fnameDispLen = filename_truncate_len_malcolm if args.malcolm else filename_truncate_len
@@ -110,10 +113,10 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             with doc.head:
                 meta(charset="utf-8")
                 meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-                link(rel="icon", href=f"{args.assetsDirRespReplacer}favicon.ico", type="image/x-icon")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/bootstrap-icons.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/google-fonts.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/styles.css", type="text/css")
+                link(rel="icon", href=f"{assetsDirRespReplacer}favicon.ico", type="image/x-icon")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/bootstrap-icons.css", type="text/css")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/google-fonts.css", type="text/css")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/styles.css", type="text/css")
 
             # <body>
             with doc:
@@ -324,8 +327,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                             a(href=f'https://github.com/idaholab/Malcolm/', target="_blank")
                         ).add(i(cls="bi-github fs-3", title="GitHub"))
 
-                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
-                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/scripts.js")
+                script(type="text/javascript", src=f"{assetsDirRespReplacer}js/bootstrap.bundle.min.js")
+                script(type="text/javascript", src=f"{assetsDirRespReplacer}js/scripts.js")
 
             # send directory listing HTML to web client
             self.wfile.write(str.encode(str(doc)))
