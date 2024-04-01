@@ -112,8 +112,9 @@ extra_root_shell_cmds = [
     'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
     'cp -r "%s/nginx/landingpage/css/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
     'cp -r "%s/nginx/landingpage/js/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/docs/images/icon/favicon.ico" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
-    'cp -r "%s/docs/images/logo/Malcolm_background.png" "${ROOT?}/opt/sensor/assets/img/bg-masthead.png"' % MALCOLM_DIR,
+    'cp -r "%s/docs/images/hedgehog/logo/favicon.ico" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/docs/images/hedgehog/logo/hedgehog-wallpaper-plain.png" "${ROOT?}/opt/sensor/assets/img/bg-masthead.png"'
+    % MALCOLM_DIR,
 ]
 
 # Extend list just in case version is 4

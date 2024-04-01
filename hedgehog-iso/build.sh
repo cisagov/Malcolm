@@ -117,8 +117,8 @@ if [ -d "$WORKDIR" ]; then
   # assets for extracted file server
   mkdir -p ./config/includes.chroot/opt/sensor/assets/img/
   rsync -a "$SCRIPT_PATH/nginx/" ./config/includes.chroot/opt/sensor/assets/
-  cp "$SCRIPT_PATH"/docs/images/icon/favicon.ico ./config/includes.chroot/opt/sensor/assets/
-  cp "$SCRIPT_PATH"/docs/images/logo/Malcolm_background.png ./config/includes.chroot/opt/sensor/assets/img/bg-masthead.png
+  cp "$SCRIPT_PATH"/docs/images/hedgehog/logo/favicon.ico ./config/includes.chroot/opt/sensor/assets/
+  cp "$SCRIPT_PATH"/docs/images/hedgehog/logo/hedgehog-wallpaper-plain.png ./config/includes.chroot/opt/sensor/assets/img/bg-masthead.png
   bash "$SCRIPT_PATH/shared/bin/web-ui-asset-download.sh" -o ./config/includes.chroot/opt/sensor/assets/css/
   chown -R root:root ./config/includes.chroot/opt/sensor/assets/css/
   find ./config/includes.chroot/opt/sensor/assets/ -type d -exec chmod 755 "{}" \;

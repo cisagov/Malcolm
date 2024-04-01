@@ -44,7 +44,8 @@ debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
-filename_truncate_len = 20
+filename_truncate_len_malcolm = 20
+filename_truncate_len = 32
 
 
 ###################################################################################################
@@ -83,6 +84,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
+        fnameDispLen = filename_truncate_len_malcolm if args.malcolm else filename_truncate_len
 
         tomorrowStr = (datetime.now(UTC) + timedelta(days=1)).isoformat().split('.')[0]
 
@@ -232,8 +234,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td(
                                                         a(
                                                             (
-                                                                (filename[:filename_truncate_len] + '...')
-                                                                if len(filename) > filename_truncate_len
+                                                                (filename[:fnameDispLen] + '...')
+                                                                if len(filename) > fnameDispLen
                                                                 else filename
                                                             ),
                                                             href=f'{filename}',
@@ -255,37 +257,38 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 )
 
                                                 # show special malcolm columns if requested
-                                                if args.malcolm and fmatch is not None:
-                                                    # list carve source, IDs, and timestamp
-                                                    t.add(
-                                                        td(
-                                                            fsource,
-                                                            style="text-align: center",
-                                                        ),
-                                                        td(
-                                                            [
-                                                                a(
-                                                                    fid,
-                                                                    href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
-                                                                    target="_blank",
-                                                                )
-                                                                for fid in fids
-                                                            ],
-                                                            style="text-align: center",
-                                                        ),
-                                                        td(
-                                                            (
-                                                                timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                                                                if timestamp
-                                                                else timestampStr
+                                                if args.malcolm:
+                                                    if fmatch is not None:
+                                                        # list carve source, IDs, and timestamp
+                                                        t.add(
+                                                            td(
+                                                                fsource,
+                                                                style="text-align: center",
                                                             ),
-                                                            title=timestampStr,
-                                                            style="text-align: center",
-                                                        ),
-                                                    )
-                                                else:
-                                                    # file name format was not recognized, so extra columns are empty
-                                                    t.add(th(), th(), th())
+                                                            td(
+                                                                [
+                                                                    a(
+                                                                        fid,
+                                                                        href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
+                                                                        target="_blank",
+                                                                    )
+                                                                    for fid in fids
+                                                                ],
+                                                                style="text-align: center",
+                                                            ),
+                                                            td(
+                                                                (
+                                                                    timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                                                                    if timestamp
+                                                                    else timestampStr
+                                                                ),
+                                                                title=timestampStr,
+                                                                style="text-align: center",
+                                                            ),
+                                                        )
+                                                    else:
+                                                        # file name format was not recognized, so extra columns are empty
+                                                        t.add(th(), th(), th())
 
                                         except Exception as e:
                                             eprint(f'Error with file "{filename}": {e}')
