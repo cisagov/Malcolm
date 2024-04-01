@@ -62,6 +62,7 @@ class Constants:
     MISCBEAT = 'miscbeat'
     ARKIMECAP = 'arkime-capture'
     TX_RX_SECURE = 'ssl-client-receive'
+    ACL_CONFIGURE = 'acl-configure'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -106,7 +107,6 @@ class Constants:
 
     # specific to arkime
     ARKIME_PASSWORD_SECRET = "ARKIME_PASSWORD_SECRET"
-    MALCOLM_REQUEST_ACL = "MALCOLM_REQUEST_ACL"
     ARKIME_COMPRESSION_TYPE = "ARKIME_COMPRESSION_TYPE"
     ARKIME_COMPRESSION_LEVEL = "ARKIME_COMPRESSION_LEVEL"
     ARKIME_COMPRESSION_TYPES = (
@@ -119,6 +119,9 @@ class Constants:
         'zstd': (-5, 19, 3),
     }
 
+    # ACL for Arkime PCAP reachback and extracted files server
+    MALCOLM_REQUEST_ACL = "MALCOLM_REQUEST_ACL"
+
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
     MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
@@ -130,6 +133,8 @@ class Constants:
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_CONFIG_TXRX = (f'{TX_RX_SECURE}', f'Receive client SSL files for {FILEBEAT} from Malcolm')
+    MSG_CONFIG_ACL = (f'{ACL_CONFIGURE}', f'Configure ACL for artifact reachback from Malcolm')
+
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
@@ -152,7 +157,7 @@ class Constants:
         '{} forwarding configured:\n\n{}\n\nRestart forwarding services or reboot to apply changes.'
     )
     MSG_CONFIG_ARKIME_VIEWER_PASSWORD = 'Specify password hash secret for Arkime viewer cluster'
-    MSG_CONFIG_ARKIME_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
+    MSG_CONFIG_REQUEST_ACL = 'Specify IP addresses for ACL for artifact reachback from Malcolm (one per line)'
     MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
     MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
     MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -841,8 +846,9 @@ def main():
                         Constants.MSG_CONFIG_ARKIME,
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
+                        Constants.MSG_CONFIG_ACL,
                         Constants.MSG_CONFIG_TXRX,
-                    ][: 4 if txRxScript else -1],
+                    ][: 5 if txRxScript else -1],
                 )
                 if code != Dialog.OK:
                     raise CancelledError
@@ -898,22 +904,6 @@ def main():
 
                     if arkime_password:
                         arkime_config_dict[Constants.ARKIME_PASSWORD_SECRET] = arkime_password
-
-                    # get list of IP addresses allowed for packet payload retrieval
-                    lines = previous_config_values[Constants.MALCOLM_REQUEST_ACL].split(",")
-                    lines.append(opensearch_config_dict[Constants.BEAT_OS_HOST])
-                    code, lines = d.editbox_str(
-                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL
-                    )
-                    if code != Dialog.OK:
-                        raise CancelledError
-                    arkime_config_dict[Constants.MALCOLM_REQUEST_ACL] = ','.join(
-                        [
-                            ip
-                            for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))
-                            if isipaddress(ip)
-                        ]
-                    )
 
                     # arkime PCAP compression settings
                     code, compression_type = d.radiolist(
@@ -1250,6 +1240,41 @@ def main():
                             if k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))
                         },
                         Constants.SENSOR_CAPTURE_CONFIG,
+                    )
+
+                elif fwd_mode == Constants.ACL_CONFIGURE:
+
+                    # get list of IP addresses allowed for packet payload retrieval
+                    acl_config_dict = defaultdict(str)
+                    lines = previous_config_values[Constants.MALCOLM_REQUEST_ACL].split(",")
+                    if Constants.BEAT_OS_HOST in previous_config_values and (
+                        previous_config_values[Constants.BEAT_OS_HOST]
+                        not in ('', '127.0.0.1', '::1', '0.0.0.0', '::', 'localhost')
+                    ):
+                        lines.append(previous_config_values[Constants.BEAT_OS_HOST])
+                    code, lines = d.editbox_str(
+                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_REQUEST_ACL
+                    )
+                    if code != Dialog.OK:
+                        raise CancelledError
+
+                    # modify specified ACL value in-place in SENSOR_CAPTURE_CONFIG file
+                    newAclValsDict = {
+                        Constants.MALCOLM_REQUEST_ACL: ','.join(
+                            [
+                                ip
+                                for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))
+                                if isipaddress(ip)
+                            ]
+                        )
+                    }
+                    rewrite_dict_to_file(newAclValsDict, Constants.SENSOR_CAPTURE_CONFIG)
+
+                    # hooray
+                    code = d.msgbox(
+                        text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(
+                            fwd_mode, "\n".join(newAclValsDict[Constants.MALCOLM_REQUEST_ACL].split(','))
+                        )
                     )
 
                 elif (fwd_mode == Constants.TX_RX_SECURE) and txRxScript:
