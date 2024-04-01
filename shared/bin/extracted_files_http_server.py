@@ -31,6 +31,7 @@ from malcolm_utils import (
     EVP_KEY_SIZE,
     OPENSSL_ENC_MAGIC,
     PKCS5_SALT_LEN,
+    pushd,
     remove_prefix,
     sizeof_fmt,
     str2bool,
@@ -428,13 +429,14 @@ def serve_on_port(
     server_class=ThreadingHTTPServer,
     handler_class=HTTPHandler,
 ):
-    server = server_class(("", port), functools.partial(handler_class, directory=path))
-    if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
-        ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
-        ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
-        server.socket = ctx.wrap_socket(server.socket, server_side=True)
-    print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
-    server.serve_forever()
+    with pushd(path):
+        server = server_class(("", port), functools.partial(handler_class, directory=path))
+        if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
+            ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
+            ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
+            server.socket = ctx.wrap_socket(server.socket, server_side=True)
+        print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
+        server.serve_forever()
 
 
 ###################################################################################################

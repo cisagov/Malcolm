@@ -399,7 +399,9 @@ install_files() {
 
     # download assets for extracted file server
     /usr/local/bin/web-ui-asset-download.sh -o /opt/sensor/assets/css
-    find /opt/sensor/assets -type f
+    find /opt/sensor/assets -type d -exec chmod 755 "{}" \;
+    find /opt/sensor/assets -type f -exec chmod 644 "{}" \;
+    ln -s -r /opt/sensor/assets /opt/sensor/assets/assets
 
     # Prepare Fluentbit and Beats repo GPG keys
     local apt_lists='/etc/apt/sources.list.d'

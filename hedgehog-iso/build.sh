@@ -123,6 +123,7 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root ./config/includes.chroot/opt/sensor/assets/css/
   find ./config/includes.chroot/opt/sensor/assets/ -type d -exec chmod 755 "{}" \;
   find ./config/includes.chroot/opt/sensor/assets/ -type f -exec chmod 644 "{}" \;
+  ln -s -r ./config/includes.chroot/opt/sensor/assets ./config/includes.chroot/opt/sensor/assets/assets
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                                       > ./config/includes.chroot/opt/sensor/.os-info
