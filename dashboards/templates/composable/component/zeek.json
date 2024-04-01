@@ -67,6 +67,7 @@
         "zeek.files.extracted": { "type": "keyword" },
         "zeek.files.extracted_cutoff": { "type": "keyword" },
         "zeek.files.extracted_size": { "type": "long" },
+        "zeek.files.extracted_uri": { "type": "keyword" },
         "zeek.files.filename": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.files.ftime": { "type": "date" },
         "zeek.files.local_orig": { "type": "keyword" },

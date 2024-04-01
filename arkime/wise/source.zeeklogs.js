@@ -966,6 +966,7 @@ class MalcolmSource extends WISESource {
       "zeek.files.extracted",
       "zeek.files.extracted_cutoff",
       "zeek.files.extracted_size",
+      "zeek.files.extracted_uri",
       "zeek.files.filename",
       "zeek.files.ftime",
       "zeek.files.local_orig",
@@ -2253,8 +2254,10 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
     // add right-click for extracted files from zeek
-    var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download", url: "/extracted-files/%TEXT%", fields: carvedFieldsStr });
+    // var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
+    // this.api.addValueAction("malcolm_carved_file", { name: "Download", url: "/extracted-files/%TEXT%", fields: carvedFieldsStr });
+    var carvedFieldsUrlStr = allFields.filter(value => /^zeek\.files\.extracted_uri$/i.test(value)).join(',');
+    this.api.addValueAction("malcolm_carved_file_url", { name: "Download", url: "/%TEXT%", fields: carvedFieldsUrlStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
