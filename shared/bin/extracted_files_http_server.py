@@ -83,11 +83,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         global debug
         global args
 
+        showMalcolmCols = args.malcolm or (malcolm_forward_header in dict(self.headers))
         assetsDirRespReplacer = f"{str(dict(self.headers).get(malcolm_forward_header, ''))}{args.assetsDirRespReplacer}"
 
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
-        fnameDispLen = filename_truncate_len_malcolm if args.malcolm else filename_truncate_len
+        fnameDispLen = filename_truncate_len_malcolm if showMalcolmCols else filename_truncate_len
 
         tomorrowStr = (datetime.now(UTC) + timedelta(days=1)).isoformat().split('.')[0]
 
@@ -138,7 +139,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     th("Type" if args.magic else "Extension"),
                                     th("Size"),
                                 )
-                                if args.malcolm:
+                                if showMalcolmCols:
                                     t.add(
                                         th("Source"),
                                         th("IDs"),
@@ -151,7 +152,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         td("Directory"),
                                         td(''),
                                     )
-                                    if args.malcolm:
+                                    if showMalcolmCols:
                                         t.add(th(), th(), th())
 
                                 # content rows (files and directories)
@@ -167,7 +168,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td("Directory"),
                                                     td(''),
                                                 )
-                                                if args.malcolm:
+                                                if showMalcolmCols:
                                                     t.add(th(), th(), th())
                                         except Exception as e:
                                             eprint(f'Error with directory "{dirname}"": {e}')
@@ -186,7 +187,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 fmatch = None
                                                 fsource = ''
                                                 fids = list()
-                                                if args.malcolm:
+                                                if showMalcolmCols:
                                                     # determine if filename is in a pattern we recognize
                                                     fmatch = carvedFileRegex.search(filename)
                                                     if fmatch is None:
@@ -260,7 +261,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 )
 
                                                 # show special malcolm columns if requested
-                                                if args.malcolm:
+                                                if showMalcolmCols:
                                                     if fmatch is not None:
                                                         # list carve source, IDs, and timestamp
                                                         t.add(
@@ -308,7 +309,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         )
 
                     with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
-                        if args.malcolm:
+                        if showMalcolmCols:
                             li(cls="list-inline-item").add(a(href=f'/', target="_blank")).add(
                                 i(cls="bi bi-house fs-3", title="Malcolm")
                             )
