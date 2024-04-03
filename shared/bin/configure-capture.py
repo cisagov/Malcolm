@@ -148,7 +148,7 @@ class Constants:
     MSG_CONFIG_ZEEK_CARVING_MIMES = 'Specify file types to carve'
     MSG_CONFIG_CARVED_FILE_PRESERVATION = 'Specify which carved files to preserve'
     MSG_CONFIG_CAP_CONFIRM = 'Sensor will capture traffic with the following parameters:\n\n{}'
-    MSG_CONFIG_AUTOSTART_CONFIRM = 'Sensor autostart the following services:\n\n{}'
+    MSG_CONFIG_AUTOSTART_CONFIRM = 'Sensor will autostart the following services:\n\n{}'
     MSG_CONFIG_FORWARDING_CONFIRM = '{} will forward with the following parameters:\n\n{}'
     MSG_CONFIG_CAP_PATHS = 'Provide paths for captured PCAPs and Zeek logs'
     MSG_CONFIG_CAPTURE_SUCCESS = 'Capture interface set to {} in {}.\n\nReboot to apply changes.'
@@ -441,7 +441,15 @@ def main():
                 # get confirmation from user that we really want to do this
                 code = d.yesno(
                     Constants.MSG_CONFIG_AUTOSTART_CONFIRM.format(
-                        "\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if "AUTOSTART" in k]))
+                        "\n".join(
+                            sorted(
+                                [
+                                    f"{k}={v}"
+                                    for k, v in capture_config_dict.items()
+                                    if (("AUTOSTART" in k) and (not k.startswith("#")))
+                                ]
+                            )
+                        )
                     ),
                     yes_label="OK",
                     no_label="Cancel",

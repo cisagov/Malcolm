@@ -29,6 +29,7 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
         * [ssl-client-receive](#HedgehogGetCerts): Receive client SSL files for filebeat from Malcolm
         * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
+        * [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
     + [Autostart services](#HedgehogConfigAutostart)
 * [Verifying Traffic Capture and Forwarding](#Verify)
 
@@ -303,7 +304,7 @@ Here users can configure Malcolm to keep its time synchronized with either an NT
 
 ![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
 
-If **htpdate** is selected, users will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for another Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
 
 ![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
 
@@ -421,7 +422,7 @@ Returning to the configuration mode selection, choose **Time Sync**. Here users 
 
 ![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
 
-If **htpdate** is selected, users will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for a Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
 
 ![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
 
@@ -480,6 +481,8 @@ Files flagged as potentially malicious will be logged as Zeek `signatures.log` e
 
 Finally, users will be presented with the list of configuration variables that will be used for capture, including the values which have been selected up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. Editing this file manually is not recommended. After confirming these values, users will be presented with a confirmation that these settings have been written to the configuration file then returned to the welcome screen.
 
+See the Malcolm documentation for [**Automatic file extraction and scanning - User interface**](file-scanning.md#ZeekFileExtractionUI) for more information on how to access preserved files.
+
 ## <a name="HedgehogConfigForwarding"></a> Configure Forwarding
 
 Select **Configure Forwarding** to set up forwarding logs and statistics from the sensor to an aggregator server, such as [Malcolm]({{ site.github.repository_url }}).
@@ -505,10 +508,6 @@ Users will be asked to enter authentication credentials for the sensor's connect
 ![OpenSearch username](./images/hedgehog/images/opensearch_username.png) ![OpenSearch password](./images/hedgehog/images/opensearch_password.png) ![Successful OpenSearch connection](./images/hedgehog/images/opensearch_connection_success.png)
 
 Users will be asked to provide a "password hash secret" for the Arkime viewer cluster. This value corresponds to the `passwordSecret` value in Arkime's [config.ini file](https://arkime.com/settings). Arkime uses this value to secure communication (specifically, the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface) between Arkime viewers in instances of Malcolm and Hedgehog Linux. In other words, this value needs to be the same for the Malcolm instance and all of the instances of Hedgehog Linux forwarding Arkime sessions to that Malcolm instance. The corresponding value is set when [setting up authentication](#MalcolmAuthSetup) during the Malcolm configuration.
-
-Users will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
-
-![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
 
 Arkime supports [compression](https://arkime.com/settings#writer-simple) for the PCAP files it creates. Select `none` (at the cost of requiring more storage for PCAP files saved on the sensor) or `zstd` (at the cost of higher CPU load when writing and reading PCAP files). If [`zstd`](https://en.wikipedia.org/wiki/Zstd?lang=en) is chosen, users will also be prompted for the compression level (something like `3` is probably a good choice).
 
@@ -576,6 +575,12 @@ The sensor uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous syst
 
 This forwarder's configuration is almost identical to that of [filebeat](#Hedgehogfilebeat) in the previous section. Select `miscbeat` from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
+### <a name="HedgehogACL"></a>acl-configure: Configure ACL for artifact reachback from Malcolm
+
+Users will be shown a dialog for a list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](#HedgehogZeekFileExtraction). The list will be prepopulated with the IP address entered a few screens prior to this one.
+
+![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
+
 ### <a name="HedgehogConfigAutostart"></a>Autostart services
 
 Once the forwarders have been configured, the final step is to **Configure Autostart Services**. Choose this option from the configuration mode menu after the welcome screen of the sensor configuration tool.
@@ -584,6 +589,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 
 * **AUTOSTART_ARKIME** - [capture](#Hedgehogarkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If using Hedgehog Linux along with [Malcolm]({{ site.github.repository_url }}) or another Arkime installation, this is probably the preferable packet capture engine.
 * **AUTOSTART_CLAMAV_UPDATES** - Virus database update service for ClamAV (requires sensor to be connected to the Internet)
+* **AUTOSTART_EXTRACTED_FILE_HTTP_SERVER** - the [HTTPS server](file-scanning.md#ZeekFileExtractionUI) providing access to the directory containing [Zeek-extracted files](#HedgehogZeekFileExtraction)
 * **AUTOSTART_FILEBEAT** - [filebeat](#Hedgehogfilebeat) Zeek and Suricata log forwarder 
 * **AUTOSTART_FLUENTBIT_AIDE** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/exec) [AIDE](https://aide.github.io/) file system integrity checks
 * **AUTOSTART_FLUENTBIT_AUDITLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/tail) [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs
