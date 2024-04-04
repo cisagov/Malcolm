@@ -88,6 +88,15 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(debug)\s*=\s*.*/\1=$ARKIME_DEBUG_LEVEL/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # enable ja4+ plugin if it's present
+  JA4_PLUGIN_FILE="/opt/arkime/plugins/ja4plus.$(dpkg --print-architecture).so"
+  if [[ -f "${JA4_PLUGIN_FILE}" ]]; then
+    # append ja4 plugin filename to end of plugins= line in config file and uncomment it if necessary
+    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1$(basename "${JA4_PLUGIN_FILE}");/" "$ARKIME_CONFIG_FILE"
+    # remove trailing semicolon from plugins= line if it exists
+    sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "$ARKIME_CONFIG_FILE"
+  fi
+
   # identify node in session metadata for PCAP reachback
   PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
   export ARKIME_NODE_NAME="$(hostname --long)"

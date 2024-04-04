@@ -153,9 +153,18 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(plugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(plugins=\).*/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+    fi
+
+    # enable ja4+ plugin if it's present
+    JA4_PLUGIN_FILE="${ARKIME_DIR}/plugins/ja4plus.$(dpkg --print-architecture).so"
+    if [[ -f "${JA4_PLUGIN_FILE}" ]]; then
+      # append ja4 plugin filename to end of plugins= line in config file and uncomment it if necessary
+      sed -i "s/^#*[[:space:]]*\(plugins=\)/\1$(basename "${JA4_PLUGIN_FILE}");/" "${ARKIME_CONFIG_FILE}"
+      # remove trailing semicolon from plugins= line if it exists
+      sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "${ARKIME_CONFIG_FILE}"
     fi
 
     chmod 600 "${ARKIME_CONFIG_FILE}" || true
