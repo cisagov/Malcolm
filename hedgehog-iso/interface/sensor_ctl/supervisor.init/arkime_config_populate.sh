@@ -91,8 +91,14 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   # enable ja4+ plugin if it's present
   JA4_PLUGIN_FILE="/opt/arkime/plugins/ja4plus.$(dpkg --print-architecture).so"
   if [[ -f "${JA4_PLUGIN_FILE}" ]]; then
+    JA4_PLUGIN_FILE_BASE="$(basename "${JA4_PLUGIN_FILE}")"
+    JA4_PLUGIN_FILE_ESCAPED="$(echo "${JA4_PLUGIN_FILE_BASE}" | sed 's@\.@\\\.@g')"
+    # clean up old references to the plugin
+    sed -i "/plugins=.*${JA4_PLUGIN_FILE_ESCAPED}/s/;\?${JA4_PLUGIN_FILE_ESCAPED}//g" "$ARKIME_CONFIG_FILE"
     # append ja4 plugin filename to end of plugins= line in config file and uncomment it if necessary
-    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1$(basename "${JA4_PLUGIN_FILE}");/" "$ARKIME_CONFIG_FILE"
+    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1${JA4_PLUGIN_FILE_BASE};/" "$ARKIME_CONFIG_FILE"
+    # squash semicolons
+    sed -i 's/;\{2,\}/;/g' "$ARKIME_CONFIG_FILE"
     # remove trailing semicolon from plugins= line if it exists
     sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "$ARKIME_CONFIG_FILE"
   fi
