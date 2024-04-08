@@ -52,7 +52,6 @@ while true ; do
   # check initial disk capacity
   USAGE_PCT=$(df -k . | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
   USAGE_GB=$(du -sh --block-size=1G . | awk '{print $1}')
-  # du -sh --block-size=1G ~/download/ | awk '{print $1}'
   if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
 
     # we have exceeded the threshold, see if there is something to prune
@@ -85,7 +84,7 @@ while true ; do
 
         fi # file was rm'ed
       fi # file exists
-
+                                                                                               # exclude files in our Zeek live capture directory
     done < <(find . -xdev -mindepth 1 -maxdepth $DEPTH -ignore_readdir_race -type f \( ! -path '*/spool/*' -o -path '*/spool/tmp*' \) -printf '%T@ %s %p\0' 2>/dev/null | sort -zn 2>/dev/null)
 
     if (( $DELETED > 0 )) ; then
