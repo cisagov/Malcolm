@@ -230,6 +230,7 @@ RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 USER root
 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
 COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
