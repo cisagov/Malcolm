@@ -466,6 +466,8 @@ If unsure what mode to choose, both **mapped (except common plain text files)** 
 
 Next, specify which carved files to preserve (saved on the sensor under `/capture/zeek/capture/extract_files/quarantine` by default). In order to not consume all the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#HedgehogConfigAutostart) section.
 
+![File quarantine](./images/hedgehog/images/file_quarantine.png)
+
 Users will prompted to specify which engine(s) to use to analyze extracted files. Extracted files can be examined through any of three methods:
 
 ![File scanners](./images/hedgehog/images/zeek_file_carve_scanners.png)
@@ -477,11 +479,9 @@ Users will prompted to specify which engine(s) to use to analyze extracted files
 
 Files flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [OpenSearch Dashboards]({{ site.github.repository_url }}#DashboardsVisualizations) when forwarded to Malcolm.
 
+Hedgehog Linux provides an extracted files directory listing to browse and download Zeek-extracted files. As this interface is primarily intended to be accessed through the Malcolm user interface, this service is accessible only by IP addresses [included in the ACL for artifact reachback from Malcolm](#HedgehogACL) over port '8006/tcp'. The next two questions indicate whether or not Zeek-extracted files downloaded through this interface will be archived using the ZIP file format and what encryption password should be used, if any (either the ZIP archive file password or as the encryption key for AES-256-CBC-encrypted files if not using ZIP). Please read the Malcolm documentation for [**Automatic file extraction and scanning - User interface**](file-scanning.md#ZeekFileExtractionUI) for more information on how to access preserved files.
+
 ![Extracted file server configuration](./images/hedgehog/images/file_server_zip.png)
-
-Hedgehog Linux provides an extracted files directory listing to browse and download Zeek-extracted files. As this interface is primarily intended to be accessed through the Malcolm user interface, this service is accessible only by IP addresses [included in the ACL for artifact reachback from Malcolm](#HedgehogACL) over port '8006/tcp'. Please read the Malcolm documentation for [**Automatic file extraction and scanning - User interface**](file-scanning.md#ZeekFileExtractionUI) for more information on how to access preserved files.
-
-![File quarantine](./images/hedgehog/images/file_quarantine.png)
 
 Finally, users will be presented with the list of configuration variables that will be used for capture, including the values which have been selected up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. Editing this file manually is not recommended. After confirming these values, users will be presented with a confirmation that these settings have been written to the configuration file then returned to the welcome screen.
 
