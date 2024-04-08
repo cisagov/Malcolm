@@ -61,7 +61,7 @@ ADD scripts/malcolm_utils.py /data/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc npm rsync shadow jq tini && \
+    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc moreutils npm rsync shadow jq tini && \
     npm install -g http-server && \
     pip3 install --break-system-packages supervisor humanfriendly requests && \
     curl -fsSLO "$SUPERCRONIC_URL" && \

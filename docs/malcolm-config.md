@@ -31,6 +31,7 @@ Although the configuration script automates many of the following configuration 
     - `LOGSTASH_HOST` – the host and port at which Beats-based forwarders will connect to Logstash (default `logstash:5044`); see `MALCOLM_PROFILE` below
 * **`dashboards.env`** and **`dashboards-helper.env`** - settings for the containers that configure and maintain [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](https://opensearch.org/docs/latest/dashboards/index/)
     - `DASHBOARDS_URL` - used primarily when `OPENSEARCH_PRIMARY` is set to `elasticsearch-remote` (see [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance)), this variable stores the URL for the [Kibana](https://www.elastic.co/kibana) instance into which Malcolm's dashboard's and index templates will be imported
+    - `DASHBOARDS_PREFIX` – a string to prepend to the titles of Malcolm's prebuilt [dashboards](dashboards.md#PrebuiltVisualizations) prior upon import during Malcolm's initialization (default is an empty string)
     - `DASHBOARDS_DARKMODE` – if set to `true`, [OpenSearch Dashboards](dashboards.md#DashboardsVisualizations) will be set to dark mode upon initialization (default `true`)
 * **`filebeat.env`** - settings specific to [Filebeat](https://www.elastic.co/products/beats/filebeat), particularly for how Filebeat watches for new log files to parse and how it receives and stores [third-Party logs](third-party-logs.md#ThirdPartyLogs)
 * **`logstash.env`** - settings specific to [Logstash](https://www.elastic.co/products/logstash)

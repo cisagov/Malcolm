@@ -12,6 +12,11 @@ OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
+DASHBOARDS_PREFIX=${DASHBOARDS_PREFIX:-""}
+# trim leading and trailing spaces and remove characters that need JSON-escaping from DASHBOARDS_PREFIX
+DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX#"${DASHBOARDS_PREFIX%%[![:space:]]*}"}"
+DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX%"${DASHBOARDS_PREFIX##*[![:space:]]}"}"
+DASHBOARDS_PREFIX="$(echo "$DASHBOARDS_PREFIX" | tr -d '"\\')"
 
 MALCOLM_TEMPLATES_DIR="/opt/templates"
 MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
@@ -233,6 +238,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
               # take care of a few other substitutions
               sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
             fi
+            # prepend $DASHBOARDS_PREFIX to dashboards' titles
+            [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
+            # import the dashboard
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
           rm -rf "${DASHBOARDS_IMPORT_DIR}"
@@ -245,6 +253,9 @@ if [[ "$CREATE_OS_ARKIME_SESSION_INDEX" = "true" ]] ; then
           rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
           DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR"
           for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
+            # prepend $DASHBOARDS_PREFIX to dashboards' titles
+            [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
+            # import the dashboard
             curl "${CURL_CONFIG_PARAMS[@]}" -L --silent --output /dev/null --show-error -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
           done
           rm -rf "${BEATS_DASHBOARDS_IMPORT_DIR}"
