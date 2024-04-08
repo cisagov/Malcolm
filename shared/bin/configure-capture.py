@@ -144,6 +144,13 @@ class Constants:
     )
     MSG_CONFIG_ICS_BEST_GUESS = 'Should the sensor use "best guess" to identify potential OT/ICS traffic with Zeek?'
     MSG_CONFIG_ZEEK_CARVED_SCANNERS = 'Specify scanners for Zeek-carved files'
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP = 'ZIP preserved files when downloaded via web interface?'
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP_KEY = (
+        'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
+    )
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ENC_KEY = (
+        'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
+    )
     MSG_CONFIG_ZEEK_CARVING = 'Specify Zeek file carving mode'
     MSG_CONFIG_ZEEK_CARVING_MIMES = 'Specify file types to carve'
     MSG_CONFIG_CARVED_FILE_PRESERVATION = 'Specify which carved files to preserve'
@@ -191,10 +198,10 @@ d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
 
 
 ###################################################################################################
-def rewrite_dict_to_file(vals_dict, config_file_name, backup='.bak'):
+def rewrite_dict_to_file(vals_dict, config_file_name, inplace=True, backup='.bak'):
     if vals_dict and os.path.isfile(config_file_name):
         values_re = re.compile(r"\b(" + '|'.join(list(vals_dict.keys())) + r")\s*=\s*.*?$")
-        with fileinput.FileInput(config_file_name, inplace=True, backup=backup) as file:
+        with fileinput.FileInput(config_file_name, inplace=inplace, backup=backup) as file:
             for line in file:
                 line = line.rstrip("\n")
                 key_match = values_re.search(line)
@@ -456,15 +463,10 @@ def main():
                 )
                 if code == Dialog.OK:
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    autostart_re = re.compile(r"(\bAUTOSTART_\w+)\s*=\s*.+?$")
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            autostart_match = autostart_re.search(line)
-                            if autostart_match is not None:
-                                print(autostart_re.sub(r"\1=%s" % capture_config_dict[autostart_match.group(1)], line))
-                            else:
-                                print(line)
+                    rewrite_dict_to_file(
+                        {k: v for (k, v) in capture_config_dict.items() if k.startswith('AUTOSTART_')},
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
 
                     # hooray
                     code = d.msgbox(text=Constants.MSG_CONFIG_AUTOSTART_SUCCESS)
@@ -477,7 +479,9 @@ def main():
                 # previously used capture interfaces
                 preselected_ifaces = set([x.strip() for x in capture_config_dict["CAPTURE_INTERFACE"].split(',')])
 
-                while (len(available_adapters) > 0) and (d.yesno(Constants.MSG_IDENTIFY_NICS) == Dialog.OK):
+                while (len(available_adapters) > 0) and (
+                    d.yesno(Constants.MSG_IDENTIFY_NICS, yes_label="No", no_label="Yes") != Dialog.OK
+                ):
                     code, blinky_iface = d.radiolist(
                         Constants.MSG_SELECT_BLINK_INTERFACE,
                         choices=[(adapter.name, adapter.description, False) for adapter in available_adapters],
@@ -545,19 +549,6 @@ def main():
                             )
                         prev_capture_filter = capture_filter
 
-                # regular expressions for selected name=value pairs to update in configuration file
-                capture_interface_re = re.compile(r"(\bCAPTURE_INTERFACE)\s*=\s*.+?$")
-                capture_filter_re = re.compile(r"(\bCAPTURE_FILTER)\s*=\s*.*?$")
-                pcap_path_re = re.compile(r"(\bPCAP_PATH)\s*=\s*.+?$")
-                zeek_path_re = re.compile(r"(\bZEEK_LOG_PATH)\s*=\s*.+?$")
-                zeek_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
-                zeek_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
-                zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
-                zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH)\s*=\s*.+?$")
-                zeek_file_scanner_re = re.compile(r"(\bZEEK_FILE_SCAN_\w+)\s*=\s*.+?$")
-                disable_ics_all_re = re.compile(r"(\bZEEK_DISABLE_ICS_ALL)\s*=\s*.+?$")
-                ics_best_guess_re = re.compile(r"(\bZEEK_DISABLE_BEST_GUESS_ICS)\s*=\s*.+?$")
-
                 # get paths for captured PCAP and Zeek files
                 while True:
                     code, path_values = d.form(
@@ -584,8 +575,10 @@ def main():
                         code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
 
                 # enable/disable ICs
-                ics_network = d.yesno(Constants.MSG_CONFIG_ICS_ANALYZERS) == Dialog.OK
-                ics_best_guess = ics_network and (d.yesno(Constants.MSG_CONFIG_ICS_BEST_GUESS) == Dialog.OK)
+                ics_network = d.yesno(Constants.MSG_CONFIG_ICS_ANALYZERS, yes_label="No", no_label="Yes") != Dialog.OK
+                ics_best_guess = ics_network and (
+                    d.yesno(Constants.MSG_CONFIG_ICS_BEST_GUESS, yes_label="No", no_label="Yes") != Dialog.OK
+                )
 
                 # configure file carving
                 code, zeek_carve_mode = d.radiolist(
@@ -645,6 +638,8 @@ def main():
                 mime_tags = []
                 capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = ""
                 zeek_carved_file_preservation = PRESERVE_NONE
+                zeek_carved_file_http_server_zip = False
+                zeek_carved_file_http_serve_encrypt_key = ''
 
                 if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM):
                     # get all known mime-to-extension mappings into a dictionary
@@ -745,6 +740,19 @@ def main():
                     ]:
                         capture_config_dict[key] = "false"
 
+                if zeek_carved_file_preservation != PRESERVE_NONE:
+                    zeek_carved_file_http_server_zip = (
+                        d.yesno(Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP) == Dialog.OK
+                    )
+                    code, zeek_carved_file_http_serve_encrypt_key = d.inputbox(
+                        (
+                            Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP_KEY
+                            if zeek_carved_file_http_server_zip
+                            else Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ENC_KEY
+                        ),
+                        init=capture_config_dict.get("EXTRACTED_FILE_HTTP_SERVER_KEY", 'infected'),
+                    )
+
                 # reconstitute dictionary with user-specified values
                 capture_config_dict["CAPTURE_INTERFACE"] = ",".join(selected_ifaces)
                 capture_config_dict["CAPTURE_FILTER"] = capture_filter
@@ -752,6 +760,10 @@ def main():
                 capture_config_dict["ZEEK_LOG_PATH"] = path_values[1]
                 capture_config_dict["ZEEK_EXTRACTOR_MODE"] = zeek_carve_mode
                 capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = zeek_carved_file_preservation
+                capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_ZIP"] = (
+                    'true' if zeek_carved_file_http_server_zip else 'false'
+                )
+                capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"] = zeek_carved_file_http_serve_encrypt_key
                 capture_config_dict["ZEEK_DISABLE_ICS_ALL"] = '' if ics_network else 'true'
                 capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"] = '' if ics_best_guess else 'true'
 
@@ -773,49 +785,31 @@ def main():
                 )
                 if code == Dialog.OK:
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            if capture_interface_re.search(line) is not None:
-                                print(capture_interface_re.sub(r"\1=%s" % ",".join(selected_ifaces), line))
-                            elif zeek_carve_override_re.search(line) is not None:
-                                print(
-                                    zeek_carve_override_re.sub(
-                                        r'\1="%s"' % capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"], line
-                                    )
-                                )
-                            elif zeek_carve_re.search(line) is not None:
-                                print(zeek_carve_re.sub(r"\1=%s" % zeek_carve_mode, line))
-                            elif zeek_file_preservation_re.search(line) is not None:
-                                print(zeek_file_preservation_re.sub(r"\1=%s" % zeek_carved_file_preservation, line))
-                            elif capture_filter_re.search(line) is not None:
-                                print(capture_filter_re.sub(r'\1="%s"' % capture_filter, line))
-                            elif pcap_path_re.search(line) is not None:
-                                print(pcap_path_re.sub(r'\1="%s"' % capture_config_dict["PCAP_PATH"], line))
-                            elif zeek_path_re.search(line) is not None:
-                                print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
-                            elif zeek_file_watch_re.search(line) is not None:
-                                print(zeek_file_watch_re.sub(r"\1=%s" % capture_config_dict["ZEEK_FILE_WATCH"], line))
-                            elif disable_ics_all_re.search(line) is not None:
-                                print(
-                                    disable_ics_all_re.sub(r'\1=%s' % capture_config_dict["ZEEK_DISABLE_ICS_ALL"], line)
-                                )
-                            elif ics_best_guess_re.search(line) is not None:
-                                print(
-                                    ics_best_guess_re.sub(
-                                        r'\1=%s' % capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"], line
-                                    )
-                                )
-                            else:
-                                zeek_file_scanner_match = zeek_file_scanner_re.search(line)
-                                if zeek_file_scanner_match is not None:
-                                    print(
-                                        zeek_file_scanner_re.sub(
-                                            r"\1=%s" % capture_config_dict[zeek_file_scanner_match.group(1)], line
-                                        )
-                                    )
-                                else:
-                                    print(line)
+                    rewrite_dict_to_file(
+                        {
+                            "CAPTURE_FILTER": '"' + capture_config_dict["CAPTURE_FILTER"] + '"',
+                            "CAPTURE_INTERFACE": capture_config_dict["CAPTURE_INTERFACE"],
+                            "EXTRACTED_FILE_HTTP_SERVER_KEY": '"'
+                            + capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"]
+                            + '"',
+                            "EXTRACTED_FILE_HTTP_SERVER_ZIP": capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_ZIP"],
+                            "EXTRACTED_FILE_PRESERVATION": capture_config_dict["EXTRACTED_FILE_PRESERVATION"],
+                            "PCAP_PATH": '"' + capture_config_dict["PCAP_PATH"] + '"',
+                            "ZEEK_DISABLE_BEST_GUESS_ICS": capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"],
+                            "ZEEK_DISABLE_ICS_ALL": capture_config_dict["ZEEK_DISABLE_ICS_ALL"],
+                            "ZEEK_EXTRACTOR_MODE": capture_config_dict["ZEEK_EXTRACTOR_MODE"],
+                            "ZEEK_LOG_PATH": '"' + capture_config_dict["ZEEK_LOG_PATH"] + '"',
+                            "ZEEK_EXTRACTOR_OVERRIDE_FILE": '"'
+                            + capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]
+                            + '"',
+                            "ZEEK_FILE_SCAN_CAPA": capture_config_dict["ZEEK_FILE_SCAN_CAPA"],
+                            "ZEEK_FILE_SCAN_CLAMAV": capture_config_dict["ZEEK_FILE_SCAN_CLAMAV"],
+                            "ZEEK_FILE_SCAN_VTOT": capture_config_dict["ZEEK_FILE_SCAN_VTOT"],
+                            "ZEEK_FILE_SCAN_YARA": capture_config_dict["ZEEK_FILE_SCAN_YARA"],
+                            "ZEEK_FILE_WATCH": capture_config_dict["ZEEK_FILE_WATCH"],
+                        },
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
 
                     # write out file carving overrides if specified
                     if (len(mime_tags) > 0) and (len(capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]) > 0):
