@@ -34,7 +34,7 @@ SENSOR_DIR='/opt/sensor'
 
 ARKIME_VERSION="5.1.0"
 
-BEATS_VER="8.13.1"
+BEATS_VER="8.13.2"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
