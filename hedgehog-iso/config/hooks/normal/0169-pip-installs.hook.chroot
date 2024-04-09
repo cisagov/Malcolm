@@ -13,6 +13,7 @@ pip3 install --break-system-packages --no-compile --no-cache-dir --force-reinsta
   dateparser \
   debinterface \
   dominate \
+  humanfriendly \
   pymisp \
   python-dotenv \
   ruamel.yaml \

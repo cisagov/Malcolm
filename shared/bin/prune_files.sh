@@ -11,7 +11,8 @@ DEPTH=1
 
 # THRESHOLD_PCT is an integer percentage between 1-100 ("prune when disk usage >= THRESHOLD_PCT%")
 THRESHOLD_PCT=0
-# MAXSIZE_GB is an integer representing gigabytes ("prune when path contents >= MAXSIZE_GB")
+# MAXSIZE_GB is an integer representing gigabytes ("prune when path contents >= MAXSIZE_GB"), although
+#   it can be specified as a human-readable data size (e.g., 10G) if humanfriendly is available
 MAXSIZE_GB=0
 
 # if specified, this script will check and prune every $INTERVAL seconds
@@ -41,6 +42,14 @@ if [[ ! "$INTERVAL" =~ $INT_RE ]] || ! (( "$INTERVAL" >= 0 && "$INTERVAL" <= 864
   exit 1
 fi
 
+if [[ ! "$MAXSIZE_GB" =~ $INT_RE ]] && command -v humanfriendly >/dev/null 2>&1; then
+  # convert max-size from a string (e.g., 1TB) to the number of gigabytes (1000)
+  MAXSIZE_BYTES="$(humanfriendly --parse-size "$MAXSIZE_GB" 2>/dev/null)"
+  if [[ -n "$MAXSIZE_BYTES" ]] && [[ "$MAXSIZE_BYTES" =~ $INT_RE ]]; then
+    MAXSIZE_GB="$(echo "$MAXSIZE_BYTES" | awk '{printf "%.0f\n", $1/1000/1000/1000}')"
+  fi
+fi
+
 if ( [[ -z "$THRESHOLD_PCT" ]] || [[ ! "$THRESHOLD_PCT" =~ $INT_RE ]] || ! (( "$THRESHOLD_PCT" >= 1 && "$THRESHOLD_PCT" <= 100)) ) &&
    ( [[ -z "$MAXSIZE_GB" ]] || [[ ! "$MAXSIZE_GB" =~ $INT_RE ]] || ! (( "$MAXSIZE_GB" >= 1 )) ); then
   echo "Please specify at least one prune trigger: threshold (percentage, 1-100) with -t; or, maximum size (gigabytes, >= 1) with -m" >&2
@@ -51,14 +60,15 @@ while true ; do
 
   # check initial disk capacity
   USAGE_PCT=$(df -k . | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
-  USAGE_GB=$(du -sh --block-size=1G . | awk '{print $1}')
+  USAGE_GB=$(du -sb . | awk '{printf "%.0f\n", $1/1000/1000/1000}')
   if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
 
     # we have exceeded the threshold, see if there is something to prune
     [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
 
     # read files by modification time, oldest first, deleting until we've dropped below the threshold
-    DELETED=0
+    DELETED_FILES=0
+    DELETED_BYTES=0
     while IFS='' read -r -d ' ' FILE_TIME && IFS='' read -r -d ' ' FILE_SIZE && IFS='' read -r -d '' FILE_TO_DELETE; do
 
       FILE_SIZE_HUMAN=$(numfmt --to=iec-i --suffix=B $FILE_SIZE)
@@ -66,13 +76,14 @@ while true ; do
 
       if [[ -f "$FILE_TO_DELETE" ]]; then
         if rm -f "$FILE_TO_DELETE" ; then
-          DELETED=$((DELETED+1))
+          DELETED_FILES=$((DELETED_FILES+1))
+          DELETED_BYTES=$((DELETED_BYTES+FILE_SIZE))
 
-          echo "Pruned \"$FILE_TO_DELETE\" ($FILE_SIZE_HUMAN, $FILE_TIME_HUMAN)" >&2
+          [[ "$VERBOSE" == "1" ]] && echo "Pruned \"$FILE_TO_DELETE\" ($FILE_SIZE_HUMAN, $FILE_TIME_HUMAN)" >&2
 
           # re-check disk capacity
           USAGE_PCT=$(df -k . | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
-          USAGE_GB=$(du -sh --block-size=1G . | awk '{print $1}')
+          USAGE_GB=$(du -sb . | awk '{printf "%.0f\n", $1/1000/1000/1000}')
           if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
             # we still exceed the threshold, continue to loop
             [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
@@ -87,8 +98,8 @@ while true ; do
                                                                                                # exclude files in our Zeek live capture directory
     done < <(find . -xdev -mindepth 1 -maxdepth $DEPTH -ignore_readdir_race -type f \( ! -path '*/spool/*' -o -path '*/spool/tmp*' \) -printf '%T@ %s %p\0' 2>/dev/null | sort -zn 2>/dev/null)
 
-    if (( $DELETED > 0 )) ; then
-      [[ "$VERBOSE" == "1" ]] && echo "Pruned $DELETED files in \"$PRUNE_PATH\"" >&2
+    if (( $DELETED_FILES > 0 )) ; then
+      echo "Pruned $DELETED_FILES files ($(numfmt --to=iec-i --suffix=B $DELETED_BYTES)) in \"$PRUNE_PATH\""
     else
       echo "Nothing was pruned in \"$PRUNE_PATH\"!" >&2
     fi
