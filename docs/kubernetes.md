@@ -369,7 +369,7 @@ Select authentication method (Basic): 1
 
 Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 
-Should Malcolm delete the oldest database indices and/or PCAP files based on available storage? (y / N): y
+Should Malcolm delete the oldest database indices and capture artifacts based on available storage? (y / N): y
 
 Delete the oldest indices when the database exceeds a certain size? (y / N): y
 
@@ -410,6 +410,8 @@ Select file extraction behavior (none): 5
 2: all
 3: none
 Select file preservation behavior (quarantined): 1
+
+Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%): 100G
 
 Expose web interface for downloading preserved files? (y / N): y
 

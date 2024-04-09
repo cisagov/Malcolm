@@ -187,8 +187,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         - This defines how many additional copies of older session indices Arkime should store.
     - **How many weeks of history should Arkime keep?",**
         - This defines the retention period (in weeks) for `arkime-history` indices.
-* **Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?**
-    - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
+* **Should Malcolm delete the oldest database indices and capture artifacts based on available storage?**
+    - Choose **Y** to proceed to the following related questions about [managing the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
     - **Delete the oldest indices when the database exceeds a certain size?**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
     - **Should Arkime delete uploaded PCAP files based on available storage?**
@@ -248,6 +248,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
         + `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
         + `none`: preserve no extracted files
+* **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
+    - Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
 * **Expose web interface for downloading preserved files?**
     - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
 * **ZIP downloaded preserved files?**
