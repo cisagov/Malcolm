@@ -1095,7 +1095,7 @@ class Installer(object):
         indexManagementHotWarm = False
         indexManagementOptimizationTimePeriod = '30d'
         indexManagementSpiDataRetention = '90d'
-        indexManagementReplicas = 1
+        indexManagementReplicas = 0
         indexManagementHistoryInWeeks = 13
         indexManagementOptimizeSessionSegments = 1
 
@@ -1397,7 +1397,9 @@ class Installer(object):
                     )
                     extractedFilePruneThresholdTemp = ''
                     while (
-                        not re.match(r'^\d+%?$', extractedFilePruneThresholdTemp, flags=re.IGNORECASE)
+                        not re.match(
+                            r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', extractedFilePruneThresholdTemp, flags=re.IGNORECASE
+                        )
                     ) and loopBreaker.increment():
                         extractedFilePruneThresholdTemp = InstallerAskForString(
                             'Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)',
