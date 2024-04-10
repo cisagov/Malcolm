@@ -3,8 +3,8 @@
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 
 # ensure capabilities for capture
-setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek || true
-setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats || true
+setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/zeek 2>/dev/null || true
+setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' "${ZEEK_DIR}"/bin/capstats 2>/dev/null || true
 
 if [[ "${ZEEK_INTEL_REFRESH_ON_ENTRYPOINT:-false}" == "true" ]] && \
    [[ -x "${ZEEK_DIR}"/bin/zeek_intel_setup.sh ]]; then
