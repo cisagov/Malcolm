@@ -131,8 +131,13 @@ fi # singleton lock check
 # write a cron entry to $SUPERCRONIC_CRONTAB using the interval specified in
 # $ZEEK_INTEL_REFRESH_CRON_EXPRESSION (e.g., 15 1 * * *) to execute this script
 set +u
+if [[ -z "${SUPERCRONIC_CRONTAB}" ]] && \
+   [[ -n "${SUPERVISOR_PATH}" ]] && \
+   [[ -d "${SUPERVISOR_PATH}"/supercronic ]]; then
+    SUPERCRONIC_CRONTAB = "${SUPERVISOR_PATH}"/supercronic/crontab
+    touch "${SUPERCRONIC_CRONTAB}" 2>/dev/null || true
+fi
 if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
-    touch "${SUPERCRONIC_CRONTAB}"
     sed -i -e "/${SCRIPT_FILESPEC_ESCAPED}/d" "${SUPERCRONIC_CRONTAB}"
     if [[ -n "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION}" ]]; then
         echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" >> "${SUPERCRONIC_CRONTAB}"
