@@ -22,11 +22,13 @@ INTEL_DIR=${INTEL_DIR:-"${ZEEK_DIR}/share/zeek/site/intel"}
 INTEL_PRESEED_DIR=${INTEL_PRESEED_DIR:-"${ZEEK_DIR}/share/zeek/site/intel-preseed"}
 THREAT_FEED_TO_ZEEK_SCRIPT=${THREAT_FEED_TO_ZEEK_SCRIPT:-"${ZEEK_DIR}/bin/zeek_intel_from_threat_feed.py"}
 LOCK_DIR="${INTEL_DIR}/lock"
-INSTANCE_UID="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 16; echo)"
+INSTANCE_UID="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 16; echo)"
+(( ${#INSTANCE_UID} == 16 )) || INSTANCE_UID=$RANDOM
 
 # make sure only one instance of the intel update runs at a time
 function finish {
-    rmdir -- "$LOCK_DIR" || echo "Failed to remove lock directory '$LOCK_DIR'" >&2
+    rmdir -- "${LOCK_DIR}" || echo "Failed to remove lock directory '${LOCK_DIR}'" >&2
+    [[ -n "${INSTANCE_UID}" ]] && find "${INTEL_DIR}"/ -type f -name "*${INSTANCE_UID}*" -delete
 }
 
 mkdir -p -- "$(dirname "$LOCK_DIR")"
@@ -135,7 +137,7 @@ set +u
 if [[ -z "${SUPERCRONIC_CRONTAB}" ]] && \
    [[ -n "${SUPERVISOR_PATH}" ]] && \
    [[ -d "${SUPERVISOR_PATH}"/supercronic ]]; then
-    SUPERCRONIC_CRONTAB = "${SUPERVISOR_PATH}"/supercronic/crontab
+    SUPERCRONIC_CRONTAB="${SUPERVISOR_PATH}"/supercronic/crontab
     touch "${SUPERCRONIC_CRONTAB}" 2>/dev/null || true
 fi
 if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
