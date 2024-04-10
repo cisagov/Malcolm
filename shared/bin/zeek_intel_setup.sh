@@ -12,6 +12,7 @@ shopt -s nocasematch
 ENCODING="utf-8"
 
 SCRIPT_FILESPEC="$(realpath -e "${BASH_SOURCE[0]}")"
+SCRIPT_FILESPEC_ESCAPED="$(printf '%s\n' "${SCRIPT_FILESPEC}" | sed -e 's/[\/&]/\\&/g')"
 ZEEK_DIR=${ZEEK_DIR:-"/opt/zeek"}
 ZEEK_INTEL_ITEM_EXPIRATION=${ZEEK_INTEL_ITEM_EXPIRATION:-"-1min"}
 ZEEK_INTEL_FEED_SINCE=${ZEEK_INTEL_FEED_SINCE:-""}
@@ -131,10 +132,10 @@ fi # singleton lock check
 # $ZEEK_INTEL_REFRESH_CRON_EXPRESSION (e.g., 15 1 * * *) to execute this script
 set +u
 if [[ -n "${SUPERCRONIC_CRONTAB}" ]] && [[ -f "${SUPERCRONIC_CRONTAB}" ]]; then
+    touch "${SUPERCRONIC_CRONTAB}"
+    sed -i -e "/${SCRIPT_FILESPEC_ESCAPED}/d" "${SUPERCRONIC_CRONTAB}"
     if [[ -n "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION}" ]]; then
-        echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" > "${SUPERCRONIC_CRONTAB}"
-    else
-        > "${SUPERCRONIC_CRONTAB}"
+        echo "${ZEEK_INTEL_REFRESH_CRON_EXPRESSION} ${SCRIPT_FILESPEC} true" >> "${SUPERCRONIC_CRONTAB}"
     fi
     # reload supercronic if it's running
     killall -s USR2 supercronic >/dev/null 2>&1 || true

@@ -67,6 +67,7 @@ fi
 [[ -z $WORKER_LB_PROCS ]] && WORKER_LB_PROCS="$ZEEK_LB_PROCS"
 [[ -z $ZEEK_LB_METHOD ]] && ZEEK_LB_METHOD="custom"
 [[ -z $ZEEK_AF_PACKET_BUFFER_SIZE ]] && ZEEK_AF_PACKET_BUFFER_SIZE="$(echo "64*1024*1024" | bc)"
+[[ -z $ZEEK_INTEL_REFRESH_ON_DEPLOY ]] && ZEEK_INTEL_REFRESH_ON_DEPLOY="true"
 
 # if zeek log path is unspecified, write logs to pwd
 [[ -z $ZEEK_LOG_PATH ]] && ZEEK_LOG_PATH=.
@@ -89,16 +90,18 @@ ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRI
 [[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
 export INTEL_DIR
 mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP
-touch "$INTEL_DIR"/__load__.zeek || true
+touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true
 # autoconfigure load directives for intel files
-[[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
+[[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && \
+  [[ "$ZEEK_INTEL_REFRESH_ON_DEPLOY" == "true" ]] && \
+  "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh /bin/true
 INTEL_UPDATE_TIME_PREV=0
 
 # make sure "custom" directory exists, even if empty
 [[ -n "$ZEEK_CUSTOM_PATH" ]] && CUSTOM_DIR="$ZEEK_CUSTOM_PATH" || CUSTOM_DIR=/opt/sensor/sensor_ctl/zeek/custom
 export CUSTOM_DIR
 mkdir -p "$CUSTOM_DIR"
-touch "$CUSTOM_DIR"/__load__.zeek || true
+touch "$CUSTOM_DIR"/__load__.zeek 2>/dev/null || true
 
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
