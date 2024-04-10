@@ -4,3 +4,4 @@ Hedgehog Linux's management of intel files is identical to what is done by a Mal
 
 * the `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` environment variable can be found in `/opt/sensor/sensor_ctl/control_vars.conf`
 * the `./zeek/intel` directory is `/opt/sensor/sensor_ctl/zeek/intel`
+* to manually refresh the Zeek intel files instead of waiting for the interval specified by `ZEEK_INTEL_REFRESH_CRON_EXPRESSION`, run `/opt/zeek/bin/zeek_intel_setup.sh true`
