@@ -102,6 +102,7 @@
         "zeek.http.host": { "type": "keyword" },
         "zeek.http.info_code": { "type": "short" },
         "zeek.http.info_msg": { "type": "keyword" },
+        "zeek.http.ja4": { "type": "keyword" },
         "zeek.http.method": { "type": "keyword" },
         "zeek.http.orig_filenames": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.http.orig_fuids": { "type": "keyword" },

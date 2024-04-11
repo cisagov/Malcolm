@@ -386,6 +386,9 @@
             "hostCnt" : {
               "type" : "long"
             },
+            "ja4" : {
+              "type": "keyword"
+            },
             "key" : {
               "type" : "keyword"
             },
@@ -874,17 +877,11 @@
             "dstSessionId" : {
               "type" : "keyword"
             },
-            "ja3" : {
+            "ja4" : {
               "type" : "keyword"
             },
-            "ja3Cnt" : {
-              "type" : "long"
-            },
-            "ja3s" : {
+            "ja4s" : {
               "type" : "keyword"
-            },
-            "ja3sCnt" : {
-              "type" : "long"
             },
             "srcSessionId" : {
               "type" : "keyword"
