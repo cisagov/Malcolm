@@ -265,8 +265,8 @@ while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" 
   # check to see if intel feeds were updated, and if so, restart
   INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
   if (( $INTEL_UPDATE_TIME > $INTEL_UPDATE_TIME_PREV )); then
-    echo "Restarting via \"$ZEEK_CTL\" after intel update..." >&2
-    "$ZEEK_CTL" restart
+    echo "Redeploying via \"$ZEEK_CTL deploy\" after intel update..." >&2
+    "$ZEEK_CTL" deploy
     INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
   fi
 
