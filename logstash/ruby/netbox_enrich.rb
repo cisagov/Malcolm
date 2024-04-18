@@ -129,6 +129,7 @@ def register(
   @source_oui = params["source_oui"]
   @source_mac = params["source_mac"]
   @source_segment = params["source_segment"]
+  @default_status = params.fetch("default_status", "active").to_sym
 
   # default manufacturer, role and device type if not specified, either specified directly or read from ENVs
   @default_manuf = params["default_manuf"]
@@ -252,6 +253,13 @@ def register(
 
   @nb_headers = { 'Content-Type': 'application/json' }.freeze
 
+  # for ip_device hash lookups, if a device is pulled out that has this status then
+  #   it should be *updated* instead of just created. this allows us to create even less-fleshed
+  #   out device entries from things like DNS entries but then give more information (like
+  #   manufacturer) later on when actual traffic is observed
+  # TODO: this part is not done yet
+  @hostname_only_device_status = 'planned'.freeze
+
 end
 
 def filter(
@@ -262,126 +270,44 @@ def filter(
     return [event]
   end
 
-  _key_ip = IPAddr.new(_key) rescue nil
-  _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
-  _autopopulate_default_manuf = (@default_manuf.nil? || @default_manuf.empty?) ? "Unspecified" : @default_manuf
-  _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
-  _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
-  _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
-  _autopopulate_hostname = event.get("#{@source_hostname}")
-  _autopopulate_mac = event.get("#{@source_mac}")
-  _autopopulate_oui = event.get("#{@source_oui}")
-
-  _result = @cache_hash.getset(@lookup_type){
-              LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
-            }.getset(_key){
-
-              _nb = Faraday.new(@netbox_url) do |conn|
-                conn.request :authorization, 'Token', @netbox_token
-                conn.request :url_encoded
-                conn.response :json, :parser_options => { :symbolize_names => true }
-              end
-
-              _lookup_result = nil
-              _autopopulate_device = nil
-              _autopopulate_role = nil
-              _autopopulate_dtype = nil
-              _autopopulate_manuf = nil
-              _autopopulate_site = nil
-              _prefixes = nil
-              _devices = nil
-
-              # handle :ip_device first, because if we're doing autopopulate we're also going to use
-              # some of the logic from :ip_prefix
-
-              if (@lookup_type == :ip_device)
-              #################################################################################
-                # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
-                # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
-                # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
-                # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-                _devices = lookup_devices(_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
-
-                if @autopopulate && (_devices.nil? || _devices.empty?) && _key_ip&.private?
-                  # no results found, autopopulate enabled, private-space IP address...
-                  # let's create an entry for this device
-                  _autopopulate_device,
-                  _autopopulate_role,
-                  _autopopulate_dtype,
-                  _autopopulate_oui,
-                  _autopopulate_manuf,
-                  _autopopulate_site = autopopulate_devices(_key,
-                                                            _autopopulate_mac,
-                                                            _autopopulate_oui,
-                                                            _autopopulate_default_site,
-                                                            _autopopulate_default_role,
-                                                            _autopopulate_default_dtype,
-                                                            _autopopulate_default_manuf,
-                                                            _autopopulate_hostname,
-                                                            _nb)
-                  if !_autopopulate_device.nil?
-                    # puts('5. %{key}: %{found}' % { key: autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-                    # we created a device, so send it back out as the result for the event as well
-                    _devices = Array.new unless _devices.is_a?(Array)
-                    _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
-                                  :id => _autopopulate_device&.fetch(:id, nil),
-                                  :url => _autopopulate_device&.fetch(:url, nil),
-                                  :site => _autopopulate_site&.fetch(:name, nil),
-                                  :role => _autopopulate_role&.fetch(:name, nil),
-                                  :device_type => _autopopulate_dtype&.fetch(:name, nil),
-                                  :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
-                                  :details => @verbose ? _autopopulate_device : nil }
-                  end # _autopopulate_device was not nil (i.e., we autocreated a device)
-                end # _autopopulate turned on and no results found
-
-                _devices = collect_values(crush(_devices))
-                _devices.fetch(:service, [])&.flatten!&.uniq!
-                _lookup_result = _devices
-              end # @lookup_type == :ip_device
-
-              # this || is because we are going to need to do the prefix lookup if we're autopopulating
-              # as well as if we're specifically requested to do that enrichment
-
-              if (@lookup_type == :ip_prefix) || !_autopopulate_device.nil?
-              #################################################################################
-                # retrieve the list of IP address prefixes containing the search key
-                _prefixes = lookup_prefixes(_key, @lookup_site, _nb)
-
-                                                           # TODO: ipv6?
-                if (_prefixes.nil? || _prefixes.empty?) && !_key_ip&.ipv6? && _key_ip&.private? && @autopopulate_create_prefix
-                  # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
-                  _prefix_info = autopopulate_prefixes(_key_ip, _autopopulate_default_site, _nb)
-                  _prefixes = Array.new unless _prefixes.is_a?(Array)
-                  _prefixes << _prefix_info
-                end # if auto-create prefix
-
-                _prefixes = collect_values(crush(_prefixes))
-                _lookup_result = _prefixes unless (@lookup_type != :ip_prefix)
-              end # @lookup_type == :ip_prefix
-
-              if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero?
-                # device has been created, we need to create an interface for it
-                _autopopulate_device = create_device_interface(_key,
-                                                               _autopopulate_device,
-                                                               _autopopulate_manuf,
-                                                               _autopopulate_mac,
-                                                               _nb)
-              end # check if device was created and has ID
-
-              # yield return value for cache_hash getset
-              _lookup_result
-            }
-
-  if !_result.nil? && _result.has_key?(:url) && !_result[:url]&.empty?
-    _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
-    if (@lookup_type == :ip_device) &&
-       (!_result.has_key?(:device_type) || _result[:device_type]&.empty?) &&
-       _result[:url].any? { |u| u.include? "virtual-machines" }
-    then
-      _result[:device_type] = [ "Virtual Machine" ]
-    end
+  # _key might be an array of IP addresses, but we're only going to set the first _result into @target.
+  #    this is still useful, though as autopopulation may happen for multiple IPs even if we only
+  #    store the result of the first one found
+  if !_key.is_a?(Array) then
+    _newKey = Array.new
+    _newKey.push(_key) unless _key.nil?
+    _key = _newKey
   end
-  event.set("#{@target}", _result) unless _result.nil? || _result.empty?
+  _result_set = false
+
+  _key.each do |ip_key|
+    _result = @cache_hash.getset(@lookup_type){
+                LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
+              }.getset(ip_key){
+                netbox_lookup(event, ip_key)
+              }
+
+    if !_result.nil?
+      # if (@lookup_type == :ip_device) &&
+      #    _result.has_key?(:status) &&
+      #    (_result[:status] == @hostname_only_device_status)
+      # then
+      # end
+      if _result.has_key?(:url) && !_result[:url]&.empty?
+        _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
+        if (@lookup_type == :ip_device) &&
+           (!_result.has_key?(:device_type) || _result[:device_type]&.empty?) &&
+           _result[:url].any? { |u| u.include? "virtual-machines" }
+        then
+          _result[:device_type] = [ "Virtual Machine" ]
+        end
+      end
+    end
+    unless _result_set || _result.nil? || _result.empty? || @target.nil? || @target.empty?
+      event.set("#{@target}", _result)
+      _result_set = true
+    end
+  end # _key.each do |ip_key|
 
   [event]
 end
@@ -703,6 +629,7 @@ def autopopulate_devices(
   autopopulate_default_dtype,
   autopopulate_default_manuf,
   autopopulate_hostname,
+  autopopulate_default_status,
   nb
 )
 
@@ -782,7 +709,7 @@ def autopopulate_devices(
         _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : "#{autopopulate_hostname} @ #{ip_str}"
         _device_data = { :name => _device_name,
                          :site => _autopopulate_site[:id],
-                         :status => "staged" }
+                         :status => autopopulate_default_status }
         if (_device_create_response = nb.post('virtualization/virtual-machines/', _device_data.to_json, @nb_headers).body) &&
            _device_create_response.is_a?(Hash) &&
            _device_create_response.has_key?(:id)
@@ -860,7 +787,7 @@ def autopopulate_devices(
                              :device_type => _autopopulate_dtype[:id],
                              :role => _autopopulate_role[:id],
                              :site => _autopopulate_site[:id],
-                             :status => "staged" }
+                             :status => autopopulate_default_status }
             if (_device_create_response = nb.post('dcim/devices/', _device_data.to_json, @nb_headers).body) &&
                _device_create_response.is_a?(Hash) &&
                _device_create_response.has_key?(:id)
@@ -901,6 +828,7 @@ end
 def autopopulate_prefixes(
   ip_obj,
   autopopulate_default_site,
+  autopopulate_default_status,
   nb
 )
   _prefix_data = nil
@@ -916,7 +844,7 @@ def autopopulate_prefixes(
     _prefix_post = { :prefix => _new_prefix_name,
                      :description => _new_prefix_name,
                      :site => _autopopulate_site&.fetch(:id, nil),
-                     :status => "active" }
+                     :status => autopopulate_default_status }
     begin
       _new_prefix_create_response = nb.post('ipam/prefixes/', _prefix_post.to_json, @nb_headers).body
       if _new_prefix_create_response &&
@@ -993,6 +921,118 @@ def create_device_interface(
   end # check if the IP address was created and has an ID
 
   _autopopulate_device
+end
+
+def netbox_lookup(
+  event,
+  ip_key
+)
+
+  _nb = Faraday.new(@netbox_url) do |conn|
+    conn.request :authorization, 'Token', @netbox_token
+    conn.request :url_encoded
+    conn.response :json, :parser_options => { :symbolize_names => true }
+  end
+
+  _key_ip = IPAddr.new(ip_key) rescue nil
+  _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
+  _autopopulate_default_manuf = (@default_manuf.nil? || @default_manuf.empty?) ? "Unspecified" : @default_manuf
+  _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
+  _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
+  _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
+  _autopopulate_hostname = event.get("#{@source_hostname}")
+  _autopopulate_mac = event.get("#{@source_mac}")
+  _autopopulate_oui = event.get("#{@source_oui}")
+
+  _lookup_result = nil
+  _autopopulate_device = nil
+  _autopopulate_role = nil
+  _autopopulate_dtype = nil
+  _autopopulate_manuf = nil
+  _autopopulate_site = nil
+  _prefixes = nil
+  _devices = nil
+
+  # handle :ip_device first, because if we're doing autopopulate we're also going to use
+  # some of the logic from :ip_prefix
+
+  if (@lookup_type == :ip_device)
+  #################################################################################
+    # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
+    # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
+    # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
+    # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
+    _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+
+    if @autopopulate && (_devices.nil? || _devices.empty?) && _key_ip&.private?
+      # no results found, autopopulate enabled, private-space IP address...
+      # let's create an entry for this device
+      _autopopulate_device,
+      _autopopulate_role,
+      _autopopulate_dtype,
+      _autopopulate_oui,
+      _autopopulate_manuf,
+      _autopopulate_site = autopopulate_devices(ip_key,
+                                                _autopopulate_mac,
+                                                _autopopulate_oui,
+                                                _autopopulate_default_site,
+                                                _autopopulate_default_role,
+                                                _autopopulate_default_dtype,
+                                                _autopopulate_default_manuf,
+                                                _autopopulate_hostname,
+                                                @default_status,
+                                                _nb)
+      if !_autopopulate_device.nil?
+        # puts('5. %{key}: %{found}' % { key: autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
+        # we created a device, so send it back out as the result for the event as well
+        _devices = Array.new unless _devices.is_a?(Array)
+        _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
+                      :id => _autopopulate_device&.fetch(:id, nil),
+                      :url => _autopopulate_device&.fetch(:url, nil),
+                      :site => _autopopulate_site&.fetch(:name, nil),
+                      :role => _autopopulate_role&.fetch(:name, nil),
+                      :device_type => _autopopulate_dtype&.fetch(:name, nil),
+                      :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
+                      :details => @verbose ? _autopopulate_device : nil }
+      end # _autopopulate_device was not nil (i.e., we autocreated a device)
+    end # _autopopulate turned on and no results found
+
+    _devices = collect_values(crush(_devices))
+    _devices.fetch(:service, [])&.flatten!&.uniq!
+    _lookup_result = _devices
+  end # @lookup_type == :ip_device
+
+  # this || is because we are going to need to do the prefix lookup if we're autopopulating
+  # as well as if we're specifically requested to do that enrichment
+
+  if (@lookup_type == :ip_prefix) || !_autopopulate_device.nil?
+  #################################################################################
+    # retrieve the list of IP address prefixes containing the search key
+    _prefixes = lookup_prefixes(ip_key, @lookup_site, _nb)
+
+                                               # TODO: ipv6?
+    if (_prefixes.nil? || _prefixes.empty?) && !_key_ip&.ipv6? && _key_ip&.private? && @autopopulate_create_prefix
+      # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
+      _prefix_info = autopopulate_prefixes(_key_ip, _autopopulate_default_site, @default_status, _nb)
+      _prefixes = Array.new unless _prefixes.is_a?(Array)
+      _prefixes << _prefix_info
+    end # if auto-create prefix
+
+    _prefixes = collect_values(crush(_prefixes))
+    _lookup_result = _prefixes unless (@lookup_type != :ip_prefix)
+  end # @lookup_type == :ip_prefix
+
+  if !_autopopulate_device.nil? && _autopopulate_device.fetch(:id, nil)&.nonzero?
+    # device has been created, we need to create an interface for it
+    _autopopulate_device = create_device_interface(ip_key,
+                                                   _autopopulate_device,
+                                                   _autopopulate_manuf,
+                                                   _autopopulate_mac,
+                                                   _nb)
+  end # check if device was created and has ID
+
+  # yield return value for cache_hash getset
+  _lookup_result
 end
 
 ###############################################################################
