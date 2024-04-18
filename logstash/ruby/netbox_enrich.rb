@@ -930,7 +930,7 @@ def netbox_lookup(
   _lookup_result = nil
 
   _key_ip = IPAddr.new(ip_key) rescue nil
-  if !_key_ip.nil? && _key_ip&.private?
+  if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
 
     _nb = Faraday.new(@netbox_url) do |conn|
       conn.request :authorization, 'Token', @netbox_token
