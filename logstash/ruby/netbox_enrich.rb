@@ -346,6 +346,34 @@ def mac_string_to_integer(
   string.tr('.:-','').to_i(16)
 end
 
+def mac_to_oui_lookup(
+  mac
+)
+  _oui = nil
+
+  case mac
+  when String
+    if @macregex.match?(mac)
+      _macint = mac_string_to_integer(mac)
+      _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+      _oui = _vendor[2] unless _vendor.nil?
+    end # mac matches @macregex
+  when Array
+    mac.each do |_addr|
+      if @macregex.match?(_addr)
+        _macint = mac_string_to_integer(_addr)
+        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
+        if !_vendor.nil?
+          _oui = _vendor[2]
+          break
+        end # !_vendor.nil?
+      end # _addr matches @macregex
+    end # mac.each do
+  end # case statement mac String vs. Array
+
+  _oui
+end
+
 def psych_load_yaml(
   filename
 )
@@ -407,40 +435,44 @@ def lookup_or_create_site(
   site_name,
   nb
 )
-  @site_hash.getset(site_name) {
-    begin
-      _site = nil
+  if !site_name.to_s.empty?
+    @site_hash.getset(site_name) {
+      begin
+        _site = nil
 
-      # look it up first
-      _query = { :offset => 0,
-                 :limit => 1,
-                 :name => site_name }
-      if (_sites_response = nb.get('dcim/sites/', _query).body) &&
-         _sites_response.is_a?(Hash) &&
-         (_tmp_sites = _sites_response.fetch(:results, [])) &&
-         (_tmp_sites.length() > 0)
-      then
-         _site = _tmp_sites.first
-      end
-
-      if _site.nil?
-        # the device site is not found, create it
-        _site_data = { :name => site_name,
-                       :slug => site_name.to_url,
-                       :status => "active" }
-        if (_site_create_response = nb.post('dcim/sites/', _site_data.to_json, @nb_headers).body) &&
-           _site_create_response.is_a?(Hash) &&
-           _site_create_response.has_key?(:id)
+        # look it up first
+        _query = { :offset => 0,
+                   :limit => 1,
+                   :name => site_name }
+        if (_sites_response = nb.get('dcim/sites/', _query).body) &&
+           _sites_response.is_a?(Hash) &&
+           (_tmp_sites = _sites_response.fetch(:results, [])) &&
+           (_tmp_sites.length() > 0)
         then
-           _site = _site_create_response
+           _site = _tmp_sites.first
         end
-      end
 
-    rescue Faraday::Error
-      # give up aka do nothing
-    end
-    _site
-  }
+        if _site.nil?
+          # the device site is not found, create it
+          _site_data = { :name => site_name,
+                         :slug => site_name.to_url,
+                         :status => "active" }
+          if (_site_create_response = nb.post('dcim/sites/', _site_data.to_json, @nb_headers).body) &&
+             _site_create_response.is_a?(Hash) &&
+             _site_create_response.has_key?(:id)
+          then
+             _site = _site_create_response
+          end
+        end
+
+      rescue Faraday::Error
+        # give up aka do nothing
+      end
+      _site
+    }
+  else
+    nil
+  end
 end
 
 def lookup_manuf(
@@ -486,6 +518,111 @@ def lookup_manuf(
     !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
   }
 end
+
+def lookup_or_create_manuf_and_dtype(
+  oui,
+  default_manuf,
+  default_dtype,
+  nb
+)
+  _oui = oui
+  _dtype = nil
+  _manuf = nil
+
+  # match/look up manufacturer based on OUI
+  if !_oui.nil? && !_oui.empty?
+    _oui = _oui.first() unless !_oui.is_a?(Array)
+    # does it look like a VM or a regular device?
+    if @vm_namesarray.include?(_oui.downcase)
+      # looks like this is probably a virtual machine
+      _manuf = { :name => _oui,
+                 :match => 1.0,
+                 :vm => true,
+                 :id => nil }
+    else
+      # looks like this is not a virtual machine (or we can't tell) so assume it's a regular device
+      _manuf = lookup_manuf(_oui, nb)
+    end # virtual machine vs. regular device
+  end # oui specified
+
+  # puts('1. %{key}: %{found}' % { key: oui, found: JSON.generate(_manuf) })
+  if !_manuf.is_a?(Hash)
+    # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
+    _manuf = { :name => (@autopopulate_create_manuf && !_oui.nil? && !_oui.empty?) ? _oui : default_manuf,
+               :match => 0.0,
+               :vm => false,
+               :id => nil}
+  end
+  # puts('2. %{key}: %{found}' % { key: _oui, found: JSON.generate(_manuf) })
+
+  if !_manuf[:vm]
+
+    if !_manuf.fetch(:id, nil)&.nonzero?
+      # the manufacturer was default (not found) so look it up first
+      _query = { :offset => 0,
+                 :limit => 1,
+                 :name => _manuf[:name] }
+      if (_manufs_response = nb.get('dcim/manufacturers/', _query).body) &&
+         _manufs_response.is_a?(Hash) &&
+         (_tmp_manufs = _manufs_response.fetch(:results, [])) &&
+         (_tmp_manufs.length() > 0)
+      then
+         _manuf[:id] = _tmp_manufs.first.fetch(:id, nil)
+         _manuf[:match] = 1.0
+      end
+    end
+    # puts('3. %{key}: %{found}' % { key: _oui, found: JSON.generate(_manuf) })
+
+    if !_manuf.fetch(:id, nil)&.nonzero?
+      # the manufacturer is still not found, create it
+      _manuf_data = { :name => _manuf[:name],
+                      :tags => [ @device_tag_autopopulated ],
+                      :slug => _manuf[:name].to_url }
+      if (_manuf_create_response = nb.post('dcim/manufacturers/', _manuf_data.to_json, @nb_headers).body) &&
+         _manuf_create_response.is_a?(Hash)
+      then
+         _manuf[:id] = _manuf_create_response.fetch(:id, nil)
+         _manuf[:match] = 1.0
+      end
+      # puts('4. %{key}: %{created}' % { key: _manuf, created: JSON.generate(_manuf_create_response) })
+    end
+
+    # at this point we *must* have the manufacturer ID
+    if _manuf.fetch(:id, nil)&.nonzero?
+
+      # make sure the desired device type also exists, look it up first
+      _query = { :offset => 0,
+                 :limit => 1,
+                 :manufacturer_id => _manuf[:id],
+                 :model => default_dtype }
+      if (_dtypes_response = nb.get('dcim/device-types/', _query).body) &&
+         _dtypes_response.is_a?(Hash) &&
+         (_tmp_dtypes = _dtypes_response.fetch(:results, [])) &&
+         (_tmp_dtypes.length() > 0)
+      then
+         _dtype = _tmp_dtypes.first
+      end
+
+      if _dtype.nil?
+        # the device type is not found, create it
+        _dtype_data = { :manufacturer => _manuf[:id],
+                        :model => default_dtype,
+                        :tags => [ @device_tag_autopopulated ],
+                        :slug => default_dtype.to_url }
+        if (_dtype_create_response = nb.post('dcim/device-types/', _dtype_data.to_json, @nb_headers).body) &&
+           _dtype_create_response.is_a?(Hash) &&
+           _dtype_create_response.has_key?(:id)
+        then
+           _dtype = _dtype_create_response
+        end
+      end
+
+    end # _manuf :id check
+  end # _manuf is not a VM
+
+  return _dtype, _manuf
+
+end # def lookup_or_create_manuf_and_dtype
 
 def lookup_prefixes(
   ip_str,
@@ -536,40 +673,44 @@ def lookup_or_create_role(
   role_name,
   nb
 )
-  @role_hash.getset(role_name) {
-    begin
-      _role = nil
+  if !role_name.to_s.empty?
+    @role_hash.getset(role_name) {
+      begin
+        _role = nil
 
-      # look it up first
-      _query = { :offset => 0,
-                 :limit => 1,
-                 :name => role_name }
-      if (_roles_response = nb.get('dcim/device-roles/', _query).body) &&
-         _roles_response.is_a?(Hash) &&
-         (_tmp_roles = _roles_response.fetch(:results, [])) &&
-         (_tmp_roles.length() > 0)
-      then
-         _role = _tmp_roles.first
-      end
-
-      if _role.nil?
-        # the role is not found, create it
-        _role_data = { :name => role_name,
-                       :slug => role_name.to_url,
-                       :color => "d3d3d3" }
-        if (_role_create_response = nb.post('dcim/device-roles/', _role_data.to_json, @nb_headers).body) &&
-           _role_create_response.is_a?(Hash) &&
-           _role_create_response.has_key?(:id)
+        # look it up first
+        _query = { :offset => 0,
+                   :limit => 1,
+                   :name => role_name }
+        if (_roles_response = nb.get('dcim/device-roles/', _query).body) &&
+           _roles_response.is_a?(Hash) &&
+           (_tmp_roles = _roles_response.fetch(:results, [])) &&
+           (_tmp_roles.length() > 0)
         then
-           _role = _role_create_response
+           _role = _tmp_roles.first
         end
-      end
 
-    rescue Faraday::Error
-      # give up aka do nothing
-    end
-    _role
-  }
+        if _role.nil?
+          # the role is not found, create it
+          _role_data = { :name => role_name,
+                         :slug => role_name.to_url,
+                         :color => "d3d3d3" }
+          if (_role_create_response = nb.post('dcim/device-roles/', _role_data.to_json, @nb_headers).body) &&
+             _role_create_response.is_a?(Hash) &&
+             _role_create_response.has_key?(:id)
+          then
+             _role = _role_create_response
+          end
+        end
+
+      rescue Faraday::Error
+        # give up aka do nothing
+      end
+      _role
+    }
+  else
+    nil
+  end
 end
 
 def lookup_devices(
@@ -664,73 +805,26 @@ def autopopulate_devices(
 
   _autopopulate_device = nil
   _autopopulate_role = nil
-  _autopopulate_dtype = nil
   _autopopulate_oui = autopopulate_oui
-  _autopopulate_manuf = nil
   _autopopulate_site = nil
   _autopopulate_tags = [ @device_tag_autopopulated ]
+  _autopopulate_tags << @device_tag_hostname_unknown if autopopulate_hostname.to_s.empty?
 
   # if MAC is set but OUI is not, do a quick lookup
   if (!autopopulate_mac.nil? && !autopopulate_mac.empty?) &&
      (_autopopulate_oui.nil? || _autopopulate_oui.empty?)
   then
-    case autopopulate_mac
-    when String
-      if @macregex.match?(autopopulate_mac)
-        _macint = mac_string_to_integer(autopopulate_mac)
-        _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
-        _autopopulate_oui = _vendor[2] unless _vendor.nil?
-      end # autopopulate_mac matches @macregex
-    when Array
-      autopopulate_mac.each do |_addr|
-        if @macregex.match?(_addr)
-          _macint = mac_string_to_integer(_addr)
-          _vendor = @macarray.bsearch{ |_vendormac| (_macint < _vendormac[0]) ? -1 : ((_macint > _vendormac[1]) ? 1 : 0)}
-          if !_vendor.nil?
-            _autopopulate_oui = _vendor[2]
-            break
-          end # !_vendor.nil?
-        end # _addr matches @macregex
-      end # autopopulate_mac.each do
-    end # case statement autopopulate_mac String vs. Array
-  end # MAC is populated but OUI is not
-
-  # match/look up manufacturer based on OUI
-  if !_autopopulate_oui.nil? && !_autopopulate_oui.empty?
-
-    _autopopulate_oui = _autopopulate_oui.first() unless !_autopopulate_oui.is_a?(Array)
-
-    # does it look like a VM or a regular device?
-    if @vm_namesarray.include?(_autopopulate_oui.downcase)
-      # looks like this is probably a virtual machine
-      _autopopulate_manuf = { :name => _autopopulate_oui,
-                              :match => 1.0,
-                              :vm => true,
-                              :id => nil }
-
-    else
-      # looks like this is not a virtual machine (or we can't tell) so assume its' a regular device
-      _autopopulate_manuf = lookup_manuf(_autopopulate_oui, nb)
-    end # virtual machine vs. regular device
-  end # _autopopulate_oui specified
-
-  # puts('1. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-  if !_autopopulate_manuf.is_a?(Hash)
-    # no match was found at ANY match level (empty database or no OUI specified), set default ("unspecified") manufacturer
-    _autopopulate_manuf = { :name => (@autopopulate_create_manuf && !_autopopulate_oui.nil? && !_autopopulate_oui.empty?) ? _autopopulate_oui : autopopulate_default_manuf,
-                            :match => 0.0,
-                            :vm => false,
-                            :id => nil}
-  end
-  # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-
-  if autopopulate_hostname.to_s.empty?
-    _autopopulate_tags << @device_tag_hostname_unknown
+    _autopopulate_oui = mac_to_oui_lookup(autopopulate_mac)
   end
 
-  # make sure the site and role exists
+  # make sure the site, role, manufacturer and device type exist
   _autopopulate_site = lookup_or_create_site(autopopulate_default_site_name, nb)
   _autopopulate_role = lookup_or_create_role(autopopulate_default_role_name, nb)
+  _autopopulate_dtype,
+  _autopopulate_manuf = lookup_or_create_manuf_and_dtype(_autopopulate_oui,
+                                                         autopopulate_default_manuf,
+                                                         autopopulate_default_dtype,
+                                                         nb)
 
   # we should have found or created the autopopulate role and site
   begin
@@ -753,105 +847,43 @@ def autopopulate_devices(
         end
 
       else
-        # a regular non-vm device
+        # a regular non-vm device: at this point we *must* have the manufacturer ID and device type ID
+        if _autopopulate_manuf.fetch(:id, nil)&.nonzero? &&
+           _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
+        then
 
-        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
-          # the manufacturer was default (not found) so look it up first
-          _query = { :offset => 0,
-                     :limit => 1,
-                     :name => _autopopulate_manuf[:name] }
-          if (_manufs_response = nb.get('dcim/manufacturers/', _query).body) &&
-             _manufs_response.is_a?(Hash) &&
-             (_tmp_manufs = _manufs_response.fetch(:results, [])) &&
-             (_tmp_manufs.length() > 0)
+          # never figured out the manufacturer (actually, we were never even given the fields to do so), so tag it as such
+          if ((_autopopulate_manuf.fetch(:name, autopopulate_default_manuf) == autopopulate_default_manuf) &&
+              autopopulate_mac.to_s.empty? && _autopopulate_oui.to_s.empty?)
           then
-             _autopopulate_manuf[:id] = _tmp_manufs.first.fetch(:id, nil)
-             _autopopulate_manuf[:match] = 1.0
-          end
-        end
-        # puts('3. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-
-        if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
-          # the manufacturer is still not found, create it
-          _manuf_data = { :name => _autopopulate_manuf[:name],
-                          :tags => _autopopulate_tags,
-                          :slug => _autopopulate_manuf[:name].to_url }
-          if (_manuf_create_response = nb.post('dcim/manufacturers/', _manuf_data.to_json, @nb_headers).body) &&
-             _manuf_create_response.is_a?(Hash)
-          then
-             _autopopulate_manuf[:id] = _manuf_create_response.fetch(:id, nil)
-             _autopopulate_manuf[:match] = 1.0
-          end
-          # puts('4. %{key}: %{created}' % { key: _autopopulate_manuf, created: JSON.generate(_manuf_create_response) })
-        end
-
-        # at this point we *must* have the manufacturer ID
-        if _autopopulate_manuf.fetch(:id, nil)&.nonzero?
-
-          # never figured out the manufacturer, so tag it as such
-          if (_autopopulate_manuf.fetch(:name, autopopulate_default_manuf) == autopopulate_default_manuf)
             _autopopulate_tags << @device_tag_manufacturer_unknown
           end
 
-          # make sure the desired device type also exists, look it up first
-          _query = { :offset => 0,
-                     :limit => 1,
-                     :manufacturer_id => _autopopulate_manuf[:id],
-                     :model => autopopulate_default_dtype }
-          if (_dtypes_response = nb.get('dcim/device-types/', _query).body) &&
-             _dtypes_response.is_a?(Hash) &&
-             (_tmp_dtypes = _dtypes_response.fetch(:results, [])) &&
-             (_tmp_dtypes.length() > 0)
+          # create the device
+          _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
+          _device_data = { :name => _device_name,
+                           :device_type => _autopopulate_dtype[:id],
+                           :role => _autopopulate_role[:id],
+                           :site => _autopopulate_site[:id],
+                           :tags => _autopopulate_tags,
+                           :status => autopopulate_default_status }
+          if (_device_create_response = nb.post('dcim/devices/', _device_data.to_json, @nb_headers).body) &&
+             _device_create_response.is_a?(Hash) &&
+             _device_create_response.has_key?(:id)
           then
-             _autopopulate_dtype = _tmp_dtypes.first
+             _autopopulate_device = _device_create_response
           end
-
-          if _autopopulate_dtype.nil?
-            # the device type is not found, create it
-            _dtype_data = { :manufacturer => _autopopulate_manuf[:id],
-                            :model => autopopulate_default_dtype,
-                            :tags => _autopopulate_tags,
-                            :slug => autopopulate_default_dtype.to_url }
-            if (_dtype_create_response = nb.post('dcim/device-types/', _dtype_data.to_json, @nb_headers).body) &&
-               _dtype_create_response.is_a?(Hash) &&
-               _dtype_create_response.has_key?(:id)
-            then
-               _autopopulate_dtype = _dtype_create_response
-            end
-          end
-
-          # # now we must also have the device type ID
-          if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
-
-            # create the device
-            _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
-            _device_data = { :name => _device_name,
-                             :device_type => _autopopulate_dtype[:id],
-                             :role => _autopopulate_role[:id],
-                             :site => _autopopulate_site[:id],
-                             :tags => _autopopulate_tags,
-                             :status => autopopulate_default_status }
-            if (_device_create_response = nb.post('dcim/devices/', _device_data.to_json, @nb_headers).body) &&
-               _device_create_response.is_a?(Hash) &&
-               _device_create_response.has_key?(:id)
-            then
-               _autopopulate_device = _device_create_response
-            end
-
-          else
-            # didn't figure out the device type ID, make sure we're not setting something half-populated
-            _autopopulate_dtype = nil
-          end # _autopopulate_dtype[:id] is valid
 
         else
-          # didn't figure out the manufacturer ID, make sure we're not setting something half-populated
+          # didn't figure out the manufacturer ID and/or device type ID, make sure we're not setting something half-populated
           _autopopulate_manuf = nil
-        end # _autopopulate_manuf[:id] is valid
+          _autopopulate_dtype = nil
+        end # _autopopulate_manuf[:id] is valid and _autopopulate_dtype[:id] is valid
 
       end # virtual machine vs. regular device
 
     else
-      # didn't figure out the IDs, make sure we're not setting something half-populated
+      # didn't figure out the site and/or role IDs, make sure we're not setting something half-populated
       _autopopulate_site = nil
       _autopopulate_role = nil
     end # site and role are valid
@@ -1053,7 +1085,7 @@ def netbox_lookup(
       elsif @autopopulate
         #################################################################################
         # update with new information on an existing device (i.e., from a previous call to netbox_lookup)
-        _patched_device_data = {}
+        _patched_device_data = Hash.new
 
         # get existing tags to update them to remove "unkown-..." values if needed
         _tags = previous_result.fetch(:tags, nil)&.flatten&.map{ |hash| { slug: hash[:slug] } }&.uniq
@@ -1072,15 +1104,33 @@ def netbox_lookup(
           if !_autopopulate_hostname.to_s.empty? &&
              _tags&.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]}
           then
-            # a hostname field was specified, which means we're going to overwrite the device name previously created
-            #   which was probably something like "Dell @ 192.168.10.100" and also remove the "unknown hostname" tag
-            _patched_device_data = { :name => _autopopulate_hostname }
+            # a hostname field was specified where before we had none, which means we're going to overwrite
+            #   the device name previously created which was probably something like "Dell @ 192.168.10.100"
+            #   and also remove the "unknown hostname" tag
+            _patched_device_data[:name] = _autopopulate_hostname
             _tags = _tags.filter{|tag| tag[:slug] != @device_tag_hostname_unknown[:slug]}
           end
 
-          if _tags&.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]}
-            # TODO: handle device_tag_manufacturer_unknown
-            # _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
+          if ((!_autopopulate_mac.to_s.empty? || !_autopopulate_oui.to_s.empty?) &&
+              _tags&.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]})
+            # if MAC is set but OUI is not, do a quick lookup
+            if (!_autopopulate_mac.nil? && !_autopopulate_mac.empty?) &&
+               (_autopopulate_oui.nil? || _autopopulate_oui.empty?)
+            then
+              _autopopulate_oui = mac_to_oui_lookup(_autopopulate_mac)
+            end
+            # a MAC address or OUI field was specified where before we had none, which means we're going to overwrite
+            #   the device manufacturer previously created which was probably something like "Unspecified"
+            #   and also remove the "unknown manufacturer" tag
+            _autopopulate_dtype,
+            _autopopulate_manuf = lookup_or_create_manuf_and_dtype(_autopopulate_oui,
+                                                                   autopopulate_default_manuf,
+                                                                   autopopulate_default_dtype,
+                                                                   _nb)
+            if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
+              _patched_device_data[:device_type] = _autopopulate_dtype[:id]
+            end
+            _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
           end
 
           if !_patched_device_data.empty? # we've got changes to make, so do it
