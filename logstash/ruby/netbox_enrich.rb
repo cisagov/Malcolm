@@ -290,11 +290,11 @@ def filter(
               }
 
     if !_result.nil?
-      # if (@lookup_type == :ip_device) &&
-      #    _result.has_key?(:status) &&
-      #    (_result[:status] == @hostname_only_device_status)
-      # then
-      # end
+      if (_tags = _result&.delete(:tags)) &&
+         (@lookup_type == :ip_device)
+      then
+        # puts('%{tags}' % { tags: JSON.generate(_tags) })
+      end
       if _result.has_key?(:url) && !_result[:url]&.empty?
         _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
         if (@lookup_type == :ip_device) &&
@@ -443,8 +443,7 @@ def lookup_manuf(
                            :id => _manuf.fetch(:id, nil),
                            :url => _manuf.fetch(:url, nil),
                            :match => _tmp_distance,
-                           :vm => false
-                         }
+                           :vm => false }
             end
           end
           _query[:offset] += _tmp_manufs.length()
@@ -487,11 +486,12 @@ def lookup_prefixes(
             _prefixName = p.fetch(:display, p.fetch(:prefix, nil))
           end
           prefixes << { :name => _prefixName,
-                         :id => p.fetch(:id, nil),
-                         :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
-                         :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
-                         :url => p.fetch(:url, p.fetch(:url, nil)),
-                         :details => @verbose ? p : nil }
+                        :id => p.fetch(:id, nil),
+                        :site => ((_site = p.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                        :tenant => ((_tenant = p.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
+                        :url => p.fetch(:url, nil),
+                        :tags => p.fetch(:tags, nil),
+                        :details => @verbose ? p : nil }
         end
         _query[:offset] += _tmp_prefixes.length()
         break unless (_tmp_prefixes.length() >= @page_size)
@@ -600,6 +600,7 @@ def lookup_devices(
             _devices << { :name => _device.fetch(:name, _device.fetch(:display, nil)),
                           :id => _device_id,
                           :url => _device.fetch(:url, nil),
+                          :tags => _device.fetch(:tags, nil),
                           :service => _device.fetch(:service, []).map {|s| s.fetch(:name, s.fetch(:display, nil)) },
                           :site => _device_site,
                           :role => ((_role = _device.fetch(:role, nil)) && _role&.has_key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
@@ -694,10 +695,8 @@ def autopopulate_devices(
                             :match => 0.0,
                             :vm => false,
                             :id => nil}
-    _autopopulate_tags << @device_tag_manufacturer_unknown
   end
   # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-
 
   if autopopulate_hostname.to_s.empty?
     _autopopulate_tags << @device_tag_hostname_unknown
@@ -762,6 +761,11 @@ def autopopulate_devices(
 
         # at this point we *must* have the manufacturer ID
         if _autopopulate_manuf.fetch(:id, nil)&.nonzero?
+
+          # never figured out the manufacturer, so tag it as such
+          if (_autopopulate_manuf.fetch(:name, autopopulate_default_manuf) == autopopulate_default_manuf)
+            _autopopulate_tags << @device_tag_manufacturer_unknown
+          end
 
           # make sure the desired device type also exists, look it up first
           _query = { :offset => 0,
@@ -871,7 +875,8 @@ def autopopulate_prefixes(
                            :id => _new_prefix_create_response.fetch(:id, nil),
                            :site => ((_site = _new_prefix_create_response.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
                            :tenant => ((_tenant = _new_prefix_create_response.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
-                           :url => _new_prefix_create_response.fetch(:url, _new_prefix_create_response.fetch(:url, nil)),
+                           :url => _new_prefix_create_response.fetch(:url, nil),
+                           :tags => _new_prefix_create_response.fetch(:tags, nil),
                            :details => @verbose ? _new_prefix_create_response : nil }
       end
     rescue Faraday::Error
@@ -1007,6 +1012,7 @@ def netbox_lookup(
           _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
                         :id => _autopopulate_device&.fetch(:id, nil),
                         :url => _autopopulate_device&.fetch(:url, nil),
+                        :tags => _autopopulate_device&.fetch(:tags, nil),
                         :site => _autopopulate_site&.fetch(:name, nil),
                         :role => _autopopulate_role&.fetch(:name, nil),
                         :device_type => _autopopulate_dtype&.fetch(:name, nil),
