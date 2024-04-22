@@ -1124,8 +1124,8 @@ def netbox_lookup(
             #   and also remove the "unknown manufacturer" tag
             _autopopulate_dtype,
             _autopopulate_manuf = lookup_or_create_manuf_and_dtype(_autopopulate_oui,
-                                                                   autopopulate_default_manuf,
-                                                                   autopopulate_default_dtype,
+                                                                   _autopopulate_default_manuf,
+                                                                   _autopopulate_default_dtype,
                                                                    _nb)
             if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
               _patched_device_data[:device_type] = _autopopulate_dtype[:id]
