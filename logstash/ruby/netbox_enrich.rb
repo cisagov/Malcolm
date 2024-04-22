@@ -262,6 +262,8 @@ def register(
   @device_tag_manufacturer_unknown = { 'slug': 'manufacturer-unknown' }.freeze
   @device_tag_hostname_unknown = { 'slug': 'hostname-unknown' }.freeze
 
+  @virtual_machine_device_type_name = "Virtual Machine".freeze
+
 end
 
 def filter(
@@ -283,25 +285,49 @@ def filter(
   _result_set = false
 
   _key.each do |ip_key|
-    _result = @cache_hash.getset(@lookup_type){
-                LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl)
-              }.getset(ip_key){
-                netbox_lookup(event, ip_key)
-              }
+
+    _lookup_hash = @cache_hash.getset(@lookup_type){ LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl) }
+    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key) }
 
     if !_result.nil?
-      if (_tags = _result&.delete(:tags)) &&
-         (@lookup_type == :ip_device)
+
+      if (_tags = _result.fetch(:tags, nil)) &&
+         @autopopulate &&
+         (@lookup_type == :ip_device) &&
+         _tags.is_a?(Array) &&
+         _tags.flatten! &&
+         _tags.all? { |item| item.is_a?(Hash) } &&
+         _tags.any? {|tag| tag[:slug] == @device_tag_autopopulated[:slug]}
       then
-        # puts('%{tags}' % { tags: JSON.generate(_tags) })
+        _updated_result = nil
+        if _tags.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]} &&
+          _autopopulate_hostname = event.get("#{@source_hostname}") &&
+          !_autopopulate_hostname.to_s.empty?
+        then
+          # the hostname-unknown tag is set, but we appear to have a hostname
+          #   from the event. we need to update the record in netbox (set the new hostname
+          #   from this value and remove the tag) and in the result
+          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
+          # puts('tried to update (1): %{result}' % { result: JSON.generate(_updated_result) })
+        end
+        if _tags.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]}
+          # the manufacturer-unknown tag is set, but we appear to have an OUI or MAC address
+          #   from the event. we need to update the record in netbox (determine the manufacturer
+          #   from this value and remove the tag) and in the result
+          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
+          # puts('tried to update (2): %{result}' % { result: JSON.generate(_updated_result) })
+        end
+        _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
       end
+      _result.delete(:tags)
+
       if _result.has_key?(:url) && !_result[:url]&.empty?
         _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
         if (@lookup_type == :ip_device) &&
            (!_result.has_key?(:device_type) || _result[:device_type]&.empty?) &&
            _result[:url].any? { |u| u.include? "virtual-machines" }
         then
-          _result[:device_type] = [ "Virtual Machine" ]
+          _result[:device_type] = [ @virtual_machine_device_type_name ]
         end
       end
     end
@@ -945,8 +971,9 @@ def create_device_interface(
 end
 
 def netbox_lookup(
-  event,
-  ip_key
+  event:,
+  ip_key:,
+  previous_result: nil
 )
   _lookup_result = nil
 
@@ -980,50 +1007,102 @@ def netbox_lookup(
     # some of the logic from :ip_prefix
 
     if (@lookup_type == :ip_device)
-    #################################################################################
-      # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
-      # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
-      # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
-      # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-      _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
 
-      if @autopopulate && (_devices.nil? || _devices.empty?)
-        # no results found, autopopulate enabled, private-space IP address...
-        # let's create an entry for this device
-        _autopopulate_device,
-        _autopopulate_role,
-        _autopopulate_dtype,
-        _autopopulate_oui,
-        _autopopulate_manuf,
-        _autopopulate_site = autopopulate_devices(ip_key,
-                                                  _autopopulate_mac,
-                                                  _autopopulate_oui,
-                                                  _autopopulate_default_site,
-                                                  _autopopulate_default_role,
-                                                  _autopopulate_default_dtype,
-                                                  _autopopulate_default_manuf,
-                                                  _autopopulate_hostname,
-                                                  @default_status,
-                                                  _nb)
-        if !_autopopulate_device.nil?
-          # puts('5. %{key}: %{found}' % { key: autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
-          # we created a device, so send it back out as the result for the event as well
-          _devices = Array.new unless _devices.is_a?(Array)
-          _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
-                        :id => _autopopulate_device&.fetch(:id, nil),
-                        :url => _autopopulate_device&.fetch(:url, nil),
-                        :tags => _autopopulate_device&.fetch(:tags, nil),
-                        :site => _autopopulate_site&.fetch(:name, nil),
-                        :role => _autopopulate_role&.fetch(:name, nil),
-                        :device_type => _autopopulate_dtype&.fetch(:name, nil),
-                        :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
-                        :details => @verbose ? _autopopulate_device : nil }
-        end # _autopopulate_device was not nil (i.e., we autocreated a device)
-      end # _autopopulate turned on and no results found
+      if (previous_result.nil? || previous_result.empty?)
+        #################################################################################
+        # retrieve the list of IP addresses where address matches the search key, limited to "assigned" addresses.
+        # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
+        # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
+        # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
+        _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
 
-      _devices = collect_values(crush(_devices))
-      _devices.fetch(:service, [])&.flatten!&.uniq!
-      _lookup_result = _devices
+        if @autopopulate && (_devices.nil? || _devices.empty?)
+          # no results found, autopopulate enabled, private-space IP address...
+          # let's create an entry for this device
+          _autopopulate_device,
+          _autopopulate_role,
+          _autopopulate_dtype,
+          _autopopulate_oui,
+          _autopopulate_manuf,
+          _autopopulate_site = autopopulate_devices(ip_key,
+                                                    _autopopulate_mac,
+                                                    _autopopulate_oui,
+                                                    _autopopulate_default_site,
+                                                    _autopopulate_default_role,
+                                                    _autopopulate_default_dtype,
+                                                    _autopopulate_default_manuf,
+                                                    _autopopulate_hostname,
+                                                    @default_status,
+                                                    _nb)
+          if !_autopopulate_device.nil?
+            # puts('5. %{key}: %{found}' % { key: autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
+            # we created a device, so send it back out as the result for the event as well
+            _devices = Array.new unless _devices.is_a?(Array)
+            _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
+                          :id => _autopopulate_device&.fetch(:id, nil),
+                          :url => _autopopulate_device&.fetch(:url, nil),
+                          :tags => _autopopulate_device&.fetch(:tags, nil),
+                          :site => _autopopulate_site&.fetch(:name, nil),
+                          :role => _autopopulate_role&.fetch(:name, nil),
+                          :device_type => _autopopulate_dtype&.fetch(:name, nil),
+                          :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
+                          :details => @verbose ? _autopopulate_device : nil }
+          end # _autopopulate_device was not nil (i.e., we autocreated a device)
+        end # _autopopulate turned on and no results found
+
+      elsif @autopopulate
+        #################################################################################
+        # update with new information on an existing device (i.e., from a previous call to netbox_lookup)
+        _patched_device_data = {}
+
+        # get existing tags to update them to remove "unkown-..." values if needed
+        _tags = previous_result.fetch(:tags, nil)&.flatten&.map{ |hash| { slug: hash[:slug] } }&.uniq
+
+        # API endpoint is different for VM vs real device
+        _is_vm = (previous_result.fetch(:device_type, nil)&.flatten&.any? {|dt| dt == @virtual_machine_device_type_name} ||
+                  (previous_result.has_key?(:url) && !previous_result[:url]&.empty? && previous_result[:url].any? { |u| u.include? "virtual-machines" }))
+
+        # get previous device ID (should only be dealing with a single device)
+        _previous_device_id = previous_result.fetch(:id, nil)&.flatten&.uniq
+        if _previous_device_id.is_a?(Array) &&
+          (_previous_device_id.length() == 1) &&
+          (_previous_device_id = _previous_device_id.first)
+        then
+
+          if !_autopopulate_hostname.to_s.empty? &&
+             _tags&.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]}
+          then
+            # a hostname field was specified, which means we're going to overwrite the device name previously created
+            #   which was probably something like "Dell @ 192.168.10.100" and also remove the "unknown hostname" tag
+            _patched_device_data = { :name => _autopopulate_hostname }
+            _tags = _tags.filter{|tag| tag[:slug] != @device_tag_hostname_unknown[:slug]}
+          end
+
+          if _tags&.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]}
+            # TODO: handle device_tag_manufacturer_unknown
+            _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
+          end
+
+          if !_patched_device_data.empty? # we've got changes to make, so do it
+            _patched_device_data[:tags] = _tags
+            if (_patched_device_response = _nb.patch("#{_is_vm ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_previous_device_id}/", _patched_device_data.to_json, @nb_headers).body) &&
+               _patched_device_response.is_a?(Hash) &&
+               _patched_device_response.has_key?(:id)
+            then
+              # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
+              #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
+               _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+            end # _nb.patch succeeded
+          end # check _patched_device_data
+
+        end # check previous device ID is valid
+      end # check on previous_result function argument
+
+      if !_devices.nil?
+        _devices = collect_values(crush(_devices))
+        _devices.fetch(:service, [])&.flatten!&.uniq!
+        _lookup_result = _devices
+      end
     end # @lookup_type == :ip_device
 
     # this || is because we are going to need to do the prefix lookup if we're autopopulating
