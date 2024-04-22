@@ -740,7 +740,7 @@ def autopopulate_devices(
 
       if _autopopulate_manuf[:vm]
         # a virtual machine
-        _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : "#{autopopulate_hostname} @ #{ip_str}"
+        _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
         _device_data = { :name => _device_name,
                          :site => _autopopulate_site[:id],
                          :tags => _autopopulate_tags,
@@ -824,7 +824,7 @@ def autopopulate_devices(
           if _autopopulate_dtype&.fetch(:id, nil)&.nonzero?
 
             # create the device
-            _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : "#{autopopulate_hostname} @ #{ip_str}"
+            _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
             _device_data = { :name => _device_name,
                              :device_type => _autopopulate_dtype[:id],
                              :role => _autopopulate_role[:id],
