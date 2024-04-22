@@ -1080,7 +1080,7 @@ def netbox_lookup(
 
           if _tags&.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]}
             # TODO: handle device_tag_manufacturer_unknown
-            _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
+            # _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
           end
 
           if !_patched_device_data.empty? # we've got changes to make, so do it
