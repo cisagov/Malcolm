@@ -253,12 +253,14 @@ def register(
 
   @nb_headers = { 'Content-Type': 'application/json' }.freeze
 
-  # for ip_device hash lookups, if a device is pulled out that has this status then
+  @device_tag_autopopulated = { 'slug': 'malcolm-autopopulated' }.freeze
+  # for ip_device hash lookups, if a device is pulled out that has one of these tags
   #   it should be *updated* instead of just created. this allows us to create even less-fleshed
   #   out device entries from things like DNS entries but then give more information (like
-  #   manufacturer) later on when actual traffic is observed
-  # TODO: this part is not done yet
-  @hostname_only_device_status = 'planned'.freeze
+  #   manufacturer) later on when actual traffic is observed. these values should match
+  #   what's in netbox/preload/tags.yml
+  @device_tag_manufacturer_unknown = { 'slug': 'manufacturer-unknown' }.freeze
+  @device_tag_hostname_unknown = { 'slug': 'hostname-unknown' }.freeze
 
 end
 
@@ -639,6 +641,7 @@ def autopopulate_devices(
   _autopopulate_oui = autopopulate_oui
   _autopopulate_manuf = nil
   _autopopulate_site = nil
+  _autopopulate_tags = [ @device_tag_autopopulated ]
 
   # if MAC is set but OUI is not, do a quick lookup
   if (!autopopulate_mac.nil? && !autopopulate_mac.empty?) &&
@@ -691,8 +694,14 @@ def autopopulate_devices(
                             :match => 0.0,
                             :vm => false,
                             :id => nil}
+    _autopopulate_tags << @device_tag_manufacturer_unknown
   end
   # puts('2. %{key}: %{found}' % { key: _autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
+
+
+  if autopopulate_hostname.to_s.empty?
+    _autopopulate_tags << @device_tag_hostname_unknown
+  end
 
   # make sure the site and role exists
   _autopopulate_site = lookup_or_create_site(autopopulate_default_site_name, nb)
@@ -709,6 +718,7 @@ def autopopulate_devices(
         _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : "#{autopopulate_hostname} @ #{ip_str}"
         _device_data = { :name => _device_name,
                          :site => _autopopulate_site[:id],
+                         :tags => _autopopulate_tags,
                          :status => autopopulate_default_status }
         if (_device_create_response = nb.post('virtualization/virtual-machines/', _device_data.to_json, @nb_headers).body) &&
            _device_create_response.is_a?(Hash) &&
@@ -739,6 +749,7 @@ def autopopulate_devices(
         if !_autopopulate_manuf.fetch(:id, nil)&.nonzero?
           # the manufacturer is still not found, create it
           _manuf_data = { :name => _autopopulate_manuf[:name],
+                          :tags => _autopopulate_tags,
                           :slug => _autopopulate_manuf[:name].to_url }
           if (_manuf_create_response = nb.post('dcim/manufacturers/', _manuf_data.to_json, @nb_headers).body) &&
              _manuf_create_response.is_a?(Hash)
@@ -769,6 +780,7 @@ def autopopulate_devices(
             # the device type is not found, create it
             _dtype_data = { :manufacturer => _autopopulate_manuf[:id],
                             :model => autopopulate_default_dtype,
+                            :tags => _autopopulate_tags,
                             :slug => autopopulate_default_dtype.to_url }
             if (_dtype_create_response = nb.post('dcim/device-types/', _dtype_data.to_json, @nb_headers).body) &&
                _dtype_create_response.is_a?(Hash) &&
@@ -787,6 +799,7 @@ def autopopulate_devices(
                              :device_type => _autopopulate_dtype[:id],
                              :role => _autopopulate_role[:id],
                              :site => _autopopulate_site[:id],
+                             :tags => _autopopulate_tags,
                              :status => autopopulate_default_status }
             if (_device_create_response = nb.post('dcim/devices/', _device_data.to_json, @nb_headers).body) &&
                _device_create_response.is_a?(Hash) &&
@@ -831,6 +844,8 @@ def autopopulate_prefixes(
   autopopulate_default_status,
   nb
 )
+  _autopopulate_tags = [ @device_tag_autopopulated ]
+
   _prefix_data = nil
   # TODO: IPv6?
   _private_ip_subnet = @private_ip_subnets.find { |subnet| subnet.include?(ip_obj) }
@@ -843,6 +858,7 @@ def autopopulate_prefixes(
     _autopopulate_site = lookup_or_create_site(autopopulate_default_site, nb)
     _prefix_post = { :prefix => _new_prefix_name,
                      :description => _new_prefix_name,
+                     :tags => _autopopulate_tags,
                      :site => _autopopulate_site&.fetch(:id, nil),
                      :status => autopopulate_default_status }
     begin
