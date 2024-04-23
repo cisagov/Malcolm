@@ -995,7 +995,7 @@ def create_device_interface(
        _ip_primary_reponse.is_a?(Hash) &&
        _ip_primary_reponse.has_key?(:id)
     then
-       _autopopulate_device = _ip_create_reponse
+       _autopopulate_device = _ip_primary_reponse
     end
   end # check if the IP address was created and has an ID
 
