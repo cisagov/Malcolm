@@ -59,8 +59,8 @@ fi
 while true ; do
 
   # check initial disk capacity
-  USAGE_PCT=$(df -k . | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
-  USAGE_GB=$(du -sb . | awk '{printf "%.0f\n", $1/1000/1000/1000}')
+  USAGE_PCT=$(df -k . 2>/dev/null | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
+  USAGE_GB=$(du -sb . 2>/dev/null | awk '{printf "%.0f\n", $1/1000/1000/1000}')
   if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
 
     # we have exceeded the threshold, see if there is something to prune
@@ -82,8 +82,8 @@ while true ; do
           [[ "$VERBOSE" == "1" ]] && echo "Pruned \"$FILE_TO_DELETE\" ($FILE_SIZE_HUMAN, $FILE_TIME_HUMAN)" >&2
 
           # re-check disk capacity
-          USAGE_PCT=$(df -k . | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
-          USAGE_GB=$(du -sb . | awk '{printf "%.0f\n", $1/1000/1000/1000}')
+          USAGE_PCT=$(df -k . 2>/dev/null | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
+          USAGE_GB=$(du -sb . 2>/dev/null | awk '{printf "%.0f\n", $1/1000/1000/1000}')
           if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
             # we still exceed the threshold, continue to loop
             [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
