@@ -307,22 +307,24 @@ def filter(
          _tags.any? {|tag| tag[:slug] == @device_tag_autopopulated[:slug]}
       then
         _updated_result = nil
-        if _tags.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]} &&
-          _autopopulate_hostname = event.get("#{@source_hostname}") &&
-          !_autopopulate_hostname.to_s.empty?
+        _autopopulate_hostname = event.get("#{@source_hostname}").to_s
+        _autopopulate_mac = event.get("#{@source_mac}").to_s.downcase
+        _autopopulate_oui = event.get("#{@source_oui}").to_s
+        if ((_tags.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]} &&
+             (!_autopopulate_hostname.empty? && !_autopopulate_hostname.end_with?('.in-addr.arpa'))) ||
+            (_tags.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]} &&
+              ((!_autopopulate_mac.empty? && (_autopopulate_mac != 'ff:ff:ff:ff:ff:ff') && (_autopopulate_mac != '00:00:00:00:00:00')) ||
+               !_autopopulate_oui.empty?)))
         then
           # the hostname-unknown tag is set, but we appear to have a hostname
           #   from the event. we need to update the record in netbox (set the new hostname
           #   from this value and remove the tag) and in the result
-          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
-          # puts('tried to update (1): %{result}' % { result: JSON.generate(_updated_result) })
-        end
-        if _tags.any? {|tag| tag[:slug] == @device_tag_manufacturer_unknown[:slug]}
+          # OR
           # the manufacturer-unknown tag is set, but we appear to have an OUI or MAC address
           #   from the event. we need to update the record in netbox (determine the manufacturer
           #   from this value and remove the tag) and in the result
           _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
-          # puts('tried to update (2): %{result}' % { result: JSON.generate(_updated_result) })
+          puts('tried to patch %{name}: %{result}' % { name: ip_key, result: JSON.generate(_updated_result) }) if @debug
         end
         _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
       end
@@ -972,7 +974,7 @@ def autopopulate_prefixes(
                            :tags => _new_prefix_create_response.fetch(:tags, nil),
                            :details => @verbose ? _new_prefix_create_response : nil }
       elsif @debug
-        puts('autopopulate_prefixes: _new_prefix_create_response: %{result}' % { result: JSON.generate(_device_create_response) })
+        puts('autopopulate_prefixes: _new_prefix_create_response: %{result}' % { result: JSON.generate(_new_prefix_create_response) })
       end
     rescue Faraday::Error => e
       # give up aka do nothing
@@ -1135,9 +1137,9 @@ def netbox_lookup(
         # get existing tags to update them to remove "unkown-..." values if needed
         _tags = previous_result.fetch(:tags, nil)&.flatten&.map{ |hash| { slug: hash[:slug] } }&.uniq
 
-        # API endpoint is different for VM vs real device
-        _is_vm = (previous_result.fetch(:device_type, nil)&.flatten&.any? {|dt| dt == @virtual_machine_device_type_name} ||
-                  (previous_result.has_key?(:url) && !previous_result[:url]&.empty? && previous_result[:url].any? { |u| u.include? "virtual-machines" }))
+        # API endpoints are different for VM vs real device
+        _was_vm = (previous_result.fetch(:device_type, nil)&.flatten&.any? {|dt| dt == @virtual_machine_device_type_name} ||
+                   (previous_result.has_key?(:url) && !previous_result[:url]&.empty? && previous_result[:url].any? { |u| u.include? "virtual-machines" }))
 
         # get previous device ID (should only be dealing with a single device)
         _previous_device_id = previous_result.fetch(:id, nil)&.flatten&.uniq
@@ -1179,17 +1181,36 @@ def netbox_lookup(
           end
 
           if !_patched_device_data.empty? # we've got changes to make, so do it
-            _patched_device_data[:tags] = _tags
-            if (_patched_device_response = _nb.patch("#{_is_vm ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_previous_device_id}/", _patched_device_data.to_json, @nb_headers).body) &&
-               _patched_device_response.is_a?(Hash) &&
-               _patched_device_response.has_key?(:id)
-            then
-              # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
-              #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-               _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
-            elsif @debug
-              puts('netbox_lookup (%{name}): _patched_device_response: %{result}' % { name: _previous_device_id, result: JSON.generate(_patched_device_response) })
-            end # _nb.patch succeeded
+
+            puts('netbox_lookup patching %{name} (%{id}, VM old/new: %{oldvm}/%{newvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
+                  name: ip_key,
+                  id: _previous_device_id,
+                  oldvm: _was_vm,
+                  newvm: _is_vm,
+                  tags: _tags.join('|'),
+                  host: _autopopulate_hostname.to_s,
+                  mac: _autopopulate_mac.to_s,
+                  oui: _autopopulate_oui.to_s,
+                  changes: JSON.generate(_patched_device_data) }) if @debug
+
+            # what if we *thought* this was a real device before (created with hostname only) but now we realize it's a VM instead?
+            _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
+            if (_is_vm != _was_vm)
+              puts('netbox_lookup cannot yet convert between VM and device: %{name}' % {name: ip_key}) if @debug
+
+            else
+              _patched_device_data[:tags] = _tags
+              if (_patched_device_response = _nb.patch("#{_was_vm ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_previous_device_id}/", _patched_device_data.to_json, @nb_headers).body) &&
+                 _patched_device_response.is_a?(Hash) &&
+                 _patched_device_response.has_key?(:id)
+              then
+                # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
+                #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
+                 _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+              elsif @debug
+                puts('netbox_lookup (%{name}): _patched_device_response: %{result}' % { name: _previous_device_id, result: JSON.generate(_patched_device_response) })
+              end # _nb.patch succeeded
+            end # _is_vm vs _was_vm check
           end # check _patched_device_data
 
         end # check previous device ID is valid
