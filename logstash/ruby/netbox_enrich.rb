@@ -294,7 +294,7 @@ def filter(
   _key.each do |ip_key|
 
     _lookup_hash = @cache_hash.getset(@lookup_type){ LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl) }
-    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key) }
+    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key) }.dup
 
     if !_result.nil?
 
@@ -489,7 +489,7 @@ def lookup_or_create_site(
         puts "lookup_or_create_site (#{site_name}): #{e.message}" if @debug
       end
       _site
-    }
+    }.dup
   else
     nil
   end
@@ -538,7 +538,7 @@ def lookup_manuf(
       # return the manuf with the highest match
       # puts('0. %{key}: %{matches}' % { key: _autopopulate_oui_cleaned, matches: JSON.generate(_manufs) })-]
       !_manufs&.empty? ? _manufs.max_by{|k| k[:match] } : nil
-    }
+    }.dup
   else
     nil
   end
@@ -746,7 +746,7 @@ def lookup_or_create_role(
         puts "lookup_or_create_role (#{role_name}): #{e.message}" if @debug
       end
       _role
-    }
+    }.dup
   else
     nil
   end
@@ -1138,6 +1138,7 @@ def netbox_lookup(
         end # _autopopulate turned on and no results found
 
       elsif @autopopulate
+
         #################################################################################
         # update with new information on an existing device (i.e., from a previous call to netbox_lookup)
         _patched_device_data = Hash.new
@@ -1151,10 +1152,21 @@ def netbox_lookup(
 
         # get previous device ID (should only be dealing with a single device)
         _previous_device_id = previous_result.fetch(:id, nil)&.flatten&.uniq
+
+        puts('netbox_lookup maybe patching %{name} (%{id}, VM old: %{oldvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}")' % {
+              name: ip_key,
+              id: _previous_device_id,
+              oldvm: _was_vm,
+              tags: _tags.is_a?(Array) ? _tags.map{ |hash| hash[:slug] }.join('|') : '',
+              host: _autopopulate_hostname.to_s,
+              mac: _autopopulate_mac.to_s,
+              oui: _autopopulate_oui.to_s }) if @debug
+
         if _previous_device_id.is_a?(Array) &&
           (_previous_device_id.length() == 1) &&
           (_previous_device_id = _previous_device_id.first)
         then
+          _previous_device_site = [previous_result.fetch(:site, nil)].flatten.uniq.first
 
           if !_autopopulate_hostname.to_s.empty? &&
              _tags&.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]}
@@ -1190,12 +1202,13 @@ def netbox_lookup(
 
           if !_patched_device_data.empty? # we've got changes to make, so do it
 
+            _device_written = false
             # what if we *thought* this was a real device before (created with hostname only) but now we realize it's a VM instead?
             _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
 
             puts('netbox_lookup patching %{name} @ %{site} (%{id}, VM old/new: %{oldvm}/%{newvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
                   name: ip_key,
-                  site: [previous_result.fetch(:site, nil)].flatten.uniq.first,
+                  site: _previous_device_site,
                   id: _previous_device_id,
                   oldvm: _was_vm,
                   newvm: _is_vm,
@@ -1205,40 +1218,51 @@ def netbox_lookup(
                   oui: _autopopulate_oui.to_s,
                   changes: JSON.generate(_patched_device_data) }) if @debug
 
-            if (_is_vm != _was_vm)
+            if (_was_vm == false) && (_is_vm == true)
               # A device can't have been autopopulated as a VM and then later "become" a device, since the only
               #   reason we'd have created it as a VM would be because we saw the OUI (from real traffic) in
               #   @vm_namesarray. However, we could have created a device (without mac/OUI) based on hostname,
               #   and now only realize that it's actually a VM. If this is the case, we need to create the
               #   VM and delete the device.
-              puts('netbox_lookup cannot yet convert between VM and device: %{name}' % {name: ip_key}) if @debug
+              _vm_data = { :name => _patched_vm_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
+                           :site => _previous_device_site,
+                           :tags => _tags,
+                           :status => @default_status }
+              if (_vm_create_response = _nb.post('virtualization/virtual-machines/', _vm_data.to_json, @nb_headers).body) &&
+                 _vm_create_response.is_a?(Hash) &&
+                 _vm_create_response.has_key?(:id)
+              then
+                _device_written = true
+                _autopopulate_device = _vm_create_response
+                # we've created the device as a VM, create_device_interface will be called below to create its interface
 
-              # _device_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
-              #                  :site => _autopopulate_site[:id],
-              #                  :tags => _tags,
-              #                  :status => @default_status }
-              # if (_device_create_response = _nb.post('virtualization/virtual-machines/', _device_data.to_json, @nb_headers).body) &&
-              #    _device_create_response.is_a?(Hash) &&
-              #    _device_create_response.has_key?(:id)
-              # then
-              #    _autopopulate_device = _device_create_response
-              # elsif @debug
-              #   puts('autopopulate_devices (VM: %{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
-              # end
+                # now delete the old device entry
+                _old_device_delete_response = _nb.delete("dcim/devices/#{_previous_device_id}/")
+                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}): _old_device_delete_response: %{result}' % {
+                     name: _vm_data[:name],
+                     oldid: _previous_device_id,
+                     newid: _vm_create_response[:id],
+                     result: JSON.generate(_old_device_delete_response) }) if @debug
+              elsif @debug
+                puts('netbox_lookup (%{name}): _vm_create_response: %{result}' % { name: _vm_data[:name], result: JSON.generate(_vm_create_response) })
+              end
 
-            else
+            elsif (_is_vm == _was_vm)
               _patched_device_data[:tags] = _tags
               if (_patched_device_response = _nb.patch("#{_was_vm ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_previous_device_id}/", _patched_device_data.to_json, @nb_headers).body) &&
                  _patched_device_response.is_a?(Hash) &&
                  _patched_device_response.has_key?(:id)
               then
-                # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
-                #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-                 _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+                _device_written = true
               elsif @debug
                 puts('netbox_lookup (%{name}): _patched_device_response: %{result}' % { name: _previous_device_id, result: JSON.generate(_patched_device_response) })
               end # _nb.patch succeeded
             end # _is_vm vs _was_vm check
+
+            # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
+            #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
+            _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
+
           end # check _patched_device_data
 
         end # check previous device ID is valid
