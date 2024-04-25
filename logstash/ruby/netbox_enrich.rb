@@ -298,6 +298,8 @@ def filter(
 
     if !_result.nil?
 
+      # we've done a lookup and got (or autopopulated) our answer, however, if this is a device lookup and
+      #   either the hostname-unknown or manufacturer-unknown is set, we should see if we can update it
       if (_tags = _result.fetch(:tags, nil)) &&
          @autopopulate &&
          (@lookup_type == :ip_device) &&
@@ -324,7 +326,13 @@ def filter(
           #   from the event. we need to update the record in netbox (determine the manufacturer
           #   from this value and remove the tag) and in the result
           _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
-          puts('tried to patch %{name}: %{result}' % { name: ip_key, result: JSON.generate(_updated_result) }) if @debug
+          puts('filter tried to patch %{name} for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
+                name: ip_key,
+                tags: _tags.map{ |hash| hash[:slug] }.join('|'),
+                host: _autopopulate_hostname,
+                mac: _autopopulate_mac,
+                oui: _autopopulate_oui,
+                result: JSON.generate(_updated_result) }) if @debug
         end
         _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
       end
@@ -1182,8 +1190,12 @@ def netbox_lookup(
 
           if !_patched_device_data.empty? # we've got changes to make, so do it
 
-            puts('netbox_lookup patching %{name} (%{id}, VM old/new: %{oldvm}/%{newvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
+            # what if we *thought* this was a real device before (created with hostname only) but now we realize it's a VM instead?
+            _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
+
+            puts('netbox_lookup patching %{name} @ %{site} (%{id}, VM old/new: %{oldvm}/%{newvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
                   name: ip_key,
+                  site: [previous_result.fetch(:site, nil)].flatten.uniq.first,
                   id: _previous_device_id,
                   oldvm: _was_vm,
                   newvm: _is_vm,
@@ -1193,10 +1205,26 @@ def netbox_lookup(
                   oui: _autopopulate_oui.to_s,
                   changes: JSON.generate(_patched_device_data) }) if @debug
 
-            # what if we *thought* this was a real device before (created with hostname only) but now we realize it's a VM instead?
-            _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
             if (_is_vm != _was_vm)
+              # A device can't have been autopopulated as a VM and then later "become" a device, since the only
+              #   reason we'd have created it as a VM would be because we saw the OUI (from real traffic) in
+              #   @vm_namesarray. However, we could have created a device (without mac/OUI) based on hostname,
+              #   and now only realize that it's actually a VM. If this is the case, we need to create the
+              #   VM and delete the device.
               puts('netbox_lookup cannot yet convert between VM and device: %{name}' % {name: ip_key}) if @debug
+
+              # _device_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
+              #                  :site => _autopopulate_site[:id],
+              #                  :tags => _tags,
+              #                  :status => @default_status }
+              # if (_device_create_response = _nb.post('virtualization/virtual-machines/', _device_data.to_json, @nb_headers).body) &&
+              #    _device_create_response.is_a?(Hash) &&
+              #    _device_create_response.has_key?(:id)
+              # then
+              #    _autopopulate_device = _device_create_response
+              # elsif @debug
+              #   puts('autopopulate_devices (VM: %{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
+              # end
 
             else
               _patched_device_data[:tags] = _tags
