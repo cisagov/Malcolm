@@ -1204,7 +1204,7 @@ def netbox_lookup(
           #   it's actually a VM. However, a device can't have been autopopulated as a VM and then later
           #   "become" a device, since the only reason we'd have created it as a VM would be because
           #   we saw the OUI (from real traffic) in @vm_namesarray in the first place.
-          _is_vm = _was_vm || (_autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
+          _is_vm = _was_vm || (_autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true))
           _device_to_vm = ((_was_vm == false) && (_is_vm == true))
 
           if !_patched_device_data.empty? || _device_to_vm
@@ -1264,7 +1264,7 @@ def netbox_lookup(
             #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
             _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
 
-          end # check _patched_device_data
+          end # check _patched_device_data, _device_to_vm
 
         end # check previous device ID is valid
       end # check on previous_result function argument
