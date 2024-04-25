@@ -5,9 +5,6 @@
   "indices": [
     "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
   ],
-  "category_field": [
-    "network.protocol"
-  ],
   "feature_attributes": [
     {
       "feature_name": "event_action",
@@ -81,5 +78,9 @@
       "interval": 10,
       "unit": "MINUTES"
     }
-  }
+  },
+  "category_field": [
+    "event.action",
+    "event.result"
+  ]
 }

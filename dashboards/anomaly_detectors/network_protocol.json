@@ -43,5 +43,8 @@
       "interval": 1,
       "unit": "Minutes"
     }
-  }
+  },
+  "category_field": [
+    "network.protocol"
+  ]
 }

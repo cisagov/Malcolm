@@ -43,5 +43,9 @@
       "interval": 1,
       "unit": "Minutes"
     }
-  }
+  },
+  "category_field": [
+    "source.ip",
+    "destination.ip"
+  ]
 }
