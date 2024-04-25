@@ -1200,30 +1200,30 @@ def netbox_lookup(
             _tags = _tags.filter{|tag| tag[:slug] != @device_tag_manufacturer_unknown[:slug]}
           end
 
-          if !_patched_device_data.empty? # we've got changes to make, so do it
+          #   We could have created a device (without mac/OUI) based on hostname, and now only realize that
+          #   it's actually a VM. However, a device can't have been autopopulated as a VM and then later
+          #   "become" a device, since the only reason we'd have created it as a VM would be because
+          #   we saw the OUI (from real traffic) in @vm_namesarray in the first place.
+          _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
+          _device_to_vm = ((_was_vm == false) && (_is_vm == true))
 
+          if !_patched_device_data.empty? || _device_to_vm
+            # we've got changes to make, so do it
             _device_written = false
-            # what if we *thought* this was a real device before (created with hostname only) but now we realize it's a VM instead?
-            _is_vm = _autopopulate_manuf.is_a?(Hash) && (_autopopulate_manuf.fetch(:vm, false) == true)
 
-            puts('netbox_lookup patching %{name} @ %{site} (%{id}, VM old/new: %{oldvm}/%{newvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
+            puts('netbox_lookup patching %{name} @ %{site} (%{id}, dev->vm: %{dev2vm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
                   name: ip_key,
                   site: _previous_device_site,
                   id: _previous_device_id,
-                  oldvm: _was_vm,
-                  newvm: _is_vm,
+                  dev2vm: _device_to_vm,
                   tags: _tags.join('|'),
                   host: _autopopulate_hostname.to_s,
                   mac: _autopopulate_mac.to_s,
                   oui: _autopopulate_oui.to_s,
                   changes: JSON.generate(_patched_device_data) }) if @debug
 
-            if (_was_vm == false) && (_is_vm == true)
-              # A device can't have been autopopulated as a VM and then later "become" a device, since the only
-              #   reason we'd have created it as a VM would be because we saw the OUI (from real traffic) in
-              #   @vm_namesarray. However, we could have created a device (without mac/OUI) based on hostname,
-              #   and now only realize that it's actually a VM. If this is the case, we need to create the
-              #   VM and delete the device.
+            if _device_to_vm
+              # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
               _vm_data = { :name => _patched_vm_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
                            :site => _previous_device_site,
                            :tags => _tags,
@@ -1248,6 +1248,7 @@ def netbox_lookup(
               end
 
             elsif (_is_vm == _was_vm)
+              # the type of object (vm vs. device) is the same as it was before, so we're just doing an update
               _patched_device_data[:tags] = _tags
               if (_patched_device_response = _nb.patch("#{_was_vm ? 'virtualization/virtual-machines' : 'dcim/devices'}/#{_previous_device_id}/", _patched_device_data.to_json, @nb_headers).body) &&
                  _patched_device_response.is_a?(Hash) &&
@@ -1261,10 +1262,11 @@ def netbox_lookup(
 
             # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
             #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-            _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
+            if _device_written
+              _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+            end #_device_written
 
           end # check _patched_device_data
-
         end # check previous device ID is valid
       end # check on previous_result function argument
 
