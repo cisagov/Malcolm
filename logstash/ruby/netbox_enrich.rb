@@ -1153,14 +1153,14 @@ def netbox_lookup(
         # get previous device ID (should only be dealing with a single device)
         _previous_device_id = previous_result.fetch(:id, nil)&.flatten&.uniq
 
-        puts('netbox_lookup maybe patching %{name} (%{id}, VM old: %{oldvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}")' % {
-              name: ip_key,
-              id: _previous_device_id,
-              oldvm: _was_vm,
-              tags: _tags.is_a?(Array) ? _tags.map{ |hash| hash[:slug] }.join('|') : '',
-              host: _autopopulate_hostname.to_s,
-              mac: _autopopulate_mac.to_s,
-              oui: _autopopulate_oui.to_s }) if @debug
+        # puts('netbox_lookup maybe patching %{name} (%{id}, VM old: %{oldvm}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}")' % {
+        #       name: ip_key,
+        #       id: _previous_device_id,
+        #       oldvm: _was_vm,
+        #       tags: _tags.is_a?(Array) ? _tags.map{ |hash| hash[:slug] }.join('|') : '',
+        #       host: _autopopulate_hostname.to_s,
+        #       mac: _autopopulate_mac.to_s,
+        #       oui: _autopopulate_oui.to_s }) if @debug
 
         if _previous_device_id.is_a?(Array) &&
           (_previous_device_id.length() == 1) &&
