@@ -1225,7 +1225,9 @@ def netbox_lookup(
             if _device_to_vm
               # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
               _vm_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
-                           :site => _previous_device_site,
+                           :site => ((_previous_device_site_obj = lookup_or_create_site(_previous_device_site, _nb)) &&
+                                     _previous_device_site_obj.is_a?(Hash) &&
+                                     _previous_device_site_obj.has_key?(:id)) ? _previous_device_site_obj[:id] : { :slug => _previous_device_site.to_url },
                            :tags => _tags,
                            :status => @default_status }
               if (_vm_create_response = _nb.post('virtualization/virtual-machines/', _vm_data.to_json, @nb_headers).body) &&
@@ -1238,11 +1240,11 @@ def netbox_lookup(
 
                 # now delete the old device entry
                 _old_device_delete_response = _nb.delete("dcim/devices/#{_previous_device_id}/")
-                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}): _old_device_delete_response: %{result}' % {
+                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}): _old_device_delete_response: %{success}' % {
                      name: _vm_data[:name],
                      oldid: _previous_device_id,
                      newid: _vm_create_response[:id],
-                     result: JSON.generate(_old_device_delete_response) }) if @debug
+                     success: _old_device_delete_response.success? }) if @debug
               elsif @debug
                 puts('netbox_lookup (%{name}): _vm_create_response: %{result}' % { name: _vm_data[:name], result: JSON.generate(_vm_create_response) })
               end
