@@ -155,7 +155,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           echo "Registering index snapshot repository..."
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -H "Accept: application/json" \
             -H "Content-type: application/json" \
-            -XPUT -fsSL "$OPENSEARCH_URL_TO_USE/_snapshot/$ISM_SNAPSHOT_REPO" \
+            -XPUT --location --fail --silent --output /dev/null --show-error "$OPENSEARCH_URL_TO_USE/_snapshot/$ISM_SNAPSHOT_REPO" \
             -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }" \
             || true
         fi
@@ -177,7 +177,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
         # get the previous stored template hash (if any) to avoid importing if it's already been imported
         set +e
-        TEMPLATE_HASH_OLD="$(curl "${CURL_CONFIG_PARAMS[@]}" -sSL --fail -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" 2>/dev/null | jq --raw-output '.index_templates[]|select(.name=="malcolm_template")|.index_template._meta.hash' 2>/dev/null)"
+        TEMPLATE_HASH_OLD="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --show-error -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" 2>/dev/null | jq --raw-output '.index_templates[]|select(.name=="malcolm_template")|.index_template._meta.hash' 2>/dev/null)"
         set -e
 
         # proceed only if the current template HASH doesn't match the previously imported one, or if there
@@ -190,7 +190,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing ECS composable template $TEMP_FILENAME ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
             done
           fi
 
@@ -200,7 +200,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing custom ECS composable template $TEMP_FILENAME ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
             done
           fi
 
@@ -218,7 +218,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             rm -f "$MALCOLM_TEMPLATE_FILE_TEMP"
 
           # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" \
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" \
             "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
 
           # import other templates as well
@@ -227,7 +227,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             TEMP_FILENAME="${TEMP_BASENAME%.*}"
             if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
               echo "Importing template \"$TEMP_FILENAME\"..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -sSL --fail -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1 || true
             fi
           done
 
