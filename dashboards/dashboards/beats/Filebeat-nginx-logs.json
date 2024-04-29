@@ -7,13 +7,12 @@
       "namespaces": [
         "default"
       ],
-      "updated_at": "2022-06-01T19:53:27.884Z",
+      "updated_at": "2024-04-29T15:49:16.000Z",
       "version": "WzEwMTgsMV0=",
       "attributes": {
         "title": "nginx Access and Error Logs",
-        "description": "nginx Access and Error logs, including from Malcolm's own nginx instance",
-        "hits": 0,
         "description": "",
+        "hits": 0,
         "panelsJSON": "[{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":16,\"w\":48,\"h\":15,\"i\":\"11\"},\"panelIndex\":\"11\",\"embeddableConfig\":{\"columns\":[\"log.level\",\"error.message\"],\"sort\":[\"@timestamp\",\"desc\"]},\"panelRefName\":\"panel_0\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":31,\"w\":48,\"h\":23,\"i\":\"16\"},\"panelIndex\":\"16\",\"embeddableConfig\":{\"columns\":[\"url.original\",\"http.request.method\",\"http.response.status_code\",\"http.response.body.bytes\"],\"sort\":[\"@timestamp\",\"desc\"]},\"panelRefName\":\"panel_1\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":4,\"w\":48,\"h\":12,\"i\":\"18\"},\"panelIndex\":\"18\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":4,\"i\":\"19\"},\"panelIndex\":\"19\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
         "optionsJSON": "{\"darkTheme\":false}",
         "version": 1,
