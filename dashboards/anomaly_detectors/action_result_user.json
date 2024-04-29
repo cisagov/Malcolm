@@ -79,6 +79,7 @@
       "unit": "MINUTES"
     }
   },
+  "last_update_time": 1714421906634,
   "category_field": [
     "event.action",
     "event.result"

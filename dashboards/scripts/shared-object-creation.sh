@@ -177,7 +177,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
         # get the previous stored template hash (if any) to avoid importing if it's already been imported
         set +e
-        TEMPLATE_HASH_OLD="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --show-error -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" 2>/dev/null | jq --raw-output '.index_templates[]|select(.name=="malcolm_template")|.index_template._meta.hash' 2>/dev/null)"
+        TEMPLATE_HASH_OLD="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" 2>/dev/null | jq --raw-output '.index_templates[]|select(.name=="malcolm_template")|.index_template._meta.hash' 2>/dev/null)"
         set -e
 
         # proceed only if the current template HASH doesn't match the previously imported one, or if there
@@ -420,7 +420,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d '{"value":true}'
 
-            echo "$DATASTORE_TYPE settings tweak complete!"
+            echo "$DATASTORE_TYPE settings updates complete!"
 
             # end OpenSearch Tweaks
             #############################################################################################################################
@@ -431,7 +431,8 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch anomaly detectors
-            #   - TODO: only do these if they're newer than the ones that already exist?
+            #   - the .anomaly_detector.last_update_time field in the anomaly detector definition JSON is used to check
+            #     whether or not the anomaly detector needs to be updated
 
             echo "Creating $DATASTORE_TYPE anomaly detectors..."
 
@@ -440,10 +441,31 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             rsync -a /opt/anomaly_detectors/ "$ANOMALY_IMPORT_DIR"/
             DoReplacersForDir "$ANOMALY_IMPORT_DIR"
             for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
-                -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                -d "@$i"
+              # identify the name of the anomaly detector, and, if it already exists, its
+              #   ID and previous update time, as well as the update time of the file to import
+              set +e
+              DETECTOR_NAME="$(jq -r '.name' 2>/dev/null < "$i")"
+
+              DETECTOR_NEW_UPDATE_TIME="$(jq -r '.anomaly_detector.last_update_time' 2>/dev/null < "$i")"
+              ( [[ -z "${DETECTOR_NEW_UPDATE_TIME}" ]] || [[ "${DETECTOR_NEW_UPDATE_TIME}" == "null" ]] ) && DETECTOR_NEW_UPDATE_TIME=$CURRENT_ISO_UNIX_SECS
+
+              DETECTOR_EXISTING_UPDATE_TIME=0
+              DETECTOR_EXISTING_ID="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/_search" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+              if [[ -n "${DETECTOR_EXISTING_ID}" ]]; then
+                DETECTOR_EXISTING_UPDATE_TIME="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent -XGET "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DETECTOR_EXISTING_ID" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' | jq -r '.anomaly_detector.last_update_time')"
+                ( [[ -z "${DETECTOR_EXISTING_UPDATE_TIME}" ]] || [[ "${DETECTOR_EXISTING_UPDATE_TIME}" == "null" ]] ) && DETECTOR_EXISTING_UPDATE_TIME=0
+              fi
+              set -e
+
+              # if the file to import is newer than the existing anomaly detector, then update it
+              if (( $DETECTOR_NEW_UPDATE_TIME > $DETECTOR_EXISTING_UPDATE_TIME )); then
+                [[ "$DETECTOR_NAME" != "$DUMMY_DETECTOR_NAME" ]] && \
+                  echo "Importing detector \"${DETECTOR_NAME}\" ($DETECTOR_NEW_UPDATE_TIME > $DETECTOR_EXISTING_UPDATE_TIME) ..."
+                curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+                  -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" \
+                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+                  -d "@$i"
+              fi
             done
             rm -rf "${ANOMALY_IMPORT_DIR}"
 
@@ -457,7 +479,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             DUMMY_DETECTOR_ID=""
             until [[ -n "$DUMMY_DETECTOR_ID" ]]; do
               sleep 5
-              DUMMY_DETECTOR_ID="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --show-error -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/_search" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
+              DUMMY_DETECTOR_ID="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/_search" -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "{ \"query\": { \"match\": { \"name\": \"$DUMMY_DETECTOR_NAME\" } } }" | jq '.. | ._id? // empty' 2>/dev/null | head -n 1 | tr -d '"')"
             done
             set -e
             if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
@@ -481,7 +503,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch alerting
-            #   - TODO: only do these if they're newer than the ones that already exist?
+            #   - always attempt to write the default Malcolm alerting objects, regardless of whether they exist or not
 
             echo "Creating $DATASTORE_TYPE alerting objects..."
 
