@@ -146,7 +146,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
     if [[ "$LOOP" != "primary" ]] || curl "${CURL_CONFIG_PARAMS[@]}" --location --silent --output /dev/null --fail -XGET "$DASHB_URL/api/status" ; then
 
       # has it been a while since we did a full import check (or have we never done one)?
-      if [[ "$LOOP" != "primary" ]] || (( (${CURRENT_ISO_UNIX_SECS} - ${LAST_IMPORT_CHECK_TIME}) >= ${CREATE_OS_ARKIME_SESSION_INDEX_CHECK_INTERVAL_SEC:-3600} )); then
+      if [[ "$LOOP" != "primary" ]] || (( (${CURRENT_ISO_UNIX_SECS} - ${LAST_IMPORT_CHECK_TIME}) >= ${CREATE_OS_ARKIME_SESSION_INDEX_CHECK_INTERVAL_SEC:-86400} )); then
 
         echo "$DATASTORE_TYPE ($LOOP) is running at \"${OPENSEARCH_URL_TO_USE}\"!"
 
@@ -165,6 +165,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         #   - a sha256 sum of the combined templates is calculated and the templates are imported if the previously stored hash
         #     (if any) does not match the files we see currently.
 
+        TEMPLATES_IMPORTED=false
         TEMPLATES_IMPORT_DIR="$(mktemp -d -t templates-XXXXXX)"
         rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
         DoReplacersForDir "$TEMPLATES_IMPORT_DIR"
@@ -230,9 +231,10 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             fi
           done
 
+          TEMPLATES_IMPORTED=true
+
         else
           echo "malcolm_template ($TEMPLATE_HASH) already exists ($LOOP) at \"${OPENSEARCH_URL_TO_USE}\""
-
         fi # TEMPLATE_HASH check
 
         # get info for creating the index patterns of "other" templates
@@ -256,29 +258,30 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
           #############################################################################################################################
           # Index pattern(s)
-          #   - TODO: how do I check to make sure it really needs to be updated? Or maybe it doesn't matter?
+          #   - Only set overwrite=true if we actually updated the templates above, otherwise overwrite=false and fail silently
+          #     if they already exist (http result code 409)
           echo "Importing index pattern..."
 
-          # From https://github.com/elastic/kibana/issues/3709
           # Create index pattern
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-            "$DASHB_URL/api/saved_objects/index-pattern/$INDEX_PATTERN" \
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}?overwrite=${TEMPLATES_IMPORTED}" \
             -d"{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" 2>&1 || true
 
           echo "Setting default index pattern..."
 
           # Make it the default index
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
             -d"{\"value\":\"$INDEX_PATTERN\"}" || true
 
+          # import other index patterns from other templates discovered above
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
             IDX_ID="$(echo "$i" | cut -d';' -f1)"
             IDX_NAME="$(echo "$i" | cut -d';' -f2)"
             IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
             echo "Creating index pattern \"$IDX_NAME\"..."
             curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-              "$DASHB_URL/api/saved_objects/index-pattern/$IDX_ID" \
+              "$DASHB_URL/api/saved_objects/index-pattern/${IDX_ID}?overwrite=${TEMPLATES_IMPORTED}" \
               -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1 || true
           done
 
@@ -366,6 +369,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch Tweaks
+            #   - TODO: only do these if they've NEVER been done before?
 
             # set dark theme (or not)
             [[ "$DARK_MODE" == "true" ]] && DARK_MODE_ARG='{"value":true}' || DARK_MODE_ARG='{"value":false}'
@@ -396,6 +400,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch anomaly detectors
+            #   - TODO: only do these if they're newer than the ones that already exist?
 
             echo "Creating $DATASTORE_TYPE anomaly detectors..."
 
@@ -436,6 +441,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch alerting
+            #   - TODO: only do these if they're newer than the ones that already exist?
 
             echo "Creating $DATASTORE_TYPE alerting objects..."
 
