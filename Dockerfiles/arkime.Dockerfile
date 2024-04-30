@@ -7,7 +7,7 @@ ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-ENV ARKIME_VERSION "v5.0.1"
+ENV ARKIME_VERSION "v5.1.2"
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_URL "https://github.com/arkime/arkime.git"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -16,7 +16,8 @@ ENV ARKIME_INET yes
 ADD arkime/scripts/bs4_remove_div.py /opt/
 ADD arkime/patch/* /opt/patches/
 
-RUN apt-get -q update && \
+RUN export DEBARCH=$(dpkg --print-architecture) && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
         binutils \
@@ -73,7 +74,10 @@ RUN apt-get -q update && \
     make install && \
     npm cache clean --force && \
     rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \
-    bash -c "file ${ARKIME_DIR}/bin/* ${ARKIME_DIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded"
+    bash -c "file ${ARKIME_DIR}/bin/* ${ARKIME_DIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded" && \
+    mkdir -p "${ARKIME_DIR}"/plugins && \
+    curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "https://github.com/arkime/arkime/releases/download/${ARKIME_VERSION}/ja4plus.${DEBARCH}.so" && \
+    chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so"
 
 FROM debian:12-slim
 

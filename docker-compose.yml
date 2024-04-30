@@ -1,7 +1,5 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-version: '3.7'
-
 x-logging:
   &default-logging
   driver: local
@@ -12,7 +10,7 @@ x-logging:
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:24.03.1
+    image: ghcr.io/idaholab/malcolm/opensearch:24.04.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -54,7 +52,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -84,7 +82,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:24.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -112,7 +110,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:24.03.1
+    image: ghcr.io/idaholab/malcolm/logstash-oss:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -159,7 +157,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.03.1
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -194,7 +192,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:24.03.1
+    image: ghcr.io/idaholab/malcolm/arkime:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -228,7 +226,7 @@ services:
       retries: 3
       start_period: 210s
   arkime-live:
-    image: ghcr.io/idaholab/malcolm/arkime:24.03.1
+    image: ghcr.io/idaholab/malcolm/arkime:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -261,7 +259,7 @@ services:
       - ./arkime/rules:/opt/arkime/rules:ro
       - ./pcap:/data/pcap
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:24.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -293,7 +291,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:24.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -321,7 +319,7 @@ services:
       - ./zeek/intel:/opt/zeek/share/zeek/site/intel
       - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:24.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -349,7 +347,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:24.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -379,7 +377,7 @@ services:
       - ./suricata/rules:/opt/suricata/rules:ro
       - ./suricata/include-configs:/opt/suricata/include-configs:ro
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:24.03.1
+    image: ghcr.io/idaholab/malcolm/file-monitor:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -408,7 +406,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:24.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-capture:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -437,7 +435,7 @@ services:
       - ./nginx/ca-trust:/var/local/ca-trust:ro
       - ./pcap/upload:/pcap
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -465,7 +463,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:24.03.1
+    image: ghcr.io/idaholab/malcolm/file-upload:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -492,7 +490,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:24.03.1
+    image: ghcr.io/idaholab/malcolm/htadmin:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -519,7 +517,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:24.03.1
+    image: ghcr.io/idaholab/malcolm/freq:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -543,7 +541,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:24.03.1
+    image: ghcr.io/idaholab/malcolm/netbox:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -577,7 +575,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:24.03.1
+    image: ghcr.io/idaholab/malcolm/postgresql:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -603,7 +601,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:24.03.1
+    image: ghcr.io/idaholab/malcolm/redis:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -633,7 +631,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:24.03.1
+    image: ghcr.io/idaholab/malcolm/redis:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -662,7 +660,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:24.03.1
+    image: ghcr.io/idaholab/malcolm/api:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     command: gunicorn --bind 0:5000 manage:app
@@ -689,7 +687,7 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.03.1
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"

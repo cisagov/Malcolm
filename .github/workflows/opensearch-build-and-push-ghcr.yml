@@ -12,6 +12,8 @@ on:
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
       - '!shared/bin/os-disk-config.py'
+      - '!shared/bin/extracted_files_http_server.py'
+      - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
       - '!shared/bin/configure-capture.py'

@@ -92,7 +92,7 @@ hostname = 'Hedgehog-rpi-%s' % version
 # Nothing yet!
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
-    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
     'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
     'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
@@ -110,6 +110,11 @@ extra_root_shell_cmds = [
     'cp -r "%s/config/hooks/normal/"* "${ROOT?}/opt/hooks/"' % SENSOR_DIR,
     'cp -r "%s/config/package-lists/"* "${ROOT?}/opt/deps/"' % SENSOR_DIR,
     'cp -r "%s/docs/images/hedgehog/logo/hedgehog-ascii-text.txt"* "${ROOT?}/root/"' % MALCOLM_DIR,
+    'cp -r "%s/nginx/landingpage/css/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/nginx/landingpage/js/" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/docs/images/hedgehog/logo/favicon.ico" "${ROOT?}/opt/sensor/assets/"' % MALCOLM_DIR,
+    'cp -r "%s/docs/images/hedgehog/logo/hedgehog-wallpaper-plain.png" "${ROOT?}/opt/sensor/assets/img/bg-masthead.png"'
+    % MALCOLM_DIR,
 ]
 
 # Extend list just in case version is 4

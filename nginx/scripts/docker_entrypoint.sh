@@ -18,6 +18,9 @@ NGINX_SSL_CONF=/etc/nginx/nginx_ssl_config.conf
 # a blank file just to use as an "include" placeholder for the nginx's LDAP config when LDAP is not used
 NGINX_BLANK_CONF=/etc/nginx/nginx_blank.conf
 
+# "include" file for resolver directive
+NGINX_RESOLVER_CONF=/etc/nginx/nginx_system_resolver.conf
+
 # "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=/etc/nginx/nginx_auth_basic.conf
 
@@ -286,6 +289,12 @@ export NGINX_DASHBOARDS_PROXY_URL="$(echo "$(echo "$NGINX_DASHBOARDS_PROXY_PASS"
 for TEMPLATE in "$NGINX_TEMPLATES_DIR"/*.conf.template; do
   DOLLAR=$ envsubst < "$TEMPLATE" > "$NGINX_CONFD_DIR/$(basename "$TEMPLATE"| sed 's/\.template$//')"
 done
+
+# put the DNS resolver (nameserver from /etc/resolv.conf) into NGINX_RESOLVER_CONF
+DNS_SERVER="$(grep -i '^nameserver' /etc/resolv.conf | head -n1 | cut -d ' ' -f2)"
+[[ -z "${DNS_SERVER:-}" ]] && DNS_SERVER="127.0.0.11"
+export DNS_SERVER
+echo "resolver ${DNS_SERVER};" > "${NGINX_RESOLVER_CONF}"
 
 set -e
 
