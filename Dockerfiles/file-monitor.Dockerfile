@@ -34,6 +34,9 @@ ARG EXTRACTED_FILE_SCANNER_START_SLEEP=10
 ARG EXTRACTED_FILE_LOGGER_START_SLEEP=5
 ARG EXTRACTED_FILE_MIN_BYTES=64
 ARG EXTRACTED_FILE_MAX_BYTES=134217728
+ARG EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE=1TB
+ARG EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT=0
+ARG EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS=300
 ARG VTOT_API2_KEY=0
 ARG VTOT_REQUESTS_PER_MINUTE=4
 ARG EXTRACTED_FILE_ENABLE_CLAMAV=false
@@ -65,6 +68,9 @@ ENV EXTRACTED_FILE_SCANNER_START_SLEEP $EXTRACTED_FILE_SCANNER_START_SLEEP
 ENV EXTRACTED_FILE_LOGGER_START_SLEEP $EXTRACTED_FILE_LOGGER_START_SLEEP
 ENV EXTRACTED_FILE_MIN_BYTES $EXTRACTED_FILE_MIN_BYTES
 ENV EXTRACTED_FILE_MAX_BYTES $EXTRACTED_FILE_MAX_BYTES
+ENV EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE $EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE
+ENV EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT $EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT
+ENV EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS $EXTRACTED_FILE_PRUNE_INTERVAL_SECONDS
 ENV VTOT_API2_KEY $VTOT_API2_KEY
 ENV VTOT_REQUESTS_PER_MINUTE $VTOT_REQUESTS_PER_MINUTE
 ENV EXTRACTED_FILE_ENABLE_CLAMAV $EXTRACTED_FILE_ENABLE_CLAMAV
@@ -103,6 +109,11 @@ ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
+ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
+ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
+ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
+COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
+COPY --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
 
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
@@ -129,7 +140,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       pkg-config \
       tini \
       unzip && \
-    apt-get  -y -q install \
+    apt-get -y -q install \
       inotify-tools \
       libzmq5 \
       psmisc \
@@ -143,6 +154,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
       clamd \
       dominate \
+      humanfriendly \
       psutil \
       pycryptodome \
       python-magic \
@@ -171,6 +183,8 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     cd "${YARA_RULES_SRC_DIR}" && \
       /usr/local/bin/yara_rules_setup.sh -r "${YARA_RULES_SRC_DIR}" -y "${YARA_RULES_DIR}" && \
     cd /tmp && \
+      /usr/local/bin/web-ui-asset-download.sh -o "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css" && \
+    cd /tmp && \
       curl -fsSL -o ./capa.zip "${CAPA_URL}" && \
       unzip ./capa.zip && \
       chmod 755 ./capa && \
@@ -190,9 +204,6 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
         libtool \
         make \
         python3-dev && \
-      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /tmp/* && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
@@ -214,7 +225,10 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB}
+      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
+  apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/* /tmp/*
 
 USER ${PUSER}
 
@@ -222,23 +236,11 @@ RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 
 USER root
 
-ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
-ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
-ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/"
-ADD --chmod=644 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff2"
-ADD --chmod=644 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css/bootstrap-icons.woff"
-
-COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
-COPY --chmod=755 file-monitor/scripts/*.py /usr/local/bin/
+COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
 COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf

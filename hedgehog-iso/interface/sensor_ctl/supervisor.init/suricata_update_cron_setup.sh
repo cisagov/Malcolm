@@ -4,9 +4,10 @@
 
 if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
 
-    # clear out supercronic crontab and repopulate based on autostart variables
+    # clear out suricata-update from crontab and repopulate based on autostart variables
     CRONTAB_PATH="$SUPERVISOR_PATH"/supercronic/crontab
-    > "$CRONTAB_PATH"
+    touch "$CRONTAB_PATH"
+    sed -i -e "/suricata-update/d" "$CRONTAB_PATH"
 
     # suricata updates
     if [[ "${AUTOSTART_SURICATA_UPDATES:-false}" == "true" ]] && \
@@ -47,4 +48,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -d "$SUPERVISOR_PATH"/supercronic ]]; then
 
         echo "${SURICATA_REFRESH_CRON_EXPRESSION:-15 2 * * *} /usr/bin/suricata-update --config \"$SURICATA_UPDATE_CONFIG_FILE\" --suricata-conf \"$SURICATA_CONFIG_FILE\" --data-dir \"${SURICATA_MANAGED_DIR:-/var/lib/suricata}\" $ETOPEN_FLAG" >> "$CRONTAB_PATH"
     fi # suricata updates
+
+    # reload supercronic if it's running
+    killall -s USR2 supercronic >/dev/null 2>&1 || true
 fi

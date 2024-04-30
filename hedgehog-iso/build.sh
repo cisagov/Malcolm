@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=cisagov
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.12.1"
+BEATS_VER="8.13.2"
 BEATS_OSS="-oss"
 
 BUILD_ERROR_CODE=1
@@ -113,6 +113,17 @@ if [ -d "$WORKDIR" ]; then
   ln -s -r ./config/includes.chroot/usr/local/bin/malcolm_utils.py ./config/includes.chroot/opt/zeek/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/zeek/bin/
   rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/
+
+  # assets for extracted file server
+  mkdir -p ./config/includes.chroot/opt/sensor/assets/img/
+  rsync -a "$SCRIPT_PATH/nginx/" ./config/includes.chroot/opt/sensor/assets/
+  cp "$SCRIPT_PATH"/docs/images/hedgehog/logo/favicon.ico ./config/includes.chroot/opt/sensor/assets/
+  cp "$SCRIPT_PATH"/docs/images/hedgehog/logo/hedgehog-wallpaper-plain.png ./config/includes.chroot/opt/sensor/assets/img/bg-masthead.png
+  bash "$SCRIPT_PATH/shared/bin/web-ui-asset-download.sh" -o ./config/includes.chroot/opt/sensor/assets/css/
+  chown -R root:root ./config/includes.chroot/opt/sensor/assets/css/
+  find ./config/includes.chroot/opt/sensor/assets/ -type d -exec chmod 755 "{}" \;
+  find ./config/includes.chroot/opt/sensor/assets/ -type f -exec chmod 644 "{}" \;
+  ln -s -r ./config/includes.chroot/opt/sensor/assets ./config/includes.chroot/opt/sensor/assets/assets
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                                       > ./config/includes.chroot/opt/sensor/.os-info

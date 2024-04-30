@@ -29,7 +29,9 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
         * [ssl-client-receive](#HedgehogGetCerts): Receive client SSL files for filebeat from Malcolm
         * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
-    + [Autostart services](#HedgehogConfigAutostart)
+        * [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
+    - [Autostart services](#HedgehogConfigAutostart)
+    - [Managing disk usage](#HedgehogDiskUsage)
 * [Verifying Traffic Capture and Forwarding](#Verify)
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
@@ -185,8 +187,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         - This defines how many additional copies of older session indices Arkime should store.
     - **How many weeks of history should Arkime keep?",**
         - This defines the retention period (in weeks) for `arkime-history` indices.
-* **Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?**
-    - Choose **Y** to proceed to the following related questions about managing the data storage used by Malcolm.
+* **Should Malcolm delete the oldest database indices and capture artifacts based on available storage?**
+    - Choose **Y** to proceed to the following related questions about [managing the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
     - **Delete the oldest indices when the database exceeds a certain size?**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
     - **Should Arkime delete uploaded PCAP files based on available storage?**
@@ -246,6 +248,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
         + `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
         + `none`: preserve no extracted files
+* **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
+    - Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
 * **Expose web interface for downloading preserved files?**
     - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
 * **ZIP downloaded preserved files?**
@@ -287,7 +291,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - **Should Malcolm analyze live network traffic with Zeek?**
         - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
     - **Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)**
-        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`.
+        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`.
     - **Disable capture interface hardware offloading and adjust ring buffer sizes?**
         - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If unsure, users should probably answer **N**.
 * **Specify capture interface(s) (comma-separated)**
@@ -303,7 +307,7 @@ Here users can configure Malcolm to keep its time synchronized with either an NT
 
 ![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
 
-If **htpdate** is selected, users will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for another Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
 
 ![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
 
@@ -421,7 +425,7 @@ Returning to the configuration mode selection, choose **Time Sync**. Here users 
 
 ![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
 
-If **htpdate** is selected, users will be prompted to enter the IP address or hostname and port of an HTTP/HTTPS server (for a Malcolm instance, port `9200` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
 
 ![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
 
@@ -445,7 +449,7 @@ Users will be presented with a list of network interfaces and prompted to select
 
 ![Select capture interfaces](./images/hedgehog/images/capture_iface_select.png)
 
-Upon choosing the capture interfaces and selecting OK, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate Hedgehog should ignore the ports it uses to communicate with Malcolm, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 9200`. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
+Upon choosing the capture interfaces and selecting OK, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate Hedgehog should ignore the ports it uses to communicate with Malcolm, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
 
 ![Specify capture filters](./images/hedgehog/images/capture_filter.png)
 
@@ -465,6 +469,8 @@ If unsure what mode to choose, both **mapped (except common plain text files)** 
 
 Next, specify which carved files to preserve (saved on the sensor under `/capture/zeek/capture/extract_files/quarantine` by default). In order to not consume all the sensor's available storage space, the oldest preserved files will be pruned along with the oldest Zeek logs as described below with **AUTOSTART_PRUNE_ZEEK** in the [autostart services](#HedgehogConfigAutostart) section.
 
+![File quarantine](./images/hedgehog/images/file_quarantine.png)
+
 Users will prompted to specify which engine(s) to use to analyze extracted files. Extracted files can be examined through any of three methods:
 
 ![File scanners](./images/hedgehog/images/zeek_file_carve_scanners.png)
@@ -476,9 +482,11 @@ Users will prompted to specify which engine(s) to use to analyze extracted files
 
 Files flagged as potentially malicious will be logged as Zeek `signatures.log` entries, and can be viewed in the **Signatures** dashboard in [OpenSearch Dashboards]({{ site.github.repository_url }}#DashboardsVisualizations) when forwarded to Malcolm.
 
-![File quarantine](./images/hedgehog/images/file_quarantine.png)
+Hedgehog Linux provides an extracted files directory listing to browse and download Zeek-extracted files. As this interface is primarily intended to be accessed through the Malcolm user interface, this service is accessible only by IP addresses [included in the ACL for artifact reachback from Malcolm](#HedgehogACL) over port `8006/tcp`. The next two questions indicate whether or not Zeek-extracted files downloaded through this interface will be archived using the ZIP file format and what encryption password should be used, if any (either the ZIP archive file password or as the encryption key for AES-256-CBC-encrypted files if not using ZIP). Please read the Malcolm documentation for [**Automatic file extraction and scanning - User interface**](file-scanning.md#ZeekFileExtractionUI) for more information on how to access preserved files.
 
-Finally, users will be presented with the list of configuration variables that will be used for capture, including the values which have been selected up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. Editing this file manually is not recommended. After confirming these values, users will be presented with a confirmation that these settings have been written to the configuration file then returned to the welcome screen.
+![Extracted file server configuration](./images/hedgehog/images/file_server_zip.png)
+
+Finally, users will be presented with the list of configuration variables that will be used for capture, including the values which have been selected up to this point in this section. Upon choosing **OK** these values will be written back out to the sensor configuration file located at `/opt/sensor/sensor_ctl/control_vars.conf`. Editing this file manually should be done with care. After confirming these values, users will be presented with a confirmation that these settings have been written to the configuration file then returned to the welcome screen.
 
 ## <a name="HedgehogConfigForwarding"></a> Configure Forwarding
 
@@ -505,10 +513,6 @@ Users will be asked to enter authentication credentials for the sensor's connect
 ![OpenSearch username](./images/hedgehog/images/opensearch_username.png) ![OpenSearch password](./images/hedgehog/images/opensearch_password.png) ![Successful OpenSearch connection](./images/hedgehog/images/opensearch_connection_success.png)
 
 Users will be asked to provide a "password hash secret" for the Arkime viewer cluster. This value corresponds to the `passwordSecret` value in Arkime's [config.ini file](https://arkime.com/settings). Arkime uses this value to secure communication (specifically, the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface) between Arkime viewers in instances of Malcolm and Hedgehog Linux. In other words, this value needs to be the same for the Malcolm instance and all of the instances of Hedgehog Linux forwarding Arkime sessions to that Malcolm instance. The corresponding value is set when [setting up authentication](#MalcolmAuthSetup) during the Malcolm configuration.
-
-Users will be shown a dialog for a list of IP addresses used to populate an access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files for display in Arkime viewer. The list will be prepopulated with the IP address entered a few screens prior to this one.
-
-![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
 
 Arkime supports [compression](https://arkime.com/settings#writer-simple) for the PCAP files it creates. Select `none` (at the cost of requiring more storage for PCAP files saved on the sensor) or `zstd` (at the cost of higher CPU load when writing and reading PCAP files). If [`zstd`](https://en.wikipedia.org/wiki/Zstd?lang=en) is chosen, users will also be prompted for the compression level (something like `3` is probably a good choice).
 
@@ -576,6 +580,12 @@ The sensor uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous syst
 
 This forwarder's configuration is almost identical to that of [filebeat](#Hedgehogfilebeat) in the previous section. Select `miscbeat` from the forwarding configuration mode options and follow the same steps outlined above to set up this forwarder.
 
+### <a name="HedgehogACL"></a>acl-configure: Configure ACL for artifact reachback from Malcolm
+
+Users will be shown a dialog for a list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](#HedgehogZeekFileExtraction). The list will be prepopulated with the IP address entered a few screens prior to this one.
+
+![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
+
 ### <a name="HedgehogConfigAutostart"></a>Autostart services
 
 Once the forwarders have been configured, the final step is to **Configure Autostart Services**. Choose this option from the configuration mode menu after the welcome screen of the sensor configuration tool.
@@ -584,6 +594,7 @@ Despite configuring capture and/or forwarder services as described in previous s
 
 * **AUTOSTART_ARKIME** - [capture](#Hedgehogarkime-capture) PCAP engine for traffic capture, as well as traffic parsing and metadata insertion into OpenSearch for viewing in [Arkime](https://arkime.com/). If using Hedgehog Linux along with [Malcolm]({{ site.github.repository_url }}) or another Arkime installation, this is probably the preferable packet capture engine.
 * **AUTOSTART_CLAMAV_UPDATES** - Virus database update service for ClamAV (requires sensor to be connected to the Internet)
+* **AUTOSTART_EXTRACTED_FILE_HTTP_SERVER** - the [HTTPS server](file-scanning.md#ZeekFileExtractionUI) providing access to the directory containing [Zeek-extracted files](#HedgehogZeekFileExtraction)
 * **AUTOSTART_FILEBEAT** - [filebeat](#Hedgehogfilebeat) Zeek and Suricata log forwarder 
 * **AUTOSTART_FLUENTBIT_AIDE** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/exec) [AIDE](https://aide.github.io/) file system integrity checks
 * **AUTOSTART_FLUENTBIT_AUDITLOG** - [Fluent Bit](https://fluentbit.io/) agent [monitoring](https://docs.fluentbit.io/manual/pipeline/inputs/tail) [auditd](https://man7.org/linux/man-pages/man8/auditd.8.html) logs
@@ -648,6 +659,18 @@ zeek:watcher                     RUNNING   pid 6510, uptime 0:03:17
 zeek:yara                        RUNNING   pid 6548, uptime 0:03:17
 zeek:zeekctl                     RUNNING   pid 6502, uptime 0:03:17
 ```
+
+### <a name="HedgehogDiskUsage"></a>Managing disk usage
+
+In instances where Hedgehog Linux is deployed with the intention of running indefinitely, eventually the question arises of what to do when the file systems used for storing Malcolm's artifacts (e.g., PCAP files, raw logs, [extracted files](file-scanning.md#ZeekFileExtraction), etc.). Hedgehog Linux provides options for tuning the "aging out" (deletion) of old artifacts to make room for newer data. These are configured during [Configure Capture](#HedgehogCapture) and are stored in the `/opt/sensor/sensor_ctl/control_vars.conf` configuration file. Editing this file manually should be done with care.
+
+* PCAP files can be periodically [pruned]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/prune_files.sh) according to these variables:
+    - `PCAP_MAX_DISK_FILL` - a maximum fill percentage for the file system containing the PCAP files; in other words, if the disk is more than this percentage utilized, the prune condition triggers
+    - `PCAP_PRUNE_CHECK_SECONDS` - the interval between checking the PCAP prune condition, in seconds
+    - `ARKIME_FREESPACEG` - this value is [used by Arkime](https://arkime.com/settings#freespaceg) to determine when to delete the oldest PCAP files. Note that this variable represents the amount of free/unused/available desired on the file system: e.g., a value of `5%` means "delete PCAP files if the amount of unused storage on the file system falls below 5%" (default `10%`). Observant users will note that there overlap in Arkime's PCAP deletion process and the process using the `PCAP_MAX_DISK_FILL` above: either process may delete old PCAP files depending on which conditions trigger first.
+* Zeek logs, files [extracted by Zeek](file-scanning.md#ZeekFileExtraction), and Suricata logs are [pruned]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/prune_files.sh) according to these variables:
+    - `ZEEK_MAX_DISK_FILL` - a maximum fill percentage for the file system containing these artifacts; in other words, if the disk is more than this percentage utilized, the prune condition triggers
+    - `ZEEK_PRUNE_CHECK_SECONDS` - the interval between checking the prune condition for these artifacts, in seconds
 
 ## <a name="Verify"></a>Verifying Traffic Capture and Forwarding
 

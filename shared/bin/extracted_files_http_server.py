@@ -7,21 +7,23 @@
 # be aes-256-cbc encrypted in a way that's compatible with:
 #   openssl enc -aes-256-cbc -d -in encrypted.data -out decrypted.data
 
+import atexit
 import argparse
 import dominate
+import functools
 import hashlib
 import magic
 import os
 import re
+import ssl
 import sys
+import time
 from Crypto.Cipher import AES
 from datetime import datetime, timedelta, UTC
 from dominate.tags import *
-from http.server import HTTPServer, SimpleHTTPRequestHandler
-from socketserver import ThreadingMixIn
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
-from threading import Thread
 
 from malcolm_utils import (
     eprint,
@@ -29,6 +31,7 @@ from malcolm_utils import (
     EVP_KEY_SIZE,
     OPENSSL_ENC_MAGIC,
     PKCS5_SALT_LEN,
+    pushd,
     remove_prefix,
     sizeof_fmt,
     str2bool,
@@ -41,7 +44,9 @@ debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
-filename_truncate_len = 20
+filename_truncate_len_malcolm = 20
+filename_truncate_len = 32
+malcolm_forward_header = 'X-Malcolm-Forward'
 
 
 ###################################################################################################
@@ -70,7 +75,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         path = SimpleHTTPRequestHandler.translate_path(self, path)
         relpath = os.path.relpath(path, os.getcwd())
-        fullpath = os.path.join(self.server.base_path, relpath)
+        fullpath = os.path.join(self.directory, relpath)
         return fullpath, relpath
 
     # override do_GET for fancy directory listing and so that files are encrypted/zipped, if requested
@@ -78,8 +83,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
         global debug
         global args
 
+        showMalcolmCols = args.malcolm or (malcolm_forward_header in dict(self.headers))
+        assetsDirRespReplacer = f"{str(dict(self.headers).get(malcolm_forward_header, ''))}{args.assetsDirRespReplacer}"
+
         fullpath, relpath = self.translate_path(self.path)
         fileBaseName = os.path.basename(fullpath)
+        fnameDispLen = filename_truncate_len_malcolm if showMalcolmCols else filename_truncate_len
 
         tomorrowStr = (datetime.now(UTC) + timedelta(days=1)).isoformat().split('.')[0]
 
@@ -105,10 +114,10 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             with doc.head:
                 meta(charset="utf-8")
                 meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-                link(rel="icon", href=f"{args.assetsDirRespReplacer}favicon.ico", type="image/x-icon")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/bootstrap-icons.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/google-fonts.css", type="text/css")
-                link(rel="stylesheet", href=f"{args.assetsDirRespReplacer}css/styles.css", type="text/css")
+                link(rel="icon", href=f"{assetsDirRespReplacer}favicon.ico", type="image/x-icon")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/bootstrap-icons.css", type="text/css")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/google-fonts.css", type="text/css")
+                link(rel="stylesheet", href=f"{assetsDirRespReplacer}css/styles.css", type="text/css")
 
             # <body>
             with doc:
@@ -130,7 +139,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     th("Type" if args.magic else "Extension"),
                                     th("Size"),
                                 )
-                                if args.malcolm:
+                                if showMalcolmCols:
                                     t.add(
                                         th("Source"),
                                         th("IDs"),
@@ -143,7 +152,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         td("Directory"),
                                         td(''),
                                     )
-                                    if args.malcolm:
+                                    if showMalcolmCols:
                                         t.add(th(), th(), th())
 
                                 # content rows (files and directories)
@@ -159,7 +168,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td("Directory"),
                                                     td(''),
                                                 )
-                                                if args.malcolm:
+                                                if showMalcolmCols:
                                                     t.add(th(), th(), th())
                                         except Exception as e:
                                             eprint(f'Error with directory "{dirname}"": {e}')
@@ -178,7 +187,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 fmatch = None
                                                 fsource = ''
                                                 fids = list()
-                                                if args.malcolm:
+                                                if showMalcolmCols:
                                                     # determine if filename is in a pattern we recognize
                                                     fmatch = carvedFileRegex.search(filename)
                                                     if fmatch is None:
@@ -229,8 +238,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     td(
                                                         a(
                                                             (
-                                                                (filename[:filename_truncate_len] + '...')
-                                                                if len(filename) > filename_truncate_len
+                                                                (filename[:fnameDispLen] + '...')
+                                                                if len(filename) > fnameDispLen
                                                                 else filename
                                                             ),
                                                             href=f'{filename}',
@@ -252,37 +261,38 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 )
 
                                                 # show special malcolm columns if requested
-                                                if args.malcolm and fmatch is not None:
-                                                    # list carve source, IDs, and timestamp
-                                                    t.add(
-                                                        td(
-                                                            fsource,
-                                                            style="text-align: center",
-                                                        ),
-                                                        td(
-                                                            [
-                                                                a(
-                                                                    fid,
-                                                                    href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
-                                                                    target="_blank",
-                                                                )
-                                                                for fid in fids
-                                                            ],
-                                                            style="text-align: center",
-                                                        ),
-                                                        td(
-                                                            (
-                                                                timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                                                                if timestamp
-                                                                else timestampStr
+                                                if showMalcolmCols:
+                                                    if fmatch is not None:
+                                                        # list carve source, IDs, and timestamp
+                                                        t.add(
+                                                            td(
+                                                                fsource,
+                                                                style="text-align: center",
                                                             ),
-                                                            title=timestampStr,
-                                                            style="text-align: center",
-                                                        ),
-                                                    )
-                                                else:
-                                                    # file name format was not recognized, so extra columns are empty
-                                                    t.add(th(), th(), th())
+                                                            td(
+                                                                [
+                                                                    a(
+                                                                        fid,
+                                                                        href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
+                                                                        target="_blank",
+                                                                    )
+                                                                    for fid in fids
+                                                                ],
+                                                                style="text-align: center",
+                                                            ),
+                                                            td(
+                                                                (
+                                                                    timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                                                                    if timestamp
+                                                                    else timestampStr
+                                                                ),
+                                                                title=timestampStr,
+                                                                style="text-align: center",
+                                                            ),
+                                                        )
+                                                    else:
+                                                        # file name format was not recognized, so extra columns are empty
+                                                        t.add(th(), th(), th())
 
                                         except Exception as e:
                                             eprint(f'Error with file "{filename}": {e}')
@@ -299,27 +309,28 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                         )
 
                     with div(cls="col-lg-6 h-100 text-center text-lg-end my-auto").add(ul(cls="list-inline mb-0")):
-                        li(cls="list-inline-item").add(a(href=f'/', target="_blank")).add(
-                            i(cls="bi bi-house fs-3", title="Malcolm")
-                        )
-                        li(cls="list-inline-item").add(a(href=f'/readme/', target="_blank")).add(
-                            i(cls="bi bi-question-circle fs-3", title="Documentation")
-                        )
-                        li(cls="list-inline-item").add(
-                            a(
-                                href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714',
-                                target="_blank",
+                        if showMalcolmCols:
+                            li(cls="list-inline-item").add(a(href=f'/', target="_blank")).add(
+                                i(cls="bi bi-house fs-3", title="Malcolm")
                             )
-                        ).add(i(cls="bi bi-bar-chart-line fs-3", title="Dashboards"))
-                        li(cls="list-inline-item").add(a(href=f'/arkime/sessions/', target="_blank")).add(
-                            i(cls="bi bi-table fs-3", title="Arkime")
-                        )
+                            li(cls="list-inline-item").add(a(href=f'/readme/', target="_blank")).add(
+                                i(cls="bi bi-question-circle fs-3", title="Documentation")
+                            )
+                            li(cls="list-inline-item").add(
+                                a(
+                                    href=f'/dashboards/app/dashboards#/view/9ee51f94-3316-4fc5-bd89-93a52af69714',
+                                    target="_blank",
+                                )
+                            ).add(i(cls="bi bi-bar-chart-line fs-3", title="Dashboards"))
+                            li(cls="list-inline-item").add(a(href=f'/arkime/sessions/', target="_blank")).add(
+                                i(cls="bi bi-table fs-3", title="Arkime")
+                            )
                         li(cls="list-inline-item").add(
                             a(href=f'https://github.com/cisagov/Malcolm/', target="_blank")
                         ).add(i(cls="bi-github fs-3", title="GitHub"))
 
-                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/bootstrap.bundle.min.js")
-                script(type="text/javascript", src=f"{args.assetsDirRespReplacer}js/scripts.js")
+                script(type="text/javascript", src=f"{assetsDirRespReplacer}js/bootstrap.bundle.min.js")
+                script(type="text/javascript", src=f"{assetsDirRespReplacer}js/scripts.js")
 
             # send directory listing HTML to web client
             self.wfile.write(str.encode(str(doc)))
@@ -417,18 +428,23 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
 ###################################################################################################
 #
-class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
-    def __init__(self, base_path, server_address, RequestHandlerClass=HTTPHandler):
-        self.base_path = base_path
-        HTTPServer.__init__(self, server_address, RequestHandlerClass)
-
-
-###################################################################################################
-#
-def serve_on_port(path: str, port: int):
-    server = ThreadingHTTPServer(path, ("", port))
-    print(f"serving {path} at port {port}")
-    server.serve_forever()
+def serve_on_port(
+    path,
+    port,
+    tls=False,
+    tls_key_file=None,
+    tls_cert_file=None,
+    server_class=ThreadingHTTPServer,
+    handler_class=HTTPHandler,
+):
+    with pushd(path):
+        server = server_class(("", port), functools.partial(handler_class, directory=path))
+        if tlsOk := (tls and os.path.isfile(str(tls_key_file)) and os.path.isfile(str(tls_cert_file))):
+            ctx = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS_SERVER)
+            ctx.load_cert_chain(certfile=tls_cert_file, keyfile=tls_key_file)
+            server.socket = ctx.wrap_socket(server.socket, server_side=True)
+        print(f"serving {path} at port {port}{' over TLS' if tlsOk else ''}")
+        server.serve_forever()
 
 
 ###################################################################################################
@@ -442,6 +458,7 @@ def main():
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
     defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
+    defaultTls = os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS', 'false')
     defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
     defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
     defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
@@ -473,6 +490,33 @@ def main():
         metavar='<port>',
         type=int,
         default=defaultPort,
+    )
+    parser.add_argument(
+        '-t',
+        '--tls',
+        dest='tls',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=defaultTls,
+        metavar='true|false',
+        help=f"Serve with TLS (must specify --tls-keyfile and --tls-certfile)",
+    )
+    parser.add_argument(
+        '--tls-keyfile',
+        dest='tlsKeyFile',
+        help=f'TLS Key File',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_KEYFILE', None),
+    )
+    parser.add_argument(
+        '--tls-certfile',
+        dest='tlsCertFile',
+        help=f'TLS Certificate File',
+        metavar='<filename>',
+        type=str,
+        default=os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS_CERTFILE', None),
     )
     parser.add_argument(
         '-d',
@@ -591,7 +635,13 @@ def main():
     if args.assetsDirRespReplacer:
         args.assetsDirRespReplacer = os.path.join(args.assetsDirRespReplacer, '')
 
-    Thread(target=serve_on_port, args=[args.serveDir, args.port]).start()
+    serve_on_port(
+        path=args.serveDir,
+        port=args.port,
+        tls=args.tls,
+        tls_key_file=args.tlsKeyFile,
+        tls_cert_file=args.tlsCertFile,
+    )
 
 
 ###################################################################################################

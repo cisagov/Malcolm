@@ -43,5 +43,9 @@
       "interval": 1,
       "unit": "Minutes"
     }
-  }
+  },
+  "last_update_time": 1714421906634,
+  "category_field": [
+    "file.mime_type"
+  ]
 }

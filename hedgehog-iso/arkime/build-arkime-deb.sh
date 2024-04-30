@@ -4,6 +4,7 @@
 
 ARKIME_URL="https://github.com/arkime/arkime.git"
 OUTPUT_DIR="/tmp"
+DEBARCH=$(dpkg --print-architecture)
 unset VERBOSE
 
 while getopts o:v opts; do
@@ -32,6 +33,10 @@ export PATH="$ARKIME_DIR/bin:/tmp/arkime-$ARKIME_VERSION/node_modules/.bin:${PAT
 ./easybutton-build.sh --dir "$ARKIME_DIR"
 
 make install
+
+mkdir -p "${ARKIME_DIR}"/plugins
+curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.${DEBARCH}.so"
+[[ -f "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" ]] && chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so"
 
 cp -r ./capture/plugins/lua/samples "$ARKIME_DIR"/lua
 

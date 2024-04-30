@@ -52,14 +52,14 @@ The `EXTRACTED_FILE_HTTP_SERVER_…` [environment variables in `zeek.env` and `z
 
 The files extracted by Zeek and the data about those files can be accessed through several of Malcolm's user interfaces.
 
-* The [Files dashboard](dashboards.md#PrebuiltVisualizations) summarizes the file transfers observed in network traffic:
+* The [Files dashboard](dashboards.md#PrebuiltVisualizations) summarizes the file transfers observed in network traffic. The **Extracted File Downloads** table provides download links for the extracted files matching the currently applied filters. Note that the presence of these links don't necessarily imply that the files they represent are available: depending on factors such as file preservation settings (above) and retention policies, files that were extracted and scanned may no longer be available. When this is the case, clicking one of the file download links will result in a "file not found" error. If one of these links refers to a file that was extracted and scanned on a [Hedgehog Linux](hedgehog.md) network sensor, Malcolm must be able to communicate with that sensor in order to retrieve and download the file.
 
 ![The files dashboard displays metrics about the files transferred over the network](./images/screenshots/dashboards_files_source.png)
 
-* Viewing logs from Zeek's `files.log` (e.g., `event.provider == zeek && event.dataset == files`), the Arkime [session](arkime.md#ArkimeSessions) detail's **Extracted Filename** field can be clicked for a context menu item to **Download** the extracted file, if it was preserved as described above.
+* Viewing logs from Zeek's `files.log` (e.g., `event.provider == zeek && event.dataset == files`), the Arkime [session](arkime.md#ArkimeSessions) detail's **Extracted Filename URL** field can be clicked for a context menu item to download the extracted file, if it was preserved as described above.
 
 ![Arkime's session details for files.log entries](./images/screenshots/arkime_sessions_files_log_dl.png)
 
-* Malcolm provides an extracted files directory listing to browse and download Zeek-extracted files. This interface is available at at **https://localhost/extracted-files/** if connecting locally. The Zeek `uid` and `fuid` values associated with these files and the sessions from which they were extracted are listed in the **IDs** column as filter links back into Dashboards.
+* Malcolm provides an extracted files directory listing to browse and download Zeek-extracted files. This interface is available at **https://localhost/extracted-files/** if connecting locally. The Zeek `uid` and `fuid` values associated with these files and the sessions from which they were extracted are listed in the **IDs** column as filter links back into Dashboards. Similarly, files extracted and preserved on a [Hedgehog Linux](hedgehog.md) network sensor can be accessed at **https://localhost/hh-extracted-files/X.X.X.X/**, where **X.X.X.X** represents the IP address or hostname of the sensor (e.g., `https://localhost/hh-extracted-files/192.168.122.57/` if the sensor's IP address were 192.168.122.57).
 
 ![The extracted files directory interface](./images/screenshots/extracted_files_dl_ui.png)
