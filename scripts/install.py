@@ -78,6 +78,7 @@ from malcolm_utils import (
     eprint,
     flatten,
     LoadFileIfJson,
+    remove_suffix,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -112,6 +113,8 @@ dotenv_imported = None
 TrueOrFalseQuote = lambda x: "'true'" if x else "'false'"
 TrueOrFalseNoQuote = lambda x: 'true' if x else 'false'
 MaxAskForValueCount = 100
+
+str2percent = lambda val: max(min(100, int(remove_suffix(val, '%'))), 0) if val else 0
 
 
 ###################################################################################################
@@ -1086,11 +1089,13 @@ class Installer(object):
         indexPruneNameSort = False
         arkimeManagePCAP = False
         arkimeFreeSpaceG = '10%'
+        extractedFileMaxSizeThreshold = '1TB'
+        extractedFileMaxPercentThreshold = 0
         indexManagementPolicy = False
         indexManagementHotWarm = False
         indexManagementOptimizationTimePeriod = '30d'
         indexManagementSpiDataRetention = '90d'
-        indexManagementReplicas = 1
+        indexManagementReplicas = 0
         indexManagementHistoryInWeeks = 13
         indexManagementOptimizeSessionSegments = 1
 
@@ -1150,14 +1155,19 @@ class Installer(object):
                 ):
                     break
 
-        if InstallerYesOrNo(
+        diskUsageManagementPrompt = InstallerYesOrNo(
             (
-                'Should Malcolm delete the oldest database indices and/or PCAP files based on available storage?'
+                'Should Malcolm delete the oldest database indices and capture artifacts based on available storage?'
                 if ((opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and (malcolmProfile == PROFILE_MALCOLM))
-                else 'Should Arkime delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?'
+                else 'Should Malcolm delete the oldest capture artifacts based on available storage?'
             ),
-            default=args.arkimeManagePCAP or bool(args.indexPruneSizeLimit),
-        ):
+            default=args.arkimeManagePCAP
+            or bool(args.indexPruneSizeLimit)
+            or bool(args.extractedFileMaxSizeThreshold)
+            or (args.extractedFileMaxPercentThreshold > 0),
+        )
+        if diskUsageManagementPrompt:
+
             # delete oldest indexes based on index pattern size
             if (
                 (malcolmProfile == PROFILE_MALCOLM)
@@ -1362,6 +1372,7 @@ class Installer(object):
                     ],
                 )
             if fileCarveMode and (fileCarveMode != 'none'):
+
                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file preservation behavior')
                 while filePreserveMode not in allowedFilePreserveModes and loopBreaker.increment():
                     filePreserveMode = InstallerChooseOne(
@@ -1379,6 +1390,33 @@ class Installer(object):
                             for x in allowedFilePreserveModes
                         ],
                     )
+
+                if diskUsageManagementPrompt:
+                    loopBreaker = CountUntilException(
+                        MaxAskForValueCount, 'Invalid Zeek extracted file prune threshold'
+                    )
+                    extractedFilePruneThresholdTemp = ''
+                    while (
+                        not re.match(
+                            r'^\d+(\.\d+)?\s*[kmgtp%]?b?$', extractedFilePruneThresholdTemp, flags=re.IGNORECASE
+                        )
+                    ) and loopBreaker.increment():
+                        extractedFilePruneThresholdTemp = InstallerAskForString(
+                            'Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)',
+                            default=(
+                                args.extractedFileMaxPercentThreshold
+                                if args.extractedFileMaxPercentThreshold
+                                else args.extractedFileMaxSizeThreshold
+                            ),
+                        )
+                    if extractedFilePruneThresholdTemp:
+                        if '%' in extractedFilePruneThresholdTemp:
+                            extractedFileMaxPercentThreshold = str2percent(extractedFilePruneThresholdTemp)
+                            extractedFileMaxSizeThreshold = '0'
+                        else:
+                            extractedFileMaxPercentThreshold = 0
+                            extractedFileMaxSizeThreshold = extractedFilePruneThresholdTemp
+
                 fileCarveHttpServer = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                     'Expose web interface for downloading preserved files?', default=args.fileCarveHttpServer
                 )
@@ -1950,6 +1988,18 @@ class Installer(object):
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_PRESERVATION',
                 filePreserveMode,
+            ),
+            # total disk fill threshold for pruning zeek extracted files
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT',
+                extractedFileMaxPercentThreshold,
+            ),
+            # zeek extracted files maximum consumption threshold
+            EnvValue(
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE',
+                extractedFileMaxSizeThreshold,
             ),
             # HTTP server for extracted files
             EnvValue(
@@ -3766,6 +3816,24 @@ def main():
         type=str,
         default='',
         help=f'Threshold for Arkime PCAP deletion (see https://arkime.com/faq#pcap-deletion)',
+    )
+    storageArgGroup.add_argument(
+        '--extracted-file-max-size-threshold',
+        dest='extractedFileMaxSizeThreshold',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help=f'Delete zeek-extracted files when they consume this much disk space (e.g., 250GB, 1TB, etc.)',
+    )
+    storageArgGroup.add_argument(
+        '--extracted-file-total-disk-usage-percent-threshold',
+        dest='extractedFileMaxPercentThreshold',
+        required=False,
+        metavar='<string>',
+        type=str2percent,
+        default=0,
+        help=f'Delete zeek-extracted files when the file system exceeds this percentage full (e.g., 90%, etc.)',
     )
     storageArgGroup.add_argument(
         '--delete-index-threshold',
