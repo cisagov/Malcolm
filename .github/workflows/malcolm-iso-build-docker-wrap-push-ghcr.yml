@@ -9,6 +9,8 @@ on:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
       - '!shared/bin/configure-capture.py'
+      - '!shared/bin/extracted_files_http_server.py'
+      - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/zeek*'
       - '!shared/bin/suricata*'
       - '.trigger_iso_workflow_build'

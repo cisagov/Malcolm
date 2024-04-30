@@ -1,7 +1,5 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-version: '3.7'
-
 x-logging:
   &default-logging
   driver: local
@@ -15,7 +13,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:24.03.1
+    image: ghcr.io/idaholab/malcolm/opensearch:24.04.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -60,7 +58,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -93,7 +91,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:24.03.1
+    image: ghcr.io/idaholab/malcolm/dashboards:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -124,7 +122,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:24.03.1
+    image: ghcr.io/idaholab/malcolm/logstash-oss:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -178,7 +176,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.03.1
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -216,7 +214,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:24.03.1
+    image: ghcr.io/idaholab/malcolm/arkime:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -255,7 +253,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:24.03.1
+    image: ghcr.io/idaholab/malcolm/arkime:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -294,7 +292,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:24.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -330,7 +328,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:24.03.1
+    image: ghcr.io/idaholab/malcolm/zeek:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -362,7 +360,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:24.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -393,7 +391,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:24.03.1
+    image: ghcr.io/idaholab/malcolm/suricata:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -426,7 +424,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:24.03.1
+    image: ghcr.io/idaholab/malcolm/file-monitor:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -458,7 +456,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:24.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-capture:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -490,7 +488,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.03.1
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.04.0
     profiles: ["malcolm", "hedgehog"]
     logging: *default-logging
     restart: "no"
@@ -521,7 +519,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:24.03.1
+    image: ghcr.io/idaholab/malcolm/file-upload:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"
@@ -548,7 +546,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:24.03.1
+    image: ghcr.io/idaholab/malcolm/htadmin:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -578,7 +576,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:24.03.1
+    image: ghcr.io/idaholab/malcolm/freq:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -605,7 +603,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:24.03.1
+    image: ghcr.io/idaholab/malcolm/netbox:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -642,7 +640,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:24.03.1
+    image: ghcr.io/idaholab/malcolm/postgresql:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -671,7 +669,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:24.03.1
+    image: ghcr.io/idaholab/malcolm/redis:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -704,7 +702,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:24.03.1
+    image: ghcr.io/idaholab/malcolm/redis:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -736,7 +734,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:24.03.1
+    image: ghcr.io/idaholab/malcolm/api:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     build:
@@ -769,7 +767,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.03.1
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.04.0
     profiles: ["malcolm"]
     logging: *default-logging
     restart: "no"

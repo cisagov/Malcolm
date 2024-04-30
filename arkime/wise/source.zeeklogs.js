@@ -966,6 +966,7 @@ class MalcolmSource extends WISESource {
       "zeek.files.extracted",
       "zeek.files.extracted_cutoff",
       "zeek.files.extracted_size",
+      "zeek.files.extracted_uri",
       "zeek.files.filename",
       "zeek.files.ftime",
       "zeek.files.local_orig",
@@ -2253,8 +2254,10 @@ class MalcolmSource extends WISESource {
     this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
     // add right-click for extracted files from zeek
-    var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_carved_file_quarantined", { name: "Download", url: "/extracted-files/%TEXT%", fields: carvedFieldsStr });
+    // var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
+    // this.api.addValueAction("malcolm_carved_file", { name: "Download", url: "/extracted-files/%TEXT%", fields: carvedFieldsStr });
+    var carvedFieldsUrlStr = allFields.filter(value => /^zeek\.files\.extracted_uri$/i.test(value)).join(',');
+    this.api.addValueAction("malcolm_carved_file_url", { name: "Download", url: "/%TEXT%", fields: carvedFieldsUrlStr });
 
     // add right-clicks for pivoting into dashboards from Arkime (see nginx.conf)
     var filterLabel = "OpenSearch Dashboards %DBFIELD%";
@@ -2265,11 +2268,6 @@ class MalcolmSource extends WISESource {
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "/mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
     this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, all: true });
-
-    // add rick-click for extracted-files
-    var extractedFilesLabel = "Browse Extracted Files";
-    var extractedFilesURL = "/extracted-files/";
-    this.api.addFieldAction("malcolm_mapi_field_extracted_files", { name: extractedFilesLabel, url: extractedFilesURL, fields: carvedFieldsStr });
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "/mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });

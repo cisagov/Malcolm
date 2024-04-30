@@ -1,16 +1,19 @@
 # <a name="HostSystemConfigWindows"></a>Windows host system configuration
 
-## <a name="HostSystemConfigWindowsDocker"></a>Installing and configuring Docker Desktop for Windows
+Installing and configuring Docker to run under the Windows Subsystem for Linux (WSL) must be done manually, rather than through the `install.py` script as with Linux and macOS.
 
-Installing and configuring [Docker to run under Windows](https://docs.docker.com/desktop/windows/wsl/) must be done manually, rather than through the `install.py` script as with Linux and macOS.
+1. Make sure your Windows 10 or Windows 11 system is up-to-date with the current Windows cummulative update.
+1. Open PowerShell or Windows Command Prompt in administrator mode by right-clicking the icon in the Start Menu and selecting **Run as administrator**.
+1. Enter the command [`wsl --install`](https://learn.microsoft.com/en-us/windows/wsl/install) and wait for the installation to finish.
+1. Reboot the system.
+1. Upon rebooting, the Linux terminal will open automatically with **Installing, this may take a few minutes...**. Wait for this process to complete.
+1. As prompted, create a default UNIX user account by providing a username and password.
+1. Install Docker by running `curl -fsSL https://get.docker.com -o get-docker.sh` followed by `sudo sh get-docker.sh`.
+1. Add the user account you just created to the `docker` group by running `sudo usermod -a -G docker username`, replacing `username` with the username you created before.
+1. Verify Docker and Docker Compose are correctly installed by running `docker --version` and `docker compose version`.
+1. If running Ubuntu 22.04 LTS, to ensure container networking works correctly, run `sudo update-alternatives --config iptables` and select the option for `iptables-legacy`.
+1. Restart WSL by rebooting the system.
+1. Upon rebooting, open the Start Menu and select the name of the Linux distribution you installed (**Ubuntu** is the default).
+1. Continue with the Malcolm installation and configuration as described in the [**Quick start**](quickstart.md#QuickStart) documentation or illustrated with the **[Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
-1. Be running Windows 10, Version 1903 or higher
-1. Prepare your system and [install WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and a Linux distribution by running `wsl --install -d Debian` in PowerShell as Administrator (these instructions are tested with Debian, but may work with other distributions)
-1. Install Docker Desktop for Windows either by downloading the installer from the [official Docker site](https://docs.docker.com/desktop/install/windows-install/) or installing it through [chocolatey](https://chocolatey.org/packages/docker-desktop).
-1. Follow the [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/windows/wsl/) instructions to finish configuration and review best practices
-1. Reboot
-1. Open the WSL distribution's terminal and run `docker info` to ensure Docker is running
-
-## <a name="HostSystemConfigWindowsMalcolm"></a>Finish Malcolm's configuration
-
-Once Docker is installed, configured, and running as described in the previous section, run [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) to finish configuration of the local Malcolm installation. Malcolm will be controlled and run from within your WSL distribution's terminal environment.
+Once the configuration is complete, Malcolm will be started and stopped from within your WSL distribution's terminal environment as described in [**Running Malcolm**](running.md).
