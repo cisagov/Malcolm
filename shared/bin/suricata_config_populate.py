@@ -74,6 +74,8 @@ DEFAULT_VARS.update(
         'ANOMALY_STREAM': False,
         'ASN1_MAX_FRAMES': 256,
         'AUTOFP_SCHEDULER': 'hash',
+        'BITTORRENT_ENABLED': True,
+        'BITTORRENT_EVE_ENABLED': False,
         'CAPTURE_CHECKSUM_VALIDATION': 'none',
         'CAPTURE_DISABLE_OFFLOADING': True,
         'CUSTOM_RULES_ONLY': False,
@@ -131,8 +133,8 @@ DEFAULT_VARS.update(
         'HTTP_EVE_ENABLED': False,
         'HTTP_EXTENDED': False,
         'HTTP_PORTS': 80,
-        'IKEV2_ENABLED': True,
-        'IKEV2_EVE_ENABLED': False,
+        'IKE_ENABLED': True,
+        'IKE_EVE_ENABLED': False,
         'IMAP_ENABLED': 'detection-only',
         'IMAP_EVE_ENABLED': False,
         'KRB5_ENABLED': True,
@@ -158,6 +160,11 @@ DEFAULT_VARS.update(
         'PACKET_SIZE': 1514,
         'PCRE_MATCH_LIMIT': 3500,
         'PCRE_RECURSION': 1500,
+        'PGSQL_ENABLED': True,
+        'PGSQL_EVE_ENABLED': False,
+        'PGSQL_PASSWORDS': False,
+        'QUIC_ENABLED': True,
+        'QUIC_EVE_ENABLED': False,
         'RDP_ENABLED': True,
         'RDP_EVE_ENABLED': False,
         'RFB_ENABLED': True,
@@ -203,6 +210,8 @@ DEFAULT_VARS.update(
         'STREAM_REASSEMBLY_RANDOMIZE_CHUNK_SIZE': True,
         'STREAM_REASSEMBLY_TOCLIENT_CHUNK_SIZE': 2560,
         'STREAM_REASSEMBLY_TOSERVER_CHUNK_SIZE': 2560,
+        'TELNET_ENABLED': True,
+        'TELNET_EVE_ENABLED': False,
         'TEREDO_ENABLED': True,
         'TEREDO_EVE_ENABLED': False,
         'TEREDO_PORTS': 3544,
@@ -257,6 +266,14 @@ PROTOCOL_CONFIGS.update(
             [],
             val2bool(DEFAULT_VARS['ANOMALY_ENABLED']),
             val2bool(DEFAULT_VARS['ANOMALY_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'bittorrent-dht': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['BITTORRENT_ENABLED']),
+            val2bool(DEFAULT_VARS['BITTORRENT_EVE_ENABLED']),
             True,
             None,
             None,
@@ -341,10 +358,10 @@ PROTOCOL_CONFIGS.update(
             None,
             None,
         ),
-        'ikev2': ProtocolConfig(
+        'ike': ProtocolConfig(
             [],
-            val2bool(DEFAULT_VARS['IKEV2_ENABLED']),
-            val2bool(DEFAULT_VARS['IKEV2_EVE_ENABLED']),
+            val2bool(DEFAULT_VARS['IKE_ENABLED']),
+            val2bool(DEFAULT_VARS['IKE_EVE_ENABLED']),
             True,
             None,
             None,
@@ -405,6 +422,22 @@ PROTOCOL_CONFIGS.update(
             None,
             None,
         ),
+        'pgsql': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['PGSQL_ENABLED']),
+            val2bool(DEFAULT_VARS['PGSQL_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'quic': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['QUIC_ENABLED']),
+            val2bool(DEFAULT_VARS['QUIC_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
         'rdp': ProtocolConfig(
             [],
             val2bool(DEFAULT_VARS['RDP_ENABLED']),
@@ -457,6 +490,14 @@ PROTOCOL_CONFIGS.update(
             [],
             val2bool(DEFAULT_VARS['SSH_ENABLED']),
             val2bool(DEFAULT_VARS['SSH_EVE_ENABLED']),
+            True,
+            None,
+            None,
+        ),
+        'telnet': ProtocolConfig(
+            [],
+            val2bool(DEFAULT_VARS['TELNET_ENABLED']),
+            val2bool(DEFAULT_VARS['TELNET_EVE_ENABLED']),
             True,
             None,
             None,
@@ -888,6 +929,15 @@ def main():
 
                                 elif dumperName == 'mqtt':
                                     for cfgKey in ([dumperName, 'passwords', 'MQTT_PASSWORDS'],):
+                                        deep_set(
+                                            cfg['outputs'][outputIdx][name]['types'][dumperIdx],
+                                            cfgKey[:-1],
+                                            DEFAULT_VARS[cfgKey[-1]],
+                                            deleteIfNone=True,
+                                        )
+
+                                elif dumperName == 'pgsql':
+                                    for cfgKey in ([dumperName, 'passwords', 'PGSQL_PASSWORDS'],):
                                         deep_set(
                                             cfg['outputs'][outputIdx][name]['types'][dumperIdx],
                                             cfgKey[:-1],
