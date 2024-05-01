@@ -239,7 +239,7 @@ Malcolm requires persistent [storage](https://kubernetes.io/docs/concepts/storag
 * `suricata-claim` - storage for Suricata logs
 * `zeek-claim` - storage for Zeek logs and files extracted by Zeek
 
-An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined using NFS can be found in the [kubernetes/01-volumes-nfs.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-nfs.yml.example) manifest file. Before [running](#Running) Malcolm, copy the `01-volumes-nfs.yml.example` file to `01-volumes.yml` and modify (or replace) its contents to define the PersistentVolumeClaim objects.
+An example of how these PersistentVolume and PersistentVolumeClaim objects could be defined using NFS can be found in the [kubernetes/01-volumes-nfs.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-nfs.yml.example) or [kubernetes/01-volumes-vagrant-nfs-server.yml.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-vagrant-nfs-server.yml.example) manifest files. The latter of the two manifest examples is used in conjunction with the NFS server Vagrantfile example: [kubernetes/vagrant/Vagrantfile_NFS_Server.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile_NFS_Server.example) . Before [running](#Running) Malcolm, copy either `01-volumes-vagrant-nfs-server.yml.example` to `01-volumes.yml` (for the Vagrant provided NFS server) or copy `01-volumes-nfs.yml.example` to `01-volumes.yml` and modify (or replace) its contents to define the PersistentVolumeClaim objects configured for your own NFS server IP address and exported paths.
 
 Attempting to start Malcolm without these PersistentVolumeClaims defined in a YAML file in Malcolm's `./kubernetes/` directory will result in an error like this:
 
@@ -302,7 +302,7 @@ Malcolm's control scripts require the [official Python 3 client library for Kube
 
 # <a name="Example"></a> Deployment Example
 
-Here is a basic step-by-step example illustrating how to deploy Malcolm with Kubernetes. For the sake of simplicity, this example uses Vagrant (see [kubernetes/vagrant/Vagrantfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile)) to create a virtualized Kubernetes cluster with one control plane node and two worker nodes. It assumes users have downloaded and extracted the [release tarball]({{ site.github.repository_url }}/releases/latest) or used `./scripts/malcolm_appliance_packager.sh` to package up the files needed to run Malcolm.
+Here is a basic step-by-step example illustrating how to deploy Malcolm with Kubernetes. For the sake of simplicity, this example uses Vagrant - see [kubernetes/vagrant/Vagrantfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile)) to create a virtualized Kubernetes cluster with one control plane node and two worker nodes or see [kubernetes/vagrant/Vagrantfile_NFS_Server.example]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/Vagrantfile_NFS_Server.example)) to include an NFS server with the cluster described above. It assumes users have downloaded and extracted the [release tarball]({{ site.github.repository_url }}/releases/latest) or used `./scripts/malcolm_appliance_packager.sh` to package up the files needed to run Malcolm.
 
 ```
 $ ls -l
@@ -484,7 +484,7 @@ Transfer self-signed client certificates to a remote log forwarder? (y / N): n
 
 ```
 
-Next, copy `./kubernetes/01-volumes-nfs.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.
+Next, copy `./kubernetes/01-volumes-vagrant-nfs-server.yml.example` to `./kubernetes/01-volumes.yml` (when using the Vagrant provided NFS server) or copy `./kubernetes/01-volumes-nfs.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.
 
 ```
 $ cp -v ./kubernetes/01-volumes-nfs.yml.example ./kubernetes/01-volumes.yml
