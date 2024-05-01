@@ -39,6 +39,8 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 ENV YQ_VERSION "4.42.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
 
+ENV SURICATA_VERSION_PATTERN "1:7.0.*"
+
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
 ENV SURICATA_CUSTOM_RULES_DIR /opt/suricata/rules
@@ -54,6 +56,7 @@ ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+    echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list.d/backports.list && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -97,11 +100,12 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
         python3-zmq \
         rsync \
         supervisor \
-        suricata \
-        suricata-update \
         tini \
         vim-tiny \
         zlib1g && \
+    apt-get install -q -y --no-install-recommends -t bookworm-backports \
+        suricata=${SURICATA_VERSION_PATTERN} \
+        suricata-update && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog && \
     curl -fsSLO "$SUPERCRONIC_URL" && \
         echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
