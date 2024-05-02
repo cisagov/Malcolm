@@ -216,7 +216,7 @@ if [ -d "$WORKDIR" ]; then
     --apt-source-archives false \
     --architectures amd64 \
     --archive-areas 'main contrib non-free non-free-firmware' \
-    --backports false \
+    --backports true \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-live "boot=live components username=sensor nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \

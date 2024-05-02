@@ -152,6 +152,14 @@ EOF
 fi
 ###
 
+# Some apt-get installs that needed to be handled manually
+#   (e.g., I want to force stuff from backports without apt-pinning)
+if [[ -f /etc/apt/forced-backports-packages.conf ]]; then
+	apt-get -y update
+  apt-get install -y --no-install-recommends -t bookworm-backports \
+    $(cat /etc/apt/forced-backports-packages.conf)
+fi
+
 # update suricata rules
 /usr/bin/suricata-update -v -D /var/lib/suricata --etopen
 
