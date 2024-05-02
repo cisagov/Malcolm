@@ -72,6 +72,7 @@ DEFAULT_VARS.update(
         'ANOMALY_EVE_ENABLED': False,
         'ANOMALY_PACKETHDR': False,
         'ANOMALY_STREAM': False,
+        'APP_LAYER_FRAMES': False,
         'ASN1_MAX_FRAMES': 256,
         'AUTOFP_SCHEDULER': 'hash',
         'BITTORRENT_ENABLED': True,
@@ -81,6 +82,7 @@ DEFAULT_VARS.update(
         'CUSTOM_RULES_ONLY': False,
         'DCERPC_ENABLED': True,
         'DCERPC_EVE_ENABLED': False,
+        'DCERPC_MAX_TX': 1024,
         'DEFRAG_HASH_SIZE': 65536,
         'DEFRAG_MAX_FRAGS': 65535,
         'DEFRAG_MEMCAP': '32mb',
@@ -129,6 +131,9 @@ DEFAULT_VARS.update(
         'HOST_PREALLOC': 1000,
         'HTTP2_ENABLED': True,
         'HTTP2_EVE_ENABLED': False,
+        'HTTP2_MAX_STREAMS': 4096,
+        'HTTP2_MAX_TABLE_SIZE': 65536,
+        'HTTP2_MAX_REASSEMBLY_SIZE': 102400
         'HTTP_ENABLED': True,
         'HTTP_EVE_ENABLED': False,
         'HTTP_EXTENDED': False,
@@ -154,6 +159,7 @@ DEFAULT_VARS.update(
         'NETFLOW_EVE_ENABLED': False,
         'NFS_ENABLED': True,
         'NFS_EVE_ENABLED': False,
+        'NFS_MAX_TX': 1024,
         'NTP_ENABLED': True,
         'NTP_EVE_ENABLED': False,
         'ORACLE_PORTS': 1521,
@@ -162,6 +168,8 @@ DEFAULT_VARS.update(
         'PCRE_RECURSION': 1500,
         'PGSQL_ENABLED': True,
         'PGSQL_EVE_ENABLED': False,
+        'PGSQL_STREAM_DEPTH': 0,
+        'PGSQL_MAX_TX': 1024,
         'PGSQL_PASSWORDS': False,
         'QUIC_ENABLED': True,
         'QUIC_EVE_ENABLED': False,
@@ -177,6 +185,7 @@ DEFAULT_VARS.update(
         'SIP_EVE_ENABLED': False,
         'SMB_ENABLED': True,
         'SMB_EVE_ENABLED': False,
+        'SMB_MAX_TX': 1024,
         'SMB_PORTS': "[139,445]",
         'SMB_STREAM_DEPTH': 0,
         'SMTP_BODY_MD5': False,
@@ -192,6 +201,7 @@ DEFAULT_VARS.update(
         'SMTP_INSPECTED_TRACKER_CONTENT_INSPECT_WINDOW': 4096,
         'SMTP_INSPECTED_TRACKER_CONTENT_LIMIT': 100000,
         'SMTP_RAW_EXTRACTION': False,
+        'SMTP_MAX_TX': 256,
         'SNMP_ENABLED': True,
         'SNMP_EVE_ENABLED': False,
         'SSH_ENABLED': True,
@@ -902,6 +912,15 @@ def main():
                                             deleteIfNone=True,
                                         )
 
+                                elif dumperName == 'frame':
+                                    for cfgKey in ([dumperName, 'enabled', 'APP_LAYER_FRAMES'],):
+                                        deep_set(
+                                            cfg['outputs'][outputIdx][name]['types'][dumperIdx],
+                                            cfgKey[:-1],
+                                            DEFAULT_VARS[cfgKey[-1]],
+                                            deleteIfNone=True,
+                                        )
+
                                 elif dumperName == 'http':
                                     for cfgKey in (
                                         [dumperName, 'extended', 'HTTP_EXTENDED'],
@@ -1100,11 +1119,20 @@ def main():
 
     # remaining protocol-related settings and global-settings not in the eve-log section
     for cfgKey in (
+        ['app-layer', 'protocols', 'dcerpc', 'max-tx', 'DCERPC_MAX_TX'],
         ['app-layer', 'protocols', 'ftp', 'memcap', 'FTP_MEMCAP'],
+        ['app-layer', 'protocols', 'http2', 'max-streams', 'HTTP2_MAX_STREAMS'],
+        ['app-layer', 'protocols', 'http2', 'max-table-size', 'HTTP2_MAX_TABLE_SIZE'],
+        ['app-layer', 'protocols', 'http2', 'max-reassembly-size', 'HTTP2_MAX_REASSEMBLY_SIZE'],
         ['app-layer', 'protocols', 'mqtt', 'max-msg-length', 'MQTT_MAX_MSG_LENGTH'],
         ['app-layer', 'protocols', 'modbus', 'stream-depth', 'MODBUS_STREAM_DEPTH'],
+        ['app-layer', 'protocols', 'nfs', 'max-tx', 'NFS_MAX_TX'],
+        ['app-layer', 'protocols', 'pgsql', 'stream-depth', 'PGSQL_STREAM_DEPTH'],
+        ['app-layer', 'protocols', 'pgsql', 'max-tx', 'PGSQL_MAX_TX'],
         ['app-layer', 'protocols', 'smb', 'stream-depth', 'SMB_STREAM_DEPTH'],
+        ['app-layer', 'protocols', 'smb', 'max-tx', 'SMB_MAX_TX'],
         ['app-layer', 'protocols', 'smtp', 'raw-extraction', 'SMTP_RAW_EXTRACTION'],
+        ['app-layer', 'protocols', 'smtp', 'max-tx', 'SMTP_MAX_TX'],
         ['app-layer', 'protocols', 'smtp', 'mime', 'decode-mime', 'SMTP_DECODE_MIME'],
         ['app-layer', 'protocols', 'smtp', 'mime', 'decode-base64', 'SMTP_DECODE_BASE64'],
         [
