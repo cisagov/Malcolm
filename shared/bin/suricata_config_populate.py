@@ -127,7 +127,7 @@ DEFAULT_VARS.update(
         'HOST_HASH_SIZE': 4096,
         'HOST_MEMCAP': '32mb',
         'HOST_PREALLOC': 1000,
-        'HTTP2_ENABLED': False,
+        'HTTP2_ENABLED': True,
         'HTTP2_EVE_ENABLED': False,
         'HTTP_ENABLED': True,
         'HTTP_EVE_ENABLED': False,
