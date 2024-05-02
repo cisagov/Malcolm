@@ -133,7 +133,7 @@ DEFAULT_VARS.update(
         'HTTP2_EVE_ENABLED': False,
         'HTTP2_MAX_STREAMS': 4096,
         'HTTP2_MAX_TABLE_SIZE': 65536,
-        'HTTP2_MAX_REASSEMBLY_SIZE': 102400
+        'HTTP2_MAX_REASSEMBLY_SIZE': 102400,
         'HTTP_ENABLED': True,
         'HTTP_EVE_ENABLED': False,
         'HTTP_EXTENDED': False,
