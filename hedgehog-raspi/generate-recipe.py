@@ -23,7 +23,7 @@ if version not in ["1", "2", "3", "4"]:
     sys.exit(1)
 
 suite = sys.argv[2]
-if suite not in ['bullseye', 'bookworm', 'trixie']:
+if suite not in ['bookworm']:
     print("E: unsupported suite %s" % suite, file=sys.stderr)
     sys.exit(1)
 target_yaml = 'raspi_%s_%s.yaml' % (version, suite)
@@ -68,9 +68,8 @@ if version != '2':
 else:
     bluetooth_firmware = ''
 
-# Pi 4 on buster required some backports. Let's keep variables around, ready to
-# be used whenever we need to pull specific things from backports.
-backports_enable = False
+# We're pulling suricata from backports
+backports_enable = True
 backports_suite = '%s-backports' % suite
 
 # Serial console:
