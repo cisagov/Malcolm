@@ -103,9 +103,7 @@ ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
@@ -115,7 +113,8 @@ ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_S
 COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 COPY --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
 
-RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
@@ -162,11 +161,8 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       supervisor \
       watchdog \
       yara-python && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     mkdir -p "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" "${SRC_BASE_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \

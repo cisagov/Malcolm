@@ -50,9 +50,7 @@ ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --from=npmget /usr/local/lib/node_modules/filepond /var/www/upload/filepond
@@ -62,7 +60,8 @@ COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-metadata /va
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-rename /var/www/upload/filepond-plugin-file-rename
 COPY --from=npmget /usr/local/lib/node_modules/@jcubic /var/www/upload/@jcubic
 
-RUN apt-get -q update && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
       ca-certificates \
@@ -78,11 +77,8 @@ RUN apt-get -q update && \
       supervisor \
       tini \
       vim-tiny && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -sr "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     mkdir -p /var/www/upload/server/php \
              /tmp/filepond-server && \
     cd /tmp && \

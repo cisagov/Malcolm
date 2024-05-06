@@ -48,13 +48,12 @@ ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
 # build and install system packages, zeek, spicy and plugins
-RUN export DEBARCH=$(dpkg --print-architecture) && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    export DEBARCH=$(dpkg --print-architecture) && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -116,11 +115,8 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     mkdir -p /tmp/zeek-packages && \
       bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
       dpkg -i /tmp/zeek-packages/*.deb && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
