@@ -99,5 +99,5 @@ jobs:
         with:
           context: ./hedgehog-raspi
           push: true
-          provenance: false
+          # provenance: false
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog-raspi:${{ steps.extract_branch.outputs.branch }}

@@ -99,7 +99,7 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
           push: true
-          provenance: false
+          # provenance: false
           platforms: ${{ matrix.platform }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/postgresql:${{ steps.extract_branch.outputs.branch }}
       -
