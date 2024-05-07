@@ -24,29 +24,7 @@ on:
   repository_dispatch:
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.matrix.outputs.value }}
-    steps:
-      -
-        name: Cancel previous run in progress
-        id: cancel-previous-runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          ignore_sha: true
-          all_but_latest: true
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-      -
-        name: Enumerate platforms
-        id: matrix
-        run: |
-          echo "value=[\"linux/amd64\", \"linux/arm64\"]" >> $GITHUB_OUTPUT
-      -
-        run: |
-          echo "${{ steps.matrix.outputs.value }}"
   docker:
-    needs: [ setup ]
     runs-on: ubuntu-22.04
     permissions:
       actions: write
@@ -56,7 +34,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        value: ${{fromJSON(needs.setup.outputs.matrix)}}
+        platform:
+          - linux/amd64
+          - linux/arm64
     steps:
       -
         name: Cancel previous run in progress
@@ -93,7 +73,7 @@ jobs:
         id: setup-qemu
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: amd64,arm64
+          platforms: ${{ matrix.platform }}
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -119,11 +99,11 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
           push: true
-          platforms: ${{ matrix.value }}
+          platforms: ${{ matrix.platform }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/zeek:${{ steps.extract_branch.outputs.branch }}
       -
         name: Run Trivy vulnerability scanner
-        if: ${{ matrix.value == 'linux/amd64' }}
+        if: ${{ matrix.platform == 'linux/amd64' }}
         id: trivy-scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -139,7 +119,7 @@ jobs:
           exit-code: '0'
       -
         name: Upload Trivy scan results to GitHub Security tab
-        if: ${{ matrix.value == 'linux/amd64' }}
+        if: ${{ matrix.platform == 'linux/amd64' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
