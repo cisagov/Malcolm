@@ -1,4 +1,6 @@
-FROM netboxcommunity/netbox:v3.6.7
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v3.6.7
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

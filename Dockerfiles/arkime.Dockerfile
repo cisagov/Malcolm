@@ -1,4 +1,6 @@
-FROM debian:12-slim AS build
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} debian:12-slim AS build
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -79,7 +81,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "https://github.com/arkime/arkime/releases/download/${ARKIME_VERSION}/ja4plus.${DEBARCH}.so" && \
     chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so"
 
-FROM debian:12-slim
+FROM --platform=${TARGETPLATFORM} debian:12-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

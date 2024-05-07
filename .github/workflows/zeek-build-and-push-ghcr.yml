@@ -36,7 +36,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          # - linux/arm64
+          - linux/arm64
     steps:
       -
         name: Cancel previous run in progress
@@ -95,6 +95,7 @@ jobs:
           file: ./Dockerfiles/zeek.Dockerfile
           build-args: |
             BUILD_JOBS=2
+            TARGETPLATFORM=${{ matrix.platform }}
             MALCOLM_VERSION=${{ steps.extract_malcolm_version.outputs.mversion }}
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}

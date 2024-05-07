@@ -36,7 +36,7 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          # - linux/arm64
+          - linux/arm64
     steps:
       -
         name: Cancel previous run in progress
@@ -94,6 +94,7 @@ jobs:
           context: .
           file: ./Dockerfiles/postgresql.Dockerfile
           build-args: |
+            TARGETPLATFORM=${{ matrix.platform }}
             MALCOLM_VERSION=${{ steps.extract_malcolm_version.outputs.mversion }}
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}

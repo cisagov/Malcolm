@@ -1,4 +1,6 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.13.3
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.13.3
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
