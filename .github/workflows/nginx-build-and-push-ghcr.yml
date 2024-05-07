@@ -106,6 +106,7 @@ jobs:
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           push: true
+          provenance: false
           platforms: ${{ matrix.platform }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/nginx-proxy:${{ steps.extract_branch.outputs.branch }}
       -

@@ -100,6 +100,7 @@ jobs:
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
             MAXMIND_GEOIP_DB_LICENSE_KEY=${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}
           push: true
+          provenance: false
           platforms: ${{ matrix.platform }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/arkime:${{ steps.extract_branch.outputs.branch }}
       -

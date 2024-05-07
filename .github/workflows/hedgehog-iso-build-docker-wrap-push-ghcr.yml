@@ -146,4 +146,5 @@ jobs:
         with:
           context: ./hedgehog-iso
           push: true
+          provenance: false
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}
