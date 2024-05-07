@@ -25,17 +25,43 @@ on:
   repository_dispatch:
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      -
+        name: Cancel previous run in progress
+        id: cancel-previous-runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          ignore_sha: true
+          all_but_latest: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+      -
+        name: Enumerate platforms
+        id: matrix
+        run: |
+          echo "value=[\"linux/amd64\", \"linux/arm64\"]" >> $GITHUB_OUTPUT
+      -
+        run: |
+          echo "${{ steps.matrix.outputs.value }}"
   docker:
+    needs: [ setup ]
     runs-on: ubuntu-22.04
     permissions:
       actions: write
       packages: write
       contents: read
       security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        value: ${{fromJSON(needs.setup.outputs.matrix)}}
     steps:
       -
         name: Cancel previous run in progress
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           ignore_sha: true
           all_but_latest: true
@@ -93,10 +119,11 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.value }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/dashboards-helper:${{ steps.extract_branch.outputs.branch }}
       -
         name: Run Trivy vulnerability scanner
+        if: ${{ matrix.value }} == 'linux/amd64'
         id: trivy-scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -112,7 +139,7 @@ jobs:
           exit-code: '0'
       -
         name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        if: ${{ matrix.value }} == 'linux/amd64'
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
