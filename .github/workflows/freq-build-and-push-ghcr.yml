@@ -60,6 +60,11 @@ jobs:
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
       -
+        name: Generate arch tag suffix
+        shell: bash
+        run: echo "archtag=$([[ "${{ matrix.platform }}" == 'linux/amd64' ]] && echo '' || ( echo -n '-' ; echo "${{ matrix.platform }}" | cut -d '/' -f 2) )" >> $GITHUB_OUTPUT
+        id: arch_tag_suffix
+      -
         name: Extract commit SHA
         shell: bash
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -100,9 +105,9 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
           push: true
-          # provenance: false
+          provenance: false
           platforms: ${{ matrix.platform }}
-          tags: ghcr.io/${{ github.repository_owner }}/malcolm/freq:${{ steps.extract_branch.outputs.branch }}
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/freq:${{ steps.extract_branch.outputs.branch }}${{ steps.arch_tag_suffix.outputs.archtag }}
       -
         name: Run Trivy vulnerability scanner
         if: ${{ matrix.platform == 'linux/amd64' }}
@@ -111,7 +116,7 @@ jobs:
         with:
           scan-type: 'image'
           scanners: 'vuln'
-          image-ref: ghcr.io/${{ github.repository_owner }}/malcolm/freq:${{ steps.extract_branch.outputs.branch }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/malcolm/freq:${{ steps.extract_branch.outputs.branch }}${{ steps.arch_tag_suffix.outputs.archtag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'

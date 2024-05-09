@@ -81,6 +81,11 @@ jobs:
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
       -
+        name: Generate arch tag suffix
+        shell: bash
+        run: echo "archtag=$([[ "${{ matrix.platform }}" == 'linux/amd64' ]] && echo '' || ( echo -n '-' ; echo "${{ matrix.platform }}" | cut -d '/' -f 2) )" >> $GITHUB_OUTPUT
+        id: arch_tag_suffix
+      -
         name: Extract commit SHA
         shell: bash
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -146,5 +151,5 @@ jobs:
         with:
           context: ./hedgehog-iso
           push: true
-          # provenance: false
-          tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}
+          provenance: false
+          tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}${{ steps.arch_tag_suffix.outputs.archtag }}
