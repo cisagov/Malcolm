@@ -84,7 +84,7 @@ function _gitreponame() {
 
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
-  $GREP -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
+  $GREP -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | sed 's/-[^-]*$//' | uniq -c | sort -nr | awk '{print $2}' | head -n 1
 }
 
 ################################################################################
@@ -107,7 +107,7 @@ function _PullAndTagGithubWorkflowBuild() {
   IMAGE=$1
 
   docker pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" && \
-    docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" ghcr.io/idaholab/"$IMAGE":"${VERSION}${IMAGE_ARCH_SUFFIX}"
+    docker tag ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" ghcr.io/idaholab/"$IMAGE":"${VERSION}${IMAGE_ARCH_SUFFIX}"
 }
 
 function PullAndTagGithubWorkflowImages() {
