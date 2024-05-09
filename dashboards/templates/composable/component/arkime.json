@@ -835,6 +835,22 @@
         "tagsCnt" : {
           "type" : "long"
         },
+        "tcp" : {
+          "properties" : {
+            "ja4l": {
+              "type": "keyword"
+            },
+            "ja4ls": {
+              "type": "keyword"
+            },
+            "ja4t": {
+              "type": "keyword"
+            },
+            "ja4ts": {
+              "type": "keyword"
+            }
+          }
+        },
         "tcpflags" : {
           "properties" : {
             "ack" : {
