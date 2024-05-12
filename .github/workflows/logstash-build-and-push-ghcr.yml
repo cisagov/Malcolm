@@ -10,6 +10,7 @@ on:
       - 'Dockerfiles/logstash.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/agg-init.sh'
+      - '!shared/bin/capa-build.sh'
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
       - '!shared/bin/extracted_files_http_server.py'

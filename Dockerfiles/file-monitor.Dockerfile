@@ -92,10 +92,6 @@ ENV YARA_VERSION "4.5.0"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV CAPA_VERSION "7.0.1"
-ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
-ENV CAPA_DIR "/opt/capa"
-ENV CAPA_BIN "${CAPA_DIR}/capa"
 ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
 ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
@@ -109,6 +105,7 @@ ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
+COPY --chmod=777 shared/bin/capa-build.sh /usr/local/bin/
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
@@ -146,6 +143,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       libzmq5 \
       psmisc \
       python3 \
+      python3-venv \
       python3-bs4 \
       python3-dev \
       python3-pip \
@@ -183,12 +181,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     cd /tmp && \
       /usr/local/bin/web-ui-asset-download.sh -o "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css" && \
     cd /tmp && \
-      curl -fsSL -o ./capa.zip "${CAPA_URL}" && \
-      unzip ./capa.zip && \
-      chmod 755 ./capa && \
-      mkdir -p "${CAPA_DIR}" && \
-      mv ./capa "${CAPA_BIN}" && \
-      rm -f ./capa.zip && \
+      /usr/local/bin/capa-build.sh && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -201,13 +194,14 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         libssl-dev \
         libtool \
         make \
-        python3-dev && \
+        python3-dev \
+        python3-venv && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
-    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
@@ -223,7 +217,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
+      echo "0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
   apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/*
@@ -248,9 +242,6 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 WORKDIR /zeek/extract_files
 
-ENV PATH "${CAPA_DIR}:${PATH}"
-
-VOLUME ["$CAPA_DIR"]
 VOLUME ["$CLAMAV_RULES_DIR"]
 VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]

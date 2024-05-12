@@ -8,6 +8,7 @@ on:
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
+      - '!shared/bin/capa-build.sh'
       - '!shared/bin/configure-capture.py'
       - '!shared/bin/extracted_files_http_server.py'
       - '!shared/bin/web-ui-asset-download.sh'

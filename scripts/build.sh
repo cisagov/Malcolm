@@ -111,6 +111,7 @@ FILES_IN_IMAGES=(
   "/usr/share/filebeat/filebeat.yml;filebeat-oss"
   "/var/www/upload/filepond/dist/filepond.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
+  "/usr/local/bin/capa;file-monitor"
   "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
   "/etc/ja3.yaml;logstash"

@@ -9,6 +9,7 @@ on:
       - 'Dockerfiles/redis.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/agg-init.sh'
+      - '!shared/bin/capa-build.sh'
       - '!shared/bin/common-init.sh'
       - '!shared/bin/sensor-init.sh'
       - '!shared/bin/os-disk-config.py'
