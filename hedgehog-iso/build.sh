@@ -188,12 +188,8 @@ if [ -d "$WORKDIR" ]; then
   curl -s -S -L -o oui.txt "https://www.wireshark.org/download/automated/data/manuf"
   popd >/dev/null 2>&1
 
-  # clone and build Arkime .deb package in its own clean environment (rather than in hooks/)
-  rsync -a "$SCRIPT_PATH"/shared/arkime_patch "$SCRIPT_PATH"/arkime/arkime_patch
-  bash "$SCRIPT_PATH/arkime/build-docker-image.sh"
-  docker run --rm -v "$SCRIPT_PATH"/arkime:/build arkime-build:latest -o /build
-  mv "$SCRIPT_PATH/arkime"/*.deb ./config/packages.chroot/
-  docker rmi -f arkime-build:latest
+  # TODO: switch to release when it's actually out, or revert to source build
+  curl -s -S -L -o ./config/packages.chroot/arkime.deb "https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_amd64.deb"
 
   # download Zeek .deb packages
   bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/

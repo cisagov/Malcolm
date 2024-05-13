@@ -91,8 +91,7 @@ hostname = 'Hedgehog-rpi-%s' % version
 # Nothing yet!
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
-    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
-    'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
     'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
     % MALCOLM_DIR,

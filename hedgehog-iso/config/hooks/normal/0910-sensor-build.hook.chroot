@@ -63,6 +63,14 @@ mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 rm -Rf zeek-$ZEEK_VER*
 ###
 
+# get Arkime JA4+ plugin
+# TODO: switch to release when it's actually out, or revert to source build
+curl "${GITHUB_API_CURL_ARGS[@]}" \
+     -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" \
+     "https://github.com/arkime/arkime/releases/download/last-commit/ja4plus.${ARCH}.so"
+cp "/opt/arkime/plugins/ja4plus.${ARCH}.so" /opt/hedgehog_install_artifacts/
+###
+
 if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 	# tweak some stuff for aide
 	chmod a-x /etc/cron.daily/aide

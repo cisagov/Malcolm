@@ -32,6 +32,7 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
+# TODO: switch back to release when it's actually out, or revert to source build
 ARKIME_VERSION="5.1.2"
 
 BEATS_VER="8.13.3"
@@ -39,7 +40,7 @@ BEATS_OSS="-oss"
 
 # Option to build from sources if desired
 # Building from source will increase build time A LOT (especially Zeek)!
-BUILD_ARKIME_FROM_SOURCE=1
+BUILD_ARKIME_FROM_SOURCE=0
 BUILD_YARA_FROM_SOURCE=1
 BUILD_ZEEK_FROM_SOURCE=0
 
