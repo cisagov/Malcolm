@@ -32,7 +32,6 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-# TODO: switch back to release when it's actually out, or revert to source build
 ARKIME_VERSION="5.1.2"
 
 BEATS_VER="8.13.3"
@@ -61,8 +60,10 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    arkime_ver="${ARKIME_VERSION}-1"
-    curl -sSL -o /tmp/arkime-deb/arkime.deb "https://github.com/arkime/arkime/releases/download/v5.0.0/arkime_${arkime_ver}.ubuntu2204_arm64.deb"
+    # TODO: switch back to release when it's actually out, or revert to source build
+    # arkime_ver="${ARKIME_VERSION}-1"
+    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_XXX.deb"
+    curl -fsSL -o /tmp/arkime-deb/arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${ARCH}/g")"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
 
@@ -398,13 +399,6 @@ install_files() {
     fi
     curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
-    popd >/dev/null 2>&1
-
-    # download ja4+ plugin
-    mkdir -p /opt/arkime/plugins
-    pushd /opt/arkime/plugins >/dev/null 2>&1
-    curl -sSL -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" "https://github.com/arkime/arkime/releases/download/v$ARKIME_VERSION/ja4plus.$ARCH.so" || true
-    [[ -f "/opt/arkime/plugins/ja4plus.${ARCH}.so" ]] && chmod 755 "/opt/arkime/plugins/ja4plus.${ARCH}.so"
     popd >/dev/null 2>&1
 
     # download assets for extracted file server
