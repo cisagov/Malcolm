@@ -32,7 +32,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
 
-ENV YQ_VERSION "4.43.1"
+ENV YQ_VERSION "4.44.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
