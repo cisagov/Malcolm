@@ -15,7 +15,7 @@ if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP" && type git) > /dev/nu
   exit 1
 fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
-IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/x86_64//' | sed 's/aarch64/-arm64/')"
+IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
 
 set -uo pipefail
 shopt -s nocasematch

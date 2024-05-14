@@ -4289,7 +4289,7 @@ def main():
     else:
         args.imageArch = ''
         if rawPlatform := platform.machine().lower():
-            if rawPlatform == 'aarch64':
+            if (rawPlatform == 'aarch64') or (rawPlatform == 'arm64'):
                 args.imageArch = '-arm64'
 
     orchMode = OrchestrationFramework.UNKNOWN
