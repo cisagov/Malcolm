@@ -117,6 +117,8 @@ The relevant environment variables related to tuning Arkime for live packet capt
 - `ARKIME_TPACKETV3_NUM_THREADS` - [the number of threads](https://arkime.com/settings#tpacketv3NumThreads) used to read packets from each network interface
 - `ARKIME_TPACKETV3_BLOCK_SIZE` - [the block size in bytes](https://arkime.com/settings#tpacketv3BlockSize) used for reads from each interface
 
+Aside from the settings mentioned above, to quote the Arkime documentation, often issues with traffic capture performance "are **not** a problem with Arkime, but usually an issue with either the hardware or the packet rate exceeding what the hardware can save to disk." Please read [**Why am I dropping packets? (and Disk Q issues)**](https://arkime.com/faq#why-am-i-dropping-packets) from the Arkime FAQ.
+
 ### <a name="LiveAnalysisTuningSuricata"></a>Suricata
 
 Suricata's resource utilization and performance can be tuned using [environment variables](malcolm-config.md#MalcolmConfigEnvVars). These environment variables are the same for both [Hedgehog Linux](#Hedgehog) and Malcolm's own monitoring [of local network interfaces](#LocalPCAP). For Hedgehog Linux, they are found in [`/opt/sensor/sensor_ctl/control_vars.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/control_vars.conf), and for Malcolm they should be added to or modified in [`suricata-live.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/suricata-live.env.example).
