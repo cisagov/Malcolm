@@ -2,6 +2,27 @@
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
+#
+# environment variables are used to control the contents of these files
+#   - zeekctl.cfg
+#   - node.cfg
+#   - networks.cfg
+#
+# CAPTURE_INTERFACE or PCAP_IFACE - defines the capture interfaces, comma-separated list
+# CAPTURE_FILTER or PCAP_FILTER - bpf filter for capture, however see idaholab/Malcolm#474 as this does not seem to be propogated correctly
+# ZEEK_AF_PACKET_BUFFER_SIZE - AF_Packet ring buffer size
+# ZEEK_AF_PACKET_FANOUT_MODE - AF_Packet fanout mode
+# ZEEK_LB_METHOD - Zeek load balancing method: should be "custom" for AF_Packet
+# ZEEK_LB_PROCS_WORKER_n - load balancing processes for worker n; should match (and will default to) the number of ZEEK_PIN_CPUS_WORKER_n if specified, else ZEEK_LB_PROCS_WORKER_n
+# ZEEK_LB_PROCS_WORKER_DEFAULT - default for ZEEK_LB_PROCS_WORKER_n if unspecified (defaults to '1'); a value of '0' means "autocalculate based on the number of CPUs the system has"
+# ZEEK_LB_PROCS_CPUS_RESERVED - if ZEEK_LB_PROCS_WORKER_DEFAULT is '0' (autocalculate), exclude this number of CPUs from the autocalculation (defaults to '4' for kernel,manager,proxy,logger)
+# ZEEK_PIN_CPUS_WORKER_n - list of CPUs to pin for worker n
+# ZEEK_PIN_CPUS_WORKER_AUTO - automatically pin worker CPUs (default 'false')
+# ZEEK_PIN_CPUS_LOGGER - list of CPUs to pin for logger process, or 'true' to auto-pin one
+# ZEEK_PIN_CPUS_MANAGER - list of CPUs to pin for manager process, or 'true' to auto-pin one
+# ZEEK_PIN_CPUS_PROXY - list of CPUs to pin for proxy process, or 'true' to auto-pin one
+
+
 # get utilities for finding default zeek path and executable
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
 [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
@@ -58,16 +79,53 @@ if [[ ! -d "$ZEEK_INSTALL_PATH" ]]; then
   exit 1
 fi
 
-# default file extraction mode is "do not extract files"
+[[ -z $ZEEK_LOCAL_NETS ]] && ZEEK_LOCAL_NETS=
+[[ -z $ZEEK_INTEL_REFRESH_ON_DEPLOY ]] && ZEEK_INTEL_REFRESH_ON_DEPLOY="true"
 [[ -z $ZEEK_EXTRACTOR_MODE ]] && ZEEK_EXTRACTOR_MODE="none"
 
-# some other defaults
-[[ -z $ZEEK_LOCAL_NETS ]] && ZEEK_LOCAL_NETS=
-[[ -z $ZEEK_LB_PROCS ]] && ZEEK_LB_PROCS="1"
-[[ -z $WORKER_LB_PROCS ]] && WORKER_LB_PROCS="$ZEEK_LB_PROCS"
 [[ -z $ZEEK_LB_METHOD ]] && ZEEK_LB_METHOD="custom"
 [[ -z $ZEEK_AF_PACKET_BUFFER_SIZE ]] && ZEEK_AF_PACKET_BUFFER_SIZE="$(echo "64*1024*1024" | bc)"
-[[ -z $ZEEK_INTEL_REFRESH_ON_DEPLOY ]] && ZEEK_INTEL_REFRESH_ON_DEPLOY="true"
+[[ -z $ZEEK_AF_PACKET_FANOUT_MODE ]] && ZEEK_AF_PACKET_FANOUT_MODE="FANOUT_HASH"
+[[ -z $ZEEK_PIN_CPUS_AUTO ]] && ZEEK_PIN_CPUS_AUTO="false"
+[[ -z $ZEEK_LB_PROCS_CPUS_RESERVED ]] && ZEEK_LB_PROCS_CPUS_RESERVED="4"
+
+# get the total number of CPUs and interfaces which may be used in calculations later
+TOTAL_CPUS_UNFILTERED="$(nproc --all 2>/dev/null || echo '0')"
+(( $TOTAL_CPUS_UNFILTERED <= 0 )) && TOTAL_CPUS_UNFILTERED=1
+TOTAL_CPUS_FILTERED=$((TOTAL_CPUS_UNFILTERED-ZEEK_LB_PROCS_CPUS_RESERVED))
+(( $TOTAL_CPUS_FILTERED <= 0 )) && TOTAL_CPUS_FILTERED=1
+TOTAL_IFACES="$(echo "${CAPTURE_INTERFACE}" | awk -F',' '{print NF}')"
+(( $TOTAL_IFACES <= 0 )) && TOTAL_IFACES=1
+
+# calculate workers based on the number of CPUs, minus reserved
+[[ -z $ZEEK_LB_PROCS_WORKER_DEFAULT ]] && ZEEK_LB_PROCS_WORKER_DEFAULT="1"
+(( $ZEEK_LB_PROCS_WORKER_DEFAULT == 0 )) && ZEEK_LB_PROCS_WORKER_DEFAULT=$((TOTAL_CPUS_FILTERED/TOTAL_IFACES))
+(( $ZEEK_LB_PROCS_WORKER_DEFAULT <= 0 )) && ZEEK_LB_PROCS_WORKER_DEFAULT=1
+
+# auto-pin proxy, manager, and logger if instructed to and we have enough CPUs
+[[ -n $ZEEK_PIN_CPUS_PROXY ]] && \
+  [[ "$ZEEK_PIN_CPUS_PROXY" == "true" ]] && \
+  (( $TOTAL_CPUS_UNFILTERED > $ZEEK_LB_PROCS_CPUS_RESERVED )) && \
+  ZEEK_PIN_CPUS_PROXY=$((TOTAL_CPUS_UNFILTERED-1))
+[[ -n $ZEEK_PIN_CPUS_PROXY ]] && \
+  [[ "$ZEEK_PIN_CPUS_PROXY" == "true" ]] && \
+  ZEEK_PIN_CPUS_PROXY=
+
+[[ -n $ZEEK_PIN_CPUS_MANAGER ]] && \
+  [[ "$ZEEK_PIN_CPUS_MANAGER" == "true" ]] && \
+  (( $TOTAL_CPUS_UNFILTERED > ( $ZEEK_LB_PROCS_CPUS_RESERVED + 1 ) )) && \
+  ZEEK_PIN_CPUS_MANAGER=$((TOTAL_CPUS_UNFILTERED-2))
+[[ -n $ZEEK_PIN_CPUS_MANAGER ]] && \
+    [[ "$ZEEK_PIN_CPUS_MANAGER" == "true" ]] && \
+    ZEEK_PIN_CPUS_MANAGER=
+
+[[ -n $ZEEK_PIN_CPUS_LOGGER ]] && \
+  [[ "$ZEEK_PIN_CPUS_LOGGER" == "true" ]] && \
+(( $TOTAL_CPUS_UNFILTERED > ( $ZEEK_LB_PROCS_CPUS_RESERVED + 2 ) )) && \
+  ZEEK_PIN_CPUS_LOGGER=$((TOTAL_CPUS_UNFILTERED-3))
+[[ -n $ZEEK_PIN_CPUS_LOGGER ]] && \
+    [[ "$ZEEK_PIN_CPUS_LOGGER" == "true" ]] && \
+    ZEEK_PIN_CPUS_LOGGER=
 
 # if zeek log path is unspecified, write logs to pwd
 [[ -z $ZEEK_LOG_PATH ]] && ZEEK_LOG_PATH=.
@@ -190,10 +248,15 @@ WORKER_ID=1
 # AF_PACKET fanout ID (per-interface)
 FANOUT_ID=1
 
+# for automatic CPU pinning
+CURRENT_CPU_ID=0
+HIGH_CPU_ID=$((TOTAL_CPUS_FILTERED-1))
+
 # create a worker for each interface
 # see idaholab/Malcolm#36 for details on fine-tuning
 for IFACE in ${CAPTURE_INTERFACE//,/ }; do
 
+  # determine the number of worker lb_procs
   WORKER_CPU_PINS_VAR=ZEEK_PIN_CPUS_WORKER_${WORKER_ID}
   WORKER_LB_PROCS_VAR=ZEEK_LB_PROCS_WORKER_${WORKER_ID}
   # priority for worker's lb_procs:
@@ -204,8 +267,8 @@ for IFACE in ${CAPTURE_INTERFACE//,/ }; do
     # 2. ZEEK_PIN_CPUS_WORKER_n is specified, count the values
     WORKER_LB_PROCS="$(echo "${!WORKER_CPU_PINS_VAR}" | awk -F',' '{print NF}')"
   else
-    # default to $ZEEK_LB_PROCS
-    WORKER_LB_PROCS="$ZEEK_LB_PROCS"
+    # default to $ZEEK_LB_PROCS_WORKER_DEFAULT
+    WORKER_LB_PROCS="$ZEEK_LB_PROCS_WORKER_DEFAULT"
   fi
 
   cat << EOF >> ./node.cfg
@@ -220,10 +283,21 @@ EOF
   if [ $AF_PACKET_SUPPORT -gt 0 ] && [ $WORKER_LB_PROCS -gt 0 ]; then
     echo "lb_procs=$WORKER_LB_PROCS" >> ./node.cfg
     echo "lb_method=$ZEEK_LB_METHOD" >> ./node.cfg
-    [[ -n "${!WORKER_CPU_PINS_VAR}" ]] && \
+    if [[ -n "${!WORKER_CPU_PINS_VAR}" ]]; then
+      # user explicitly specified worker CPUs to pin
       echo "pin_cpus=${!WORKER_CPU_PINS_VAR}" >> ./node.cfg
+    elif [[ "$ZEEK_PIN_CPUS_WORKER_AUTO" == "true" ]]; then
+      # user asked us to autmatically PIN worker CPUs
+      echo -n "pin_cpus=" >> ./node.cfg
+      for PIN in $(seq 1 $WORKER_LB_PROCS); do
+          echo -n "${CURRENT_CPU_ID}" >> ./node.cfg
+          CURRENT_CPU_ID=$((CURRENT_CPU_ID+1))
+          (( $CURRENT_CPU_ID > $HIGH_CPU_ID )) && CURRENT_CPU_ID=0
+          (( $PIN < $WORKER_LB_PROCS )) && echo -n ','  >> ./node.cfg || echo >> ./node.cfg
+      done
+    fi
     echo "af_packet_fanout_id=$FANOUT_ID" >> ./node.cfg
-    echo "af_packet_fanout_mode=AF_Packet::FANOUT_HASH" >> ./node.cfg
+    echo "af_packet_fanout_mode=AF_Packet::$ZEEK_AF_PACKET_FANOUT_MODE" >> ./node.cfg
     echo "af_packet_buffer_size=$ZEEK_AF_PACKET_BUFFER_SIZE" >> ./node.cfg
   fi
 

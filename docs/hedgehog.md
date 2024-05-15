@@ -32,7 +32,11 @@ Hedgehog Linux is a Debian-based operating system built to
         * [acl-configure](malcolm-hedgehog-e2e-iso-install.md#HedgehogACL): Configure ACL for artifact reachback from Malcolm
     - [Autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigAutostart)
     - [Managing disk usage](malcolm-hedgehog-e2e-iso-install.md#HedgehogDiskUsage)
-+ [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
+    - [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
+    - [Tuning](live-analysis.md#LiveAnalysisTuning)
+        + [Zeek](live-analysis.md#LiveAnalysisTuningZeek)
+        + [Arkime](live-analysis.md#LiveAnalysisTuningArkime)
+        + [Suricata](live-analysis.md#LiveAnalysisTuningSuricata)
 * [Appendix A - Generating the ISO](hedgehog-iso-build.md#HedgehogISOBuild)
 * [Appendix B - Generating a Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild)
 * [Appendix C - Configuring SSH access](hedgehog-ssh.md#HedgehogConfigSSH)

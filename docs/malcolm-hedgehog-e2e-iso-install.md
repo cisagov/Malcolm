@@ -33,6 +33,7 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
     - [Autostart services](#HedgehogConfigAutostart)
     - [Managing disk usage](#HedgehogDiskUsage)
 * [Verifying Traffic Capture and Forwarding](#Verify)
+* [Tuning Live Analysis](live-analysis.md#LiveAnalysisTuning)
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
