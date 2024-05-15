@@ -47,18 +47,19 @@ else
   fi
 fi
 
+# capture interface(s) *must* be specified
 if [[ -z "$CAPTURE_INTERFACE" ]] && [[ -n "$PCAP_IFACE" ]]; then
   CAPTURE_INTERFACE="$PCAP_IFACE"
 fi
-if [[ -z "$CAPTURE_FILTER" ]] && [[ -n "$PCAP_FILTER" ]]; then
-  CAPTURE_FILTER="$PCAP_FILTER"
-fi
-
-# capture interface(s) *must* be specified
 if [[ -z $CAPTURE_INTERFACE ]] ; then
   echo "Zeek capture interface(s) (via \$CAPTURE_INTERFACE) not specified"
   exit 1
 fi
+
+if [[ -z "$CAPTURE_FILTER" ]] && [[ -n "$PCAP_FILTER" ]]; then
+  CAPTURE_FILTER="$PCAP_FILTER"
+fi
+export CAPTURE_FILTER
 
 # do we have AF_PACKET support in the kernel? if we can't determine, assume "yes"
 BOOT_CONFIG_FILE="/boot/config-$(uname -r)"
