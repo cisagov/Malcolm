@@ -737,6 +737,7 @@ LOG_IGNORE_REGEX = re.compile(
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
+  | Falling\s+back\s+to\s+single\s+shard\s+assignment
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
