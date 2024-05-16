@@ -30,6 +30,7 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
         * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
         * [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
+        * [tags-configure](#HedgehogTags): Specify extra tags for forwarded logs
     - [Autostart services](#HedgehogConfigAutostart)
     - [Managing disk usage](#HedgehogDiskUsage)
 * [Verifying Traffic Capture and Forwarding](#Verify)
@@ -586,6 +587,12 @@ This forwarder's configuration is almost identical to that of [filebeat](#Hedgeh
 Users will be shown a dialog for a list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](#HedgehogZeekFileExtraction). The list will be prepopulated with the IP address entered a few screens prior to this one.
 
 ![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
+
+### <a name="HedgehogTags"></a>tags-configure: Specify extra tags for forwarded logs
+
+Users may populate a list of values, one per line, to be added to the `tags` field for logs forwarded from the sensor to a Malcolm aggregator. These tags may make it easier to identify or search for data during analysis.
+
+![Extra tags](./images/hedgehog/images/forwarder_tags_config.png)
 
 ### <a name="HedgehogConfigAutostart"></a>Autostart services
 

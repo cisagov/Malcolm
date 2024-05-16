@@ -30,6 +30,7 @@ Hedgehog Linux is a Debian-based operating system built to
         * [filebeat](malcolm-hedgehog-e2e-iso-install.md#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](malcolm-hedgehog-e2e-iso-install.md#Hedgehogmiscbeat): System metrics forwarding        
         * [acl-configure](malcolm-hedgehog-e2e-iso-install.md#HedgehogACL): Configure ACL for artifact reachback from Malcolm
+        * [tags-configure](malcolm-hedgehog-e2e-iso-install.md#HedgehogTags): Specify extra tags for forwarded logs
     - [Autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigAutostart)
     - [Managing disk usage](malcolm-hedgehog-e2e-iso-install.md#HedgehogDiskUsage)
     - [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
