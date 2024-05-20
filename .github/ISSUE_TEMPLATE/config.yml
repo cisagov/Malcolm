@@ -1,0 +1,6 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Malcolm Issues @ Idaho National Lab
+    url: https://github.com/idaholab/malcolm/issues?q=is%3Aissue+is%3Aopen+-label%3Atraining
+    about: Issue tracking is managed in Idaho National Lab's fork downstream.
