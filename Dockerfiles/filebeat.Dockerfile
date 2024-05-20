@@ -66,6 +66,8 @@ ENV SUPERCRONIC_VERSION "0.2.29"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ENV YQ_VERSION "4.44.1"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 USER root
 
@@ -80,6 +82,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         gzip \
         inotify-tools \
         lzma \
+        jq \
+        jo \
         openssl \
         p7zip \
         p7zip-full \
@@ -96,6 +100,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
+        chmod 755 /usr/local/bin/yq && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -103,7 +109,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD filebeat/filebeat.yml /usr/share/filebeat/filebeat.yml
+ADD filebeat/filebeat-logs.yml /usr/share/filebeat-logs/filebeat-logs.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
@@ -111,11 +117,11 @@ ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD shared/bin/watch_common.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
-RUN for INPUT in nginx tcp; do \
+RUN for INPUT in logs nginx tcp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
       chown -R root:${PGROUP} /usr/share/filebeat-$INPUT; \
       cp -a /usr/share/filebeat/module /usr/share/filebeat-$INPUT/module; \
-      chmod 750 /usr/share/filebeat-$INPUT; \
+      chmod 770 /usr/share/filebeat-$INPUT; \
       chmod 770 /usr/share/filebeat-$INPUT/data; \
     done; \
     chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py && \
@@ -153,11 +159,11 @@ ENV FILEBEAT_TCP_PARSE_SOURCE_FIELD $FILEBEAT_TCP_PARSE_SOURCE_FIELD
 ENV FILEBEAT_TCP_PARSE_TARGET_FIELD $FILEBEAT_TCP_PARSE_TARGET_FIELD
 ENV FILEBEAT_TCP_PARSE_DROP_FIELD $FILEBEAT_TCP_PARSE_DROP_FIELD
 ENV FILEBEAT_TCP_TAG $FILEBEAT_TCP_TAG
-ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat/data/registry/filebeat/data.json"
+ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat-logs/data/registry/filebeat/data.json"
 ENV FILEBEAT_ZEEK_DIR "/zeek/"
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
-VOLUME ["/usr/share/filebeat/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
+VOLUME ["/usr/share/filebeat-logs/data", "/usr/share/filebeat-nginx/data", "/usr/share/filebeat-tcp/data"]
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \

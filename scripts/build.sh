@@ -108,7 +108,7 @@ fi
 
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
-  "/usr/share/filebeat/filebeat.yml;filebeat-oss"
+  "/usr/share/filebeat-logs/filebeat-logs.yml;filebeat-oss"
   "/var/www/upload/filepond/dist/filepond.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
   "/usr/local/bin/capa;file-monitor"

@@ -18,7 +18,7 @@ from subprocess import Popen, PIPE
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
-fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry/filebeat/data.json")
+fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/data.json")
 
 zeekDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 zeekLiveDir = zeekDir + "live/logs/"
