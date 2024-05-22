@@ -97,13 +97,14 @@ class Constants:
     BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
 
     # specific to filebeat
-    BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
+    BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('spool')
     BEAT_ZEEK_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
+    BEAT_ZEEK_LOG_PATTERN_VAL = os.path.join('logger-*', '*.log')
     BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'static')
     BEAT_STATIC_ZEEK_LOG_PATTERN_KEY = 'BEAT_STATIC_LOG_PATTERN'
+    BEAT_STATIC_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATH_SUBDIR = 'suricata'
     BEAT_SURICATA_LOG_PATTERN_KEY = 'BEAT_SURICATA_LOG_PATTERN'
-    BEAT_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
     # specific to arkime
@@ -1088,7 +1089,7 @@ def main():
                                 )
                                 forwarder_dict[Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_KEY] = os.path.join(
                                     os.path.join(log_path, Constants.BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
+                                    Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_VAL,
                                 )
                                 forwarder_dict[Constants.BEAT_SURICATA_LOG_PATTERN_KEY] = os.path.join(
                                     os.path.join(log_path, Constants.BEAT_SURICATA_LOG_PATH_SUBDIR),
