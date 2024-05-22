@@ -23,20 +23,24 @@ if [[ -n $VERBOSE ]]; then
   set -x
 fi
 
-DEB_URL="https://downloadcontentcdn.opensuse.org/repositories/security:/zeek/${DISTRO}"
+URL_PREFIX="https://downloadcontentcdn.opensuse.org/repositories/security:/zeek/${DISTRO}"
+URLS=(
+  "${URL_PREFIX}/${ARCH}/libbroker-dev_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/${ARCH}/zeek-core-dev_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/${ARCH}/zeek-core_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/${ARCH}/zeek-spicy-dev_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/${ARCH}/zeek_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/${ARCH}/zeekctl_${ZEEK_VERSION}_${ARCH}.deb"
+  "${URL_PREFIX}/all/zeek-client_${ZEEK_VERSION}_all.deb"
+  "${URL_PREFIX}/all/zeek-zkg_${ZEEK_VERSION}_all.deb"
+  "${URL_PREFIX}/all/zeek-btest_${ZEEK_VERSION}_all.deb"
+  "${URL_PREFIX}/all/zeek-btest-data_${ZEEK_VERSION}_all.deb"
+)
 
 pushd "$OUTPUT_DIR" >/dev/null 2>&1
-curl --fail-early -fsSL --remote-name-all \
-  "${DEB_URL}/${ARCH}/libbroker-dev_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/${ARCH}/zeek-core-dev_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/${ARCH}/zeek-core_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/${ARCH}/zeek-spicy-dev_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/${ARCH}/zeek_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/${ARCH}/zeekctl_${ZEEK_VERSION}_${ARCH}.deb" \
-  "${DEB_URL}/all/zeek-client_${ZEEK_VERSION}_all.deb" \
-  "${DEB_URL}/all/zeek-zkg_${ZEEK_VERSION}_all.deb" \
-  "${DEB_URL}/all/zeek-btest_${ZEEK_VERSION}_all.deb" \
-  "${DEB_URL}/all/zeek-btest-data_${ZEEK_VERSION}_all.deb"
+for URL in ${URLS[@]}; do
+  curl -fsSL -O -J "${URL}"
+done
 popd >/dev/null 2>&1
 
 if [[ -n $VERBOSE ]]; then
