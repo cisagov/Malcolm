@@ -54,16 +54,16 @@ class NullRepresenter:
 DEFAULT_VARS = defaultdict(lambda: None)
 DEFAULT_VARS.update(
     {
-        'AF_PACKET_BLOCK_SIZE': 32768,
+        'AF_PACKET_BLOCK_SIZE': 1048576,
         'AF_PACKET_BLOCK_TIMEOUT': 10,
-        'AF_PACKET_BUFFER_SIZE': 32768,
+        'AF_PACKET_BUFFER_SIZE': 0,
         'AF_PACKET_CHECKSUM_CHECKS': 'kernel',
         'AF_PACKET_CLUSTER_TYPE': 'cluster_flow',
         'AF_PACKET_DEFRAG': True,
         'AF_PACKET_EMERGENCY_FLUSH': False,
-        'AF_PACKET_IFACE_THREADS': 'auto',
-        'AF_PACKET_MMAP_LOCKED': False,
-        'AF_PACKET_RING_SIZE': 2048,
+        'AF_PACKET_IFACE_THREADS': 2,
+        'AF_PACKET_MMAP_LOCKED': True,
+        'AF_PACKET_RING_SIZE': 0,
         'AF_PACKET_TPACKET_V3': True,
         'AF_PACKET_USE_MMAP': True,
         'ANOMALY_APPLAYER': True,
@@ -146,7 +146,7 @@ DEFAULT_VARS.update(
         'KRB5_EVE_ENABLED': False,
         'LIVE_CAPTURE': False,
         'MANAGED_RULES_DIR': '/var/lib/suricata/rules',
-        'MAX_PENDING_PACKETS': 1024,
+        'MAX_PENDING_PACKETS': 10000,
         'MODBUS_ENABLED': True,
         'MODBUS_EVE_ENABLED': False,
         'MODBUS_PORTS': 502,
@@ -796,30 +796,34 @@ def main():
         cfg['af-packet'] = [{'interface': 'default'}]
         clusterId = 99
         for iface in captureIface.split(','):
-            cfg['af-packet'].insert(
-                0,
-                {
-                    'interface': iface,
-                    'cluster-id': clusterId,
-                    'block-size': DEFAULT_VARS['AF_PACKET_BLOCK_SIZE'],
-                    'block-timeout': DEFAULT_VARS['AF_PACKET_BLOCK_TIMEOUT'],
-                    'bpf-filter': (
-                        DEFAULT_VARS['CAPTURE_FILTER']
-                        if DEFAULT_VARS['CAPTURE_FILTER'] is not None
-                        else DEFAULT_VARS['PCAP_FILTER']
-                    ),
-                    'buffer-size': DEFAULT_VARS['AF_PACKET_BUFFER_SIZE'],
-                    'checksum-checks': DEFAULT_VARS['AF_PACKET_CHECKSUM_CHECKS'],
-                    'cluster-type': DEFAULT_VARS['AF_PACKET_CLUSTER_TYPE'],
-                    'defrag': DEFAULT_VARS['AF_PACKET_DEFRAG'],
-                    'mmap-locked': DEFAULT_VARS['AF_PACKET_MMAP_LOCKED'],
-                    'ring-size': DEFAULT_VARS['AF_PACKET_RING_SIZE'],
-                    'threads': DEFAULT_VARS['AF_PACKET_IFACE_THREADS'],
-                    'tpacket-v3': DEFAULT_VARS['AF_PACKET_TPACKET_V3'],
-                    'use-emergency-flush': DEFAULT_VARS['AF_PACKET_EMERGENCY_FLUSH'],
-                    'use-mmap': DEFAULT_VARS['AF_PACKET_USE_MMAP'],
-                },
-            )
+            ifaceSettings = {
+                'interface': iface,
+                'cluster-id': clusterId,
+                'block-size': DEFAULT_VARS['AF_PACKET_BLOCK_SIZE'],
+                'block-timeout': DEFAULT_VARS['AF_PACKET_BLOCK_TIMEOUT'],
+                'bpf-filter': (
+                    DEFAULT_VARS['CAPTURE_FILTER']
+                    if DEFAULT_VARS['CAPTURE_FILTER'] is not None
+                    else DEFAULT_VARS['PCAP_FILTER']
+                ),
+                'checksum-checks': DEFAULT_VARS['AF_PACKET_CHECKSUM_CHECKS'],
+                'cluster-type': DEFAULT_VARS['AF_PACKET_CLUSTER_TYPE'],
+                'defrag': DEFAULT_VARS['AF_PACKET_DEFRAG'],
+                'mmap-locked': DEFAULT_VARS['AF_PACKET_MMAP_LOCKED'],
+                'threads': DEFAULT_VARS['AF_PACKET_IFACE_THREADS'],
+                'tpacket-v3': DEFAULT_VARS['AF_PACKET_TPACKET_V3'],
+                'use-emergency-flush': DEFAULT_VARS['AF_PACKET_EMERGENCY_FLUSH'],
+                'use-mmap': DEFAULT_VARS['AF_PACKET_USE_MMAP'],
+            }
+            if DEFAULT_VARS.get('AF_PACKET_RING_SIZE', 0) > 0:
+                # if ring size is unset (0), it will be "computed with respect to max_pending_packets
+                #   and number of threads" by suricata
+                ifaceSettings['ring-size'] = DEFAULT_VARS['AF_PACKET_RING_SIZE']
+            if DEFAULT_VARS.get('AF_PACKET_BUFFER_SIZE', 0) > 0:
+                # best practices found online indicates that you should use ring-buffer size rather than
+                #   buffer-size on newer kernels and when you use >1 threads
+                ifaceSettings['buffer-size'] = DEFAULT_VARS['AF_PACKET_BUFFER_SIZE']
+            cfg['af-packet'].insert(0, ifaceSettings)
             clusterId = clusterId - 1
 
     # disable all outputs, then enable just the one we want (eve-log)

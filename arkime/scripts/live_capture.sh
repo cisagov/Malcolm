@@ -5,7 +5,6 @@
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 CERT_FILE="${ARKIME_DIR}"/etc/viewer.crt
 KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
-ARKIME_PACKET_THREADS=${ARKIME_PACKET_THREADS:-1}
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
 
