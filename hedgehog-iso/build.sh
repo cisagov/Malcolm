@@ -189,7 +189,7 @@ if [ -d "$WORKDIR" ]; then
   popd >/dev/null 2>&1
 
   # TODO: switch to release when it's actually out, or revert to source build
-  curl -s -S -L -o ./config/packages.chroot/arkime.deb "https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_amd64.deb"
+  curl -s -S -L -o ./config/packages.chroot/arkime_5.2.0-1_amd64.deb "https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_amd64.deb"
 
   # download Zeek .deb packages
   bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/

@@ -190,7 +190,7 @@ mv ./yara-rules-src-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
 ###
 
 # capa
-/usr/local/bin/build-capa.sh
+/usr/local/bin/capa-build.sh
 ###
 
 # yq
