@@ -62,6 +62,7 @@ class Constants:
     MISCBEAT = 'miscbeat'
     ARKIMECAP = 'arkime-capture'
     TX_RX_SECURE = 'ssl-client-receive'
+    ACL_CONFIGURE = 'acl-configure'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -77,9 +78,10 @@ class Constants:
     BEAT_LS_HOST = 'BEAT_LS_HOST'
     BEAT_LS_PORT = 'BEAT_LS_PORT'
     BEAT_LS_SSL = 'BEAT_LS_SSL'
-    BEAT_LS_SSL_CA_CRT = 'BEAT_LS_SSL_CA_CRT'
-    BEAT_LS_SSL_CLIENT_CRT = 'BEAT_LS_SSL_CLIENT_CRT'
-    BEAT_LS_SSL_CLIENT_KEY = 'BEAT_LS_SSL_CLIENT_KEY'
+    BEAT_LS_SSL_PREFIX = 'BEAT_LS_SSL_'
+    BEAT_LS_SSL_CA_CRT = f'{BEAT_LS_SSL_PREFIX}CA_CRT'
+    BEAT_LS_SSL_CLIENT_CRT = f'{BEAT_LS_SSL_PREFIX}CLIENT_CRT'
+    BEAT_LS_SSL_CLIENT_KEY = f'{BEAT_LS_SSL_PREFIX}CLIENT_KEY'
     BEAT_LS_SSL_VERIFY = 'BEAT_LS_SSL_VERIFY'
     BEAT_LS_CERT_DIR_DEFAULT = "/opt/sensor/sensor_ctl/logstash-client-certificates"
 
@@ -105,7 +107,6 @@ class Constants:
 
     # specific to arkime
     ARKIME_PASSWORD_SECRET = "ARKIME_PASSWORD_SECRET"
-    ARKIME_PACKET_ACL = "ARKIME_PACKET_ACL"
     ARKIME_COMPRESSION_TYPE = "ARKIME_COMPRESSION_TYPE"
     ARKIME_COMPRESSION_LEVEL = "ARKIME_COMPRESSION_LEVEL"
     ARKIME_COMPRESSION_TYPES = (
@@ -118,6 +119,9 @@ class Constants:
         'zstd': (-5, 19, 3),
     }
 
+    # ACL for Arkime PCAP reachback and extracted files server
+    MALCOLM_REQUEST_ACL = "MALCOLM_REQUEST_ACL"
+
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
     MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
@@ -129,6 +133,8 @@ class Constants:
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_CONFIG_TXRX = (f'{TX_RX_SECURE}', f'Receive client SSL files for {FILEBEAT} from Malcolm')
+    MSG_CONFIG_ACL = (f'{ACL_CONFIGURE}', f'Configure ACL for artifact reachback from Malcolm')
+
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
@@ -138,11 +144,18 @@ class Constants:
     )
     MSG_CONFIG_ICS_BEST_GUESS = 'Should the sensor use "best guess" to identify potential OT/ICS traffic with Zeek?'
     MSG_CONFIG_ZEEK_CARVED_SCANNERS = 'Specify scanners for Zeek-carved files'
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP = 'ZIP preserved files when downloaded via web interface?'
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP_KEY = (
+        'Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)'
+    )
+    MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ENC_KEY = (
+        'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
+    )
     MSG_CONFIG_ZEEK_CARVING = 'Specify Zeek file carving mode'
     MSG_CONFIG_ZEEK_CARVING_MIMES = 'Specify file types to carve'
     MSG_CONFIG_CARVED_FILE_PRESERVATION = 'Specify which carved files to preserve'
     MSG_CONFIG_CAP_CONFIRM = 'Sensor will capture traffic with the following parameters:\n\n{}'
-    MSG_CONFIG_AUTOSTART_CONFIRM = 'Sensor autostart the following services:\n\n{}'
+    MSG_CONFIG_AUTOSTART_CONFIRM = 'Sensor will autostart the following services:\n\n{}'
     MSG_CONFIG_FORWARDING_CONFIRM = '{} will forward with the following parameters:\n\n{}'
     MSG_CONFIG_CAP_PATHS = 'Provide paths for captured PCAPs and Zeek logs'
     MSG_CONFIG_CAPTURE_SUCCESS = 'Capture interface set to {} in {}.\n\nReboot to apply changes.'
@@ -151,7 +164,7 @@ class Constants:
         '{} forwarding configured:\n\n{}\n\nRestart forwarding services or reboot to apply changes.'
     )
     MSG_CONFIG_ARKIME_VIEWER_PASSWORD = 'Specify password hash secret for Arkime viewer cluster'
-    MSG_CONFIG_ARKIME_PCAP_ACL = 'Specify IP addresses for PCAP retrieval ACL (one per line)'
+    MSG_CONFIG_REQUEST_ACL = 'Specify IP addresses for ACL for artifact reachback from Malcolm (one per line)'
     MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
     MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
     MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -182,6 +195,20 @@ class Constants:
 # the main dialog window used for the duration of this tool
 d = Dialog(dialog='dialog', autowidgetsize=True)
 d.set_background_title(Constants.MSG_BACKGROUND_TITLE)
+
+
+###################################################################################################
+def rewrite_dict_to_file(vals_dict, config_file_name, inplace=True, backup='.bak'):
+    if vals_dict and os.path.isfile(config_file_name):
+        values_re = re.compile(r"\b(" + '|'.join(list(vals_dict.keys())) + r")\s*=\s*.*?$")
+        with fileinput.FileInput(config_file_name, inplace=inplace, backup=backup) as file:
+            for line in file:
+                line = line.rstrip("\n")
+                key_match = values_re.search(line)
+                if key_match is not None:
+                    print(values_re.sub(r"\1=%s" % vals_dict[key_match.group(1)], line))
+                else:
+                    print(line)
 
 
 ###################################################################################################
@@ -364,28 +391,19 @@ def main():
                     if len(line.strip()) > 0:
                         name, var = remove_prefix(line, "export").partition("=")[::2]
                         capture_config_dict[name.strip()] = var.strip().strip("'").strip('"')
-            if (Constants.BEAT_OS_HOST not in previous_config_values.keys()) and (
-                "OS_HOST" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_OS_HOST] = capture_config_dict["OS_HOST"]
-            if (Constants.BEAT_OS_PORT not in previous_config_values.keys()) and (
-                "OS_PORT" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_OS_PORT] = capture_config_dict["OS_PORT"]
-            if (Constants.BEAT_HTTP_USERNAME not in previous_config_values.keys()) and (
-                "OS_USERNAME" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.BEAT_HTTP_USERNAME] = capture_config_dict["OS_USERNAME"]
-            if (Constants.ARKIME_PACKET_ACL not in previous_config_values.keys()) and (
-                "ARKIME_PACKET_ACL" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.ARKIME_PACKET_ACL] = capture_config_dict[Constants.ARKIME_PACKET_ACL]
-            if (Constants.ARKIME_PASSWORD_SECRET not in previous_config_values.keys()) and (
-                "ARKIME_PASSWORD_SECRET" in capture_config_dict.keys()
-            ):
-                previous_config_values[Constants.ARKIME_PASSWORD_SECRET] = capture_config_dict[
-                    Constants.ARKIME_PASSWORD_SECRET
-                ]
+
+            for key, value in {
+                Constants.BEAT_OS_HOST: "OS_HOST",
+                Constants.BEAT_OS_PORT: "OS_PORT",
+                Constants.BEAT_HTTP_USERNAME: "OS_USERNAME",
+                Constants.MALCOLM_REQUEST_ACL: Constants.MALCOLM_REQUEST_ACL,
+                Constants.ARKIME_PASSWORD_SECRET: Constants.ARKIME_PASSWORD_SECRET,
+                Constants.BEAT_LS_SSL_CA_CRT: Constants.BEAT_LS_SSL_CA_CRT,
+                Constants.BEAT_LS_SSL_CLIENT_CRT: Constants.BEAT_LS_SSL_CLIENT_CRT,
+                Constants.BEAT_LS_SSL_CLIENT_KEY: Constants.BEAT_LS_SSL_CLIENT_KEY,
+            }.items():
+                if (key not in previous_config_values.keys()) and (value in capture_config_dict.keys()):
+                    previous_config_values[key] = capture_config_dict[value]
 
             code = d.yesno(Constants.MSG_WELCOME_TITLE, yes_label="Continue", no_label="Quit")
             if code == Dialog.CANCEL or code == Dialog.ESC:
@@ -430,22 +448,25 @@ def main():
                 # get confirmation from user that we really want to do this
                 code = d.yesno(
                     Constants.MSG_CONFIG_AUTOSTART_CONFIRM.format(
-                        "\n".join(sorted([f"{k}={v}" for k, v in capture_config_dict.items() if "AUTOSTART" in k]))
+                        "\n".join(
+                            sorted(
+                                [
+                                    f"{k}={v}"
+                                    for k, v in capture_config_dict.items()
+                                    if (("AUTOSTART" in k) and (not k.startswith("#")))
+                                ]
+                            )
+                        )
                     ),
                     yes_label="OK",
                     no_label="Cancel",
                 )
                 if code == Dialog.OK:
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    autostart_re = re.compile(r"(\bAUTOSTART_\w+)\s*=\s*.+?$")
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            autostart_match = autostart_re.search(line)
-                            if autostart_match is not None:
-                                print(autostart_re.sub(r"\1=%s" % capture_config_dict[autostart_match.group(1)], line))
-                            else:
-                                print(line)
+                    rewrite_dict_to_file(
+                        {k: v for (k, v) in capture_config_dict.items() if k.startswith('AUTOSTART_')},
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
 
                     # hooray
                     code = d.msgbox(text=Constants.MSG_CONFIG_AUTOSTART_SUCCESS)
@@ -458,7 +479,9 @@ def main():
                 # previously used capture interfaces
                 preselected_ifaces = set([x.strip() for x in capture_config_dict["CAPTURE_INTERFACE"].split(',')])
 
-                while (len(available_adapters) > 0) and (d.yesno(Constants.MSG_IDENTIFY_NICS) == Dialog.OK):
+                while (len(available_adapters) > 0) and (
+                    d.yesno(Constants.MSG_IDENTIFY_NICS, yes_label="No", no_label="Yes") != Dialog.OK
+                ):
                     code, blinky_iface = d.radiolist(
                         Constants.MSG_SELECT_BLINK_INTERFACE,
                         choices=[(adapter.name, adapter.description, False) for adapter in available_adapters],
@@ -526,19 +549,6 @@ def main():
                             )
                         prev_capture_filter = capture_filter
 
-                # regular expressions for selected name=value pairs to update in configuration file
-                capture_interface_re = re.compile(r"(\bCAPTURE_INTERFACE)\s*=\s*.+?$")
-                capture_filter_re = re.compile(r"(\bCAPTURE_FILTER)\s*=\s*.*?$")
-                pcap_path_re = re.compile(r"(\bPCAP_PATH)\s*=\s*.+?$")
-                zeek_path_re = re.compile(r"(\bZEEK_LOG_PATH)\s*=\s*.+?$")
-                zeek_carve_re = re.compile(r"(\bZEEK_EXTRACTOR_MODE)\s*=\s*.+?$")
-                zeek_file_preservation_re = re.compile(r"(\bEXTRACTED_FILE_PRESERVATION)\s*=\s*.+?$")
-                zeek_carve_override_re = re.compile(r"(\bZEEK_EXTRACTOR_OVERRIDE_FILE)\s*=\s*.*?$")
-                zeek_file_watch_re = re.compile(r"(\bZEEK_FILE_WATCH)\s*=\s*.+?$")
-                zeek_file_scanner_re = re.compile(r"(\bZEEK_FILE_SCAN_\w+)\s*=\s*.+?$")
-                disable_ics_all_re = re.compile(r"(\bZEEK_DISABLE_ICS_ALL)\s*=\s*.+?$")
-                ics_best_guess_re = re.compile(r"(\bZEEK_DISABLE_BEST_GUESS_ICS)\s*=\s*.+?$")
-
                 # get paths for captured PCAP and Zeek files
                 while True:
                     code, path_values = d.form(
@@ -565,8 +575,10 @@ def main():
                         code = d.msgbox(text=Constants.MSG_ERROR_DIR_NOT_FOUND)
 
                 # enable/disable ICs
-                ics_network = d.yesno(Constants.MSG_CONFIG_ICS_ANALYZERS) == Dialog.OK
-                ics_best_guess = ics_network and (d.yesno(Constants.MSG_CONFIG_ICS_BEST_GUESS) == Dialog.OK)
+                ics_network = d.yesno(Constants.MSG_CONFIG_ICS_ANALYZERS, yes_label="No", no_label="Yes") != Dialog.OK
+                ics_best_guess = ics_network and (
+                    d.yesno(Constants.MSG_CONFIG_ICS_BEST_GUESS, yes_label="No", no_label="Yes") != Dialog.OK
+                )
 
                 # configure file carving
                 code, zeek_carve_mode = d.radiolist(
@@ -626,6 +638,8 @@ def main():
                 mime_tags = []
                 capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"] = ""
                 zeek_carved_file_preservation = PRESERVE_NONE
+                zeek_carved_file_http_server_zip = False
+                zeek_carved_file_http_serve_encrypt_key = ''
 
                 if zeek_carve_mode.startswith(Constants.ZEEK_FILE_CARVING_CUSTOM):
                     # get all known mime-to-extension mappings into a dictionary
@@ -726,6 +740,19 @@ def main():
                     ]:
                         capture_config_dict[key] = "false"
 
+                if zeek_carved_file_preservation != PRESERVE_NONE:
+                    zeek_carved_file_http_server_zip = (
+                        d.yesno(Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP) == Dialog.OK
+                    )
+                    code, zeek_carved_file_http_serve_encrypt_key = d.inputbox(
+                        (
+                            Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ZIP_KEY
+                            if zeek_carved_file_http_server_zip
+                            else Constants.MSG_CONFIG_ZEEK_CARVED_HTTP_SERVER_ENC_KEY
+                        ),
+                        init=capture_config_dict.get("EXTRACTED_FILE_HTTP_SERVER_KEY", 'infected'),
+                    )
+
                 # reconstitute dictionary with user-specified values
                 capture_config_dict["CAPTURE_INTERFACE"] = ",".join(selected_ifaces)
                 capture_config_dict["CAPTURE_FILTER"] = capture_filter
@@ -733,6 +760,10 @@ def main():
                 capture_config_dict["ZEEK_LOG_PATH"] = path_values[1]
                 capture_config_dict["ZEEK_EXTRACTOR_MODE"] = zeek_carve_mode
                 capture_config_dict["EXTRACTED_FILE_PRESERVATION"] = zeek_carved_file_preservation
+                capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_ZIP"] = (
+                    'true' if zeek_carved_file_http_server_zip else 'false'
+                )
+                capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"] = zeek_carved_file_http_serve_encrypt_key
                 capture_config_dict["ZEEK_DISABLE_ICS_ALL"] = '' if ics_network else 'true'
                 capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"] = '' if ics_best_guess else 'true'
 
@@ -754,49 +785,31 @@ def main():
                 )
                 if code == Dialog.OK:
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            if capture_interface_re.search(line) is not None:
-                                print(capture_interface_re.sub(r"\1=%s" % ",".join(selected_ifaces), line))
-                            elif zeek_carve_override_re.search(line) is not None:
-                                print(
-                                    zeek_carve_override_re.sub(
-                                        r'\1="%s"' % capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"], line
-                                    )
-                                )
-                            elif zeek_carve_re.search(line) is not None:
-                                print(zeek_carve_re.sub(r"\1=%s" % zeek_carve_mode, line))
-                            elif zeek_file_preservation_re.search(line) is not None:
-                                print(zeek_file_preservation_re.sub(r"\1=%s" % zeek_carved_file_preservation, line))
-                            elif capture_filter_re.search(line) is not None:
-                                print(capture_filter_re.sub(r'\1="%s"' % capture_filter, line))
-                            elif pcap_path_re.search(line) is not None:
-                                print(pcap_path_re.sub(r'\1="%s"' % capture_config_dict["PCAP_PATH"], line))
-                            elif zeek_path_re.search(line) is not None:
-                                print(zeek_path_re.sub(r'\1="%s"' % capture_config_dict["ZEEK_LOG_PATH"], line))
-                            elif zeek_file_watch_re.search(line) is not None:
-                                print(zeek_file_watch_re.sub(r"\1=%s" % capture_config_dict["ZEEK_FILE_WATCH"], line))
-                            elif disable_ics_all_re.search(line) is not None:
-                                print(
-                                    disable_ics_all_re.sub(r'\1=%s' % capture_config_dict["ZEEK_DISABLE_ICS_ALL"], line)
-                                )
-                            elif ics_best_guess_re.search(line) is not None:
-                                print(
-                                    ics_best_guess_re.sub(
-                                        r'\1=%s' % capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"], line
-                                    )
-                                )
-                            else:
-                                zeek_file_scanner_match = zeek_file_scanner_re.search(line)
-                                if zeek_file_scanner_match is not None:
-                                    print(
-                                        zeek_file_scanner_re.sub(
-                                            r"\1=%s" % capture_config_dict[zeek_file_scanner_match.group(1)], line
-                                        )
-                                    )
-                                else:
-                                    print(line)
+                    rewrite_dict_to_file(
+                        {
+                            "CAPTURE_FILTER": '"' + capture_config_dict["CAPTURE_FILTER"] + '"',
+                            "CAPTURE_INTERFACE": capture_config_dict["CAPTURE_INTERFACE"],
+                            "EXTRACTED_FILE_HTTP_SERVER_KEY": '"'
+                            + capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"]
+                            + '"',
+                            "EXTRACTED_FILE_HTTP_SERVER_ZIP": capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_ZIP"],
+                            "EXTRACTED_FILE_PRESERVATION": capture_config_dict["EXTRACTED_FILE_PRESERVATION"],
+                            "PCAP_PATH": '"' + capture_config_dict["PCAP_PATH"] + '"',
+                            "ZEEK_DISABLE_BEST_GUESS_ICS": capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"],
+                            "ZEEK_DISABLE_ICS_ALL": capture_config_dict["ZEEK_DISABLE_ICS_ALL"],
+                            "ZEEK_EXTRACTOR_MODE": capture_config_dict["ZEEK_EXTRACTOR_MODE"],
+                            "ZEEK_LOG_PATH": '"' + capture_config_dict["ZEEK_LOG_PATH"] + '"',
+                            "ZEEK_EXTRACTOR_OVERRIDE_FILE": '"'
+                            + capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]
+                            + '"',
+                            "ZEEK_FILE_SCAN_CAPA": capture_config_dict["ZEEK_FILE_SCAN_CAPA"],
+                            "ZEEK_FILE_SCAN_CLAMAV": capture_config_dict["ZEEK_FILE_SCAN_CLAMAV"],
+                            "ZEEK_FILE_SCAN_VTOT": capture_config_dict["ZEEK_FILE_SCAN_VTOT"],
+                            "ZEEK_FILE_SCAN_YARA": capture_config_dict["ZEEK_FILE_SCAN_YARA"],
+                            "ZEEK_FILE_WATCH": capture_config_dict["ZEEK_FILE_WATCH"],
+                        },
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
 
                     # write out file carving overrides if specified
                     if (len(mime_tags) > 0) and (len(capture_config_dict["ZEEK_EXTRACTOR_OVERRIDE_FILE"]) > 0):
@@ -835,8 +848,9 @@ def main():
                         Constants.MSG_CONFIG_ARKIME,
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
+                        Constants.MSG_CONFIG_ACL,
                         Constants.MSG_CONFIG_TXRX,
-                    ][: 4 if txRxScript else -1],
+                    ][: 5 if txRxScript else -1],
                 )
                 if code != Dialog.OK:
                     raise CancelledError
@@ -892,22 +906,6 @@ def main():
 
                     if arkime_password:
                         arkime_config_dict[Constants.ARKIME_PASSWORD_SECRET] = arkime_password
-
-                    # get list of IP addresses allowed for packet payload retrieval
-                    lines = previous_config_values[Constants.ARKIME_PACKET_ACL].split(",")
-                    lines.append(opensearch_config_dict[Constants.BEAT_OS_HOST])
-                    code, lines = d.editbox_str(
-                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_ARKIME_PCAP_ACL
-                    )
-                    if code != Dialog.OK:
-                        raise CancelledError
-                    arkime_config_dict[Constants.ARKIME_PACKET_ACL] = ','.join(
-                        [
-                            ip
-                            for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))
-                            if isipaddress(ip)
-                        ]
-                    )
 
                     # arkime PCAP compression settings
                     code, compression_type = d.radiolist(
@@ -971,21 +969,7 @@ def main():
                     previous_config_values = opensearch_config_dict.copy()
 
                     # modify specified values in-place in SENSOR_CAPTURE_CONFIG file
-                    opensearch_values_re = re.compile(
-                        r"\b(" + '|'.join(list(arkime_config_dict.keys())) + r")\s*=\s*.*?$"
-                    )
-                    with fileinput.FileInput(Constants.SENSOR_CAPTURE_CONFIG, inplace=True, backup='.bak') as file:
-                        for line in file:
-                            line = line.rstrip("\n")
-                            opensearch_key_match = opensearch_values_re.search(line)
-                            if opensearch_key_match is not None:
-                                print(
-                                    opensearch_values_re.sub(
-                                        r"\1=%s" % arkime_config_dict[opensearch_key_match.group(1)], line
-                                    )
-                                )
-                            else:
-                                print(line)
+                    rewrite_dict_to_file(arkime_config_dict, Constants.SENSOR_CAPTURE_CONFIG)
 
                     # hooray
                     code = d.msgbox(
@@ -1137,10 +1121,8 @@ def main():
                                         'SSL Certificate Authorities File',
                                         1,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CA_CRT]
-                                            if Constants.BEAT_LS_SSL_CA_CRT in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CA_CRT, f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/ca.crt"
                                         ),
                                         1,
                                         35,
@@ -1151,10 +1133,9 @@ def main():
                                         'SSL Certificate File',
                                         2,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_CRT]
-                                            if Constants.BEAT_LS_SSL_CLIENT_CRT in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CLIENT_CRT,
+                                            f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.crt",
                                         ),
                                         2,
                                         35,
@@ -1165,10 +1146,9 @@ def main():
                                         'SSL Key File',
                                         3,
                                         1,
-                                        (
-                                            previous_config_values[Constants.BEAT_LS_SSL_CLIENT_KEY]
-                                            if Constants.BEAT_LS_SSL_CLIENT_KEY in previous_config_values
-                                            else f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key"
+                                        previous_config_values.get(
+                                            Constants.BEAT_LS_SSL_CLIENT_KEY,
+                                            f"{Constants.BEAT_LS_CERT_DIR_DEFAULT}/client.key",
                                         ),
                                         3,
                                         35,
@@ -1254,6 +1234,51 @@ def main():
                         # keystore list failed
                         raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
 
+                    # also write the TLS files back out to the config file
+                    rewrite_dict_to_file(
+                        {
+                            k: v
+                            for (k, v) in forwarder_dict.items()
+                            if k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))
+                        },
+                        Constants.SENSOR_CAPTURE_CONFIG,
+                    )
+
+                elif fwd_mode == Constants.ACL_CONFIGURE:
+
+                    # get list of IP addresses allowed for packet payload retrieval
+                    acl_config_dict = defaultdict(str)
+                    lines = previous_config_values[Constants.MALCOLM_REQUEST_ACL].split(",")
+                    if Constants.BEAT_OS_HOST in previous_config_values and (
+                        previous_config_values[Constants.BEAT_OS_HOST]
+                        not in ('', '127.0.0.1', '::1', '0.0.0.0', '::', 'localhost')
+                    ):
+                        lines.append(previous_config_values[Constants.BEAT_OS_HOST])
+                    code, lines = d.editbox_str(
+                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_REQUEST_ACL
+                    )
+                    if code != Dialog.OK:
+                        raise CancelledError
+
+                    # modify specified ACL value in-place in SENSOR_CAPTURE_CONFIG file
+                    newAclValsDict = {
+                        Constants.MALCOLM_REQUEST_ACL: ','.join(
+                            [
+                                ip
+                                for ip in list(set(filter(None, [x.strip() for x in lines.split('\n')])))
+                                if isipaddress(ip)
+                            ]
+                        )
+                    }
+                    rewrite_dict_to_file(newAclValsDict, Constants.SENSOR_CAPTURE_CONFIG)
+
+                    # hooray
+                    code = d.msgbox(
+                        text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(
+                            fwd_mode, "\n".join(newAclValsDict[Constants.MALCOLM_REQUEST_ACL].split(','))
+                        )
+                    )
+
                 elif (fwd_mode == Constants.TX_RX_SECURE) and txRxScript:
                     # use tx-rx-secure.sh (via croc) to get certs from Malcolm
                     code = d.msgbox(text='Run auth_setup on Malcolm "Transfer self-signed client certificates..."')
@@ -1309,6 +1334,19 @@ def main():
                             raise RuntimeError("Operation cancelled")
 
                         p.poll()
+
+                    keyFiles = {
+                        Constants.BEAT_LS_SSL_CA_CRT: os.path.join(Constants.BEAT_LS_CERT_DIR_DEFAULT, 'ca.crt'),
+                        Constants.BEAT_LS_SSL_CLIENT_CRT: os.path.join(
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT, 'client.crt'
+                        ),
+                        Constants.BEAT_LS_SSL_CLIENT_KEY: os.path.join(
+                            Constants.BEAT_LS_CERT_DIR_DEFAULT, 'client.key'
+                        ),
+                    }
+                    if all([os.path.isfile(v) for (k, v) in keyFiles.items()]):
+                        # also write the TLS files back out to the config file
+                        rewrite_dict_to_file(keyFiles, Constants.SENSOR_CAPTURE_CONFIG)
 
                 else:
                     # we're here without a valid forwarding type selection?!?

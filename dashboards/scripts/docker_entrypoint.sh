@@ -42,5 +42,7 @@ if [[ -f "$ORIG_YML" ]]; then
     chmod 600 "$FINAL_YML"
 fi
 
+rm -f /tmp/shared-objects-created
+
 # start the default dashboards entrypoint
 exec "$@"

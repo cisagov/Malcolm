@@ -6,7 +6,7 @@ LABEL maintainer="malcolm@inl.gov"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ENV ARKIME_VERSION "5.0.1"
+ENV ARKIME_VERSION "5.1.2"
 ENV ARKIME_DIR "/opt/arkime"
 
 RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \

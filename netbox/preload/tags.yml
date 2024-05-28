@@ -1,0 +1,9 @@
+- name: Autopopulated
+  slug: malcolm-autopopulated
+  color: Light Blue
+- name: Manufacturer Unknown
+  slug: manufacturer-unknown
+  color: Light Grey
+- name: Hostname Unknown
+  slug: hostname-unknown
+  color: Light Grey

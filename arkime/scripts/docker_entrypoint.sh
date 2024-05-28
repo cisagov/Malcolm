@@ -14,6 +14,7 @@ ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
+ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"false"}
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-}
 ARKIME_DEBUG_LEVEL=${ARKIME_DEBUG_LEVEL:-0}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
@@ -62,6 +63,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(passwordSecret=\).*/\1"${ARKIME_PASSWORD_SECRET}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(rotateIndex=\).*/\1"${ARKIME_ROTATE_INDEX}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(queryAllIndices=\).*/\1"${ARKIME_QUERY_ALL_INDICES}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${MALCOLM_NETWORK_INDEX_PATTERN}" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(debug=\).*/\1"${ARKIME_DEBUG_LEVEL}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
@@ -151,9 +153,24 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(plugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
+        sed -i "s/^\(plugins=\).*/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+    fi
+
+    # enable ja4+ plugin if it's present
+    JA4_PLUGIN_FILE="${ARKIME_DIR}/plugins/ja4plus.$(dpkg --print-architecture).so"
+    if [[ -f "${JA4_PLUGIN_FILE}" ]]; then
+      JA4_PLUGIN_FILE_BASE="$(basename "${JA4_PLUGIN_FILE}")"
+      JA4_PLUGIN_FILE_ESCAPED="$(echo "${JA4_PLUGIN_FILE_BASE}" | sed 's@\.@\\\.@g')"
+      # clean up old references to the plugin
+      sed -i "/plugins=.*${JA4_PLUGIN_FILE_ESCAPED}/s/;\?${JA4_PLUGIN_FILE_ESCAPED}//g" "${ARKIME_CONFIG_FILE}"
+      # append ja4 plugin filename to end of plugins= line in config file and uncomment it if necessary
+      sed -i "s/^#*[[:space:]]*\(plugins=\)/\1${JA4_PLUGIN_FILE_BASE};/" "${ARKIME_CONFIG_FILE}"
+      # squash semicolons
+      sed -i 's/;\{2,\}/;/g' "${ARKIME_CONFIG_FILE}"
+      # remove trailing semicolon from plugins= line if it exists
+      sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "${ARKIME_CONFIG_FILE}"
     fi
 
     chmod 600 "${ARKIME_CONFIG_FILE}" || true

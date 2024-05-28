@@ -291,7 +291,7 @@ sensor@hedgehog:~$ cd /opt
 sensor@hedgehog:opt$ diff sensor_upgrade_backup_2020-05-08/sensor_ctl/control_vars.conf sensor/sensor_ctl/control_vars.conf 
 1,2c1,2
 < export CAPTURE_INTERFACE=enp0s3
-< export CAPTURE_FILTER="not port 5044 and not port 5601 and not port 8005 and not port 9200 and not port 9600"
+< export CAPTURE_FILTER="not port 5044 and not port 5601 and not port 8005 and not port 8006 and not port 9200 and not port 9600"
 ---
 > export CAPTURE_INTERFACE=xxxx
 > export CAPTURE_FILTER=""

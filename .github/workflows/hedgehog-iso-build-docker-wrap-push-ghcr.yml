@@ -99,6 +99,9 @@ jobs:
           cp -r ./arkime/patch ./hedgehog-iso/shared/arkime_patch
           mkdir -p ./hedgehog-iso/suricata
           cp -r ./suricata/rules-default ./hedgehog-iso/suricata/
+          mkdir -p ./hedgehog-iso/nginx
+          cp -r ./nginx/landingpage/css ./hedgehog-iso/nginx/
+          cp -r ./nginx/landingpage/js ./hedgehog-iso/nginx/
           pushd ./hedgehog-iso
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt

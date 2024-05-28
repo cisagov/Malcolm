@@ -32,7 +32,9 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-BEATS_VER="8.12.1"
+ARKIME_VERSION="5.1.2"
+
+BEATS_VER="8.13.2"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -58,7 +60,7 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    arkime_ver='5.0.1-1'
+    arkime_ver="${ARKIME_VERSION}-1"
     curl -sSL -o /tmp/arkime-deb/arkime.deb "https://github.com/arkime/arkime/releases/download/v5.0.0/arkime_${arkime_ver}.ubuntu2204_arm64.deb"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
@@ -66,7 +68,7 @@ build_arkime(){
 build_arkime_src(){
 
     arkime_repo='https://github.com/arkime/arkime.git'
-    arkime_ver='5.0.1'
+    arkime_ver="${ARKIME_VERSION}"
     arkime_dir='/opt/arkime'
     build_jobs=$((PROC_CNT/2))
 
@@ -396,6 +398,19 @@ install_files() {
     curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
     popd >/dev/null 2>&1
+
+    # download ja4+ plugin
+    mkdir -p /opt/arkime/plugins
+    pushd /opt/arkime/plugins >/dev/null 2>&1
+    curl -sSL -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" "https://github.com/arkime/arkime/releases/download/v$ARKIME_VERSION/ja4plus.$ARCH.so" || true
+    [[ -f "/opt/arkime/plugins/ja4plus.${ARCH}.so" ]] && chmod 755 "/opt/arkime/plugins/ja4plus.${ARCH}.so"
+    popd >/dev/null 2>&1
+
+    # download assets for extracted file server
+    /usr/local/bin/web-ui-asset-download.sh -o /opt/sensor/assets/css
+    find /opt/sensor/assets -type d -exec chmod 755 "{}" \;
+    find /opt/sensor/assets -type f -exec chmod 644 "{}" \;
+    ln -s -r /opt/sensor/assets /opt/sensor/assets/assets
 
     # Prepare Fluentbit and Beats repo GPG keys
     local apt_lists='/etc/apt/sources.list.d'
