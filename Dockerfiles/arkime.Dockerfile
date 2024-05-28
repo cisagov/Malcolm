@@ -34,11 +34,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
-# ENV ARKIME_VERSION "v5.1.2"
-# ENV ARKIME_URL "https://github.com/arkime/arkime.git"
-# TODO: switch to release when it's actually out, or revert to source build
-ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_XXX.deb"
-ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/last-commit/ja4plus.XXX.so"
+ENV ARKIME_VERSION "5.2.0"
+ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
+ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
 

@@ -32,7 +32,7 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.1.2"
+ARKIME_VERSION="5.2.0"
 
 BEATS_VER="8.13.4"
 BEATS_OSS="-oss"
@@ -61,9 +61,8 @@ BUILD_ERROR_CODE=1
 build_arkime(){
     mkdir -p /tmp/arkime-deb
     # TODO: switch back to release when it's actually out, or revert to source build
-    # arkime_ver="${ARKIME_VERSION}-1"
-    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/last-commit/arkime-main_debian12_XXX.deb"
-    curl -fsSL -o /tmp/arkime-deb/arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${ARCH}/g")"
+    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_${ARCH}.deb"
+    curl -fsSL -o /tmp/arkime-deb/arkime.deb "${ARKIME_DEB_URL}"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
 

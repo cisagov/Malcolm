@@ -58,16 +58,16 @@ touch /opt/sensor/sensor_ctl/zeek/custom/__load__.zeek
 
 # cleanup
 cd /usr/local/src
-tar czf zeek-$ZEEK_VER-hedgehog.tar.gz -C /opt zeek spicy
-mv ./zeek-$ZEEK_VER-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
-rm -Rf zeek-$ZEEK_VER*
+tar czf zeek-hedgehog.tar.gz -C /opt zeek spicy
+mv ./zeek-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
+rm -Rf zeek* spicy*
 ###
 
 # get Arkime JA4+ plugin
-# TODO: switch to release when it's actually out, or revert to source build
+ARKIME_VERSION="5.2.0"
 curl "${GITHUB_API_CURL_ARGS[@]}" \
      -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" \
-     "https://github.com/arkime/arkime/releases/download/last-commit/ja4plus.${ARCH}.so"
+     "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.${ARCH}.so"
 cp "/opt/arkime/plugins/ja4plus.${ARCH}.so" /opt/hedgehog_install_artifacts/
 ###
 
