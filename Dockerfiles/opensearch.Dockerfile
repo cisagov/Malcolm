@@ -1,4 +1,6 @@
-FROM opensearchproject/opensearch:2.13.0
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch:2.14.0
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -23,6 +25,7 @@ ENV PUSER_RLIMIT_UNLOCK true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
+ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
@@ -32,11 +35,10 @@ ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
 
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
-
 # Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
-RUN yum upgrade -y && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+  yum upgrade -y && \
   yum install -y openssl util-linux procps rsync findutils && \
   yum remove -y vim-* && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
@@ -53,7 +55,8 @@ RUN yum upgrade -y && \
                           /opt/opensearch/backup \
                           /usr/share/opensearch/config/bootstrap \
                           /usr/share/opensearch/config/persist && \
-  chmod +x /usr/bin/tini && \
+  curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
+    chmod +x /usr/bin/tini && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/keystore-bootstrap.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 

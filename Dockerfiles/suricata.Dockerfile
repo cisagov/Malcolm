@@ -1,5 +1,8 @@
-FROM debian:12-slim
+ARG TARGETPLATFORM=linux/amd64
 
+FROM --platform=${TARGETPLATFORM} debian:12-slim
+
+# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -31,13 +34,13 @@ ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.42.1"
-ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+ENV YQ_VERSION "4.44.1"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
+ENV SURICATA_VERSION_PATTERN "1:7.0.*"
 
 ENV SURICATA_CONFIG_DIR /etc/suricata
 ENV SURICATA_CONFIG_FILE "$SURICATA_CONFIG_DIR"/suricata.yaml
@@ -53,7 +56,9 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
-RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+    echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list.d/backports.list && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -97,18 +102,16 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
         python3-zmq \
         rsync \
         supervisor \
-        suricata \
-        suricata-update \
         tini \
         vim-tiny \
         zlib1g && \
+    apt-get install -q -y --no-install-recommends -t bookworm-backports \
+        suricata=${SURICATA_VERSION_PATTERN} \
+        suricata-update && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-        echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-        chmod +x "$SUPERCRONIC" && \
-        mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-        ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
-    curl -fsSL -o /usr/bin/yq "${YQ_URL}" && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \

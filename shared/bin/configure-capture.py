@@ -63,6 +63,7 @@ class Constants:
     ARKIMECAP = 'arkime-capture'
     TX_RX_SECURE = 'ssl-client-receive'
     ACL_CONFIGURE = 'acl-configure'
+    TAGS_CONFIGURE = 'tags-configure'
 
     BEAT_DIR = {
         FILEBEAT: f'/opt/sensor/sensor_ctl/{FILEBEAT}',
@@ -96,13 +97,14 @@ class Constants:
     BEAT_HTTP_USERNAME = "BEAT_HTTP_USERNAME"
 
     # specific to filebeat
-    BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'current')
+    BEAT_ZEEK_LOG_PATH_SUBDIR = os.path.join('spool')
     BEAT_ZEEK_LOG_PATTERN_KEY = 'BEAT_LOG_PATTERN'
+    BEAT_ZEEK_LOG_PATTERN_VAL = os.path.join('logger-*', '*.log')
     BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR = os.path.join('logs', 'static')
     BEAT_STATIC_ZEEK_LOG_PATTERN_KEY = 'BEAT_STATIC_LOG_PATTERN'
+    BEAT_STATIC_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATH_SUBDIR = 'suricata'
     BEAT_SURICATA_LOG_PATTERN_KEY = 'BEAT_SURICATA_LOG_PATTERN'
-    BEAT_ZEEK_LOG_PATTERN_VAL = '*.log'
     BEAT_SURICATA_LOG_PATTERN_VAL = 'eve*.json'
 
     # specific to arkime
@@ -122,6 +124,9 @@ class Constants:
     # ACL for Arkime PCAP reachback and extracted files server
     MALCOLM_REQUEST_ACL = "MALCOLM_REQUEST_ACL"
 
+    # Comma-separated list of tags for data forwarded to Malcolm via filebeat
+    MALCOLM_EXTRA_TAGS = "MALCOLM_EXTRA_TAGS"
+
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
     MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
@@ -134,6 +139,7 @@ class Constants:
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_CONFIG_TXRX = (f'{TX_RX_SECURE}', f'Receive client SSL files for {FILEBEAT} from Malcolm')
     MSG_CONFIG_ACL = (f'{ACL_CONFIGURE}', f'Configure ACL for artifact reachback from Malcolm')
+    MSG_CONFIG_TAGS = (f'{TAGS_CONFIGURE}', f'Define extra tags for logs forwarded to Malcolm')
 
     MSG_OVERWRITE_CONFIG = '{} is already configured, overwrite current settings?'
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
@@ -165,6 +171,7 @@ class Constants:
     )
     MSG_CONFIG_ARKIME_VIEWER_PASSWORD = 'Specify password hash secret for Arkime viewer cluster'
     MSG_CONFIG_REQUEST_ACL = 'Specify IP addresses for ACL for artifact reachback from Malcolm (one per line)'
+    MSG_CONFIG_EXTRA_TAGS = 'Specify extra tags for logs forwarded to Malcolm (one per line)'
     MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
     MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
     MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -397,6 +404,7 @@ def main():
                 Constants.BEAT_OS_PORT: "OS_PORT",
                 Constants.BEAT_HTTP_USERNAME: "OS_USERNAME",
                 Constants.MALCOLM_REQUEST_ACL: Constants.MALCOLM_REQUEST_ACL,
+                Constants.MALCOLM_EXTRA_TAGS: Constants.MALCOLM_EXTRA_TAGS,
                 Constants.ARKIME_PASSWORD_SECRET: Constants.ARKIME_PASSWORD_SECRET,
                 Constants.BEAT_LS_SSL_CA_CRT: Constants.BEAT_LS_SSL_CA_CRT,
                 Constants.BEAT_LS_SSL_CLIENT_CRT: Constants.BEAT_LS_SSL_CLIENT_CRT,
@@ -849,8 +857,9 @@ def main():
                         Constants.MSG_CONFIG_FILEBEAT,
                         Constants.MSG_CONFIG_MISCBEAT,
                         Constants.MSG_CONFIG_ACL,
+                        Constants.MSG_CONFIG_TAGS,
                         Constants.MSG_CONFIG_TXRX,
-                    ][: 5 if txRxScript else -1],
+                    ][: 6 if txRxScript else -1],
                 )
                 if code != Dialog.OK:
                     raise CancelledError
@@ -1080,7 +1089,7 @@ def main():
                                 )
                                 forwarder_dict[Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_KEY] = os.path.join(
                                     os.path.join(log_path, Constants.BEAT_STATIC_ZEEK_LOG_PATH_SUBDIR),
-                                    Constants.BEAT_ZEEK_LOG_PATTERN_VAL,
+                                    Constants.BEAT_STATIC_ZEEK_LOG_PATTERN_VAL,
                                 )
                                 forwarder_dict[Constants.BEAT_SURICATA_LOG_PATTERN_KEY] = os.path.join(
                                     os.path.join(log_path, Constants.BEAT_SURICATA_LOG_PATH_SUBDIR),
@@ -1247,7 +1256,6 @@ def main():
                 elif fwd_mode == Constants.ACL_CONFIGURE:
 
                     # get list of IP addresses allowed for packet payload retrieval
-                    acl_config_dict = defaultdict(str)
                     lines = previous_config_values[Constants.MALCOLM_REQUEST_ACL].split(",")
                     if Constants.BEAT_OS_HOST in previous_config_values and (
                         previous_config_values[Constants.BEAT_OS_HOST]
@@ -1276,6 +1284,41 @@ def main():
                     code = d.msgbox(
                         text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(
                             fwd_mode, "\n".join(newAclValsDict[Constants.MALCOLM_REQUEST_ACL].split(','))
+                        )
+                    )
+
+                elif fwd_mode == Constants.TAGS_CONFIGURE:
+
+                    # get list of tags for logs forwarded to Malcolm
+                    lines = previous_config_values[Constants.MALCOLM_EXTRA_TAGS].split(",")
+                    code, lines = d.editbox_str(
+                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_EXTRA_TAGS
+                    )
+                    if code != Dialog.OK:
+                        raise CancelledError
+
+                    # modify specified tags array value in-place in SENSOR_CAPTURE_CONFIG file
+                    newTagsValsDict = {
+                        Constants.MALCOLM_EXTRA_TAGS: ','.join(
+                            [
+                                tag
+                                for tag in list(
+                                    set(
+                                        filter(
+                                            None,
+                                            [re.sub(r'[^A-Za-z0-9 ._-]', '', x.strip()) for x in lines.split('\n')],
+                                        )
+                                    )
+                                )
+                            ]
+                        )
+                    }
+                    rewrite_dict_to_file(newTagsValsDict, Constants.SENSOR_CAPTURE_CONFIG)
+
+                    # hooray
+                    code = d.msgbox(
+                        text=Constants.MSG_CONFIG_FORWARDING_SUCCESS.format(
+                            fwd_mode, "\n".join(newTagsValsDict[Constants.MALCOLM_EXTRA_TAGS].split(','))
                         )
                     )
 

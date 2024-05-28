@@ -114,7 +114,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     }
     ```
 1. Launch an instance from the new AMI
-    * Both `c4.4xlarge` and `t3a.2xlarge` seem to be good instance types for Malcolm
+    * `c4.4xlarge`, `t2.2xlarge`, and `t3a.2xlarge` seem to be good instance types for Malcolm
 1. SSH into the instance
 1. Run `~/Malcolm/scripts/configure` to configure Malcolm
 1. Run `~/Malcolm/scripts/auth_setup` to set up authentication for Malcolm

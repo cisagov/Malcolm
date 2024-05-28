@@ -101,7 +101,6 @@ YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-co
 [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]] && echo "$MAXMIND_GEOIP_DB_LICENSE_KEY" > "$SCRIPT_PATH"/shared/maxmind_license.txt
 [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
 echo "VCS_REVSION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
-[[ -d "$SCRIPT_PATH"/../arkime/patch ]] && cp -r "$SCRIPT_PATH"/../arkime/patch "$SCRIPT_PATH"/shared/arkime_patch
 trap cleanup_shared_and_docs EXIT
 
 vm_execute "sudo bash -c \"whoami && cd /sensor-build && pwd && ./build.sh\""

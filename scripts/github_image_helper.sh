@@ -15,6 +15,7 @@ if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP" && type git) > /dev/nu
   exit 1
 fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
+IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
 
 set -uo pipefail
 shopt -s nocasematch
@@ -83,7 +84,7 @@ function _gitreponame() {
 
 # get the current git working copy's Malcolm version (grepped from docker-compose.yml, e.g., 5.0.3)
 function _malcolmversion() {
-  $GREP -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1
+  $GREP -P "^\s+image:.*/malcolm" "$(_gittoplevel)"/docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | sed 's/-[^-]*$//' | uniq -c | sort -nr | awk '{print $2}' | head -n 1
 }
 
 ################################################################################
@@ -105,15 +106,15 @@ function _PullAndTagGithubWorkflowBuild() {
   OWNER="$(_gitowner)"
   IMAGE=$1
 
-  docker pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" && \
-    docker tag ghcr.io/"$OWNER"/"$IMAGE":"$BRANCH" ghcr.io/idaholab/"$IMAGE":"$VERSION"
+  docker pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" && \
+    docker tag ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" ghcr.io/idaholab/"$IMAGE":"${VERSION}${IMAGE_ARCH_SUFFIX}"
 }
 
 function PullAndTagGithubWorkflowImages() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
-  echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
+  echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as ${VERSION}${IMAGE_ARCH_SUFFIX}..."
   for IMG in $($GREP image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done

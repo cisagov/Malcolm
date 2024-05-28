@@ -2,8 +2,8 @@ pytz==2021.3
 Flask==2.3.2
 gunicorn==22.0.0
 opensearch-py==2.5.0
-requests==2.31.0
+requests==2.32.0
 regex==2022.3.2
 dateparser==1.1.1
-elasticsearch==8.13.0
-elasticsearch-dsl==8.13.0
+elasticsearch==8.13.2
+elasticsearch-dsl==8.13.1

@@ -1,4 +1,6 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.13.2
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.13.4
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -21,8 +23,6 @@ ENV PUSER_RLIMIT_UNLOCK true
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ENV TINI_VERSION v0.19.0
-
 ARG LOGSTASH_ENRICHMENT_PIPELINE=enrichment
 ARG LOGSTASH_PARSE_PIPELINE_ADDRESSES=zeek-parse,suricata-parse,beats-parse
 ARG LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=internal-os
@@ -37,8 +37,6 @@ ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PI
 
 USER root
 
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
-
 RUN set -x && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -51,7 +49,6 @@ RUN set -x && \
         python3-requests \
         rsync \
         tini && \
-    chmod +x /usr/bin/tini && \
     pip3 install ipaddress supervisor manuf pyyaml && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \

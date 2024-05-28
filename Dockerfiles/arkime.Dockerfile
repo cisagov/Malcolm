@@ -1,85 +1,8 @@
-FROM debian:12-slim AS build
+ARG TARGETPLATFORM=linux/amd64
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV TERM xterm
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-ENV ARKIME_VERSION "v5.1.2"
-ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_URL "https://github.com/arkime/arkime.git"
-ENV ARKIME_LOCALELASTICSEARCH no
-ENV ARKIME_INET yes
-
-ADD arkime/scripts/bs4_remove_div.py /opt/
-ADD arkime/patch/* /opt/patches/
-
-RUN export DEBARCH=$(dpkg --print-architecture) && \
-    apt-get -q update && \
-    apt-get -y -q --no-install-recommends upgrade && \
-    apt-get install -q -y --no-install-recommends \
-        binutils \
-        bison \
-        cmake \
-        curl \
-        file \
-        flex \
-        g++ \
-        gcc \
-        gettext \
-        git-core \
-        groff \
-        groff-base \
-        libcap-dev \
-        libjson-perl \
-        libkrb5-dev \
-        libmaxminddb-dev \
-        libpcap0.8-dev \
-        libpcre3-dev \
-        libssl-dev \
-        libtool \
-        libwww-perl \
-        libyaml-dev \
-        make \
-        meson \
-        ninja-build \
-        patch \
-        python3-dev \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
-        re2c \
-        sudo \
-        swig \
-        wget \
-        zlib1g-dev && \
-  python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 meson && \
-  cd /opt && \
-    git clone --recurse-submodules --branch="$ARKIME_VERSION" "$ARKIME_URL" "./arkime-"$ARKIME_VERSION && \
-    cd "./arkime-"$ARKIME_VERSION && \
-    bash -c 'for i in /opt/patches/*.patch; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    export PATH="$ARKIME_DIR/bin:${PATH}" && \
-    ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
-    ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
-    ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
-    python3 /opt/bs4_remove_div.py -i ./viewer/vueapp/src/components/users/Users.vue -o ./viewer/vueapp/src/components/users/Users.new -c "new-user-form" && \
-    mv -vf ./viewer/vueapp/src/components/users/Users.new ./viewer/vueapp/src/components/users/Users.vue && \
-    sed -i 's/v-if.*password.*"/v-if="false"/g' ./viewer/vueapp/src/components/settings/Settings.vue && \
-    rm -rf ./capture/plugins/suricata* && \
-    sed -i "s/^\(ARKIME_LOCALELASTICSEARCH=\).*/\1"$ARKIME_LOCALELASTICSEARCH"/" ./release/Configure && \
-    sed -i "s/^\(ARKIME_INET=\).*/\1"$ARKIME_INET"/" ./release/Configure && \
-    ./easybutton-build.sh && \
-    make install && \
-    npm cache clean --force && \
-    rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \
-    bash -c "file ${ARKIME_DIR}/bin/* ${ARKIME_DIR}/node-v*/bin/* | grep 'ELF 64-bit' | sed 's/:.*//' | xargs -l -r strip -v --strip-unneeded" && \
-    mkdir -p "${ARKIME_DIR}"/plugins && \
-    curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "https://github.com/arkime/arkime/releases/download/${ARKIME_VERSION}/ja4plus.${DEBARCH}.so" && \
-    chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so"
-
-FROM debian:12-slim
+FROM --platform=${TARGETPLATFORM} debian:12-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -110,13 +33,20 @@ ENV TERM xterm
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+ENV ARKIME_DIR "/opt/arkime"
+ENV ARKIME_VERSION "5.2.0"
+ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
+ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
+ENV ARKIME_LOCALELASTICSEARCH no
+ENV ARKIME_INET yes
+
 ARG MALCOLM_USERNAME=admin
 ARG ARKIME_ECS_PROVIDER=arkime
 ARG ARKIME_ECS_DATASET=session
-ARG ARKIME_INTERFACE=eth0
 ARG ARKIME_AUTO_ANALYZE_PCAP_FILES=false
 ARG ARKIME_AUTO_ANALYZE_PCAP_THREADS=1
-ARG ARKIME_PACKET_THREADS=1
+ARG ARKIME_PACKET_THREADS=2
+ARG ARKIME_TPACKETV3_NUM_THREADS=2
 ARG OPENSEARCH_MAX_SHARDS_PER_NODE=2500
 ARG WISE=on
 ARG VIEWER=on
@@ -137,7 +67,6 @@ ARG PCAP_NODE_NAME=malcolm
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
 
 # Declare envs vars for each arg
-ENV ARKIME_INTERFACE $ARKIME_INTERFACE
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
 # this needs to be present, but is unused as nginx is going to handle auth for us
 ENV ARKIME_PASSWORD "ignored"
@@ -147,6 +76,7 @@ ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_AUTO_ANALYZE_PCAP_FILES $ARKIME_AUTO_ANALYZE_PCAP_FILES
 ENV ARKIME_AUTO_ANALYZE_PCAP_THREADS $ARKIME_AUTO_ANALYZE_PCAP_THREADS
 ENV ARKIME_PACKET_THREADS $ARKIME_PACKET_THREADS
+ENV ARKIME_TPACKETV3_NUM_THREADS $ARKIME_TPACKETV3_NUM_THREADS
 ENV ARKIME_PCAP_PROCESSOR $ARKIME_PCAP_PROCESSOR
 ENV ARKIME_LIVE_CAPTURE $ARKIME_LIVE_CAPTURE
 ENV ARKIME_COMPRESSION_TYPE $ARKIME_COMPRESSION_TYPE
@@ -162,50 +92,67 @@ ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
-COPY --from=build $ARKIME_DIR $ARKIME_DIR
 
-RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+RUN export DEBARCH=$(dpkg --print-architecture) && \
+    sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       bc \
+      bzip2 \
       curl \
       ethtool \
       file \
       geoip-bin \
-      gettext \
+      gzip \
       inotify-tools \
       jq \
       libcap2-bin \
+      libglib2.0-0 \
       libjson-perl \
       libkrb5-3 \
+      liblua5.4-0 \
       libmaxminddb0 \
       libpcap0.8 \
       libpcre3 \
+      librdkafka1 \
       libssl3 \
       libtool \
       libwww-perl \
       libyaml-0-2 \
+      libyaml-dev \
+      libyara9 \
       libzmq5 \
+      lzma \
+      p7zip-full \
       procps \
       psmisc \
       python3 \
       python3-pip \
       python3-setuptools \
       python3-wheel \
-      rename \
       rsync \
-      sudo \
       supervisor \
+      tar \
       tini \
+      unrar \
+      unzip \
       vim-tiny \
       wget \
-      tar gzip unzip cpio bzip2 lzma xz-utils p7zip-full unrar zlib1g && \
+      xz-utils \
+      zlib1g && \
+    cd /tmp && \
+      curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
+      dpkg -i /tmp/arkime.deb && \
+      rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \
+    mkdir -p "${ARKIME_DIR}"/plugins && \
+      curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
+      chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove gcc gcc-12 cpp cpp-12 libssl-dev && \
+    apt-get -q -y --purge remove gcc gcc-12 cpp cpp-12 && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -15,6 +15,7 @@ ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
 ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"false"}
+ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-}
 ARKIME_DEBUG_LEVEL=${ARKIME_DEBUG_LEVEL:-0}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
@@ -64,7 +65,8 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(freeSpaceG=\).*/\1"${ARKIME_FREESPACEG}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(rotateIndex=\).*/\1"${ARKIME_ROTATE_INDEX}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(queryAllIndices=\).*/\1"${ARKIME_QUERY_ALL_INDICES}"/" "${ARKIME_CONFIG_FILE}"
-    sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${MALCOLM_NETWORK_INDEX_PATTERN}" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(spiDataMaxIndices=\).*/\1"${ARKIME_SPI_DATA_MAX_INDICES}"/" "${ARKIME_CONFIG_FILE}"
+    sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(debug=\).*/\1"${ARKIME_DEBUG_LEVEL}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"

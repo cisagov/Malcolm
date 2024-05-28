@@ -341,11 +341,11 @@ def pod_stats(node, namespace):
                     if c['usage']['cpu'] == '0':
                         pass
                     else:
-                        cpu = +int(c['usage']['cpu'][:-1])
+                        cpu += int(c['usage']['cpu'][:-1])
                 cpu = str(cpu) + 'n'
                 cpu = _nanocore_to_millicore(cpu)
                 for m in cpu_mem['containers']:
-                    mem = +int(m['usage']['memory'][:-2])
+                    mem += int(m['usage']['memory'][:-2])
                 mem = str(mem) + 'Ki'
                 mem = _to_gibibyte_or_mebibyte(mem)
             except kubeImported.client.rest.ApiException as x:

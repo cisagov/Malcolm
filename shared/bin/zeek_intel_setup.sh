@@ -103,9 +103,11 @@ EOF
                 --output ./.threat_autogen.zeek."${INSTANCE_UID}" \
                 --input "${THREAT_JSON_FILES[@]}" \
                 --input-file ./STIX/.stix_input.txt ./MISP/.misp_input.txt
-            mv --backup=simple --suffix=.old ./.threat_autogen.zeek."${INSTANCE_UID}" ./.threat_autogen.zeek
-            rm -f ./.threat_autogen.zeek.old
-            LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/.threat_autogen.zeek )
+            if [[ $? -eq 0 ]]; then
+                rm -f ./.threat_autogen.zeek.old
+                mv --backup=simple --suffix=.old ./.threat_autogen.zeek."${INSTANCE_UID}" ./.threat_autogen.zeek
+            fi
+            [[ -s ./.threat_autogen.zeek ]] && LOOSE_INTEL_FILES+=( "${INTEL_DIR}"/.threat_autogen.zeek )
         else
             rm -f ./.threat_autogen.zeek*
         fi

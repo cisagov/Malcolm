@@ -1,7 +1,8 @@
-FROM debian:12-slim
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
-
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -32,7 +33,7 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 
 # for download and install
-ARG ZEEK_VERSION=6.2.0-0
+ARG ZEEK_VERSION=6.2.1-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
@@ -48,13 +49,11 @@ ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
 # build and install system packages, zeek, spicy and plugins
-RUN export DEBARCH=$(dpkg --print-architecture) && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
@@ -116,11 +115,8 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     mkdir -p /tmp/zeek-packages && \
       bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
       dpkg -i /tmp/zeek-packages/*.deb && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     cd /tmp && \
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
@@ -225,7 +221,7 @@ ENV ZEEK_AUTO_ANALYZE_PCAP_THREADS $ZEEK_AUTO_ANALYZE_PCAP_THREADS
 ENV ZEEK_INTEL_ITEM_EXPIRATION $ZEEK_INTEL_ITEM_EXPIRATION
 ENV ZEEK_INTEL_REFRESH_THREADS $ZEEK_INTEL_REFRESH_THREADS
 ENV ZEEK_INTEL_FEED_SINCE $ZEEK_INTEL_FEED_SINCE
-eNV ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION $ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION
+ENV ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION $ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION
 ENV ZEEK_EXTRACTOR_MODE $ZEEK_EXTRACTOR_MODE
 ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 ENV ZEEK_INTEL_PATH $ZEEK_INTEL_PATH

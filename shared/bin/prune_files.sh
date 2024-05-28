@@ -25,7 +25,7 @@ while getopts i:m:p:rt:v opts; do
       m) MAXSIZE_GB=${OPTARG} ;;
       p) PRUNE_PATH=${OPTARG} ;;
       r) DEPTH=999 ;;
-      t) THRESHOLD_PCT=${OPTARG} ;;
+      t) THRESHOLD_PCT="${OPTARG//%}" ;;
       v) VERBOSE=1 ;;
    esac
 done

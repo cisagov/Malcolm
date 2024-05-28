@@ -11,14 +11,14 @@ import time
 import fcntl
 import magic
 import json
-import pprint
 import re
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, DEVNULL
+from malcolm_utils import LoadFileIfJson, deep_get
 
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60
-fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat/data/registry/filebeat/data.json")
+fbRegFilename = os.getenv('FILEBEAT_REGISTRY_FILE', "/usr/share/filebeat-logs/data/registry/filebeat/log.json")
 
 zeekDir = os.path.join(os.getenv('FILEBEAT_ZEEK_DIR', "/zeek/"), '')
 zeekLiveDir = zeekDir + "live/logs/"
@@ -53,22 +53,21 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
             if fileStatInfo:
                 fileFound = any(
                     (
-                        (entry['FileStateOS'])
-                        and (entry['FileStateOS']['device'] == fileStatInfo.st_dev)
-                        and (entry['FileStateOS']['inode'] == fileStatInfo.st_ino)
+                        (deep_get(entry, ['v', 'FileStateOS', 'device']) == fileStatInfo.st_dev)
+                        and (deep_get(entry, ['v', 'FileStateOS', 'inode']) == fileStatInfo.st_ino)
                     )
                     for entry in filebeatReg
                 )
                 if fileFound:
                     # found a file in the filebeat registry, so leave it alone!
                     # we only want to delete files that filebeat has forgotten
-                    # print "{} is found in registry!".format(filename)
+                    # print(f"{filename} is found in registry!")
                     return
                 # else:
-                # print "{} is NOT found in registry!".format(filename)
+                #     print(f"{filename} is NOT found in registry!")
 
         # now see if the file is in use by any other process in the system
-        fuserProcess = Popen(["fuser", "-s", filename], stdout=PIPE)
+        fuserProcess = Popen(["fuser", "-s", filename], stdout=PIPE, stderr=DEVNULL)
         fuserProcess.communicate()
         fuserExitCode = fuserProcess.wait()
         if fuserExitCode != 0:
@@ -88,7 +87,7 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
 
             if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
                 # this is a closed file that is old, so delete it
-                print('removing old file "{}" ({}, used {} seconds ago)'.format(filename, fileType, lastUseTime))
+                print(f'removing old file "{filename}" ({fileType}, used {lastUseTime} seconds ago)')
                 silentRemove(filename)
 
     except FileNotFoundError:
@@ -96,7 +95,7 @@ def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
         pass
 
     except Exception as e:
-        print("{} for '{}': {}".format(type(e).__name__, filename, e))
+        print(f"{type(e).__name__} for '{filename}': {e}")
 
 
 def pruneFiles():
@@ -120,7 +119,7 @@ def pruneFiles():
     fbReg = None
     if os.path.isfile(fbRegFilename):
         with open(fbRegFilename) as f:
-            fbReg = json.load(f)
+            fbReg = LoadFileIfJson(f, attemptLines=True)
 
     # see if the files we found are in use and old enough to be pruned
     for file in zeekFoundFiles:
@@ -132,7 +131,7 @@ def pruneFiles():
     for current in os.listdir(zeekCurrentDir):
         currentFileSpec = os.path.join(zeekCurrentDir, current)
         if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
-            print('removing dead symlink "{}"'.format(currentFileSpec))
+            print(f'removing dead symlink "{currentFileSpec}"')
             silentRemove(currentFileSpec)
 
     # clean up any old and empty directories in Zeek processed/ directory
@@ -150,7 +149,7 @@ def pruneFiles():
         if dirAge >= cleanDirSeconds:
             try:
                 os.rmdir(dirToRm)
-                print('removed empty directory "{}" (used {} seconds ago)'.format(dirToRm, dirAge))
+                print(f'removed empty directory "{dirToRm}" (used {dirAge} seconds ago)')
             except OSError:
                 pass
 

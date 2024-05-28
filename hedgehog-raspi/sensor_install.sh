@@ -32,14 +32,14 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.1.2"
+ARKIME_VERSION="5.2.0"
 
-BEATS_VER="8.13.2"
+BEATS_VER="8.13.4"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
 # Building from source will increase build time A LOT (especially Zeek)!
-BUILD_ARKIME_FROM_SOURCE=1
+BUILD_ARKIME_FROM_SOURCE=0
 BUILD_YARA_FROM_SOURCE=1
 BUILD_ZEEK_FROM_SOURCE=0
 
@@ -50,7 +50,7 @@ BUILD_DEPS+='meson ninja-build python3-dev re2c ruby ruby-dev ruby-rubygems '
 # Build dependencies we're leaving in place after installation (for building new Zeek plugins in the wild, mostly)
 BUILD_DEPS_KEEP='build-essential ccache cmake flex gcc g++ git libfl-dev libgoogle-perftools-dev '
 BUILD_DEPS_KEEP+='libgoogle-perftools4 libkrb5-3 libkrb5-dev libmaxminddb-dev libpcap-dev libssl-dev libtcmalloc-minimal4 '
-BUILD_DEPS_KEEP+='make patch pkg-config python3-git python3-pip python3-semantic-version python3-setuptools python3-venv swig wget zlib1g-dev '
+BUILD_DEPS_KEEP+='make patch pkg-config python3-git python3-pip python3-semantic-version python3-setuptools swig wget zlib1g-dev '
 
 BUILD_ERROR_CODE=1
 
@@ -60,8 +60,9 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    arkime_ver="${ARKIME_VERSION}-1"
-    curl -sSL -o /tmp/arkime-deb/arkime.deb "https://github.com/arkime/arkime/releases/download/v5.0.0/arkime_${arkime_ver}.ubuntu2204_arm64.deb"
+    # TODO: switch back to release when it's actually out, or revert to source build
+    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_${ARCH}.deb"
+    curl -fsSL -o /tmp/arkime-deb/arkime.deb "${ARKIME_DEB_URL}"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
 
@@ -213,7 +214,7 @@ build_zeek_src() {
     export PYTHONUNBUFFERED=1
 
     zeek_url=https://github.com/zeek/zeek.git
-    zeek_version=6.2.0
+    zeek_version=6.2.1
     zeek_release=1
     zeek_dir=/opt/zeek
     # Zeek's build eats a ton of resources; prevent OOM from the killing build process
@@ -397,13 +398,6 @@ install_files() {
     fi
     curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
-    popd >/dev/null 2>&1
-
-    # download ja4+ plugin
-    mkdir -p /opt/arkime/plugins
-    pushd /opt/arkime/plugins >/dev/null 2>&1
-    curl -sSL -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" "https://github.com/arkime/arkime/releases/download/v$ARKIME_VERSION/ja4plus.$ARCH.so" || true
-    [[ -f "/opt/arkime/plugins/ja4plus.${ARCH}.so" ]] && chmod 755 "/opt/arkime/plugins/ja4plus.${ARCH}.so"
     popd >/dev/null 2>&1
 
     # download assets for extracted file server
