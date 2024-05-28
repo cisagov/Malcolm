@@ -12,8 +12,8 @@ opensearch:
     - ./nginx/ca-trust:/var/local/ca-trust:ro
     - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
     - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-    - ./opensearch:/usr/share/opensearch/data:delegated
-    - ./opensearch-backup:/opt/opensearch/backup:delegated
+    - ./opensearch:/usr/share/opensearch/data
+    - ./opensearch-backup:/opt/opensearch/backup
     - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
 dashboards-helper:
     - ./nginx/ca-trust:/var/local/ca-trust:ro

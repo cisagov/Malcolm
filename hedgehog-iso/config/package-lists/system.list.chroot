@@ -69,6 +69,7 @@ hfsutils
 htop
 hwdata
 javascript-common
+jo
 jq
 less
 libatomic1
@@ -80,6 +81,7 @@ libjansson4
 libjson-perl
 libkrb5-3
 liblsan0
+liblua5.4-0
 libmagic1
 libmaxminddb0
 libmhash2
@@ -91,6 +93,7 @@ libpcre2-16-0
 libpcre2-32-0
 libpcre2-8-0
 libpcre3
+librdkafka1
 libsodium23
 libssl3
 libtcmalloc-minimal4
@@ -99,6 +102,7 @@ libtsan0
 libubsan1
 libunwind8
 libwww-perl
+libyaml-dev
 libykpers-1-1
 libyubikey0
 libzmq5

@@ -1,4 +1,6 @@
-FROM debian:12-slim
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -86,14 +88,10 @@ ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
-ENV YARA_VERSION "4.5.0"
+ENV YARA_VERSION "4.5.1"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
-ENV CAPA_VERSION "7.0.1"
-ENV CAPA_URL "https://github.com/fireeye/capa/releases/download/v${CAPA_VERSION}/capa-v${CAPA_VERSION}-linux.zip"
-ENV CAPA_DIR "/opt/capa"
-ENV CAPA_BIN "${CAPA_DIR}/capa"
 ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
 ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
@@ -103,19 +101,19 @@ ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
+COPY --chmod=777 shared/bin/capa-build.sh /usr/local/bin/
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
 COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 COPY --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
 
-RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
@@ -145,6 +143,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       libzmq5 \
       psmisc \
       python3 \
+      python3-venv \
       python3-bs4 \
       python3-dev \
       python3-pip \
@@ -162,11 +161,8 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       supervisor \
       watchdog \
       yara-python && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     mkdir -p "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" "${SRC_BASE_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
     cd "${SRC_BASE_DIR}" && \
       curl -sSL "${YARA_URL}" | tar xzf - -C "${SRC_BASE_DIR}" && \
@@ -185,12 +181,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
     cd /tmp && \
       /usr/local/bin/web-ui-asset-download.sh -o "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css" && \
     cd /tmp && \
-      curl -fsSL -o ./capa.zip "${CAPA_URL}" && \
-      unzip ./capa.zip && \
-      chmod 755 ./capa && \
-      mkdir -p "${CAPA_DIR}" && \
-      mv ./capa "${CAPA_BIN}" && \
-      rm -f ./capa.zip && \
+      /usr/local/bin/capa-build.sh && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
         automake \
         build-essential \
@@ -203,13 +194,14 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
         libssl-dev \
         libtool \
         make \
-        python3-dev && \
+        python3-dev \
+        python3-venv && \
     mkdir -p /var/log/clamav "${CLAMAV_RULES_DIR}" && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
-    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${CAPA_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
@@ -225,7 +217,7 @@ RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sour
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/clam_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/yara_scan.py && \
       ln -r -s /usr/local/bin/zeek_carve_scanner.py /usr/local/bin/capa_scan.py && \
-      echo "0 */6 * * * /bin/bash /usr/local/bin/capa-update.sh\n0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
+      echo "0 */6 * * * /usr/local/bin/yara_rules_setup.sh -r \"${YARA_RULES_SRC_DIR}\" -y \"${YARA_RULES_DIR}\"" > ${SUPERCRONIC_CRONTAB} && \
   apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/*
@@ -250,9 +242,6 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 WORKDIR /zeek/extract_files
 
-ENV PATH "${CAPA_DIR}:${PATH}"
-
-VOLUME ["$CAPA_DIR"]
 VOLUME ["$CLAMAV_RULES_DIR"]
 VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]

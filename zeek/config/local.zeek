@@ -47,6 +47,11 @@ global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
 
+global capture_filter_str = getenv("CAPTURE_FILTER");
+@if (capture_filter_str != "")
+  redef restrict_filters += { ["user-defined capture filter"] = capture_filter_str };
+@endif
+
 global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @if (json_format)
   redef LogAscii::use_json = T;

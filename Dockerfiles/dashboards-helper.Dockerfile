@@ -1,4 +1,6 @@
-FROM alpine:3.19
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} alpine:3.19
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -36,9 +38,7 @@ ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
 ENV SUPERCRONIC_VERSION "0.2.29"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-amd64"
-ENV SUPERCRONIC "supercronic-linux-amd64"
-ENV SUPERCRONIC_SHA1SUM "cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b"
+ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
@@ -59,16 +59,14 @@ COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
 COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
 ADD scripts/malcolm_utils.py /data/
 
-RUN apk update --no-cache && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    apk update --no-cache && \
     apk upgrade --no-cache && \
     apk --no-cache add bash python3 py3-pip curl openssl procps psmisc moreutils npm rsync shadow jq tini && \
     npm install -g http-server && \
     pip3 install --break-system-packages supervisor humanfriendly requests && \
-    curl -fsSLO "$SUPERCRONIC_URL" && \
-      echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-      chmod +x "$SUPERCRONIC" && \
-      mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-      ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
+      chmod +x /usr/local/bin/supercronic && \
     addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
       addgroup ${PUSER} tty ; \

@@ -5,7 +5,6 @@
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 CERT_FILE="${ARKIME_DIR}"/etc/viewer.crt
 KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
-ARKIME_PACKET_THREADS=${ARKIME_PACKET_THREADS:-1}
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
 
@@ -47,6 +46,15 @@ fi
 # download and/or update geo updates
 $ARKIME_DIR/bin/arkime_update_geo.sh
 
+# calculate tags
+TAGS_ARGS=()
+if [[ -n "${EXTRA_TAGS}" ]]; then
+  while read EXTRA_TAG; do
+    TAGS_ARGS+=( -t )
+    TAGS_ARGS+=( "${EXTRA_TAG}" )
+  done < <(echo "${EXTRA_TAGS}" | tr ',' '\n') # loop over ',' separated EXTRA_TAGS values
+fi
+
 # we haven't dropUser/dropGroup'ed yet, so make sure the regular user owns the files we just touched
 [[ -n ${PUID} ]] && [[ -n ${PGID} ]] && chown -f -R ${PUID}:${PGID} "${ARKIME_DIR}"/etc/ || true
 
@@ -65,7 +73,7 @@ touch /var/run/arkime/initialized
 echo "Arkime is initialized!"
 echo
 
-"${ARKIME_DIR}"/bin/capture --insecure "${NODE_ARGS[@]}" \
+"${ARKIME_DIR}"/bin/capture --insecure "${TAGS_ARGS[@]}" "${NODE_ARGS[@]}" \
   -c "${ARKIME_DIR}"/etc/config.ini \
   -o pcapDir=/data/pcap/arkime-live \
   -o dropUser=${PUSER} \

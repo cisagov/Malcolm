@@ -6,9 +6,10 @@
 #             tiredofit/docker-nginx-ldap -  https://github.com/tiredofit/docker-nginx-ldap/blob/master/Dockerfile
 
 ####################################################################################
+ARG TARGETPLATFORM=linux/amd64
 
 # first build documentation with jekyll
-FROM ghcr.io/mmguero-dev/jekyll:latest as docbuild
+FROM --platform=${TARGETPLATFORM} ghcr.io/mmguero-dev/jekyll:latest as docbuild
 
 ARG GITHUB_TOKEN
 ARG VCS_REVISION
@@ -32,7 +33,7 @@ RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.bu
     find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme/"@g' "{}" \;
 
 # build NGINX image
-FROM alpine:3.18
+FROM --platform=${TARGETPLATFORM} alpine:3.18
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

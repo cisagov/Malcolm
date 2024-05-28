@@ -4,7 +4,7 @@ This document outlines how to install [Malcolm]({{ site.github.repository_url }}
 
 The Malcolm and Hedgehog Linux installers as described in these instructions are intended to be used to **replace** the existing operating system (if any) of the respective systems onto which they are installed; and, as such, are designed to require as little user input as possible. For this reason, there are NO user prompts or confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
-In contrast to using the ISO installer, Malcolm can also be installed "natively" on any x86_64 platform capable of running Docker. See the [installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
+In contrast to using the ISO installer, Malcolm can also be installed on any x86-64 (also known as x64, x86_64, AMD64, and Intel 64) or AArch64 (also known as ARM64) platform capable of running Docker. See the [installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
 
 ### <a name="TableOfContents"></a> Table of Contents
 
@@ -30,9 +30,11 @@ In contrast to using the ISO installer, Malcolm can also be installed "natively"
         * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
         * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
         * [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
+        * [tags-configure](#HedgehogTags): Specify extra tags for forwarded logs
     - [Autostart services](#HedgehogConfigAutostart)
     - [Managing disk usage](#HedgehogDiskUsage)
 * [Verifying Traffic Capture and Forwarding](#Verify)
+* [Tuning Live Analysis](live-analysis.md#LiveAnalysisTuning)
 
 ## <a name="ISODownload"></a> Obtaining the Installation ISOs
 
@@ -585,6 +587,12 @@ This forwarder's configuration is almost identical to that of [filebeat](#Hedgeh
 Users will be shown a dialog for a list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](#HedgehogZeekFileExtraction). The list will be prepopulated with the IP address entered a few screens prior to this one.
 
 ![PCAP retrieval ACL](./images/hedgehog/images/malcolm_arkime_reachback_acl.png)
+
+### <a name="HedgehogTags"></a>tags-configure: Specify extra tags for forwarded logs
+
+Users may populate a list of values, one per line, to be added to the `tags` field for logs forwarded from the sensor to a Malcolm aggregator. These tags may make it easier to identify or search for data during analysis.
+
+![Extra tags](./images/hedgehog/images/forwarder_tags_config.png)
 
 ### <a name="HedgehogConfigAutostart"></a>Autostart services
 

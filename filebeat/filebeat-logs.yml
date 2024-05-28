@@ -29,7 +29,7 @@ filebeat.inputs:
 
 - type: log
   paths:
-    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/logs/current/*.log
+    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/spool/logger-*/*.log
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_zeek_malcolm_live"]

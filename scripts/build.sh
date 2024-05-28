@@ -75,6 +75,8 @@ unset CONFIRMATION
 read -p "Malcolm Docker images will now be built and/or pulled, force full clean (non-cached) rebuild [y/N]? " CONFIRMATION
 CONFIRMATION=${CONFIRMATION:-N}
 
+# e.g., linux/amd64 or linux/arm64
+TARGET_PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 MALCOLM_VERSION="$($GREP -P "^\s+image:.*/malcolm/" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
@@ -99,16 +101,17 @@ fi
 
 # build the image(s)
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly
 FILES_IN_IMAGES=(
-  "/usr/share/filebeat/filebeat.yml;filebeat-oss"
+  "/usr/share/filebeat-logs/filebeat-logs.yml;filebeat-oss"
   "/var/www/upload/filepond/dist/filepond.js;file-upload"
   "/opt/freq_server/freq_server.py;freq"
+  "/usr/local/bin/capa;file-monitor"
   "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
   "/etc/ja3.yaml;logstash"

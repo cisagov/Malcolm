@@ -23,7 +23,7 @@ if version not in ["1", "2", "3", "4"]:
     sys.exit(1)
 
 suite = sys.argv[2]
-if suite not in ['bullseye', 'bookworm', 'trixie']:
+if suite not in ['bookworm']:
     print("E: unsupported suite %s" % suite, file=sys.stderr)
     sys.exit(1)
 target_yaml = 'raspi_%s_%s.yaml' % (version, suite)
@@ -68,9 +68,8 @@ if version != '2':
 else:
     bluetooth_firmware = ''
 
-# Pi 4 on buster required some backports. Let's keep variables around, ready to
-# be used whenever we need to pull specific things from backports.
-backports_enable = False
+# We're pulling suricata from backports
+backports_enable = True
 backports_suite = '%s-backports' % suite
 
 # Serial console:
@@ -92,8 +91,7 @@ hostname = 'Hedgehog-rpi-%s' % version
 # Nothing yet!
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
-    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
-    'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
     'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
     % MALCOLM_DIR,

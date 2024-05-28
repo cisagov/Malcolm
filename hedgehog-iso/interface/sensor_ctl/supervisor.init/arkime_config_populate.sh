@@ -78,6 +78,27 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(simpleGzipLevel)\s*=\s*.*/\1=$COMPRESSION_LEVEL/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # capture performance-related settings
+  DB_BULK_SIZE="${ARKIME_DB_BULK_SIZE:-4000000}"
+  MAGIC_MODE="${ARKIME_MAGIC_MODE:-basic}"
+  MAX_PACKETS_IN_QUEUE="${ARKIME_MAX_PACKETS_IN_QUEUE:-300000}"
+  PACKET_THREADS="${ARKIME_PACKET_THREADS:-2}"
+  PCAP_READ_METHOD="${ARKIME_PCAP_READ_METHOD:-tpacketv3}"
+  PCAP_WRITE_METHOD="${ARKIME_PCAP_WRITE_METHOD:-simple}"
+  PCAP_WRITE_SIZE="${ARKIME_PCAP_WRITE_SIZE:-2560000}"
+  TPACKETV3_BLOCK_SIZE="${ARKIME_TPACKETV3_BLOCK_SIZE:-8388608}"
+  TPACKETV3_NUM_THREADS="${ARKIME_TPACKETV3_NUM_THREADS:-2}"
+
+  sed -r -i "s/(dbBulkSize)\s*=\s*.*/\1=$DB_BULK_SIZE/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(magicMode)\s*=\s*.*/\1=$MAGIC_MODE/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(maxPacketsInQueue)\s*=\s*.*/\1=$MAX_PACKETS_IN_QUEUE/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(packetThreads)\s*=\s*.*/\1=$PACKET_THREADS/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(pcapReadMethod)\s*=\s*.*/\1=$PCAP_READ_METHOD/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(pcapWriteMethod)\s*=\s*.*/\1=$PCAP_WRITE_METHOD/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(pcapWriteSize)\s*=\s*.*/\1=$PCAP_WRITE_SIZE/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(tpacketv3BlockSize)\s*=\s*.*/\1=$TPACKETV3_BLOCK_SIZE/" "$ARKIME_CONFIG_FILE"
+  sed -r -i "s/(tpacketv3NumThreads)\s*=\s*.*/\1=$TPACKETV3_NUM_THREADS/" "$ARKIME_CONFIG_FILE"
+
   # how often OpenSearch/Elasticsearch should create a new index
   if [[ -n $ARKIME_ROTATE_INDEX ]]; then
     sed -r -i "s/(rotateIndex)\s*=\s*.*/\1=$ARKIME_ROTATE_INDEX/" "$ARKIME_CONFIG_FILE"

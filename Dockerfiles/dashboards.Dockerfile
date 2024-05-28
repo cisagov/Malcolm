@@ -1,4 +1,6 @@
-FROM opensearchproject/opensearch-dashboards:2.13.0
+ARG TARGETPLATFORM=linux/amd64
+
+FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch-dashboards:2.14.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -20,6 +22,8 @@ ENV PUSER_PRIV_DROP true
 ENV TERM xterm
 
 ENV TINI_VERSION v0.19.0
+ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
+
 ENV OSD_TRANSFORM_VIS_VERSION 2.13.0
 
 ARG NODE_OPTIONS="--max_old_space_size=4096"
@@ -29,25 +33,26 @@ ENV PATH="/data:${PATH}"
 
 USER root
 
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSFORM_VIS_VERSION/transformVis-$OSD_TRANSFORM_VIS_VERSION.zip /tmp/transformVis.zip
 
-RUN yum upgrade -y && \
+RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    yum upgrade -y && \
     yum install -y curl-minimal psmisc findutils util-linux openssl rsync python3 zip unzip && \
     yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.12\.0/2\.13\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.12\.0/2\.13\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.13\.0/2\.14\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.13\.0/2\.14\.0/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \
     chown --silent -R ${PUSER}:${PGROUP} /usr/share/opensearch-dashboards && \
-    chmod +x /usr/bin/tini && \
+    curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
+      chmod +x /usr/bin/tini && \
     yum clean all && \
     rm -rf /var/cache/yum
 

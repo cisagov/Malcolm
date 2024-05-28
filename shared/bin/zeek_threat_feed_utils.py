@@ -477,10 +477,13 @@ class FeedParserZeekPrinter(object):
         toParse,
         source: Union[Tuple[str], None] = None,
     ):
+        result = False
         try:
             # parse the STIX and process all "Indicator" objects
             for obj in STIXParse(toParse, allow_custom=True).objects:
                 if type(obj).__name__ == "Indicator":
+                    if not result:
+                        result = True
                     # map indicator object to Zeek value(s)
                     if ((self.since is None) or (obj.created >= self.since) or (obj.modified >= self.since)) and (
                         vals := map_stix_indicator_to_zeek(indicator=obj, source=source, logger=self.logger)
@@ -494,6 +497,7 @@ class FeedParserZeekPrinter(object):
         except STIXError as ve:
             if self.logger is not None:
                 self.logger.warning(f"{type(ve).__name__}: {ve}")
+        return result
 
     def ProcessMISP(
         self,
@@ -501,6 +505,7 @@ class FeedParserZeekPrinter(object):
         source: Union[Tuple[str], None] = None,
         url: Union[str, None] = None,
     ):
+        result = False
         if isinstance(toParse, dict):
             try:
                 attr = None
@@ -527,6 +532,8 @@ class FeedParserZeekPrinter(object):
                     event.from_dict(**attr.Event)
 
                 if attr or event:
+                    if not result:
+                        result = True
                     if event:
                         # format the descriptive info for the Zeek intel item
                         if hasattr(event, 'Orgc') and event.Orgc:
@@ -591,10 +598,11 @@ class FeedParserZeekPrinter(object):
 
         elif self.logger is not None:
             self.logger.warning(f"Unknown MISP object format ('{type(toParse)}')")
+        return result
 
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
-    inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, logger = (
+    inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, successCount, logger = (
         threatInputWorkerArgs[0],
         threatInputWorkerArgs[1],
         threatInputWorkerArgs[2],
@@ -602,6 +610,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
         threatInputWorkerArgs[4],
         threatInputWorkerArgs[5],
         threatInputWorkerArgs[6],
+        threatInputWorkerArgs[7],
     )
 
     with workerThreadCount as workerId:
@@ -625,17 +634,19 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 if isinstance(infileJson, dict):
                                     if 'type' in infileJson and 'id' in infileJson:
                                         # STIX input file
-                                        zeekPrinter.ProcessSTIX(
+                                        if zeekPrinter.ProcessSTIX(
                                             infileJson,
                                             source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                        )
+                                        ):
+                                            successCount.increment()
 
                                     elif (len(infileJson.keys()) == 1) and ('Event' in infileJson):
                                         # MISP input file containing "Event"
-                                        zeekPrinter.ProcessMISP(
+                                        if zeekPrinter.ProcessMISP(
                                             infileJson,
                                             source=[os.path.splitext(os.path.basename(inarg))[0]],
-                                        )
+                                        ):
+                                            successCount.increment()
                                     else:
                                         raise Exception(f"Could not identify content in '{inarg}'")
                                 else:
@@ -689,10 +700,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         and ('Event' in mispJson)
                                     ):
                                         # this is a single MISP Event, process it
-                                        zeekPrinter.ProcessMISP(
+                                        if zeekPrinter.ProcessMISP(
                                             mispJson,
                                             url=mispUrl,
-                                        )
+                                        ):
+                                            successCount.increment()
 
                                     elif isinstance(mispJson, list) and (len(mispJson) > 0):
                                         # are these Attributes or Events?
@@ -747,10 +759,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         resultCount = len(mispResults[resultKey])
                                                         for item in mispResults[resultKey]:
                                                             try:
-                                                                zeekPrinter.ProcessMISP(
+                                                                if zeekPrinter.ProcessMISP(
                                                                     item,
                                                                     url=mispUrl,
-                                                                )
+                                                                ):
+                                                                    successCount.increment()
                                                             except Exception as e:
                                                                 if logger is not None:
                                                                     logger.warning(
@@ -763,10 +776,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         for item in mispResults:
                                                             if item and isinstance(item, dict) and (resultKey in item):
                                                                 try:
-                                                                    zeekPrinter.ProcessMISP(
+                                                                    if zeekPrinter.ProcessMISP(
                                                                         item[resultKey],
                                                                         url=mispUrl,
-                                                                    )
+                                                                    ):
+                                                                        successCount.increment()
                                                                 except Exception as e:
                                                                     if logger is not None:
                                                                         logger.warning(
@@ -807,10 +821,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         verify=sslVerify,
                                                     )
                                                     mispObjectReponse.raise_for_status()
-                                                    zeekPrinter.ProcessMISP(
+                                                    if zeekPrinter.ProcessMISP(
                                                         mispObjectReponse.json(),
                                                         url=newUrl,
-                                                    )
+                                                    ):
+                                                        successCount.increment()
                                             except Exception as e:
                                                 if logger is not None:
                                                     logger.warning(
@@ -859,10 +874,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                                 verify=sslVerify,
                                                             )
                                                             mispObjectReponse.raise_for_status()
-                                                            zeekPrinter.ProcessMISP(
+                                                            if zeekPrinter.ProcessMISP(
                                                                 mispObjectReponse.json(),
                                                                 url=newUrl,
-                                                            )
+                                                            ):
+                                                                successCount.increment()
                                                     except Exception as e:
                                                         if logger is not None:
                                                             logger.warning(
@@ -885,10 +901,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     verify=sslVerify,
                                                 )
                                                 mispObjectReponse.raise_for_status()
-                                                zeekPrinter.ProcessMISP(
+                                                if zeekPrinter.ProcessMISP(
                                                     mispObjectReponse.json(),
                                                     url=url,
-                                                )
+                                                ):
+                                                    successCount.increment()
                                             except Exception as e:
                                                 if logger is not None:
                                                     logger.warning(
@@ -973,10 +990,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             **TAXII_INDICATOR_FILTER,
                                         )
                                     ):
-                                        zeekPrinter.ProcessSTIX(
+                                        if zeekPrinter.ProcessSTIX(
                                             envelope,
                                             source=[':'.join([x for x in [server.title, title] if x is not None])],
-                                        )
+                                        ):
+                                            successCount.increment()
 
                                 except Exception as e:
                                     if logger is not None:
