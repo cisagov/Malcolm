@@ -49,12 +49,8 @@ elif version in ['3', '4']:
 # raspi-firmware was in 'non-free'
 #
 # ¹ https://www.debian.org/vote/2022/vote_003
-if suite != 'bullseye':
-    firmware_component = 'non-free-firmware'
-    firmware_component_old = 'non-free'
-else:
-    firmware_component = 'non-free'
-    firmware_component_old = ''
+firmware_component = 'non-free-firmware'
+firmware_component_old = 'non-free'
 
 # wireless firmware:
 if version != '2':
@@ -128,19 +124,16 @@ extra_chroot_shell_cmds.extend(
 # Enable backports with a reason, or add commented-out entry:
 if backports_enable:
     backports_stanza = """
-%s
-deb http://deb.debian.org/debian/ %s main %s
+deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
-        backports_enable,
         backports_suite,
         firmware_component,
     )
 else:
-    # ugh
     backports_stanza = """
 # Backports are _not_ enabled by default.
 # Enable them by uncommenting the following line:
-# deb http://deb.debian.org/debian %s main %s
+# deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
         backports_suite,
         firmware_component,
