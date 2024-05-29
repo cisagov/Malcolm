@@ -4,6 +4,7 @@
 .vagrant
 /config/packages.chroot/*.deb
 /arkime/*.deb
+/arkime/etc/*
 
 # a temporary copy of ../shared
 /shared
