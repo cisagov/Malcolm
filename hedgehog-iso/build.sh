@@ -173,8 +173,8 @@ if [ -d "$WORKDIR" ]; then
   docker rmi -f htpdate-build:latest
 
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
-  mkdir -p "$SCRIPT_PATH/arkime/etc"
-  pushd "$SCRIPT_PATH/arkime/etc"
+  mkdir -p ./config/includes.chroot/opt/arkime/etc/
+  pushd ./config/includes.chroot/opt/arkime/etc/
   MAXMIND_GEOIP_DB_LICENSE_KEY=""
   if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
     MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
