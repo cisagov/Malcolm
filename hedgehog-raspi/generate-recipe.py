@@ -128,19 +128,16 @@ extra_chroot_shell_cmds.extend(
 # Enable backports with a reason, or add commented-out entry:
 if backports_enable:
     backports_stanza = """
-%s
-deb http://deb.debian.org/debian/ %s main %s
+deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
-        backports_enable,
         backports_suite,
         firmware_component,
     )
 else:
-    # ugh
     backports_stanza = """
 # Backports are _not_ enabled by default.
 # Enable them by uncommenting the following line:
-# deb http://deb.debian.org/debian %s main %s
+# deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
         backports_suite,
         firmware_component,
