@@ -166,7 +166,8 @@ elif [[ -n "${PORTS}" ]] && ( [[ "${MODE}" == "rx" ]] && [[ -n "${TOKEN}" ]] && 
     [[ -n "${SERVER}" ]] && RELAY_ARGS=(--relay "${SERVER}:${FIRST_PORT}")
 
     # run croc
-    croc --yes --ignore-stdin --overwrite ${DEBUG_FLAG} "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" "${OUTPUT_ARGS[@]}" "${TOKEN}"
+    export CROC_SECRET="${TOKEN}"
+    croc --yes --ignore-stdin --overwrite ${DEBUG_FLAG} "${CURVE_ARGS[@]}" "${RELAY_ARGS[@]}" "${OUTPUT_ARGS[@]}"
 
 else
     help >&2

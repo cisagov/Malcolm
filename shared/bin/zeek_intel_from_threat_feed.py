@@ -133,7 +133,7 @@ def main():
         args = parser.parse_args()
     except SystemExit:
         parser.print_help()
-        exit(2)
+        sys.exit(2)
 
     args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
     logging.basicConfig(
@@ -152,6 +152,7 @@ def main():
         ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
     )
     defaultNow = datetime.now().astimezone(UTCTimeZone)
+    successCount = malcolm_utils.AtomicInt(value=0)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
         zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(
@@ -205,6 +206,7 @@ def main():
                     args.sslVerify,
                     defaultNow,
                     workerThreadCount,
+                    successCount,
                     logging,
                 ],
             ),
@@ -217,7 +219,12 @@ def main():
         while workerThreadCount.value() > 0:
             sleep(1)
 
+    return successCount.value()
+
 
 ###################################################################################################
 if __name__ == '__main__':
-    main()
+    if main() > 0:
+        sys.exit(0)
+    else:
+        sys.exit(1)

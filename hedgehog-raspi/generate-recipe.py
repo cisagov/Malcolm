@@ -23,7 +23,7 @@ if version not in ["1", "2", "3", "4"]:
     sys.exit(1)
 
 suite = sys.argv[2]
-if suite not in ['bullseye', 'bookworm', 'trixie']:
+if suite not in ['bookworm']:
     print("E: unsupported suite %s" % suite, file=sys.stderr)
     sys.exit(1)
 target_yaml = 'raspi_%s_%s.yaml' % (version, suite)
@@ -49,12 +49,8 @@ elif version in ['3', '4']:
 # raspi-firmware was in 'non-free'
 #
 # ¹ https://www.debian.org/vote/2022/vote_003
-if suite != 'bullseye':
-    firmware_component = 'non-free-firmware'
-    firmware_component_old = 'non-free'
-else:
-    firmware_component = 'non-free'
-    firmware_component_old = ''
+firmware_component = 'non-free-firmware'
+firmware_component_old = 'non-free'
 
 # wireless firmware:
 if version != '2':
@@ -68,9 +64,8 @@ if version != '2':
 else:
     bluetooth_firmware = ''
 
-# Pi 4 on buster required some backports. Let's keep variables around, ready to
-# be used whenever we need to pull specific things from backports.
-backports_enable = False
+# We're pulling suricata from backports
+backports_enable = True
 backports_suite = '%s-backports' % suite
 
 # Serial console:
@@ -92,8 +87,7 @@ hostname = 'Hedgehog-rpi-%s' % version
 # Nothing yet!
 extra_root_shell_cmds = [
     'cp sensor_install.sh "${ROOT?}/root/"',
-    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,patches,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
-    'cp "%s/arkime/patch/"* "${ROOT?}/opt/patches/" || true' % MALCOLM_DIR,
+    '/bin/bash -c \'mkdir -p "${ROOT?}/opt/"{sensor/assets/img,buildshared,deps,hooks,sensor/sensor_ctl/suricata/rules-default,arkime/etc,zeek/bin}\'',
     'cp "%s/arkime/etc/"* "${ROOT?}/opt/arkime/etc" || true' % SENSOR_DIR,
     'cp -r "%s/suricata/rules-default/"* "${ROOT?}/opt/sensor/sensor_ctl/suricata/rules-default/" || true'
     % MALCOLM_DIR,
@@ -130,19 +124,16 @@ extra_chroot_shell_cmds.extend(
 # Enable backports with a reason, or add commented-out entry:
 if backports_enable:
     backports_stanza = """
-%s
-deb http://deb.debian.org/debian/ %s main %s
+deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
-        backports_enable,
         backports_suite,
         firmware_component,
     )
 else:
-    # ugh
     backports_stanza = """
 # Backports are _not_ enabled by default.
 # Enable them by uncommenting the following line:
-# deb http://deb.debian.org/debian %s main %s
+# deb http://deb.debian.org/debian/ %s main contrib non-free %s
 """ % (
         backports_suite,
         firmware_component,

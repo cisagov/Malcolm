@@ -78,6 +78,7 @@ from malcolm_utils import (
     eprint,
     flatten,
     LoadFileIfJson,
+    remove_prefix,
     remove_suffix,
     run_process,
     same_file_or_dir,
@@ -2201,6 +2202,12 @@ class Installer(object):
                                 # whether or not to restart services automatically (on boot, etc.)
                                 line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
 
+                            elif re.match(r'^\s*image\s*:.*$', line):
+                                # use architecture-specific images
+                                imageLineSpit = line.rstrip().split(":")
+                                imageLineSpit[-1] = imageLineSpit[-1].split("-", 1)[0] + args.imageArch
+                                line = ":".join(imageLineSpit)
+
                             elif (currentService == 'arkime') or (currentService == 'arkime-live'):
                                 # stuff specifically in the arkime section
                                 if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
@@ -3485,6 +3492,15 @@ def main():
         default=True,
         help="Enable dark mode for OpenSearch Dashboards",
     )
+    runtimeOptionsArgGroup.add_argument(
+        '--image-arch',
+        dest='imageArch',
+        required=False,
+        metavar='<amd64|arm64>',
+        type=str,
+        default=None,
+        help='Architecture for container image',
+    )
 
     authencOptionsArgGroup = parser.add_argument_group('Entryption and authentication options')
     authencOptionsArgGroup.add_argument(
@@ -4265,6 +4281,16 @@ def main():
         eprint(f"Arguments: {args}")
     else:
         sys.tracebacklimit = 0
+
+    if args.imageArch is not None:
+        args.imageArch = (
+            '' if (args.imageArch.lower() == 'amd64') else ('-' + remove_suffix(args.imageArch.lower(), '-'))
+        )
+    else:
+        args.imageArch = ''
+        if rawPlatform := platform.machine().lower():
+            if (rawPlatform == 'aarch64') or (rawPlatform == 'arm64'):
+                args.imageArch = '-arm64'
 
     orchMode = OrchestrationFramework.UNKNOWN
     if args.configFile and os.path.isfile(args.configFile):

@@ -27,7 +27,7 @@ jobs:
     steps:
       -
         name: Cancel previous run in progress
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           ignore_sha: true
           all_but_latest: true
@@ -96,7 +96,6 @@ jobs:
           cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./malcolm-iso/htpdate ./hedgehog-iso
           cp ./scripts/malcolm_utils.py ./hedgehog-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./hedgehog-iso/docs/
-          cp -r ./arkime/patch ./hedgehog-iso/shared/arkime_patch
           mkdir -p ./hedgehog-iso/suricata
           cp -r ./suricata/rules-default ./hedgehog-iso/suricata/
           mkdir -p ./hedgehog-iso/nginx
@@ -114,6 +113,7 @@ jobs:
           popd
       -
         name: Run Trivy vulnerability scanner
+        if: ${{ matrix.platform == 'linux/amd64' }}
         id: trivy-scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -128,8 +128,8 @@ jobs:
           exit-code: '0'
       -
         name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        if: ${{ matrix.platform == 'linux/amd64' }}
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
       -
@@ -145,4 +145,5 @@ jobs:
         with:
           context: ./hedgehog-iso
           push: true
+          provenance: false
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog:${{ steps.extract_branch.outputs.branch }}
