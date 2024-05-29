@@ -49,12 +49,8 @@ elif version in ['3', '4']:
 # raspi-firmware was in 'non-free'
 #
 # ¹ https://www.debian.org/vote/2022/vote_003
-if suite != 'bullseye':
-    firmware_component = 'non-free-firmware'
-    firmware_component_old = 'non-free'
-else:
-    firmware_component = 'non-free'
-    firmware_component_old = ''
+firmware_component = 'non-free-firmware'
+firmware_component_old = 'non-free'
 
 # wireless firmware:
 if version != '2':
