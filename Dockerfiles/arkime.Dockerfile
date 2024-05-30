@@ -179,11 +179,11 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 #   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
 #   see https://github.com/arkime/arkime/issues/1350
 #   see https://github.com/arkime/arkime/issues/1352
-RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do \
+RUN mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/rules/ $ARKIME_DIR/logs/ && \
+    [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do \
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/rules/ $ARKIME_DIR/logs/ && \
       mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
