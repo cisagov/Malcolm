@@ -4,6 +4,7 @@
     "aws_secret_key": "${aws_secret_key}",
     "vpc_region": "${vpc_region}",
     "instance_type": "${instance_type}",
+    "instance_arch": "${instance_arch}",
     "ssh_username": "${ssh_username}",
     "vpc_tag_name_filter": "${vpc_tag_name_filter}",
     "vpc_subnet_tag_name_filter": "${vpc_subnet_tag_name_filter}",
@@ -36,9 +37,9 @@
       },
       "source_ami_filter": {
         "filters": {
-          "architecture": "x86_64",
+          "architecture": "{{user `instance_arch`}}",
           "virtualization-type": "hvm",
-          "name": "amzn2-ami-kernel-5.10-hvm-*-x86_64-gp2",
+          "name": "amzn2-ami-kernel-5.10-hvm-*-{{user `instance_arch`}}-gp2",
           "root-device-type": "ebs"
         },
         "owners": [
@@ -68,7 +69,7 @@
         "source_ami_name": "{{ .SourceAMIName }}",
         "Malcolm": "{{user `malcolm_repo`}}/{{user `malcolm_tag`}}"
       },
-      "ami_name": "malcolm-{{user `malcolm_tag`}}-{{isotime | clean_resource_name}}"
+      "ami_name": "malcolm-{{user `malcolm_tag`}}-{{user `instance_arch`}}-{{isotime | clean_resource_name}}"
     }
   ],
   "provisioners": [

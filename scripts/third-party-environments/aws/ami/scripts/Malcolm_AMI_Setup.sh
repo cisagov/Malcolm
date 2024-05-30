@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v23.10.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v24.05.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -70,6 +70,7 @@ MALCOLM_USER="$(id -nu $MALCOLM_UID)"
 MALCOLM_USER_GROUP="$(id -gn $MALCOLM_UID)"
 MALCOLM_USER_HOME="$(getent passwd "$MALCOLM_USER" | cut -d: -f6)"
 MALCOLM_URL="https://codeload.github.com/$MALCOLM_REPO/tar.gz/$MALCOLM_TAG"
+IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
 
 ###################################################################################
 # InstallEssentialPackages
@@ -215,6 +216,7 @@ function InstallMalcolm {
     if [[ -s ./Malcolm/docker-compose.yml ]]; then
         pushd ./Malcolm >/dev/null 2>&1
         for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
+        sed -i "s@\(/malcolm/.*\):\(.*\)@\1:\2${IMAGE_ARCH_SUFFIX}@g" docker-compose.yml
         echo "Pulling Docker images..." >&2
         docker-compose --profile malcolm pull >/dev/null 2>&1
         rm -f ./config/*.env
