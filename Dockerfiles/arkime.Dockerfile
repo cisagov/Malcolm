@@ -183,7 +183,6 @@ RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do
       cd /tmp && \
       curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
       tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mkdir -p $ARKIME_DIR/etc/ $ARKIME_DIR/rules/ $ARKIME_DIR/logs/ && \
       mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
       rm -f "GeoLite2-$DB*"; \
     done; \
@@ -202,7 +201,7 @@ RUN groupadd --gid $DEFAULT_GID $PGROUP && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' $ARKIME_DIR/bin/capture && \
     chown root:${PGROUP} /sbin/ethtool && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /sbin/ethtool && \
-    mkdir -p /var/run/arkime && \
+    mkdir -p /var/run/arkime $ARKIME_DIR/logs && \
     chown -R $PUSER:$PGROUP $ARKIME_DIR/etc $ARKIME_DIR/rules $ARKIME_DIR/logs /var/run/arkime
 #Update Path
 ENV PATH="/opt:$ARKIME_DIR/bin:${PATH}"

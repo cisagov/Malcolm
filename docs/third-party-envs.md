@@ -8,7 +8,7 @@
 
 ## <a name="AWSAMI"></a>Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
 
-This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI. This section assumes you have good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
+This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI for either the x86-64 or arm64 CPU architecture. This section assumes you have good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
 
 ### <a name="AWSAMIPrerequisites"></a> Prerequisites
 
@@ -30,7 +30,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     $ cp ./packer_vars.json.example ./packer_vars.json
     ```
 1. Edit `packer_vars.json` 
-    * set `aws_access_key`, `aws_secret_key`, `vpc_region`, and other variables as needed
+    * set `aws_access_key`, `aws_secret_key`, `vpc_region`, `instance_arch`, and other variables as needed
 1. Validate the packer configuration
     ```bash
     $ packer validate packer_build.json
@@ -43,20 +43,26 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     amazon-ebs: output will be in this color.
 
     ==> amazon-ebs: Prevalidating any provided VPC information
-    ==> amazon-ebs: Prevalidating AMI Name: malcolm-amzn2_v1-2023-05-30T21-12-22Z
-        amazon-ebs: Found Image ID: ami-0bef6cc322bfff646
+    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v24.05.0-arm64-2024-05-30T13-57-31Z
+        amazon-ebs: Found Image ID: ami-xxxxxxxxxxxxxxxxx
 
     ...
 
     ==> amazon-ebs: Waiting for AMI to become ready...
     ==> amazon-ebs: Skipping Enable AMI deprecation...
+    ==> amazon-ebs: Adding tags to AMI (ami-xxxxxxxxxxxxxxxxx)...
+    ==> amazon-ebs: Tagging snapshot: snap-xxxxxxxxxxxxxxxxx
+    ==> amazon-ebs: Creating AMI tags
+        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v24.05.0"
+        amazon-ebs: Adding tag: "source_ami_name": "amzn2-ami-kernel-5.10-hvm-2.0.20240521.0-arm64-gp2"
+    ==> amazon-ebs: Creating snapshot tags
     ==> amazon-ebs: Terminating the source AWS instance...
     ==> amazon-ebs: Cleaning up any extra volumes...
     ==> amazon-ebs: No volumes to clean up, skipping
     ==> amazon-ebs: Deleting temporary keypair...
-    Build 'amazon-ebs' finished after 3 minutes 47 seconds.
+    Build 'amazon-ebs' finished after 23 minutes 58 seconds.
 
-    ==> Wait completed after 3 minutes 47 seconds
+    ==> Wait completed after 23 minutes 58 seconds
 
     ==> Builds finished. The artifacts of successful builds are:
     --> amazon-ebs: AMIs were created:
@@ -70,10 +76,10 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     {
         "Images": [
             {
-                "Architecture": "x86_64",
-                "CreationDate": "2023-05-31T17:07:42.000Z",
+                "Architecture": "arm64",
+                "CreationDate": "2024-05-30T14:02:21.000Z",
                 "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-                "ImageLocation": "xxxxxxxxxxxx/malcolm-v23.05.1-2023-05-31T16-58-00Z",
+                "ImageLocation": "xxxxxxxxxxxx/malcolm-v24.05.0-arm64-2024-05-30T13-57-31Z",
                 "ImageType": "machine",
                 "Public": false,
                 "OwnerId": "xxxxxxxxxxxx",
@@ -94,27 +100,32 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                 ],
                 "EnaSupport": true,
                 "Hypervisor": "xen",
-                "Name": "malcolm-v23.05.1-2023-05-31T16-58-00Z",
+                "Name": "malcolm-v24.05.0-arm64-2024-05-30T13-57-31Z",
                 "RootDeviceName": "/dev/xvda",
                 "RootDeviceType": "ebs",
                 "SriovNetSupport": "simple",
                 "Tags": [
                     {
                         "Key": "Malcolm",
-                        "Value": "idaholab/Malcolm/v23.05.1"
+                        "Value": "idaholab/Malcolm/v24.05.0"
                     },
                     {
                         "Key": "source_ami_name",
-                        "Value": "amzn2-ami-kernel-5.10-hvm-2.0.20230515.0-x86_64-gp2"
+                        "Value": "amzn2-ami-kernel-5.10-hvm-2.0.20240521.0-arm64-gp2"
                     }
                 ],
-                "VirtualizationType": "hvm"
+                "VirtualizationType": "hvm",
+                "BootMode": "uefi",
+                "SourceInstanceId": "i-xxxxxxxxxxxxxxxxx",
+                "DeregistrationProtection": "disabled"
             }
         ]
     }
     ```
 1. Launch an instance from the new AMI
-    * `c4.4xlarge`, `t2.2xlarge`, and `t3a.2xlarge` seem to be good instance types for Malcolm
+    * for x86-64 instances `c4.4xlarge`, `t2.2xlarge`, and `t3a.2xlarge` seem to be good instance types for Malcolm
+    * for arm64 instances, `m6gd.2xlarge`, `m6g.2xlarge`, `m7g.2xlarge`, and `t4g.2xlarge` seem to be good instance types for Malcolm
+    * see [recommended system requirements](system-requirements.md#SystemRequirements) for Malcolm
 1. SSH into the instance
 1. Run `~/Malcolm/scripts/configure` to configure Malcolm
 1. Run `~/Malcolm/scripts/auth_setup` to set up authentication for Malcolm
