@@ -440,10 +440,36 @@ def main():
                     netboxVenvPy,
                     os.path.basename(manageScript),
                     "migrate",
+                    "--check",
                 ]
                 err, results = malcolm_utils.run_process(cmd, logger=logging)
-                if (err != 0) or (not results):
-                    logging.error(f'{err} performing NetBox migration: {results}')
+                if err != 0:
+                    for operation in [
+                        [
+                            "migrate",
+                            "--no-input",
+                        ],
+                        [
+                            "trace_paths",
+                            "--no-input",
+                        ],
+                        [
+                            "remove_stale_contenttypes",
+                            "--no-input",
+                        ],
+                        [
+                            "clearsessions",
+                        ],
+                        [
+                            "reindex",
+                            "--lazy",
+                        ],
+                    ]:
+
+                        cmd = [netboxVenvPy, os.path.basename(manageScript)] + operation
+                        err, results = malcolm_utils.run_process(cmd, logger=logging)
+                        if (err != 0) or (not results):
+                            logging.error(f'{err} performing NetBox {cmd[2]}: {results}')
 
                 # create auth_user for superuser
                 cmd = [
