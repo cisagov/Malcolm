@@ -1,9 +1,8 @@
-from django.contrib.auth.models import User
-from users.models import Token
+from users.models import Token, User
 from os import getenv
 
 # adapted from
-# - https://github.com/netbox-community/netbox-docker/blob/b47e85ab3f2261021adf99ae9de2e9692fd674c3/docker/docker-entrypoint.sh#L74-L80
+# - https://github.com/netbox-community/netbox-docker/blob/release/docker/docker-entrypoint.sh
 
 superUserName = getenv('SUPERUSER_NAME', '')
 superUserEmail = getenv('SUPERUSER_EMAIL', '')
