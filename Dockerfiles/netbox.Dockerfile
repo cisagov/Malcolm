@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v3.6.7
+FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v4.0.3
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -30,7 +30,7 @@ ENV SUPERCRONIC_VERSION "0.2.29"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
+ENV NETBOX_INITIALIZERS_VERSION "50d077d"
 
 ENV YQ_VERSION "4.44.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
