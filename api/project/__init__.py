@@ -2,6 +2,8 @@ import dateparser
 import json
 import malcolm_utils
 import os
+import platform
+import psutil
 import pytz
 import random
 import re
@@ -453,18 +455,20 @@ def filtertime(search, args, default_from="1 day ago", default_to="now"):
     return (
         start_time_ms,
         end_time_ms,
-        search.filter(
-            "range",
-            **{
-                timefield_from_args(args): {
-                    "gte": start_time_ms,
-                    "lte": end_time_ms,
-                    "format": "epoch_millis",
-                }
-            },
-        )
-        if search
-        else None,
+        (
+            search.filter(
+                "range",
+                **{
+                    timefield_from_args(args): {
+                        "gte": start_time_ms,
+                        "lte": end_time_ms,
+                        "format": "epoch_millis",
+                    }
+                },
+            )
+            if search
+            else None
+        ),
     )
 
 
@@ -840,6 +844,10 @@ def version():
     -------
     version
         a string containing the Malcolm version (e.g., "5.2.0")
+    machine
+        the platform machine (e.g., x86_64)
+    boot_time
+        the UTC system boot time in ISO format
     built
         a string containing the Malcolm build timestamp (e.g., "2021-12-22T14:13:26Z")
     sha
@@ -864,6 +872,8 @@ def version():
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
         mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
+        machine=platform.machine(),
+        boot_time=datetime.fromtimestamp(psutil.boot_time(), tz=pytz.utc).isoformat().replace('+00:00', 'Z'),
         opensearch=opensearchStats,
     )
 

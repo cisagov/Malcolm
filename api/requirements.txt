@@ -7,3 +7,4 @@ regex==2022.3.2
 dateparser==1.1.1
 elasticsearch==8.13.2
 elasticsearch-dsl==8.13.1
+psutil==5.9.8
