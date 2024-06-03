@@ -481,6 +481,7 @@
         "zeek.ssh.hasshServer": { "type": "keyword" },
         "zeek.ssh.hasshServerAlgorithms": { "type": "keyword" },
         "zeek.ssh.hasshVersion": { "type": "keyword" },
+        "zeek.ssh.ja4ssh": { "type": "keyword" },
         "zeek.ssh.host_key": { "type": "keyword" },
         "zeek.ssh.host_key_alg": { "type": "keyword" },
         "zeek.ssh.kex_alg": { "type": "keyword" },

@@ -769,6 +769,9 @@
             "hasshServerCnt" : {
               "type" : "long"
             },
+            "ja4ssh": {
+              "type" : "keyword"
+            },
             "key" : {
               "type" : "keyword"
             },
