@@ -13,7 +13,7 @@
 # 2. calculate tags based on splitting the file path and filename (splitting on
 #    on [, -/_])
 
-FILEBEAT_PREPARE_PROCESS_COUNT=1
+FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-1}
 
 # ensure only one instance of this script can run at a time
 LOCKDIR="/tmp/zeek-beats-process-folder"
@@ -38,25 +38,34 @@ if mkdir $LOCKDIR; then
 
   # get new logs ready for processing
   cd "$ZEEK_LOGS_DIR"
-  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)" | awk -F'|' '{print $1}' | sort -V | \
+  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)" | sort -V | \
     xargs -n 1 -P $FILEBEAT_PREPARE_PROCESS_COUNT -I '{}' bash -c '
 
-    fuser -s "{}" 2>/dev/null
+    # separate filename and mime type
+    FILENAME="$( echo "{}" | awk -F"|" "{print \$1}" )"
+    FILEMIME="$( echo "{}" | awk -F"|" "{print \$2}" )"
+    # trim leading and trailing spaces
+    FILENAME="${FILENAME#"${FILENAME%%[![:space:]]*}"}"
+    FILENAME="${FILENAME%"${FILENAME##*[![:space:]]}"}"
+    FILEMIME="${FILEMIME#"${FILEMIME%%[![:space:]]*}"}"
+    FILEMIME="${FILEMIME%"${FILEMIME##*[![:space:]]}"}"
+
+    fuser -s "$FILENAME" 2>/dev/null
     if [[ $? -ne 0 ]]
     then
       . $SCRIPT_DIR/filebeat-process-zeek-folder-functions.sh
 
       PROCESS_TIME=$(date +%s%N)
-      SOURCEDIR="$(dirname "{}")"
+      SOURCEDIR="$(dirname "$FILENAME")"
       DESTDIR="./processed/$SOURCEDIR"
-      DESTNAME="$DESTDIR/$(basename "{}")"
+      DESTNAME="$DESTDIR/$(basename "$FILENAME")"
       DESTDIR_EXTRACTED="${DESTNAME}_${PROCESS_TIME}"
       LINKDIR="./current"
       USERTAG=false
 
       TAGS=()
-      IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "{}" | sed "s/\.[^.]*$//")
-      echo "\"{}\" -> \"${DESTNAME}\""
+      IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "$FILENAME" | sed "s/\.[^.]*$//")
+      echo "\"$FILENAME\" -> \"${DESTNAME}\""
       for index in "${!SOURCESPLIT[@]}"
       do
         TAG_CANDIDATE="${SOURCESPLIT[index]}"
@@ -75,8 +84,16 @@ if mkdir $LOCKDIR; then
 
       mkdir -p "$DESTDIR"
       mkdir -p "$DESTDIR_EXTRACTED"
-      mv -v "{}" "$DESTNAME"
-      python3 -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
+
+      if [[ "$FILEMIME" == "application/x-ms-evtx" ]]; then
+        # special case for Windows event log files that are uploaded uncompressed
+        # TODO: temporary
+        rm -vf "$FILENAME"
+      else
+        mv -v "$FILENAME" "$DESTNAME"
+        python3 -m pyunpack.cli "$DESTNAME" "$DESTDIR_EXTRACTED"
+      fi
+
       find "$DESTDIR_EXTRACTED" -type f -name "*.log" | while read LOGFILE
       do
         PROCESS_TIME=$(date +%s%N)
