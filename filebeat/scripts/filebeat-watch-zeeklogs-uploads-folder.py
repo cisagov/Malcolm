@@ -42,6 +42,9 @@ SUPPORTED_MIME_TYPES = [
     'application/x-tar',
     'application/x-xz',
     'application/zip',
+    # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
+    # may be uploaded either as-is or compressed
+    'application.evtx',
 ]
 
 
@@ -71,7 +74,9 @@ def file_processor(pathname, **kwargs):
             fileMime = magic.from_file(pathname, mime=True)
 
             if fileMime in mime_types:
-                # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
+                # looks like this is a compressed file (or evtx file), we're assuming it's:
+                #  * a zeek log archive to be processed by filebeat
+                #  * a windows event log archive to be processed into JSON and then also sent through filebeat
                 logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}] to {destination}")
                 shutil.move(pathname, os.path.join(destination, os.path.basename(pathname)))
 

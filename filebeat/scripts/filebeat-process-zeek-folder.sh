@@ -5,7 +5,9 @@
 
 # for files (sort -V (natural)) under /zeek that:
 #   - are not in processed/ or current/ or upload/ or extract_files/ or live/ (-prune)
-#   - are archive files
+#   - are archive files (or, application/x-ms-evtx, which are also handled here as we accept
+#     Windows event log .evtx files which may be compressed and we don't know what's inside
+#     the archvies prior to this)
 #   - are not in use (fuser -s)
 # 1. move file to processed/ (preserving original subdirectory heirarchy, if any)
 # 2. calculate tags based on splitting the file path and filename (splitting on
@@ -34,9 +36,9 @@ if mkdir $LOCKDIR; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
-  # get new zeek logs ready for processing
+  # get new logs ready for processing
   cd "$ZEEK_LOGS_DIR"
-  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)" | awk -F'|' '{print $1}' | sort -V | \
+  find . -path ./processed -prune -o -path ./current -prune -o -path ./upload -prune -o -path ./extract_files -prune -o -path ./live -prune -o -type f -exec file --separator '|' --mime-type "{}" \; | grep -P "(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)" | awk -F'|' '{print $1}' | sort -V | \
     xargs -n 1 -P $FILEBEAT_PREPARE_PROCESS_COUNT -I '{}' bash -c '
 
     fuser -s "{}" 2>/dev/null
