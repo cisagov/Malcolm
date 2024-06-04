@@ -592,7 +592,7 @@ def main():
 
         try:
             # get all content types (for creating new permissions)
-            allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
+            allObjectTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
 
             permsPreExisting = {x.name: x for x in nb.users.permissions.all()}
             logging.debug(f"permissions (before): { {k:v.id for k, v in permsPreExisting.items()} }")
@@ -605,7 +605,7 @@ def main():
             }.items():
                 permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
                 permConfig['object_types'] = [
-                    ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']
+                    ct for ct in allObjectTypeNames if ct not in permConfig['exclude_objects']
                 ]
                 permConfig.pop('exclude_objects', None)
                 try:
