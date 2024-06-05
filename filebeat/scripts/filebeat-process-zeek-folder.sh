@@ -111,7 +111,6 @@ if mkdir $LOCKDIR; then
 
         ZEEK_LOG_EXT=log
         EVTX_LOG_EXT=evtx
-        pwd
         while IFS="" read -r -d "" LOGFILE; do
           PROCESS_TIME=$(date +%s%N)
           TAGS_JOINED=$(printf "%s," "${TAGS[@]}")${PROCESS_TIME}
