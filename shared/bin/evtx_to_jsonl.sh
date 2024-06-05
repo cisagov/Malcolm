@@ -53,6 +53,7 @@ function processFile() {
       evtx \
          --threads 1 \
          --format jsonl \
+         --separate-json-attributes \
          --no-confirm-overwrite \
          --output "${FNAME_JSON}" \
          "${FNAME}"

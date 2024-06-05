@@ -113,7 +113,7 @@ filebeat.inputs:
     add_error_key: false
     ignore_decoding_error: true
     keys_under_root: false
-  tags: ["_malcolm_beats","_evtx_to_json"]
+  tags: ["_evtx_to_json"]
   compression_level: 0
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
