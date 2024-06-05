@@ -15,6 +15,7 @@ import logging
 import magic
 import os
 import pathlib
+import re
 import shutil
 import signal
 import sys
@@ -44,9 +45,16 @@ SUPPORTED_MIME_TYPES = [
     'application/zip',
     # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
     # may be uploaded either as-is or compressed
-    'application.evtx',
+    'application/x-ms-evtx',
 ]
 
+# PITA... The version of the "file" utility in the filebeat container
+#   gives "application/octet-stream" instead of "application/x-ms-evtx"
+#   for Windows .evtx files.
+#   A similar check exists in filebeat-process-zeek-folder.sh
+SUPPORTED_FILE_TYPE_REGEXES = [
+    r'Windows.*Event Log',
+]
 
 ###################################################################################################
 # handle sigint/sigterm and set a global shutdown variable
@@ -58,6 +66,7 @@ def shutdown_handler(signum, frame):
 ###################################################################################################
 def file_processor(pathname, **kwargs):
     mime_types = kwargs["mime_types"]
+    file_type_regexes = kwargs["file_types"]
     uid = kwargs["uid"]
     gid = kwargs["gid"]
     destination = kwargs["destination"]
@@ -72,8 +81,9 @@ def file_processor(pathname, **kwargs):
 
             # get the file magic mime type
             fileMime = magic.from_file(pathname, mime=True)
+            fileType = magic.from_file(pathname)
 
-            if fileMime in mime_types:
+            if (fileMime in mime_types) or any([re.search(reg, fileType, re.IGNORECASE) for reg in file_type_regexes]):
                 # looks like this is a compressed file (or evtx file), we're assuming it's:
                 #  * a zeek log archive to be processed by filebeat
                 #  * a windows event log archive to be processed into JSON and then also sent through filebeat
@@ -248,6 +258,7 @@ def main():
             "uid": args.chownUid,
             "gid": args.chownGid,
             "mime_types": SUPPORTED_MIME_TYPES,
+            "file_types": SUPPORTED_FILE_TYPE_REGEXES,
         },
         args.assumeClosedSec,
         shuttingDown,

@@ -86,6 +86,7 @@ export {
     ["application/x-install-instructions"]= "install",
     ["application/x-lzh-compressed"]= "lzh",
     ["application/x-ms-application"]= "application",
+    ["application/x-ms-evtx"]= "evtx",
     ["application/x-ms-installer"]= "msi",
     ["application/x-ms-shortcut"]= "lnk",
     ["application/x-msdos-program"]= "exe",

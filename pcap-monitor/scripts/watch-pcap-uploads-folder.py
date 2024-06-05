@@ -82,7 +82,7 @@ def file_processor(pathname, **kwargs):
                     'application/zip',
                     # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
                     # may be uploaded either as-is or compressed
-                    'application.evtx',
+                    'application/x-ms-evtx',
                 ]
             ):
                 # looks like this is a compressed file (or evtx file), we're assuming it's:
