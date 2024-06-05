@@ -109,6 +109,7 @@ filebeat.inputs:
     - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/*.evtx.json
   symlinks: true
   json:
+    expand_keys: true
     add_error_key: false
     ignore_decoding_error: true
     keys_under_root: false
