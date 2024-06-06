@@ -22,6 +22,7 @@
     "ecs_user",
     "ecs_user_agent",
     "custom_miscbeat",
+    "custom_evtx",
     "custom_suricata_stats",
     "custom_zeek_diagnostic"
   ],
@@ -29,7 +30,8 @@
     "settings" : {
       "index" : {
         "mapping.total_fields.limit" : "5000",
-        "mapping.nested_fields.limit" : "250"
+        "mapping.nested_fields.limit" : "250",
+        "max_docvalue_fields_search" : "200"
       }
     },
     "mappings": {
