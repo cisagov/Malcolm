@@ -63,6 +63,9 @@
                 "EventData.Binary": {
                   "type": "keyword"
                 },
+                "EventData.bytesTotal": {
+                  "type": "double"
+                },
                 "EventData.CallTrace": {
                   "type": "keyword"
                 },
@@ -195,6 +198,9 @@
                 "EventData.Engine_Version": {
                   "type": "keyword"
                 },
+                "EventData.ErrorCode": {
+                  "type": "keyword"
+                },
                 "EventData.Error_Code": {
                   "type": "keyword"
                 },
@@ -215,6 +221,9 @@
                 },
                 "EventData.FWLink": {
                   "type": "keyword"
+                },
+                "EventData.fileLength": {
+                  "type": "double"
                 },
                 "EventData.FileVersion": {
                   "type": "keyword"
@@ -817,6 +826,30 @@
                   "type": "keyword"
                 },
                 "EventData.username": {
+                  "type": "keyword"
+                },
+                "EventData.EventName": {
+                  "type": "keyword"
+                },
+                "EventData.FailureReason": {
+                  "type": "keyword"
+                },
+                "EventData.NewStateName": {
+                  "type": "keyword"
+                },
+                "EventData.PreviousStateName": {
+                  "type": "keyword"
+                },
+                "EventData.Service": {
+                  "type": "keyword"
+                },
+                "EventData.StateTransition": {
+                  "type": "keyword"
+                },
+                "EventData.SubStatus": {
+                  "type": "keyword"
+                },
+                "EventData.TargetLinkedLogonId": {
                   "type": "keyword"
                 },
                 "EventData_attributes.Name": {
