@@ -266,6 +266,7 @@
                 "Computer" : { "type": "keyword" },
                 "Data" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "EventRecordID" : { "type": "integer" },
+                "EventType" : { "type": "keyword" },
                 "Keywords" : { "type": "keyword" },
                 "Level" : { "type": "integer" },
                 "Message" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },

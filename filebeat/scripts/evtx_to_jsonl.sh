@@ -50,24 +50,28 @@ function processFile() {
       [[ "${FNAME_JSON}" == *.evtx ]] || FNAME_JSON+=.evtx
       FNAME_JSON+=.json
 
+      # convert the EVTX file to JSON, then pipe it through jq to rename fields with spaces
+      #   in the names to have underscores instead
       evtx \
          --threads 1 \
          --format jsonl \
          --separate-json-attributes \
-         --no-confirm-overwrite \
-         --output "${FNAME_JSON}" \
-         "${FNAME}"
-      EVTX_EXIT_CODE=$?
+         "${FNAME}" 2>/dev/null | jq -c 'def walk(f):
+                                          . as $in
+                                          | if type == "object" then
+                                              reduce keys[] as $key
+                                              ( {}; . + {($key | gsub(" "; "_")): ($in[$key] | walk(f))} )
+                                            elif type == "array" then
+                                              map( walk(f) )
+                                            else
+                                              f
+                                            end;
+                                        walk(.)' > "${FNAME_JSON}"
 
       # delete input file if specified
-      ( ( [[ "${EVTX_EXIT_CODE}" == "0" ]] && [[ "${DELETE_SRC_ON_SUCCESS}" == "1" ]] ) || \
+      ( ( [[ -s "${FNAME_JSON}" ]] && [[ "${DELETE_SRC_ON_SUCCESS}" == "1" ]] ) || \
         [[ "${DELETE_SRC_FORCE}" == "1" ]] ) && \
          rm -f "${FNAME}"
-
-      # massage output
-      if [[ -f "${FNAME_JSON}" ]]; then
-         true
-      fi
 
    fi # [[ -f "${FNAME}" ]]
 } # processFile
