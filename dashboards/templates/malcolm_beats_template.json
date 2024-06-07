@@ -13,6 +13,7 @@
     "ecs_http",
     "ecs_log",
     "ecs_network",
+    "ecs_os",
     "ecs_process",
     "ecs_related",
     "ecs_server",

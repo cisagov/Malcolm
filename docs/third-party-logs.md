@@ -21,6 +21,7 @@ The types of third-party logs and metrics discussed in this document are *not* t
     - [Convenience Script for Linux/macOS](#FluentBitBash)
     - [Convenience Script for Windows](#FluentBitPowerShell)
 * [Beats](#Beats)
+* [Uploading Third-Party Logs](#ThirdPartyUpload)
 * [Data Format and Visualization](#Data)
 * [Document Indices](#Indices)
 
@@ -307,6 +308,12 @@ output.logstash:
 The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless creating a custom [Logstash pipeline](contributing-logstash.md#LogstashNewSource), users probably want to use `_malcolm_beats` in order for logs to be picked up and ingested through Malcolm's `beats` pipeline. This applies regardless of the specific Beats forwarder being used (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
 
 Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform, and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
+
+## <a name="ThirdPartyUpload"></a>Uploading Third-Party Logs
+
+### Microsoft Windows Event Logs
+
+Microsoft Windows [event log files](https://learn.microsoft.com/en-us/windows/win32/eventlog/event-log-file-format) (with a `.evtx` file extension) can also be [uploaded](upload.md#Upload) via the artifact upload interface, either singly or in archive files (`application/gzip`, `application/x-gzip`, `application/x-7z-compressed`, `application/x-bzip2`, `application/x-cpio`, `application/x-lzip`, `application/x-lzma`, `application/x-rar-compressed`, `application/x-tar`, `application/x-xz`, or `application/zip`). These files are processed using [evtx](https://github.com/omerbenamram/evtx) and indexed as similarly as possible to the way forwarded Windows event logs are indexed.
 
 ## <a name="Data"></a>Data Format and Visualization
 
