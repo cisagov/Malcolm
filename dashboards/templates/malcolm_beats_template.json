@@ -13,7 +13,6 @@
     "ecs_http",
     "ecs_log",
     "ecs_network",
-    "ecs_os",
     "ecs_process",
     "ecs_related",
     "ecs_server",
@@ -39,7 +38,9 @@
       "properties": {
         "timestamp": { "type": "date" },
         "node": { "type": "keyword" },
-        "event.result": { "type": "keyword" }
+        "event.result": { "type": "keyword" },
+        "os.family": { "type": "keyword" },
+        "os.type": { "type": "keyword" }
       }
     }
   }
