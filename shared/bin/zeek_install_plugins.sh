@@ -102,6 +102,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zeek-xor-exe-plugin|master"
   "https://github.com/corelight/zerologon"
   "https://github.com/cybera/zeek-sniffpass"
+  "https://github.com/mmguero-dev/acid"
   "https://github.com/mmguero-dev/bzar"
   "https://github.com/ncsa/bro-is-darknet"
   "https://github.com/ncsa/bro-simple-scan"
