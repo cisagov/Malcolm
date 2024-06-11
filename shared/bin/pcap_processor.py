@@ -70,7 +70,7 @@ ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
 ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_LOG_COMPRESSION_LEVEL = 6
-
+NETBOX_SITE_ID_TAG_PREFIX = 'NBSITEID'
 USERTAG_TAG = 'USERTAG'
 
 TAGS_NOSHOW = (
@@ -174,7 +174,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             [
                                 x
                                 for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                                if (x not in TAGS_NOSHOW)
+                                and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
+                                and (not x.startswith(NETBOX_SITE_ID_TAG_PREFIX))
                             ]
                             if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()

@@ -31,7 +31,14 @@ def register(
   #   valid values are: ip_device, ip_prefix
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
-  # site value to include in queries for enrichment lookups, either specified directly or read from ENV
+  # field containing site ID to use in queries for enrichment lookups and autopopulation
+  @lookup_site_id = params["lookup_site_id"]
+  if !@lookup_site_id.nil? && @lookup_site_id.empty?
+    @lookup_site_id = nil
+  end
+
+  # fallback/default site value to use in queries for enrichment lookups and autopopulation,
+  #   either specified directly or read from ENV
   @lookup_site = params["lookup_site"]
   _lookup_site_env = params["lookup_site_env"]
   if @lookup_site.nil? && !_lookup_site_env.nil?
@@ -226,8 +233,9 @@ def register(
   # case-insensitive hash of role names to IDs
   @role_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("role_cache_size", 256), @cache_ttl)
 
-  # case-insensitive hash of site names to IDs
-  @site_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl)
+  # case-insensitive hash of site names or site IDs to site objects
+  @site_name_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl)
+  @site_id_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl)
 
   # end of autopopulation arguments
 
@@ -449,15 +457,45 @@ def clean_manuf_string(
 end
 
 def lookup_or_create_site(
+  site_id,
   site_name,
   nb
 )
-  if !site_name.to_s.empty?
-    @site_hash.getset(site_name) {
+  _result_site = nil
+
+  # if the ID was specified explicitly, use that first to look up the site
+  if (site_id.to_i > 0) then
+    _result_site = @site_id_hash.getset(site_id) {
       begin
         _site = nil
 
-        # look it up first
+        # look it up by ID
+        _query = { :offset => 0,
+                   :limit => 1,
+                   :id => site_id }
+        if (_sites_response = nb.get('dcim/sites/', _query).body) &&
+           _sites_response.is_a?(Hash) &&
+           (_tmp_sites = _sites_response.fetch(:results, [])) &&
+           (_tmp_sites.length() > 0)
+        then
+           _site = _tmp_sites.first
+        end
+
+      rescue Faraday::Error => e
+        # give up aka do nothing
+        puts "lookup_or_create_site (#{site_id}): #{e.message}" if @debug
+      end
+      _site
+    }.dup
+  end
+
+  # if the site ID wasn't specified but the name was, either look up or create it by name
+  if _result_site.nil? && !site_name.to_s.empty? then
+    _result_site = @site_name_hash.getset(site_name) {
+      begin
+        _site = nil
+
+        # try to look it up by name
         _query = { :offset => 0,
                    :limit => 1,
                    :name => site_name }
@@ -490,9 +528,9 @@ def lookup_or_create_site(
       end
       _site
     }.dup
-  else
-    nil
   end
+
+  _result_site
 end
 
 def lookup_manuf(
@@ -834,6 +872,7 @@ def autopopulate_devices(
   ip_str,
   autopopulate_mac,
   autopopulate_oui,
+  autopopulate_site_id,
   autopopulate_default_site_name,
   autopopulate_default_role_name,
   autopopulate_default_dtype,
@@ -858,7 +897,7 @@ def autopopulate_devices(
   end
 
   # make sure the site, role, manufacturer and device type exist
-  _autopopulate_site = lookup_or_create_site(autopopulate_default_site_name, nb)
+  _autopopulate_site = lookup_or_create_site(autopopulate_site_id, autopopulate_default_site_name, nb)
   _autopopulate_role = lookup_or_create_role(autopopulate_default_role_name, nb)
   _autopopulate_dtype,
   _autopopulate_manuf = lookup_or_create_manuf_and_dtype(_autopopulate_oui,
@@ -947,6 +986,7 @@ end
 
 def autopopulate_prefixes(
   ip_obj,
+  autopopulate_site_id,
   autopopulate_default_site,
   autopopulate_default_status,
   nb
@@ -962,7 +1002,7 @@ def autopopulate_prefixes(
     if !_new_prefix_name.to_s.include?('/')
       _new_prefix_name += '/' + _new_prefix_ip.prefix().to_s
     end
-    _autopopulate_site = lookup_or_create_site(autopopulate_default_site, nb)
+    _autopopulate_site = lookup_or_create_site(autopopulate_site_id, autopopulate_default_site, nb)
     _prefix_post = { :prefix => _new_prefix_name,
                      :description => _new_prefix_name,
                      :tags => _autopopulate_tags,
@@ -1081,6 +1121,7 @@ def netbox_lookup(
     _autopopulate_hostname = nil if _autopopulate_hostname.to_s.end_with?('.in-addr.arpa')
     _autopopulate_mac = event.get("#{@source_mac}")
     _autopopulate_oui = event.get("#{@source_oui}")
+    _lookup_site_id = @lookup_site_id.nil? ? 0 : event.get("#{@lookup_site_id}")
 
     _autopopulate_device = nil
     _autopopulate_role = nil
@@ -1114,6 +1155,7 @@ def netbox_lookup(
           _autopopulate_site = autopopulate_devices(ip_key,
                                                     _autopopulate_mac,
                                                     _autopopulate_oui,
+                                                    _lookup_site_id,
                                                     _autopopulate_default_site,
                                                     _autopopulate_default_role,
                                                     _autopopulate_default_dtype,
@@ -1288,7 +1330,7 @@ def netbox_lookup(
 
       if (_prefixes.nil? || _prefixes.empty?) && @autopopulate_create_prefix
         # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
-        _prefix_info = autopopulate_prefixes(_key_ip, _autopopulate_default_site, @default_status, _nb)
+        _prefix_info = autopopulate_prefixes(_key_ip, _lookup_site_id, _autopopulate_default_site, @default_status, _nb)
         _prefixes = Array.new unless _prefixes.is_a?(Array)
         _prefixes << _prefix_info
       end # if auto-create prefix

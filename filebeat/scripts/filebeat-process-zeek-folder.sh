@@ -11,7 +11,7 @@
 #   - are not in use (fuser -s)
 # 1. move file to processed/ (preserving original subdirectory heirarchy, if any)
 # 2. calculate tags based on splitting the file path and filename (splitting on
-#    on [, -/_])
+#    on ",-/_.")
 
 FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-1}
 
@@ -79,6 +79,7 @@ if mkdir $LOCKDIR; then
         USERTAG=false
 
         TAGS=()
+        TAGS_PRESERVED=()
         IFS=",-/_." read -r -a SOURCESPLIT <<< $(echo "$FILENAME" | sed "s/\.[^.]*$//")
         echo "\"$FILENAME\" -> \"${DESTNAME}\""
         for index in "${!SOURCESPLIT[@]}"
@@ -87,14 +88,17 @@ if mkdir $LOCKDIR; then
           if ! in_array TAGS "$TAG_CANDIDATE"; then
             if [[ "$TAG_CANDIDATE" = "USERTAG" ]]; then
               USERTAG=true
-            elif [[ -n $TAG_CANDIDATE && ! $TAG_CANDIDATE =~ ^[0-9-]+$ && $TAG_CANDIDATE != "tar" && $TAG_CANDIDATE != "AUTOZEEK" && ! $TAG_CANDIDATE =~ ^AUTOCARVE ]]; then
+            elif [[ -n "$TAG_CANDIDATE" && ! "$TAG_CANDIDATE" =~ ^[0-9-]+$ && "$TAG_CANDIDATE" != "tar" && "$TAG_CANDIDATE" != "AUTOZEEK" && ! "$TAG_CANDIDATE" =~ ^AUTOCARVE ]]; then
               TAGS+=("${TAG_CANDIDATE}")
+              if [[ "$TAG_CANDIDATE" =~ ^NBSITEID[0-9-]+$ ]]; then
+                TAGS_PRESERVED+=("${TAG_CANDIDATE}")
+              fi
             fi
           fi
         done
 
         if [[ "$ZEEK_LOG_AUTO_TAG" != "true" ]] && [[ "$USERTAG" != "true" ]]; then
-          TAGS=()
+          TAGS=("${TAGS_PRESERVED[@]}")
         fi
 
         mkdir -p "$DESTDIR"

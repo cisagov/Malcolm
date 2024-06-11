@@ -55,6 +55,14 @@
         .imgcenter {
             width: 50%;
         }
+        .site-dropdown {
+            display: none; /* hide initially */
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+            border-radius: 12px;
+            border: 1px solid #909497;
+            font-size: 14px;
+            padding: 12px;
+        }
     </style>
 </head>
 <body>
@@ -63,7 +71,14 @@
 
     <form id="commit_files" action="server/php/submit.php" method="post" enctype="multipart/form-data">
 
-        <input type="text" name="tags"/>
+        <div style="display: flex;">
+            <div style="flex-grow: 1;"><input type="text" name="tags"/></div>
+            <div>
+                <select name="site-dropdown" id="site-dropdown" class="site-dropdown" title="NetBox site">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+        </div>
         <br>
         <button type="submit" id="commit_button" class="button button_rounded">Commit Uploaded Files</button>
         <input type="file" name="filepond[]" multiple>
@@ -155,6 +170,58 @@
             }
             setInterval(checkSubmitEnabler, 5000);
 
+            const siteDropdown = document.getElementById('site-dropdown');
+
+            // Function to populate the NetBox site dropdown
+            function populateSiteDropdown(data) {
+                // Clear any existing options
+                siteDropdown.innerHTML = '';
+
+                // Create and append options from the API result data
+                if (data.results && data.results.length > 0) {
+                    let lowestId = data.results[0].id;
+                    let lowestIdIndex = 0;
+
+                    // Find the index of the item with the lowest id
+                    data.results.forEach((item, index) => {
+                        if (item.id < lowestId) {
+                            lowestId = item.id;
+                            lowestIdIndex = index;
+                        }
+                    });
+
+                    // Create and append options from the data
+                    data.results.forEach((item, index) => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = item.display;
+                        // Automatically select the option with the lowest id
+                        if (index === lowestIdIndex) {
+                            option.selected = true;
+                        }
+                        siteDropdown.appendChild(option);
+                    });
+
+                    // Make the dropdown visible
+                    siteDropdown.style.display = 'block';
+
+                } else {
+                    // Hide the dropdown if no results
+                    siteDropdown.style.display = 'none';
+                }
+            }
+
+            // Fetch data from the NetBox dcim/sites REST API
+            fetch('/netbox/api/dcim/sites/?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    populateSiteDropdown(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching NetBox sites:', error);
+                    // Hide the dropdown on error
+                    siteDropdown.style.display = 'none';
+                });
 
         })
     </script>
