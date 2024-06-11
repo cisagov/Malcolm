@@ -31,7 +31,7 @@ def register(
   #   valid values are: ip_device, ip_prefix
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
-  # field containing site ID to use in queries for enrichment lookups and autopopulation
+  # field containing site ID (or name) to use in queries for enrichment lookups and autopopulation
   @lookup_site_id = params["lookup_site_id"]
   if !@lookup_site_id.nil? && @lookup_site_id.empty?
     @lookup_site_id = nil
@@ -456,23 +456,36 @@ def clean_manuf_string(
     new_val
 end
 
+def shorten_string(
+  val
+)
+  if val.length > 64
+    "#{val[0, 30]}...#{val[-30, 30]}"
+  else
+    val
+  end
+end
+
 def lookup_or_create_site(
   site_id,
   site_name,
   nb
 )
   _result_site = nil
+  _site_id_str = site_id.to_s
+  _site_name_str = site_name.to_s
 
   # if the ID was specified explicitly, use that first to look up the site
-  if (site_id.to_i > 0) then
-    _result_site = @site_id_hash.getset(site_id) {
+  if (!_site_id_str.empty?) && (_site_id_str.scan(/\D/).empty?) && (_site_id_str.to_i > 0) then
+    _site_id_int = _site_id_str.to_i
+    _result_site = @site_id_hash.getset(_site_id_int) {
       begin
         _site = nil
 
         # look it up by ID
         _query = { :offset => 0,
                    :limit => 1,
-                   :id => site_id }
+                   :id => _site_id_int }
         if (_sites_response = nb.get('dcim/sites/', _query).body) &&
            _sites_response.is_a?(Hash) &&
            (_tmp_sites = _sites_response.fetch(:results, [])) &&
@@ -483,22 +496,23 @@ def lookup_or_create_site(
 
       rescue Faraday::Error => e
         # give up aka do nothing
-        puts "lookup_or_create_site (#{site_id}): #{e.message}" if @debug
+        puts "lookup_or_create_site (#{_site_id_str}): #{e.message}" if @debug
       end
       _site
     }.dup
   end
 
   # if the site ID wasn't specified but the name was, either look up or create it by name
-  if _result_site.nil? && !site_name.to_s.empty? then
-    _result_site = @site_name_hash.getset(site_name) {
+  if _result_site.nil? && (!_site_id_str.empty? || !_site_name_str.empty?) then
+    _site_key_str = !_site_id_str.empty? ? _site_id_str : _site_name_str
+    _result_site = @site_name_hash.getset(_site_key_str) {
       begin
         _site = nil
 
         # try to look it up by name
         _query = { :offset => 0,
                    :limit => 1,
-                   :name => site_name }
+                   :name => _site_key_str }
         if (_sites_response = nb.get('dcim/sites/', _query).body) &&
            _sites_response.is_a?(Hash) &&
            (_tmp_sites = _sites_response.fetch(:results, [])) &&
@@ -509,8 +523,8 @@ def lookup_or_create_site(
 
         if _site.nil?
           # the device site is not found, create it
-          _site_data = { :name => site_name,
-                         :slug => site_name.to_url,
+          _site_data = { :name => _site_key_str,
+                         :slug => _site_key_str.to_url,
                          :status => "active" }
           if (_site_create_response = nb.post('dcim/sites/', _site_data.to_json, @nb_headers).body) &&
              _site_create_response.is_a?(Hash) &&
@@ -518,13 +532,13 @@ def lookup_or_create_site(
           then
              _site = _site_create_response
           elsif @debug
-            puts('lookup_or_create_site (%{name}): _site_create_response: %{result}' % { name: site_name, result: JSON.generate(_site_create_response) })
+            puts('lookup_or_create_site (%{name}): _site_create_response: %{result}' % { name: _site_key_str, result: JSON.generate(_site_create_response) })
           end
         end
 
       rescue Faraday::Error => e
         # give up aka do nothing
-        puts "lookup_or_create_site (#{site_name}): #{e.message}" if @debug
+        puts "lookup_or_create_site (#{_site_key_str}): #{e.message}" if @debug
       end
       _site
     }.dup
@@ -913,7 +927,7 @@ def autopopulate_devices(
 
       if _autopopulate_manuf&.fetch(:vm, false)
         # a virtual machine
-        _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
+        _device_name = shorten_string(autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname)
         _device_data = { :name => _device_name,
                          :site => _autopopulate_site[:id],
                          :tags => _autopopulate_tags,
@@ -924,7 +938,7 @@ def autopopulate_devices(
         then
            _autopopulate_device = _device_create_response
         elsif @debug
-          puts('autopopulate_devices (VM: %{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
+          puts('autopopulate_devices (VM: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: _autopopulate_site[:id], result: JSON.generate(_device_create_response) })
         end
 
       else
@@ -941,7 +955,7 @@ def autopopulate_devices(
           end
 
           # create the device
-          _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
+          _device_name = shorten_string(autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname)
           _device_data = { :name => _device_name,
                            :device_type => _autopopulate_dtype[:id],
                            :role => _autopopulate_role[:id],
@@ -954,7 +968,7 @@ def autopopulate_devices(
           then
              _autopopulate_device = _device_create_response
           elsif @debug
-            puts('autopopulate_devices (%{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
+            puts('autopopulate_devices (device: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: _autopopulate_site[:id], result: JSON.generate(_device_create_response) })
           end
 
         else
@@ -1121,7 +1135,7 @@ def netbox_lookup(
     _autopopulate_hostname = nil if _autopopulate_hostname.to_s.end_with?('.in-addr.arpa')
     _autopopulate_mac = event.get("#{@source_mac}")
     _autopopulate_oui = event.get("#{@source_oui}")
-    _lookup_site_id = @lookup_site_id.nil? ? 0 : event.get("#{@lookup_site_id}")
+    _lookup_site_id = @lookup_site_id.nil? ? nil : event.get("#{@lookup_site_id}").to_s
 
     _autopopulate_device = nil
     _autopopulate_role = nil
@@ -1267,7 +1281,7 @@ def netbox_lookup(
             if _device_to_vm
               # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
               _vm_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
-                           :site => ((_previous_device_site_obj = lookup_or_create_site(0, _previous_device_site, _nb)) &&
+                           :site => ((_previous_device_site_obj = lookup_or_create_site('', _previous_device_site, _nb)) &&
                                      _previous_device_site_obj.is_a?(Hash) &&
                                      _previous_device_site_obj.has_key?(:id)) ? _previous_device_site_obj[:id] : { :slug => _previous_device_site.to_url },
                            :tags => _tags,

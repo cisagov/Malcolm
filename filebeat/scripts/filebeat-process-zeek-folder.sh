@@ -90,7 +90,7 @@ if mkdir $LOCKDIR; then
               USERTAG=true
             elif [[ -n "$TAG_CANDIDATE" && ! "$TAG_CANDIDATE" =~ ^[0-9-]+$ && "$TAG_CANDIDATE" != "tar" && "$TAG_CANDIDATE" != "AUTOZEEK" && ! "$TAG_CANDIDATE" =~ ^AUTOCARVE ]]; then
               TAGS+=("${TAG_CANDIDATE}")
-              if [[ "$TAG_CANDIDATE" =~ ^NBSITEID[0-9-]+$ ]]; then
+              if [[ "$TAG_CANDIDATE" =~ ^NBSITEID ]]; then
                 TAGS_PRESERVED+=("${TAG_CANDIDATE}")
               fi
             fi
