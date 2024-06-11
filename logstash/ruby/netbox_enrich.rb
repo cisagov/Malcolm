@@ -1267,7 +1267,7 @@ def netbox_lookup(
             if _device_to_vm
               # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
               _vm_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
-                           :site => ((_previous_device_site_obj = lookup_or_create_site(_previous_device_site, _nb)) &&
+                           :site => ((_previous_device_site_obj = lookup_or_create_site(0, _previous_device_site, _nb)) &&
                                      _previous_device_site_obj.is_a?(Hash) &&
                                      _previous_device_site_obj.has_key?(:id)) ? _previous_device_site_obj[:id] : { :slug => _previous_device_site.to_url },
                            :tags => _tags,
