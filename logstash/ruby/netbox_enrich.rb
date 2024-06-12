@@ -1346,11 +1346,10 @@ def netbox_lookup(
 
                 # now delete the old device entry
                 _old_device_delete_response = _nb.delete("dcim/devices/#{_previous_device_id}/")
-                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}): _old_device_delete_response: %{success}' % {
+                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}) deletion failed' % {
                      name: _vm_data[:name],
                      oldid: _previous_device_id,
-                     newid: _vm_create_response[:id],
-                     success: _old_device_delete_response.success? }) if @debug
+                     newid: _vm_create_response[:id] }) if (@debug && !_old_device_delete_response.success?)
               elsif @debug
                 puts('netbox_lookup (%{name}): _vm_create_response: %{result}' % { name: _vm_data[:name], result: JSON.generate(_vm_create_response) })
               end
@@ -1364,7 +1363,7 @@ def netbox_lookup(
               then
                 _device_written = true
               elsif @debug
-                puts('netbox_lookup (%{name}): _patched_device_response: %{result}' % { name: _previous_device_id, result: JSON.generate(_patched_device_response) })
+                puts('netbox_lookup (%{prev_id}): _patched_device_response: %{result}' % { prev_id: _previous_device_id, result: JSON.generate(_patched_device_response) })
               end # _nb.patch succeeded
             end # _is_vm vs _was_vm check
 
