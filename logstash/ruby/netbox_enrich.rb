@@ -108,7 +108,7 @@ def register(
     _debug_str = ENV[_debug_env]
   end
   @debug_verbose = ['verbose', 'v', 'extra'].include?(_debug_str.to_s.downcase)
-  @debug = @debug_verbose || [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase)
+  @debug = (@debug_verbose || [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase))
 
   # connection URL for netbox
   @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
@@ -359,7 +359,7 @@ def filter(
           #   from the event. we need to update the record in netbox (determine the manufacturer
           #   from this value and remove the tag) and in the result
           _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id, :previous_result=>_result)
-          puts('filter tried to patch %{name} (site %{_lookup_site_id}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
+          puts('filter tried to patch %{name} (site %{site}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
                 name: ip_key,
                 site: _lookup_site_id,
                 tags: _tags.map{ |hash| hash[:slug] }.join('|'),
