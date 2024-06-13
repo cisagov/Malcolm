@@ -277,7 +277,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * **Should Malcolm automatically populate NetBox inventory based on observed network traffic?**
     - Answer **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
 * **Specify default NetBox site name**
-    - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used as a query parameter for these enrichment lookups.
+    - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used for NetBox enrichment lookups performed by Logstash and will be associated with traffic Malcolm itself [captures on local interfaces](live-analysis.md#LocalPCAP).
 * **Should Malcolm create "catch-all" prefixes for private IP address space?**
     - Answer **Y** to automatically create "catch-all" NetBox prefixes for private IP address space (i.e., one each for `10.0.0.0/8`, `172.16.0.0/12`, and `192.168.0.0/16`, respectively). This is not recommended for networks with more than one subnet.
 * **Should Malcolm capture live network traffic?**

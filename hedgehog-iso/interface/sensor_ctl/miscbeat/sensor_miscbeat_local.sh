@@ -25,8 +25,14 @@ trap cleanup EXIT
 
 mkdir -p "$SCRIPT_PATH/data"
 
+EXTRA_TAGS_ARRAY=()
 if [[ -n "${MALCOLM_EXTRA_TAGS}" ]]; then
   readarray -td '' EXTRA_TAGS_ARRAY < <(awk '{ gsub(/,/,"\0"); print; }' <<<"$MALCOLM_EXTRA_TAGS,"); unset 'EXTRA_TAGS_ARRAY[-1]';
+fi
+if [[ -n "${NETBOX_SITE}" ]]; then
+  EXTRA_TAGS_ARRAY+=( "NBSITEID${NETBOX_SITE}" )
+fi
+if [[ ${#EXTRA_TAGS_ARRAY[@]} -gt 0 ]]; then
   yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" "$SCRIPT_PATH/filebeat.yml" > "$TMP_CONFIG_FILE"
 else
   cp "$SCRIPT_PATH/filebeat.yml" "$TMP_CONFIG_FILE"
