@@ -54,12 +54,18 @@ ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 ADD netbox/patch/* /tmp/netbox-patches/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    mv /etc/apt/sources.list.d/unit.list /tmp/ && \
+      apt-get -q update && \
+      apt-get install -q -y --no-install-recommends gpg && \
+      curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor > /usr/share/keyrings/nginx-keyring.gpg && \
+      mv /tmp/unit.list /etc/apt/sources.list.d/unit.list && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       gcc \
       file \
       git \
+      gpg \
       jq \
       libmagic-dev \
       libmagic1 \
@@ -87,7 +93,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev && \
+    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
