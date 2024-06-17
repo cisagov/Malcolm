@@ -48,7 +48,7 @@ ENV CCACHE_COMPRESS 1
 ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
-ENV SUPERCRONIC_VERSION "0.2.29"
+ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 

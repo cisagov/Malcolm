@@ -26,13 +26,13 @@ ENV PUSER "ubuntu"
 ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 
-ENV SUPERCRONIC_VERSION "0.2.29"
+ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "50d077d"
 
-ENV YQ_VERSION "4.44.1"
+ENV YQ_VERSION "4.44.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
