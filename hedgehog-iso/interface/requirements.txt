@@ -12,5 +12,5 @@ psutil==5.9.4
 python-dotenv==1.0.0
 requests==2.32.0
 six==1.16.0
-urllib3==1.26.18
+urllib3==1.26.19
 Werkzeug==3.0.3
