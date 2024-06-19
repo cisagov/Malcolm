@@ -44,7 +44,11 @@ jobs:
       -
         name: Build environment setup
         run: |
-          sudo apt-get -q update
+          sudo rm -rf \
+            /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
+            /usr/lib/jvm || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
                apt-transport-https \
                bc \
@@ -93,6 +97,7 @@ jobs:
       -
         name: Build image
         run: |
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
           cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./malcolm-iso/htpdate ./hedgehog-iso
           cp ./scripts/malcolm_utils.py ./hedgehog-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./hedgehog-iso/docs/

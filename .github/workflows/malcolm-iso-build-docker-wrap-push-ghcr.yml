@@ -50,7 +50,10 @@ jobs:
       -
         name: Build environment setup
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo rm -rf \
+            /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
+            /usr/lib/jvm || true
           sudo env DEBIAN_FRONTEND=noninteractive apt-get -q update
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
                apt-transport-https \
@@ -101,6 +104,7 @@ jobs:
       -
         name: Build image
         run: |
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
           IMAGES=( $(grep image: docker-compose-dev.yml | awk '{print $2}' | sort -u) )
           for IMAGE in "${IMAGES[@]}"; do
             REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"
