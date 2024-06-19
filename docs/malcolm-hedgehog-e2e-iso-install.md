@@ -558,7 +558,11 @@ To configure filebeat, first provide the log path (the same path previously conf
 
 Users must also provide the IP address of the Logstash instance to which the logs are to be forwarded, and the port on which Logstash is listening. These logs are forwarded using the Beats protocol, generally over port 5044. Depending on network configuration, users may need to open a firewall port to allow this connection from the sensor to the aggregator.
 
-![Configure filebeat for log forwrading](./images/hedgehog/images/filebeat_ip_port.png)
+![Configure filebeat for log forwarding](./images/hedgehog/images/filebeat_ip_port.png)
+
+Users may specify a NetBox [site](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/) to associate with the network traffic metadata forwarded to Malcolm by this sensor. See [**Asset Interaction Analysis**](asset-interaction-analysis.md#AssetInteractionAnalysis) for more information about NetBox.
+
+![NetBox site](./images/hedgehog/images/filebeat_site_config.png)
 
 Next users will be asked whether the connection used for log forwarding should be done **unencrypted** or over **SSL**. Unencrypted communication requires less processing overhead and is simpler to configure, but the contents of the logs may be visible to anyone able to intercept that traffic.
 

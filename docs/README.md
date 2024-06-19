@@ -52,7 +52,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Temporary read-only interface](running.md#ReadOnlyUI)
 * [Network traffic artifact upload](upload.md#Upload)
     - [Tagging](upload.md#Tagging)
-    - [Processing uploaded PCAPs with Zeek and Suricata](upload.md#UploadPCAPProcessors)
+    - [NetBox site](upload.md#UploadNetBoxSite)
 * [Live analysis](live-analysis.md#LiveAnalysis)
     - [Using a network sensor appliance](live-analysis.md#Hedgehog)
     - [Monitoring local network interfaces](live-analysis.md#LocalPCAP)

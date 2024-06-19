@@ -2,7 +2,7 @@
 
 * [Network traffic artifact upload](#Upload)
     - [Tagging](#Tagging)
-    - [Processing uploaded PCAPs with Zeek and Suricata](#UploadPCAPProcessors)
+    - [NetBox site](#UploadNetBoxSite)
 
 Malcolm serves a web browser-based upload form for uploading PCAP files and Zeek logs at **https://localhost/upload/** if connecting locally.
 
@@ -26,3 +26,7 @@ Files uploaded via these methods are monitored and moved automatically to other 
 In addition to being processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters `,` (comma), `-` (dash), and `_` (underscore). These tags are viewable and searchable (via the `tags` field) in Arkime and OpenSearch Dashboards. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `upload-common.env`](malcolm-config.md#MalcolmConfigEnvVars).
 
 Tags may also be specified manually with the [browser-based upload form](#Upload).
+
+## <a name="NetBox"></a>NetBox site
+
+If NetBox was enabled during [configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig), users may specify a NetBox [site](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/) to associate the uploaded PCAP data using the dropdown to the right of the Tags input. See [**Asset Interaction Analysis**](asset-interaction-analysis.md#AssetInteractionAnalysis) for more information about NetBox.
