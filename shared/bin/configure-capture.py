@@ -1261,13 +1261,17 @@ def main():
                         {
                             k: v
                             for (k, v) in forwarder_dict.items()
-                            if (
-                                (k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v)))
-                                or (k == Constants.NETBOX_SITE)
-                            )
+                            if ((k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))))
                         },
                         Constants.SENSOR_CAPTURE_CONFIG,
                     )
+                    if Constants.NETBOX_SITE in forwarder_dict:
+                        rewrite_dict_to_file(
+                            {
+                                Constants.NETBOX_SITE: '"' + forwarder_dict[Constants.NETBOX_SITE] + '"',
+                            },
+                            Constants.SENSOR_CAPTURE_CONFIG,
+                        )
 
                 elif fwd_mode == Constants.ACL_CONFIGURE:
 
