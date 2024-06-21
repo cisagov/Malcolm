@@ -52,8 +52,14 @@ jobs:
         run: |
           sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
           sudo rm -rf \
-            /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/lib/jvm \
-            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup || true
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /usr/lib/jvm \
+            /usr/local/.ghcup \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift >/dev/null 2>&1 || true
           sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y update >/dev/null 2>&1
           sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge remove \
             azure-cli \
