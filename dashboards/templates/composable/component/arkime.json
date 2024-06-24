@@ -386,7 +386,7 @@
             "hostCnt" : {
               "type" : "long"
             },
-            "ja4" : {
+            "ja4h" : {
               "type": "keyword"
             },
             "key" : {
