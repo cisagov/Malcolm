@@ -1429,7 +1429,7 @@ $ curl -k -u username -L -XPOST -H 'Content-Type: application/json' \
             },
             {
                 "doc_count": 100,
-                "key": "MITRE ATT&CK framework technique"
+                "key": "MITRE ATT&CK framework tactic or technique"
             },
             {
                 "doc_count": 66,

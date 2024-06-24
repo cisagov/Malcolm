@@ -18,8 +18,8 @@
 "File transfer": 0
 "File transfer (high concern)": 75
 "File transfer (medium concern)": 50
-"MITRE ATT&CK for ICS framework technique": 80
-"MITRE ATT&CK framework technique": 80
+"MITRE ATT&CK for ICS framework tactic or technique": 80
+"MITRE ATT&CK framework tactic or technique": 80
 "Notice (other)": 60
 "Notice (protocol)": 60
 "Notice (scan)": 60
