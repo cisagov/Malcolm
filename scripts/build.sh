@@ -114,7 +114,6 @@ FILES_IN_IMAGES=(
   "/usr/local/bin/capa;file-monitor"
   "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
-  "/etc/ja3.yaml;logstash"
   "/etc/vendor_macs.yaml;logstash"
   "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
   "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"

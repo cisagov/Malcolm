@@ -99,8 +99,6 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
         /logstash-persistent-queue && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
-    echo "Retrieving JA3 fingerprint lists..." && \
-    python3 /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml && \
     echo "Complete."
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included

@@ -53,7 +53,6 @@ Malcolm leverages the following excellent open source tools, among others.
     * Lexi Brent's [EternalSafety](https://github.com/0xl3x1/zeek-EternalSafety) plugin
     * MITRE Cyber Analytics Repository's [Bro/Zeek ATT&CK®-Based Analytics (BZAR)](https://github.com/mitre-attack/car/tree/master/implementations) script
     * Salesforce's [gQUIC](https://github.com/salesforce/GQUIC_Protocol_Analyzer) analyzer
-    * Salesforce's [JA3](https://github.com/salesforce/ja3) TLS fingerprinting plugin
     * Zeek's [Spicy](https://github.com/zeek/spicy) plugin framework
 * [GeoLite2](https://dev.maxmind.com/geoip/geoip2/geolite2/) - Malcolm includes GeoLite2 data created by [MaxMind](https://www.maxmind.com)
 
