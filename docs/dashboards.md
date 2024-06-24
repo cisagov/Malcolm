@@ -68,7 +68,7 @@ Inspiration for many of Malcolm's prebuilt visualizations for Zeek logs was orig
 
 ![The SMTP dashboard highlights details about SMTP traffic](./images/screenshots/dashboards_smtp.png)
 
-![The SSL dashboard displays information about SSL versions, certificates, and TLS JA3 fingerprints](./images/screenshots/dashboards_ssl.png)
+![The SSL dashboard displays information about SSL versions and certificates](./images/screenshots/dashboards_ssl.png)
 
 ![The files dashboard displays metrics about the files transferred over the network](./images/screenshots/dashboards_files_source.png)
 
