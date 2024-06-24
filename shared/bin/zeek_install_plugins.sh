@@ -79,7 +79,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-profinet-io-cm"
   "https://github.com/cisagov/icsnpp-s7comm"
   "https://github.com/cisagov/icsnpp-synchrophasor"
-  "https://github.com/cisagov/acid"
   "https://github.com/corelight/callstranger-detector"
   "https://github.com/corelight/CVE-2020-16898"
   "https://github.com/corelight/CVE-2021-31166"
@@ -121,3 +120,8 @@ for i in ${ZKG_GITHUB_URLS[@]}; do
 done
 
 find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \;
+
+# plugins/packages/scripts that don't play nicely or need to be coddled
+git clone \
+  --single-branch --depth 1 --recurse-submodules --shallow-submodules \
+  "https://github.com/cisagov/ACID" "${ZEEK_DIR}"/share/zeek/site/ACID
