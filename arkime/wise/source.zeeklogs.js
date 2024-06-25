@@ -2010,8 +2010,6 @@ class MalcolmSource extends WISESource {
       "zeek.ssl.issuer.ST",
       "zeek.ssl.issuer.title",
       "zeek.ssl.issuer_full",
-      "zeek.ssl.ja4",
-      "zeek.ssl.ja4s",
       "zeek.ssl.last_alert",
       "zeek.ssl.next_protocol",
       "zeek.ssl.resumed",

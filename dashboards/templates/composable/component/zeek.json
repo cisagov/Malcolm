@@ -545,8 +545,6 @@
         "zeek.ssl.issuer.ST": { "type": "keyword" },
         "zeek.ssl.issuer.title": { "type": "keyword" },
         "zeek.ssl.issuer_full": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-        "zeek.ssl.ja4": { "type": "keyword" },
-        "zeek.ssl.ja4s": { "type": "keyword" },
         "zeek.ssl.last_alert": { "type": "keyword" },
         "zeek.ssl.next_protocol": { "type": "keyword" },
         "zeek.ssl.resumed": { "type": "keyword" },
