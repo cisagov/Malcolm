@@ -71,7 +71,9 @@
             "url": { "type": "keyword" },
             "details": { "type": "nested" }
           }
-        }
+        },
+        "tls.client.ja4": { "type": "keyword" },
+        "tls.server.ja4s": { "type": "keyword" }
       }
     }
   }
