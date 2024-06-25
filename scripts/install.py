@@ -3110,6 +3110,7 @@ class LinuxInstaller(Installer):
                     'kinetic',
                     'lunar',
                     'mantic',
+                    'noble',
                     'stretch',
                     'buster',
                     'bookworm',
