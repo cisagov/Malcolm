@@ -113,7 +113,6 @@ class MalcolmSource extends WISESource {
       "file.type",
       "file.uid",
       "host.name",
-      "http.ja4h",
       "http.request.body.bytes",
       "http.request.method",
       "http.request.mime_type",
