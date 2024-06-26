@@ -7,6 +7,9 @@ youtube_url: https://www.youtube.com/@MalcolmNetworkTrafficAnalysis
 mastodon:
   id: malcolm@malcolm.fyi
   url: https://infosec.exchange/@mmguero
+reddit:
+  id: Malcolm on Reddit
+  url: https://reddit.com/r/Malcolm
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html

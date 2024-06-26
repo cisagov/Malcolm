@@ -98,6 +98,9 @@
         {% if site.mastodon.id %}
         <p class="view"><i class="fa fa-share-alt" aria-hidden="true"></i> <a rel="me" href="{{ site.mastodon.url }}">@{{ site.mastodon.id }} <i class="fa fa-sign-out" aria-hidden="true"></i></a></p>
         {% endif %}
+        {% if site.reddit.id %}
+        <p class="view"><i class="fa fa-reddit" aria-hidden="true"></i> <a rel="me" href="{{ site.reddit.url }}">{{ site.reddit.id }} <i class="fa fa-sign-out" aria-hidden="true"></i></a></p>
+        {% endif %}
       </footer>
     </div>
     <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
