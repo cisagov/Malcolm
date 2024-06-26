@@ -55,6 +55,9 @@
             "issuerON" : {
               "type" : "keyword"
             },
+            "ja4x" : {
+              "type" : "keyword"
+            },
             "notAfter" : {
               "type" : "date"
             },
