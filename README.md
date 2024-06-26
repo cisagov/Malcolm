@@ -1,3 +1,5 @@
+### [Click here](https://github.com/cisagov/Malcolm/wiki/Mal.Con-'24-Announcement) for information on the first-ever Malcolm community conference, Mal.Con '24!
+
 # Malcolm
 
 ![](./docs/images/logo/Malcolm_outline_banner_dark.png)
