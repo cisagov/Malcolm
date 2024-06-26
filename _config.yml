@@ -7,6 +7,9 @@ youtube_url: https://www.youtube.com/@MalcolmNetworkTrafficAnalysis
 mastodon:
   id:
   url:
+reddit:
+  id:
+  url:
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html
