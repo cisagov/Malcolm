@@ -3,7 +3,7 @@ def concurrency
 end
 
 def register(params)
-  require 'lru_redux'
+  require 'lru_reredux'
   require 'net/http'
   require 'cgi'
 
@@ -32,7 +32,7 @@ def register(params)
   @cache_size = params.fetch("cache_size", 2048)
 
   # hash of source_types
-  @source_type_hash = LruRedux::ThreadSafeCache.new(@source_type_cache_size)
+  @source_type_hash = LruReredux::ThreadSafeCache.new(@source_type_cache_size)
 end
 
 def filter(event)
@@ -58,7 +58,7 @@ def filter(event)
     _vals.each { |_query|
       if (_query.length >= 4) and (_query !~ /(ip6\.int|ip6\.arpa|in-addr\.arpa|b32\.i2p)$/i) then
         _scores_tmp = @source_type_hash.getset(@source_type){
-          LruRedux::ThreadSafeCache.new(@cache_size)
+          LruReredux::ThreadSafeCache.new(@cache_size)
         }.getset(_query){
           Net::HTTP.get_response(URI.parse(@freq_url + '/' + CGI.escape(_query))).body.gsub(/(^\(|\)$|\s+)/, '').split(',').map(&:to_f)
         }

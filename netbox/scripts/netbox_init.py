@@ -410,7 +410,7 @@ def main():
             if err != 0:
                 logging.error(f'{err} migrating ipam_vrf.name to ipam_prefix.description: {results}')
 
-            # don't restore auth_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
+            # don't restore users_user, tokens, etc: they're created by Malcolm and may not be the same on this instance
             cmd = [
                 'psql',
                 '-h',
@@ -418,11 +418,11 @@ def main():
                 '-U',
                 {args.postgresUser},
                 '-c',
-                'TRUNCATE auth_user CASCADE',
+                'TRUNCATE users_user CASCADE',
             ]
             err, results = malcolm_utils.run_process(cmd, env=osEnv, logger=logging)
             if err != 0:
-                logging.error(f'{err} truncating table auth_user table: {results}')
+                logging.error(f'{err} truncating table users_user table: {results}')
 
             # start back up the netbox processes (except initialization)
             cmd = [
@@ -440,12 +440,38 @@ def main():
                     netboxVenvPy,
                     os.path.basename(manageScript),
                     "migrate",
+                    "--check",
                 ]
                 err, results = malcolm_utils.run_process(cmd, logger=logging)
-                if (err != 0) or (not results):
-                    logging.error(f'{err} performing NetBox migration: {results}')
+                if err != 0:
+                    for operation in [
+                        [
+                            "migrate",
+                            "--no-input",
+                        ],
+                        [
+                            "trace_paths",
+                            "--no-input",
+                        ],
+                        [
+                            "remove_stale_contenttypes",
+                            "--no-input",
+                        ],
+                        [
+                            "clearsessions",
+                        ],
+                        [
+                            "reindex",
+                            "--lazy",
+                        ],
+                    ]:
 
-                # create auth_user for superuser
+                        cmd = [netboxVenvPy, os.path.basename(manageScript)] + operation
+                        err, results = malcolm_utils.run_process(cmd, logger=logging)
+                        if (err != 0) or (not results):
+                            logging.error(f'{err} performing NetBox {cmd[2]}: {results}')
+
+                # create users_user for superuser
                 cmd = [
                     netboxVenvPy,
                     os.path.basename(manageScript),
@@ -566,7 +592,7 @@ def main():
 
         try:
             # get all content types (for creating new permissions)
-            allContentTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.content_types.all()]
+            allObjectTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
 
             permsPreExisting = {x.name: x for x in nb.users.permissions.all()}
             logging.debug(f"permissions (before): { {k:v.id for k, v in permsPreExisting.items()} }")
@@ -579,7 +605,7 @@ def main():
             }.items():
                 permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
                 permConfig['object_types'] = [
-                    ct for ct in allContentTypeNames if ct not in permConfig['exclude_objects']
+                    ct for ct in allObjectTypeNames if ct not in permConfig['exclude_objects']
                 ]
                 permConfig.pop('exclude_objects', None)
                 try:

@@ -623,6 +623,7 @@ export {
     ["application/x-mmxp"] = "mxp",
     ["application/x-mobipocket-ebook"] = "mobi",
     ["application/x-ms-application"] = "application",
+    ["application/x-ms-evtx"]= "evtx",
     ["application/x-ms-installer"] = "msi",
     ["application/x-ms-license"] = "slupkg-ms",
     ["application/x-ms-manifest"] = "manifest",

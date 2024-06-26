@@ -102,6 +102,28 @@ filebeat.inputs:
   close_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
+#-------------------------- Uploaded Windows EVTX Logs (as JSON) ---------------
+#                           (see evtx_to_jsonl.sh)
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_PATH:/zeek/current}/*.evtx.json
+  symlinks: true
+  json:
+    expand_keys: true
+    add_error_key: false
+    ignore_decoding_error: true
+    keys_under_root: false
+  tags: ["_evtx_to_json"]
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+  close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
+  close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
+  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
+
 #================================ Outputs ======================================
 
 #-------------------------- Logstash Output ------------------------------------

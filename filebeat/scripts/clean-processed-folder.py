@@ -31,7 +31,7 @@ suricataLiveDir = suricataDir + "live/"
 nowTime = time.time()
 logMimeTypeRegex = re.compile(r"(text/plain|application/(x-nd)?json)")
 archiveMimeTypeRegex = re.compile(
-    r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip)"
+    r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)"
 )
 
 

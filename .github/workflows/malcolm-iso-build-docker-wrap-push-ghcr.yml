@@ -50,8 +50,30 @@ jobs:
       -
         name: Build environment setup
         run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
-          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q update
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /usr/lib/jvm \
+            /usr/local/.ghcup \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y update >/dev/null 2>&1
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge remove \
+            azure-cli \
+            dotnet* \
+            firefox \
+            google-chrome-stable \
+            google-cloud-cli \
+            microsoft-edge-stable \
+            mono-* \
+            mysql* \
+            postgresql* \
+            powershell \
+            temurin*  >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge autoremove >/dev/null 2>&1 || true
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
                apt-transport-https \
                bc \
@@ -101,6 +123,7 @@ jobs:
       -
         name: Build image
         run: |
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
           IMAGES=( $(grep image: docker-compose-dev.yml | awk '{print $2}' | sort -u) )
           for IMAGE in "${IMAGES[@]}"; do
             REPO_IMAGE="$(echo "$IMAGE" | sed "s@^.*\(malcolm\)@ghcr.io/${{ github.repository_owner }}/\1@" | sed "s/:.*/:${{ steps.extract_branch.outputs.branch }}/")"

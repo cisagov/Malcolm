@@ -53,7 +53,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 
 * `ghcr.io/idaholab/malcolm/api` (based on `python:3-slim`)
 * `ghcr.io/idaholab/malcolm/arkime` (based on `debian:12-slim`)
-* `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `alpine:3.19`)
+* `ghcr.io/idaholab/malcolm/dashboards-helper` (based on `alpine:3.20`)
 * `ghcr.io/idaholab/malcolm/dashboards` (based on `opensearchproject/opensearch-dashboards`)
 * `ghcr.io/idaholab/malcolm/file-monitor` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/file-upload` (based on `debian:12-slim`)
@@ -62,7 +62,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `opensearchproject/logstash-oss-with-opensearch-output-plugin`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
-* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.19`)
+* `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.18`)
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:12-slim`)
@@ -71,7 +71,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/suricata` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/zeek` (based on `debian:12-slim`)
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the docker images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you willll need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
+Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the docker images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you will need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
 # <a name="Packager"></a>Pre-Packaged installation files
 

@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v24.05.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v24.06.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -108,7 +108,7 @@ function InstallPythonPackages {
         pythondialog \
         pyyaml \
         requests \
-        urllib3==1.26.18
+        urllib3==1.26.19
 }
 
 ################################################################################

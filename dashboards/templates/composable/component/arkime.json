@@ -386,6 +386,9 @@
             "hostCnt" : {
               "type" : "long"
             },
+            "ja4h" : {
+              "type": "keyword"
+            },
             "key" : {
               "type" : "keyword"
             },
@@ -766,6 +769,9 @@
             "hasshServerCnt" : {
               "type" : "long"
             },
+            "ja4ssh": {
+              "type" : "keyword"
+            },
             "key" : {
               "type" : "keyword"
             },
@@ -832,6 +838,22 @@
         "tagsCnt" : {
           "type" : "long"
         },
+        "tcp" : {
+          "properties" : {
+            "ja4l": {
+              "type": "keyword"
+            },
+            "ja4ls": {
+              "type": "keyword"
+            },
+            "ja4t": {
+              "type": "keyword"
+            },
+            "ja4ts": {
+              "type": "keyword"
+            }
+          }
+        },
         "tcpflags" : {
           "properties" : {
             "ack" : {
@@ -874,17 +896,11 @@
             "dstSessionId" : {
               "type" : "keyword"
             },
-            "ja3" : {
+            "ja4" : {
               "type" : "keyword"
             },
-            "ja3Cnt" : {
-              "type" : "long"
-            },
-            "ja3s" : {
+            "ja4s" : {
               "type" : "keyword"
-            },
-            "ja3sCnt" : {
-              "type" : "long"
             },
             "srcSessionId" : {
               "type" : "keyword"

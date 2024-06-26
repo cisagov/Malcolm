@@ -72,8 +72,8 @@
             "details": { "type": "nested" }
           }
         },
-        "tls.client.ja3_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-        "tls.server.ja3s_description": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
+        "tls.client.ja4": { "type": "keyword" },
+        "tls.server.ja4s": { "type": "keyword" }
       }
     }
   }

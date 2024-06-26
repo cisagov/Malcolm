@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.13.4
+FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.14.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -43,6 +43,7 @@ RUN set -x && \
     apt-get -y --no-install-recommends install \
         curl \
         gettext \
+        git \
         patch \
         python3-setuptools \
         python3-pip \
@@ -55,7 +56,7 @@ RUN set -x && \
     echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'lru_redux'" >> /usr/share/logstash/Gemfile && \
+    echo "gem 'lru_reredux', git: 'https://github.com/mmguero-dev/lru_reredux'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
@@ -65,8 +66,10 @@ RUN set -x && \
                                        logstash-filter-kv logstash-filter-mutate logstash-filter-dissect \
                                        logstash-filter-fingerprint logstash-filter-useragent \
                                        logstash-input-beats logstash-output-elasticsearch logstash-output-opensearch && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
-        apt-get clean && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove \
+        git && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge autoremove && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
            /root/.cache /root/.gem /root/.bundle
 
@@ -99,8 +102,6 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
         /logstash-persistent-queue && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
-    echo "Retrieving JA3 fingerprint lists..." && \
-    python3 /usr/local/bin/ja3_build_list.py -o /etc/ja3.yaml && \
     echo "Complete."
 
 # As the keystore is encapsulated in logstash, this isn't really necessary. It's included

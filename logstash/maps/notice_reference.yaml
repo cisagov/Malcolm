@@ -1,4 +1,5 @@
 "ATTACK": "https://github.com/mitre-attack/bzar"
+"ATTACKICS": "https://github.com/cisagov/acid"
 "Corelight": "https://github.com/corelight"
 "CVE_2020_0601": "https://github.com/0xxon/cve-2020-0601"
 "CVE_2020_13777": "https://github.com/0xxon/cve-2020-13777"

@@ -4,7 +4,7 @@
 
 Malcolm processes network traffic data in the form of packet capture (PCAP) files or Zeek logs. A [sensor](live-analysis.md#Hedgehog) (packet capture appliance) monitors network traffic mirrored to it over a SPAN port on a network switch or router, or by using a network TAP device. [Zeek](https://www.zeek.org/index.html) logs and [Arkime](https://arkime.com/) sessions are generated containing important session metadata from the traffic observed, which are then securely forwarded to a Malcolm instance. Full PCAP files are optionally stored locally on the sensor device for later examination.
 
-Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (docs/OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments and hosts](asset-interaction-analysis.md#AssetInteractionAnalysis) based on a user-defined asset inventory, performing [TLS fingerprinting](https://engineering.salesforce.com/tls-fingerprinting-with-ja3-and-ja3s-247362855967), and many others.
+Malcolm parses the network session data and enriches it with additional lookups and mappings including GeoIP mapping, hardware manufacturer lookups from [organizationally unique identifiers (docs/OUI)](http://standards-oui.ieee.org/oui/oui.txt) in MAC addresses, assigning names to [network segments and hosts](asset-interaction-analysis.md#AssetInteractionAnalysis) based on a user-defined asset inventory, performing [JA4 fingerprinting](https://blog.foxio.io/ja4%2B-network-fingerprinting), and many others.
 
 This enriched data is stored in an [OpenSearch](https://opensearch.org/) document in a format suitable for analysis through two intuitive interfaces: OpenSearch Dashboards, a flexible data visualization plugin with dozens of prebuilt dashboards providing an at-a-glance overview of network protocols; and Arkime, a powerful tool for finding and identifying the network sessions comprising suspected security incidents. These tools can be accessed through a web browser from analyst workstations or on a display in a security operations center (SOC). Logs can also be forwarded on to another instance of Malcolm.
 
@@ -52,7 +52,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Temporary read-only interface](running.md#ReadOnlyUI)
 * [Network traffic artifact upload](upload.md#Upload)
     - [Tagging](upload.md#Tagging)
-    - [Processing uploaded PCAPs with Zeek and Suricata](upload.md#UploadPCAPProcessors)
+    - [NetBox site](upload.md#UploadNetBoxSite)
 * [Live analysis](live-analysis.md#LiveAnalysis)
     - [Using a network sensor appliance](live-analysis.md#Hedgehog)
     - [Monitoring local network interfaces](live-analysis.md#LocalPCAP)
@@ -136,3 +136,13 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 * [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)
 * [Upgrading Malcolm](malcolm-upgrade.md#UpgradePlan)
 * [Modifying or Contributing to Malcolm](contributing-guide.md#Contributing)
+    - [Local modifications](contributing-local-modifications.md#LocalMods)
+    - [Adding a new service (Docker image)](contributing-new-image.md#NewImage)
+    - [Adding new log fields](contributing-new-log-fields.md#NewFields)
+    - [Zeek](contributing-zeek.md#Zeek)
+    - [PCAP processors](contributing-pcap.md#PCAP)
+    - [Logstash](contributing-logstash.md#Logstash)
+    - [OpenSearch Dashboards](contributing-dashboards.md#dashboards)
+    - [Carved file scanners](contributing-file-scanners.md#Scanners)
+    - [Style](contributing-style.md#Style)
+    - [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)

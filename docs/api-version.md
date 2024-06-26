@@ -8,45 +8,47 @@ Returns version information about Malcolm and version/[health](https://opensearc
 
 ```json
 {
-  "built": "2024-01-10T15:27:31Z",
-  "mode": "opensearch-remote",
+  "boot_time": "2024-05-20T14:15:01Z",
+  "built": "2024-06-03T14:23:38Z",
+  "machine": "x86_64",
+  "mode": "opensearch-local",
   "opensearch": {
-    "cluster_name": "opensearch-cluster",
-    "cluster_uuid": "4QK51McnS96aAvuj5qQKXA",
+    "cluster_name": "docker-cluster",
+    "cluster_uuid": "D6uCu7DNRC6WPFlu_SHalg",
     "health": {
-      "active_primary_shards": 5,
-      "active_shards": 10,
-      "active_shards_percent_as_number": 100,
-      "cluster_name": "opensearch-cluster",
+      "active_primary_shards": 19,
+      "active_shards": 19,
+      "active_shards_percent_as_number": 95.0,
+      "cluster_name": "docker-cluster",
       "delayed_unassigned_shards": 0,
       "discovered_cluster_manager": true,
       "discovered_master": true,
       "initializing_shards": 0,
-      "number_of_data_nodes": 2,
+      "number_of_data_nodes": 1,
       "number_of_in_flight_fetch": 0,
-      "number_of_nodes": 4,
+      "number_of_nodes": 1,
       "number_of_pending_tasks": 0,
       "relocating_shards": 0,
       "status": "green",
       "task_max_waiting_in_queue_millis": 0,
       "timed_out": false,
-      "unassigned_shards": 0
+      "unassigned_shards": 1
     },
-    "name": "opensearch-node1",
+    "name": "opensearch",
     "tagline": "The OpenSearch Project: https://opensearch.org/",
     "version": {
-      "build_date": "2023-10-13T02:55:55.511945994Z",
-      "build_hash": "4dcad6dd1fd45b6bd91f041a041829c8687278fa",
+      "build_date": "2024-05-09T18:51:00.973564994Z",
+      "build_hash": "aaa555453f4713d652b52436874e11ba258d8f03",
       "build_snapshot": false,
       "build_type": "tar",
       "distribution": "opensearch",
-      "lucene_version": "9.7.0",
+      "lucene_version": "9.10.0",
       "minimum_index_compatibility_version": "7.0.0",
       "minimum_wire_compatibility_version": "7.10.0",
-      "number": "2.11.0"
+      "number": "2.14.0"
     }
   },
-  "sha": "77574975",
-  "version": "24.05.0"
+  "sha": "dad18b1",
+  "version": "24.06.0"
 }
 ```

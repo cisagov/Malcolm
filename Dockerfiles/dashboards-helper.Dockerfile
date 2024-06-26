@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} alpine:3.19
+FROM --platform=${TARGETPLATFORM} alpine:3.20
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -37,7 +37,7 @@ ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.2.29"
+ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 

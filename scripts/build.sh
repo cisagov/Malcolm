@@ -76,7 +76,7 @@ read -p "Malcolm Docker images will now be built and/or pulled, force full clean
 CONFIRMATION=${CONFIRMATION:-N}
 
 # e.g., linux/amd64 or linux/arm64
-TARGET_PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+TARGET_PLATFORM=linux/$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 MALCOLM_VERSION="$($GREP -P "^\s+image:.*/malcolm/" "$CONFIG_FILE" | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
 VCS_REVISION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
@@ -114,7 +114,6 @@ FILES_IN_IMAGES=(
   "/usr/local/bin/capa;file-monitor"
   "/var/www/htadmin/htadmin.php;htadmin"
   "/etc/ip_protocol_name_to_number.yaml;logstash"
-  "/etc/ja3.yaml;logstash"
   "/etc/vendor_macs.yaml;logstash"
   "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
   "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"

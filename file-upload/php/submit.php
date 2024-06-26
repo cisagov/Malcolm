@@ -93,6 +93,12 @@ function handle_transfer_ids_post($ids) {
         if (isset($_POST["tags"]) && (strlen($_POST["tags"]) > 0)) {
             $new_name_prefix = $_POST["tags"] . ",USERTAG,";
         }
+        if (isset($_POST["site-dropdown"]) && (strlen($_POST["site-dropdown"]) > 0) && ((is_int($_POST["site-dropdown"])) || (ctype_digit($_POST["site-dropdown"])))) {
+            if (strlen($new_name_prefix) > 0) {
+                $new_name_prefix = $new_name_prefix . ',';
+            }
+            $new_name_prefix = $new_name_prefix . 'NBSITEID' . $_POST["site-dropdown"] . ",";
+        }
         
         $files = $transfer->getFiles(defined('TRANSFER_PROCESSOR') ? TRANSFER_PROCESSOR : null);
         if($files != null){

@@ -48,7 +48,7 @@ ENV CCACHE_COMPRESS 1
 ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
-ENV SUPERCRONIC_VERSION "0.2.29"
+ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
@@ -121,12 +121,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     mkdir -p "${CCACHE_DIR}" && \
     zkg autoconfig --force && \
     bash /usr/local/bin/zeek_install_plugins.sh && \
-    ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
-    ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
-    rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
-    rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
-    ( find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded ) && \
-    ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
+      ( find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"' || true ) && \
+      ( find "${ZEEK_DIR}"/var/lib/zkg/clones -type d -name .git -execdir bash -c "pwd; du -sh; git pull --depth=1 --ff-only; git reflog expire --expire=all --all; git tag -l | xargs -r git tag -d; git gc --prune=all; du -sh" \; ) && \
+      rm -rf "${ZEEK_DIR}"/var/lib/zkg/scratch && \
+      rm -rf "${ZEEK_DIR}"/lib/zeek/python/zeekpkg/__pycache__ && \
+      ( find "${ZEEK_DIR}/" -type f -exec file "{}" \; | grep -Pi "ELF 64-bit.*not stripped" | sed 's/:.*//' | xargs -l -r strip --strip-unneeded || true ) && \
+      ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
@@ -154,13 +154,6 @@ ADD zeek/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
 ADD shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
 
-# sanity checks to make sure the plugins installed and copied over correctly
-# these ENVs should match the number of third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_COUNT 22
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS)"
-ENV ZEEK_THIRD_PARTY_SCRIPTS_COUNT 25
-ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-22954/main|cve-2022-26809/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja3/ja3|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
-
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
     usermod -a -G tty ${PUSER} && \
@@ -173,12 +166,19 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
     ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
 
+# sanity checks to make sure the plugins installed and copied over correctly
+# these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_DHCP|ANALYZER_SPICY_DNS|ANALYZER_SPICY_HTTP|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-22954/main|cve-2022-26809/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja4/main|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
+
 RUN mkdir -p /tmp/logs && \
     cd /tmp/logs && \
+    export ZEEK_THIRD_PARTY_PLUGINS_COUNT=$(echo "$ZEEK_THIRD_PARTY_PLUGINS_GREP" | grep -P -o "\([^)]+\)" | head -n 1 | sed "s/^(//" | sed "s/)$//" | tr '|' '\n' | wc -l) && \
+    export ZEEK_THIRD_PARTY_SCRIPTS_COUNT=$(echo "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" | grep -P -o "\([^)]+\)" | head -n 1 | sed "s/^(//" | sed "s/)$//" | tr '|' '\n' | wc -l) && \
     "$ZEEK_DIR"/bin/zeek-offline -NN local >zeeknn.log 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo 'Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo $ZEEK_THIRD_PARTY_PLUGINS_COUNT' Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
     "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo 'Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo $ZEEK_THIRD_PARTY_SCRIPTS_COUNT' Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
     cd /tmp && \
     rm -rf /tmp/logs /tmp/pcaps
 

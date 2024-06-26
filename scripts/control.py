@@ -24,6 +24,7 @@ import signal
 import stat
 import string
 import tarfile
+import tempfile
 import time
 
 from malcolm_common import (
@@ -1121,6 +1122,88 @@ def start():
 
 
 ###################################################################################################
+def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
+    global args
+    global opensslBin
+
+    clientKey = None
+    clientCrt = None
+    clientCaCrt = None
+
+    with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
+        with pushd(tmpCertDir):
+            err, out = run_process(
+                [opensslBin, 'genrsa', '-out', 'client.key', '2048'],
+                stderr=True,
+                debug=args.debug,
+            )
+            if err != 0:
+                raise Exception(f'Unable to generate client.key: {out}')
+
+            err, out = run_process(
+                [
+                    opensslBin,
+                    'req',
+                    '-sha512',
+                    '-new',
+                    '-key',
+                    'client.key',
+                    '-out',
+                    'client.csr',
+                    '-config',
+                    clientConf,
+                ],
+                stderr=True,
+                debug=args.debug,
+            )
+            if err != 0:
+                raise Exception(f'Unable to generate client.csr: {out}')
+
+            err, out = run_process(
+                [
+                    opensslBin,
+                    'x509',
+                    '-days',
+                    '3650',
+                    '-req',
+                    '-sha512',
+                    '-in',
+                    'client.csr',
+                    '-CAcreateserial',
+                    '-CA',
+                    caCrt,
+                    '-CAkey',
+                    caKey,
+                    '-out',
+                    'client.crt',
+                    '-extensions',
+                    'v3_req',
+                    '-extensions',
+                    'usr_cert',
+                    '-extfile',
+                    clientConf,
+                ],
+                stderr=True,
+                debug=args.debug,
+            )
+            if err != 0:
+                raise Exception(f'Unable to generate client.crt: {out}')
+
+            if os.path.isfile('client.key'):
+                shutil.move('client.key', outputDir)
+                clientKey = os.path.join(outputDir, 'client.key')
+            if os.path.isfile('client.crt'):
+                shutil.move('client.crt', outputDir)
+                clientCrt = os.path.join(outputDir, 'client.crt')
+            clientCaCrt = os.path.join(outputDir, os.path.basename(caCrt))
+            if not os.path.isfile(clientCaCrt) or not same_file_or_dir(caCrt, clientCaCrt):
+                shutil.copy2(caCrt, clientCaCrt)
+            # -----------------------------------------------
+
+    return clientKey, clientCrt, clientCaCrt
+
+
+###################################################################################################
 def authSetup():
     global args
     global opensslBin
@@ -1564,64 +1647,6 @@ def authSetup():
                         raise Exception(f'Unable to generate server.key: {out}')
 
                     # client -------------------------------
-                    err, out = run_process(
-                        [opensslBin, 'genrsa', '-out', 'client.key', '2048'],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate client.key: {out}')
-
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'req',
-                            '-sha512',
-                            '-new',
-                            '-key',
-                            'client.key',
-                            '-out',
-                            'client.csr',
-                            '-config',
-                            'client.conf',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate client.csr: {out}')
-
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'x509',
-                            '-days',
-                            '3650',
-                            '-req',
-                            '-sha512',
-                            '-in',
-                            'client.csr',
-                            '-CAcreateserial',
-                            '-CA',
-                            'ca.crt',
-                            '-CAkey',
-                            'ca.key',
-                            '-out',
-                            'client.crt',
-                            '-extensions',
-                            'v3_req',
-                            '-extensions',
-                            'usr_cert',
-                            '-extfile',
-                            'client.conf',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate client.crt: {out}')
-                    # -----------------------------------------------
-
                     # mkdir filebeat/certs if it doesn't exist
                     try:
                         os.makedirs(filebeatPath)
@@ -1635,17 +1660,22 @@ def authSetup():
                     for oldfile in glob.glob(os.path.join(filebeatPath, "*")):
                         os.remove(oldfile)
 
-                    # copy the ca so logstasn and filebeat both have it
-                    shutil.copy2(os.path.join(logstashPath, "ca.crt"), filebeatPath)
-
-                    # move the client certs for filebeat
-                    for f in ['client.key', 'client.crt']:
-                        shutil.move(os.path.join(logstashPath, f), filebeatPath)
-
-                    # remove leftovers
-                    for pat in ['*.srl', '*.csr', '*.pem']:
-                        for oldfile in glob.glob(pat):
-                            os.remove(oldfile)
+                    clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
+                        caCrt=os.path.join(logstashPath, 'ca.crt'),
+                        caKey=os.path.join(logstashPath, 'ca.key'),
+                        clientConf=os.path.join(logstashPath, 'client.conf'),
+                        outputDir=filebeatPath,
+                    )
+                    if (
+                        (not clientKey)
+                        or (not clientCrt)
+                        or (not clientCaCrt)
+                        or (not os.path.isfile(clientKey))
+                        or (not os.path.isfile(clientCrt))
+                        or (not os.path.isfile(clientCaCrt))
+                    ):
+                        raise Exception(f'Unable to generate client key/crt')
+                    # -----------------------------------------------
 
             # create and populate connection parameters file for remote OpenSearch instance(s)
             elif authItem[0] == 'remoteos':
@@ -1905,30 +1935,48 @@ def authSetup():
                     'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
                     defaultBehavior=defaultBehavior,
                 )
-                with pushd(filebeatPath):
-                    with Popen(
-                        [txRxScript, '-t', "ca.crt", "client.crt", "client.key"],
-                        stdout=PIPE,
-                        stderr=STDOUT,
-                        bufsize=0 if MainDialog else -1,
-                    ) as p:
-                        if MainDialog:
-                            DisplayProgramBox(
-                                fileDescriptor=p.stdout.fileno(),
-                                text='ssl-client-transmit',
-                                clearScreen=True,
-                            )
-                        else:
-                            while True:
-                                output = p.stdout.readline()
-                                if (len(output) == 0) and (p.poll() is not None):
-                                    break
-                                if output:
-                                    print(output.decode('utf-8').rstrip())
-                                else:
-                                    time.sleep(0.5)
+                # generate new client key/crt and send it
+                with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
+                    with pushd(tmpCertDir):
+                        clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
+                            caCrt=os.path.join(logstashPath, 'ca.crt'),
+                            caKey=os.path.join(logstashPath, 'ca.key'),
+                            clientConf=os.path.join(logstashPath, 'client.conf'),
+                            outputDir=tmpCertDir,
+                        )
+                        if (
+                            (not clientKey)
+                            or (not clientCrt)
+                            or (not clientCaCrt)
+                            or (not os.path.isfile(clientKey))
+                            or (not os.path.isfile(clientCrt))
+                            or (not os.path.isfile(clientCaCrt))
+                        ):
+                            raise Exception(f'Unable to generate client key/crt')
 
-                        p.poll()
+                        with Popen(
+                            [txRxScript, '-t', clientCaCrt, clientCrt, clientKey],
+                            stdout=PIPE,
+                            stderr=STDOUT,
+                            bufsize=0 if MainDialog else -1,
+                        ) as p:
+                            if MainDialog:
+                                DisplayProgramBox(
+                                    fileDescriptor=p.stdout.fileno(),
+                                    text='ssl-client-transmit',
+                                    clearScreen=True,
+                                )
+                            else:
+                                while True:
+                                    output = p.stdout.readline()
+                                    if (len(output) == 0) and (p.poll() is not None):
+                                        break
+                                    if output:
+                                        print(output.decode('utf-8').rstrip())
+                                    else:
+                                        time.sleep(0.5)
+
+                            p.poll()
 
 
 ###################################################################################################

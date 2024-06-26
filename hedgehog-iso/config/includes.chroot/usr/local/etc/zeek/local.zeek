@@ -107,6 +107,9 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @endif
 
 @load packages
+@if (!disable_ics_all)
+  @load ACID/scripts
+@endif
 @load /opt/sensor/sensor_ctl/zeek/intel
 @load /opt/sensor/sensor_ctl/zeek/custom
 

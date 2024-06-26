@@ -80,9 +80,14 @@ def file_processor(pathname, **kwargs):
                     'application/x-tar',
                     'application/x-xz',
                     'application/zip',
+                    # windows event logs (idaholab/Malcolm#465) will be handled here as well, as they
+                    # may be uploaded either as-is or compressed
+                    'application/x-ms-evtx',
                 ]
             ):
-                # looks like this is a compressed file, we're assuming it's a zeek log archive to be processed by filebeat
+                # looks like this is a compressed file (or evtx file), we're assuming it's:
+                #  * a zeek log archive to be processed by filebeat
+                #  * a windows event log archive to be processed into JSON and then also sent through filebeat
                 logger.info(f"{scriptName}:\t🖅\t{pathname} [{fileMime}][{fileType}] to {zeekDir}")
                 shutil.move(pathname, os.path.join(zeekDir, os.path.basename(pathname)))
 

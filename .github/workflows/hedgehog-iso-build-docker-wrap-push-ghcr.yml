@@ -44,7 +44,30 @@ jobs:
       -
         name: Build environment setup
         run: |
-          sudo apt-get -q update
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            "$AGENT_TOOLSDIRECTORY" \
+            /opt/ghc \
+            /usr/lib/jvm \
+            /usr/local/.ghcup \
+            /usr/local/lib/android \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/swift >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y update >/dev/null 2>&1
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge remove \
+            azure-cli \
+            dotnet* \
+            firefox \
+            google-chrome-stable \
+            google-cloud-cli \
+            microsoft-edge-stable \
+            mono-* \
+            mysql* \
+            postgresql* \
+            powershell \
+            temurin*  >/dev/null 2>&1 || true
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get -q -y --purge autoremove >/dev/null 2>&1 || true
           sudo env DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y -q \
                apt-transport-https \
                bc \
@@ -93,6 +116,7 @@ jobs:
       -
         name: Build image
         run: |
+          sudo rm -rf ${GITHUB_WORKSPACE}/.git
           cp -r ./shared ./docs ./_config.yml ./_includes ./_layouts ./Gemfile ./README.md ./malcolm-iso/htpdate ./hedgehog-iso
           cp ./scripts/malcolm_utils.py ./hedgehog-iso/shared/bin/
           cp ./scripts/documentation_build.sh ./hedgehog-iso/docs/

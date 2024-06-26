@@ -69,7 +69,6 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(debug=\).*/\1"${ARKIME_DEBUG_LEVEL}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
-    sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
     # note: when setting the node name, the viewer_service.sh script needs to match
     sed -i "s/MALCOLM_PCAP_NODE_NAME/${NODE_NAME}-upload/g" "${ARKIME_CONFIG_FILE}"
 
@@ -103,6 +102,9 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       sed -r -i "s|(interface)\s*=\s*.*|\1=$ARKIME_CAPTURE_INTERFACE|" "${ARKIME_CONFIG_FILE}"
       sed -i "s/^\(readTruncatedPackets=\).*/\1"false"/" "${ARKIME_CONFIG_FILE}"
       sed -r -i "s/(bpf)\s*=\s*.*/\1=${PCAP_FILTER:-}/" "${ARKIME_CONFIG_FILE}"
+
+      # PCAP capture location
+      sed -i "s/^\(pcapDir=\).*/\1\/data\/pcap\/arkime-live/" "${ARKIME_CONFIG_FILE}"
 
       # convert pcap rotation size units (MB to GB) and stick in config file
       if [[ -n $PCAP_ROTATE_MEGABYTES ]]; then

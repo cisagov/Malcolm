@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v3.6.7
+FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v4.0.6
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -26,13 +26,13 @@ ENV PUSER "ubuntu"
 ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 
-ENV SUPERCRONIC_VERSION "0.2.29"
+ENV SUPERCRONIC_VERSION "0.2.30"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV NETBOX_INITIALIZERS_VERSION "ebf1f76"
+ENV NETBOX_INITIALIZERS_VERSION "50d077d"
 
-ENV YQ_VERSION "4.44.1"
+ENV YQ_VERSION "4.44.2"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
@@ -54,12 +54,18 @@ ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 ADD netbox/patch/* /tmp/netbox-patches/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
+    mv /etc/apt/sources.list.d/unit.list /tmp/ && \
+      apt-get -q update && \
+      apt-get install -q -y --no-install-recommends gpg && \
+      curl -s https://nginx.org/keys/nginx_signing.key | gpg --dearmor > /usr/share/keyrings/nginx-keyring.gpg && \
+      mv /tmp/unit.list /etc/apt/sources.list.d/unit.list && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install -q -y --no-install-recommends \
       gcc \
       file \
       git \
+      gpg \
       jq \
       libmagic-dev \
       libmagic1 \
@@ -87,7 +93,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev && \
+    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
       apt-get -q -y --purge autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \

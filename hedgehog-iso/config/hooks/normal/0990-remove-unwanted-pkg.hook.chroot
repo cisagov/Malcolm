@@ -16,6 +16,7 @@ rm -rf /var/spool/ccache
 apt-get -y --purge remove \
   bluez-firmware \
   cracklib-runtime \
+  firmware-libertas \
   firmware-netronome \
   firmware-nvidia* \
   firmware-qcom-soc \
@@ -36,7 +37,7 @@ apt-get -y --purge remove \
   xdg-user-dirs \
   yelp || true
 
-apt-get -y autoremove
+apt-get -y --purge autoremove
 apt-get clean
 
 # hold packages we don't want to update with an apt-get upgrade

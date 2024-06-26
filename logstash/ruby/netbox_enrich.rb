@@ -11,7 +11,7 @@ def register(
   require 'fuzzystringmatch'
   require 'ipaddr'
   require 'json'
-  require 'lru_redux'
+  require 'lru_reredux'
   require 'psych'
   require 'stringex_lite'
 
@@ -31,7 +31,14 @@ def register(
   #   valid values are: ip_device, ip_prefix
   @lookup_type = params.fetch("lookup_type", "").to_sym
 
-  # site value to include in queries for enrichment lookups, either specified directly or read from ENV
+  # field containing site ID (or name) to use in queries for enrichment lookups and autopopulation
+  @lookup_site_id = params["lookup_site_id"]
+  if !@lookup_site_id.nil? && @lookup_site_id.empty?
+    @lookup_site_id = nil
+  end
+
+  # fallback/default site value to use in queries for enrichment lookups and autopopulation,
+  #   either specified directly or read from ENV
   @lookup_site = params["lookup_site"]
   _lookup_site_env = params["lookup_site_env"]
   if @lookup_site.nil? && !_lookup_site_env.nil?
@@ -100,7 +107,8 @@ def register(
   if _debug_str.nil? && !_debug_env.nil?
     _debug_str = ENV[_debug_env]
   end
-  @debug = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase)
+  @debug_verbose = ['verbose', 'v', 'extra'].include?(_debug_str.to_s.downcase)
+  @debug = (@debug_verbose || [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase))
 
   # connection URL for netbox
   @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
@@ -114,8 +122,10 @@ def register(
     @netbox_token = ENV[_netbox_token_env]
   end
 
-  # hash of lookup types (from @lookup_type), each of which contains the respective looked-up values
-  @cache_hash = LruRedux::ThreadSafeCache.new(params.fetch("lookup_cache_size", 512))
+  # hash of hashes, where key = site ID and value = hash of lookup types (from @lookup_type),
+  #   each of which contains the respective looked-up values
+  @site_lookup_types_hash = LruReredux::ThreadSafeCache.new(128, true)
+  @lookup_cache_size = params.fetch("lookup_cache_size", 512)
 
   # these are used for autopopulation only, not lookup/enrichment
 
@@ -221,13 +231,16 @@ def register(
   @autopopulate_create_prefix = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_prefix_str.to_s.downcase)
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
-  @manuf_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048), @cache_ttl)
+  @manuf_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048), @cache_ttl, true)
 
   # case-insensitive hash of role names to IDs
-  @role_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("role_cache_size", 256), @cache_ttl)
+  @role_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("role_cache_size", 256), @cache_ttl, true)
 
-  # case-insensitive hash of site names to IDs
-  @site_hash = LruRedux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl)
+  # case-insensitive hash of site names to site IDs
+  @site_name_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl, true)
+
+  # hash of site IDs to site objects
+  @site_id_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl, true)
 
   # end of autopopulation arguments
 
@@ -281,6 +294,23 @@ def filter(
     return [event]
   end
 
+  # site *must* be specified from the VERY TOP, either explicitly by ID (or name) in lookup_site_id
+  #   or via the fallback @lookup_site value. If we can't get (or create) the site, we can't determine which
+  #   hashes to look up the _key by @lookup_type in, nor where to autopopulate, etc.
+  _lookup_site_id_str = @lookup_site_id.nil? ? nil : event.get("#{@lookup_site_id}").to_s
+  _lookup_site_name_str =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
+  _lookup_site_obj = lookup_or_create_site(_lookup_site_id_str, _lookup_site_name_str, nil)
+  if _lookup_site_obj.is_a?(Hash) && ((_lookup_site_id = _lookup_site_obj.fetch(:id, 0).to_i) > 0)
+    _site_lookups_hash = @site_lookup_types_hash.getset(_lookup_site_id){ LruReredux::ThreadSafeCache.new(@lookup_cache_size, true) }
+    _lookup_hash = _site_lookups_hash.getset(@lookup_type){ LruReredux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl, true) }
+    puts "netbox_enrich.filter: found site (#{_lookup_site_id_str}, #{_lookup_site_name_str}): #{JSON.generate(_lookup_site_obj)}" if @debug_verbose
+  else
+    puts "netbox_enrich.filter: unable to lookup site (#{_lookup_site_id_str}, #{_lookup_site_name_str})" if @debug
+    return [event]
+  end
+
+  _result_set = false
+
   # _key might be an array of IP addresses, but we're only going to set the first _result into @target.
   #    this is still useful, though as autopopulation may happen for multiple IPs even if we only
   #    store the result of the first one found
@@ -289,14 +319,17 @@ def filter(
     _newKey.push(_key) unless _key.nil?
     _key = _newKey
   end
-  _result_set = false
 
   _key.each do |ip_key|
 
-    _lookup_hash = @cache_hash.getset(@lookup_type){ LruRedux::TTL::ThreadSafeCache.new(@cache_size, @cache_ttl) }
-    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key) }.dup
+    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id) }.dup
+    if !_result.nil? && !_result.empty?
 
-    if !_result.nil?
+      puts('netbox_enrich.filter(%{lookup_type}: %{lookup_key} @ %{site}) success: %{result}' % {
+            lookup_type: @lookup_type,
+            lookup_key: ip_key,
+            site: _lookup_site_id,
+            result: JSON.generate(_result) }) if @debug_verbose
 
       # we've done a lookup and got (or autopopulated) our answer, however, if this is a device lookup and
       #   either the hostname-unknown or manufacturer-unknown is set, we should see if we can update it
@@ -325,9 +358,10 @@ def filter(
           # the manufacturer-unknown tag is set, but we appear to have an OUI or MAC address
           #   from the event. we need to update the record in netbox (determine the manufacturer
           #   from this value and remove the tag) and in the result
-          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :previous_result=>_result)
-          puts('filter tried to patch %{name} for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
+          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id, :previous_result=>_result)
+          puts('filter tried to patch %{name} (site %{site}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
                 name: ip_key,
+                site: _lookup_site_id,
                 tags: _tags.map{ |hash| hash[:slug] }.join('|'),
                 host: _autopopulate_hostname,
                 mac: _autopopulate_mac,
@@ -347,11 +381,15 @@ def filter(
           _result[:device_type] = [ @virtual_machine_device_type_name ]
         end
       end
+    else
+      puts "netbox_enrich.filter(#{@lookup_type}: #{ip_key} @ #{_lookup_site_id}) failed" if @debug_verbose
     end
+
     unless _result_set || _result.nil? || _result.empty? || @target.nil? || @target.empty?
       event.set("#{@target}", _result)
       _result_set = true
     end
+
   end # _key.each do |ip_key|
 
   [event]
@@ -448,20 +486,49 @@ def clean_manuf_string(
     new_val
 end
 
+def shorten_string(
+  val
+)
+  if val.length > 64
+    "#{val[0, 30]}...#{val[-30, 30]}"
+  else
+    val
+  end
+end
+
+def netbox_connection()
+  Faraday.new(@netbox_url) do |conn|
+    conn.request :authorization, 'Token', @netbox_token
+    conn.request :url_encoded
+    conn.response :json, :parser_options => { :symbolize_names => true }
+  end
+end
+
 def lookup_or_create_site(
+  site_id,
   site_name,
   nb
 )
-  if !site_name.to_s.empty?
-    @site_hash.getset(site_name) {
+  _result_site_obj = nil
+  _site_id_str = site_id.to_s
+  _site_name_str = site_name.to_s
+  _nb_to_use = nb
+
+  # if the ID was specified explicitly, use that first to look up the site
+  if (!_site_id_str.empty?) && (_site_id_str.scan(/\D/).empty?) && (_site_id_str.to_i > 0) then
+    _site_id_int = _site_id_str.to_i
+    _result_site_obj = @site_id_hash.getset(_site_id_int) {
       begin
         _site = nil
 
-        # look it up first
+        # this shouldn't be too often, once the hash gets populated
+        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+
+        # look it up by ID
         _query = { :offset => 0,
                    :limit => 1,
-                   :name => site_name }
-        if (_sites_response = nb.get('dcim/sites/', _query).body) &&
+                   :id => _site_id_int }
+        if (_sites_response = _nb_to_use.get('dcim/sites/', _query).body) &&
            _sites_response.is_a?(Hash) &&
            (_tmp_sites = _sites_response.fetch(:results, [])) &&
            (_tmp_sites.length() > 0)
@@ -469,30 +536,68 @@ def lookup_or_create_site(
            _site = _tmp_sites.first
         end
 
-        if _site.nil?
+      rescue Faraday::Error => e
+        # give up aka do nothing
+        puts "lookup_or_create_site (#{_site_id_str}): #{e.message}" if @debug
+      end
+      _site
+    }.dup
+  end
+
+  # if the site ID wasn't specified but the name was, either look up or create it by name
+  if _result_site_obj.nil? && (!_site_id_str.empty? || !_site_name_str.empty?) then
+    _site_name_key_str = (!_site_id_str.empty? && !_site_id_str.scan(/\D/).empty?) ? _site_id_str : _site_name_str
+    _result_site_id = @site_name_hash.getset(_site_name_key_str) {
+      begin
+        _site = nil
+        _site_id = 0
+
+        # this shouldn't be too often, once the hash gets populated
+        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+
+        # try to look it up by name
+        _query = { :offset => 0,
+                   :limit => 1,
+                   :name => _site_name_key_str }
+        if (_sites_response = _nb_to_use.get('dcim/sites/', _query).body) &&
+           _sites_response.is_a?(Hash) &&
+           (_tmp_sites = _sites_response.fetch(:results, [])) &&
+           (_tmp_sites.length() > 0)
+        then
+           _site = _tmp_sites.first
+        end
+
+        if _site.is_a?(Hash)
+          _site_id = _site.fetch(:id, 0)
+        elsif @autopopulate
           # the device site is not found, create it
-          _site_data = { :name => site_name,
-                         :slug => site_name.to_url,
+          _site_data = { :name => _site_name_key_str,
+                         :slug => _site_name_key_str.to_url,
                          :status => "active" }
-          if (_site_create_response = nb.post('dcim/sites/', _site_data.to_json, @nb_headers).body) &&
+          if (_site_create_response = _nb_to_use.post('dcim/sites/', _site_data.to_json, @nb_headers).body) &&
              _site_create_response.is_a?(Hash) &&
              _site_create_response.has_key?(:id)
           then
-             _site = _site_create_response
+             _site_id = _site_create_response.fetch(:id, 0)
           elsif @debug
-            puts('lookup_or_create_site (%{name}): _site_create_response: %{result}' % { name: site_name, result: JSON.generate(_site_create_response) })
+            puts('lookup_or_create_site (%{name}): _site_create_response: %{result}' % { name: _site_name_key_str, result: JSON.generate(_site_create_response) })
           end
         end
 
       rescue Faraday::Error => e
         # give up aka do nothing
-        puts "lookup_or_create_site (#{site_name}): #{e.message}" if @debug
+        puts "lookup_or_create_site (#{_site_name_key_str}): #{e.message}" if @debug
       end
-      _site
-    }.dup
-  else
-    nil
+
+      _site_id
+    }
+    if (_result_site_id.to_i > 0) then
+      # we got name -> ID in site_name_hash, now recursively call to make sure ID -> obj ends up in @site_id_hash
+      _result_site_obj = lookup_or_create_site(_result_site_id, '', _nb_to_use)
+    end
   end
+
+  _result_site_obj
 end
 
 def lookup_manuf(
@@ -661,7 +766,7 @@ end # def lookup_or_create_manuf_and_dtype
 
 def lookup_prefixes(
   ip_str,
-  lookup_site,
+  site_id,
   nb
 )
   prefixes = Array.new
@@ -669,7 +774,7 @@ def lookup_prefixes(
   _query = { :contains => ip_str,
              :offset => 0,
              :limit => @page_size }
-  _query[:site_n] = lookup_site unless lookup_site.nil? || lookup_site.empty?
+  _query[:site_id] = site_id if (site_id.is_a?(Integer) && (site_id > 0))
   begin
     while true do
       if (_prefixes_response = nb.get('ipam/prefixes/', _query).body) &&
@@ -699,7 +804,7 @@ def lookup_prefixes(
     end
   rescue Faraday::Error => e
     # give up aka do nothing
-    puts "lookup_prefixes (#{ip_str}): #{e.message}" if @debug
+    puts "lookup_prefixes (#{ip_str}, #{site_id}): #{e.message}" if @debug
   end
 
   prefixes
@@ -754,7 +859,7 @@ end
 
 def lookup_devices(
   ip_str,
-  lookup_site,
+  site_id,
   lookup_service_port,
   url_base,
   url_suffix,
@@ -766,6 +871,7 @@ def lookup_devices(
              :limit => @page_size }
   begin
     while true do
+      # query all matching IP addresses, but only return devices where the site matches
       if (_ip_addresses_response = nb.get('ipam/ip-addresses/', _query).body) &&
          _ip_addresses_response.is_a?(Hash)
       then
@@ -780,9 +886,21 @@ def lookup_devices(
             _device = _is_device ? _device_obj : _virtualized_obj
             # if we can, follow the :assigned_object's "full" device URL to get more information
             _device = (_device.has_key?(:url) && (_full_device = nb.get(_device[:url].delete_prefix(url_base).delete_prefix(url_suffix).delete_prefix("/")).body)) ? _full_device : _device
-            _device_id = _device.fetch(:id, nil)
-            _device_site = ((_site = _device.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil)
-            next unless (_device_site.to_s.downcase == lookup_site.to_s.downcase) || lookup_site.nil? || lookup_site.empty? || _device_site.nil? || _device_site.empty?
+            _device_site_obj = _device.fetch(:site, nil)
+            if ((_device_site_obj&.fetch(:id, 0)).to_i == site_id.to_i)
+              _device_id = _device.fetch(:id, nil)
+              puts('lookup_devices(%{lookup_key} @ %{site}) candidate %{device_id} match: %{device}' % {
+                    lookup_key: ip_str,
+                    site: site_id,
+                    device_id: _device_id,
+                    device: JSON.generate(_device) }) if @debug_verbose
+            else
+              puts('lookup_devices(%{lookup_key} @ %{site}) candidate mismatch: %{device}' % {
+                    lookup_key: ip_str,
+                    site: site_id,
+                    device: JSON.generate(_device) }) if @debug_verbose
+              next
+            end
             # look up service if requested (based on device/vm found and service port)
             if (lookup_service_port > 0)
               _services = Array.new
@@ -808,7 +926,7 @@ def lookup_devices(
                           :url => _device.fetch(:url, nil),
                           :tags => _device.fetch(:tags, nil),
                           :service => _device.fetch(:service, []).map {|s| s.fetch(:name, s.fetch(:display, nil)) },
-                          :site => _device_site,
+                          :site => _device_site_obj&.fetch(:name, _device_site_obj&.fetch(:display, nil)),
                           :role => ((_role = _device.fetch(:role, nil)) && _role&.has_key?(:name)) ? _role[:name] : _role&.fetch(:display, nil),
                           :cluster => ((_cluster = _device.fetch(:cluster, nil)) && _cluster&.has_key?(:name)) ? _cluster[:name] : _cluster&.fetch(:display, nil),
                           :device_type => ((_dtype = _device.fetch(:device_type, nil)) && _dtype&.has_key?(:name)) ? _dtype[:name] : _dtype&.fetch(:display, nil),
@@ -825,16 +943,16 @@ def lookup_devices(
     end # while true
   rescue Faraday::Error => e
     # give up aka do nothing
-    puts "lookup_devices (#{ip_str}, #{lookup_site}): #{e.message}" if @debug
+    puts "lookup_devices (#{ip_str}, #{site_id}): #{e.message}" if @debug
   end
   _devices
 end
 
 def autopopulate_devices(
   ip_str,
+  site_id,
   autopopulate_mac,
   autopopulate_oui,
-  autopopulate_default_site_name,
   autopopulate_default_role_name,
   autopopulate_default_dtype,
   autopopulate_default_manuf,
@@ -846,7 +964,6 @@ def autopopulate_devices(
   _autopopulate_device = nil
   _autopopulate_role = nil
   _autopopulate_oui = autopopulate_oui
-  _autopopulate_site = nil
   _autopopulate_tags = [ @device_tag_autopopulated ]
   _autopopulate_tags << @device_tag_hostname_unknown if autopopulate_hostname.to_s.empty?
 
@@ -857,8 +974,7 @@ def autopopulate_devices(
     _autopopulate_oui = mac_to_oui_lookup(autopopulate_mac)
   end
 
-  # make sure the site, role, manufacturer and device type exist
-  _autopopulate_site = lookup_or_create_site(autopopulate_default_site_name, nb)
+  # make sure the role, manufacturer and device type exist
   _autopopulate_role = lookup_or_create_role(autopopulate_default_role_name, nb)
   _autopopulate_dtype,
   _autopopulate_manuf = lookup_or_create_manuf_and_dtype(_autopopulate_oui,
@@ -866,17 +982,15 @@ def autopopulate_devices(
                                                          autopopulate_default_dtype,
                                                          nb)
 
-  # we should have found or created the autopopulate role and site
+  # we should have found or created the autopopulate role
   begin
-    if _autopopulate_site&.fetch(:id, nil)&.nonzero? &&
-       _autopopulate_role&.fetch(:id, nil)&.nonzero?
-    then
+    if _autopopulate_role&.fetch(:id, nil)&.nonzero?
 
       if _autopopulate_manuf&.fetch(:vm, false)
         # a virtual machine
-        _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
+        _device_name = shorten_string(autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname)
         _device_data = { :name => _device_name,
-                         :site => _autopopulate_site[:id],
+                         :site => site_id,
                          :tags => _autopopulate_tags,
                          :status => autopopulate_default_status }
         if (_device_create_response = nb.post('virtualization/virtual-machines/', _device_data.to_json, @nb_headers).body) &&
@@ -885,7 +999,7 @@ def autopopulate_devices(
         then
            _autopopulate_device = _device_create_response
         elsif @debug
-          puts('autopopulate_devices (VM: %{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
+          puts('autopopulate_devices (VM: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: site_id, result: JSON.generate(_device_create_response) })
         end
 
       else
@@ -902,11 +1016,11 @@ def autopopulate_devices(
           end
 
           # create the device
-          _device_name = autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname
+          _device_name = shorten_string(autopopulate_hostname.to_s.empty? ? "#{_autopopulate_manuf[:name]} @ #{ip_str}" : autopopulate_hostname)
           _device_data = { :name => _device_name,
                            :device_type => _autopopulate_dtype[:id],
                            :role => _autopopulate_role[:id],
-                           :site => _autopopulate_site[:id],
+                           :site => site_id,
                            :tags => _autopopulate_tags,
                            :status => autopopulate_default_status }
           if (_device_create_response = nb.post('dcim/devices/', _device_data.to_json, @nb_headers).body) &&
@@ -915,7 +1029,7 @@ def autopopulate_devices(
           then
              _autopopulate_device = _device_create_response
           elsif @debug
-            puts('autopopulate_devices (%{name}): _device_create_response: %{result}' % { name: _device_name, result: JSON.generate(_device_create_response) })
+            puts('autopopulate_devices (device: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: site_id, result: JSON.generate(_device_create_response) })
           end
 
         else
@@ -927,27 +1041,25 @@ def autopopulate_devices(
       end # virtual machine vs. regular device
 
     else
-      # didn't figure out the site and/or role IDs, make sure we're not setting something half-populated
-      _autopopulate_site = nil
+      # didn't figure out role ID, make sure we're not setting something half-populated
       _autopopulate_role = nil
     end # site and role are valid
 
   rescue Faraday::Error => e
     # give up aka do nothing
-    puts "autopopulate_devices (#{ip_str}): #{e.message}" if @debug
+    puts "autopopulate_devices (#{ip_str}, #{site_id}): #{e.message}" if @debug
   end
 
   return _autopopulate_device,
          _autopopulate_role,
          _autopopulate_dtype,
          _autopopulate_oui,
-         _autopopulate_manuf,
-         _autopopulate_site
+         _autopopulate_manuf
 end
 
 def autopopulate_prefixes(
   ip_obj,
-  autopopulate_default_site,
+  site_id,
   autopopulate_default_status,
   nb
 )
@@ -962,11 +1074,10 @@ def autopopulate_prefixes(
     if !_new_prefix_name.to_s.include?('/')
       _new_prefix_name += '/' + _new_prefix_ip.prefix().to_s
     end
-    _autopopulate_site = lookup_or_create_site(autopopulate_default_site, nb)
     _prefix_post = { :prefix => _new_prefix_name,
                      :description => _new_prefix_name,
                      :tags => _autopopulate_tags,
-                     :site => _autopopulate_site&.fetch(:id, nil),
+                     :site => site_id,
                      :status => autopopulate_default_status }
     begin
       _new_prefix_create_response = nb.post('ipam/prefixes/', _prefix_post.to_json, @nb_headers).body
@@ -982,11 +1093,15 @@ def autopopulate_prefixes(
                            :tags => _new_prefix_create_response.fetch(:tags, nil),
                            :details => @verbose ? _new_prefix_create_response : nil }
       elsif @debug
-        puts('autopopulate_prefixes: _new_prefix_create_response: %{result}' % { result: JSON.generate(_new_prefix_create_response) })
+        puts('autopopulate_prefixes (%{ip}, %{site}): _new_prefix_create_response: %{result}' % {
+          ip: ip_obj.to_s,
+          site: site_id,
+          result: JSON.generate(_new_prefix_create_response)
+        })
       end
     rescue Faraday::Error => e
       # give up aka do nothing
-      puts "autopopulate_prefixes (#{ip_obj.to_s}): #{e.message}" if @debug
+      puts "autopopulate_prefixes (#{ip_obj.to_s}, #{site_id}): #{e.message}" if @debug
     end
   end
   _prefix_data
@@ -1059,6 +1174,7 @@ end
 def netbox_lookup(
   event:,
   ip_key:,
+  site_id:,
   previous_result: nil
 )
   _lookup_result = nil
@@ -1066,17 +1182,13 @@ def netbox_lookup(
   _key_ip = IPAddr.new(ip_key) rescue nil
   if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
 
-    _nb = Faraday.new(@netbox_url) do |conn|
-      conn.request :authorization, 'Token', @netbox_token
-      conn.request :url_encoded
-      conn.response :json, :parser_options => { :symbolize_names => true }
-    end
+    _nb = netbox_connection()
 
+    _site_obj = lookup_or_create_site(site_id, '', _nb)
     _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
     _autopopulate_default_manuf = (@default_manuf.nil? || @default_manuf.empty?) ? "Unspecified" : @default_manuf
     _autopopulate_default_role = (@default_role.nil? || @default_role.empty?) ? "Unspecified" : @default_role
     _autopopulate_default_dtype = (@default_dtype.nil? || @default_dtype.empty?) ? "Unspecified" : @default_dtype
-    _autopopulate_default_site =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
     _autopopulate_hostname = event.get("#{@source_hostname}")
     _autopopulate_hostname = nil if _autopopulate_hostname.to_s.end_with?('.in-addr.arpa')
     _autopopulate_mac = event.get("#{@source_mac}")
@@ -1086,7 +1198,6 @@ def netbox_lookup(
     _autopopulate_role = nil
     _autopopulate_dtype = nil
     _autopopulate_manuf = nil
-    _autopopulate_site = nil
     _prefixes = nil
     _devices = nil
 
@@ -1101,7 +1212,7 @@ def netbox_lookup(
         # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
         # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
         # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-        _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
           # no results found, autopopulate enabled, private-space IP address...
@@ -1110,17 +1221,16 @@ def netbox_lookup(
           _autopopulate_role,
           _autopopulate_dtype,
           _autopopulate_oui,
-          _autopopulate_manuf,
-          _autopopulate_site = autopopulate_devices(ip_key,
-                                                    _autopopulate_mac,
-                                                    _autopopulate_oui,
-                                                    _autopopulate_default_site,
-                                                    _autopopulate_default_role,
-                                                    _autopopulate_default_dtype,
-                                                    _autopopulate_default_manuf,
-                                                    _autopopulate_hostname,
-                                                    @default_status,
-                                                    _nb)
+          _autopopulate_manuf = autopopulate_devices(ip_key,
+                                                     site_id,
+                                                     _autopopulate_mac,
+                                                     _autopopulate_oui,
+                                                     _autopopulate_default_role,
+                                                     _autopopulate_default_dtype,
+                                                     _autopopulate_default_manuf,
+                                                     _autopopulate_hostname,
+                                                     @default_status,
+                                                     _nb)
           if !_autopopulate_device.nil?
             # puts('5. %{key}: %{found}' % { key: autopopulate_oui, found: JSON.generate(_autopopulate_manuf) })
             # we created a device, so send it back out as the result for the event as well
@@ -1129,7 +1239,7 @@ def netbox_lookup(
                           :id => _autopopulate_device&.fetch(:id, nil),
                           :url => _autopopulate_device&.fetch(:url, nil),
                           :tags => _autopopulate_device&.fetch(:tags, nil),
-                          :site => _autopopulate_site&.fetch(:name, nil),
+                          :site => _site_obj&.fetch(:name, _site_obj&.fetch(:display, nil)),
                           :role => _autopopulate_role&.fetch(:name, nil),
                           :device_type => _autopopulate_dtype&.fetch(:name, nil),
                           :manufacturer => _autopopulate_manuf&.fetch(:name, nil),
@@ -1166,8 +1276,6 @@ def netbox_lookup(
           (_previous_device_id.length() == 1) &&
           (_previous_device_id = _previous_device_id.first)
         then
-          _previous_device_site = [previous_result.fetch(:site, nil)].flatten.uniq.first
-
           if !_autopopulate_hostname.to_s.empty? &&
              _tags&.any? {|tag| tag[:slug] == @device_tag_hostname_unknown[:slug]}
           then
@@ -1213,7 +1321,7 @@ def netbox_lookup(
 
             puts('netbox_lookup patching %{name} @ %{site} (%{id}, VM: %{wasvm}->%{isvm}) ("%{host}", "%{mac}", "%{oui}"): %{changes}' % {
                   name: ip_key,
-                  site: _previous_device_site,
+                  site: site_id,
                   id: _previous_device_id,
                   wasvm: _was_vm,
                   isvm: _is_vm,
@@ -1225,9 +1333,7 @@ def netbox_lookup(
             if _device_to_vm
               # you can't "convert" a device to a VM, so we have to create a new VM then delete the old device
               _vm_data = { :name => _patched_device_data.fetch(:name, [previous_result.fetch(:name, nil)])&.flatten&.uniq.first,
-                           :site => ((_previous_device_site_obj = lookup_or_create_site(_previous_device_site, _nb)) &&
-                                     _previous_device_site_obj.is_a?(Hash) &&
-                                     _previous_device_site_obj.has_key?(:id)) ? _previous_device_site_obj[:id] : { :slug => _previous_device_site.to_url },
+                           :site => site_id,
                            :tags => _tags,
                            :status => @default_status }
               if (_vm_create_response = _nb.post('virtualization/virtual-machines/', _vm_data.to_json, @nb_headers).body) &&
@@ -1240,11 +1346,10 @@ def netbox_lookup(
 
                 # now delete the old device entry
                 _old_device_delete_response = _nb.delete("dcim/devices/#{_previous_device_id}/")
-                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}): _old_device_delete_response: %{success}' % {
+                puts('netbox_lookup (%{name}: dev.%{oldid} -> vm.%{newid}) deletion failed' % {
                      name: _vm_data[:name],
                      oldid: _previous_device_id,
-                     newid: _vm_create_response[:id],
-                     success: _old_device_delete_response.success? }) if @debug
+                     newid: _vm_create_response[:id] }) if (@debug && !_old_device_delete_response.success?)
               elsif @debug
                 puts('netbox_lookup (%{name}): _vm_create_response: %{result}' % { name: _vm_data[:name], result: JSON.generate(_vm_create_response) })
               end
@@ -1258,13 +1363,13 @@ def netbox_lookup(
               then
                 _device_written = true
               elsif @debug
-                puts('netbox_lookup (%{name}): _patched_device_response: %{result}' % { name: _previous_device_id, result: JSON.generate(_patched_device_response) })
+                puts('netbox_lookup (%{prev_id}): _patched_device_response: %{result}' % { prev_id: _previous_device_id, result: JSON.generate(_patched_device_response) })
               end # _nb.patch succeeded
             end # _is_vm vs _was_vm check
 
             # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
             #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-            _devices = lookup_devices(ip_key, @lookup_site, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
+            _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
 
           end # check _patched_device_data, _device_to_vm
 
@@ -1284,11 +1389,11 @@ def netbox_lookup(
     if (@lookup_type == :ip_prefix) || !_autopopulate_device.nil?
     #################################################################################
       # retrieve the list of IP address prefixes containing the search key
-      _prefixes = lookup_prefixes(ip_key, @lookup_site, _nb)
+      _prefixes = lookup_prefixes(ip_key, site_id, _nb)
 
       if (_prefixes.nil? || _prefixes.empty?) && @autopopulate_create_prefix
         # we didn't find a prefix containing this private-space IPv4 address and auto-create is true
-        _prefix_info = autopopulate_prefixes(_key_ip, _autopopulate_default_site, @default_status, _nb)
+        _prefix_info = autopopulate_prefixes(_key_ip, site_id, @default_status, _nb)
         _prefixes = Array.new unless _prefixes.is_a?(Array)
         _prefixes << _prefix_info
       end # if auto-create prefix
@@ -1307,8 +1412,8 @@ def netbox_lookup(
     end # check if device was created and has ID
   end # IP address is private IP
 
-  # yield return value for cache_hash getset
-  _lookup_result
+  # yield return value for _lookup_hash getset
+  (!_lookup_result.nil? && !_lookup_result.empty?) ? _lookup_result : nil
 end
 
 ###############################################################################

@@ -25,11 +25,18 @@ trap cleanup EXIT
 
 mkdir -p "$SCRIPT_PATH/data"
 
+cp "$SCRIPT_PATH/filebeat.yml" "$TMP_CONFIG_FILE"
+
 if [[ -n "${MALCOLM_EXTRA_TAGS}" ]]; then
+  EXTRA_TAGS_ARRAY=()
   readarray -td '' EXTRA_TAGS_ARRAY < <(awk '{ gsub(/,/,"\0"); print; }' <<<"$MALCOLM_EXTRA_TAGS,"); unset 'EXTRA_TAGS_ARRAY[-1]';
-  yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" "$SCRIPT_PATH/filebeat.yml" > "$TMP_CONFIG_FILE"
-else
-  cp "$SCRIPT_PATH/filebeat.yml" "$TMP_CONFIG_FILE"
+  if [[ ${#EXTRA_TAGS_ARRAY[@]} -gt 0 ]]; then
+    yq -P eval "(.processors[] | select(has(\"add_tags\")).add_tags.tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "$TMP_CONFIG_FILE"
+  fi
+fi
+
+if [[ -n "${NETBOX_SITE}" ]]; then
+  yq -P eval ".processors |= (. // []) | .processors += [{\"add_fields\": {\"target\": \"netbox\", \"fields\": {\"site\": \"${NETBOX_SITE}\"}}}]" -i "$TMP_CONFIG_FILE"
 fi
 
 filebeat --path.home "$SCRIPT_PATH" --path.config "$SCRIPT_PATH" --path.data "$SCRIPT_PATH/data" -c "$TMP_CONFIG_FILE" -e

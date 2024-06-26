@@ -127,6 +127,8 @@ class Constants:
     # Comma-separated list of tags for data forwarded to Malcolm via filebeat
     MALCOLM_EXTRA_TAGS = "MALCOLM_EXTRA_TAGS"
 
+    NETBOX_SITE = "NETBOX_SITE"
+
     MSG_CONFIG_MODE = 'Configuration Mode'
     MSG_CONFIG_MODE_CAPTURE = 'Configure Capture'
     MSG_CONFIG_MODE_FORWARD = 'Configure Forwarding'
@@ -135,7 +137,7 @@ class Constants:
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
     MSG_CONFIG_ARKIME_COMPRESSION = 'Specify Arkime PCAP compression mode'
     MSG_CONFIG_ARKIME_COMPRESSION_LEVEL = 'Specify Arkime PCAP {} compression level'
-    MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek log forwarding via {FILEBEAT}')
+    MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek and Suricata log forwarding via {FILEBEAT}')
     MSG_CONFIG_MISCBEAT = (f'{MISCBEAT}', f"Configure miscellaneous sensor metrics forwarding via {FILEBEAT}")
     MSG_CONFIG_TXRX = (f'{TX_RX_SECURE}', f'Receive client SSL files for {FILEBEAT} from Malcolm')
     MSG_CONFIG_ACL = (f'{ACL_CONFIGURE}', f'Configure ACL for artifact reachback from Malcolm')
@@ -1020,9 +1022,10 @@ def main():
                         log_path = None
                         logstash_host = None
                         logstash_port = None
+                        netbox_site = None
 
                         if fwd_mode == Constants.FILEBEAT:
-                            # zeek log dir is filebeat only
+                            # zeek/suricata log dir is filebeat only
                             code, values = d.form(
                                 Constants.MSG_CONFIG_GENERIC.format(fwd_mode),
                                 [
@@ -1080,6 +1083,14 @@ def main():
                                 logstash_port = values[1]
 
                         if not forwarder_config_error:
+                            # netbox site
+                            code, netbox_site = d.inputbox(
+                                "NetBox site name", init=capture_config_dict[Constants.NETBOX_SITE]
+                            )
+                            if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+                                raise CancelledError
+
+                        if not forwarder_config_error:
                             # store inputted items into the configuration dictionary for the forwarder
 
                             if log_path is not None:
@@ -1101,6 +1112,8 @@ def main():
 
                             if logstash_port is not None:
                                 forwarder_dict[Constants.BEAT_LS_PORT] = logstash_port
+
+                            forwarder_dict[Constants.NETBOX_SITE] = netbox_site.strip()
 
                             break
 
@@ -1243,15 +1256,22 @@ def main():
                         # keystore list failed
                         raise Exception(Constants.MSG_ERROR_KEYSTORE.format(fwd_mode, "\n".join(add_results)))
 
-                    # also write the TLS files back out to the config file
+                    # also write some values back out to the config file
                     rewrite_dict_to_file(
                         {
                             k: v
                             for (k, v) in forwarder_dict.items()
-                            if k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))
+                            if ((k.startswith(Constants.BEAT_LS_SSL_PREFIX) and os.path.isfile(str(v))))
                         },
                         Constants.SENSOR_CAPTURE_CONFIG,
                     )
+                    if Constants.NETBOX_SITE in forwarder_dict:
+                        rewrite_dict_to_file(
+                            {
+                                Constants.NETBOX_SITE: '"' + forwarder_dict[Constants.NETBOX_SITE] + '"',
+                            },
+                            Constants.SENSOR_CAPTURE_CONFIG,
+                        )
 
                 elif fwd_mode == Constants.ACL_CONFIGURE:
 

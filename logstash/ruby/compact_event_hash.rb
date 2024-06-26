@@ -15,11 +15,11 @@ def compact(h)
       c = compact(v)
       result[k] = c unless c.empty?
     when String
-      result[k] = v unless (v.empty? || (v == "-") || (v == "(empty)"))
+      result[k] = v unless (v.empty? || (v == "-") || (v == "?") || (v == "(empty)") || (v == "(none)") || (v == "(null)") || (v == "NULL") || (v == "unset") || (v == "Nul") || (@discard_zeroes && ((v == "0") || (v == "0x0"))))
     when Numeric
       result[k] = v unless (@discard_zeroes && v.zero?)
     when Array
-      c = v.delete_if{|e| e.nil? || (e.is_a?(String) && (e.empty? || (e == "-") || (e == "(empty)")))}
+      c = v.delete_if{|e| e.nil? || (e.is_a?(String) && (e.empty? || (e == "-") || (e == "?") || (e == "(empty)") || (e == "(none)") || (e == "(null)") || (e == "NULL") || (e == "unset") || (e == "Nul") || (@discard_zeroes && ((e == "0") || (e == "0x0")))))}
       result[k] = c unless c.empty?
     when NilClass
       # nothing
