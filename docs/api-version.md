@@ -49,6 +49,6 @@ Returns version information about Malcolm and version/[health](https://opensearc
     }
   },
   "sha": "dad18b1",
-  "version": "24.06.0"
+  "version": "24.07.0"
 }
 ```
