@@ -144,13 +144,25 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
         vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
-                volSplit = vol.split(':')
-                if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
-                    if localBasePath and not os.path.isabs(volSplit[0]):
-                        localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                if (
+                    isinstance(vol, dict)
+                    and ('source' in vol)
+                    and ('target' in vol)
+                    and (vol['target'] == containerPath)
+                ):
+                    if localBasePath and not os.path.isabs(vol['source']):
+                        localPath = os.path.realpath(os.path.join(localBasePath, vol['source']))
                     else:
-                        localPath = volSplit[0]
+                        localPath = vol['source']
                     break
+                elif isinstance(vol, str):
+                    volSplit = vol.split(':')
+                    if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
+                        if localBasePath and not os.path.isabs(volSplit[0]):
+                            localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                        else:
+                            localPath = volSplit[0]
+                        break
 
     return localPath
 
