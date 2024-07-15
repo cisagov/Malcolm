@@ -106,7 +106,7 @@ function InstallPythonPackages {
     $SUDO_CMD /usr/bin/python3.8 -m pip install $USERFLAG -U \
         python-dotenv \
         pythondialog \
-        pyyaml \
+        ruamel.yaml \
         requests \
         urllib3==1.26.19
 }

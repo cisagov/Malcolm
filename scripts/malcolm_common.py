@@ -645,7 +645,7 @@ def RequestsDynamic(debug=False, forceInteraction=False):
 
 
 def YAMLDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
+    return DoDynamicImport("ruamel.yaml", "ruamel.yaml", interactive=forceInteraction, debug=debug)
 
 
 def KubernetesDynamic(verifySsl=False, debug=False, forceInteraction=False):
@@ -685,7 +685,7 @@ def DetermineYamlFileFormat(inputFileName):
     if yamlImported := YAMLDynamic():
         try:
             with open(inputFileName, 'r') as cf:
-                orchestrationYaml = yamlImported.safe_load(cf)
+                orchestrationYaml = yamlImported.YAML(typ='safe', pure=True).load(cf)
 
             if isinstance(orchestrationYaml, dict):
                 if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):

@@ -2364,7 +2364,7 @@ def main():
 
             # load compose file YAML (used to find some volume bind mount locations)
             with open(args.composeFile, 'r') as cf:
-                dockerComposeYaml = yamlImported.safe_load(cf)
+                dockerComposeYaml = yamlImported.YAML(typ='safe', pure=True).load(cf)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
             kubeImported = KubernetesDynamic(debug=args.debug)

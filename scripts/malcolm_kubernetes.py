@@ -518,7 +518,9 @@ def PodExec(
 
                 err = None
                 if yamlImported := YAMLDynamic():
-                    err = yamlImported.safe_load(resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL))
+                    err = yamlImported.YAML(typ='safe', pure=True).load(
+                        resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL)
+                    )
 
                 if not err:
                     err = {}

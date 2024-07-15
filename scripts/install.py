@@ -2634,7 +2634,7 @@ class LinuxInstaller(Installer):
                     'python3-dialog',
                     'python3-dotenv',
                     'python3-requests',
-                    'python3-yaml',
+                    'python3-ruamel.yaml',
                     'xz-utils',
                 ]
             )
@@ -2647,7 +2647,7 @@ class LinuxInstaller(Installer):
                     'python3-dialog',
                     'python3-dotenv',
                     'python3-requests',
-                    'python3-yaml',
+                    'python3-ruamel.yaml',
                     'xz',
                 ]
             )
