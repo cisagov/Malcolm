@@ -63,6 +63,15 @@ PLATFORM_LINUX_DEBIAN = 'debian'
 PLATFORM_LINUX_FEDORA = 'fedora'
 PLATFORM_LINUX_UBUNTU = 'ubuntu'
 
+###################################################################################################
+YAML_VERSION = (1, 1)
+
+
+class NullRepresenter:
+    def __call__(self, repr, data):
+        ret_val = repr.represent_scalar(u'tag:yaml.org,2002:null', u'')
+        return ret_val
+
 
 def DialogInit():
     global Dialog
@@ -98,6 +107,12 @@ BoundPath = namedtuple(
     rename=False,
 )
 
+BoundPathReplacer = namedtuple(
+    "BoundPathReplacer",
+    ["service", "container_dir", "host_dir"],
+    rename=False,
+)
+
 # URLS for figuring things out if something goes wrong
 DOCKER_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/install/')
 DOCKER_INSTALL_URLS[PLATFORM_WINDOWS] = [
@@ -129,6 +144,7 @@ OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | Orche
 
 ##################################################################################################
 def ReplaceBindMountLocation(line, location, linePrefix):
+    # TODO: switch to ruamel
     if os.path.isdir(location):
         volumeParts = line.strip().lstrip('-').lstrip().split(':')
         volumeParts[0] = location
@@ -697,6 +713,53 @@ def DetermineYamlFileFormat(inputFileName):
             eprint(f'Error deciphering {inputFileName}: {e}')
 
     return result
+
+
+###################################################################################################
+def LoadYaml(inputFileName):
+    result = None
+    if inputFileName and os.path.isfile(inputFileName):
+        if yamlImported := YAMLDynamic():
+            with open(inputFileName, 'r') as f:
+                inYaml = yamlImported.YAML(typ='rt')
+                inYaml.boolean_representation = ['false', 'true']
+                inYaml.emitter.alt_null = None
+                inYaml.preserve_quotes = True
+                inYaml.representer.ignore_aliases = lambda *args: True
+                inYaml.width = 4096
+                result = inYaml.load(f)
+    return result
+
+
+###################################################################################################
+def PopLine(fileName, count=1):
+    result = []
+    with open(fileName, 'r+') as f:
+        for i in range(0, count):
+            result.append(f.readline())
+        data = f.read()
+        f.seek(0)
+        f.write(data)
+        f.truncate()
+    return result if (len(result) != 1) else result[0]
+
+
+###################################################################################################
+def DumpYaml(data, outputFileName):
+    if data is not None:
+        if yamlImported := YAMLDynamic():
+            with open(outputFileName, 'w') as outfile:
+                outYaml = yamlImported.YAML(typ='rt')
+                outYaml.boolean_representation = ['false', 'true']
+                outYaml.preserve_quotes = False
+                outYaml.representer.ignore_aliases = lambda *args: True
+                outYaml.representer.add_representer(type(None), NullRepresenter())
+                outYaml.version = YAML_VERSION
+                outYaml.width = 4096
+                outYaml.dump(data, outfile)
+            # ruamel puts the YAML version header (2 lines) at the top, which docker-compose
+            #   doesn't like, so we need to remove it
+            PopLine(outputFileName, 2)
 
 
 ###################################################################################################
