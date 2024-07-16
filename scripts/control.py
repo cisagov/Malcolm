@@ -225,25 +225,20 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         localKeystore = None
         localKeystoreDir = None
         localKeystorePreExists = False
+        composeFileKeystore = f"/usr/share/{service}/config/persist/{service}.keystore"
         volumeKeystore = f"/usr/share/{service}/config/{service}.keystore"
         volumeKeystoreDir = os.path.dirname(volumeKeystore)
 
         try:
-            composeFileLines = list()
-            with open(args.composeFile, 'r') as f:
-                allLines = f.readlines()
-                composeFileLines = [
-                    x for x in allLines if re.search(fr'-.*?{service}.keystore\s*:.*{service}.keystore', x)
-                ]
-
-            if (len(composeFileLines) == 1) and (len(composeFileLines[0]) > 0):
-                matches = re.search(
-                    fr'-\s*(?P<localKeystore>.*?{service}.keystore)\s*:\s*.*?{service}.keystore',
-                    composeFileLines[0],
-                )
-                if matches:
-                    localKeystore = os.path.realpath(matches.group('localKeystore'))
-                    localKeystoreDir = os.path.dirname(localKeystore)
+            localKeystore = LocalPathForContainerBindMount(
+                service,
+                dockerComposeYaml,
+                composeFileKeystore,
+                MalcolmPath,
+            )
+            if localKeystore:
+                localKeystore = os.path.realpath(localKeystore)
+                localKeystoreDir = os.path.dirname(localKeystore)
 
             if (localKeystore is not None) and os.path.isdir(localKeystoreDir):
                 localKeystorePreExists = os.path.isfile(localKeystore)
