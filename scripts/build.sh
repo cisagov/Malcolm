@@ -60,6 +60,10 @@ function dirsize_in_image() {
   echo $(($KBYTES * 1024))
 }
 
+function _cleanup {
+  [[ -f "$CONFIG_FILE_TMP" ]] && rm -f "$CONFIG_FILE_TMP"
+}
+
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
@@ -70,6 +74,7 @@ if [[ -n "$CONFIG_FILE_TMP" ]] && [[ -n "$IMAGE_ARCH_SUFFIX" ]]; then
   sed -i "/^[[:space:]]*image:/ s/\$/$IMAGE_ARCH_SUFFIX/" "$CONFIG_FILE_TMP"
   CONFIG_FILE="$CONFIG_FILE_TMP"
 fi
+trap "_cleanup" EXIT
 
 # make sure docker is installed, at this point it's required
 if ! $DOCKER_BIN info >/dev/null 2>&1 ; then
@@ -155,5 +160,3 @@ for i in ${DIRS_IN_IMAGES[@]}; do
   MINSIZE="$(echo "$i" | cut -d';' -f3)"
   (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
 done
-
-[[ -f "$CONFIG_FILE_TMP" ]] && rm -f "$CONFIG_FILE_TMP"
