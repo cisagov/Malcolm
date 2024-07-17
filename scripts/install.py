@@ -2214,127 +2214,93 @@ class Installer(object):
                                 "zeek-live", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
                             ),
                         )
+                        # TODO
 
-                        # filebeat
-                        if 'filebeat' in data['services']:
-                            # TODO
-                            pass
-                            # if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                            #     # set bind IP based on whether it should be externally exposed or not
-                            #     line = re.sub(
-                            #         r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            #         fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
-                            #         line,
-                            #     )
+                        # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
+                        # set bind IPs based on whether it should be externally exposed or not
+                        for service, portInfo in {
+                            'filebeat': (filebeatTcpOpen, 5045),
+                            'logstash': (logstashOpen, 5044),
+                            'upload': (sftpOpen, 8022),
+                        }.items():
+                            if service in data['services']:
+                                data['services'][service]['ports'] = [
+                                    f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[1]}"
+                                ]
 
-                        # logstash
-                        if 'logstash' in data['services']:
-                            # TODO
-                            pass
-                            # if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                            #     # set bind IP based on whether it should be externally exposed or not
-                            #     line = re.sub(
-                            #         r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            #         fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
-                            #         line,
-                            #     )
-
-                        # upload
-                        if 'upload' in data['services']:
-                            # TODO
-                            pass
-                            # if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                            #     # set bind IP based on whether it should be externally exposed or not
-                            #     line = re.sub(
-                            #         r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            #         fr"\g<1>{'0.0.0.0' if sftpOpen else '127.0.0.1'}:\g<3>",
-                            #         line,
-                            #     )
-
-                        # nginx-proxy
+                        # nginx-proxy has got a lot going on
                         if 'nginx-proxy' in data['services']:
-                            # TODO
-                            pass
-                            #                 if re.match(r'^\s*test\s*:', line):
-                            #                     # set nginx-proxy health check based on whether they're using HTTPS or not
-                            #                     line = re.sub(
-                            #                         r'https?://localhost:\d+',
-                            #                         fr"{'https' if nginxSSL else 'http'}://localhost:443",
-                            #                         line,
-                            #                     )
 
-                            #                 elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                            #                     # set bind IPs and ports based on whether it should be externally exposed or not
-                            #                     line = re.sub(
-                            #                         r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                            #                         fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
-                            #                         line,
-                            #                     )
-                            #                     if nginxSSL is False:
-                            #                         if ':443:' in line:
-                            #                             line = line.replace(':443:', ':80:')
-                            #                         if ':9200:' in line:
-                            #                             line = line.replace(':9200:', ':9201:')
-                            #                     else:
-                            #                         if ':80:' in line:
-                            #                             line = line.replace(':80:', ':443:')
-                            #                         if ':9201:' in line:
-                            #                             line = line.replace(':9201:', ':9200:')
+                            # set nginx-proxy health check based on whether they're using HTTPS or not
+                            data['services']['nginx-proxy']['test'] = [
+                                "CMD",
+                                "curl",
+                                "--insecure",
+                                "--silent",
+                                f"{'https' if nginxSSL else 'http'}://localhost:443",
+                            ]
 
-                            #                 elif 'traefik.' in line:
-                            #                     # enable/disable/configure traefik labels if applicable
+                            # set bind IPs and ports based on whether it should be externally exposed or not
+                            data['services']['nginx-proxy']['ports'] = [
+                                f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
+                            ]
+                            if opensearchOpen:
+                                data['services']['nginx-proxy']['ports'].append(
+                                    f"{'0.0.0.0:9200' if nginxSSL else '127.0.0.1:9201'}:9200"
+                                )
 
-                            #                     # Traefik enabled vs. disabled
-                            #                     if 'traefik.enable' in line:
-                            #                         line = re.sub(
-                            #                             r'(#\s*)?(traefik\.enable\s*:\s*)(\S+)',
-                            #                             fr"\g<2>{TrueOrFalseQuote(behindReverseProxy and traefikLabels)}",
-                            #                             line,
-                            #                         )
-                            #                     else:
-                            #                         line = re.sub(
-                            #                             r'(#\s*)?(traefik\..*)',
-                            #                             fr"{'' if traefikLabels else '# '}\g<2>",
-                            #                             line,
-                            #                         )
+                            # enable/disable/configure traefik labels if applicable
+                            for label in (
+                                'traefik.http.routers.osmalcolm.rule',
+                                'traefik.http.routers.osmalcolm.entrypoints',
+                                'traefik.http.routers.osmalcolm.tls.certresolver',
+                                'traefik.http.routers.osmalcolm.service',
+                                'traefik.http.services.osmalcolm.loadbalancer.server.port',
+                                'traefik.http.routers.malcolm.rule',
+                                'traefik.http.routers.malcolm.entrypoints',
+                                'traefik.http.routers.malcolm.tls.certresolver',
+                                'traefik.http.routers.malcolm.service',
+                                'traefik.http.services.malcolm.loadbalancer.server.port',
+                            ):
+                                data['services']['nginx-proxy']['labels'].pop(label, None)
 
-                            #                     if 'traefik.http.' in line and '.osmalcolm.' in line:
-                            #                         # OpenSearch router enabled/disabled/host value
-                            #                         line = re.sub(
-                            #                             r'(#\s*)?(traefik\..*)',
-                            #                             fr"{'' if behindReverseProxy and traefikLabels and opensearchOpen else '# '}\g<2>",
-                            #                             line,
-                            #                         )
-                            #                         if ('.rule') in line:
-                            #                             line = re.sub(
-                            #                                 r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
-                            #                                 fr"\g<1>'Host(`{traefikOpenSearchHost}`)'",
-                            #                                 line,
-                            #                             )
+                            # Traefik enabled vs. disabled
+                            data['services']['nginx-proxy']['labels']['traefik.enable'] = bool(behindReverseProxy)
 
-                            #                     if 'traefik.http.routers.malcolm.rule' in line:
-                            #                         # Malcolm interface router host value
-                            #                         line = re.sub(
-                            #                             r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
-                            #                             fr"\g<1>'Host(`{traefikHost}`)'",
-                            #                             line,
-                            #                         )
-
-                            #                     elif 'traefik.http.routers.' in line and '.entrypoints' in line:
-                            #                         # Malcolm routers entrypoints
-                            #                         line = re.sub(
-                            #                             r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                            #                             fr"\g<1>'{traefikEntrypoint}'",
-                            #                             line,
-                            #                         )
-
-                            #                     elif 'traefik.http.routers.' in line and '.certresolver' in line:
-                            #                         # Malcolm routers resolvers
-                            #                         line = re.sub(
-                            #                             r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                            #                             fr"\g<1>'{traefikResolver}'",
-                            #                             line,
-                            #                         )
+                            if traefikLabels:
+                                # general router enabled/disabled/host/etc values
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.rule'
+                                ] = f'Host(`{traefikHost}`)'
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.entrypoints'
+                                ] = traefikEntrypoint
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.tls.certresolver'
+                                ] = traefikResolver
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.service'
+                                ] = 'malcolm'
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.services.malcolm.loadbalancer.server.port'
+                                ] = '443'
+                                if opensearchOpen:
+                                    # OpenSearch router enabled/disabled/host/etc values
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.rule'
+                                    ] = f'Host(`{traefikOpenSearchHost}`)'
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.entrypoints'
+                                    ] = traefikEntrypoint
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.tls.certresolver'
+                                    ] = traefikResolver
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.service'
+                                    ] = 'osmalcolm'
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.services.osmalcolm.loadbalancer.server.port'
+                                    ] = '9200'
 
                     # re-write the network definition from scratch
                     if 'networks' in data:
