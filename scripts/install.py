@@ -61,7 +61,6 @@ from malcolm_common import (
     PROFILE_MALCOLM,
     PROFILE_HEDGEHOG,
     PROFILE_KEY,
-    ReplaceBindMountLocation,
     RequestsDynamic,
     ScriptPath,
     UserInputDefaultsBehavior,
@@ -2214,7 +2213,23 @@ class Installer(object):
                                 "zeek-live", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
                             ),
                         )
+                        for boundPath in boundPathsToAdjust:
+                            if (boundPath.service in data['services']) and (
+                                'volumes' in data['services'][boundPath.service]
+                            ):
+                                for volIdx, volVal in enumerate(data['services'][boundPath.service]['volumes']):
+                                    eprint(volVal)
+
                         # TODO
+                        # ##################################################################################################
+                        # def ReplaceBindMountLocation(line, location, linePrefix):
+                        #     # TODO: switch to ruamel
+                        #     if os.path.isdir(location):
+                        #         volumeParts = line.strip().lstrip('-').lstrip().split(':')
+                        #         volumeParts[0] = location
+                        #         return "{}- {}".format(linePrefix, ':'.join(volumeParts))
+                        #     else:
+                        #         return line
 
                         # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
                         # set bind IPs based on whether it should be externally exposed or not

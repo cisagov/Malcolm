@@ -143,17 +143,6 @@ OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | Orche
 
 
 ##################################################################################################
-def ReplaceBindMountLocation(line, location, linePrefix):
-    # TODO: switch to ruamel
-    if os.path.isdir(location):
-        volumeParts = line.strip().lstrip('-').lstrip().split(':')
-        volumeParts[0] = location
-        return "{}- {}".format(linePrefix, ':'.join(volumeParts))
-    else:
-        return line
-
-
-##################################################################################################
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:
