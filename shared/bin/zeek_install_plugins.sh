@@ -125,3 +125,19 @@ find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 
 git clone \
   --single-branch --depth 1 --recurse-submodules --shallow-submodules \
   "https://github.com/cisagov/ACID" "${ZEEK_DIR}"/share/zeek/site/ACID
+
+# one-off packages from local build
+if [[ -d "$ZEEK_DIR"/custom-pkg ]]; then
+  while IFS= read -r -d '' PKGDIR; do
+    pushd "$PKGDIR" >/dev/null 2>&1
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      git init
+      git add .
+      git config --global user.email "nobody@example.com"
+      git config --global user.name "nobody"
+      git commit -m "initial commit"
+    fi
+    zkg install --nodeps --force --skiptests .
+    popd >/dev/null 2>&1
+  done < <(find "$ZEEK_DIR"/custom-pkg -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+fi
