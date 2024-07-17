@@ -2219,35 +2219,35 @@ class Installer(object):
                         # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
                         # set bind IPs based on whether it should be externally exposed or not
                         for service, portInfo in {
-                            'filebeat': (filebeatTcpOpen, 5045),
-                            'logstash': (logstashOpen, 5044),
-                            'upload': (sftpOpen, 8022),
+                            'filebeat': (filebeatTcpOpen, 5045, 5045),
+                            'logstash': (logstashOpen, 5044, 5044),
+                            'upload': (sftpOpen, 8022, 22),
                         }.items():
                             if service in data['services']:
                                 data['services'][service]['ports'] = [
-                                    f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[1]}"
+                                    f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
                                 ]
 
                         # nginx-proxy has got a lot going on
                         if 'nginx-proxy' in data['services']:
 
                             # set nginx-proxy health check based on whether they're using HTTPS or not
-                            data['services']['nginx-proxy']['test'] = [
-                                "CMD",
-                                "curl",
-                                "--insecure",
-                                "--silent",
-                                f"{'https' if nginxSSL else 'http'}://localhost:443",
-                            ]
+                            if 'healthcheck' in data['services']['nginx-proxy']:
+                                data['services']['nginx-proxy']['healthcheck']['test'] = [
+                                    "CMD",
+                                    "curl",
+                                    "--insecure",
+                                    "--silent",
+                                    f"{'https' if nginxSSL else 'http'}://localhost:443",
+                                ]
 
                             # set bind IPs and ports based on whether it should be externally exposed or not
                             data['services']['nginx-proxy']['ports'] = [
                                 f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
                             ]
-                            if opensearchOpen:
-                                data['services']['nginx-proxy']['ports'].append(
-                                    f"{'0.0.0.0:9200' if nginxSSL else '127.0.0.1:9201'}:9200"
-                                )
+                            data['services']['nginx-proxy']['ports'].append(
+                                f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                            )
 
                             # enable/disable/configure traefik labels if applicable
                             for label in (
