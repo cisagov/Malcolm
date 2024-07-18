@@ -324,7 +324,6 @@ drwxr-xr-x 3 user user     19 Apr 24 14:35 yara
 drwxr-xr-x 3 user user     19 Apr 24 14:35 zeek
 drwxr-xr-x 7 user user     85 Apr 24 14:35 zeek-logs
 -rw-r--r-- 1 user user 18,761 Apr 24 14:35 docker-compose.yml
--rw-r--r-- 1 user user      2 Apr 24 14:35 net-map.json
 -rw-r--r-- 1 user user  3,453 Apr 24 14:35 README.md
 ```
 

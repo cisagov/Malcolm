@@ -138,12 +138,6 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
         },
     ],
-    'netbox-netmap-json': [
-        {
-            'secret': False,
-            'path': os.path.join(MalcolmPath, 'net-map.json'),
-        },
-    ],
     'netbox-config': [
         {
             'secret': False,
