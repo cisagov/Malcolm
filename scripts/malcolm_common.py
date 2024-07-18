@@ -103,13 +103,13 @@ class UserInterfaceMode(IntFlag):
 
 BoundPath = namedtuple(
     "BoundPath",
-    ["service", "container_dir", "files", "relative_dirs", "clean_empty_dirs"],
+    ["service", "target", "files", "relative_dirs", "clean_empty_dirs"],
     rename=False,
 )
 
 BoundPathReplacer = namedtuple(
     "BoundPathReplacer",
-    ["service", "container_dir", "host_dir"],
+    ["service", "target", "source"],
     rename=False,
 )
 

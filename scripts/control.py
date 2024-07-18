@@ -888,7 +888,7 @@ def stop(wipe=False):
                 localPath = LocalPathForContainerBindMount(
                     boundPath.service,
                     dockerComposeYaml,
-                    boundPath.container_dir,
+                    boundPath.target,
                     MalcolmPath,
                 )
                 if localPath and os.path.isdir(localPath):
@@ -1035,7 +1035,7 @@ def start():
             localPath = LocalPathForContainerBindMount(
                 boundPath.service,
                 dockerComposeYaml,
-                boundPath.container_dir,
+                boundPath.target,
                 MalcolmPath,
             )
             if localPath:

@@ -2153,17 +2153,21 @@ class Installer(object):
                 os.chown(envFile, int(puid), int(pgid))
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+
             # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
             for composeFile in configFiles:
+
                 # save off owner of original files
                 composeFileStat = os.stat(composeFile)
                 origUid, origGuid = composeFileStat[4], composeFileStat[5]
                 try:
+
                     # load the docker-compose file
                     data = LoadYaml(composeFile)
 
                     if 'services' in data:
 
+                        ###################################
                         # stuff for all services
                         for service in data['services']:
 
@@ -2184,7 +2188,12 @@ class Installer(object):
                                 imageLineSpit[-1] = imageLineSpit[-1].split("-", 1)[0] + args.imageArch
                                 deep_set(data, ['services', service, 'image'], ":".join(imageLineSpit))
 
+                        ###################################
                         # stuff for specific services
+
+                        ###################################
+                        # for "large' storage locations (pcap, logs, opensearch, etc.) replace
+                        #   bind mount sources with user-specified locations
                         boundPathsToAdjust = (
                             BoundPathReplacer("arkime", "/data/pcap", pcapDir),
                             BoundPathReplacer("arkime-live", "/data/pcap", pcapDir),
@@ -2214,23 +2223,30 @@ class Installer(object):
                             ),
                         )
                         for boundPath in boundPathsToAdjust:
-                            if (boundPath.service in data['services']) and (
-                                'volumes' in data['services'][boundPath.service]
+                            if (
+                                (boundPath.service in data['services'])
+                                and ('volumes' in data['services'][boundPath.service])
+                                and os.path.isdir(boundPath.source)
                             ):
                                 for volIdx, volVal in enumerate(data['services'][boundPath.service]['volumes']):
-                                    eprint(volVal)
+                                    if (
+                                        isinstance(volVal, dict)
+                                        and ('source' in volVal)
+                                        and ('target' in volVal)
+                                        and (volVal['target'] == boundPath.target)
+                                    ):
+                                        data['services'][boundPath.service]['volumes'][volIdx][
+                                            'source'
+                                        ] = boundPath.source
+                                    elif isinstance(volVal, str) and re.match(
+                                        fr'^.+:{boundPath.target}(:.+)?\s*$', volVal
+                                    ):
+                                        volumeParts = volVal.strip().split(':')
+                                        volumeParts[0] = boundPath.source
+                                        data['services'][boundPath.service]['volumes'][volIdx] = ':'.join(volumeParts)
+                        ###################################
 
-                        # TODO
-                        # ##################################################################################################
-                        # def ReplaceBindMountLocation(line, location, linePrefix):
-                        #     # TODO: switch to ruamel
-                        #     if os.path.isdir(location):
-                        #         volumeParts = line.strip().lstrip('-').lstrip().split(':')
-                        #         volumeParts[0] = location
-                        #         return "{}- {}".format(linePrefix, ':'.join(volumeParts))
-                        #     else:
-                        #         return line
-
+                        ###################################
                         # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
                         # set bind IPs based on whether it should be externally exposed or not
                         for service, portInfo in {
@@ -2242,7 +2258,9 @@ class Installer(object):
                                 data['services'][service]['ports'] = [
                                     f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
                                 ]
+                        ###################################
 
+                        ###################################
                         # nginx-proxy has got a lot going on
                         if 'nginx-proxy' in data['services']:
 
@@ -2316,6 +2334,7 @@ class Installer(object):
                                     data['services']['nginx-proxy']['labels'][
                                         'traefik.http.services.osmalcolm.loadbalancer.server.port'
                                     ] = '9200'
+                        ###################################
 
                     # re-write the network definition from scratch
                     if 'networks' in data:
