@@ -2339,9 +2339,10 @@ class Installer(object):
                     # re-write the network definition from scratch
                     if 'networks' in data:
                         del data['networks']
-                    networkDef = {'external': True if (len(dockerNetworkExternalName) > 0) else False}
+                    networkDef = {}
+                    networkDef['external'] = bool(len(dockerNetworkExternalName) > 0)
                     if len(dockerNetworkExternalName) > 0:
-                        networkDef['name']: dockerNetworkExternalName
+                        networkDef['name'] = dockerNetworkExternalName
                     data['networks'] = {}
                     data['networks']['default'] = networkDef
 

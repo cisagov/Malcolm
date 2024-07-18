@@ -1242,8 +1242,8 @@ services:
     labels:
       traefik.enable: false
 
-# shared named volume so filebeat can access nginx access logs
 volumes:
+  # shared named volume so filebeat can access nginx access logs
   nginx-log-path:
 
 networks:
