@@ -2298,7 +2298,7 @@ class Installer(object):
                                 data['services']['nginx-proxy']['labels'].pop(label, None)
 
                             # Traefik enabled vs. disabled
-                            data['services']['nginx-proxy']['labels']['traefik.enable'] = bool(behindReverseProxy)
+                            data['services']['nginx-proxy']['labels']['traefik.enable'] = bool(traefikLabels)
 
                             if traefikLabels:
                                 # general router enabled/disabled/host/etc values
