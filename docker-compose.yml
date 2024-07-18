@@ -1235,7 +1235,12 @@ services:
       target: /etc/nginx/dhparam/dhparam.pem
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--silent", "http://localhost:443"]
+      test:
+      - CMD
+      - curl
+      - --insecure
+      - --silent
+      - https://localhost:443
       interval: 30s
       timeout: 15s
       retries: 3
