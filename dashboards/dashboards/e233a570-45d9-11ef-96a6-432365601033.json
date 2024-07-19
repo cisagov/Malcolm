@@ -635,10 +635,17 @@
         "columns": [
           "source.ip",
           "destination.ip",
-          "zeek.ge_srtp.plc_state",
           "zeek.ge_srtp.srtp_type",
+          "zeek.ge_srtp.segment_selector",
+          "zeek.ge_srtp.memory_offset",
+          "zeek.ge_srtp.data_length",
+          "zeek.ge_srtp.sequence_number_1",
+          "zeek.ge_srtp.sequence_number_2",
+          "zeek.ge_srtp.packet_number",
+          "zeek.ge_srtp.total_packet_number",
           "event.action",
           "event.result",
+          "zeek.ge_srtp.plc_state",
           "event.id"
         ],
         "sort": [],
