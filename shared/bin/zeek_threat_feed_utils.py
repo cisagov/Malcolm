@@ -671,7 +671,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                 mispAuthKey = mispConnInfo[1]
 
                             with requests.Session() as mispSession:
-                                mispSession.headers.update({'Accept': 'application/json, text/plain, text/html'})
+                                mispSession.headers.update(
+                                    {'Accept': 'application/json;q=1.0,text/plain;q=0.9,text/html;q=0.9'}
+                                )
                                 if mispAuthKey is not None:
                                     mispSession.headers.update({'Authorization': mispAuthKey})
 
