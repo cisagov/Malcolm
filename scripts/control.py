@@ -421,10 +421,12 @@ def status():
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
+        cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps']
+        if args.service is not None:
+            cmd.append(args.service)
+
         err, out = run_process(
-            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
-                : 7 if args.service is not None else -1
-            ],
+            cmd,
             env=osEnv,
             debug=args.debug,
         )
@@ -733,10 +735,11 @@ def logs():
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
 
+        cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps']
+        if args.service is not None:
+            cmd.append(args.service)
         err, out = run_process(
-            [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', args.service][
-                : 7 if args.service is not None else -1
-            ],
+            cmd,
             env=osEnv,
             debug=args.debug,
         )
@@ -752,8 +755,9 @@ def logs():
             '--tail',
             str(args.logLineCount) if args.logLineCount else 'all',
             '-f',
-            args.service,
-        ][: 10 if args.service else -1]
+        ]
+        if args.service is not None:
+            cmd.append(args.service)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if which("stern"):
@@ -2226,9 +2230,10 @@ def main():
         required=False,
         dest='service',
         metavar='<string>',
+        nargs='*',
         type=str,
         default=None,
-        help='docker-compose service (only for status and logs operations)',
+        help='docker-compose service(s) (only for status and logs operations)',
     )
 
     netboxGroup = parser.add_argument_group('NetBox Backup and Restore')
