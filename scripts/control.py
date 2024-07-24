@@ -846,13 +846,17 @@ def stop(wipe=False):
         if args.service is not None:
             # stopping a single (or multiple services)
             err, out = run_process(
-                [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'stop'] + args.service
+                [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'stop'] + args.service,
+                env=osEnv,
+                debug=args.debug,
             )
             if err == 0:
                 eprint(f"Stopped Malcolm's {args.service} services\n")
                 err, out = run_process(
                     [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'rm', '--force']
-                    + args.service
+                    + args.service,
+                    env=osEnv,
+                    debug=args.debug,
                 )
                 if err == 0:
                     eprint(f"Removed Malcolm's {args.service} services\n")
