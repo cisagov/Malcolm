@@ -13,6 +13,8 @@
         "zeek.bacnet_device_control.device_state": { "type": "keyword" },
         "zeek.bacnet_device_control.result": { "type": "keyword" },
         "zeek.bacnet_device_control.result_code": { "type": "keyword" },
+        "zeek.bacnet_discovery.device_id_number": { "type": "long" },
+        "zeek.bacnet_discovery.device_id_type": { "type": "keyword" },
         "zeek.bacnet_discovery.object_name": { "type": "keyword" },
         "zeek.bacnet_discovery.object_type": { "type": "keyword" },
         "zeek.bacnet_discovery.range": { "type": "keyword" },

@@ -756,6 +756,8 @@ class MalcolmSource extends WISESource {
       "zeek.bacnet_device_control.result",
       "zeek.bacnet_device_control.result_code",
       "zeek.bacnet_device_control.time_duration",
+      "zeek.bacnet_discovery.device_id_number",
+      "zeek.bacnet_discovery.device_id_type",
       "zeek.bacnet_discovery.object_name",
       "zeek.bacnet_discovery.object_type",
       "zeek.bacnet_discovery.range",
