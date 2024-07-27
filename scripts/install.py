@@ -233,6 +233,34 @@ def InstallerDisplayMessage(
     )
 
 
+def DetermineUid(
+    scriptUser,
+    scriptPlatform,
+    referencePath,
+):
+    defaultUid = '1000'
+    defaultGid = '1000'
+    if ((scriptPlatform == PLATFORM_LINUX) or (scriptPlatform == PLATFORM_MAC)) and (scriptUser == "root"):
+        if pathUid := os.stat(referencePath).st_uid:
+            defaultUid = str(pathUid)
+        if pathGid := os.stat(referencePath).st_gid:
+            defaultGid = str(pathGid)
+
+    uid = defaultUid
+    gid = defaultGid
+    try:
+        if scriptPlatform == PLATFORM_LINUX:
+            uid = str(os.getuid())
+            gid = str(os.getgid())
+            if (uid == '0') or (gid == '0'):
+                raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
+    except Exception:
+        uid = defaultUid
+        gid = defaultGid
+
+    return uid, gid
+
+
 ###################################################################################################
 class Installer(object):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -400,11 +428,19 @@ class Installer(object):
                 if self.debug:
                     eprint(f"Created {installPath} for Malcolm runtime files")
 
+                # extract the .tar.gz and chown the results
+                extUid, extGid = DetermineUid(self.scriptUser, self.platform, malcolm_install_file)
                 tar = tarfile.open(malcolm_install_file)
                 try:
                     tar.extractall(path=installPath, numeric_owner=True)
                 finally:
                     tar.close()
+                os.chown(installPath, int(extUid), int(extGid))
+                for dirpath, dirnames, filenames in os.walk(installPath, followlinks=False):
+                    for dname in dirnames:
+                        os.chown(os.path.join(dirpath, dname), int(extUid), int(extGid))
+                    for fname in filenames:
+                        os.chown(os.path.join(dirpath, fname), int(extUid), int(extGid), follow_symlinks=False)
 
                 # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level
                 childDir = glob.glob(f'{installPath}/*/')
@@ -465,26 +501,8 @@ class Installer(object):
         if (not args.configDir) or (not os.path.isdir(args.configDir)):
             raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
-        # figure out what UID/GID to run non-rood processes under docker as
-        defaultUid = '1000'
-        defaultGid = '1000'
-        if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
-            if pathUid := os.stat(malcolm_install_path).st_uid:
-                defaultUid = str(pathUid)
-            if pathGid := os.stat(malcolm_install_path).st_gid:
-                defaultGid = str(pathGid)
-
-        puid = defaultUid
-        pgid = defaultGid
-        try:
-            if self.platform == PLATFORM_LINUX:
-                puid = str(os.getuid())
-                pgid = str(os.getgid())
-                if (puid == '0') or (pgid == '0'):
-                    raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
-        except Exception:
-            puid = defaultUid
-            pgid = defaultGid
+        # figure out what UID/GID to run non-root processes under docker as
+        puid, pgid = DetermineUid(self.scriptUser, self.platform, malcolm_install_path)
 
         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid UID/GID')
         while (

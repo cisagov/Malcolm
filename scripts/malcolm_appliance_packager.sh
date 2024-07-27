@@ -141,7 +141,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
 
-  tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
+  tar -czf --owner=0 --group=0 $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
 
   unset CONFIRMATION
