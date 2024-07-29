@@ -10,7 +10,7 @@ fi
 set -e
 
 DESTDIR="$(mktemp -d -t malcolm-XXXXXX)"
-VERBOSE=""
+VERBOSE="-v"
 
 function cleanup {
   if ! rm -rf "$DESTDIR"; then
@@ -96,7 +96,6 @@ if mkdir "$DESTDIR"; then
 
   cp $VERBOSE ./config/*.example "$DESTDIR/config/"
   cp $VERBOSE ./docker-compose.yml "$DESTDIR/docker-compose.yml"
-  cp $VERBOSE ./net-map.json "$DESTDIR/"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
@@ -142,7 +141,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
 
-  tar -czf $VERBOSE "$DESTNAME" "./$(basename $DESTDIR)/"
+  tar $VERBOSE --numeric-owner --owner=0 --group=0 -czf "$DESTNAME" "./$(basename $DESTDIR)/"
   echo "Packaged Malcolm to \"$DESTNAME\""
 
   unset CONFIRMATION

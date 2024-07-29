@@ -1,50 +1,74 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-x-logging:
-  &default-logging
-  driver: local
-  options:
-    max-size: 200m
-    max-file: 2
-    compress: "false"
-
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:24.06.0
+    image: ghcr.io/idaholab/malcolm/opensearch:24.07.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
     #   satisfy some other containers' depends_on.
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: opensearch
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
     environment:
-      VIRTUAL_HOST : 'os.malcolm.local'
+      VIRTUAL_HOST: 'os.malcolm.local'
     ulimits:
       memlock:
         soft: -1
         hard: -1
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
+    - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
+    - SYS_RESOURCE
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-      - ./opensearch:/usr/share/opensearch/data
-      - ./opensearch-backup:/opt/opensearch/backup
-      - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.secondary.curlrc
+      target: /var/local/curlrc/.opensearch.secondary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./opensearch
+      target: /usr/share/opensearch/data
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./opensearch-backup
+      target: /opt/opensearch/backup
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./opensearch/opensearch.keystore
+      target: /usr/share/opensearch/config/persist/opensearch.keystore
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
       interval: 30s
@@ -52,29 +76,49 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.06.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards-helper
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/dashboards.env
-      - ./config/dashboards-helper.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/dashboards.env
+    - ./config/dashboards-helper.env
     environment:
-      VIRTUAL_HOST : 'dashboards-helper.malcolm.local'
+      VIRTUAL_HOST: 'dashboards-helper.malcolm.local'
     depends_on:
-      - opensearch
+    - opensearch
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.secondary.curlrc
+      target: /var/local/curlrc/.opensearch.secondary.curlrc
+      read_only: true
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "cron", "maps"]
       interval: 60s
@@ -82,27 +126,42 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:24.06.0
+    image: ghcr.io/idaholab/malcolm/dashboards:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: dashboards
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
     environment:
-      VIRTUAL_HOST : 'dashboards.malcolm.local'
+      VIRTUAL_HOST: 'dashboards.malcolm.local'
     depends_on:
-      - opensearch
-      - dashboards-helper
+    - opensearch
+    - dashboards-helper
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
       interval: 30s
@@ -110,46 +169,86 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:24.06.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: logstash
     networks:
-      - default
+    - default
     ulimits:
       memlock:
         soft: -1
         hard: -1
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
+    - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
+    - SYS_RESOURCE
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/netbox-common.env
-      - ./config/netbox.env
-      - ./config/netbox-secret.env
-      - ./config/beats-common.env
-      - ./config/lookup-common.env
-      - ./config/logstash.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/netbox-common.env
+    - ./config/netbox.env
+    - ./config/netbox-secret.env
+    - ./config/beats-common.env
+    - ./config/lookup-common.env
+    - ./config/logstash.env
     depends_on:
-      - opensearch
+    - opensearch
     ports:
-      - "127.0.0.1:5044:5044"
+    - 127.0.0.1:5044:5044
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-      - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
-      - ./logstash/certs/ca.crt:/certs/ca.crt:ro
-      - ./logstash/certs/server.crt:/certs/server.crt:ro
-      - ./logstash/certs/server.key:/certs/server.key:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.secondary.curlrc
+      target: /var/local/curlrc/.opensearch.secondary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./logstash/maps/malcolm_severity.yaml
+      target: /etc/malcolm_severity.yaml
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./logstash/certs/ca.crt
+      target: /certs/ca.crt
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./logstash/certs/server.crt
+      target: /certs/server.crt
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./logstash/certs/server.key
+      target: /certs/server.key
+      read_only: true
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
       interval: 30s
@@ -157,34 +256,72 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.06.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: filebeat
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/upload-common.env
-      - ./config/nginx.env
-      - ./config/beats-common.env
-      - ./config/filebeat.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./config/nginx.env
+    - ./config/beats-common.env
+    - ./config/filebeat.env
     ports:
-      - "127.0.0.1:5045:5045"
+    - 127.0.0.1:5045:5045
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - nginx-log-path:/nginx:ro
-      - ./zeek-logs:/zeek
-      - ./suricata-logs:/suricata
-      - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
-      - ./filebeat/certs/client.crt:/certs/client.crt:ro
-      - ./filebeat/certs/client.key:/certs/client.key:ro
+    - nginx-log-path:/nginx:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs
+      target: /zeek
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata-logs
+      target: /suricata
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filebeat/certs/ca.crt
+      target: /certs/ca.crt
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filebeat/certs/client.crt
+      target: /certs/client.crt
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filebeat/certs/client.key
+      target: /certs/client.key
+      read_only: true
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "filebeat"]
       interval: 30s
@@ -192,33 +329,57 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:24.06.0
+    image: ghcr.io/idaholab/malcolm/arkime:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: arkime
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/upload-common.env
-      - ./config/auth.env
-      - ./config/arkime.env
-      - ./config/arkime-offline.env
-      - ./config/arkime-secret.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./config/auth.env
+    - ./config/arkime.env
+    - ./config/arkime-offline.env
+    - ./config/arkime-secret.env
     environment:
-      VIRTUAL_HOST : 'arkime.malcolm.local'
+      VIRTUAL_HOST: 'arkime.malcolm.local'
     depends_on:
-      - opensearch
+    - opensearch
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./arkime/rules:/opt/arkime/rules:ro
-      - ./pcap:/data/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./arkime/rules
+      target: /opt/arkime/rules
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap
+      target: /data/pcap
     healthcheck:
       test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
       interval: 90s
@@ -226,64 +387,119 @@ services:
       retries: 3
       start_period: 210s
   arkime-live:
-    image: ghcr.io/idaholab/malcolm/arkime:24.06.0
+    image: ghcr.io/idaholab/malcolm/arkime:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
+    - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
+    - SYS_RESOURCE
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
-      - NET_ADMIN
-      - NET_RAW
+    - NET_ADMIN
+    - NET_RAW
       # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
-      - SYS_NICE
+    - SYS_NICE
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/upload-common.env
-      - ./config/pcap-capture.env
-      - ./config/auth.env
-      - ./config/arkime.env
-      - ./config/arkime-live.env
-      - ./config/arkime-secret.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
+    - ./config/pcap-capture.env
+    - ./config/auth.env
+    - ./config/arkime.env
+    - ./config/arkime-live.env
+    - ./config/arkime-secret.env
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./arkime/rules:/opt/arkime/rules:ro
-      - ./pcap:/data/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./arkime/rules
+      target: /opt/arkime/rules
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap
+      target: /data/pcap
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:24.06.0
+    image: ghcr.io/idaholab/malcolm/zeek:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: zeek
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/upload-common.env
-      - ./config/zeek.env
-      - ./config/zeek-secret.env
-      - ./config/zeek-offline.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/zeek.env
+    - ./config/zeek-secret.env
+    - ./config/zeek-offline.env
     depends_on:
-      - opensearch
+    - opensearch
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap:/pcap
-      - ./zeek-logs/upload:/zeek/upload
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap
+      target: /pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/upload
+      target: /zeek/upload
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/extract_files
+      target: /zeek/extract_files
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek/intel
+      target: /opt/zeek/share/zeek/site/intel
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek/custom
+      target: /opt/zeek/share/zeek/site/custom
+      read_only: true
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
       interval: 30s
@@ -291,55 +507,110 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:24.06.0
+    image: ghcr.io/idaholab/malcolm/zeek:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
     cap_add:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
-      - NET_ADMIN
-      - NET_RAW
+    - NET_ADMIN
+    - NET_RAW
       # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
-      - SYS_NICE
+    - SYS_NICE
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/upload-common.env
-      - ./config/pcap-capture.env
-      - ./config/zeek.env
-      - ./config/zeek-secret.env
-      - ./config/zeek-live.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/pcap-capture.env
+    - ./config/zeek.env
+    - ./config/zeek-secret.env
+    - ./config/zeek-live.env
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./zeek-logs/live:/zeek/live
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-      - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/live
+      target: /zeek/live
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/extract_files
+      target: /zeek/extract_files
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek/intel
+      target: /opt/zeek/share/zeek/site/intel
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek/custom
+      target: /opt/zeek/share/zeek/site/custom
+      read_only: true
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:24.06.0
+    image: ghcr.io/idaholab/malcolm/suricata:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: suricata
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/upload-common.env
-      - ./config/suricata.env
-      - ./config/suricata-offline.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/suricata.env
+    - ./config/suricata-offline.env
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./suricata-logs:/var/log/suricata
-      - ./pcap:/data/pcap
-      - ./suricata/rules:/opt/suricata/rules:ro
-      - ./suricata/include-configs:/opt/suricata/include-configs:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata-logs
+      target: /var/log/suricata
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap
+      target: /data/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata/rules
+      target: /opt/suricata/rules
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata/include-configs
+      target: /opt/suricata/include-configs
+      read_only: true
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
       interval: 30s
@@ -347,58 +618,105 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:24.06.0
+    image: ghcr.io/idaholab/malcolm/suricata:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     network_mode: host
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
+    - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
+    - SYS_RESOURCE
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
-      - NET_ADMIN
-      - NET_RAW
-      # SYS_NICE - to set process nice values and scheduling policies for capture
-      - SYS_NICE
+    - NET_ADMIN
+    - NET_RAW
+      # SYS_NICE - to set process nice values, real-time scheduling policies, I/O scheduling
+    - SYS_NICE
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/upload-common.env
-      - ./config/pcap-capture.env
-      - ./config/suricata.env
-      - ./config/suricata-live.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/upload-common.env
+    - ./config/pcap-capture.env
+    - ./config/suricata.env
+    - ./config/suricata-live.env
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./suricata-logs:/var/log/suricata
-      - ./suricata/rules:/opt/suricata/rules:ro
-      - ./suricata/include-configs:/opt/suricata/include-configs:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata-logs
+      target: /var/log/suricata
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata/rules
+      target: /opt/suricata/rules
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./suricata/include-configs
+      target: /opt/suricata/include-configs
+      read_only: true
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:24.06.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: file-monitor
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/dashboards.env
-      - ./config/zeek.env
-      - ./config/zeek-secret.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/dashboards.env
+    - ./config/zeek.env
+    - ./config/zeek-secret.env
     environment:
-      VIRTUAL_HOST : 'file-monitor.malcolm.local'
+      VIRTUAL_HOST: 'file-monitor.malcolm.local'
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./zeek-logs/extract_files:/zeek/extract_files
-      - ./zeek-logs/current:/zeek/logs
-      - ./yara/rules:/yara-rules/custom:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/extract_files
+      target: /zeek/extract_files
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs/current
+      target: /zeek/logs
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./yara/rules
+      target: /yara-rules/custom
+      read_only: true
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "watcher", "logger"]
       interval: 30s
@@ -406,9 +724,14 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:24.06.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
@@ -419,43 +742,75 @@ services:
         hard: -1
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
-      - IPC_LOCK
+    - IPC_LOCK
       # SYS_RESOURCE - for increasing memlock limits
-      - SYS_RESOURCE
+    - SYS_RESOURCE
       # SYS_ADMIN - for netsniff-ng to set the disc I/O scheduler policy
-      - SYS_ADMIN
+    - SYS_ADMIN
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
-      - NET_ADMIN
-      - NET_RAW
+    - NET_ADMIN
+    - NET_RAW
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/pcap-capture.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/pcap-capture.env
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap/upload:/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap/upload
+      target: /pcap
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.06.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.07.0
     profiles: ["malcolm", "hedgehog"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: pcap-monitor
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/upload-common.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/upload-common.env
     depends_on:
-      - opensearch
+    - opensearch
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-      - ./zeek-logs:/zeek
-      - ./pcap:/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./zeek-logs
+      target: /zeek
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap
+      target: /pcap
     healthcheck:
       test: ["CMD", "supervisorctl", "status", "watch-upload", "pcap-publisher"]
       interval: 30s
@@ -463,26 +818,40 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:24.06.0
+    image: ghcr.io/idaholab/malcolm/file-upload:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: upload
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/auth.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/auth.env
     environment:
-      VIRTUAL_HOST : 'upload.malcolm.local'
+      VIRTUAL_HOST: 'upload.malcolm.local'
     ports:
-      - "127.0.0.1:8022:22"
+    - 127.0.0.1:8022:22
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./pcap/upload:/var/www/upload/server/php/chroot/files
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./pcap/upload
+      target: /var/www/upload/server/php/chroot/files
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
       interval: 30s
@@ -490,26 +859,48 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:24.06.0
+    image: ghcr.io/idaholab/malcolm/htadmin:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: htadmin
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/auth-common.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/auth-common.env
     environment:
-      VIRTUAL_HOST : 'htadmin.malcolm.local'
+      VIRTUAL_HOST: 'htadmin.malcolm.local'
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
-      - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-      - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./htadmin/config.ini
+      target: /var/www/htadmin/config/config.ini
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./htadmin/metadata
+      target: /var/www/htadmin/config/metadata
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/htpasswd
+      target: /var/www/htadmin/auth/htpasswd
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
       interval: 60s
@@ -517,23 +908,33 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:24.06.0
+    image: ghcr.io/idaholab/malcolm/freq:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: freq
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/lookup-common.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/lookup-common.env
     environment:
-      VIRTUAL_HOST : 'freq.malcolm.local'
+      VIRTUAL_HOST: 'freq.malcolm.local'
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:10004"]
       interval: 30s
@@ -541,145 +942,221 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:24.06.0
+    image: ghcr.io/idaholab/malcolm/netbox:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/netbox-common.env
-      - ./config/netbox.env
-      - ./config/netbox-secret.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox.env
+    - ./config/netbox-secret.env
     environment:
-      VIRTUAL_HOST : 'netbox.malcolm.local'
+      VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
-      - netbox-postgres
-      - netbox-redis
-      - netbox-redis-cache
+    - netbox-postgres
+    - netbox-redis
+    - netbox-redis-cache
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./netbox/config:/etc/netbox/config:ro
-      - ./netbox/media:/opt/netbox/netbox/media:rw
-      - ./net-map.json:/usr/local/share/net-map.json:ro
-      - ./netbox/preload:/opt/netbox-preload/configmap:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/config
+      target: /etc/netbox/config
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/media
+      target: /opt/netbox/netbox/media
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/preload
+      target: /opt/netbox-preload/configmap
+      read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/" ]
+      test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:24.06.0
+    image: ghcr.io/idaholab/malcolm/postgresql:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-postgres
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/netbox-common.env
-      - ./config/netbox-postgres.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-postgres.env
     environment:
-      VIRTUAL_HOST : 'netbox-postgres.malcolm.local'
+      VIRTUAL_HOST: 'netbox-postgres.malcolm.local'
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./netbox/postgres:/var/lib/postgresql/data:rw
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/postgres
+      target: /var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "[[ $${NETBOX_POSTGRES_DISABLED} == 'true' ]] || pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      test: ["CMD-SHELL", "[[ $${NETBOX_POSTGRES_DISABLED} == 'true' ]] || pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:24.06.0
+    image: ghcr.io/idaholab/malcolm/redis:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-redis
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/netbox-common.env
-      - ./config/netbox-redis.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-redis.env
     environment:
-      VIRTUAL_HOST : 'netbox-redis.malcolm.local'
+      VIRTUAL_HOST: 'netbox-redis.malcolm.local'
     command:
-      - sh
-      - -c
-      - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
+    - sh
+    - -c
+    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./netbox/redis:/data
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/redis
+      target: /data
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )" ]
+      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:24.06.0
+    image: ghcr.io/idaholab/malcolm/redis:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: netbox-redis-cache
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/netbox-common.env
-      - ./config/netbox-redis-cache.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/netbox-common.env
+    - ./config/netbox-redis-cache.env
     environment:
-      VIRTUAL_HOST : 'netbox-redis-cache.malcolm.local'
+      VIRTUAL_HOST: 'netbox-redis-cache.malcolm.local'
     command:
-      - sh
-      - -c
-      - redis-server --requirepass $$REDIS_PASSWORD
+    - sh
+    - -c
+    - redis-server --requirepass $$REDIS_PASSWORD
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )" ]
+      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:24.06.0
+    image: ghcr.io/idaholab/malcolm/api:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     command: gunicorn --bind 0:5000 manage:app
     restart: "no"
     stdin_open: false
     tty: true
     hostname: api
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/dashboards.env
-      - ./config/opensearch.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/dashboards.env
+    - ./config/opensearch.env
     environment:
-      VIRTUAL_HOST : 'api.malcolm.local'
+      VIRTUAL_HOST: 'api.malcolm.local'
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./.opensearch.primary.curlrc
+      target: /var/local/curlrc/.opensearch.primary.curlrc
+      read_only: true
     healthcheck:
       test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
       interval: 30s
@@ -687,61 +1164,86 @@ services:
       retries: 3
       start_period: 60s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.06.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.07.0
     profiles: ["malcolm"]
-    logging: *default-logging
+    logging:
+      driver: local
+      options:
+        max-size: 200m
+        max-file: 2
+        compress: "false"
     restart: "no"
     stdin_open: false
     tty: true
     hostname: nginx-proxy
     networks:
-      - default
+    - default
     env_file:
-      - ./config/process.env
-      - ./config/ssl.env
-      - ./config/opensearch.env
-      - ./config/dashboards.env
-      - ./config/auth-common.env
-      - ./config/nginx.env
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/opensearch.env
+    - ./config/dashboards.env
+    - ./config/auth-common.env
+    - ./config/nginx.env
     depends_on:
-      - api
-      - arkime
-      - dashboards
-      - file-monitor
-      - htadmin
-      - netbox
-      - upload
+    - api
+    - arkime
+    - dashboards
+    - file-monitor
+    - htadmin
+    - netbox
+    - upload
     ports:
-      - "0.0.0.0:443:443"
-      - "127.0.0.1:9200:9200"
+    - 0.0.0.0:443:443
+    - 127.0.0.1:9200:9200
     volumes:
-      - ./nginx/ca-trust:/var/local/ca-trust:ro
-      - nginx-log-path:/var/log/nginx:rw
-      - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-      - ./nginx/htpasswd:/etc/nginx/auth/htpasswd:ro
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+    - nginx-log-path:/var/log/nginx
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/nginx_ldap.conf
+      target: /etc/nginx/nginx_ldap.conf
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/htpasswd
+      target: /etc/nginx/auth/htpasswd
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/certs
+      target: /etc/nginx/certs
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/certs/dhparam.pem
+      target: /etc/nginx/dhparam/dhparam.pem
+      read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--silent", "https://localhost:443"]
+      test:
+      - CMD
+      - curl
+      - --insecure
+      - --silent
+      - https://localhost:443
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 120s
     labels:
-      traefik.enable: 'false'
-      # traefik.http.routers.osmalcolm.rule: 'Host(``)'
-      # traefik.http.routers.osmalcolm.entrypoints: ''
-      # traefik.http.routers.osmalcolm.tls.certresolver: ''
-      # traefik.http.routers.osmalcolm.service: 'osmalcolm'
-      # traefik.http.services.osmalcolm.loadbalancer.server.port: '9200'
-      # traefik.http.routers.malcolm.rule: 'Host(``)'
-      # traefik.http.routers.malcolm.entrypoints: ''
-      # traefik.http.routers.malcolm.tls.certresolver: ''
-      # traefik.http.routers.malcolm.service: 'malcolm'
-      # traefik.http.services.malcolm.loadbalancer.server.port: '443'
+      traefik.enable: false
 
-# shared named volume so filebeat can access nginx access logs
 volumes:
+  # shared named volume so filebeat can access nginx access logs
   nginx-log-path:
 
 networks:

@@ -196,6 +196,7 @@ function InstallFluentBit() {
 ###############################################################################
 # identify malcolm connection information
 function GetMalcolmConnInfo() {
+  local INPUT_NAME="$1"
   IP=
   PORT=
   FORMAT=
@@ -210,6 +211,8 @@ function GetMalcolmConnInfo() {
   SUGGESTED_PORT=5045
   SUGGESTED_FORMAT=json_lines
   SUGGESTED_AGENT_NAME="$(hostname)"
+  SUGGESTED_NEST="$INPUT_NAME"
+  SUGGESTED_MODULE="$INPUT_NAME"
 
   while [[ -z "$IP" ]] || \
         [[ -z "$PORT" ]] || \
@@ -219,8 +222,8 @@ function GetMalcolmConnInfo() {
     PORT="$(_GetString "Enter Malcolm Filebeat TCP port ($SUGGESTED_PORT):" "$SUGGESTED_PORT")"
     AGENT_NAME="$(_GetString "Enter agent hostname ($SUGGESTED_AGENT_NAME):" "$SUGGESTED_AGENT_NAME")"
     FORMAT="$(_GetString "Enter fluent-bit output format ($SUGGESTED_FORMAT):" "$SUGGESTED_FORMAT")"
-    NEST="$(_GetString "Nest values under field:")"
-    MODULE="$(_GetString "Add \"module\" value:")"
+    NEST="$(_GetString "Nest values under field ($SUGGESTED_NEST):" "$SUGGESTED_NEST")"
+    MODULE="$(_GetString "Add \"module\" value ($SUGGESTED_MODULE):" "$SUGGESTED_MODULE")"
   done
 
   if [[ -r "$SCRIPT_PATH"/ca.crt ]] && \
@@ -322,7 +325,7 @@ function GetMalcolmConnInfo() {
 ###############################################################################
 # identify information for fluent-bit intput/output
 function GetFluentBitFormatInfo() {
-  INPUT_NAME=
+  local INPUT_NAME=
   declare -A PARAMS
 
   echo "Choose input plugin and enter parameters. Leave parameters blank for defaults." >&2
@@ -587,6 +590,9 @@ function GetFluentBitFormatInfo() {
   done
 
   FLUENTBIT_ARGS=()
+  # this one's not actually going in the arguments, but is returned at the beginning
+  #   so it can be shifted off and used in gathering some other information
+  FLUENTBIT_ARGS+=( "$INPUT_NAME" )
   FLUENTBIT_PARSER_CFG=$(_fluentbit_parser_cfg)
   if [[ -n "$FLUENTBIT_PARSER_CFG" ]]; then
     FLUENTBIT_ARGS+=( -R )
@@ -710,8 +716,10 @@ if [[ -z "$USER_FUNCTION_IDX" ]] || (( $USER_FUNCTION_IDX == 0 )); then
   # do everything, in order
   if InstallFluentBit; then
     readarray -t FLUENTBIT_INPUT_INFO < <(GetFluentBitFormatInfo)
-    if [[ "${#FLUENTBIT_INPUT_INFO[@]}" -ge 2 ]]; then
-      readarray -t MALCOLM_CONN_INFO < <(GetMalcolmConnInfo)
+    if [[ "${#FLUENTBIT_INPUT_INFO[@]}" -ge 3 ]]; then
+      INPUT_NAME="${FLUENTBIT_INPUT_INFO[0]}"
+      FLUENTBIT_INPUT_INFO=("${FLUENTBIT_INPUT_INFO[@]:1}")
+      readarray -t MALCOLM_CONN_INFO < <(GetMalcolmConnInfo "$INPUT_NAME")
       if [[ "${#MALCOLM_CONN_INFO[@]}" -ge 4 ]]; then
         FLUENTBIT_COMMAND=("$(_fluentbit_bin)" "${FLUENTBIT_INPUT_INFO[@]}" "${MALCOLM_CONN_INFO[@]}")
         echo

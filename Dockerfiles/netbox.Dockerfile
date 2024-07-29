@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v4.0.6
+FROM --platform=${TARGETPLATFORM} netboxcommunity/netbox:v4.0.8
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

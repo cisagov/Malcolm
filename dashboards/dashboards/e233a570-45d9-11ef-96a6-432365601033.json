@@ -1,0 +1,669 @@
+{
+  "version": "2.15.0",
+  "objects": [
+    {
+      "id": "e233a570-45d9-11ef-96a6-432365601033",
+      "type": "dashboard",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:48:37.408Z",
+      "version": "WzEwMTksMV0=",
+      "attributes": {
+        "title": "GE SRTP",
+        "hits": 0,
+        "description": "Dashboard for the GE SRTP Protocol",
+        "panelsJSON": "[{\"version\":\"2.15.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":29,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":12,\"i\":\"d01761fb-4cdc-4144-bdf0-329399bdba61\"},\"panelIndex\":\"d01761fb-4cdc-4144-bdf0-329399bdba61\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":33,\"h\":12,\"i\":\"0e193564-0bc0-428d-a8a7-cd11833303c6\"},\"panelIndex\":\"0e193564-0bc0-428d-a8a7-cd11833303c6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":8,\"y\":12,\"w\":11,\"h\":17,\"i\":\"bfe958a4-ab13-4a3c-8aec-8c170c2683f9\"},\"panelIndex\":\"bfe958a4-ab13-4a3c-8aec-8c170c2683f9\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":19,\"y\":12,\"w\":12,\"h\":17,\"i\":\"2adaf642-cea2-4f1d-9feb-621da6809962\"},\"panelIndex\":\"2adaf642-cea2-4f1d-9feb-621da6809962\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":31,\"y\":12,\"w\":17,\"h\":17,\"i\":\"708e5044-8ba7-4e5a-b245-57e9eb77a63e\"},\"panelIndex\":\"708e5044-8ba7-4e5a-b245-57e9eb77a63e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":0,\"y\":29,\"w\":8,\"h\":9,\"i\":\"a84286a3-67a8-4c5e-940d-6060255c1f3f\"},\"panelIndex\":\"a84286a3-67a8-4c5e-940d-6060255c1f3f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":8,\"y\":29,\"w\":8,\"h\":9,\"i\":\"09a3da63-03a0-4666-93c7-5368a484176c\"},\"panelIndex\":\"09a3da63-03a0-4666-93c7-5368a484176c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":16,\"y\":29,\"w\":8,\"h\":9,\"i\":\"69d4aca4-b1b7-454e-9150-9b6f6cecf1dd\"},\"panelIndex\":\"69d4aca4-b1b7-454e-9150-9b6f6cecf1dd\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":24,\"y\":29,\"w\":8,\"h\":9,\"i\":\"3467aa3f-97a5-41b1-81d1-93c341cde9d2\"},\"panelIndex\":\"3467aa3f-97a5-41b1-81d1-93c341cde9d2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":32,\"y\":29,\"w\":8,\"h\":9,\"i\":\"9a0ac9e3-065c-4c99-bd5e-27fb853527e5\"},\"panelIndex\":\"9a0ac9e3-065c-4c99-bd5e-27fb853527e5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":40,\"y\":29,\"w\":8,\"h\":18,\"i\":\"016a4e10-7fba-48d4-82c2-e3a95009dd1d\"},\"panelIndex\":\"016a4e10-7fba-48d4-82c2-e3a95009dd1d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":0,\"y\":38,\"w\":8,\"h\":9,\"i\":\"c82584a3-efd5-4c0c-bad9-fcac2705a3dd\"},\"panelIndex\":\"c82584a3-efd5-4c0c-bad9-fcac2705a3dd\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":8,\"y\":38,\"w\":8,\"h\":9,\"i\":\"ffb7812e-e5e9-41e9-92e7-4296fd84765f\"},\"panelIndex\":\"ffb7812e-e5e9-41e9-92e7-4296fd84765f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":16,\"y\":38,\"w\":8,\"h\":9,\"i\":\"6ceca272-987e-4e3d-a37d-3f3d51b1ae7d\"},\"panelIndex\":\"6ceca272-987e-4e3d-a37d-3f3d51b1ae7d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":24,\"y\":38,\"w\":8,\"h\":9,\"i\":\"ae25aca4-972b-43aa-b86f-13697e35dbe4\"},\"panelIndex\":\"ae25aca4-972b-43aa-b86f-13697e35dbe4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":32,\"y\":38,\"w\":8,\"h\":9,\"i\":\"5069945c-e704-4597-847e-0f5cbbfa8875\"},\"panelIndex\":\"5069945c-e704-4597-847e-0f5cbbfa8875\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"2.15.0\",\"gridData\":{\"x\":0,\"y\":47,\"w\":48,\"h\":31,\"i\":\"ea0a7632-a286-45bb-86e7-53820165b380\"},\"panelIndex\":\"ea0a7632-a286-45bb-86e7-53820165b380\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"}]",
+        "optionsJSON": "{\"useMargins\":true}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "references": [
+        {
+          "name": "panel_0",
+          "type": "visualization",
+          "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3"
+        },
+        {
+          "name": "panel_1",
+          "type": "visualization",
+          "id": "a9280ba0-45f6-11ef-8b66-a5760b606a5c"
+        },
+        {
+          "name": "panel_2",
+          "type": "visualization",
+          "id": "fd6bda70-45f6-11ef-8b66-a5760b606a5c"
+        },
+        {
+          "name": "panel_3",
+          "type": "visualization",
+          "id": "45ebc520-45f8-11ef-8b66-a5760b606a5c"
+        },
+        {
+          "name": "panel_4",
+          "type": "visualization",
+          "id": "5becdb70-45f8-11ef-8b66-a5760b606a5c"
+        },
+        {
+          "name": "panel_5",
+          "type": "visualization",
+          "id": "5b4b12a0-45f7-11ef-8b66-a5760b606a5c"
+        },
+        {
+          "name": "panel_6",
+          "type": "visualization",
+          "id": "876b02a0-4606-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_7",
+          "type": "visualization",
+          "id": "d5f92dc0-4606-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_8",
+          "type": "visualization",
+          "id": "c7369a80-4605-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_9",
+          "type": "visualization",
+          "id": "36f21e80-4606-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_10",
+          "type": "visualization",
+          "id": "9aa530c0-4606-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_11",
+          "type": "visualization",
+          "id": "c3279000-4607-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_12",
+          "type": "visualization",
+          "id": "88fc6d80-4605-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_13",
+          "type": "visualization",
+          "id": "76ae2600-4605-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_14",
+          "type": "visualization",
+          "id": "e33ab130-4605-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_15",
+          "type": "visualization",
+          "id": "6653c9d0-4606-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_16",
+          "type": "visualization",
+          "id": "18b427f0-4607-11ef-99a0-6115b852b945"
+        },
+        {
+          "name": "panel_17",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      }
+    },
+    {
+      "id": "df9e399b-efa5-4e33-b0ac-a7668a8ac2b3",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:29.210Z",
+      "version": "Wzg3NywxXQ==",
+      "attributes": {
+        "title": "Navigation",
+        "visState": "{\"title\":\"Navigation\",\"type\":\"markdown\",\"params\":{\"markdown\":\"### General Network Logs\\n[Overview](#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Files](#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)  \\n[Executables](#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)  \\n[Software](#/dashboard/87d990cc-9e0b-41e5-b8fe-b10ae1da0c85)  \\n[Zeek Known Summary](#/dashboard/89d1cc50-974c-11ed-bb6b-3fb06c879b11)  \\n[Zeek Intelligence](#/dashboard/36ed695f-edcc-47c1-b0ec-50d20c93ce0f)  \\n[Zeek Notices](#/dashboard/f1f09567-fc7f-450b-a341-19d2f2bb468b)  \\n[Zeek Weird](#/dashboard/1fff49f6-0199-4a0f-820b-721aff9ff1f1)  \\n[Signatures](#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)  \\n[Suricata Alerts](#/dashboard/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)  \\n[Asset Interaction Analysis](#/dashboard/677ee170-809e-11ed-8d5b-07069f823b6f)  \\n[↪ NetBox](/netbox/)  \\n[↪ Arkime](/arkime/)  \\n\\n### Common Protocols\\n[DCE/RPC](#/dashboard/432af556-c5c0-4cc3-8166-b274b4e3a406)   ●   [DHCP](#/dashboard/2d98bb8e-214c-4374-837b-20e1bcd63a5e)   ●   [DNS](#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [FTP](#/dashboard/078b9aa5-9bd4-4f02-ae5e-cf80fa6f887b) / [TFTP](#/dashboard/bf5efbb0-60f1-11eb-9d60-dbf0411cfc48)   ●   [HTTP](#/dashboard/37041ee1-79c0-4684-a436-3173b0e89876)   ●   [IRC](#/dashboard/76f2f912-80da-44cd-ab66-6a73c8344cc3)   ●   [Kerberos](#/dashboard/82da3101-2a9c-4ae2-bb61-d447a3fbe673)   ●   [LDAP](#/dashboard/05e3e000-f118-11e9-acda-83a8e29e1a24)   ●   [MQTT](#/dashboard/87a32f90-ef58-11e9-974e-9d600036d105)   ●   [MySQL](#/dashboard/50ced171-1b10-4c3f-8b67-2db9635661a6)   ●   [NTLM](#/dashboard/543118a9-02d7-43fe-b669-b8652177fc37)   ●   [NTP](#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [OSPF](#/dashboard/1cc01ff0-5205-11ec-a62c-7bc80e88f3f0)   ●   [QUIC](#/dashboard/11ddd980-e388-11e9-b568-cf17de8e860c)   ●   [RADIUS](#/dashboard/ae79b7d1-4281-4095-b2f6-fa7eafda9970)   ●   [RDP](#/dashboard/7f41913f-cba8-43f5-82a8-241b7ead03e0)   ●   [RFB](#/dashboard/f77bf097-18a8-465c-b634-eb2acc7a4f26)   ●   [SIP](#/dashboard/0b2354ae-0fe9-4fd9-b156-1c3870e5c7aa)   ●   [SMB](#/dashboard/42e831b9-41a9-4f35-8b7d-e1566d368773)   ●   [SMTP](#/dashboard/bb827f8e-639e-468c-93c8-9f5bc132eb8f)   ●   [SNMP](#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   ●   [SSH](#/dashboard/caef3ade-d289-4d05-a511-149f3e97f238)   ●   [SSL](#/dashboard/7f77b58a-df3e-4cc2-b782-fd7f8bad8ffb) / [X.509 Certificates](#/dashboard/024062a6-48d6-498f-a91a-3bf2da3a3cd3)   ●   [STUN](#/dashboard/fa477130-2b8a-11ec-a9f2-3911c8571bfd)   ●   [Syslog](#/dashboard/92985909-dc29-4533-9e80-d3182a0ecf1d)   ●   [TDS](#/dashboard/bed185a0-ef82-11e9-b38a-2db3ee640e88) / [TDS RPC](#/dashboard/32587740-ef88-11e9-b38a-2db3ee640e88) / [TDS SQL](#/dashboard/fa141950-ef89-11e9-b38a-2db3ee640e88)   ●   [Telnet / rlogin / rsh](#/dashboard/c2549e10-7f2e-11ea-9f8a-1fe1327e2cd2)   ●   [Tunnels](#/dashboard/11be6381-beef-40a7-bdce-88c5398392fc)\\n\\n### ICS/IoT Protocols\\n[BACnet](#/dashboard/2bec1490-eb94-11e9-a384-0fcf32210194)   ●   [BSAP](#/dashboard/ca5799a0-56b5-11eb-b749-576de068f8ad)   ●   [DNP3](#/dashboard/870a5862-6c26-4a08-99fd-0c06cda85ba3)   ●   [EtherCAT](#/dashboard/4a073440-b286-11eb-a4d4-09fa12a6ebd4)   ●   [EtherNet/IP](#/dashboard/29a1b290-eb98-11e9-a384-0fcf32210194)   ●   [GENISYS](#/dashboard/03207c00-d07e-11ec-b4a7-d1b4003706b7)   ●   [GE SRTP](#/dashboard/e233a570-45d9-11ef-96a6-432365601033)   ●   [Modbus](#/dashboard/152f29dc-51a2-4f53-93e9-6e92765567b8)   ●   [OPCUA Binary](#/dashboard/dd87edd0-796a-11ec-9ce6-b395c1ff58f4)   ●   [PROFINET](#/dashboard/a7514350-eba6-11e9-a384-0fcf32210194)   ●   [S7comm](#/dashboard/e76d05c0-eb9f-11e9-a384-0fcf32210194)   ●   [Synchrophasor](#/dashboard/2cc56240-e460-11ed-a9d5-9f591c284cb4)   ●   [Best Guess](#/dashboard/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)\\n\\n### Malcolm and Third-Party Logs\\n\\nResources: [System Overview](#/dashboard/Metricbeat-system-overview-ecs) / [Host Overview](#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs)   ●   [Hardware Temperature](#/dashboard/0d4955f0-eb25-11ec-a6d4-b3526526c2c7)   ●   nginx [Overview](#/dashboard/55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs) / [Access and Error Logs](#/dashboard/046212a0-a2a1-11e7-928f-5dbe6f6f5519-ecs)   ●   Linux [Journald](#/dashboard/f6600310-9943-11ee-a029-e973f4774355) / [Kernel Messages](#/dashboard/3768ef70-d819-11ee-820d-dd9fd73a3921)   ●   [Windows Events](#/dashboard/79202ee0-d811-11ee-820d-dd9fd73a3921)   ●   [Malcolm Sensor File Integrity](#/dashboard/903f42c0-f634-11ec-828d-2fb7a4a26e1f)   ●   [Malcolm Sensor Audit Logs](#/dashboard/7a7e0a60-e8e8-11ec-b9d4-4569bb965430)   ●   [Packet Capture Statistics](#/dashboard/4ca94c70-d7da-11ee-9ed3-e7afff29e59a)\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false},\"aggs\":[]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      },
+      "references": [],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "a9280ba0-45f6-11ef-8b66-a5760b606a5c",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgwNSwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Log Count",
+        "visState": "{\"title\":\"GE SRTP - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":false},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":30}}}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "fd6bda70-45f6-11ef-8b66-a5760b606a5c",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgwNiwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Logs Over Time",
+        "visState": "{\"title\":\"GE SRTP - Logs Over Time\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"date_histogram\",\"params\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"timeRange\":{\"from\":\"now-15y\",\"to\":\"now\"},\"useNormalizedOpenSearchInterval\":true,\"scaleMetricValues\":false,\"interval\":\"auto\",\"drop_partials\":false,\"min_doc_count\":1,\"extended_bounds\":{},\"customLabel\":\"Logs Over Time\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":false},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":false},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"}}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "45ebc520-45f8-11ef-8b66-a5760b606a5c",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgwNywxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Source IP",
+        "visState": "{\"title\":\"GE SRTP - Source IP\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "5becdb70-45f8-11ef-8b66-a5760b606a5c",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgwOCwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Destination IP",
+        "visState": "{\"title\":\"GE SRTP - Destination IP\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "5b4b12a0-45f7-11ef-8b66-a5760b606a5c",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgwOSwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Actions and Results",
+        "visState": "{\"title\":\"GE SRTP - Actions and Results\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.action\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Action\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.result\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Result\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "876b02a0-4606-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:42:14.529Z",
+      "version": "WzEwMTQsMV0=",
+      "attributes": {
+        "title": "GE SRTP - Panel Run Switch",
+        "visState": "{\"title\":\"GE SRTP - Panel Run Switch\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.front_panel_run_switch\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"RUN switch\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "d5f92dc0-4606-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:41:53.222Z",
+      "version": "WzEwMTMsMV0=",
+      "attributes": {
+        "title": "GE SRTP - Panel Enable Switch",
+        "visState": "{\"title\":\"GE SRTP - Panel Enable Switch\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.front_panel_enable_switch\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Outputs enabled\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "c7369a80-4605-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:33:30.280Z",
+      "version": "WzEwMDEsMV0=",
+      "attributes": {
+        "title": "GE SRTP - PLC Fault Entry Present",
+        "visState": "{\"title\":\"GE SRTP - PLC Fault Entry Present\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.plc_fault_entry_present\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Entries exist in PLC fault table\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "36f21e80-4606-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:37:12.390Z",
+      "version": "WzEwMDYsMV0=",
+      "attributes": {
+        "title": "GE SRTP - I/O Fault Entry Present",
+        "visState": "{\"title\":\"GE SRTP - I/O Fault Entry Present\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.io_fault_entry_present\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Entries exist in I/O fault table\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "9aa530c0-4606-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:39:25.004Z",
+      "version": "WzEwMTAsMV0=",
+      "attributes": {
+        "title": "GE SRTP - Programmer Attachment",
+        "visState": "{\"title\":\"GE SRTP - Programmer Attachment\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.programmer_attachment\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Programmer attachment found\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "c3279000-4607-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:47:42.464Z",
+      "version": "WzEwMTgsMV0=",
+      "attributes": {
+        "title": "GE SRTP - PLC State",
+        "visState": "{\"title\":\"GE SRTP - PLC State\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.plc_state\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PLC State\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "88fc6d80-4605-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:32:26.797Z",
+      "version": "Wzk5OCwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Constant Sweep Mode",
+        "visState": "{\"title\":\"GE SRTP - Constant Sweep Mode\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.constant_sweep_mode\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Constant sweep mode active\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "76ae2600-4605-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:31:15.167Z",
+      "version": "Wzk5NiwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Oversweep Flag",
+        "visState": "{\"title\":\"GE SRTP - Oversweep Flag\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.oversweep_flag\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Constant sweep value exceeded\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "e33ab130-4605-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:36:20.606Z",
+      "version": "WzEwMDQsMV0=",
+      "attributes": {
+        "title": "GE SRTP - PLC Fault Table Changed",
+        "visState": "{\"title\":\"GE SRTP - PLC Fault Table Changed\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.plc_fault_entry_last_read\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"PLC fault table changed since last read\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "6653c9d0-4606-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:38:32.764Z",
+      "version": "WzEwMDgsMV0=",
+      "attributes": {
+        "title": "GE SRTP - I/O Fault Table Changed",
+        "visState": "{\"title\":\"GE SRTP - I/O Fault Table Changed\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.io_fault_entry_last_read\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"I/O fault table changed since last read\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "18b427f0-4607-11ef-99a0-6115b852b945",
+      "type": "visualization",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:42:56.495Z",
+      "version": "WzEwMTYsMV0=",
+      "attributes": {
+        "title": "GE SRTP - OEM Protection",
+        "visState": "{\"title\":\"GE SRTP - OEM Protection\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.ge_srtp.oem_protected\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"OEM protected\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":true,\"truncate\":100},\"row\":true}}",
+        "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0"
+      },
+      "references": [
+        {
+          "name": "search_0",
+          "type": "search",
+          "id": "69d71da0-45d9-11ef-96a6-432365601033"
+        }
+      ],
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      }
+    },
+    {
+      "id": "69d71da0-45d9-11ef-96a6-432365601033",
+      "type": "search",
+      "namespaces": [
+        "default"
+      ],
+      "updated_at": "2024-07-19T19:23:22.091Z",
+      "version": "WzgxMCwxXQ==",
+      "attributes": {
+        "title": "GE SRTP - Logs",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "source.ip",
+          "destination.ip",
+          "zeek.ge_srtp.srtp_type",
+          "zeek.ge_srtp.segment_selector",
+          "zeek.ge_srtp.memory_offset",
+          "zeek.ge_srtp.data_length",
+          "zeek.ge_srtp.sequence_number_1",
+          "zeek.ge_srtp.sequence_number_2",
+          "zeek.ge_srtp.packet_number",
+          "zeek.ge_srtp.total_packet_number",
+          "event.action",
+          "event.result",
+          "zeek.ge_srtp.plc_state",
+          "event.id"
+        ],
+        "sort": [],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.provider:zeek AND event.dataset:ge_srtp\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        }
+      },
+      "references": [
+        {
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern",
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
+        }
+      ],
+      "migrationVersion": {
+        "search": "7.9.3"
+      }
+    }
+  ]
+}

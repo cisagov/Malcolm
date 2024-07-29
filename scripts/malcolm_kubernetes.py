@@ -138,12 +138,6 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
         },
     ],
-    'netbox-netmap-json': [
-        {
-            'secret': False,
-            'path': os.path.join(MalcolmPath, 'net-map.json'),
-        },
-    ],
     'netbox-config': [
         {
             'secret': False,
@@ -518,7 +512,9 @@ def PodExec(
 
                 err = None
                 if yamlImported := YAMLDynamic():
-                    err = yamlImported.safe_load(resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL))
+                    err = yamlImported.YAML(typ='safe', pure=True).load(
+                        resp.read_channel(kubeImported.stream.ws_client.ERROR_CHANNEL)
+                    )
 
                 if not err:
                     err = {}
@@ -847,7 +843,7 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
             # check to make sure the container in this YAML file belongs to this profile
             containerBelongsInProfile = True
             with open(yamlName, 'r') as manYamlFile:
-                if manYamlFileContents := list(yamlImported.safe_load_all(manYamlFile)):
+                if manYamlFileContents := list(yamlImported.YAML(typ='safe', pure=True).load_all(manYamlFile)):
                     for doc in manYamlFileContents:
                         if (
                             containers := [
@@ -903,7 +899,7 @@ def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):
         )
         for yamlName in yamlFiles:
             with open(yamlName, 'r') as cf:
-                allYamlContents.extend(list(yamlImported.safe_load_all(cf)))
+                allYamlContents.extend(list(yamlImported.YAML(typ='safe', pure=True).safe_load_all(cf)))
         for name, kind in REQUIRED_VOLUME_OBJECTS[profile].items():
             for doc in allYamlContents:
                 if (

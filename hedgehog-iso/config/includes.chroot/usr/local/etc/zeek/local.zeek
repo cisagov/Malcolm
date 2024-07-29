@@ -37,6 +37,7 @@ global disable_ics_dnp3 = (getenv("ZEEK_DISABLE_ICS_DNP3") == true_regex) ? T : 
 global disable_ics_enip = (getenv("ZEEK_DISABLE_ICS_ENIP") == true_regex) ? T : F;
 global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex) ? T : F;
 global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == true_regex) ? T : F;
+global disable_ics_ge_srtp = (getenv("ZEEK_DISABLE_ICS_GE_SRTP") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
@@ -146,6 +147,9 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_genisys) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_GENISYS_TCP);
+  }
+  if (disable_ics_all || disable_ics_ge_srtp) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GE_SRTP_TCP);
   }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);

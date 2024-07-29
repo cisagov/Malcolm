@@ -458,6 +458,18 @@ def pushd(directory):
 
 
 ###################################################################################################
+# "chown -R" a file or directory
+def ChownRecursive(path, uid, gid):
+    os.chown(path, int(uid), int(gid))
+    if os.path.isdir(path):
+        for dirpath, dirnames, filenames in os.walk(path, followlinks=False):
+            for dname in dirnames:
+                os.chown(os.path.join(dirpath, dname), int(uid), int(gid))
+            for fname in filenames:
+                os.chown(os.path.join(dirpath, fname), int(uid), int(gid), follow_symlinks=False)
+
+
+###################################################################################################
 # recursively remove empty subfolders
 def RemoveEmptyFolders(path, removeRoot=True):
     if not os.path.isdir(path):

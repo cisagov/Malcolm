@@ -36,6 +36,7 @@ sudo apt-get -y -q --no-install-recommends install \
     python3-dialog \
     python3-dotenv \
     python3-requests \
+    python3-ruamel.yaml \
     ripgrep \
     rsync \
     socat \

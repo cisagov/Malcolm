@@ -43,7 +43,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     amazon-ebs: output will be in this color.
 
     ==> amazon-ebs: Prevalidating any provided VPC information
-    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v24.06.0-arm64-2024-05-30T13-57-31Z
+    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v24.07.0-arm64-2024-05-30T13-57-31Z
         amazon-ebs: Found Image ID: ami-xxxxxxxxxxxxxxxxx
 
     ...
@@ -53,7 +53,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     ==> amazon-ebs: Adding tags to AMI (ami-xxxxxxxxxxxxxxxxx)...
     ==> amazon-ebs: Tagging snapshot: snap-xxxxxxxxxxxxxxxxx
     ==> amazon-ebs: Creating AMI tags
-        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v24.06.0"
+        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v24.07.0"
         amazon-ebs: Adding tag: "source_ami_name": "amzn2-ami-kernel-5.10-hvm-2.0.20240521.0-arm64-gp2"
     ==> amazon-ebs: Creating snapshot tags
     ==> amazon-ebs: Terminating the source AWS instance...
@@ -79,7 +79,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                 "Architecture": "arm64",
                 "CreationDate": "2024-05-30T14:02:21.000Z",
                 "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-                "ImageLocation": "xxxxxxxxxxxx/malcolm-v24.06.0-arm64-2024-05-30T13-57-31Z",
+                "ImageLocation": "xxxxxxxxxxxx/malcolm-v24.07.0-arm64-2024-05-30T13-57-31Z",
                 "ImageType": "machine",
                 "Public": false,
                 "OwnerId": "xxxxxxxxxxxx",
@@ -100,14 +100,14 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                 ],
                 "EnaSupport": true,
                 "Hypervisor": "xen",
-                "Name": "malcolm-v24.06.0-arm64-2024-05-30T13-57-31Z",
+                "Name": "malcolm-v24.07.0-arm64-2024-05-30T13-57-31Z",
                 "RootDeviceName": "/dev/xvda",
                 "RootDeviceType": "ebs",
                 "SriovNetSupport": "simple",
                 "Tags": [
                     {
                         "Key": "Malcolm",
-                        "Value": "idaholab/Malcolm/v24.06.0"
+                        "Value": "idaholab/Malcolm/v24.07.0"
                     },
                     {
                         "Key": "source_ami_name",
