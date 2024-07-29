@@ -6,111 +6,544 @@ There are several ways to customize Malcolm's runtime behavior via local changes
 
 Some configuration changes can be put in place by modifying local copies of configuration files and then using a [Docker bind mount](https://docs.docker.com/storage/bind-mounts/) to overlay the modified file onto the running Malcolm container. This is already done for many files and directories used to persist Malcolm configuration and data. For example, the default list of bind mounted files and directories for each Malcolm service is as follows:
 
-```
-$ grep -P "^(      - ./|  [\w-]+:)" docker-compose.yml
-opensearch:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-    - ./opensearch:/usr/share/opensearch/data
-    - ./opensearch-backup:/opt/opensearch/backup
-    - ./opensearch/opensearch.keystore:/usr/share/opensearch/config/persist/opensearch.keystore:rw
-dashboards-helper:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-dashboards:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-logstash:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./.opensearch.secondary.curlrc:/var/local/curlrc/.opensearch.secondary.curlrc:ro
-    - ./logstash/maps/malcolm_severity.yaml:/etc/malcolm_severity.yaml:ro
-    - ./logstash/certs/ca.crt:/certs/ca.crt:ro
-    - ./logstash/certs/server.crt:/certs/server.crt:ro
-    - ./logstash/certs/server.key:/certs/server.key:ro
-filebeat:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./zeek-logs:/zeek
-    - ./suricata-logs:/suricata
-    - ./filebeat/certs/ca.crt:/certs/ca.crt:ro
-    - ./filebeat/certs/client.crt:/certs/client.crt:ro
-    - ./filebeat/certs/client.key:/certs/client.key:ro
-arkime:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./pcap:/data/pcap
-zeek:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./pcap:/pcap
-    - ./zeek-logs/upload:/zeek/upload
-    - ./zeek-logs/extract_files:/zeek/extract_files
-    - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-    - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
-zeek-live:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./zeek-logs/live:/zeek/live
-    - ./zeek-logs/extract_files:/zeek/extract_files
-    - ./zeek/intel:/opt/zeek/share/zeek/site/intel
-    - ./zeek/custom:/opt/zeek/share/zeek/site/custom:ro
-suricata:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./suricata-logs:/var/log/suricata
-    - ./pcap:/data/pcap
-    - ./suricata/rules:/opt/suricata/rules:ro
-    - ./suricata/include-configs:/opt/suricata/include-configs:ro
-suricata-live:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./suricata-logs:/var/log/suricata
-    - ./suricata/rules:/opt/suricata/rules:ro
-    - ./suricata/include-configs:/opt/suricata/include-configs:ro
-file-monitor:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./zeek-logs/extract_files:/zeek/extract_files
-    - ./zeek-logs/current:/zeek/logs
-    - ./yara/rules:/yara-rules/custom:ro
-pcap-capture:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./pcap/upload:/pcap
-pcap-monitor:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-    - ./zeek-logs:/zeek
-    - ./pcap:/pcap
-upload:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./pcap/upload:/var/www/upload/server/php/chroot/files
-htadmin:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./htadmin/config.ini:/var/www/htadmin/config/config.ini:rw
-    - ./htadmin/metadata:/var/www/htadmin/config/metadata:rw
-    - ./nginx/htpasswd:/var/www/htadmin/auth/htpasswd:rw
-freq:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-netbox:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./netbox/config:/etc/netbox/config:ro
-    - ./netbox/media:/opt/netbox/netbox/media:rw
-    - ./net-map.json:/usr/local/share/net-map.json:ro
-netbox-postgres:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./netbox/postgres:/var/lib/postgresql/data:rw
-netbox-redis:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./netbox/redis:/data
-netbox-redis-cache:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-api:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./.opensearch.primary.curlrc:/var/local/curlrc/.opensearch.primary.curlrc:ro
-nginx-proxy:
-    - ./nginx/ca-trust:/var/local/ca-trust:ro
-    - ./nginx/nginx_ldap.conf:/etc/nginx/nginx_ldap.conf:ro
-    - ./nginx/htpasswd:/etc/nginx/auth/htpasswd:ro
-    - ./nginx/certs:/etc/nginx/certs:ro
-    - ./nginx/certs/dhparam.pem:/etc/nginx/dhparam/dhparam.pem:ro
+`$ yq eval '.services = (.services | with_entries(.value = {"volumes": .value.volumes}))' docker-compose.yml`
+```yaml
+services:
+  opensearch:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.secondary.curlrc
+        target: /var/local/curlrc/.opensearch.secondary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./opensearch
+        target: /usr/share/opensearch/data
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./opensearch-backup
+        target: /opt/opensearch/backup
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./opensearch/opensearch.keystore
+        target: /usr/share/opensearch/config/persist/opensearch.keystore
+  dashboards-helper:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.secondary.curlrc
+        target: /var/local/curlrc/.opensearch.secondary.curlrc
+        read_only: true
+  dashboards:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+  logstash:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.secondary.curlrc
+        target: /var/local/curlrc/.opensearch.secondary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./logstash/maps/malcolm_severity.yaml
+        target: /etc/malcolm_severity.yaml
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./logstash/certs/ca.crt
+        target: /certs/ca.crt
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./logstash/certs/server.crt
+        target: /certs/server.crt
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./logstash/certs/server.key
+        target: /certs/server.key
+        read_only: true
+  filebeat:
+    volumes:
+      - nginx-log-path:/nginx:ro
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs
+        target: /zeek
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata-logs
+        target: /suricata
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./filebeat/certs/ca.crt
+        target: /certs/ca.crt
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./filebeat/certs/client.crt
+        target: /certs/client.crt
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./filebeat/certs/client.key
+        target: /certs/client.key
+        read_only: true
+  arkime:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/rules
+        target: /opt/arkime/rules
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap
+        target: /data/pcap
+  arkime-live:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/rules
+        target: /opt/arkime/rules
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap
+        target: /data/pcap
+  zeek:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap
+        target: /pcap
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/upload
+        target: /zeek/upload
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/extract_files
+        target: /zeek/extract_files
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek/intel
+        target: /opt/zeek/share/zeek/site/intel
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek/custom
+        target: /opt/zeek/share/zeek/site/custom
+        read_only: true
+  zeek-live:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/live
+        target: /zeek/live
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/extract_files
+        target: /zeek/extract_files
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek/intel
+        target: /opt/zeek/share/zeek/site/intel
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek/custom
+        target: /opt/zeek/share/zeek/site/custom
+        read_only: true
+  suricata:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata-logs
+        target: /var/log/suricata
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap
+        target: /data/pcap
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata/rules
+        target: /opt/suricata/rules
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata/include-configs
+        target: /opt/suricata/include-configs
+        read_only: true
+  suricata-live:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata-logs
+        target: /var/log/suricata
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata/rules
+        target: /opt/suricata/rules
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./suricata/include-configs
+        target: /opt/suricata/include-configs
+        read_only: true
+  file-monitor:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/extract_files
+        target: /zeek/extract_files
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs/current
+        target: /zeek/logs
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./yara/rules
+        target: /yara-rules/custom
+        read_only: true
+  pcap-capture:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap/upload
+        target: /pcap
+  pcap-monitor:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./zeek-logs
+        target: /zeek
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap
+        target: /pcap
+  upload:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./pcap/upload
+        target: /var/www/upload/server/php/chroot/files
+  htadmin:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./htadmin/config.ini
+        target: /var/www/htadmin/config/config.ini
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./htadmin/metadata
+        target: /var/www/htadmin/config/metadata
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/htpasswd
+        target: /var/www/htadmin/auth/htpasswd
+  freq:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+  netbox:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/config
+        target: /etc/netbox/config
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/media
+        target: /opt/netbox/netbox/media
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/preload
+        target: /opt/netbox-preload/configmap
+        read_only: true
+  netbox-postgres:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/postgres
+        target: /var/lib/postgresql/data
+  netbox-redis:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/redis
+        target: /data
+  netbox-redis-cache:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+  api:
+    volumes:
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./.opensearch.primary.curlrc
+        target: /var/local/curlrc/.opensearch.primary.curlrc
+        read_only: true
+  nginx-proxy:
+    volumes:
+      - nginx-log-path:/var/log/nginx
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/ca-trust
+        target: /var/local/ca-trust
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/nginx_ldap.conf
+        target: /etc/nginx/nginx_ldap.conf
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/htpasswd
+        target: /etc/nginx/auth/htpasswd
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/certs
+        target: /etc/nginx/certs
+        read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./nginx/certs/dhparam.pem
+        target: /etc/nginx/dhparam/dhparam.pem
+        read_only: true
 ```
 
 So, for example, if a user wanted to make a change to the `nginx-proxy` container's `nginx.conf` file, they could add the following line to the `volumes:` section of the `nginx-proxy` service in the `docker-compose.yml` file:

@@ -32,13 +32,20 @@ elif $GREP -q Microsoft /proc/version; then
   fi
 fi
 
+IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
+CONFIG_FILE_TMP=
 if [[ -f "$1" ]]; then
   CONFIG_FILE="$1"
+  IMAGE_ARCH_SUFFIX_NEEDED=0
   shift # use remainder of arguments for services
 else
   CONFIG_FILE="docker-compose-dev.yml"
+  if [[ -n "$IMAGE_ARCH_SUFFIX" ]]; then
+    TMP_UID="$(tr -dc A-Za-z0-9 </dev/urandom 2>/dev/null | head -c 8; echo)"
+    (( ${#TMP_UID} == 8 )) || TMP_UID=$RANDOM
+    CONFIG_FILE_TMP="docker-compose-dev-$TMP_UID.yml"
+  fi
 fi
-DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
 
 function filesize_in_image() {
   FILESPEC="$2"
@@ -53,9 +60,21 @@ function dirsize_in_image() {
   echo $(($KBYTES * 1024))
 }
 
+function _cleanup {
+  [[ -f "$CONFIG_FILE_TMP" ]] && rm -f "$CONFIG_FILE_TMP"
+}
+
 # force-navigate to Malcolm base directory (parent of scripts/ directory)
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
+
+# if we need to, make sure the images in the config file has the right arch suffix on them
+if [[ -n "$CONFIG_FILE_TMP" ]] && [[ -n "$IMAGE_ARCH_SUFFIX" ]]; then
+  cp "$CONFIG_FILE" "$CONFIG_FILE_TMP"
+  sed -i "/^[[:space:]]*image:/ s/\$/$IMAGE_ARCH_SUFFIX/" "$CONFIG_FILE_TMP"
+  CONFIG_FILE="$CONFIG_FILE_TMP"
+fi
+trap "_cleanup" EXIT
 
 # make sure docker is installed, at this point it's required
 if ! $DOCKER_BIN info >/dev/null 2>&1 ; then
@@ -100,6 +119,7 @@ else
 fi
 
 # build the image(s)
+DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
   $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else

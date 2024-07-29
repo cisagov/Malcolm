@@ -33,6 +33,7 @@ from collections import defaultdict, namedtuple
 
 from malcolm_common import (
     AskForString,
+    BoundPathReplacer,
     ChooseMultiple,
     ChooseOne,
     DetermineYamlFileFormat,
@@ -42,8 +43,10 @@ from malcolm_common import (
     DOCKER_INSTALL_URLS,
     DotEnvDynamic,
     DownloadToFile,
+    DumpYaml,
     HOMEBREW_INSTALL_URLS,
     KubernetesDynamic,
+    LoadYaml,
     MalcolmCfgRunOnceFile,
     MalcolmPath,
     OrchestrationFramework,
@@ -58,7 +61,6 @@ from malcolm_common import (
     PROFILE_MALCOLM,
     PROFILE_HEDGEHOG,
     PROFILE_KEY,
-    ReplaceBindMountLocation,
     RequestsDynamic,
     ScriptPath,
     UserInputDefaultsBehavior,
@@ -67,6 +69,7 @@ from malcolm_common import (
     YesOrNo,
 )
 from malcolm_utils import (
+    ChownRecursive,
     CountUntilException,
     DatabaseMode,
     DATABASE_MODE_LABELS,
@@ -75,6 +78,7 @@ from malcolm_utils import (
     MALCOLM_PCAP_DIR,
     MALCOLM_LOGS_DIR,
     deep_get,
+    deep_set,
     eprint,
     flatten,
     LoadFileIfJson,
@@ -228,6 +232,34 @@ def InstallerDisplayMessage(
         defaultBehavior=defBehavior,
         uiMode=uiMode,
     )
+
+
+def DetermineUid(
+    scriptUser,
+    scriptPlatform,
+    referencePath,
+):
+    defaultUid = '1000'
+    defaultGid = '1000'
+    if ((scriptPlatform == PLATFORM_LINUX) or (scriptPlatform == PLATFORM_MAC)) and (scriptUser == "root"):
+        if pathUid := os.stat(referencePath).st_uid:
+            defaultUid = str(pathUid)
+        if pathGid := os.stat(referencePath).st_gid:
+            defaultGid = str(pathGid)
+
+    uid = defaultUid
+    gid = defaultGid
+    try:
+        if scriptPlatform == PLATFORM_LINUX:
+            uid = str(os.getuid())
+            gid = str(os.getgid())
+            if (uid == '0') or (gid == '0'):
+                raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
+    except Exception:
+        uid = defaultUid
+        gid = defaultGid
+
+    return uid, gid
 
 
 ###################################################################################################
@@ -397,11 +429,14 @@ class Installer(object):
                 if self.debug:
                     eprint(f"Created {installPath} for Malcolm runtime files")
 
+                # extract the .tar.gz and chown the results
+                extUid, extGid = DetermineUid(self.scriptUser, self.platform, malcolm_install_file)
                 tar = tarfile.open(malcolm_install_file)
                 try:
                     tar.extractall(path=installPath, numeric_owner=True)
                 finally:
                     tar.close()
+                ChownRecursive(installPath, extUid, extGid)
 
                 # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level
                 childDir = glob.glob(f'{installPath}/*/')
@@ -462,26 +497,8 @@ class Installer(object):
         if (not args.configDir) or (not os.path.isdir(args.configDir)):
             raise Exception("Could not determine configuration directory containing Malcolm's .env files")
 
-        # figure out what UID/GID to run non-rood processes under docker as
-        defaultUid = '1000'
-        defaultGid = '1000'
-        if ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC)) and (self.scriptUser == "root"):
-            if pathUid := os.stat(malcolm_install_path).st_uid:
-                defaultUid = str(pathUid)
-            if pathGid := os.stat(malcolm_install_path).st_gid:
-                defaultGid = str(pathGid)
-
-        puid = defaultUid
-        pgid = defaultGid
-        try:
-            if self.platform == PLATFORM_LINUX:
-                puid = str(os.getuid())
-                pgid = str(os.getgid())
-                if (puid == '0') or (pgid == '0'):
-                    raise Exception('it is preferrable not to run Malcolm as root, prompting for UID/GID instead')
-        except Exception:
-            puid = defaultUid
-            pgid = defaultGid
+        # figure out what UID/GID to run non-root processes under docker as
+        puid, pgid = DetermineUid(self.scriptUser, self.platform, malcolm_install_path)
 
         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid UID/GID')
         while (
@@ -753,8 +770,6 @@ class Installer(object):
                 )
         else:
             restartMode = 'no'
-        if restartMode == 'no':
-            restartMode = '"no"'
 
         if malcolmProfile == PROFILE_MALCOLM:
             nginxSSL = InstallerYesOrNo('Require encrypted HTTPS connections?', default=args.nginxSSL)
@@ -2152,365 +2167,203 @@ class Installer(object):
                 os.chown(envFile, int(puid), int(pgid))
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+
             # modify docker-compose specific values (port mappings, volume bind mounts, etc.) in-place in docker-compose files
             for composeFile in configFiles:
+
                 # save off owner of original files
                 composeFileStat = os.stat(composeFile)
                 origUid, origGuid = composeFileStat[4], composeFileStat[5]
-                composeFileHandle = fileinput.FileInput(composeFile, inplace=True, backup=None)
                 try:
-                    sectionIndents = defaultdict(lambda: '  ')
-                    currentSection = None
-                    currentService = None
-                    networkWritten = False
 
-                    for line in composeFileHandle:
-                        line = line.rstrip("\n")
-                        skipLine = False
-                        sectionStartLine = False
-                        serviceStartLine = False
+                    # load the docker-compose file
+                    data = LoadYaml(composeFile)
 
-                        # it would be cleaner to use something like PyYAML to do this, but I want to have as few dependencies
-                        # as possible so we're going to do it janky instead. Also, as of right now pyyaml doesn't preserve
-                        # comments, which is a big deal for this complicated docker-compose file. There is
-                        # https://pypi.org/project/ruamel.yaml to possibly consider if we're comfortable with the dependency.
+                    if 'services' in data:
 
-                        # determine which section of the compose file we are in (e.g., services, networks, volumes, etc.)
-                        sectionMatch = re.match(r'^([^\s#]+):\s*(#.*)?$', line)
-                        if sectionMatch is not None:
-                            currentSection = sectionMatch.group(1)
-                            sectionStartLine = True
-                            currentService = None
+                        ###################################
+                        # stuff for all services
+                        for service in data['services']:
 
-                        # determine indentation for each compose file section (assumes YML file is consistently indented)
-                        if (currentSection is not None) and (currentSection not in sectionIndents):
-                            indentMatch = re.search(r'^(\s+)\S+\s*:\s*$', line)
-                            if indentMatch is not None:
-                                sectionIndents[currentSection] = indentMatch.group(1)
+                            # whether or not to restart services automatically (on boot, etc.)
+                            deep_set(
+                                data,
+                                ['services', service, 'restart'],
+                                restartMode,
+                            )
 
-                        # determine which service we're currently processing in the YML file
-                        if currentSection == 'services':
-                            serviceMatch = re.search(fr'^{sectionIndents[currentSection]}(\S+)\s*:\s*$', line)
-                            if serviceMatch is not None:
-                                currentService = serviceMatch.group(1).lower()
-                                serviceStartLine = True
-
-                        if (currentSection == 'services') and (not serviceStartLine) and (currentService is not None):
-                            # down in the individual services sections of the compose file
-
-                            if re.match(r'^\s*restart\s*:.*$', line):
-                                # whether or not to restart services automatically (on boot, etc.)
-                                line = f"{sectionIndents[currentSection] * 2}restart: {restartMode}"
-
-                            elif re.match(r'^\s*image\s*:.*$', line):
-                                # use architecture-specific images
-                                imageLineSpit = line.rstrip().split(":")
+                            # use architecture-specific images
+                            image = deep_get(
+                                data,
+                                ['services', service, 'image'],
+                            )
+                            if image:
+                                imageLineSpit = image.rstrip().split(":")
                                 imageLineSpit[-1] = imageLineSpit[-1].split("-", 1)[0] + args.imageArch
-                                line = ":".join(imageLineSpit)
+                                deep_set(data, ['services', service, 'image'], ":".join(imageLineSpit))
 
-                            elif (currentService == 'arkime') or (currentService == 'arkime-live'):
-                                # stuff specifically in the arkime section
-                                if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
-                                    # Arkime's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        pcapDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                        ###################################
+                        # stuff for specific services
 
-                            elif currentService == 'filebeat':
-                                # stuff specifically in the filebeat section
-                                if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IP based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if filebeatTcpOpen else '127.0.0.1'}:\g<3>",
-                                        line,
-                                    )
+                        ###################################
+                        # for "large' storage locations (pcap, logs, opensearch, etc.) replace
+                        #   bind mount sources with user-specified locations
+                        boundPathsToAdjust = (
+                            BoundPathReplacer("arkime", "/data/pcap", pcapDir),
+                            BoundPathReplacer("arkime-live", "/data/pcap", pcapDir),
+                            BoundPathReplacer("filebeat", "/suricata", suricataLogDir),
+                            BoundPathReplacer("filebeat", "/zeek", zeekLogDir),
+                            BoundPathReplacer(
+                                "file-monitor", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
+                            ),
+                            BoundPathReplacer("file-monitor", "/zeek/logs", os.path.join(zeekLogDir, 'current')),
+                            BoundPathReplacer("opensearch", "/usr/share/opensearch/data", indexDir),
+                            BoundPathReplacer("opensearch", "/opt/opensearch/backup", indexSnapshotDir),
+                            BoundPathReplacer("pcap-capture", "/pcap", os.path.join(pcapDir, 'upload')),
+                            BoundPathReplacer("pcap-monitor", "/pcap", pcapDir),
+                            BoundPathReplacer("pcap-monitor", "/zeek", zeekLogDir),
+                            BoundPathReplacer("suricata", "/data/pcap", pcapDir),
+                            BoundPathReplacer("suricata", "/var/log/suricata", suricataLogDir),
+                            BoundPathReplacer("suricata-live", "/var/log/suricata", suricataLogDir),
+                            BoundPathReplacer(
+                                "upload", "/var/www/upload/server/php/chroot/files", os.path.join(pcapDir, 'upload')
+                            ),
+                            BoundPathReplacer("zeek", "/pcap", pcapDir),
+                            BoundPathReplacer("zeek", "/zeek/upload", os.path.join(zeekLogDir, 'upload')),
+                            BoundPathReplacer("zeek", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')),
+                            BoundPathReplacer("zeek-live", "/zeek/live", os.path.join(zeekLogDir, 'live')),
+                            BoundPathReplacer(
+                                "zeek-live", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
+                            ),
+                        )
+                        for boundPath in boundPathsToAdjust:
+                            if (
+                                (boundPath.service in data['services'])
+                                and ('volumes' in data['services'][boundPath.service])
+                                and os.path.isdir(boundPath.source)
+                            ):
+                                for volIdx, volVal in enumerate(data['services'][boundPath.service]['volumes']):
+                                    if (
+                                        isinstance(volVal, dict)
+                                        and ('source' in volVal)
+                                        and ('target' in volVal)
+                                        and (volVal['target'] == boundPath.target)
+                                    ):
+                                        data['services'][boundPath.service]['volumes'][volIdx][
+                                            'source'
+                                        ] = boundPath.source
+                                    elif isinstance(volVal, str) and re.match(
+                                        fr'^.+:{boundPath.target}(:.+)?\s*$', volVal
+                                    ):
+                                        volumeParts = volVal.strip().split(':')
+                                        volumeParts[0] = boundPath.source
+                                        data['services'][boundPath.service]['volumes'][volIdx] = ':'.join(volumeParts)
+                        ###################################
 
-                                elif re.match(r'^\s*-.+:/suricata(:.+)?\s*$', line):
-                                    # filebeat's reference to the suricata-logs directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        suricataLogDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                        ###################################
+                        # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
+                        # set bind IPs based on whether it should be externally exposed or not
+                        for service, portInfo in {
+                            'filebeat': (filebeatTcpOpen, 5045, 5045),
+                            'logstash': (logstashOpen, 5044, 5044),
+                            'upload': (sftpOpen, 8022, 22),
+                        }.items():
+                            if service in data['services']:
+                                data['services'][service]['ports'] = [
+                                    f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
+                                ]
+                        ###################################
 
-                                elif re.match(r'^\s*-.+:/zeek(:.+)?\s*$', line):
-                                    # filebeat's reference to the zeek-logs directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        zeekLogDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                        ###################################
+                        # nginx-proxy has got a lot going on
+                        if 'nginx-proxy' in data['services']:
 
-                            elif currentService == 'file-monitor':
-                                # stuff specifically in the file-monitor section
-                                if re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
-                                    # file-monitor's reference to the zeek-logs/extract_files directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'extract_files'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                            # set nginx-proxy health check based on whether they're using HTTPS or not
+                            if 'healthcheck' in data['services']['nginx-proxy']:
+                                data['services']['nginx-proxy']['healthcheck']['test'] = [
+                                    "CMD",
+                                    "curl",
+                                    "--insecure",
+                                    "--silent",
+                                    f"{'https' if nginxSSL else 'http'}://localhost:443",
+                                ]
 
-                                elif re.match(r'^\s*-.+:/zeek/logs(:.+)?\s*$', line):
-                                    # zeek's reference to the zeek-logs/current directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'current'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                            # set bind IPs and ports based on whether it should be externally exposed or not
+                            data['services']['nginx-proxy']['ports'] = [
+                                f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
+                            ]
+                            data['services']['nginx-proxy']['ports'].append(
+                                f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                            )
 
-                            elif currentService == 'logstash':
-                                # stuff specifically in the logstash section
-                                if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IP based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if logstashOpen else '127.0.0.1'}:\g<3>",
-                                        line,
-                                    )
+                            # enable/disable/configure traefik labels if applicable
+                            for label in (
+                                'traefik.http.routers.osmalcolm.rule',
+                                'traefik.http.routers.osmalcolm.entrypoints',
+                                'traefik.http.routers.osmalcolm.tls.certresolver',
+                                'traefik.http.routers.osmalcolm.service',
+                                'traefik.http.services.osmalcolm.loadbalancer.server.port',
+                                'traefik.http.routers.malcolm.rule',
+                                'traefik.http.routers.malcolm.entrypoints',
+                                'traefik.http.routers.malcolm.tls.certresolver',
+                                'traefik.http.routers.malcolm.service',
+                                'traefik.http.services.malcolm.loadbalancer.server.port',
+                            ):
+                                data['services']['nginx-proxy']['labels'].pop(label, None)
 
-                            elif currentService == 'opensearch':
-                                # stuff specifically in the opensearch section
-                                if re.match(r'^\s*-.+:/usr/share/opensearch/data(:.+)?\s*$', line):
-                                    # OpenSearch indexes directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        indexDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                            # Traefik enabled vs. disabled
+                            data['services']['nginx-proxy']['labels']['traefik.enable'] = bool(traefikLabels)
 
-                                elif re.match(r'^\s*-.+:/opt/opensearch/backup(:.+)?\s*$', line):
-                                    # OpenSearch backup directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        indexSnapshotDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                            if traefikLabels:
+                                # general router enabled/disabled/host/etc values
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.rule'
+                                ] = f'Host(`{traefikHost}`)'
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.entrypoints'
+                                ] = traefikEntrypoint
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.tls.certresolver'
+                                ] = traefikResolver
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.routers.malcolm.service'
+                                ] = 'malcolm'
+                                data['services']['nginx-proxy']['labels'][
+                                    'traefik.http.services.malcolm.loadbalancer.server.port'
+                                ] = '443'
+                                if opensearchOpen:
+                                    # OpenSearch router enabled/disabled/host/etc values
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.rule'
+                                    ] = f'Host(`{traefikOpenSearchHost}`)'
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.entrypoints'
+                                    ] = traefikEntrypoint
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.tls.certresolver'
+                                    ] = traefikResolver
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.routers.osmalcolm.service'
+                                    ] = 'osmalcolm'
+                                    data['services']['nginx-proxy']['labels'][
+                                        'traefik.http.services.osmalcolm.loadbalancer.server.port'
+                                    ] = '9200'
+                        ###################################
 
-                            elif currentService == 'pcap-capture':
-                                # stuff specifically in the pcap-capture section
-                                if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
-                                    # pcap-capture's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(pcapDir, 'upload'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
+                    # re-write the network definition from scratch
+                    if 'networks' in data:
+                        del data['networks']
+                    networkDef = {}
+                    networkDef['external'] = bool(len(dockerNetworkExternalName) > 0)
+                    if len(dockerNetworkExternalName) > 0:
+                        networkDef['name'] = dockerNetworkExternalName
+                    data['networks'] = {}
+                    data['networks']['default'] = networkDef
 
-                            elif currentService == 'pcap-monitor':
-                                # stuff specifically in the pcap-monitor section
-                                if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
-                                    # pcap-monitor's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        pcapDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/zeek(:.+)?\s*$', line):
-                                    # pcap-monitor's reference to the zeek-logs directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        zeekLogDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'suricata':
-                                # stuff specifically in the suricata section
-                                if re.match(r'^\s*-.+:/data/pcap(:.+)?\s*$', line):
-                                    # Suricata's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        pcapDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/var/log/suricata(:.+)?\s*$', line):
-                                    # suricata's reference to the suricata-logs directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        suricataLogDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'suricata-live':
-                                # stuff specifically in the suricata-live section
-                                if re.match(r'^\s*-.+:/var/log/suricata(:.+)?\s*$', line):
-                                    # suricata-live's reference to the suricata-logs directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        suricataLogDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'upload':
-                                # stuff specifically in the upload section
-                                if re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IP based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if sftpOpen else '127.0.0.1'}:\g<3>",
-                                        line,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/var/www/upload/server/php/chroot/files(:.+)?\s*$', line):
-                                    # upload's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(pcapDir, 'upload'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'zeek':
-                                # stuff specifically in the zeek section
-                                if re.match(r'^\s*-.+:/pcap(:.+)?\s*$', line):
-                                    # Zeek's reference to the PCAP directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        pcapDir,
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/zeek/upload(:.+)?\s*$', line):
-                                    # zeek's reference to the zeek-logs/upload directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'upload'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
-                                    # zeek's reference to the zeek-logs/extract_files directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'extract_files'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'zeek-live':
-                                # stuff specifically in the zeek-live section
-                                if re.match(r'^\s*-.+:/zeek/live(:.+)?\s*$', line):
-                                    # zeek-live's reference to the zeek-logs/live directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'live'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                                elif re.match(r'^\s*-.+:/zeek/extract_files(:.+)?\s*$', line):
-                                    # zeek-lives's reference to the zeek-logs/extract_files directory
-                                    line = ReplaceBindMountLocation(
-                                        line,
-                                        os.path.join(zeekLogDir, 'extract_files'),
-                                        sectionIndents[currentSection] * 3,
-                                    )
-
-                            elif currentService == 'nginx-proxy':
-                                # stuff specifically in the nginx-proxy section
-
-                                if re.match(r'^\s*test\s*:', line):
-                                    # set nginx-proxy health check based on whether they're using HTTPS or not
-                                    line = re.sub(
-                                        r'https?://localhost:\d+',
-                                        fr"{'https' if nginxSSL else 'http'}://localhost:443",
-                                        line,
-                                    )
-
-                                elif re.match(r'^[\s#]*-\s*"([\d\.]+:)?\d+:\d+"\s*$', line):
-                                    # set bind IPs and ports based on whether it should be externally exposed or not
-                                    line = re.sub(
-                                        r'^([\s#]*-\s*")([\d\.]+:)?(\d+:\d+"\s*)$',
-                                        fr"\g<1>{'0.0.0.0' if nginxSSL and (((not '9200:9200' in line) and (not '5601:5601' in line)) or opensearchOpen) else '127.0.0.1'}:\g<3>",
-                                        line,
-                                    )
-                                    if nginxSSL is False:
-                                        if ':443:' in line:
-                                            line = line.replace(':443:', ':80:')
-                                        if ':9200:' in line:
-                                            line = line.replace(':9200:', ':9201:')
-                                    else:
-                                        if ':80:' in line:
-                                            line = line.replace(':80:', ':443:')
-                                        if ':9201:' in line:
-                                            line = line.replace(':9201:', ':9200:')
-
-                                elif 'traefik.' in line:
-                                    # enable/disable/configure traefik labels if applicable
-
-                                    # Traefik enabled vs. disabled
-                                    if 'traefik.enable' in line:
-                                        line = re.sub(
-                                            r'(#\s*)?(traefik\.enable\s*:\s*)(\S+)',
-                                            fr"\g<2>{TrueOrFalseQuote(behindReverseProxy and traefikLabels)}",
-                                            line,
-                                        )
-                                    else:
-                                        line = re.sub(
-                                            r'(#\s*)?(traefik\..*)',
-                                            fr"{'' if traefikLabels else '# '}\g<2>",
-                                            line,
-                                        )
-
-                                    if 'traefik.http.' in line and '.osmalcolm.' in line:
-                                        # OpenSearch router enabled/disabled/host value
-                                        line = re.sub(
-                                            r'(#\s*)?(traefik\..*)',
-                                            fr"{'' if behindReverseProxy and traefikLabels and opensearchOpen else '# '}\g<2>",
-                                            line,
-                                        )
-                                        if ('.rule') in line:
-                                            line = re.sub(
-                                                r'(traefik\.http\.routers\.osmalcolm\.rule\s*:\s*)(\S+)',
-                                                fr"\g<1>'Host(`{traefikOpenSearchHost}`)'",
-                                                line,
-                                            )
-
-                                    if 'traefik.http.routers.malcolm.rule' in line:
-                                        # Malcolm interface router host value
-                                        line = re.sub(
-                                            r'(traefik\.http\.routers\.malcolm\.rule\s*:\s*)(\S+)',
-                                            fr"\g<1>'Host(`{traefikHost}`)'",
-                                            line,
-                                        )
-
-                                    elif 'traefik.http.routers.' in line and '.entrypoints' in line:
-                                        # Malcolm routers entrypoints
-                                        line = re.sub(
-                                            r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                                            fr"\g<1>'{traefikEntrypoint}'",
-                                            line,
-                                        )
-
-                                    elif 'traefik.http.routers.' in line and '.certresolver' in line:
-                                        # Malcolm routers resolvers
-                                        line = re.sub(
-                                            r'(traefik\.[\w\.]+\s*:\s*)(\S+)',
-                                            fr"\g<1>'{traefikResolver}'",
-                                            line,
-                                        )
-
-                        elif currentSection == 'networks':
-                            # re-write the network definition from scratch
-                            if not sectionStartLine:
-                                if not networkWritten:
-                                    print(f"{sectionIndents[currentSection]}default:")
-                                    print(
-                                        f"{sectionIndents[currentSection] * 2}external: {'true' if (len(dockerNetworkExternalName) > 0) else 'false'}"
-                                    )
-                                    if len(dockerNetworkExternalName) > 0:
-                                        print(f"{sectionIndents[currentSection] * 2}name: {dockerNetworkExternalName}")
-                                    networkWritten = True
-                                # we already re-wrote the network stuff, anything else is superfluous
-                                skipLine = True
-
-                        if not skipLine:
-                            print(line)
+                    # write the docker-compose file back out
+                    DumpYaml(data, composeFile)
 
                 finally:
-                    composeFileHandle.close()
                     # restore ownership
                     os.chown(composeFile, origUid, origGuid)
 
@@ -2634,7 +2487,7 @@ class LinuxInstaller(Installer):
                     'python3-dialog',
                     'python3-dotenv',
                     'python3-requests',
-                    'python3-yaml',
+                    'python3-ruamel.yaml',
                     'xz-utils',
                 ]
             )
@@ -2647,7 +2500,7 @@ class LinuxInstaller(Installer):
                     'python3-dialog',
                     'python3-dotenv',
                     'python3-requests',
-                    'python3-yaml',
+                    'python3-ruamel.yaml',
                     'xz',
                 ]
             )

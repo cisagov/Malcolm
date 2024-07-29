@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v24.06.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v24.07.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -106,7 +106,7 @@ function InstallPythonPackages {
     $SUDO_CMD /usr/bin/python3.8 -m pip install $USERFLAG -U \
         python-dotenv \
         pythondialog \
-        pyyaml \
+        ruamel.yaml \
         requests \
         urllib3==1.26.19
 }

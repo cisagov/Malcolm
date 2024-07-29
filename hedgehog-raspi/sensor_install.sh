@@ -32,9 +32,9 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.2.0"
+ARKIME_VERSION="5.3.0"
 
-BEATS_VER="8.14.1"
+BEATS_VER="8.14.3"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired

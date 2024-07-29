@@ -78,7 +78,6 @@ exclude:
   - htadmin
   - logstash
   - malcolm-iso
-  - net-map.json
   - netbox
   - nginx
   - opensearch

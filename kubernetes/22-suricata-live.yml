@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-live-container
-        image: ghcr.io/idaholab/malcolm/suricata:24.06.0
+        image: ghcr.io/idaholab/malcolm/suricata:24.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -56,7 +56,7 @@ spec:
             name: suricata-live-custom-configs-volume
       initContainers:
       - name: suricata-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:24.06.0
+        image: ghcr.io/idaholab/malcolm/dirinit:24.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -63,6 +63,15 @@ PLATFORM_LINUX_DEBIAN = 'debian'
 PLATFORM_LINUX_FEDORA = 'fedora'
 PLATFORM_LINUX_UBUNTU = 'ubuntu'
 
+###################################################################################################
+YAML_VERSION = (1, 1)
+
+
+class NullRepresenter:
+    def __call__(self, repr, data):
+        ret_val = repr.represent_scalar(u'tag:yaml.org,2002:null', u'')
+        return ret_val
+
 
 def DialogInit():
     global Dialog
@@ -94,7 +103,13 @@ class UserInterfaceMode(IntFlag):
 
 BoundPath = namedtuple(
     "BoundPath",
-    ["service", "container_dir", "files", "relative_dirs", "clean_empty_dirs"],
+    ["service", "target", "files", "relative_dirs", "clean_empty_dirs"],
+    rename=False,
+)
+
+BoundPathReplacer = namedtuple(
+    "BoundPathReplacer",
+    ["service", "target", "source"],
     rename=False,
 )
 
@@ -128,29 +143,31 @@ OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | Orche
 
 
 ##################################################################################################
-def ReplaceBindMountLocation(line, location, linePrefix):
-    if os.path.isdir(location):
-        volumeParts = line.strip().lstrip('-').lstrip().split(':')
-        volumeParts[0] = location
-        return "{}- {}".format(linePrefix, ':'.join(volumeParts))
-    else:
-        return line
-
-
-##################################################################################################
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:
         vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
-                volSplit = vol.split(':')
-                if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
-                    if localBasePath and not os.path.isabs(volSplit[0]):
-                        localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                if (
+                    isinstance(vol, dict)
+                    and ('source' in vol)
+                    and ('target' in vol)
+                    and (vol['target'] == containerPath)
+                ):
+                    if localBasePath and not os.path.isabs(vol['source']):
+                        localPath = os.path.realpath(os.path.join(localBasePath, vol['source']))
                     else:
-                        localPath = volSplit[0]
+                        localPath = vol['source']
                     break
+                elif isinstance(vol, str):
+                    volSplit = vol.split(':')
+                    if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
+                        if localBasePath and not os.path.isabs(volSplit[0]):
+                            localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                        else:
+                            localPath = volSplit[0]
+                        break
 
     return localPath
 
@@ -633,7 +650,7 @@ def RequestsDynamic(debug=False, forceInteraction=False):
 
 
 def YAMLDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("yaml", "pyyaml", interactive=forceInteraction, debug=debug)
+    return DoDynamicImport("ruamel.yaml", "ruamel.yaml", interactive=forceInteraction, debug=debug)
 
 
 def KubernetesDynamic(verifySsl=False, debug=False, forceInteraction=False):
@@ -673,7 +690,7 @@ def DetermineYamlFileFormat(inputFileName):
     if yamlImported := YAMLDynamic():
         try:
             with open(inputFileName, 'r') as cf:
-                orchestrationYaml = yamlImported.safe_load(cf)
+                orchestrationYaml = yamlImported.YAML(typ='safe', pure=True).load(cf)
 
             if isinstance(orchestrationYaml, dict):
                 if any(key in orchestrationYaml for key in ('apiVersion', 'clusters', 'contexts', 'kind')):
@@ -685,6 +702,53 @@ def DetermineYamlFileFormat(inputFileName):
             eprint(f'Error deciphering {inputFileName}: {e}')
 
     return result
+
+
+###################################################################################################
+def LoadYaml(inputFileName):
+    result = None
+    if inputFileName and os.path.isfile(inputFileName):
+        if yamlImported := YAMLDynamic():
+            with open(inputFileName, 'r') as f:
+                inYaml = yamlImported.YAML(typ='rt')
+                inYaml.boolean_representation = ['false', 'true']
+                inYaml.emitter.alt_null = None
+                inYaml.preserve_quotes = True
+                inYaml.representer.ignore_aliases = lambda *args: True
+                inYaml.width = 4096
+                result = inYaml.load(f)
+    return result
+
+
+###################################################################################################
+def PopLine(fileName, count=1):
+    result = []
+    with open(fileName, 'r+') as f:
+        for i in range(0, count):
+            result.append(f.readline())
+        data = f.read()
+        f.seek(0)
+        f.write(data)
+        f.truncate()
+    return result if (len(result) != 1) else result[0]
+
+
+###################################################################################################
+def DumpYaml(data, outputFileName):
+    if data is not None:
+        if yamlImported := YAMLDynamic():
+            with open(outputFileName, 'w') as outfile:
+                outYaml = yamlImported.YAML(typ='rt')
+                outYaml.boolean_representation = ['false', 'true']
+                outYaml.preserve_quotes = False
+                outYaml.representer.ignore_aliases = lambda *args: True
+                outYaml.representer.add_representer(type(None), NullRepresenter())
+                outYaml.version = YAML_VERSION
+                outYaml.width = 4096
+                outYaml.dump(data, outfile)
+            # ruamel puts the YAML version header (2 lines) at the top, which docker-compose
+            #   doesn't like, so we need to remove it
+            PopLine(outputFileName, 2)
 
 
 ###################################################################################################
