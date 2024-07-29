@@ -69,6 +69,7 @@ from malcolm_common import (
     YesOrNo,
 )
 from malcolm_utils import (
+    ChownRecursive,
     CountUntilException,
     DatabaseMode,
     DATABASE_MODE_LABELS,
@@ -435,12 +436,7 @@ class Installer(object):
                     tar.extractall(path=installPath, numeric_owner=True)
                 finally:
                     tar.close()
-                os.chown(installPath, int(extUid), int(extGid))
-                for dirpath, dirnames, filenames in os.walk(installPath, followlinks=False):
-                    for dname in dirnames:
-                        os.chown(os.path.join(dirpath, dname), int(extUid), int(extGid))
-                    for fname in filenames:
-                        os.chown(os.path.join(dirpath, fname), int(extUid), int(extGid), follow_symlinks=False)
+                ChownRecursive(installPath, extUid, extGid)
 
                 # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level
                 childDir = glob.glob(f'{installPath}/*/')
