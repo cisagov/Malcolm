@@ -104,16 +104,22 @@ def pruneFiles():
         return
 
     # look for regular Zeek files in the processed/ directory
-    zeekFoundFiles = [
-        (os.path.join(root, filename))
-        for root, dirnames, filenames in os.walk(zeekProcessedDir)
-        for filename in filenames
-    ]
+    zeekFoundFiles = (
+        [
+            (os.path.join(root, filename))
+            for root, dirnames, filenames in os.walk(zeekProcessedDir)
+            for filename in filenames
+        ]
+        if os.path.isdir(zeekProcessedDir)
+        else []
+    )
 
     # look for rotated files from live zeek instance
-    zeekRotatedFiles = [
-        (os.path.join(root, filename)) for root, dirnames, filenames in os.walk(zeekLiveDir) for filename in filenames
-    ]
+    zeekRotatedFiles = (
+        [(os.path.join(root, filename)) for root, dirnames, filenames in os.walk(zeekLiveDir) for filename in filenames]
+        if os.path.isdir(zeekLiveDir)
+        else []
+    )
 
     # look up the filebeat registry file and try to read it
     fbReg = None
@@ -128,18 +134,20 @@ def pruneFiles():
         checkFile(file, filebeatReg=None, checkLogs=False, checkArchives=True)
 
     # clean up any broken symlinks in the Zeek current/ directory
-    for current in os.listdir(zeekCurrentDir):
-        currentFileSpec = os.path.join(zeekCurrentDir, current)
-        if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
-            print(f'removing dead symlink "{currentFileSpec}"')
-            silentRemove(currentFileSpec)
+    if os.path.isdir(zeekCurrentDir):
+        for current in os.listdir(zeekCurrentDir):
+            currentFileSpec = os.path.join(zeekCurrentDir, current)
+            if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
+                print(f'removing dead symlink "{currentFileSpec}"')
+                silentRemove(currentFileSpec)
 
     # clean up any old and empty directories in Zeek processed/ directory
     cleanDirSeconds = min(i for i in (cleanLogSeconds, cleanZipSeconds) if i > 0)
     candidateDirs = []
-    for root, dirs, files in os.walk(zeekProcessedDir, topdown=False):
-        if root and dirs:
-            candidateDirs += [os.path.join(root, tmpDir) for tmpDir in dirs]
+    if os.path.isdir(zeekProcessedDir):
+        for root, dirs, files in os.walk(zeekProcessedDir, topdown=False):
+            if root and dirs:
+                candidateDirs += [os.path.join(root, tmpDir) for tmpDir in dirs]
     candidateDirs = list(set(candidateDirs))
     candidateDirs.sort(reverse=True)
     candidateDirs.sort(key=len, reverse=True)
@@ -155,10 +163,11 @@ def pruneFiles():
 
     # check the suricata logs (live and otherwise) as well
     for surDir in [suricataDir, suricataLiveDir]:
-        for eve in os.listdir(surDir):
-            eveFile = os.path.join(surDir, eve)
-            if os.path.isfile(eveFile):
-                checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
+        if os.path.isdir(surDir):
+            for eve in os.listdir(surDir):
+                eveFile = os.path.join(surDir, eve)
+                if os.path.isfile(eveFile):
+                    checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
 
 
 def main():
