@@ -353,6 +353,23 @@ def isipaddress(value):
 
 
 ###################################################################################################
+# check a string or list to see if something is a private IP address or subnet
+def isprivateip(value):
+    result = True
+    try:
+        if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
+            for v in value:
+                result = result and ipaddress.ip_network(value).is_private
+                if not result:
+                    break
+        else:
+            result = ipaddress.ip_network(value).is_private
+    except Exception:
+        result = False
+    return result
+
+
+###################################################################################################
 # return the primary IP (the one with a default route) on the local box
 def get_primary_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

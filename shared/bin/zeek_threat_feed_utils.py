@@ -37,7 +37,7 @@ import re
 import requests
 import urllib3
 
-from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson
+from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
 
 # keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
@@ -316,9 +316,14 @@ def map_stix_indicator_to_zeek(
             parsed = urlparse(ioc_value)
             scheme = f"{parsed.scheme}://"
             ioc_value = parsed.geturl().replace(scheme, "", 1)
-        elif zeek_type == "ADDR" and re.match(".+/.+", ioc_value):
-            # elevate to subnet if possible
-            zeek_type = "SUBNET"
+        elif zeek_type == "ADDR":
+            if not isprivateip(ioc_value):
+                if re.match(".+/.+", ioc_value):
+                    # elevate to subnet if possible
+                    zeek_type = "SUBNET"
+            else:
+                # ignore private IP-space ADDR avlues
+                continue
 
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
@@ -395,9 +400,14 @@ def map_misp_attribute_to_zeek(
             parsed = urlparse(attribute_value)
             scheme = f"{parsed.scheme}://"
             attribute_value = parsed.geturl().replace(scheme, "", 1)
-        elif zeek_type == "ADDR" and re.match(".+/.+", attribute_value):
-            # elevate to subnet if possible
-            zeek_type = "SUBNET"
+        elif zeek_type == "ADDR":
+            if not isprivateip(attribute_value):
+                if re.match(".+/.+", attribute_value):
+                    # elevate to subnet if possible
+                    zeek_type = "SUBNET"
+            else:
+                # ignore private IP-space ADDR avlues
+                continue
 
         # ... "fields containing only a hyphen are considered to be null values"
         zeekItem = defaultdict(lambda: '-')
