@@ -1481,19 +1481,13 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=args.netboxLogstashEnrich,
         )
-        netboxAutoPopulate = (
-            netboxEnabled
-            and InstallerYesOrNo(
-                'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
-                default=args.netboxAutoPopulate,
-            )
-            and (
-                args.acceptDefaultsNonInteractive
-                or InstallerYesOrNo(
-                    "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                    default=args.netboxAutoPopulate,
-                )
-            )
+        netboxAutoPopulate = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
+            default=args.netboxAutoPopulate,
+        )
+        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
+            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
+            default=args.netboxLogstashAutoSubnets,
         )
         netboxSiteName = (
             InstallerAskForString(
@@ -1505,10 +1499,6 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
-        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
-            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
-            default=args.netboxLogstashAutoSubnets,
-        )
 
         # input packet capture parameters
         pcapNetSniff = False
