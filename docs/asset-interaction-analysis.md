@@ -127,8 +127,6 @@ See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
 
 YML files in [`./netbox/preload`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/netbox/preload/) under the Malcolm installation directory will be preloaded upon startup using the third-party [netbox-initializers](https://github.com/tobiasge/netbox-initializers) plugin. Examples illustrating the format of these YML files can be found at its [GitHub repository](https://github.com/tobiasge/netbox-initializers/tree/main/src/netbox_initializers/initializers/yaml).
 
-[workflow files]
-
 ## <a name="NetBoxBackup"></a>Backup and Restore
 
 The NetBox database may be backed up and restored using `./scripts/netbox-backup` and `./scripts/netbox-restore`, respectively. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
