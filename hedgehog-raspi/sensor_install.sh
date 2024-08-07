@@ -214,7 +214,7 @@ build_zeek_src() {
     export PYTHONUNBUFFERED=1
 
     zeek_url=https://github.com/zeek/zeek.git
-    zeek_version=6.2.1
+    zeek_version=7.0.0
     zeek_release=1
     zeek_dir=/opt/zeek
     # Zeek's build eats a ton of resources; prevent OOM from the killing build process

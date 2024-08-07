@@ -33,7 +33,7 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 
 # for download and install
-ARG ZEEK_VERSION=6.2.1-0
+ARG ZEEK_VERSION=7.0.0-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
