@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch:2.15.0
+FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch:2.16.0
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
