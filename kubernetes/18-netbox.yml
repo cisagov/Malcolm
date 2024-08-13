@@ -77,8 +77,6 @@ spec:
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: netbox-var-local-catrust-volume
-          - mountPath: /usr/local/share/configmap
-            name: netbox-netmap-json-volume
           - mountPath: /etc/netbox/config/configmap
             name: netbox-config-volume
           - mountPath: /opt/netbox-preload/configmap
@@ -105,9 +103,6 @@ spec:
         - name: netbox-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: netbox-netmap-json-volume
-          configMap:
-            name: netbox-netmap-json
         - name: netbox-config-volume
           configMap:
             name: netbox-config
