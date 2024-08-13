@@ -36,9 +36,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - pcap-zeek
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

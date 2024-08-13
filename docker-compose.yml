@@ -501,7 +501,7 @@ services:
       target: /opt/zeek/share/zeek/site/custom
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "pcap-zeek"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
