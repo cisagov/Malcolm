@@ -1,8 +1,9 @@
-# <a name="CustomRulesAndScripts"></a>Custom Rules and Scripts
+# <a name="CustomRulesAndScripts"></a>Custom Rules, Scripts and Plugins
 
 * [Suricata](#Suricata)
 * [Zeek](#Zeek)
 * [YARA](#YARA)
+* [NetBox](#NetBox)
 * [Other Customizations](#Other)
 
 Much of Malcolm's behavior can be adjusted through [environment variable files](malcolm-config.md#MalcolmConfigEnvVars). However, some components allow further customization through the use of custom scripts, configuration files, and rules.
@@ -72,6 +73,10 @@ docker compose exec file-monitor supervisorctl restart yara
 ```
 
 If the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`.
+
+## <a name="NetBox"></a>NetBox
+
+TODO documentation
 
 ## <a name="Other"></a>Other Customizations
 

@@ -979,7 +979,7 @@ services:
       bind:
         create_host_path: false
       source: ./netbox/config
-      target: /etc/netbox/config
+      target: /etc/netbox/config/configmap
       read_only: true
     - type: bind
       bind:
@@ -991,6 +991,12 @@ services:
         create_host_path: false
       source: ./netbox/preload
       target: /opt/netbox-preload/configmap
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./netbox/custom-plugins
+      target: /opt/netbox-custom-plugins
       read_only: true
     healthcheck:
       test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/"]

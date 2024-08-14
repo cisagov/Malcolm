@@ -100,6 +100,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/htadmin/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/certs/"
   mkdir -p "$MALCOLM_DEST_DIR/logstash/maps/"
+  mkdir -p "$MALCOLM_DEST_DIR/netbox/custom-plugins/requirements/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/media/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/postgres/"
   mkdir -p "$MALCOLM_DEST_DIR/netbox/redis/"

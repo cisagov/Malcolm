@@ -76,6 +76,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       procps \
       psmisc \
       python3-dev \
+      ripgrep \
       rsync \
       supervisor \
       tini && \
