@@ -396,6 +396,7 @@ def main():
 
         # now install the plugins directories
         installedOrUpdatedPlugins = []
+        pluginsListModified = False
         customPluginSubdirs = [
             malcolm_utils.remove_suffix(f.path, '/')
             for f in os.scandir(args.customPluginsDir)
@@ -467,6 +468,7 @@ def main():
             class PluginListModifier(ast.NodeTransformer):
                 def visit_Assign(self, node):
                     global pluginsListFound
+                    global pluginsListModified
                     if isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'PLUGINS':
                         pluginsListFound = True
                         # Check if the node's value is a list
@@ -477,6 +479,7 @@ def main():
                             for plugin in pluginNames:
                                 if plugin not in existingPlugins:
                                     node.value.elts.append(ast.Constant(value=plugin))
+                                    pluginsListModified = True
                     return node
 
             # Modify the AST
@@ -491,6 +494,7 @@ def main():
                         value=ast.List(elts=[ast.Constant(value=plugin) for plugin in pluginNames], ctx=ast.Load()),
                     )
                 )
+                pluginsListModified = True
 
             # Unparse the modified AST back into code
             modifiedCode = ast.unparse(ast.fix_missing_locations(modifiedTree))
@@ -498,6 +502,10 @@ def main():
             # Write the modified code back to the file
             with open(os.path.join(args.netboxConfigDir, 'plugins.py'), 'w') as pluginFile:
                 pluginFile.write(modifiedCode)
+
+        if installedOrUpdatedPlugins or pluginsListModified:
+            # TODO: migrate? restart things?
+            pass
 
         # END CUSTOM PLUGIN INSTALLATION #############################################################################
 
