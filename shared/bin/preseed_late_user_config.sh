@@ -66,7 +66,7 @@ Description: SSH Password Authentication
 
 Template: malcolm/format_large_storage
 Type: boolean
-Default: false
+Default: true
 Description:
  Format non-OS drive(s) for artifact storage?
 
