@@ -110,6 +110,7 @@ After the passwords have been entered, the installer will proceed to format the 
 
 At the end of the installation process, users will be prompted with a few self-explanatory yes/no questions:
 
+* **Format non-OS drive(s) for artifact storage?**
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
@@ -364,6 +365,7 @@ The installer will ask for a few pieces of information prior to installing Hedge
 
 At the end of the installation process, users will be prompted with a few self-explanatory yes/no questions:
 
+* **Format non-OS drive(s) for artifact storage?**
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
