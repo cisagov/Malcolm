@@ -139,6 +139,8 @@ COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
 
+VOLUME ["/opt/netbox/venv/lib/python3.11/site-packages"]
+
 EXPOSE 9001
 
 ENTRYPOINT ["/usr/bin/tini", \

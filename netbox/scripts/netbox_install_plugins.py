@@ -10,9 +10,11 @@ import logging
 import os
 import sys
 import malcolm_utils
+from tempfile import TemporaryDirectory
 
 from datetime import datetime
 from packaging.version import Version
+from distutils import dir_util
 
 ###################################################################################################
 args = None
@@ -99,24 +101,26 @@ def InstallPackageDirIfNeeded(
             pluginNeedsInstall = True
 
     if pluginNeedsInstall:
-        with malcolm_utils.temporary_filename(suffix='.json') as installReportFileName:
-            cmd = [
-                venvPy,
-                "-m",
-                "pip",
-                "--no-color",
-                "--no-input",
-                "--disable-pip-version-check",
-                "install",
-                "--upgrade",
-                "--progress-bar",
-                "off",
-                "--report",
-                installReportFileName,
-                packageDir,
-            ]
-            err, results = malcolm_utils.run_process(cmd, logger=logging)
-            installResult = err == 0
+        with TemporaryDirectory() as tmpPackageDir:
+            dir_util.copy_tree(packageDir, tmpPackageDir, preserve_symlinks=True)
+            with malcolm_utils.temporary_filename(suffix='.json') as installReportFileName:
+                cmd = [
+                    venvPy,
+                    "-m",
+                    "pip",
+                    "--no-color",
+                    "--no-input",
+                    "--disable-pip-version-check",
+                    "install",
+                    "--upgrade",
+                    "--progress-bar",
+                    "off",
+                    "--report",
+                    installReportFileName,
+                    tmpPackageDir,
+                ]
+                err, results = malcolm_utils.run_process(cmd, logger=logging)
+                installResult = err == 0
 
     return installResult
 
