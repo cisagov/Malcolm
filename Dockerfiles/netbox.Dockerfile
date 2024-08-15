@@ -47,7 +47,6 @@ ARG NETBOX_CUSTOM_PLUGINS_PATH="/opt/netbox-custom-plugins"
 ARG NETBOX_CONFIG_PATH="/etc/netbox/config"
 
 ENV NETBOX_PATH /opt/netbox
-ENV BASE_PATH netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH $NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
 ENV NETBOX_CRON $NETBOX_CRON
@@ -120,14 +119,13 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       "Django>=4.2.10,<5" \
       paramiko \
       pillow && \
-    mkdir -p "${NETBOX_PATH}/netbox/${BASE_PATH}" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" && \
-      mv "${NETBOX_PATH}/netbox/static" "${NETBOX_PATH}/netbox/${BASE_PATH}/static" && \
-      jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq ".routes.main[0].match.uri = \"/${BASE_PATH}/static/*\"" > /etc/unit/nginx-unit-new.json && \
+    mkdir -p "${NETBOX_PATH}/netbox/netbox" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" && \
+      jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq '.routes.main[0].action.share = "`/opt/netbox/netbox${uri.substring(7)}`"' | jq '.routes.main[0].match.uri = "/netbox/static/*"' | jq '.routes.status[0].match.uri = "/netbox/status/*"' > /etc/unit/nginx-unit-new.json && \
       mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \
       chmod 644 /etc/unit/nginx-unit.json && \
-    tr -cd '\11\12\15\40-\176' < "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration.py" > "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration_ascii.py" && \
-      mv "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration_ascii.py" "${NETBOX_PATH}/netbox/${BASE_PATH}/configuration.py" && \
-    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" "${NETBOX_PATH}/netbox/${BASE_PATH}/settings.py" && \
+    tr -cd '\11\12\15\40-\176' < "${NETBOX_PATH}/netbox/netbox/configuration.py" > "${NETBOX_PATH}/netbox/netbox/configuration_ascii.py" && \
+      mv "${NETBOX_PATH}/netbox/netbox/configuration_ascii.py" "${NETBOX_PATH}/netbox/netbox/configuration.py" && \
+    sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" "${NETBOX_PATH}/netbox/netbox/settings.py" && \
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' "${NETBOX_PATH}/launch-netbox.sh" && \
     sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh
 
