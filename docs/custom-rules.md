@@ -80,6 +80,10 @@ NetBox's functionality can be extended with plugins that can provide "[new data 
 
 When Malcolm's NetBox container [starts up]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/netbox/scripts/netbox_install_plugins.py), it installs (using [pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages)) any NetBox plugins that have [cloned](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) or [downloaded and extracted](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives) into subdirectories in `./netbox/custom-plugins/` in the Malcolm installation directory. In instances where Malcolm is being run in an offline/airgapped configuration, the plugins' additional dependencies must also be present under `./netbox/custom-plugins/requirements/`, where they will be automatically installed first.
 
+The following warning is quoted from the [NetBox documentation](https://netboxlabs.com/docs/netbox/en/stable/configuration/plugins/):
+
+> Plugins extend NetBox by allowing external code to run with the same access and privileges as NetBox itself. Only install plugins from trusted sources. The NetBox maintainers make absolutely no guarantees about the integrity or security of your installation with plugins enabled.
+
 ## <a name="Other"></a>Other Customizations
 
 There are other areas of Malcolm that can be modified and customized to fit users' needs. Please see these other sections of the documentation for more information.
