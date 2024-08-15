@@ -321,8 +321,18 @@ def main():
                 pluginFile.write(modifiedCode)
 
         if installedOrUpdatedPlugins or pluginsListModified:
-            # TODO: migrate? restart things?
-            pass
+            # collect static files
+            with malcolm_utils.pushd(os.path.dirname(manageScript)):
+                # migrations if needed
+                cmd = [
+                    netboxVenvPy,
+                    os.path.basename(manageScript),
+                    "collectstatic",
+                    "--no-input",
+                ]
+                err, results = malcolm_utils.run_process(cmd, logger=logging)
+                if err != 0:
+                    logging.error(f'{err} collecting static files: {results}')
 
 
 ###################################################################################################
