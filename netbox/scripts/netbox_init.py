@@ -4,7 +4,6 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
-import ast
 import glob
 import gzip
 import ipaddress
@@ -27,7 +26,6 @@ import malcolm_utils
 from collections.abc import Iterable
 from distutils.dir_util import copy_tree
 from datetime import datetime
-from packaging.version import Version
 from slugify import slugify
 
 ###################################################################################################
@@ -38,6 +36,45 @@ orig_path = os.getcwd()
 
 
 ###################################################################################################
+def get_iterable(x):
+    if isinstance(x, Iterable) and not isinstance(x, str):
+        return x
+    else:
+        return (x,)
+
+
+def is_ip_address(x):
+    try:
+        ipaddress.ip_address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_v4_address(x):
+    try:
+        ipaddress.IPv4Address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_v6_address(x):
+    try:
+        ipaddress.IPv6Address(x)
+        return True
+    except Exception:
+        return False
+
+
+def is_ip_network(x):
+    try:
+        ipaddress.ip_network(x)
+        return True
+    except Exception:
+        return False
+
+
 def min_hash_value_by_value(x):
     return next(
         iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values())),
@@ -66,104 +103,6 @@ def max_hash_value_by_key(x):
     except Exception:
         last = None
     return last
-
-
-def GetInstalledPackages(venvPy):
-    packagesInstalled = {}
-    cmd = [
-        venvPy,
-        "-m",
-        "pip",
-        "--no-color",
-        "--no-input",
-        "--disable-pip-version-check",
-        "list",
-        "--local",
-        "--format",
-        "json",
-        "--verbose",
-    ]
-    err, results = malcolm_utils.run_process(cmd, stderr=False, logger=logging)
-    if (err == 0) and results and (len(results) > 0):
-        try:
-            packagesInstalled = {item['name']: item for item in malcolm_utils.LoadStrIfJson(results[0])}
-        except Exception as e:
-            logging.error(f"{type(e).__name__} getting list of installed Python packages: {e}")
-
-    return packagesInstalled
-
-
-def InstallPackageDirIfNeeded(
-    packageDir,
-    venvPy,
-    preinstalledPackagesDict={},
-):
-    installResult = False
-
-    # First do a "dry run" install to determine what would happen. The report from this will
-    #   help us determine if the package actually needs installed or not, as pip always treats
-    #   installations from local directories as "new installs" and would uninstall/reinstall
-    #   no matter what, which we want to avoid if we don't need it.
-    pluginNeedsInstall = False
-    with malcolm_utils.temporary_filename(suffix='.json') as dryRunInstallReportFileName:
-        cmd = [
-            venvPy,
-            "-m",
-            "pip",
-            "--no-color",
-            "--no-input",
-            "--disable-pip-version-check",
-            "install",
-            "--upgrade",
-            "--dry-run",
-            "--progress-bar",
-            "off",
-            "--report",
-            dryRunInstallReportFileName,
-            packageDir,
-        ]
-        err, results = malcolm_utils.run_process(cmd, logger=logging)
-        if (err == 0) and os.path.isfile(dryRunInstallReportFileName):
-            with open(dryRunInstallReportFileName, 'r') as f:
-                dryRunReport = malcolm_utils.LoadFileIfJson(f)
-                wouldInstallInfo = {
-                    malcolm_utils.deep_get(installItem, ['metadata', 'name']): malcolm_utils.deep_get(
-                        installItem, ['metadata', 'version']
-                    )
-                    for installItem in dryRunReport.get('install', [])
-                }
-            pluginNeedsInstall = any(
-                [
-                    package_name
-                    for package_name, new_version in wouldInstallInfo.items()
-                    if (package_name not in preinstalledPackagesDict)
-                    or (Version(new_version) > Version(preinstalledPackagesDict[package_name]['version']))
-                ]
-            )
-        else:
-            pluginNeedsInstall = True
-
-    if pluginNeedsInstall:
-        with malcolm_utils.temporary_filename(suffix='.json') as installReportFileName:
-            cmd = [
-                venvPy,
-                "-m",
-                "pip",
-                "--no-color",
-                "--no-input",
-                "--disable-pip-version-check",
-                "install",
-                "--upgrade",
-                "--progress-bar",
-                "off",
-                "--report",
-                installReportFileName,
-                packageDir,
-            ]
-            err, results = malcolm_utils.run_process(cmd, logger=logging)
-            installResult = err == 0
-
-    return installResult
 
 
 ###################################################################################################
@@ -281,14 +220,6 @@ def main():
         help="NetBox installation directory",
     )
     parser.add_argument(
-        '--netbox-config',
-        dest='netboxConfigDir',
-        type=str,
-        default=os.getenv('NETBOX_CONFIG_PATH', '/etc/netbox/config'),
-        required=False,
-        help="NetBox config directory (containing plugins.py, etc.)",
-    )
-    parser.add_argument(
         '-l',
         '--library',
         dest='libraryDir',
@@ -296,15 +227,6 @@ def main():
         default=os.getenv('NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH', '/opt/netbox-devicetype-library-import'),
         required=False,
         help="Directory containing NetBox Device-Type-Library-Import project and library repo",
-    )
-    parser.add_argument(
-        '-c',
-        '--custom-plugins',
-        dest='customPluginsDir',
-        type=str,
-        default=os.getenv('NETBOX_CUSTOM_PLUGINS_PATH', '/opt/netbox-custom-plugins'),
-        required=False,
-        help="Parent directory containing custom NetBox plugins to install",
     )
     parser.add_argument(
         '-p',
@@ -374,140 +296,6 @@ def main():
 
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
     manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
-
-    # CUSTOM PLUGIN INSTALLATION #################################################################################
-    if os.path.isdir(args.customPluginsDir) and os.path.isfile(os.path.join(args.netboxConfigDir, 'plugins.py')):
-
-        # get a list of what packages/plugins already installed (package names and versions in a dict)
-        packagesInstalled = GetInstalledPackages(netboxVenvPy)
-
-        # if there is a "requirements" subdirectory, handle that first as it contains dependencies
-        if os.path.isdir(os.path.join(args.customPluginsDir, 'requirements')):
-            requirementsSubDirs = [
-                malcolm_utils.remove_suffix(f.path, '/')
-                for f in os.scandir(os.path.join(args.customPluginsDir, 'requirements'))
-                if f.is_dir()
-            ]
-            for packageDir in requirementsSubDirs:
-                packageInstalled = InstallPackageDirIfNeeded(packageDir, netboxVenvPy, packagesInstalled)
-                logging.info(
-                    f"{os.path.basename(packageDir)} (dependency): {'' if packageInstalled else 'not ' }installed"
-                )
-
-        # now install the plugins directories
-        installedOrUpdatedPlugins = []
-        pluginsListModified = False
-        customPluginSubdirs = [
-            malcolm_utils.remove_suffix(f.path, '/')
-            for f in os.scandir(args.customPluginsDir)
-            if f.is_dir() and (os.path.basename(f) != 'requirements')
-        ]
-        for pluginDir in customPluginSubdirs:
-            if pluginInstalled := InstallPackageDirIfNeeded(pluginDir, netboxVenvPy, packagesInstalled):
-                installedOrUpdatedPlugins.append(pluginDir)
-            logging.info(f"{os.path.basename(pluginDir)}: {'' if pluginInstalled else 'not ' }installed")
-
-        # for any packages that were newly installed (or updated, we'll be thorough) we need to make
-        #   sure the package name is in the plugins.py
-        logging.info(f"Plugins installed or updated: {installedOrUpdatedPlugins}")
-        if installedOrUpdatedPlugins:
-            # get updated list of installed packages
-            packagesInstalled = GetInstalledPackages(netboxVenvPy)
-
-        # now get the names of the NetBox plugins installed
-        pluginNames = []
-
-        # first get a list of __init__.py files for potential plugins installed in the package location(s)
-        cmd = [
-            '/usr/bin/rg',
-            '--files-with-matches',
-            '--iglob',
-            '__init__.py',
-            r'\bPluginConfig\b',
-            list({package['location'] for package in packagesInstalled.values() if 'location' in package}),
-        ]
-        err, results = malcolm_utils.run_process(cmd, stderr=False, logger=logging)
-        if results:
-            # process each of those potential plugin __init__.py files
-            for pluginInitFileName in results:
-                try:
-                    if os.path.isfile(pluginInitFileName):
-                        # parse the Python of the __init__.py into an abstract syntax tree
-                        with open(pluginInitFileName, 'r') as f:
-                            node = ast.parse(f.read())
-                            # look at each Class defined in this code
-                            for c in [n for n in node.body if isinstance(n, ast.ClassDef)]:
-                                # plugins are classes with "PluginConfig" for a parent
-                                if any([baseClass.id == 'PluginConfig' for baseClass in c.bases]):
-                                    # this ia a plugin class, so iterate over its members (functions,
-                                    #   variables, etc.) to find its name
-                                    for item in c.body:
-                                        # the name is defined as an assignment (ast.Assign)
-                                        if isinstance(item, ast.Assign):
-                                            # does this assignment have a target called 'name'?
-                                            for target in item.targets:
-                                                if isinstance(target, ast.Name) and target.id == 'name':
-                                                    # check if the value assigned to 'name' is a constant
-                                                    if isinstance(item.value, ast.Constant):
-                                                        pluginNames.append(item.value.value)
-                except Exception as e:
-                    logging.error(f"{type(e).__name__} identifying NetBox plugin names: {e}")
-
-        if pluginNames:
-            pluginNames = list(set(pluginNames))
-            # at this point we have a list of plugin names for all of the plugin classes!
-            #   we need to make sure they exist in plugins.py
-
-            # Load and parse the plugins.py file
-            pluginsListFound = False
-            with open(os.path.join(args.netboxConfigDir, 'plugins.py'), 'r') as pluginFile:
-                code = pluginFile.read()
-                tree = ast.parse(code)
-
-            # Walk the AST to find the PLUGINS assignment
-            class PluginListModifier(ast.NodeTransformer):
-                def visit_Assign(self, node):
-                    global pluginsListFound
-                    global pluginsListModified
-                    if isinstance(node.targets[0], ast.Name) and node.targets[0].id == 'PLUGINS':
-                        pluginsListFound = True
-                        # Check if the node's value is a list
-                        if isinstance(node.value, ast.List):
-                            # Get the existing plugin names in the list
-                            existingPlugins = {elt.s for elt in node.value.elts if isinstance(elt, ast.Str)}
-                            # Add new plugins if they aren't already in the list
-                            for plugin in pluginNames:
-                                if plugin not in existingPlugins:
-                                    node.value.elts.append(ast.Constant(value=plugin))
-                                    pluginsListModified = True
-                    return node
-
-            # Modify the AST
-            modifier = PluginListModifier()
-            modifiedTree = modifier.visit(tree)
-
-            # # If PLUGINS was not found, add it at the end of the module
-            if not pluginsListFound:
-                modifiedTree.body.append(
-                    ast.Assign(
-                        targets=[ast.Name(id='PLUGINS', ctx=ast.Store())],
-                        value=ast.List(elts=[ast.Constant(value=plugin) for plugin in pluginNames], ctx=ast.Load()),
-                    )
-                )
-                pluginsListModified = True
-
-            # Unparse the modified AST back into code
-            modifiedCode = ast.unparse(ast.fix_missing_locations(modifiedTree))
-
-            # Write the modified code back to the file
-            with open(os.path.join(args.netboxConfigDir, 'plugins.py'), 'w') as pluginFile:
-                pluginFile.write(modifiedCode)
-
-        if installedOrUpdatedPlugins or pluginsListModified:
-            # TODO: migrate? restart things?
-            pass
-
-        # END CUSTOM PLUGIN INSTALLATION #############################################################################
 
     # if there is a database backup .gz in the preload directory, load it up (preferring the newest)
     # if there are multiple) instead of populating via API
