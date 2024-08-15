@@ -641,7 +641,7 @@
       "updated_at": "2024-06-12T16:50:47.700Z",
       "version": "WzQzMiwxXQ==",
       "attributes": {
-        "title": "NetBox Enrichment - Candidate Logs",
+        "title": "NetBox Enrichment - Logs",
         "description": "",
         "hits": 0,
         "columns": [
@@ -650,7 +650,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR software OR known*)) AND (network.direction:(internal OR inbound OR outbound))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"tags:netbox\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
