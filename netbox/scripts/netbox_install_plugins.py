@@ -324,6 +324,22 @@ def main():
             # collect static files
             with malcolm_utils.pushd(os.path.dirname(manageScript)):
                 # migrations if needed
+                for plugin in pluginNames:
+                    cmd = [
+                        netboxVenvPy,
+                        os.path.basename(manageScript),
+                        "makemigrations",
+                        plugin,
+                    ]
+                    err, results = malcolm_utils.run_process(cmd, logger=logging)
+                    if err != 0:
+                        logging.warning(f'{err} making migrations for {plugin}: {results}')
+
+                cmd = [netboxVenvPy, os.path.basename(manageScript), "migrate"]
+                err, results = malcolm_utils.run_process(cmd, logger=logging)
+                if err != 0:
+                    logging.warning(f'{err} migrating: {results}')
+
                 cmd = [
                     netboxVenvPy,
                     os.path.basename(manageScript),
@@ -332,7 +348,7 @@ def main():
                 ]
                 err, results = malcolm_utils.run_process(cmd, logger=logging)
                 if err != 0:
-                    logging.error(f'{err} collecting static files: {results}')
+                    logging.warning(f'{err} collecting static files: {results}')
 
 
 ###################################################################################################
