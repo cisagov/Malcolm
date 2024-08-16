@@ -149,6 +149,12 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('netbox', 'config')),
         },
     ],
+    'netbox-custom-plugins': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'custom-plugins')),
+        },
+    ],
     'netbox-preload': [
         {
             'secret': False,

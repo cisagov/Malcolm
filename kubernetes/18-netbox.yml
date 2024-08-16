@@ -79,7 +79,8 @@ spec:
             name: netbox-var-local-catrust-volume
           - mountPath: /etc/netbox/config/configmap
             name: netbox-config-volume
-          # TODO: custom-plugins
+          - mountPath: /opt/netbox-custom-plugins
+            name: netbox-custom-plugins-volume
           - mountPath: /opt/netbox-preload/configmap
             name: netbox-preload-volume
           - mountPath: /opt/netbox/netbox/media
@@ -107,6 +108,9 @@ spec:
         - name: netbox-config-volume
           configMap:
             name: netbox-config
+        - name: netbox-custom-plugins-volume
+          configMap:
+            name: netbox-custom-plugins
         - name: netbox-preload-volume
           configMap:
             name: netbox-preload
