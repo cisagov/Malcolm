@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} alpine:3.20
+FROM --platform=${TARGETPLATFORM} debian:12-slim
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -60,17 +60,26 @@ COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
 ADD scripts/malcolm_utils.py /data/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
-    apk update --no-cache && \
-    apk upgrade --no-cache && \
-    apk --no-cache add bash python3 py3-pip curl openssl procps psmisc moreutils npm rsync shadow jq tini && \
-    npm install -g http-server && \
+    apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages install --no-install-recommends \
+      bash \
+      curl \
+      jq \
+      moreutils \
+      openssl \
+      procps \
+      psmisc \
+      python3 \
+      python3-pip \
+      rsync \
+      tini && \
     pip3 install --break-system-packages supervisor humanfriendly requests && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
-    addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
-      adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
-      addgroup ${PUSER} tty ; \
-      addgroup ${PUSER} shadow ; \
+    groupadd --gid ${DEFAULT_GID} ${PUSER} && \
+      useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} -d /nonexistant -s /sbin/nologin ${PUSER} && \
+      usermod -a -G tty ${PUSER} && \
     mkdir -p /data/init /opt/ecs && \
       cd /opt && \
       curl -sSL "$(curl -sSL "$ECS_RELEASES_URL" | jq '.tarball_url' | tr -d '"')" | tar xzf - -C ./ecs --strip-components 1 && \
@@ -93,17 +102,17 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
                                 /opt/templates && \
     chmod 755 /data/*.sh /data/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo -e "*/2 * * * * /data/shared-object-creation.sh\n0 10 * * * /data/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo "*/2 * * * * /data/shared-object-creation.sh\n0 10 * * * /data/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 
-ENTRYPOINT ["/sbin/tini", \
+ENTRYPOINT ["/usr/bin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "dashboards-helper"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 VOLUME ["/data/init"]
 
