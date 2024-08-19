@@ -2282,9 +2282,10 @@ class Installer(object):
                             data['services']['nginx-proxy']['ports'] = [
                                 f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
                             ]
-                            data['services']['nginx-proxy']['ports'].append(
-                                f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
-                            )
+                            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                                data['services']['nginx-proxy']['ports'].append(
+                                    f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                                )
 
                             # enable/disable/configure traefik labels if applicable
                             for label in (
