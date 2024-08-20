@@ -8,6 +8,7 @@ import glob
 import os
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import nullcontext
 from collections import defaultdict
 from itertools import chain
 from io import StringIO
@@ -15,11 +16,14 @@ from pathlib import Path
 
 from malcolm_common import (
     DotEnvDynamic,
+    GetMemMegabytesFromJavaOptsLine,
     KubernetesDynamic,
     MalcolmPath,
+    NullRepresenter,
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
     YAMLDynamic,
+    YAML_VERSION,
 )
 from malcolm_utils import (
     deep_get,
@@ -29,6 +33,7 @@ from malcolm_utils import (
     remove_suffix,
     tablify,
     LoadStrIfJson,
+    temporary_filename,
     val2bool,
 )
 
@@ -144,6 +149,12 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('netbox', 'config')),
         },
     ],
+    'netbox-custom-plugins': [
+        {
+            'secret': False,
+            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'custom-plugins')),
+        },
+    ],
     'netbox-preload': [
         {
             'secret': False,
@@ -232,6 +243,11 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'zeek-live',
     'zeek-offline',
 ]
+
+CONTAINER_JAVA_OPTS_VARS = {
+    'opensearch': 'OPENSEARCH_JAVA_OPTS',
+    'logstash': 'LS_JAVA_OPTS',
+}
 
 
 ###################################################################################################
@@ -694,7 +710,7 @@ def DeleteNamespace(namespace, deleteRetPerVol=False):
     return results_dict
 
 
-def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
+def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dryrun=False):
     if not namespace:
         namespace = 'malcolm'
 
@@ -710,21 +726,23 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
         and (apiClient := kubeImported.client.ApiClient())
     ):
         # create the namespace
-        try:
-            results_dict['create_namespace']['result'] = client.create_namespace(
-                kubeImported.client.V1Namespace(metadata=kubeImported.client.V1ObjectMeta(name=namespace))
-            ).metadata
-        except kubeImported.client.rest.ApiException as x:
-            if x.status != 409:
-                results_dict['create_namespace']['error'] = LoadStrIfJson(str(x))
-                if not results_dict['create_namespace']['error']:
-                    results_dict['create_namespace']['error'] = str(x)
+        if not dryrun:
+            try:
+                results_dict['create_namespace']['result'] = client.create_namespace(
+                    kubeImported.client.V1Namespace(metadata=kubeImported.client.V1ObjectMeta(name=namespace))
+                ).metadata
+            except kubeImported.client.rest.ApiException as x:
+                if x.status != 409:
+                    results_dict['create_namespace']['error'] = LoadStrIfJson(str(x))
+                    if not results_dict['create_namespace']['error']:
+                        results_dict['create_namespace']['error'] = str(x)
 
         # create configmaps from files
         # files in nested directories will be created with a name like foo_MALDIR_bar_MALDIR_baz.txt
         #   and then renamed to foo/bar/baz.txt during container start up by docker-uid-gid-setup.sh
-        results_dict['create_namespaced_config_map']['result'] = dict()
-        results_dict['create_namespaced_secret']['result'] = dict()
+        if not dryrun:
+            results_dict['create_namespaced_config_map']['result'] = dict()
+            results_dict['create_namespaced_secret']['result'] = dict()
         for configMapName, configMapFiles in MALCOLM_CONFIGMAPS.items():
             for isSecret in (True, False):
                 resultsEntry = 'create_namespaced_secret' if isSecret else 'create_namespaced_config_map'
@@ -763,24 +781,27 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                             name=configMapName,
                             namespace=namespace,
                         )
-                        if isSecret:
-                            results_dict[resultsEntry]['result'][configMapName] = client.create_namespaced_secret(
-                                namespace=namespace,
-                                body=kubeImported.client.V1Secret(
-                                    metadata=metadata,
-                                    string_data=dataMap if dataMap else {},
-                                    data=binaryDataMap if binaryDataMap else {},
-                                ),
-                            ).metadata
-                        else:
-                            results_dict[resultsEntry]['result'][configMapName] = client.create_namespaced_config_map(
-                                namespace=namespace,
-                                body=kubeImported.client.V1ConfigMap(
-                                    metadata=metadata,
-                                    data=dataMap if dataMap else {},
-                                    binary_data=binaryDataMap if binaryDataMap else {},
-                                ),
-                            ).metadata
+                        if not dryrun:
+                            if isSecret:
+                                results_dict[resultsEntry]['result'][configMapName] = client.create_namespaced_secret(
+                                    namespace=namespace,
+                                    body=kubeImported.client.V1Secret(
+                                        metadata=metadata,
+                                        string_data=dataMap if dataMap else {},
+                                        data=binaryDataMap if binaryDataMap else {},
+                                    ),
+                                ).metadata
+                            else:
+                                results_dict[resultsEntry]['result'][configMapName] = (
+                                    client.create_namespaced_config_map(
+                                        namespace=namespace,
+                                        body=kubeImported.client.V1ConfigMap(
+                                            metadata=metadata,
+                                            data=dataMap if dataMap else {},
+                                            binary_data=binaryDataMap if binaryDataMap else {},
+                                        ),
+                                    ).metadata
+                                )
                     except kubeImported.client.rest.ApiException as x:
                         if x.status != 409:
                             if 'error' not in results_dict[resultsEntry]:
@@ -790,8 +811,10 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                                 results_dict[resultsEntry]['error'][os.path.basename(configMapName)] = str(x)
 
         # create configmaps (or secrets, given a K8S_SECRET key) from .env files
-        results_dict['create_namespaced_config_map_from_env_file']['result'] = dict()
-        results_dict['create_namespaced_secret_from_env_file']['result'] = dict()
+        namedEnvs = defaultdict(dict)
+        if not dryrun:
+            results_dict['create_namespaced_config_map_from_env_file']['result'] = dict()
+            results_dict['create_namespaced_secret_from_env_file']['result'] = dict()
         for envFileName in glob.iglob(os.path.join(configPath, '*.env'), recursive=False):
             if os.path.isfile(envFileName):
                 try:
@@ -800,24 +823,26 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                     metadata = kubeImported.client.V1ObjectMeta(
                         name=remove_suffix(os.path.basename(envFileName), '.env') + '-env'
                     )
-                    if isSecret:
-                        resultsEntry = 'create_namespaced_secret_from_env_file'
-                        results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_secret(
-                            namespace=namespace,
-                            body=kubeImported.client.V1Secret(
-                                metadata=metadata,
-                                string_data=values if values else {},
-                            ),
-                        ).metadata
-                    else:
-                        resultsEntry = 'create_namespaced_config_map_from_env_file'
-                        results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_config_map(
-                            namespace=namespace,
-                            body=kubeImported.client.V1ConfigMap(
-                                metadata=metadata,
-                                data=values if values else {},
-                            ),
-                        ).metadata
+                    namedEnvs[metadata.name] = values if values else {}
+                    if not dryrun:
+                        if isSecret:
+                            resultsEntry = 'create_namespaced_secret_from_env_file'
+                            results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_secret(
+                                namespace=namespace,
+                                body=kubeImported.client.V1Secret(
+                                    metadata=metadata,
+                                    string_data=values if values else {},
+                                ),
+                            ).metadata
+                        else:
+                            resultsEntry = 'create_namespaced_config_map_from_env_file'
+                            results_dict[resultsEntry]['result'][metadata.name] = client.create_namespaced_config_map(
+                                namespace=namespace,
+                                body=kubeImported.client.V1ConfigMap(
+                                    metadata=metadata,
+                                    data=values if values else {},
+                                ),
+                            ).metadata
 
                 except kubeImported.client.rest.ApiException as x:
                     if x.status != 409:
@@ -828,7 +853,8 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
                             results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = str(x)
 
         # apply manifests
-        results_dict['create_from_yaml']['result'] = dict()
+        if not dryrun:
+            results_dict['create_from_yaml']['result'] = dict()
         yamlFiles = sorted(
             list(
                 chain(
@@ -842,6 +868,7 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
         for yamlName in yamlFiles:
             # check to make sure the container in this YAML file belongs to this profile
             containerBelongsInProfile = True
+            manYamlFileContents = None
             with open(yamlName, 'r') as manYamlFile:
                 if manYamlFileContents := list(yamlImported.YAML(typ='safe', pure=True).load_all(manYamlFile)):
                     for doc in manYamlFileContents:
@@ -856,28 +883,122 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM):
 
             # apply the manifests in this YAML file, otherwise skip it
             if containerBelongsInProfile:
-                try:
-                    results_dict['create_from_yaml']['result'][os.path.basename(yamlName)] = (
-                        kubeImported.utils.create_from_yaml(
-                            apiClient,
-                            yamlName,
-                            namespace=namespace,
-                        )
-                    )
-                except kubeImported.client.rest.ApiException as x:
-                    if x.status != 409:
-                        if 'error' not in results_dict['create_from_yaml']:
-                            results_dict['create_from_yaml']['error'] = dict()
-                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(x))
-                        if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
-                            results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
-                except kubeImported.utils.FailToCreateError as fe:
-                    if [exc for exc in fe.api_exceptions if exc.status != 409]:
-                        if 'error' not in results_dict['create_from_yaml']:
-                            results_dict['create_from_yaml']['error'] = dict()
-                        results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(str(fe))
-                        if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
-                            results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
+
+                # Some containers need to have resource requests created for them on the fly (idaholab/Malcolm#539).
+                # For now the only ones I'm doing this for are ones that have JAVA_OPTS specified (see CONTAINER_JAVA_OPTS_VARS)
+                #   which we retrieve from the container's environment variables we created earlier as configMapRefs.
+                modified = False
+                if manYamlFileContents:
+                    for docIdx, doc in enumerate(manYamlFileContents):
+                        if (
+                            ('spec' in manYamlFileContents[docIdx])
+                            and ('template' in manYamlFileContents[docIdx]['spec'])
+                            and ('spec' in manYamlFileContents[docIdx]['spec']['template'])
+                            and ('containers' in manYamlFileContents[docIdx]['spec']['template']['spec'])
+                        ):
+                            # loop over each container defined in this document (by index since we're modifying in-place)
+                            for containerIdx, container in enumerate(
+                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers']
+                            ):
+                                # we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
+                                containerName = remove_suffix(
+                                    manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                        containerIdx
+                                    ].get('name', ''),
+                                    '-container',
+                                )
+                                if containerName in CONTAINER_JAVA_OPTS_VARS:
+                                    # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
+                                    containerEnvs = {}
+                                    if (
+                                        'envFrom'
+                                        in manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                            containerIdx
+                                        ]
+                                    ):
+                                        for env in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                            'containers'
+                                        ][containerIdx]['envFrom']:
+                                            if ('configMapRef' in env) and ('name' in env['configMapRef']):
+                                                containerEnvs.update(namedEnvs.get(env['configMapRef']['name'], {}))
+                                    # proceed if the environment variable in CONTAINER_JAVA_OPTS_VARS for this container
+                                    #  is defined in this container's runtime environment variables
+                                    if CONTAINER_JAVA_OPTS_VARS[containerName] in containerEnvs:
+                                        # calculate mebibytes for resources request from JAVA_OPTS line and proceed if it's > 0
+                                        if requestMib := GetMemMegabytesFromJavaOptsLine(
+                                            containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
+                                        ):
+                                            if (
+                                                'resources'
+                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    'containers'
+                                                ][containerIdx]
+                                            ):
+                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                                    containerIdx
+                                                ]['resources'] = {}
+                                            if (
+                                                'requests'
+                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    'containers'
+                                                ][containerIdx]['resources']
+                                            ):
+                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                                    containerIdx
+                                                ]['resources']['requests'] = {}
+                                            if (
+                                                'memory'
+                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    'containers'
+                                                ][containerIdx]['resources']['requests']
+                                            ):
+                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                                    containerIdx
+                                                ]['resources']['requests']['memory'] = f'{requestMib}Mi'
+                                            modified = True
+
+                # if we added a resource request, write out the modified YAML to a temporary file
+                with temporary_filename(suffix='.yml') if modified else nullcontext() as tmpYmlFileName:
+                    if modified:
+                        with open(tmpYmlFileName, 'w') as tmpYmlFile:
+                            outYaml = yamlImported.YAML(typ='rt')
+                            outYaml.preserve_quotes = True
+                            outYaml.allow_duplicate_keys = True
+                            outYaml.representer.ignore_aliases = lambda *args: True
+                            outYaml.representer.add_representer(type(None), NullRepresenter())
+                            outYaml.boolean_representation = ['false', 'true']
+                            outYaml.version = YAML_VERSION
+                            outYaml.width = 4096
+                            outYaml.dump_all(manYamlFileContents, tmpYmlFile)
+
+                    if not dryrun:
+                        try:
+                            # load from the temporary file if we made modifications, otherwise load from the original
+                            results_dict['create_from_yaml']['result'][os.path.basename(yamlName)] = (
+                                kubeImported.utils.create_from_yaml(
+                                    apiClient,
+                                    tmpYmlFileName if modified else yamlName,
+                                    namespace=namespace,
+                                )
+                            )
+                        except kubeImported.client.rest.ApiException as x:
+                            if x.status != 409:
+                                if 'error' not in results_dict['create_from_yaml']:
+                                    results_dict['create_from_yaml']['error'] = dict()
+                                results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(
+                                    str(x)
+                                )
+                                if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(x)
+                        except kubeImported.utils.FailToCreateError as fe:
+                            if [exc for exc in fe.api_exceptions if exc.status != 409]:
+                                if 'error' not in results_dict['create_from_yaml']:
+                                    results_dict['create_from_yaml']['error'] = dict()
+                                results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = LoadStrIfJson(
+                                    str(fe)
+                                )
+                                if not results_dict['create_from_yaml']['error'][os.path.basename(yamlName)]:
+                                    results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
 
@@ -899,7 +1020,7 @@ def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):
         )
         for yamlName in yamlFiles:
             with open(yamlName, 'r') as cf:
-                allYamlContents.extend(list(yamlImported.YAML(typ='safe', pure=True).safe_load_all(cf)))
+                allYamlContents.extend(list(yamlImported.YAML(typ='safe', pure=True).load_all(cf)))
         for name, kind in REQUIRED_VOLUME_OBJECTS[profile].items():
             for doc in allYamlContents:
                 if (

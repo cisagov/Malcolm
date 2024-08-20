@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:24.07.0
+        image: ghcr.io/idaholab/malcolm/zeek:24.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -36,9 +36,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - pcap-zeek
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15
@@ -64,7 +62,7 @@ spec:
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:24.07.0
+        image: ghcr.io/idaholab/malcolm/dirinit:24.08.0
         imagePullPolicy: Always
         stdin: false
         tty: true

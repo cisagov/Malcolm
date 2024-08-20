@@ -1481,19 +1481,13 @@ class Installer(object):
             'Should Malcolm enrich network traffic using NetBox?',
             default=args.netboxLogstashEnrich,
         )
-        netboxAutoPopulate = (
-            netboxEnabled
-            and InstallerYesOrNo(
-                'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
-                default=args.netboxAutoPopulate,
-            )
-            and (
-                args.acceptDefaultsNonInteractive
-                or InstallerYesOrNo(
-                    "Autopopulating NetBox's inventory is not recommended. Are you sure?",
-                    default=args.netboxAutoPopulate,
-                )
-            )
+        netboxAutoPopulate = netboxEnabled and InstallerYesOrNo(
+            'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
+            default=args.netboxAutoPopulate,
+        )
+        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
+            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
+            default=args.netboxLogstashAutoSubnets,
         )
         netboxSiteName = (
             InstallerAskForString(
@@ -1505,10 +1499,6 @@ class Installer(object):
         )
         if len(netboxSiteName) == 0:
             netboxSiteName = 'Malcolm'
-        netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
-            'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
-            default=args.netboxLogstashAutoSubnets,
-        )
 
         # input packet capture parameters
         pcapNetSniff = False
@@ -2292,9 +2282,10 @@ class Installer(object):
                             data['services']['nginx-proxy']['ports'] = [
                                 f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
                             ]
-                            data['services']['nginx-proxy']['ports'].append(
-                                f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
-                            )
+                            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                                data['services']['nginx-proxy']['ports'].append(
+                                    f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                                )
 
                             # enable/disable/configure traefik labels if applicable
                             for label in (

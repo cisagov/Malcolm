@@ -53,6 +53,8 @@ For Malcolm's purposes, both physical devices and virtualized hosts will be stor
 
 NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/). Sites can have overlapping IP address ranges. The site to associate with network traffic can be specified when [PCAP is uploaded](upload.md#Upload), when configuring [live analysis](live-analysis.md#LiveAnalysis), and when [configuring forwarding from Hedgehog Linux](malcolm-hedgehog-e2e-iso-install.md#Hedgehogfilebeat). If not otherwise specified, the value of the `NETBOX_DEFAULT_SITE` variable in [environment variable in `netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars) will be used for these enrichment lookups.
 
+When NetBox enrichment is attempted for a log, the value `netbox` is automatically added to its `tags` field.
+
 ## <a name="NetBoxCompare"></a>Compare and highlight discrepancies between NetBox inventory and observed network traffic
 
 As Malcolm cross-checks network traffic with NetBox's model (as described [above](#NetBoxEnrichment)), the resulting enrichment data (or lack thereof) can highlight devices and services observed in network traffic for which there is no corresponding entry in the list of inventoried assets.
@@ -126,8 +128,6 @@ See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
 ## <a name="NetBoxPreload"></a>Preloading NetBox inventory
 
 YML files in [`./netbox/preload`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/netbox/preload/) under the Malcolm installation directory will be preloaded upon startup using the third-party [netbox-initializers](https://github.com/tobiasge/netbox-initializers) plugin. Examples illustrating the format of these YML files can be found at its [GitHub repository](https://github.com/tobiasge/netbox-initializers/tree/main/src/netbox_initializers/initializers/yaml).
-
-[workflow files]
 
 ## <a name="NetBoxBackup"></a>Backup and Restore
 

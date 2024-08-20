@@ -33,7 +33,7 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 
 # for download and install
-ARG ZEEK_VERSION=6.2.1-0
+ARG ZEEK_VERSION=7.0.0-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
@@ -144,6 +144,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 # add configuration and scripts
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
+COPY --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
+COPY --chmod=755 zeek/scripts/container_health.sh /usr/local/bin/
+COPY --chmod=755 zeek/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD shared/bin/pcap_processor.py /usr/local/bin/
 ADD shared/bin/pcap_utils.py /usr/local/bin/
@@ -153,9 +157,7 @@ ADD shared/pcaps /tmp/pcaps
 ADD zeek/supervisord.conf /etc/supervisord.conf
 ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
 ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
-ADD zeek/scripts/docker_entrypoint.sh /usr/local/bin/
-ADD shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
-ADD shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
+
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
