@@ -2,14 +2,14 @@
 # fluent-bit-setup.ps1
 #
 # Interactive PowerShell script to aid in the installation and
-# configuration of fluent-bit (https://fluentbit.io/) for forwarding logs to
+# configuration of fluent-bit (https://packages.fluentbit.io) for forwarding logs to
 # an instance of Malcolm (https://github.com/cisagov/malcolm).
 #
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 ###############################################################################
 
 $fluent_bit_version = '3.1'
-$fluent_bit_full_version = '3.1.4'
+$fluent_bit_full_version = '3.1.6'
 
 ###############################################################################
 # select an item from a menu provided in an array
@@ -107,8 +107,8 @@ if (-Not $fluentbit_installed) {
         $choices  = '&Yes', '&No'
         $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
         if ($decision -eq 0) {
-            $fluentbit_sha_url = "https://fluentbit.io/releases/$fluent_bit_version/$fluent_bit_shafile"
-            $fluentbit_url = "https://fluentbit.io/releases/$fluent_bit_version/$fluent_bit_zip"
+            $fluentbit_sha_url = "https://packages.fluentbit.io/windows/$fluent_bit_shafile"
+            $fluentbit_url = "https://packages.fluentbit.io/windows/$fluent_bit_zip"
             Invoke-WebRequest -Uri "$fluentbit_sha_url" -OutFile "$fluent_bit_shafile"
             Invoke-WebRequest -Uri "$fluentbit_url" -OutFile "$fluent_bit_zip"
         }

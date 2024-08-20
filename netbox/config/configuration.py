@@ -142,9 +142,7 @@ if 'BANNER_LOGIN' in environ:
     BANNER_LOGIN = environ.get('BANNER_LOGIN', None)
 
 # Base URL path if accessing NetBox within a directory. For example, if installed at http://example.com/netbox/, set:
-# BASE_PATH = 'netbox/'
-if 'BASE_PATH' in environ:
-    BASE_PATH = environ.get('BASE_PATH', '')
+BASE_PATH = 'netbox/'
 
 # Maximum number of days to retain logged changes. Set to 0 to retain changes indefinitely. (Default: 90)
 if 'CHANGELOG_RETENTION' in environ:

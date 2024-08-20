@@ -463,6 +463,12 @@ services:
         source: ./netbox/preload
         target: /opt/netbox-preload/configmap
         read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./netbox/custom-plugins
+        target: /opt/netbox-custom-plugins
+        read_only: true
   netbox-postgres:
     volumes:
       - type: bind

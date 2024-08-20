@@ -1267,6 +1267,7 @@ def authSetup():
             "Configure all authentication-related settings",
             True,
             True,
+            [],
         ),
         (
             'admin',
@@ -1274,6 +1275,7 @@ def authSetup():
             False,
             (not args.cmdAuthSetupNonInteractive)
             or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
+            [],
         ),
         (
             'webcerts',
@@ -1286,6 +1288,7 @@ def authSetup():
                     os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
                 )
             ),
+            [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
         ),
         (
             'fwcerts',
@@ -1294,62 +1297,66 @@ def authSetup():
             not args.cmdAuthSetupNonInteractive
             or (
                 args.authGenFwCerts
-                or not os.path.isfile(
-                    os.path.join(MalcolmPath, os.path.join('logstash', os.path.join('certs', 'server.key')))
-                )
+                or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
+                or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
             ),
+            [
+                os.path.join(logstashPath, 'server.key'),
+                os.path.join(filebeatPath, 'client.key'),
+            ],
         ),
         (
             'remoteos',
             "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
             False,
             False,
+            [],
         ),
         (
             'email',
             "Store username/password for OpenSearch Alerting email sender account",
             False,
             False,
+            [],
         ),
         (
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
-            (
-                not os.path.isfile(
-                    os.path.join(MalcolmPath, os.path.join('netbox', os.path.join('env', 'netbox-secret.env')))
-                )
-            )
-            or (args.cmdAuthSetupNonInteractive and args.authGenNetBoxPasswords),
+            args.cmdAuthSetupNonInteractive and args.authGenNetBoxPasswords,
+            [],
         ),
         (
             'arkime',
             "Store password hash secret for Arkime viewer cluster",
             False,
             False,
+            [],
         ),
         (
             'txfwcerts',
             "Transfer self-signed client certificates to a remote log forwarder",
             False,
             False,
+            [],
         ),
     )[: 9 if txRxScript else -1]
 
     authMode = (
         ChooseOne(
             'Configure Authentication',
-            choices=[x[:-1] for x in authModeChoices],
+            choices=[x[:-2] for x in authModeChoices],
         )
         if not args.cmdAuthSetupNonInteractive
         else 'all'
     )
-    defaultBehavior = (
+    noninteractiveBehavior = (
         UserInputDefaultsBehavior.DefaultsPrompt
-        if not args.cmdAuthSetupNonInteractive
-        else UserInputDefaultsBehavior.DefaultsPrompt
         | UserInputDefaultsBehavior.DefaultsAccept
         | UserInputDefaultsBehavior.DefaultsNonInteractive
+    )
+    defaultBehavior = (
+        UserInputDefaultsBehavior.DefaultsPrompt if not args.cmdAuthSetupNonInteractive else noninteractiveBehavior
     )
 
     for authItem in authModeChoices[1:]:
@@ -1358,7 +1365,11 @@ def authSetup():
             and YesOrNo(
                 f'{authItem[1]}?',
                 default=authItem[3],
-                defaultBehavior=defaultBehavior,
+                defaultBehavior=(
+                    noninteractiveBehavior
+                    if (authItem[4] and (not all([os.path.isfile(x) for x in authItem[4]])))
+                    else defaultBehavior
+                ),
             )
         ) or ((authMode != 'all') and (authMode == authItem[0])):
             if authItem[0] == 'admin':

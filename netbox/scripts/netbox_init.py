@@ -491,7 +491,7 @@ def main():
         except Exception as e:
             logging.error(f"{type(e).__name__} restoring {os.path.basename(preloadDatabaseFile)}: {e}")
 
-    # only proceed to do the regular population/preload if if we didn't preload a database backup, or
+    # only proceed to do the regular population if if we didn't preload a database backup, or
     #   if we attempted (and failed) but they didn't explicitly specify a backup file
     if not preloadDatabaseSuccess and (not args.preloadBackupFile):
         # create connection to netbox API
@@ -715,31 +715,36 @@ def main():
         except Exception as e:
             logging.error(f"{type(e).__name__} migrating prefix VRF to prefix description: {e}")
 
-        # ###### Netbox-Initializers ###################################################################################
-        if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
-            try:
-                with malcolm_utils.pushd(os.path.dirname(manageScript)):
-                    # make a local copy of the YMLs to preload
-                    with tempfile.TemporaryDirectory() as tmpPreloadDir:
-                        copy_tree(args.preloadDir, tmpPreloadDir)
-                        retcode, output = malcolm_utils.run_process(
-                            [
-                                netboxVenvPy,
-                                os.path.basename(manageScript),
-                                "load_initializer_data",
-                                "--path",
-                                tmpPreloadDir,
-                            ],
-                            logger=logging,
-                        )
-                        if retcode == 0:
-                            logging.debug(f"netbox-initializers: {retcode} {output}")
-                        else:
-                            logging.error(f"Error processing netbox-initializers: {retcode} {output}")
+    # ###### Netbox-Initializers ###################################################################################
+    # We're doing the netbox initializers even if we did a database backup preload, as we always want to
+    #   honor there being something in here. If things already got loaded upas part of the backup preload,
+    #   no big deal, those things will just fail for already existing.
+    if os.path.isfile(netboxVenvPy) and os.path.isfile(manageScript) and os.path.isdir(args.preloadDir):
+        try:
+            with malcolm_utils.pushd(os.path.dirname(manageScript)):
+                # make a local copy of the YMLs to preload
+                with tempfile.TemporaryDirectory() as tmpPreloadDir:
+                    copy_tree(args.preloadDir, tmpPreloadDir)
+                    retcode, output = malcolm_utils.run_process(
+                        [
+                            netboxVenvPy,
+                            os.path.basename(manageScript),
+                            "load_initializer_data",
+                            "--path",
+                            tmpPreloadDir,
+                        ],
+                        logger=logging,
+                    )
+                    if retcode == 0:
+                        logging.debug(f"netbox-initializers: {retcode} {output}")
+                    else:
+                        logging.error(f"Error processing netbox-initializers: {retcode} {output}")
 
-            except Exception as e:
-                logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")
+        except Exception as e:
+            logging.error(f"{type(e).__name__} processing netbox-initializers: {e}")
 
+    # this if statement is the same check we did above after the preload backup restore finished
+    if not preloadDatabaseSuccess and (not args.preloadBackupFile):
         # ######  Device-Type-Library-Import ###########################################################################
         if os.path.isdir(args.libraryDir):
             try:

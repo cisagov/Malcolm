@@ -88,10 +88,11 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Email Sender Accounts](alerting.md#AlertingEmail)
 * [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
-    - [Custom Rules and Scripts](custom-rules.md#CustomRulesAndScripts)
+    - [Custom Rules, Scripts and Plugins](custom-rules.md#CustomRulesAndScripts)
         + [Suricata](custom-rules.md#Suricata)
         + [Zeek](custom-rules.md#Zeek)
         + [YARA](custom-rules.md#YARA)
+        + [NetBox Plugins](custom-rules.md#NetBox)
         + [Other Customizations](custom-rules.md#Other)
     - [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction)
         + [User interface](file-scanning.md#ZeekFileExtractionUI)

@@ -42,3 +42,5 @@ suricata-logs
 netbox/netbox/media
 netbox/netbox/postgres
 netbox/netbox/redis
+netbox/custom-plugins
+zeek/custom

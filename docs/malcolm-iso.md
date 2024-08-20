@@ -41,7 +41,7 @@ Building the ISO may take 30 minutes or more depending on the system. As the bui
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-24.07.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-24.08.0.iso"
 …
 ```
 
@@ -71,6 +71,7 @@ The installer will ask for several pieces of information prior to installing the
 
 At the end of the installation process, users will be prompted with the following self-explanatory yes/no questions:
 
+* **Format non-OS drive(s) for artifact storage?**
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**

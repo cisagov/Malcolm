@@ -176,9 +176,9 @@ def decapitalize(s):
 #
 # Example:
 #   d = {'meta': {'status': 'OK', 'status_code': 200}}
-#   DeepGet(d, ['meta', 'status_code'])          # => 200
-#   DeepGet(d, ['garbage', 'status_code'])       # => None
-#   DeepGet(d, ['meta', 'garbage'], default='-') # => '-'
+#   deep_get(d, ['meta', 'status_code'])          # => 200
+#   deep_get(d, ['garbage', 'status_code'])       # => None
+#   deep_get(d, ['meta', 'garbage'], default='-') # => '-'
 def deep_get(d, keys, default=None):
     k = get_iterable(keys)
     if d is None:

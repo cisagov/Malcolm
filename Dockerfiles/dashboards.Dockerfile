@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch-dashboards:2.15.0
+FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch-dashboards:2.16.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -43,10 +43,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     # Malcolm manages authentication and encryption via NGINX reverse proxy
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
-        # unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        # sed -i "s/2\.13\.0/2\.15\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        # sed -i "s/2\.13\.0/2\.15\.0/g" opensearch-dashboards/transformVis/package.json && \
-        # zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.15\.0/2\.16\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.15\.0/2\.16\.0/g" opensearch-dashboards/transformVis/package.json && \
+        zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
         rm -rf /tmp/transformVis /tmp/opensearch-dashboards && \

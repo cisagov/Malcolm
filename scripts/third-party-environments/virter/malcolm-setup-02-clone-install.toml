@@ -67,8 +67,6 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
         --extracted-file-yara \
         --netbox \
         --netbox-enrich \
-        --netbox-autopopulate false \
-        --netbox-preload-prefixes \
         --netbox-site-name malcolm
 
     # username: analyst
