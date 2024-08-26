@@ -5,7 +5,6 @@ apt-get -y --purge remove build-essential sparse $(dpkg --get-selections | grep 
 
 # remove unwanted packages
 apt-get -y --purge remove bluez-firmware \
-                          cracklib-runtime \
                           docker-scan-plugin \
                           docker-buildx-plugin \
                           docker-ce-rootless-extras \
