@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CAPA_VERSION="7.1.0"
+export CAPA_VERSION="7.2.0"
 export CAPA_SRC_URL="https://github.com/mandiant/capa/archive/refs/tags/v${CAPA_VERSION}.zip"
 export CAPA_RULES_URL="https://github.com/mandiant/capa-rules/archive/refs/tags/v${CAPA_VERSION}.zip"
 
