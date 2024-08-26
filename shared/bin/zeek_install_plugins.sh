@@ -109,10 +109,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/ncsa/bro-simple-scan"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer"
-  "https://github.com/zeek/spicy-dhcp"
-  "https://github.com/zeek/spicy-dns"
-  "https://github.com/zeek/spicy-http"
-  "https://github.com/zeek/spicy-pe"
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
 )
