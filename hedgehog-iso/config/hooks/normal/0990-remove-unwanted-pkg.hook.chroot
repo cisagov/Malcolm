@@ -15,7 +15,6 @@ rm -rf /var/spool/ccache
 # remove unwanted packages
 apt-get -y --purge remove \
   bluez-firmware \
-  cracklib-runtime \
   firmware-libertas \
   firmware-netronome \
   firmware-nvidia* \
