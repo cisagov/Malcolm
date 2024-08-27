@@ -7,6 +7,7 @@ import getpass
 import importlib
 import json
 import os
+import math
 import platform
 import re
 import string
@@ -170,6 +171,31 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
                         break
 
     return localPath
+
+
+##################################################################################################
+def GetMemMegabytesFromJavaOptsLine(val):
+    resultStr = None
+    resultMB = 0
+    for opt in ('Xmx', 'Xms'):
+        if resultStr is not None:
+            break
+        if match := re.search(fr'-{opt}(\d+[kmg])', val, re.IGNORECASE):
+            resultStr = match.group(1)
+    if resultStr is not None:
+        value = int(resultStr[:-1])
+        unit = resultStr[-1].lower()
+        if unit == 'g':
+            resultMB = value * 1024
+        elif unit == 'm':
+            resultMB = value
+        elif unit == 'k':
+            resultMB = math.ceil(value / 1024)
+        else:
+            resultMB = 0
+        if resultMB < 1:
+            resultMB = 0
+    return resultMB
 
 
 ##################################################################################################

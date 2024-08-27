@@ -33,6 +33,7 @@ After the passwords have been entered, the installer will proceed to format the 
 
 At the end of the installation process, the installer will prompt users with few self-explanatory yes/no questions:
 
+* **Format non-OS drive(s) for artifact storage?**
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**

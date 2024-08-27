@@ -32,9 +32,9 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.3.0"
+ARKIME_VERSION="5.4.0"
 
-BEATS_VER="8.14.3"
+BEATS_VER="8.15.0"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -214,7 +214,7 @@ build_zeek_src() {
     export PYTHONUNBUFFERED=1
 
     zeek_url=https://github.com/zeek/zeek.git
-    zeek_version=6.2.1
+    zeek_version=7.0.0
     zeek_release=1
     zeek_dir=/opt/zeek
     # Zeek's build eats a ton of resources; prevent OOM from the killing build process

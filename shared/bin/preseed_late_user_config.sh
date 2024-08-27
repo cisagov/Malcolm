@@ -63,10 +63,37 @@ Description:
 Template: malcolm/ssh_password_auth_title
 Type: text
 Description: SSH Password Authentication
+
+Template: malcolm/format_large_storage
+Type: boolean
+Default: true
+Description:
+ Format non-OS drive(s) for artifact storage?
+
+Template: malcolm/format_large_storage_title
+Type: text
+Description: Format Non-OS Drive(s)?
 !EOF!
 
 # load template
 db_x_loadtemplatefile /tmp/malcolm.template malcolm
+
+# set title
+db_settitle malcolm/format_large_storage_title
+
+# prompt
+db_input critical malcolm/format_large_storage
+db_go
+
+# get answer to $RET
+db_get malcolm/format_large_storage
+
+if [ "$RET" = false ]; then
+  # capture_storage_format file was already created in preseed, remove it
+  rm -f /etc/capture_storage_format*
+fi
+
+echo "malcolm/format_large_storage=$RET" >> /tmp/malcolm.answer
 
 # set title
 db_settitle malcolm/disable_ipv6_title

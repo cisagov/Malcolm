@@ -66,6 +66,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
+  mkdir $VERBOSE -p "$DESTDIR/netbox/custom-plugins/requirements/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"

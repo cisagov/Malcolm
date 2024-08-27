@@ -1,8 +1,9 @@
-# <a name="CustomRulesAndScripts"></a>Custom Rules and Scripts
+# <a name="CustomRulesAndScripts"></a>Custom Rules, Scripts and Plugins
 
 * [Suricata](#Suricata)
 * [Zeek](#Zeek)
 * [YARA](#YARA)
+* [NetBox Plugins](#NetBox)
 * [Other Customizations](#Other)
 
 Much of Malcolm's behavior can be adjusted through [environment variable files](malcolm-config.md#MalcolmConfigEnvVars). However, some components allow further customization through the use of custom scripts, configuration files, and rules.
@@ -72,6 +73,16 @@ docker compose exec file-monitor supervisorctl restart yara
 ```
 
 If the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`.
+
+## <a name="NetBox"></a>NetBox Plugins
+
+NetBox's functionality can be extended with plugins that can provide "[new data models, integrations, and more](https://netboxlabs.com/netbox-plugins/)" (see also the [NetBox Wiki](https://github.com/netbox-community/netbox/wiki/Plugins)).
+
+When Malcolm's NetBox container [starts up]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/netbox/scripts/netbox_install_plugins.py), it installs (using [pip](https://packaging.python.org/en/latest/guides/tool-recommendations/#installing-packages)) any NetBox plugins that have [cloned](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) or [downloaded and extracted](https://docs.github.com/en/repositories/working-with-files/using-files/downloading-source-code-archives) into subdirectories in `./netbox/custom-plugins/` in the Malcolm installation directory. In instances where Malcolm is being run in an offline/airgapped configuration, the plugins' additional dependencies must also be present under `./netbox/custom-plugins/requirements/`, where they will be automatically installed first.
+
+The following warning is quoted from the [NetBox documentation](https://netboxlabs.com/docs/netbox/en/stable/configuration/plugins/):
+
+> Plugins extend NetBox by allowing external code to run with the same access and privileges as NetBox itself. Only install plugins from trusted sources. The NetBox maintainers make absolutely no guarantees about the integrity or security of your installation with plugins enabled.
 
 ## <a name="Other"></a>Other Customizations
 

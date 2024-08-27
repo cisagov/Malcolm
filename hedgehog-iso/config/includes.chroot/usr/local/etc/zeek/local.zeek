@@ -18,9 +18,6 @@ global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
 global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
-global disable_spicy_dhcp = (getenv("ZEEK_DISABLE_SPICY_DHCP") == true_regex) ? T : F;
-global disable_spicy_dns = (getenv("ZEEK_DISABLE_SPICY_DNS") == true_regex) ? T : F;
-global disable_spicy_http = (getenv("ZEEK_DISABLE_SPICY_HTTP") == true_regex) ? T : F;
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == true_regex) ? T : F;
 global disable_spicy_ldap = (getenv("ZEEK_DISABLE_SPICY_LDAP") == true_regex) ? T : F;
 global disable_spicy_openvpn = (getenv("ZEEK_DISABLE_SPICY_OPENVPN") == true_regex) ? T : F;
@@ -169,15 +166,6 @@ event zeek_init() &priority=-5 {
   if (disable_ics_all || disable_ics_synchrophasor) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_TCP);
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SYNCHROPHASOR_UDP);
-  }
-  if (disable_spicy_dhcp) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DHCP);
-  }
-  if (disable_spicy_dns) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_DNS);
-  }
-  if (disable_spicy_http) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HTTP);
   }
   if (disable_spicy_ipsec) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_IPSEC_TCP);
