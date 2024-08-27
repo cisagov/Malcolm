@@ -46,7 +46,7 @@ from urllib3.exceptions import NewConnectionError
 
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
-from watchdog.utils import WatchdogShutdownError
+from watchdog.utils import WatchdogShutdown
 
 ###################################################################################################
 MINIMUM_CHECKED_FILE_SIZE_DEFAULT = 24
@@ -564,9 +564,9 @@ def main():
         logging.info(f"{scriptName}:\tshutting down...")
 
         if shuttingDown[0]:
-            raise WatchdogShutdownError()
+            raise WatchdogShutdown()
 
-    except WatchdogShutdownError:
+    except WatchdogShutdown:
         observer.unschedule_all()
 
     finally:

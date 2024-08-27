@@ -24,7 +24,7 @@ import zmq
 from multiprocessing.pool import ThreadPool
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
-from watchdog.utils import WatchdogShutdownError
+from watchdog.utils import WatchdogShutdown
 
 from zeek_carve_utils import (
     CAPA_VIV_MIME,
@@ -320,9 +320,9 @@ def main():
         logging.info(f"{scriptName}:\tshutting down...")
 
         if shuttingDown[0]:
-            raise WatchdogShutdownError()
+            raise WatchdogShutdown()
 
-    except WatchdogShutdownError:
+    except WatchdogShutdown:
         observer.unschedule_all()
 
     finally:
