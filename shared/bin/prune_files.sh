@@ -101,7 +101,7 @@ while true ; do
     if (( $DELETED_FILES > 0 )) ; then
       echo "Pruned $DELETED_FILES files ($(numfmt --to=iec-i --suffix=B $DELETED_BYTES)) in \"$PRUNE_PATH\""
     else
-      echo "Nothing was pruned in \"$PRUNE_PATH\"!" >&2
+      [[ "$VERBOSE" == "1" ]] && echo "Nothing was pruned in \"$PRUNE_PATH\"!" >&2
     fi
 
   else
