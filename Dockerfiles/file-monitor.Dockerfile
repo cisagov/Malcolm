@@ -159,7 +159,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python-magic \
       stream-zip \
       supervisor \
-      watchdog==4.0.2 \
+      watchdog==5.0.0 \
       yara-python && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
