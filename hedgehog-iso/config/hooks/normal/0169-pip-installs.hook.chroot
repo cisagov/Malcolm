@@ -20,4 +20,4 @@ pip3 install --break-system-packages --no-compile --no-cache-dir --force-reinsta
   stix2 \
   stream-zip \
   taxii2-client \
-  watchdog
+  watchdog==4.0.2
