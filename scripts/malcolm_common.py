@@ -15,7 +15,6 @@ import sys
 
 import malcolm_utils
 from malcolm_utils import (
-    decapitalize,
     deep_get,
     eprint,
     EscapeAnsi,
@@ -283,7 +282,7 @@ def YesOrNo(
         # by default the "extra" button is between "Yes" and "No" which looks janky, IMO.
         #   so we're going to switch things around a bit.
         yesLabelTmp = yesLabel.capitalize() if defaultYes else noLabel.capitalize()
-        noLabelTmp = decapitalize(noLabel) if defaultYes else decapitalize(yesLabel)
+        noLabelTmp = noLabel.capitalize() if defaultYes else yesLabel.capitalize()
         replyMap = {}
         if hasExtraLabel := (extraLabel is not None):
             replyMap[Dialog.EXTRA] = Dialog.CANCEL
