@@ -280,13 +280,22 @@ def YesOrNo(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         defaultYes = (default is not None) and str2boolorextra(default)
+        # by default the "extra" button is between "Yes" and "No" which looks janky, IMO.
+        #   so we're going to switch things around a bit.
+        yesLabelTmp = yesLabel.capitalize() if defaultYes else noLabel.capitalize()
+        noLabelTmp = decapitalize(noLabel) if defaultYes else decapitalize(yesLabel)
+        replyMap = {}
+        if hasExtraLabel := (extraLabel is not None):
+            replyMap[Dialog.EXTRA] = Dialog.CANCEL
+            replyMap[Dialog.CANCEL] = Dialog.EXTRA
         reply = MainDialog.yesno(
-            question,
-            yes_label=yesLabel.capitalize() if defaultYes else noLabel.capitalize(),
-            no_label=decapitalize(noLabel) if defaultYes else decapitalize(yesLabel),
-            extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            str(question),
+            yes_label=str(yesLabelTmp),
+            no_label=str(extraLabel) if hasExtraLabel else str(noLabelTmp),
+            extra_button=hasExtraLabel,
+            extra_label=str(noLabelTmp) if hasExtraLabel else str(extraLabel),
         )
+        reply = replyMap.get(reply, reply)
         if defaultYes:
             reply = 'y' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'n')
         else:
@@ -362,14 +371,14 @@ def AskForString(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.inputbox(
-            question,
+            str(question),
             init=(
                 default
                 if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
                 else ""
             ),
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(question)
@@ -417,10 +426,10 @@ def AskForPassword(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.passwordbox(
-            prompt,
+            str(prompt),
             insecure=True,
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(prompt)
@@ -466,10 +475,10 @@ def ChooseOne(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.radiolist(
-            prompt,
+            str(prompt),
             choices=validChoices,
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if code == Dialog.CANCEL or code == Dialog.ESC:
             raise DialogCanceledException(prompt)
@@ -535,10 +544,10 @@ def ChooseMultiple(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.checklist(
-            prompt,
+            str(prompt),
             choices=validChoices,
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if code == Dialog.CANCEL or code == Dialog.ESC:
             raise DialogCanceledException(prompt)
@@ -608,9 +617,9 @@ def DisplayMessage(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code = MainDialog.msgbox(
-            message,
+            str(message),
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(message)
@@ -653,7 +662,7 @@ def DisplayProgramBox(
             width=78,
             height=20,
             extra_button=(extraLabel is not None),
-            extra_label=extraLabel,
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException()

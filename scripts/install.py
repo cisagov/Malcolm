@@ -128,32 +128,32 @@ str2percent = lambda val: max(min(100, int(remove_suffix(val, '%'))), 0) if val 
 
 
 class ConfigOptions(IntEnum):
-    Preconfig = 1
-    UidGuid = 2
-    NodeName = 3
-    RunProfile = 4
-    DatabaseMode = 5
-    LogstashRemote = 6
-    ContainerResources = 7
-    RestartMode = 8
-    RequireHTTPS = 9
-    DockerNetworking = 10
-    AuthMethod = 11
-    StorageLocations = 12
-    ILMISM = 13
-    StorageManagement = 14
-    AutoArkime = 15
-    AutoSuricata = 16
-    SuricataRuleUpdate = 17
-    AutoZeek = 18
-    ICS = 19
-    Enrichment = 20
-    OpenPorts = 21
-    FileCarving = 22
-    NetBox = 23
-    Capture = 24
-    DarkMode = 25
-    PostConfig = 26
+    Preconfig = 0
+    UidGuid = 1
+    NodeName = 2
+    RunProfile = 3
+    DatabaseMode = 4
+    LogstashRemote = 5
+    ContainerResources = 6
+    RestartMode = 7
+    RequireHTTPS = 8
+    DockerNetworking = 9
+    AuthMethod = 10
+    StorageLocations = 11
+    ILMISM = 12
+    StorageManagement = 13
+    AutoArkime = 14
+    AutoSuricata = 15
+    SuricataRuleUpdate = 16
+    AutoZeek = 17
+    ICS = 18
+    Enrichment = 19
+    OpenPorts = 20
+    FileCarving = 21
+    NetBox = 22
+    Capture = 23
+    DarkMode = 24
+    PostConfig = 25
 
 
 ###################################################################################################
@@ -166,7 +166,7 @@ def InstallerYesOrNo(
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
     yesLabel='Yes',
     noLabel='No',
-    extraLabel=BACK_LABEL,
+    extraLabel=None,
 ):
     global args
     defBehavior = defaultBehavior
@@ -192,7 +192,7 @@ def InstallerAskForString(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
-    extraLabel=BACK_LABEL,
+    extraLabel=None,
 ):
     global args
     defBehavior = defaultBehavior
@@ -216,7 +216,7 @@ def InstallerChooseOne(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
-    extraLabel=BACK_LABEL,
+    extraLabel=None,
 ):
     global args
     defBehavior = defaultBehavior
@@ -240,7 +240,7 @@ def InstallerChooseMultiple(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
-    extraLabel=BACK_LABEL,
+    extraLabel=None,
 ):
     global args
     defBehavior = defaultBehavior
@@ -263,7 +263,7 @@ def InstallerDisplayMessage(
     forceInteraction=False,
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
-    extraLabel=BACK_LABEL,
+    extraLabel=None,
 ):
     global args
     defBehavior = defaultBehavior
@@ -624,7 +624,6 @@ class Installer(object):
         while True:
             prevStep = currentStep
             currentStep = ConfigOptions(int(currentStep) + 1)
-            eprint(f'{prevStep} -> {currentStep}')
             try:
                 ###################################################################################
                 if currentStep == ConfigOptions.Preconfig:
@@ -659,6 +658,7 @@ class Installer(object):
                     pcapNodeName = InstallerAskForString(
                         f'Enter the node name to associate with network traffic metadata',
                         default=args.pcapNodeName,
+                        extraLabel=BACK_LABEL,
                     )
 
                 ###################################################################################
@@ -670,6 +670,7 @@ class Installer(object):
                             default=args.malcolmProfile,
                             yesLabel='Malcolm',
                             noLabel='Hedgehog',
+                            extraLabel=BACK_LABEL,
                         )
                         else PROFILE_HEDGEHOG
                     )
@@ -679,6 +680,7 @@ class Installer(object):
                     if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                         'Should Malcolm use and maintain its own OpenSearch instance?',
                         default=DATABASE_MODE_ENUMS[args.opensearchPrimaryMode] == DatabaseMode.OpenSearchLocal,
+                        extraLabel=BACK_LABEL,
                     ):
                         opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
 
@@ -708,6 +710,7 @@ class Installer(object):
                                     (x, allowedDatabaseModes[x][1], x == args.opensearchPrimaryMode)
                                     for x in list(allowedDatabaseModes.keys())
                                 ],
+                                extraLabel=BACK_LABEL,
                             )
                         opensearchPrimaryMode = allowedDatabaseModes[databaseModeChoice][0]
                         opensearchPrimaryLabel = allowedDatabaseModes[databaseModeChoice][1]
@@ -719,17 +722,20 @@ class Installer(object):
                             opensearchPrimaryUrl = InstallerAskForString(
                                 f'Enter primary {opensearchPrimaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                                 default=args.opensearchPrimaryUrl,
+                                extraLabel=BACK_LABEL,
                             )
                         opensearchPrimarySslVerify = opensearchPrimaryUrl.lower().startswith(
                             'https'
                         ) and InstallerYesOrNo(
                             f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                             default=args.opensearchPrimarySslVerify,
+                            extraLabel=BACK_LABEL,
                         )
                     else:
                         indexSnapshotCompressed = InstallerYesOrNo(
                             f'Compress {opensearchPrimaryLabel} index snapshots?',
                             default=args.indexSnapshotCompressed,
+                            extraLabel=BACK_LABEL,
                         )
 
                     if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
@@ -739,6 +745,7 @@ class Installer(object):
                             dashboardsUrl = InstallerAskForString(
                                 f'Enter Kibana connection URL (e.g., https://192.168.1.123:5601)',
                                 default=args.dashboardsUrl,
+                                extraLabel=BACK_LABEL,
                             )
 
                 ###################################################################################
@@ -750,6 +757,7 @@ class Installer(object):
                             logstashHost = InstallerAskForString(
                                 f'Enter Logstash host and port (e.g., 192.168.1.123:5044)',
                                 default=args.logstashHost,
+                                extraLabel=BACK_LABEL,
                             )
 
                     if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
@@ -758,6 +766,7 @@ class Installer(object):
                             DATABASE_MODE_ENUMS[args.opensearchSecondaryMode]
                             in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)
                         ),
+                        extraLabel=BACK_LABEL,
                     ):
                         databaseModeChoice = ''
                         allowedDatabaseModes = {
@@ -778,6 +787,7 @@ class Installer(object):
                                     (x, allowedDatabaseModes[x][1], x == args.opensearchSecondaryMode)
                                     for x in list(allowedDatabaseModes.keys())
                                 ],
+                                extraLabel=BACK_LABEL,
                             )
                         opensearchSecondaryMode = allowedDatabaseModes[databaseModeChoice][0]
                         opensearchSecondaryLabel = allowedDatabaseModes[databaseModeChoice][1]
@@ -791,12 +801,14 @@ class Installer(object):
                             opensearchSecondaryUrl = InstallerAskForString(
                                 f'Enter secondary {opensearchSecondaryLabel} connection URL (e.g., https://192.168.1.123:9200)',
                                 default=args.opensearchSecondaryUrl,
+                                extraLabel=BACK_LABEL,
                             )
                         opensearchSecondarySslVerify = opensearchSecondaryUrl.lower().startswith(
                             'https'
                         ) and InstallerYesOrNo(
                             f'Require SSL certificate validation for communication with secondary {opensearchSecondaryLabel} instance?',
                             default=args.opensearchSecondarySslVerify,
+                            extraLabel=BACK_LABEL,
                         )
 
                     if (opensearchPrimaryMode in (DatabaseMode.OpenSearchRemote, DatabaseMode.ElasticsearchRemote)) or (
@@ -821,12 +833,19 @@ class Installer(object):
                                     else f'Setting {lsMemory} for Logstash. Is this OK?'
                                 ),
                                 default=True,
+                                extraLabel=BACK_LABEL,
                             )
                             and loopBreaker.increment()
                         ):
                             if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
-                                osMemory = InstallerAskForString('Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)')
-                            lsMemory = InstallerAskForString('Enter memory for Logstash (e.g., 4g, 2500m, etc.)')
+                                osMemory = InstallerAskForString(
+                                    'Enter memory for OpenSearch (e.g., 16g, 9500m, etc.)',
+                                    extraLabel=BACK_LABEL,
+                                )
+                            lsMemory = InstallerAskForString(
+                                'Enter memory for Logstash (e.g., 4g, 2500m, etc.)',
+                                extraLabel=BACK_LABEL,
+                            )
 
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Logstash worker setting(s)')
                         while (
@@ -835,10 +854,14 @@ class Installer(object):
                                 not InstallerYesOrNo(
                                     f'Setting {lsWorkers} workers for Logstash pipelines. Is this OK?',
                                     default=True,
+                                    extraLabel=BACK_LABEL,
                                 )
                             )
                         ) and loopBreaker.increment():
-                            lsWorkers = InstallerAskForString('Enter number of Logstash workers (e.g., 4, 8, etc.)')
+                            lsWorkers = InstallerAskForString(
+                                'Enter number of Logstash workers (e.g., 4, 8, etc.)',
+                                extraLabel=BACK_LABEL,
+                            )
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.RestartMode:
@@ -847,12 +870,14 @@ class Installer(object):
                     if (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE) and InstallerYesOrNo(
                         'Restart Malcolm upon system or Docker daemon restart?',
                         default=args.malcolmAutoRestart,
+                        extraLabel=BACK_LABEL,
                     ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid restart mode')
                         while restartMode not in allowedRestartModes and loopBreaker.increment():
                             restartMode = InstallerChooseOne(
                                 'Select Malcolm restart behavior',
                                 choices=[(x, '', x == 'unless-stopped') for x in allowedRestartModes],
+                                extraLabel=BACK_LABEL,
                             )
                     else:
                         restartMode = 'no'
@@ -863,10 +888,13 @@ class Installer(object):
                         nginxSSL = InstallerYesOrNo(
                             'Require encrypted HTTPS connections?',
                             default=args.nginxSSL,
+                            extraLabel=BACK_LABEL,
                         )
                         if (not nginxSSL) and (not args.acceptDefaultsNonInteractive):
                             nginxSSL = not InstallerYesOrNo(
-                                'Unencrypted connections are NOT recommended. Are you sure?', default=False
+                                'Unencrypted connections are NOT recommended. Are you sure?',
+                                default=False,
+                                extraLabel=BACK_LABEL,
                             )
                     else:
                         nginxSSL = True
@@ -878,6 +906,7 @@ class Installer(object):
                         and InstallerYesOrNo(
                             'Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?',
                             default=args.behindReverseProxy or (not nginxSSL),
+                            extraLabel=BACK_LABEL,
                         )
                     )
 
@@ -891,6 +920,7 @@ class Installer(object):
                             traefikLabels = InstallerYesOrNo(
                                 'Configure labels for Traefik?',
                                 default=bool(args.traefikHost),
+                                extraLabel=BACK_LABEL,
                             )
                             if traefikLabels:
                                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Traefik request domain')
@@ -898,6 +928,7 @@ class Installer(object):
                                     traefikHost = InstallerAskForString(
                                         'Enter request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)',
                                         default=args.traefikHost,
+                                        extraLabel=BACK_LABEL,
                                     )
                                 if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
                                     loopBreaker = CountUntilException(
@@ -909,6 +940,7 @@ class Installer(object):
                                         traefikOpenSearchHost = InstallerAskForString(
                                             f'Enter request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.{traefikHost})',
                                             default=args.traefikOpenSearchHost,
+                                            extraLabel=BACK_LABEL,
                                         )
                                 loopBreaker = CountUntilException(
                                     MaxAskForValueCount, 'Invalid Traefik router entrypoint'
@@ -917,6 +949,7 @@ class Installer(object):
                                     traefikEntrypoint = InstallerAskForString(
                                         'Enter Traefik router entrypoint (e.g., websecure)',
                                         default=args.traefikEntrypoint,
+                                        extraLabel=BACK_LABEL,
                                     )
                                 loopBreaker = CountUntilException(
                                     MaxAskForValueCount, 'Invalid Traefik router resolver'
@@ -925,11 +958,13 @@ class Installer(object):
                                     traefikResolver = InstallerAskForString(
                                         'Enter Traefik router resolver (e.g., myresolver)',
                                         default=args.traefikResolver,
+                                        extraLabel=BACK_LABEL,
                                     )
 
                     dockerNetworkExternalName = InstallerAskForString(
                         'Specify external Docker network name (or leave blank for default networking)',
                         default=args.dockerNetworkName,
+                        extraLabel=BACK_LABEL,
                     )
 
                 ###################################################################################
@@ -955,6 +990,7 @@ class Installer(object):
                                 )
                                 for x in list(allowedAuthModes.keys())
                             ],
+                            extraLabel=BACK_LABEL,
                         )
 
                     ldapStartTLS = False
@@ -968,10 +1004,12 @@ class Installer(object):
                             ldapServerType = InstallerChooseOne(
                                 'Select LDAP server compatibility type',
                                 choices=[(x, '', x == ldapServerTypeDefault) for x in allowedLdapModes],
+                                extraLabel=BACK_LABEL,
                             )
                         ldapStartTLS = InstallerYesOrNo(
                             'Use StartTLS (rather than LDAPS) for LDAP connection security?',
                             default=args.ldapStartTLS,
+                            extraLabel=BACK_LABEL,
                         )
                         try:
                             with open(
@@ -1089,17 +1127,20 @@ class Installer(object):
                         if diskFormatInfo or not InstallerYesOrNo(
                             f'Store {"PCAP, log and index" if (malcolmProfile == PROFILE_MALCOLM) else "PCAP and log"} files in {malcolm_install_path}?',
                             default=not args.acceptDefaultsNonInteractive,
+                            extraLabel=BACK_LABEL,
                         ):
                             # PCAP directory
                             if not InstallerYesOrNo(
                                 'Store PCAP files in {}?'.format(pcapDirDefault),
                                 default=not bool(args.pcapDir),
+                                extraLabel=BACK_LABEL,
                             ):
                                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid PCAP directory')
                                 while loopBreaker.increment():
                                     pcapDir = InstallerAskForString(
                                         'Enter PCAP directory',
                                         default=pcapDirDefault,
+                                        extraLabel=BACK_LABEL,
                                     )
                                     if (len(pcapDir) > 1) and os.path.isdir(pcapDir):
                                         pcapDirFull = os.path.realpath(pcapDir)
@@ -1114,12 +1155,14 @@ class Installer(object):
                             if not InstallerYesOrNo(
                                 'Store Zeek logs in {}?'.format(zeekLogDirDefault),
                                 default=not bool(args.zeekLogDir),
+                                extraLabel=BACK_LABEL,
                             ):
                                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Zeek directory')
                                 while loopBreaker.increment():
                                     zeekLogDir = InstallerAskForString(
                                         'Enter Zeek log directory',
                                         default=zeekLogDirDefault,
+                                        extraLabel=BACK_LABEL,
                                     )
                                     if (len(zeekLogDir) > 1) and os.path.isdir(zeekLogDir):
                                         zeekLogDirFull = os.path.realpath(zeekLogDir)
@@ -1134,12 +1177,14 @@ class Installer(object):
                             if not InstallerYesOrNo(
                                 'Store Suricata logs in {}?'.format(suricataLogDirDefault),
                                 default=not bool(args.suricataLogDir),
+                                extraLabel=BACK_LABEL,
                             ):
                                 loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Suricata directory')
                                 while loopBreaker.increment():
                                     suricataLogDir = InstallerAskForString(
                                         'Enter Suricata log directory',
                                         default=suricataLogDirDefault,
+                                        extraLabel=BACK_LABEL,
                                     )
                                     if (len(suricataLogDir) > 1) and os.path.isdir(suricataLogDir):
                                         suricataLogDirFull = os.path.realpath(suricataLogDir)
@@ -1157,6 +1202,7 @@ class Installer(object):
                                 if not InstallerYesOrNo(
                                     'Store OpenSearch indices in {}?'.format(indexDirDefault),
                                     default=not bool(args.indexDir),
+                                    extraLabel=BACK_LABEL,
                                 ):
                                     loopBreaker = CountUntilException(
                                         MaxAskForValueCount, 'Invalid OpenSearch index directory'
@@ -1165,6 +1211,7 @@ class Installer(object):
                                         indexDir = InstallerAskForString(
                                             'Enter OpenSearch index directory',
                                             default=indexDirDefault,
+                                            extraLabel=BACK_LABEL,
                                         )
                                         if (len(indexDir) > 1) and os.path.isdir(indexDir):
                                             indexDirFull = os.path.realpath(indexDir)
@@ -1179,6 +1226,7 @@ class Installer(object):
                                 if not InstallerYesOrNo(
                                     'Store OpenSearch index snapshots in {}?'.format(indexSnapshotDirDefault),
                                     default=not bool(args.indexSnapshotDir),
+                                    extraLabel=BACK_LABEL,
                                 ):
                                     loopBreaker = CountUntilException(
                                         MaxAskForValueCount, 'Invalid OpenSearch snapshots directory'
@@ -1187,6 +1235,7 @@ class Installer(object):
                                         indexSnapshotDir = InstallerAskForString(
                                             'Enter OpenSearch index snapshot directory',
                                             default=indexSnapshotDirDefault,
+                                            extraLabel=BACK_LABEL,
                                         )
                                         if (len(indexSnapshotDir) > 1) and os.path.isdir(indexSnapshotDir):
                                             indexSnapshotDirFull = os.path.realpath(indexSnapshotDir)
@@ -1246,6 +1295,7 @@ class Installer(object):
                     indexManagementPolicy = InstallerYesOrNo(
                         f'Enable index management policies (ILM/ISM) in Arkime?',
                         default=args.indexManagementPolicy,
+                        extraLabel=BACK_LABEL,
                     )
                     if indexManagementPolicy:
                         while loopBreaker.increment():
@@ -1253,6 +1303,7 @@ class Installer(object):
                             indexManagementHotWarm = InstallerYesOrNo(
                                 f'Should Arkime use a hot/warm design in which non-session data is stored in a warm index?',
                                 default=args.indexManagementHotWarm,
+                                extraLabel=BACK_LABEL,
                             )
                             if indexManagementHotWarm:
                                 if opensearchPrimaryMode == DatabaseMode.ElasticsearchRemote:
@@ -1267,26 +1318,31 @@ class Installer(object):
                             indexManagementOptimizationTimePeriod = InstallerAskForString(
                                 "How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)",
                                 default=args.indexManagementOptimizationTimePeriod,
+                                extraLabel=BACK_LABEL,
                             )
                             # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90d
                             indexManagementSpiDataRetention = InstallerAskForString(
                                 "How long should Arkime retain SPI data before deleting it? (e.g. 25h, 90d, etc.)",
                                 default=str(args.indexManagementSpiDataRetention),
+                                extraLabel=BACK_LABEL,
                             )
                             # Number of segments to optimize sessions to in the ILM policy, default 1
                             indexManagementOptimizeSessionSegments = InstallerAskForString(
                                 "How many segments should Arkime use to optimize?",
                                 default=str(args.indexManagementOptimizeSessionSegments),
+                                extraLabel=BACK_LABEL,
                             )
                             # Number of replicas for older sessions indices in the ILM policy, default 0
                             indexManagementReplicas = InstallerAskForString(
                                 "How many replicas should Arkime maintain for older session indices?",
                                 default=str(args.indexManagementReplicas),
+                                extraLabel=BACK_LABEL,
                             )
                             # Number of weeks of history to keep, default 13
                             indexManagementHistoryInWeeks = InstallerAskForString(
                                 "How many weeks of history should Arkime keep?",
                                 default=str(args.indexManagementHistoryInWeeks),
+                                extraLabel=BACK_LABEL,
                             )
                             if (
                                 (re.match(r"\d+(h|d)", indexManagementOptimizationTimePeriod))
@@ -1320,6 +1376,7 @@ class Installer(object):
                         or bool(args.indexPruneSizeLimit)
                         or bool(args.extractedFileMaxSizeThreshold)
                         or (args.extractedFileMaxPercentThreshold > 0),
+                        extraLabel=BACK_LABEL,
                     )
                     if diskUsageManagementPrompt:
 
@@ -1330,6 +1387,7 @@ class Installer(object):
                             and InstallerYesOrNo(
                                 'Delete the oldest indices when the database exceeds a certain size?',
                                 default=bool(args.indexPruneSizeLimit),
+                                extraLabel=BACK_LABEL,
                             )
                         ):
                             indexPruneSizeLimit = ''
@@ -1342,9 +1400,12 @@ class Installer(object):
                                 indexPruneSizeLimit = InstallerAskForString(
                                     'Enter index threshold (e.g., 250GB, 1TB, 60%, etc.)',
                                     default=args.indexPruneSizeLimit,
+                                    extraLabel=BACK_LABEL,
                                 )
                             indexPruneNameSort = InstallerYesOrNo(
-                                'Determine oldest indices by name (instead of creation time)?', default=False
+                                'Determine oldest indices by name (instead of creation time)?',
+                                default=False,
+                                extraLabel=BACK_LABEL,
                             )
 
                         # let Arkime delete old PCAP files based on available storage
@@ -1354,6 +1415,7 @@ class Installer(object):
                             or InstallerYesOrNo(
                                 'Should Arkime delete uploaded PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)?',
                                 default=args.arkimeManagePCAP,
+                                extraLabel=BACK_LABEL,
                             )
                         )
                         if arkimeManagePCAP:
@@ -1365,34 +1427,44 @@ class Installer(object):
                                 arkimeFreeSpaceGTmp = InstallerAskForString(
                                     'Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)',
                                     default=args.arkimeFreeSpaceG,
+                                    extraLabel=BACK_LABEL,
                                 )
                             if arkimeFreeSpaceGTmp:
                                 arkimeFreeSpaceG = arkimeFreeSpaceGTmp
                 ###################################################################################
                 elif currentStep == ConfigOptions.AutoArkime:
                     autoArkime = InstallerYesOrNo(
-                        'Automatically analyze all PCAP files with Arkime?', default=args.autoArkime
+                        'Automatically analyze all PCAP files with Arkime?',
+                        default=args.autoArkime,
+                        extraLabel=BACK_LABEL,
                     )
                 ###################################################################################
                 elif currentStep == ConfigOptions.AutoSuricata:
                     autoSuricata = InstallerYesOrNo(
-                        'Automatically analyze all PCAP files with Suricata?', default=args.autoSuricata
+                        'Automatically analyze all PCAP files with Suricata?',
+                        default=args.autoSuricata,
+                        extraLabel=BACK_LABEL,
                     )
                 ###################################################################################
                 elif currentStep == ConfigOptions.SuricataRuleUpdate:
                     suricataRuleUpdate = autoSuricata and InstallerYesOrNo(
-                        'Download updated Suricata signatures periodically?', default=args.suricataRuleUpdate
+                        'Download updated Suricata signatures periodically?',
+                        default=args.suricataRuleUpdate,
+                        extraLabel=BACK_LABEL,
                     )
                 ###################################################################################
                 elif currentStep == ConfigOptions.AutoZeek:
                     autoZeek = InstallerYesOrNo(
-                        'Automatically analyze all PCAP files with Zeek?', default=args.autoZeek
+                        'Automatically analyze all PCAP files with Zeek?',
+                        default=args.autoZeek,
+                        extraLabel=BACK_LABEL,
                     )
                 ###################################################################################
                 elif currentStep == ConfigOptions.ICS:
                     malcolmIcs = InstallerYesOrNo(
                         'Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?',
                         default=args.malcolmIcs,
+                        extraLabel=BACK_LABEL,
                     )
 
                     zeekICSBestGuess = (
@@ -1401,6 +1473,7 @@ class Installer(object):
                         and InstallerYesOrNo(
                             'Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
                             default=args.zeekICSBestGuess,
+                            extraLabel=BACK_LABEL,
                         )
                     )
 
@@ -1409,12 +1482,17 @@ class Installer(object):
                     reverseDns = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                         'Perform reverse DNS lookup locally for source and destination IP addresses in logs?',
                         default=args.reverseDns,
+                        extraLabel=BACK_LABEL,
                     )
                     autoOui = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
-                        'Perform hardware vendor OUI lookups for MAC addresses?', default=args.autoOui
+                        'Perform hardware vendor OUI lookups for MAC addresses?',
+                        default=args.autoOui,
+                        extraLabel=BACK_LABEL,
                     )
                     autoFreq = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
-                        'Perform string randomness scoring on some fields?', default=args.autoFreq
+                        'Perform string randomness scoring on some fields?',
+                        default=args.autoFreq,
+                        extraLabel=BACK_LABEL,
                     )
 
                 ###################################################################################
@@ -1434,6 +1512,7 @@ class Installer(object):
                                 openPortsSelection = InstallerChooseOne(
                                     'Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?',
                                     choices=[(x, '', x == openPortsOptions[0]) for x in openPortsOptions],
+                                    extraLabel=BACK_LABEL,
                                 )[0]
                             if openPortsSelection == 'n':
                                 opensearchOpen = False
@@ -1448,13 +1527,19 @@ class Installer(object):
                                 opensearchOpen = (
                                     opensearchPrimaryMode == DatabaseMode.OpenSearchLocal
                                 ) and InstallerYesOrNo(
-                                    'Expose OpenSearch port to external hosts?', default=args.exposeOpenSearch
+                                    'Expose OpenSearch port to external hosts?',
+                                    default=args.exposeOpenSearch,
+                                    extraLabel=BACK_LABEL,
                                 )
                                 logstashOpen = InstallerYesOrNo(
-                                    'Expose Logstash port to external hosts?', default=args.exposeLogstash
+                                    'Expose Logstash port to external hosts?',
+                                    default=args.exposeLogstash,
+                                    extraLabel=BACK_LABEL,
                                 )
                                 filebeatTcpOpen = InstallerYesOrNo(
-                                    'Expose Filebeat TCP port to external hosts?', default=args.exposeFilebeatTcp
+                                    'Expose Filebeat TCP port to external hosts?',
+                                    default=args.exposeFilebeatTcp,
+                                    extraLabel=BACK_LABEL,
                                 )
                         else:
                             opensearchOpen = False
@@ -1476,7 +1561,11 @@ class Installer(object):
                     if (
                         filebeatTcpOpen
                         and (openPortsSelection == 'c')
-                        and not InstallerYesOrNo('Use default field values for Filebeat TCP listener?', default=True)
+                        and not InstallerYesOrNo(
+                            'Use default field values for Filebeat TCP listener?',
+                            default=True,
+                            extraLabel=BACK_LABEL,
+                        )
                     ):
                         allowedFilebeatTcpFormats = ('json', 'raw')
                         filebeatTcpFormat = 'unset'
@@ -1485,23 +1574,28 @@ class Installer(object):
                             filebeatTcpFormat = InstallerChooseOne(
                                 'Select log format for messages sent to Filebeat TCP listener',
                                 choices=[(x, '', x == allowedFilebeatTcpFormats[0]) for x in allowedFilebeatTcpFormats],
+                                extraLabel=BACK_LABEL,
                             )
                         if filebeatTcpFormat == 'json':
                             filebeatTcpSourceField = InstallerAskForString(
                                 'Source field to parse for messages sent to Filebeat TCP listener',
                                 default=filebeatTcpSourceField,
+                                extraLabel=BACK_LABEL,
                             )
                             filebeatTcpTargetField = InstallerAskForString(
                                 'Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener',
                                 default=filebeatTcpTargetField,
+                                extraLabel=BACK_LABEL,
                             )
                             filebeatTcpDropField = InstallerAskForString(
                                 'Field to drop from events sent to Filebeat TCP listener',
                                 default=filebeatTcpSourceField,
+                                extraLabel=BACK_LABEL,
                             )
                         filebeatTcpTag = InstallerAskForString(
                             'Tag to apply to messages sent to Filebeat TCP listener',
                             default=filebeatTcpTag,
+                            extraLabel=BACK_LABEL,
                         )
 
                     sftpOpen = (
@@ -1509,7 +1603,9 @@ class Installer(object):
                         and (malcolmProfile == PROFILE_MALCOLM)
                         and (openPortsSelection == 'c')
                         and InstallerYesOrNo(
-                            'Expose SFTP server (for PCAP upload) to external hosts?', default=args.exposeSFTP
+                            'Expose SFTP server (for PCAP upload) to external hosts?',
+                            default=args.exposeSFTP,
+                            extraLabel=BACK_LABEL,
                         )
                     )
 
@@ -1552,6 +1648,7 @@ class Installer(object):
                                     )
                                     for x in allowedFileCarveModes.keys()
                                 ],
+                                extraLabel=BACK_LABEL,
                             )
                         if fileCarveMode and (fileCarveMode != 'none'):
 
@@ -1571,6 +1668,7 @@ class Installer(object):
                                         )
                                         for x in allowedFilePreserveModes
                                     ],
+                                    extraLabel=BACK_LABEL,
                                 )
 
                             if diskUsageManagementPrompt:
@@ -1592,6 +1690,7 @@ class Installer(object):
                                             if args.extractedFileMaxPercentThreshold
                                             else args.extractedFileMaxSizeThreshold
                                         ),
+                                        extraLabel=BACK_LABEL,
                                     )
                                 if extractedFilePruneThresholdTemp:
                                     if '%' in extractedFilePruneThresholdTemp:
@@ -1604,10 +1703,13 @@ class Installer(object):
                             fileCarveHttpServer = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                                 'Expose web interface for downloading preserved files?',
                                 default=args.fileCarveHttpServer,
+                                extraLabel=BACK_LABEL,
                             )
                             if fileCarveHttpServer:
                                 fileCarveHttpServerZip = InstallerYesOrNo(
-                                    'ZIP downloaded preserved files?', default=args.fileCarveHttpServerZip
+                                    'ZIP downloaded preserved files?',
+                                    default=args.fileCarveHttpServerZip,
+                                    extraLabel=BACK_LABEL,
                                 )
                                 fileCarveHttpServeEncryptKey = InstallerAskForString(
                                     (
@@ -1616,25 +1718,43 @@ class Installer(object):
                                         else 'Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)'
                                     ),
                                     default=args.fileCarveHttpServeEncryptKey,
+                                    extraLabel=BACK_LABEL,
                                 )
                             if fileCarveMode is not None:
-                                if InstallerYesOrNo('Scan extracted files with ClamAV?', default=args.clamAvScan):
+                                if InstallerYesOrNo(
+                                    'Scan extracted files with ClamAV?',
+                                    default=args.clamAvScan,
+                                    extraLabel=BACK_LABEL,
+                                ):
                                     clamAvScan = True
-                                if InstallerYesOrNo('Scan extracted files with Yara?', default=args.yaraScan):
+                                if InstallerYesOrNo(
+                                    'Scan extracted files with Yara?',
+                                    default=args.yaraScan,
+                                    extraLabel=BACK_LABEL,
+                                ):
                                     yaraScan = True
-                                if InstallerYesOrNo('Scan extracted PE files with Capa?', default=args.capaScan):
+                                if InstallerYesOrNo(
+                                    'Scan extracted PE files with Capa?',
+                                    default=args.capaScan,
+                                    extraLabel=BACK_LABEL,
+                                ):
                                     capaScan = True
                                 if InstallerYesOrNo(
-                                    'Lookup extracted file hashes with VirusTotal?', default=(len(args.vtotApiKey) > 1)
+                                    'Lookup extracted file hashes with VirusTotal?',
+                                    default=(len(args.vtotApiKey) > 1),
+                                    extraLabel=BACK_LABEL,
                                 ):
                                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid VirusTotal API key')
                                     while (len(vtotApiKey) <= 1) and loopBreaker.increment():
                                         vtotApiKey = InstallerAskForString(
-                                            'Enter VirusTotal API key', default=args.vtotApiKey
+                                            'Enter VirusTotal API key',
+                                            default=args.vtotApiKey,
+                                            extraLabel=BACK_LABEL,
                                         )
                                 fileScanRuleUpdate = InstallerYesOrNo(
                                     'Download updated file scanner signatures periodically?',
                                     default=args.fileScanRuleUpdate,
+                                    extraLabel=BACK_LABEL,
                                 )
 
                     if fileCarveMode not in allowedFileCarveModes.keys():
@@ -1650,23 +1770,28 @@ class Installer(object):
                     netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
                         'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
                         default=args.netboxEnabled,
+                        extraLabel=BACK_LABEL,
                     )
                     netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
                         'Should Malcolm enrich network traffic using NetBox?',
                         default=args.netboxLogstashEnrich,
+                        extraLabel=BACK_LABEL,
                     )
                     netboxAutoPopulate = netboxEnabled and InstallerYesOrNo(
                         'Should Malcolm automatically populate NetBox inventory based on observed network traffic?',
                         default=args.netboxAutoPopulate,
+                        extraLabel=BACK_LABEL,
                     )
                     netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
                         'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
                         default=args.netboxLogstashAutoSubnets,
+                        extraLabel=BACK_LABEL,
                     )
                     netboxSiteName = (
                         InstallerAskForString(
                             'Specify default NetBox site name',
                             default=args.netboxSiteName,
+                            extraLabel=BACK_LABEL,
                         )
                         if netboxEnabled
                         else ''
@@ -1704,6 +1829,7 @@ class Installer(object):
                         captureSelection = InstallerChooseOne(
                             'Should Malcolm capture live network traffic?',
                             choices=[(x, '', x == captureOptions[0]) for x in captureOptions],
+                            extraLabel=BACK_LABEL,
                         )[0]
                     if captureSelection == 'y':
                         liveArkime = (malcolmProfile == PROFILE_HEDGEHOG) or (
@@ -1720,34 +1846,51 @@ class Installer(object):
                             or args.pcapTcpDump
                             or args.liveArkime
                             or (malcolmProfile == PROFILE_HEDGEHOG),
+                            extraLabel=BACK_LABEL,
                         ):
                             liveArkime = (opensearchPrimaryMode != DatabaseMode.OpenSearchLocal) and (
                                 (malcolmProfile == PROFILE_HEDGEHOG)
-                                or InstallerYesOrNo('Capture packets using Arkime capture?', default=args.liveArkime)
+                                or InstallerYesOrNo(
+                                    'Capture packets using Arkime capture?',
+                                    default=args.liveArkime,
+                                    extraLabel=BACK_LABEL,
+                                )
                             )
                             pcapNetSniff = (not liveArkime) and InstallerYesOrNo(
-                                'Capture packets using netsniff-ng?', default=args.pcapNetSniff
+                                'Capture packets using netsniff-ng?',
+                                default=args.pcapNetSniff,
+                                extraLabel=BACK_LABEL,
                             )
                             pcapTcpDump = (
                                 (not liveArkime)
                                 and (not pcapNetSniff)
-                                and InstallerYesOrNo('Capture packets using tcpdump?', default=args.pcapTcpDump)
+                                and InstallerYesOrNo(
+                                    'Capture packets using tcpdump?',
+                                    default=args.pcapTcpDump,
+                                    extraLabel=BACK_LABEL,
+                                )
                             )
                         liveSuricata = InstallerYesOrNo(
-                            'Should Malcolm analyze live network traffic with Suricata?', default=args.liveSuricata
+                            'Should Malcolm analyze live network traffic with Suricata?',
+                            default=args.liveSuricata,
+                            extraLabel=BACK_LABEL,
                         )
                         liveZeek = InstallerYesOrNo(
-                            'Should Malcolm analyze live network traffic with Zeek?', default=args.liveZeek
+                            'Should Malcolm analyze live network traffic with Zeek?',
+                            default=args.liveZeek,
+                            extraLabel=BACK_LABEL,
                         )
                         if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
                             pcapFilter = InstallerAskForString(
                                 'Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)',
                                 default=args.pcapFilter,
+                                extraLabel=BACK_LABEL,
                             )
                             # Arkime requires disabling NIC offloading: https://arkime.com/faq#arkime_requires_full_packet_captures_error
                             tweakIface = liveArkime or InstallerYesOrNo(
                                 'Disable capture interface hardware offloading and adjust ring buffer sizes?',
                                 default=args.tweakIface,
+                                extraLabel=BACK_LABEL,
                             )
 
                     if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
@@ -1755,13 +1898,16 @@ class Installer(object):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid capture interface(s)')
                         while (len(pcapIface) <= 0) and loopBreaker.increment():
                             pcapIface = InstallerAskForString(
-                                'Specify capture interface(s) (comma-separated)', default=args.pcapIface
+                                'Specify capture interface(s) (comma-separated)',
+                                default=args.pcapIface,
+                                extraLabel=BACK_LABEL,
                             )
 
                     if liveArkime:
                         liveArkimeNodeHost = InstallerAskForString(
                             f"Enter this node's hostname or IP to associate with network traffic metadata",
                             default=args.liveArkimeNodeHost,
+                            extraLabel=BACK_LABEL,
                         )
 
                     if (
@@ -1782,12 +1928,14 @@ class Installer(object):
                         (malcolmProfile == PROFILE_MALCOLM)
                         and (opensearchPrimaryMode != DatabaseMode.ElasticsearchRemote)
                         and InstallerYesOrNo(
-                            'Enable dark mode for OpenSearch Dashboards?', default=args.dashboardsDarkMode
+                            'Enable dark mode for OpenSearch Dashboards?',
+                            default=args.dashboardsDarkMode,
+                            extraLabel=BACK_LABEL,
                         )
                     )
 
                 ###################################################################################
-                elif currentStep == ConfigOptions.PostConfig:
+                elif int(currentStep) >= int(ConfigOptions.PostConfig):
                     break
 
             except DialogBackException:
@@ -1795,10 +1943,9 @@ class Installer(object):
                     currentStep = ConfigOptions(int(currentStep) - 2)
                 else:
                     currentStep = ConfigOptions.Preconfig
-                eprint(f'back: {currentStep}')
 
             except DialogCanceledException:
-                raise Exception("Canceled by the user")
+                raise
 
         # modify values in .env files in args.configDir
 
