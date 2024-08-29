@@ -1106,7 +1106,15 @@ def start():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         # start docker
-        cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'up', '--detach']
+        cmd = [
+            dockerComposeBin,
+            '--profile',
+            args.composeProfile,
+            '-f',
+            args.composeFile,
+            'up',
+            '--detach',
+        ]
         if args.service is not None:
             cmd.append(['--no-deps', args.service])
 
@@ -2088,6 +2096,16 @@ def main():
         default=None,
         help='docker-compose profile to enable',
     )
+    parser.add_argument(
+        '-r',
+        '--runtime',
+        required=False,
+        dest='runtimeBin',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_CONTAINER_RUNTIME', None),
+        help='Container runtime binary (e.g., docker, podman)',
+    )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -2377,7 +2395,10 @@ def main():
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # make sure docker and docker compose are available
-            dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
+            if args.runtimeBin is not None:
+                dockerBin = args.runtimeBin
+            else:
+                dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
