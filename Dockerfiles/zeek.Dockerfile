@@ -33,7 +33,7 @@ ENV PGROUP "zeeker"
 ENV PUSER_PRIV_DROP false
 
 # for download and install
-ARG ZEEK_VERSION=7.0.0-0
+ARG ZEEK_VERSION=7.0.1-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
@@ -51,7 +51,7 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 
-ENV SUPERCRONIC_VERSION "0.2.30"
+ENV SUPERCRONIC_VERSION "0.2.31"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
