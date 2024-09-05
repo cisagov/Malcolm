@@ -813,6 +813,7 @@ class MalcolmSource extends WISESource {
       "zeek.cip.class_name",
       "zeek.cip.direction",
       "zeek.cip.instance_id",
+      "zeek.cip.packet_correlation_id",
       "zeek.cip_identity.device_state",
       "zeek.cip_identity.device_status",
       "zeek.cip_identity.device_type_id",
