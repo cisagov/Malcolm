@@ -109,6 +109,20 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(debug)\s*=\s*.*/\1=$ARKIME_DEBUG_LEVEL/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # rules files
+  ARKIME_RULES_DIR="$SUPERVISOR_PATH"/arkime/rules
+  if [[ -d "${ARKIME_RULES_DIR}" ]]; then
+    RULES_FILES="$(find "${ARKIME_RULES_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c \( -name '*.yml' -o -name '*.yaml' \) | tr '\n' ';' | sed 's/;$//' )"
+    sed -r -i "s|(rulesFiles)\s*=\s*.*|\1=$RULES_FILES|" "$ARKIME_CONFIG_FILE"
+  fi
+
+  # lua plugins
+  ARKIME_LUA_DIR="$SUPERVISOR_PATH"/arkime/lua
+  if [[ -d "${ARKIME_LUA_DIR}" ]]; then
+    LUA_FILES="$(find "${ARKIME_LUA_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c -name '*.lua' | tr '\n' ';' | sed 's/;$//' )"
+    sed -r -i "s|(luaFiles)\s*=\s*.*|\1=$LUA_FILES|" "$ARKIME_CONFIG_FILE"
+  fi
+
   # enable ja4+ plugin if it's present
   JA4_PLUGIN_FILE="/opt/arkime/plugins/ja4plus.$(dpkg --print-architecture).so"
   if [[ -f "${JA4_PLUGIN_FILE}" ]]; then

@@ -182,6 +182,12 @@ services:
       - type: bind
         bind:
           create_host_path: false
+        source: ./arkime/lua
+        target: /opt/arkime/lua
+        read_only: true        
+      - type: bind
+        bind:
+          create_host_path: false
         source: ./arkime/rules
         target: /opt/arkime/rules
         read_only: true
@@ -204,6 +210,12 @@ services:
         source: ./.opensearch.primary.curlrc
         target: /var/local/curlrc/.opensearch.primary.curlrc
         read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/lua
+        target: /opt/arkime/lua
+        read_only: true        
       - type: bind
         bind:
           create_host_path: false

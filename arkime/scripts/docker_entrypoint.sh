@@ -10,6 +10,7 @@ function urlencodeall() {
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 ARKIME_RULES_DIR=${ARKIME_RULES_DIR:-"/opt/arkime/rules"}
+ARKIME_LUA_DIR=${ARKIME_LUA_DIR:-"/opt/arkime/lua"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 ARKIME_PASSWORD_SECRET=${ARKIME_PASSWORD_SECRET:-"Malcolm"}
 ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
@@ -150,6 +151,12 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       sed -r -i "s|(rulesFiles)\s*=\s*.*|\1=$RULES_FILES|" "${ARKIME_CONFIG_FILE}"
     fi
 
+    # lua plugins
+    if [[ -d "${ARKIME_LUA_DIR}" ]]; then
+      LUA_FILES="$(find "${ARKIME_LUA_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c -name '*.lua' | tr '\n' ';' | sed 's/;$//' )"
+      sed -r -i "s|(luaFiles)\s*=\s*.*|\1=$LUA_FILES|" "${ARKIME_CONFIG_FILE}"
+    fi
+
     # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
         sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
@@ -157,7 +164,6 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wiseHost=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-        sed -i "s/^\(plugins=\).*/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
     fi

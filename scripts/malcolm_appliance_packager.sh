@@ -61,6 +61,7 @@ if mkdir "$DESTDIR"; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
+  mkdir $VERBOSE -p "$DESTDIR/arkime/lua/"
   mkdir $VERBOSE -p "$DESTDIR/arkime/rules/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"

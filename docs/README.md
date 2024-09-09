@@ -89,6 +89,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 * [Search Queries in Arkime and OpenSearch Dashboards](queries-cheat-sheet.md#SearchCheatSheet)
 * Other Malcolm features
     - [Custom Rules, Scripts and Plugins](custom-rules.md#CustomRulesAndScripts)
+        + [Arkime](custom-rules.md#Arkime)
         + [Suricata](custom-rules.md#Suricata)
         + [Zeek](custom-rules.md#Zeek)
         + [YARA](custom-rules.md#YARA)
