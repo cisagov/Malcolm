@@ -442,7 +442,8 @@
           "zeek.cip.cip_sequence_count",
           "zeek.cip.class_id",
           "zeek.cip.class_name",
-          "zeek.cip.instance_id"
+          "zeek.cip.instance_id",
+          "zeek.cip.packet_correlation_id"
         ],
         "sort": [
           [
@@ -485,7 +486,8 @@
           "zeek.cip_identity.product_name",
           "zeek.cip_identity.vendor_name",
           "zeek.cip_identity.revision",
-          "zeek.cip_identity.serial_number"
+          "zeek.cip_identity.serial_number",
+          "zeek.cip.packet_correlation_id"
         ],
         "sort": [
           [
@@ -529,6 +531,7 @@
           "zeek.enip.options",
           "zeek.enip.sender_context",
           "zeek.enip.session_handle",
+          "zeek.cip.packet_correlation_id",
           "event.id"
         ],
         "sort": [
@@ -571,6 +574,7 @@
           "zeek.cip_io.connection_id",
           "zeek.cip_io.sequence_number",
           "zeek.cip_io.data_length",
+          "zeek.cip.packet_correlation_id",
           "event.id"
         ],
         "sort": [
@@ -614,6 +618,7 @@
           "zeek.notice.msg",
           "source.ip",
           "destination.ip",
+          "zeek.cip.packet_correlation_id",
           "event.id"
         ],
         "sort": [],
