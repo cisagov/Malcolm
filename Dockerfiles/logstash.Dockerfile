@@ -1,6 +1,6 @@
 ARG TARGETPLATFORM=linux/amd64
 
-FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.15.0
+FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.15.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
