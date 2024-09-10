@@ -1,5 +1,3 @@
-### [Click here](https://github.com/cisagov/Malcolm/wiki/Mal.Con24-Announcement) for information & [register](https://forms.office.com/Pages/ResponsePage.aspx?id=bOfNPG2UEkq7evydCEI1Ss88WRPn8NRIuiwTHruDKhdUMVdZU0pBNFBKQjVCWU9RODI2SEJMUE0yMi4u) the first-ever Malcolm community conference, Mal.Con '24! In-Person registration closes on 8/26/2024!
-
 # Malcolm
 
 ![](./docs/images/logo/Malcolm_outline_banner_dark.png)
