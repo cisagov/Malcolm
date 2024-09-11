@@ -37,6 +37,7 @@ from malcolm_common import (
     BoundPathReplacer,
     ChooseMultiple,
     ChooseOne,
+    CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DialogInit,
     DialogBackException,
@@ -389,6 +390,8 @@ class Installer(object):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker_images(self, docker_image_file, malcolm_install_path):
+        global args
+
         result = False
         composeFile = os.path.join(malcolm_install_path, 'docker-compose.yml')
 
@@ -397,19 +400,19 @@ class Installer(object):
                 docker_image_file
                 and os.path.isfile(docker_image_file)
                 and InstallerYesOrNo(
-                    f'Load Malcolm Docker images from {docker_image_file}?', default=True, forceInteraction=True
+                    f'Load Malcolm images from {docker_image_file}?', default=True, forceInteraction=True
                 )
             ):
-                ecode, out = self.run_process(['docker', 'load', '-q', '-i', docker_image_file], privileged=True)
+                ecode, out = self.run_process([args.runtimeBin, 'load', '-q', '-i', docker_image_file], privileged=True)
                 if ecode == 0:
                     result = True
                 else:
-                    eprint(f"Loading Malcolm Docker images failed: {out}")
+                    eprint(f"Loading Malcolm images failed: {out}")
 
             elif (
                 os.path.isfile(composeFile)
                 and self.dockerComposeCmd
-                and InstallerYesOrNo(f'Pull Malcolm Docker images?', default=False, forceInteraction=False)
+                and InstallerYesOrNo(f'Pull Malcolm images?', default=False, forceInteraction=False)
             ):
                 for priv in (False, True):
                     ecode, out = self.run_process(
@@ -429,7 +432,7 @@ class Installer(object):
                 if ecode == 0:
                     result = True
                 else:
-                    eprint(f"Pulling Malcolm Docker images failed: {out}")
+                    eprint(f"Pulling Malcolm images failed: {out}")
 
         return result
 
@@ -868,7 +871,7 @@ class Installer(object):
                     restartMode = None
                     allowedRestartModes = ('no', 'on-failure', 'always', 'unless-stopped')
                     if (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE) and InstallerYesOrNo(
-                        'Restart Malcolm upon system or Docker daemon restart?',
+                        'Restart Malcolm upon system or container daemon restart?',
                         default=args.malcolmAutoRestart,
                         extraLabel=BACK_LABEL,
                     ):
@@ -962,8 +965,8 @@ class Installer(object):
                                     )
 
                     dockerNetworkExternalName = InstallerAskForString(
-                        'Specify external Docker network name (or leave blank for default networking)',
-                        default=args.dockerNetworkName,
+                        'Specify external container network name (or leave blank for default networking)',
+                        default=args.containerNetworkName,
                         extraLabel=BACK_LABEL,
                     )
 
@@ -2286,6 +2289,12 @@ class Installer(object):
                 'PGID',
                 pgid,
             ),
+            # Container runtime engine (e.g., docker, podman)
+            EnvValue(
+                os.path.join(args.configDir, 'process.env'),
+                CONTAINER_RUNTIME_KEY,
+                'kubernetes' if (self.orchMode is OrchestrationFramework.KUBERNETES) else args.runtimeBin,
+            ),
             # Malcolm run profile (malcolm vs. hedgehog)
             EnvValue(
                 os.path.join(args.configDir, 'process.env'),
@@ -2519,6 +2528,21 @@ class Installer(object):
                         ###################################
                         # stuff for all services
                         for service in data['services']:
+
+                            # podman uses "userns_mode: keep-id"
+                            deep_set(
+                                data,
+                                ['services', service, 'userns_mode'],
+                                'keep-id' if args.runtimeBin.startswith('podman') else None,
+                                deleteIfNone=True,
+                            )
+
+                            # podman and docker have different logging driver options
+                            deep_set(
+                                data,
+                                ['services', service, 'logging', 'driver'],
+                                'journald' if args.runtimeBin.startswith('podman') else 'local',
+                            )
 
                             # whether or not to restart services automatically (on boot, etc.)
                             deep_set(
@@ -2900,18 +2924,21 @@ class LinuxInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker(self):
+        global args
         global requests_imported
 
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # first see if docker is already installed and runnable
-            err, out = self.run_process(['docker', 'info'], privileged=True)
+            err, out = self.run_process([args.runtimeBin, 'info'], privileged=True)
 
             if err == 0:
                 result = True
 
-            elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
+            elif args.runtimeBin.startswith('docker') and InstallerYesOrNo(
+                '"docker info" failed, attempt to install Docker?', default=True
+            ):
                 if InstallerYesOrNo('Attempt to install Docker using official repositories?', default=True):
                     # install required packages for repo-based install
                     if self.distro == PLATFORM_LINUX_UBUNTU:
@@ -3062,7 +3089,11 @@ class LinuxInstaller(Installer):
                     else:
                         eprint(f"Downloading https://get.docker.com/ to {tempFileName} failed")
 
-            if result and ((self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS)):
+            if (
+                result
+                and args.runtimeBin.startswith('docker')
+                and ((self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS))
+            ):
                 # centos/fedora don't automatically start/enable the daemon, so do so now
                 err, out = self.run_process(['systemctl', 'start', 'docker'], privileged=True)
                 if err == 0:
@@ -3073,52 +3104,61 @@ class LinuxInstaller(Installer):
                     eprint(f"Starting docker service failed: {out}")
 
             # at this point we either have installed docker successfully or we have to give up, as we've tried all we could
-            err, out = self.run_process(['docker', 'info'], privileged=True, retry=6, retrySleepSec=5)
+            err, out = self.run_process([args.runtimeBin, 'info'], privileged=True, retry=6, retrySleepSec=5)
             if result and (err == 0):
                 if self.debug:
-                    eprint('"docker info" succeeded')
+                    eprint(f'"{args.runtimeBin} info" succeeded')
 
-                # add non-root user to docker group if required
-                usersToAdd = []
-                if self.scriptUser == 'root':
-                    while InstallerYesOrNo(
-                        f"Add {'a' if len(usersToAdd) == 0 else 'another'} non-root user to the \"docker\" group?"
-                    ):
-                        tmpUser = InstallerAskForString('Enter user account')
-                        if len(tmpUser) > 0:
-                            usersToAdd.append(tmpUser)
-                else:
-                    usersToAdd.append(self.scriptUser)
-
-                for user in usersToAdd:
-                    err, out = self.run_process(['usermod', '-a', '-G', 'docker', user], privileged=True)
-                    if err == 0:
-                        if self.debug:
-                            eprint(f'Adding {user} to "docker" group succeeded')
+                if args.runtimeBin.startswith('docker'):
+                    # add non-root user to docker group if required
+                    usersToAdd = []
+                    if self.scriptUser == 'root':
+                        while InstallerYesOrNo(
+                            f"Add {'a' if len(usersToAdd) == 0 else 'another'} non-root user to the \"docker\" group?"
+                        ):
+                            tmpUser = InstallerAskForString('Enter user account')
+                            if len(tmpUser) > 0:
+                                usersToAdd.append(tmpUser)
                     else:
-                        eprint(f'Adding {user} to "docker" group failed')
+                        usersToAdd.append(self.scriptUser)
+
+                    for user in usersToAdd:
+                        err, out = self.run_process(['usermod', '-a', '-G', 'docker', user], privileged=True)
+                        if err == 0:
+                            if self.debug:
+                                eprint(f'Adding {user} to "docker" group succeeded')
+                        else:
+                            eprint(f'Adding {user} to "docker" group failed')
 
             elif err != 0:
                 result = False
-                raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.distro]}')
+                if args.runtimeBin.startswith('docker'):
+                    raise Exception(
+                        f'{ScriptName} requires {args.runtimeBin}, please see {DOCKER_INSTALL_URLS[self.distro]}'
+                    )
+                else:
+                    raise Exception(
+                        f"{ScriptName} requires {args.runtimeBin}, please consult your distribution's documentation"
+                    )
 
         return result
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker_compose(self):
+        global args
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # first see if docker compose/docker-compose is already installed and runnable
             #   (try non-root and root)
-            tmpComposeCmd = ('docker', 'compose')
+            tmpComposeCmd = (args.runtimeBin, 'compose')
 
             for priv in (False, True):
                 err, out = self.run_process([tmpComposeCmd, 'version'], privileged=priv)
                 if err == 0:
                     break
             if err != 0:
-                tmpComposeCmd = 'docker-compose'
+                tmpComposeCmd = f'{args.runtimeBin}-compose'
                 if not which(tmpComposeCmd, debug=self.debug):
                     if os.path.isfile('/usr/libexec/docker/cli-plugins/docker-compose'):
                         tmpComposeCmd = '/usr/libexec/docker/cli-plugins/docker-compose'
@@ -3132,7 +3172,9 @@ class LinuxInstaller(Installer):
             if err == 0:
                 self.dockerComposeCmd = tmpComposeCmd
 
-            elif InstallerYesOrNo('docker compose failed, attempt to install docker compose?', default=True):
+            elif args.runtimeBin.startswith('docker') and InstallerYesOrNo(
+                'docker compose failed, attempt to install docker compose?', default=True
+            ):
                 if InstallerYesOrNo('Install docker compose directly from docker github?', default=True):
                     # download docker-compose from github and put it in /usr/local/bin
 
@@ -3189,12 +3231,17 @@ class LinuxInstaller(Installer):
                 self.dockerComposeCmd = tmpComposeCmd
                 result = True
                 if self.debug:
-                    eprint('docker compose succeeded')
+                    eprint(f'{args.runtimeBin} compose succeeded')
 
             else:
-                raise Exception(
-                    f'{ScriptName} requires docker compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
-                )
+                if args.runtimeBin.startswith('docker'):
+                    raise Exception(
+                        f'{ScriptName} requires {args.runtimeBin} compose, please see {DOCKER_COMPOSE_INSTALL_URLS[self.platform]}'
+                    )
+                else:
+                    raise Exception(
+                        f"{ScriptName} requires {args.runtimeBin} compose, please consult your distribution's documentation"
+                    )
 
         return result
 
@@ -3421,13 +3468,19 @@ class MacInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker(self):
+        global args
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # first see if docker is already installed/runnable
-            err, out = self.run_process(['docker', 'info'])
+            err, out = self.run_process([args.runtimeBin, 'info'])
 
-            if (err != 0) and self.useBrew and self.package_is_installed(MAC_BREW_DOCKER_PACKAGE):
+            if (
+                (err != 0)
+                and self.useBrew
+                and args.runtimeBin.startswith('docker')
+                and self.package_is_installed(MAC_BREW_DOCKER_PACKAGE)
+            ):
                 # if docker is installed via brew, but not running, prompt them to start it
                 eprint(f'{MAC_BREW_DOCKER_PACKAGE} appears to be installed via Homebrew, but "docker info" failed')
                 while True:
@@ -3442,7 +3495,9 @@ class MacInstaller(Installer):
             if err == 0:
                 result = True
 
-            elif InstallerYesOrNo('"docker info" failed, attempt to install Docker?', default=True):
+            elif args.runtimeBin.startswith('docker') and InstallerYesOrNo(
+                '"docker info" failed, attempt to install Docker?', default=True
+            ):
                 if self.useBrew:
                     # install docker via brew cask (requires user interaction)
                     dockerPackages = [MAC_BREW_DOCKER_PACKAGE, MAC_BREW_DOCKER_COMPOSE_PACKAGE]
@@ -3476,95 +3531,105 @@ class MacInstaller(Installer):
                                 break
 
                 # at this point we either have installed docker successfully or we have to give up, as we've tried all we could
-                err, out = self.run_process(['docker', 'info'], retry=12, retrySleepSec=5)
+                err, out = self.run_process([args.runtimeBin, 'info'], retry=12, retrySleepSec=5)
                 if err == 0:
                     result = True
                     if self.debug:
-                        eprint('"docker info" succeeded')
+                        eprint(f'"{args.runtimeBin} info" succeeded')
 
                 elif err != 0:
-                    raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
+                    raise Exception(
+                        f'{ScriptName} requires {args.runtimeBin}, please see {DOCKER_INSTALL_URLS[self.platform]}'
+                    )
 
             elif err != 0:
-                raise Exception(f'{ScriptName} requires docker, please see {DOCKER_INSTALL_URLS[self.platform]}')
-
-            # tweak CPU/RAM usage for Docker in Mac
-            settingsFile = MAC_BREW_DOCKER_SETTINGS.format(self.scriptUser)
-            if (
-                result
-                and os.path.isfile(settingsFile)
-                and InstallerYesOrNo(f'Configure Docker resource usage in {settingsFile}?', default=True)
-            ):
-                # adjust CPU and RAM based on system resources
-                if self.totalCores >= 16:
-                    newCpus = 12
-                elif self.totalCores >= 12:
-                    newCpus = 8
-                elif self.totalCores >= 8:
-                    newCpus = 6
-                elif self.totalCores >= 4:
-                    newCpus = 4
+                if args.runtimeBin.startswith('docker'):
+                    raise Exception(
+                        f'{ScriptName} requires {args.runtimeBin}, please see {DOCKER_INSTALL_URLS[self.platform]}'
+                    )
                 else:
-                    newCpus = 2
+                    raise Exception(
+                        f"{ScriptName} requires {args.runtimeBin}, please consult your platform's documentation"
+                    )
 
-                if self.totalMemoryGigs >= 64.0:
-                    newMemoryGiB = 32
-                elif self.totalMemoryGigs >= 32.0:
-                    newMemoryGiB = 24
-                elif self.totalMemoryGigs >= 24.0:
-                    newMemoryGiB = 16
-                elif self.totalMemoryGigs >= 16.0:
-                    newMemoryGiB = 12
-                elif self.totalMemoryGigs >= 8.0:
-                    newMemoryGiB = 8
-                elif self.totalMemoryGigs >= 4.0:
-                    newMemoryGiB = 4
-                else:
-                    newMemoryGiB = 2
-
-                while not InstallerYesOrNo(
-                    f"Setting {newCpus if newCpus else '(unchanged)'} for CPU cores and {newMemoryGiB if newMemoryGiB else '(unchanged)'} GiB for RAM. Is this OK?",
-                    default=True,
+            if args.runtimeBin.startswith('docker'):
+                # tweak CPU/RAM usage for Docker in Mac
+                settingsFile = MAC_BREW_DOCKER_SETTINGS.format(self.scriptUser)
+                if (
+                    result
+                    and os.path.isfile(settingsFile)
+                    and InstallerYesOrNo(f'Configure Docker resource usage in {settingsFile}?', default=True)
                 ):
-                    newCpus = InstallerAskForString('Enter Docker CPU cores (e.g., 4, 8, 16)')
-                    newMemoryGiB = InstallerAskForString('Enter Docker RAM MiB (e.g., 8, 16, etc.)')
-
-                if newCpus or newMemoryGiB:
-                    with open(settingsFile, 'r+') as f:
-                        data = json.load(f)
-                        if newCpus:
-                            data['cpus'] = int(newCpus)
-                        if newMemoryGiB:
-                            data['memoryMiB'] = int(newMemoryGiB) * 1024
-                        f.seek(0)
-                        json.dump(data, f, indent=2)
-                        f.truncate()
-
-                    # at this point we need to essentially update our system memory stats because we're running inside docker
-                    # and don't have the whole banana at our disposal
-                    self.totalMemoryGigs = newMemoryGiB
-
-                    eprint("Docker resource settings adjusted, attempting restart...")
-
-                    err, out = self.run_process(['osascript', '-e', 'quit app "Docker"'])
-                    if err == 0:
-                        time.sleep(5)
-                        err, out = self.run_process(['open', '-a', 'Docker'])
-
-                    if err == 0:
-                        err, out = self.run_process(['docker', 'info'], retry=12, retrySleepSec=5)
-                        if err == 0:
-                            if self.debug:
-                                eprint('"docker info" succeeded')
-
+                    # adjust CPU and RAM based on system resources
+                    if self.totalCores >= 16:
+                        newCpus = 12
+                    elif self.totalCores >= 12:
+                        newCpus = 8
+                    elif self.totalCores >= 8:
+                        newCpus = 6
+                    elif self.totalCores >= 4:
+                        newCpus = 4
                     else:
-                        eprint(f"Restarting Docker automatically failed: {out}")
-                        while True:
-                            response = InstallerAskForString(
-                                'Please restart Docker via the system taskbar, then return here and type YES'
-                            ).lower()
-                            if response == 'yes':
-                                break
+                        newCpus = 2
+
+                    if self.totalMemoryGigs >= 64.0:
+                        newMemoryGiB = 32
+                    elif self.totalMemoryGigs >= 32.0:
+                        newMemoryGiB = 24
+                    elif self.totalMemoryGigs >= 24.0:
+                        newMemoryGiB = 16
+                    elif self.totalMemoryGigs >= 16.0:
+                        newMemoryGiB = 12
+                    elif self.totalMemoryGigs >= 8.0:
+                        newMemoryGiB = 8
+                    elif self.totalMemoryGigs >= 4.0:
+                        newMemoryGiB = 4
+                    else:
+                        newMemoryGiB = 2
+
+                    while not InstallerYesOrNo(
+                        f"Setting {newCpus if newCpus else '(unchanged)'} for CPU cores and {newMemoryGiB if newMemoryGiB else '(unchanged)'} GiB for RAM. Is this OK?",
+                        default=True,
+                    ):
+                        newCpus = InstallerAskForString('Enter Docker CPU cores (e.g., 4, 8, 16)')
+                        newMemoryGiB = InstallerAskForString('Enter Docker RAM MiB (e.g., 8, 16, etc.)')
+
+                    if newCpus or newMemoryGiB:
+                        with open(settingsFile, 'r+') as f:
+                            data = json.load(f)
+                            if newCpus:
+                                data['cpus'] = int(newCpus)
+                            if newMemoryGiB:
+                                data['memoryMiB'] = int(newMemoryGiB) * 1024
+                            f.seek(0)
+                            json.dump(data, f, indent=2)
+                            f.truncate()
+
+                        # at this point we need to essentially update our system memory stats because we're running inside docker
+                        # and don't have the whole banana at our disposal
+                        self.totalMemoryGigs = newMemoryGiB
+
+                        eprint("Docker resource settings adjusted, attempting restart...")
+
+                        err, out = self.run_process(['osascript', '-e', 'quit app "Docker"'])
+                        if err == 0:
+                            time.sleep(5)
+                            err, out = self.run_process(['open', '-a', 'Docker'])
+
+                        if err == 0:
+                            err, out = self.run_process(['docker', 'info'], retry=12, retrySleepSec=5)
+                            if err == 0:
+                                if self.debug:
+                                    eprint('"docker info" succeeded')
+
+                        else:
+                            eprint(f"Restarting Docker automatically failed: {out}")
+                            while True:
+                                response = InstallerAskForString(
+                                    'Please restart Docker via the system taskbar, then return here and type YES'
+                                ).lower()
+                                if response == 'yes':
+                                    break
 
         return result
 
@@ -3658,10 +3723,19 @@ def main():
         metavar='<string>',
         type=str,
         default='',
-        help='Malcolm docker images .tar.gz file for installation',
+        help='Malcolm container images .tar.gz file for installation',
     )
 
     runtimeOptionsArgGroup = parser.add_argument_group('Runtime options')
+    runtimeOptionsArgGroup.add_argument(
+        '--runtime',
+        required=False,
+        dest='runtimeBin',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_CONTAINER_RUNTIME', ''),
+        help='Container runtime binary (e.g., docker, podman)',
+    )
     runtimeOptionsArgGroup.add_argument(
         '--malcolm-profile',
         dest='malcolmProfile',
@@ -3733,7 +3807,7 @@ def main():
         help="Use StartTLS (rather than LDAPS) for LDAP connection security",
     )
 
-    dockerOptionsArgGroup = parser.add_argument_group('Docker options')
+    dockerOptionsArgGroup = parser.add_argument_group('Container options')
     dockerOptionsArgGroup.add_argument(
         '-r',
         '--restart-malcolm',
@@ -3792,13 +3866,13 @@ def main():
         help='Traefik router resolver (e.g., myresolver)',
     )
     dockerOptionsArgGroup.add_argument(
-        '--docker-network-name',
-        dest='dockerNetworkName',
+        '--network-name',
+        dest='containerNetworkName',
         required=False,
         metavar='<string>',
         type=str,
         default='',
-        help='External Docker network name (or leave blank for default networking)',
+        help='External container network name (or leave blank for default networking)',
     )
 
     opensearchArgGroup = parser.add_argument_group('OpenSearch options')
@@ -4502,6 +4576,17 @@ def main():
         raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
         # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
 
+    if orchMode == OrchestrationFramework.DOCKER_COMPOSE:
+        runtimeOptions = ('docker', 'podman')
+        loopBreaker = CountUntilException(MaxAskForValueCount)
+        while (args.runtimeBin not in runtimeOptions) and loopBreaker.increment():
+            args.runtimeBin = InstallerChooseOne(
+                'Select container runtime engine',
+                choices=[(x, '', x == runtimeOptions[0]) for x in runtimeOptions],
+            )
+        if args.debug:
+            eprint(f"Container engine: {args.runtimeBin}")
+
     if (not args.configOnly) and hasattr(installer, 'install_required_packages'):
         installer.install_required_packages()
 
@@ -4547,7 +4632,7 @@ def main():
             eprint("Only doing configuration, not installation")
         else:
             eprint(f"Malcolm install file: {malcolmFile}")
-            eprint(f"Docker images file: {imageFile}")
+            eprint(f"Malcolm images file: {imageFile}")
 
     if not args.configOnly:
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker'):

@@ -141,7 +141,8 @@ The first time the Malcolm base operating system boots the **Malcolm Configurati
 
 The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's questions proceed as follows. Users may not see every question listed in the bulleted list below as some questions depend on earlier responses. Usually the default selection is recommended unless otherwise indicated. The configuration values resulting from these questions (in **bold**) are stored in [environment variable files](malcolm-config.md#MalcolmConfigEnvVars) in the `./config` directory.
 
-
+* **Select container runtime engine**
+    - When deployed locally (i.e., not via Kubernetes), Malcolm can run under [Docker](https://docs.docker.com/get-started/docker-overview/) or [Podman](https://podman.io/). However, for brevity's sake, the term "Docker" is used throughout this documentation.
 * **Malcolm processes will run as UID 1000 and GID 1000. Is this OK?**
     - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
 * **Run with Malcolm (all containers) or Hedgehog (capture only) profile?**
@@ -156,7 +157,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 16 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
 * **Setting 3 workers for Logstash pipelines. Is this OK?**
     - This setting is used to tune the performance and resource utilization of the the `logstash` container. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
-* **Restart Malcolm upon system or Docker daemon restart?**
+* **Restart Malcolm upon system or container daemon restart?**
     - This question allows users to configure Docker's [restart policy](https://docs.docker.com/config/containers/start-containers-automatically/#use-a-restart-policy) for Malcolm (i.e., the behavior used to restart Malcolm should the system be shut down or rebooted, or should one of Malcolm's components crash). Possible options are:
         + no - do not automatically restart the container
         + on-failure - restart the container if it exits due to an error, which manifests as a non-zero exit code
@@ -166,7 +167,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Answering **Y** to this question is almost always preferred. The only situation where **N** would be appropriate would be when running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates automatically and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. Users should ensure they understand these implications and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying the local firewall configuration, when answering **N** to this question.
 * **Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?**
     - See the previous question. If Malcolm is configured behind a remote proxy, Malcolm can prompt users to *Configure labels for Traefik?* to allow it to identify itself to Traefik.
-* **Specify external Docker network name (or leave blank for default networking)**
+* **Specify external container network name (or leave blank for default networking)**
     - This configures Malcolm to use [custom Docker networks](https://docs.docker.com/compose/networking/#specify-custom-networks). If unsure, leave this blank.
 * **Select authentication method**
     - Choose **Basic** to use Malcolm's own built-in [local account management](authsetup.md#AuthBasicAccountManagement), **LDAP** to use [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP) or **None** to not require authentication (not recommended)

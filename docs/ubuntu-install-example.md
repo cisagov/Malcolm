@@ -98,6 +98,10 @@ Malcolm runtime files extracted to /home/user/Malcolm
 
 Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
 ```
+1: docker
+2: podman
+Select container runtime engine (docker): 1
+
 Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
 
 Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y / n): y
@@ -112,7 +116,7 @@ Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
 
 Setting 3 workers for Logstash pipelines. Is this OK? (Y / n): y
 
-Restart Malcolm upon system or Docker daemon restart? (y / N): y
+Restart Malcolm upon system or container daemon restart? (y / N): y
 1: no
 2: on-failure
 3: always
@@ -123,7 +127,7 @@ Require encrypted HTTPS connections? (Y / n): y
 
 Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y / N): n
 
-Specify external Docker network name (or leave blank for default networking) (): 
+Specify external container network name (or leave blank for default networking) (): 
 
 1: Basic
 2: Lightweight Directory Access Protocol (LDAP)
@@ -197,7 +201,7 @@ Specify capture interface(s) (comma-separated): eth0
 
 Enable dark mode for OpenSearch Dashboards? (Y / n): y
 
-Pull Malcolm Docker images (y / N): y
+Pull Malcolm images (y / N): y
 
 Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.

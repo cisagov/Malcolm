@@ -52,6 +52,7 @@ MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 PROFILE_KEY = 'MALCOLM_PROFILE'
 PROFILE_MALCOLM = 'malcolm'
 PROFILE_HEDGEHOG = 'hedgehog'
+CONTAINER_RUNTIME_KEY = 'MALCOLM_CONTAINER_RUNTIME'
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"

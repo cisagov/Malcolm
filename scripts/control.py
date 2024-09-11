@@ -32,6 +32,7 @@ from malcolm_common import (
     AskForString,
     BoundPath,
     ChooseOne,
+    CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
@@ -2394,11 +2395,27 @@ def main():
         osEnv['TMPDIR'] = MalcolmTmpPath
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
-            # make sure docker and docker compose are available
-            if args.runtimeBin is not None:
-                dockerBin = args.runtimeBin
-            else:
+            # identify runtime engine
+            runtimeBinSrc = ''
+            if not args.runtimeBin:
+                processEnvFile = os.path.join(args.configDir, 'process.env')
+                try:
+                    if os.path.isfile(processEnvFile):
+                        dockerBin = dotenvImported.get_key(processEnvFile, CONTAINER_RUNTIME_KEY)
+                        runtimeBinSrc = os.path.basename(processEnvFile)
+                    elif args.debug:
+                        runtimeBinSrc = 'process.env not found'
+                except Exception as e:
+                    runtimeBinSrc = f'exception ({e})'
+            elif args.debug:
+                runtimeBinSrc = 'specified'
+            if not dockerBin:
                 dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
+                runtimeBinSrc = 'default'
+            if args.debug:
+                eprint(f"Container runtime ({runtimeBinSrc}): {dockerBin}")
+
+            # make sure docker and docker compose are available
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
