@@ -34,6 +34,7 @@ Hedgehog Linux is a Debian-based operating system built to
     - [Autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigAutostart)
     - [Managing disk usage](malcolm-hedgehog-e2e-iso-install.md#HedgehogDiskUsage)
     - [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
+    - [Custom Rules, Scripts and Plugins](hedgehog-custom-rules.md#CustomRulesAndScripts)
     - [Tuning](live-analysis.md#LiveAnalysisTuning)
         + [Zeek](live-analysis.md#LiveAnalysisTuningZeek)
         + [Arkime](live-analysis.md#LiveAnalysisTuningArkime)
