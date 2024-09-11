@@ -11,6 +11,7 @@ services:
     #   start but not actually run OpenSearch. It's included in both profiles to
     #   satisfy some other containers' depends_on.
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -84,6 +85,7 @@ services:
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards-helper:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -137,6 +139,7 @@ services:
       dockerfile: Dockerfiles/dashboards.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -183,6 +186,7 @@ services:
       dockerfile: Dockerfiles/logstash.Dockerfile
     image: ghcr.io/idaholab/malcolm/logstash-oss:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -297,6 +301,7 @@ services:
       dockerfile: Dockerfiles/filebeat.Dockerfile
     image: ghcr.io/idaholab/malcolm/filebeat-oss:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -373,6 +378,7 @@ services:
       dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -458,6 +464,7 @@ services:
       dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -542,6 +549,7 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -614,6 +622,7 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -678,6 +687,7 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -737,6 +747,7 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -794,6 +805,7 @@ services:
       dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-monitor:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -849,6 +861,7 @@ services:
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-capture:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -895,6 +908,7 @@ services:
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-monitor:24.09.0
     profiles: ["malcolm", "hedgehog"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -949,6 +963,7 @@ services:
       dockerfile: Dockerfiles/file-upload.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-upload:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -990,6 +1005,7 @@ services:
   htadmin:
     image: ghcr.io/idaholab/malcolm/htadmin:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1042,6 +1058,7 @@ services:
   freq:
     image: ghcr.io/idaholab/malcolm/freq:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1079,6 +1096,7 @@ services:
   netbox:
     image: ghcr.io/idaholab/malcolm/netbox:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1145,6 +1163,7 @@ services:
   netbox-postgres:
     image: ghcr.io/idaholab/malcolm/postgresql:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1188,6 +1207,7 @@ services:
   netbox-redis:
     image: ghcr.io/idaholab/malcolm/redis:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1235,6 +1255,7 @@ services:
   netbox-redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1277,6 +1298,7 @@ services:
   api:
     image: ghcr.io/idaholab/malcolm/api:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1325,6 +1347,7 @@ services:
       dockerfile: Dockerfiles/nginx.Dockerfile
     image: ghcr.io/idaholab/malcolm/nginx-proxy:24.09.0
     profiles: ["malcolm"]
+    userns_mode: keep-id
     logging:
       driver: local
       options:
