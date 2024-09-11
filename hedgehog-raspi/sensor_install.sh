@@ -97,8 +97,6 @@ build_arkime_src(){
 
     make install -j${build_jobs}
 
-    cp -r ./capture/plugins/lua/samples "${arkime_dir}"/lua
-
     cat NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
 
     rm -f $arkime_dir/etc/*.systemd.service
