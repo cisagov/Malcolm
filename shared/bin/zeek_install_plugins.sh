@@ -68,7 +68,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/0xxon/cve-2020-13777"
   "https://github.com/amzn/zeek-plugin-profinet|master"
   "https://github.com/amzn/zeek-plugin-tds|master"
-  "https://github.com/mmguero-dev/zeek-iec104"
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap"
   "https://github.com/cisagov/icsnpp-dnp3"
