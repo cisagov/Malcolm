@@ -139,7 +139,11 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   fi
 
   # identify node in session metadata for PCAP reachback
-  PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
+  if [[ -n $OS_HOST ]]; then
+    PRIMARY_IP=$(ip route get $OS_HOST | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
+  else
+    PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
+  fi
   export ARKIME_NODE_NAME="$(hostname --long)"
   export ARKIME_NODE_HOST="$PRIMARY_IP"
 
