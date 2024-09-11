@@ -19,6 +19,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "monitor"
 ENV PGROUP "monitor"
 ENV PUSER_PRIV_DROP true
+# see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -237,11 +238,18 @@ COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
-COPY --chmod=755 file-monitor/*update.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 WORKDIR /zeek/extract_files
 
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "$CLAMAV_RULES_DIR;$YARA_RULES_DIR;$YARA_RULES_SRC_DIR"
+
+# see PUSER_CHOWN comment above
 VOLUME ["$CLAMAV_RULES_DIR"]
 VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]

@@ -34,6 +34,12 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "www-data"
 ENV PGROUP "www-data"
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/var/www/upload/server/php/chroot/files"
 # not dropping privileges globally in this container as required to run SFTP server. this can
 # be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
 # will drop privileges to www-data as well.
@@ -122,7 +128,9 @@ RUN mkdir -p /run/php \
       >/var/www/upload/server/php/chroot/README.txt && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
 
+# see PUSER_CHOWN comment above
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
+
 EXPOSE 22 80
 
 ENTRYPOINT ["/usr/bin/tini", \

@@ -31,6 +31,7 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+# see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
 ARG ZEEK_VERSION=7.0.1-0
@@ -276,8 +277,18 @@ ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 ENV ZEEK_SYNCHROPHASOR_DETAILED $ZEEK_SYNCHROPHASOR_DETAILED
 
+# This is in part to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+# However, note that in this case (unlike most of the other Dockerfiles
+#   where I've put this workaround) in this case the PUSER_CHOWN was
+#   already being set like this, so even if I resolve that issue
+#   I probably don't want to remove this.
 ENV PUSER_CHOWN "$ZEEK_DIR"
 
+# see PUSER_CHOWN comment above
 VOLUME ["${ZEEK_DIR}/share/zeek/site/intel"]
 
 ENTRYPOINT ["/usr/bin/tini", \

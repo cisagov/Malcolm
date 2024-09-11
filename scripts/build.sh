@@ -15,13 +15,14 @@ if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP") > /dev/null; then
   exit 1
 fi
 
+MALCOLM_CONTAINER_RUNTIME="${MALCOLM_CONTAINER_RUNTIME:-docker}"
 DOCKER_COMPOSE_BIN=()
-if docker compose version >/dev/null 2>&1; then
-  DOCKER_COMPOSE_BIN=(docker compose)
-  DOCKER_BIN=docker
-elif docker-compose version >/dev/null 2>&1; then
-  DOCKER_COMPOSE_BIN=(docker-compose)
-  DOCKER_BIN=docker
+if $MALCOLM_CONTAINER_RUNTIME compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=($MALCOLM_CONTAINER_RUNTIME compose)
+  DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
+elif ${MALCOLM_CONTAINER_RUNTIME}-compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=(${$MALCOLM_CONTAINER_RUNTIME}-compose)
+  DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
 elif $GREP -q Microsoft /proc/version; then
   if docker.exe compose version >/dev/null 2>&1; then
     DOCKER_COMPOSE_BIN=(docker.exe compose)
