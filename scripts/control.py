@@ -2104,7 +2104,7 @@ def main():
         dest='runtimeBin',
         metavar='<string>',
         type=str,
-        default=os.getenv('MALCOLM_CONTAINER_RUNTIME', None),
+        default=os.getenv('MALCOLM_CONTAINER_RUNTIME', ''),
         help='Container runtime binary (e.g., docker, podman)',
     )
 
