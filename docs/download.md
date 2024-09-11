@@ -1,19 +1,19 @@
 # <a name="DownloadMalcolm"></a> Downloading Malcolm
 
-* [Docker images](#DownloadDockerImages)
+* [Container images](#DownloadDockerImages)
 * [Installer ISOs](#DownloadISOs)
     - [Joining split ISOs](#JoinISOs)
     - [Warning](#ISOsWarning)
 
-## <a name="DownloadDockerImages"></a> Docker images
+## <a name="DownloadDockerImages"></a> Container images
 
-Malcolm operates as a cluster of Docker containers, isolated sandboxes which each serve a dedicated function of the system. These Docker images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) by running `docker compose --profile malcolm pull` from within the Malcolm installation directory, or they can be built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
+Malcolm operates as a cluster of containers, isolated sandboxes which each serve a dedicated function of the system. These images can be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) by running `docker compose --profile malcolm pull` from within the Malcolm installation directory, or they can be built from source by following the instructions in the [Quick Start](quickstart.md#QuickStart) section of the documentation.
 
 ## <a name="DownloadISOs"></a> Installer ISOs
 
 * [Latest release]({{ site.github.repository_url }}/releases/latest)
 
-Malcolm's Docker-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
+Malcolm's container-based deployment model makes Malcolm able to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside of a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
 
 Malcolm is also packaged into an [installer ISO](malcolm-iso.md#ISO) based on the current [stable release](https://wiki.debian.org/DebianStable) of [Debian](https://www.debian.org/). This [customized Debian installation](https://wiki.debian.org/DebianLive) is preconfigured with the bare minimum software needed to run Malcolm.
 

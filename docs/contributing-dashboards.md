@@ -33,8 +33,8 @@ Visualizations and dashboards can be [easily created](dashboards.md#BuildDashboa
         }
     ```
 1. In your text editor, perform a global-search and replace, replacing the string `arkime_sessions3-*` with `MALCOLM_NETWORK_INDEX_PATTERN_REPLACER` and `malcolm_beats_*` with `MALCOLM_OTHER_INDEX_PATTERN_REPLACER`. These replacers are used to [allow customizing indexes for logs written to OpenSearch or Elasticsearch](https://github.com/idaholab/Malcolm/issues/313).
-1. Include the new dashboard either by using a [bind mount](contributing-local-modifications.md#Bind) for the `./dashboards/dashboards/` directory or by [rebuilding](development.md#Build) the `dashboards-helper` Docker image. Dashboards are imported the first time Malcolm starts up.
+1. Include the new dashboard either by using a [bind mount](contributing-local-modifications.md#Bind) for the `./dashboards/dashboards/` directory or by [rebuilding](development.md#Build) the `dashboards-helper` image. Dashboards are imported the first time Malcolm starts up.
 
 ## <a name="DashboardsPlugins"></a>OpenSearch Dashboards plugins
 
-The [dashboards.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/dashboards.Dockerfile) installs the OpenSearch Dashboards plugins used by Malcolm (search for `opensearch-dashboards-plugin install` in that file). Additional Dashboards plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `dashboards` Docker image.
+The [dashboards.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/dashboards.Dockerfile) installs the OpenSearch Dashboards plugins used by Malcolm (search for `opensearch-dashboards-plugin install` in that file). Additional Dashboards plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `dashboards` image.

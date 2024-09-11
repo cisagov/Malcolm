@@ -1,10 +1,10 @@
 # <a name="GitHubRunners"></a>Using GitHub runners to build Malcolm images
 
-Users who have [forked](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) Malcolm on [GitHub]({{ site.github.repository_url }}) can use GitHub-hosted [runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) to build Malcolm docker images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs, and push those images to GitHub's [ghcr.io container registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+Users who have [forked](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo) Malcolm on [GitHub]({{ site.github.repository_url }}) can use GitHub-hosted [runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) to build Malcolm images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs, and push those images to GitHub's [ghcr.io container registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
 
 The resulting images are named according to the pattern `ghcr.io/username/malcolm/image:branch` (e.g., if the user has forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run a local instance of Malcolm using these images instead of the official `ghcr.io/idaholab` ones, users will need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the Bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
-[Workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions to build the docker images using GitHub-hosted runners, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. 
+[Workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions to build the images using GitHub-hosted runners, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. 
 
 This document outlines the steps needed to configure and use GitHub runners to build Malcolm images.
 
@@ -93,7 +93,7 @@ As mentioned earlier, Malcolm images built using the instructions in this docume
 
 Before explaining that script, a discussion of the workflow files for the [Hedgehog Linux](live-analysis.md#Hedgehog) ([hedgehog-iso-build-docker-wrap-push-ghcr.yml
 ]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml)) and [Malcolm](malcolm-iso.md#ISO) ([malcolm-iso-build-docker-wrap-push-ghcr.yml
-]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml)) installer ISOs is warranted. The installer images are [ISO 9660](https://en.wikipedia.org/wiki/ISO_9660)-formatted files, not docker container images, so one may reasonably wonder about the purpose of the `ghcr.io/username/malcolm/malcolm:main` and `ghcr.io/username/malcolm/hedgehog:main` images pushed to ghcr.io. 
+]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml)) installer ISOs is warranted. The installer images are [ISO 9660](https://en.wikipedia.org/wiki/ISO_9660)-formatted files, not container images, so one may reasonably wonder about the purpose of the `ghcr.io/username/malcolm/malcolm:main` and `ghcr.io/username/malcolm/hedgehog:main` images pushed to ghcr.io. 
 
 Examining [`malcolm-iso/Dockerfile`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso/Dockerfile) and [`hedgehog-iso/Dockerfile`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso/Dockerfile), one will see that these container images are just [thin wrappers](https://github.com/mmguero/docker-qemu-live-iso) around the ISO 9660 image files built during their respective workflows. These wrapper images serve two purposes:
 
@@ -132,7 +132,7 @@ These menu options are described below:
     
 The script can also be run non-interactively by specifying the option number on the command line (e.g., `./scripts/github_image_helper.sh 4`).
 
-In addition to requiring Docker, some of the options above also require the [xorriso](https://www.gnu.org/software/xorriso/) and [squashfs-tools](https://github.com/plougher/squashfs-tools) packages to extract from the ISO 9660 image file embedded in the Malcolm installer ISO wrapper container image. Consult your distribution's documentation for how to install these tools (something like `sudo apt-get -y install xorriso squashfs-tools` should work on distributions that use the apt package manager).
+In addition to requiring Docker or Podman, some of the options above also require the [xorriso](https://www.gnu.org/software/xorriso/) and [squashfs-tools](https://github.com/plougher/squashfs-tools) packages to extract from the ISO 9660 image file embedded in the Malcolm installer ISO wrapper container image. Consult your distribution's documentation for how to install these tools (something like `sudo apt-get -y install xorriso squashfs-tools` should work on distributions that use the apt package manager).
 
 ### Example
 

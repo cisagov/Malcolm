@@ -9,4 +9,4 @@ When a PCAP is uploaded (either through Malcolm's [upload web interface](upload.
 
 While that might be a bit of hand-waving, these general steps take care of the PCAP processing piece: users shouldn't have to really edit any *existing* code to add a new PCAP processor, only create a *new* container to subscribe to ZeroMQ topic and handle the PCAPs it receives.
 
-The `PCAP_PIPELINE_VERBOSITY` [environment variables](malcolm-config.md#MalcolmConfigEnvVars) in `./config/upload-common.env` can be set to `-v`, `-vv`, etc., to increase the verbosity of debug logging from the output of the Docker containers involved in the PCAP processing pipeline.
+The `PCAP_PIPELINE_VERBOSITY` [environment variables](malcolm-config.md#MalcolmConfigEnvVars) in `./config/upload-common.env` can be set to `-v`, `-vv`, etc., to increase the verbosity of debug logging from the output of the containers involved in the PCAP processing pipeline.

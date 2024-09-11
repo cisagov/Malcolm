@@ -4,7 +4,7 @@ This document outlines how to install [Malcolm]({{ site.github.repository_url }}
 
 The Malcolm and Hedgehog Linux installers as described in these instructions are intended to be used to **replace** the existing operating system (if any) of the respective systems onto which they are installed; and, as such, are designed to require as little user input as possible. For this reason, there are NO user prompts or confirmations about partitioning and reformatting hard disks for use by the operating system. The installer assumes that all non-removable storage media (eg., SSD, HDD, NVMe, etc.) are available for use and ⛔🆘😭💀 ***will partition and format them without warning*** 💀😭🆘⛔.
 
-In contrast to using the ISO installer, Malcolm can also be installed on any x86-64 (also known as x64, x86_64, AMD64, and Intel 64) or AArch64 (also known as ARM64) platform capable of running Docker. See the [installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
+In contrast to using the ISO installer, Malcolm can also be installed on any x86-64 (also known as x64, x86_64, AMD64, and Intel 64) or AArch64 (also known as ARM64) platform capable of running Docker or Podman. See the [installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
 
 ### <a name="TableOfContents"></a> Table of Contents
 
@@ -148,7 +148,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * **Run with Malcolm (all containers) or Hedgehog (capture only) profile?**
     - Malcolm can be run in either of two [profiles](https://docs.docker.com/compose/profiles/): the "malcolm" profile runs all containers including those for log enrichment and indexing, while the "hedgehog" (named as a nod to [Hedgehog Linux](hedgehog.md), Malcolm's [dedicated network sensor OS](live-analysis.md#Hedgehog)) profile rules only the containers required for [live traffic analysis](live-analysis.md#LocalPCAP). When using the "hedgehog" profile, captured network artifacts must be forwarded to another Malcolm instance: its [OpenSearch instance](opensearch-instances.md#OpenSearchInstance) connection parameters (e.g., `https://192.168.122.5:9200`) and Logstash connection parameters (e.g., `192.168.122.5:5044`) must be specified later on in the configuration. See [idaholab/Malcolm#254](https://github.com/idaholab/Malcolm/issues/254) for the origin of this feature.
 * **Should Malcolm use and maintain its own OpenSearch instance?**
-    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
+    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
 * **Compress local OpenSearch index snapshots?**
     - Choose whether OpenSearch [index snapshots](https://opensearch.org/docs/2.6/tuning-your-cluster/availability-and-recovery/snapshots/snapshot-management/) should be compressed or not, should users opt to configure them later in [OpenSearch index management](index-management.md#IndexManagement).
 * **Forward Logstash logs to a secondary remote document store?**
@@ -168,7 +168,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * **Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?**
     - See the previous question. If Malcolm is configured behind a remote proxy, Malcolm can prompt users to *Configure labels for Traefik?* to allow it to identify itself to Traefik.
 * **Specify external container network name (or leave blank for default networking)**
-    - This configures Malcolm to use [custom Docker networks](https://docs.docker.com/compose/networking/#specify-custom-networks). If unsure, leave this blank.
+    - This configures Malcolm to use [custom container networks](https://docs.docker.com/compose/networking/#specify-custom-networks). If unsure, leave this blank.
 * **Select authentication method**
     - Choose **Basic** to use Malcolm's own built-in [local account management](authsetup.md#AuthBasicAccountManagement), **LDAP** to use [Lightweight Directory Access Protocol (LDAP) authentication](authsetup.md#AuthLDAP) or **None** to not require authentication (not recommended)
 * **Select LDAP server compatibility type**

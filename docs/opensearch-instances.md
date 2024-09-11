@@ -3,7 +3,7 @@
 * [OpenSearch and Elasticsearch instances](#OpenSearchInstance)
     - [Authentication and authorization for remote data store clusters](#OpenSearchAuth)
 
-Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a Docker container to index and search network traffic metadata. OpenSearch can also run as a [cluster](https://opensearch.org/docs/latest/opensearch/cluster/) with instances distributed across multiple nodes with dedicated [roles](https://opensearch.org/docs/latest/opensearch/cluster/#nodes) such as cluster manager, data node, ingest node, etc.
+Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. OpenSearch can also run as a [cluster](https://opensearch.org/docs/latest/opensearch/cluster/) with instances distributed across multiple nodes with dedicated [roles](https://opensearch.org/docs/latest/opensearch/cluster/#nodes) such as cluster manager, data node, ingest node, etc.
 
 As the permutations of OpenSearch cluster configurations are numerous, it is beyond Malcolm's scope to set up multi-node clusters. However, Malcolm can be configured to use a remote OpenSearch cluster rather than its own internal instance.
 
@@ -74,7 +74,7 @@ You must run auth_setup after configure to store data store connection credentia
 
 ## <a name="OpenSearchAuth"></a>Authentication and authorization for remote data store clusters
 
-In addition to setting the environment variables in [`opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) as described above, users must provide Malcolm with credentials for it to communicate with remote OpenSearch and Elasticsearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary data store connections, respectively, and are bind-mounted into the Docker containers that need to communicate with OpenSearch/Elasticsearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
+In addition to setting the environment variables in [`opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) as described above, users must provide Malcolm with credentials for it to communicate with remote OpenSearch and Elasticsearch instances. These credentials are stored in the Malcolm installation directory as `.opensearch.primary.curlrc` and `.opensearch.secondary.curlrc` for the primary and secondary data store connections, respectively, and are bind-mounted into the containers that need to communicate with OpenSearch/Elasticsearch. These [cURL-formatted](https://everything.curl.dev/cmdline/configfile) config files can be generated for you by the [`auth_setup`](authsetup.md#AuthSetup) script as illustrated:
 
 ```
 $ ./scripts/auth_setup 

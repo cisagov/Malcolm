@@ -11,4 +11,4 @@ When Zeek extracts a file it observes being transfered in network traffic, the `
 
 Additional file scanners could either be added to the `file-monitor` service; or to avoid coupling with Malcolm's code users could simply define a new service as instructed in the [Adding a new service](contributing-new-image.md#NewImage) section and write custom scripts to subscribe and publish to the topics as described above. While this might be a bit of hand-waving, these general steps take care of the plumbing around extracting the file and notifying a new tool, as well as handling the logging of "hits": users shouldn't have to really edit any *existing* code to add a new carved file scanner.
 
-The `EXTRACTED_FILE_PIPELINE_VERBOSITY` environment variables in can be set to `-v`, `-vv`, etc., to increase the verbosity of debug logging from the output of the Docker containers involved in the carved file processing pipeline.
+The `EXTRACTED_FILE_PIPELINE_VERBOSITY` environment variables in can be set to `-v`, `-vv`, etc., to increase the verbosity of debug logging from the output of the containers involved in the carved file processing pipeline.
