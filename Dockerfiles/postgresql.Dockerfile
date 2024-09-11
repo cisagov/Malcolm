@@ -20,6 +20,7 @@ ENV PUSER "postgres"
 ENV PGROUP "postgres"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_CHOWN "/run/postgresql;/var/lib/postgresql"
+USER root
 
 ENV TERM xterm
 

@@ -27,6 +27,7 @@ ENV PGROUP "arkime"
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

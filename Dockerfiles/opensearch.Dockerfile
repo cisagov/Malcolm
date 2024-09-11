@@ -27,6 +27,7 @@ ENV PUSER_RLIMIT_UNLOCK true
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
 ENV PUSER_CHOWN "/var/local/ca-trust"
+USER root
 
 ENV TERM xterm
 

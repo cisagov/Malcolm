@@ -25,6 +25,7 @@ ENV PGROUP "helper"
 #   other implications. See containers/podman#23347.
 ENV PUSER_CHOWN "/data/init"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 

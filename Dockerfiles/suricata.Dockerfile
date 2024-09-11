@@ -33,6 +33,7 @@ ENV PGROUP "suricata"
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
+USER root
 
 ENV SUPERCRONIC_VERSION "0.2.31"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
@@ -209,7 +210,6 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
-
 
 # to be populated at build-time:
 ARG BUILD_DATE

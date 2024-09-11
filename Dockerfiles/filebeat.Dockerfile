@@ -28,6 +28,7 @@ ENV PUSER_CHOWN "/usr/share/filebeat-logs/data;/usr/share/filebeat-nginx/data;/u
 # on a case-by-case basis so that one script (filebeat-watch-zeeklogs-uploads-folder.py)
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

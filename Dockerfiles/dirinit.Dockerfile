@@ -19,6 +19,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "dirinit"
 ENV PGROUP "dirinit"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 

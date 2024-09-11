@@ -44,6 +44,7 @@ ENV PUSER_CHOWN "/var/www/upload/server/php/chroot/files"
 # be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
 # will drop privileges to www-data as well.
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

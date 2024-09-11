@@ -21,6 +21,7 @@ ENV PGROUP "www-data"
 # not dropping privileges globally so nginx can bind privileged ports internally.
 # nginx and php-fpm will drop privileges to "www-data" user for worker processes
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

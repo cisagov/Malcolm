@@ -54,6 +54,7 @@ ENV PGROUP "nginx"
 # not dropping privileges globally so nginx and stunnel can bind privileged ports internally.
 # nginx itself will drop privileges to "nginx" user for worker processes
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV TERM xterm
 

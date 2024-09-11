@@ -20,6 +20,7 @@ ENV PUSER "monitor"
 ENV PGROUP "monitor"
 ENV PUSER_PRIV_DROP true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

@@ -25,6 +25,7 @@ ENV PUSER_RLIMIT_UNLOCK true
 #   This is to override that, although I'm not yet sure if there are
 #   other implications. See containers/podman#23347.
 ENV PUSER_CHOWN "/logstash-persistent-queue"
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

@@ -18,6 +18,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "opensearch-dashboards"
 ENV PGROUP "opensearch-dashboards"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 

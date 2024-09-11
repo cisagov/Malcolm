@@ -22,6 +22,7 @@ ENV PGROUP "watcher"
 # on a case-by-case basis so that one script (watch-pcap-uploads-folder.sh)
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

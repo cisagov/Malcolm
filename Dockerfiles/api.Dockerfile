@@ -39,6 +39,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "yeflask"
 ENV PGROUP "yeflask"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

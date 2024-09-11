@@ -31,6 +31,7 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
@@ -300,6 +301,7 @@ ENTRYPOINT ["/usr/bin/tini", \
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
+USER root
 
 # to be populated at build-time:
 ARG BUILD_DATE
