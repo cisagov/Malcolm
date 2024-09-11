@@ -66,7 +66,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:12-slim`)
-* `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:14-alpine`)
+* `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:16-alpine`)
 * `ghcr.io/idaholab/malcolm/redis` (based on `redis:7-alpine`)
 * `ghcr.io/idaholab/malcolm/suricata` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/zeek` (based on `debian:12-slim`)
