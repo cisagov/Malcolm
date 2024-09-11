@@ -75,7 +75,7 @@ Although the configuration script automates many of the following configuration 
         + `MALCOLM_NETWORK_INDEX_TIME_FIELD` - Default time field to use for network traffic logs in Logstash and Dashboards (default is `firstPacket`)
         + `MALCOLM_NETWORK_INDEX_SUFFIX` - Suffix used to create index to which network traffic logs are written
             * supports [Ruby `strftime`](https://docs.ruby-lang.org/en/3.2/strftime_formatting_rdoc.html) strings in `％{}`) (e.g., hourly: `％{％y％m％dh％H}`, twice daily: `％{％P％y％m％d}`, daily (default): `％{％y％m％d}`, weekly: `％{％yw％U}`, monthly: `％{％ym％m}`
-            * supports expanding dot-delimited field names in `{{ }}` (e.g., `{{event.provider}}％{％y％m％d}`)
+            * supports expanding dot-delimited field names in `｛｛ ｝｝` (e.g., `｛｛event.provider｝｝％{％y％m％d}`)
     - The following variables control the OpenSearch indices to which other logs ([third-party logs](third-party-logs.md#ThirdPartyLogs), resource utilization reports from network sensors, etc.) are written.
         + `MALCOLM_OTHER_INDEX_PATTERN` - Index pattern for other logs written via Logstash (default is `malcolm_beats_*`)
         + `MALCOLM_OTHER_INDEX_TIME_FIELD` - Default time field to use for other logs in Logstash and Dashboards (default is `@timestamp`)
