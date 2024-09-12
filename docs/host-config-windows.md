@@ -17,3 +17,9 @@ Installing and configuring Docker to run under the Windows Subsystem for Linux (
 1. Continue with the Malcolm installation and configuration as described in the [**Quick start**](quickstart.md#QuickStart) documentation or illustrated with the **[Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
 Once the configuration is complete, Malcolm will be started and stopped from within your WSL distribution's terminal environment as described in [**Running Malcolm**](running.md).
+
+## Podman
+
+Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. When [Running Malcolm](running.md#Running) with Podman, [`podman compose`](https://docs.podman.io/en/latest/markdown/podman-compose.1.html) is used as a wrapper around an external compose provider (such as [`docker-compose`](https://docs.docker.com/compose/) or [`podman-compose`](https://github.com/containers/podman-compose)) which in turn uses the Podman back end to run and orchestrate containers. The same Malcolm runtime scripts (e.g., `./scripts/start`, `./scripts/stop`, etc.) are used whether using Docker or Podman.
+
+Installation and configuration of Podman is not covered in this documentation. Please see the Podman [documentation](https://podman.io/docs/installation#windows).

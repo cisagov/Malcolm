@@ -54,3 +54,9 @@ Some changes should be made for performance ([this link](http://markshust.com/20
 * **Volume mount performance** - Users can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if volumes are mounted under the home directory only, users could share /Users but remove other paths.
 
 After making these changes, right-click on the Docker 🐋 icon in the system tray and select **Restart**.
+
+## Podman
+
+Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. When [Running Malcolm](running.md#Running) with Podman, [`podman compose`](https://docs.podman.io/en/latest/markdown/podman-compose.1.html) is used as a wrapper around an external compose provider (such as [`docker-compose`](https://docs.docker.com/compose/) or [`podman-compose`](https://github.com/containers/podman-compose)) which in turn uses the Podman back end to run and orchestrate containers. The same Malcolm runtime scripts (e.g., `./scripts/start`, `./scripts/stop`, etc.) are used whether using Docker or Podman.
+
+Installation and configuration of Podman is not covered in this documentation. Please see the Podman [documentation](https://podman.io/docs/installation#macos).
