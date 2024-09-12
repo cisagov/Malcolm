@@ -27,7 +27,7 @@ ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 USER root
 
-ENV SUPERCRONIC_VERSION "0.2.31"
+ENV SUPERCRONIC_VERSION "0.2.32"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
