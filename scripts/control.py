@@ -118,7 +118,7 @@ pyPlatform = platform.system()
 
 args = None
 dockerBin = None
-# dockerComposeBin might be e.g., ('docker', 'compose') or 'docker-compose',
+# dockerComposeBin might be e.g., ('docker', 'compose'), ('podman', 'compose'), or 'docker-compose', etc.
 #   it will be flattened in run_process
 dockerComposeBin = None
 dockerComposeYaml = None
@@ -214,7 +214,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
         dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
-        # docker-compose use local temporary path
+        # compose use local temporary path
         osEnv = os.environ.copy()
         osEnv['TMPDIR'] = MalcolmTmpPath
 
@@ -301,6 +301,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                             'run',
                             # remove the container when complete
                             '--rm',
+                            # if using podman, use --userns keep-id
+                            ['--userns', 'keep-id'] if dockerBin.startswith('podman') else '',
                             # if using stdin, indicate the container is "interactive", else noop
                             '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
                             # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
@@ -2397,18 +2399,19 @@ def main():
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # identify runtime engine
             runtimeBinSrc = ''
-            if not args.runtimeBin:
+            if args.runtimeBin:
+                dockerBin = args.runtimeBin
+                runtimeBinSrc = 'specified'
+            else:
                 processEnvFile = os.path.join(args.configDir, 'process.env')
                 try:
                     if os.path.isfile(processEnvFile):
                         dockerBin = dotenvImported.get_key(processEnvFile, CONTAINER_RUNTIME_KEY)
                         runtimeBinSrc = os.path.basename(processEnvFile)
-                    elif args.debug:
+                    else:
                         runtimeBinSrc = 'process.env not found'
                 except Exception as e:
                     runtimeBinSrc = f'exception ({e})'
-            elif args.debug:
-                runtimeBinSrc = 'specified'
             if not dockerBin:
                 dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
                 runtimeBinSrc = 'default'
