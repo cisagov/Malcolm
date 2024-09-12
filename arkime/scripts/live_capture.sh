@@ -67,8 +67,8 @@ until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: applicatio
     sleep 1
 done
 
-# this will also allow viewer to kick off
-touch /var/run/arkime/initialized
+# this will also allow viewer and wise to kick off
+touch /var/run/arkime/initialized /var/run/arkime/runwise
 
 echo "Arkime is initialized!"
 echo
