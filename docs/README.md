@@ -17,6 +17,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 * [Quick start](quickstart.md#QuickStart)
     - [Getting Malcolm](quickstart.md#GetMalcolm)
     - [User interface](quickstart.md#UserInterfaceURLs)
+    - [Docker vs. Podman](quickstart.md#DockerVPodman)
 * [Components](components.md#Components)
 * [Supported Protocols](protocols.md#Protocols)
 * [Downloading Malcolm](download.md#DownloadMalcolm)
