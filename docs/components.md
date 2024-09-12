@@ -18,6 +18,7 @@ Malcolm leverages the following excellent open source tools, among others.
 * Providing application containerization and orchestration for simple, reproducible deployment of Malcolm across environments and coordination of communication between its various components, either of the following may be used:
     - [Docker](https://www.docker.com/)
     - [Podman](https://podman.io/)
+        - It should be noted that if rootless Podman is used, Malcolm itself cannot perform [traffic capture on local network interfaces](live-analysis.md#LocalPCAP), although it can accept network traffic metadata forwarded from a [a network sensor appliance](live-analysis.md#Hedgehog).
 * [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks
 * [PostgreSQL](https://www.postgresql.org/) - a relational database for persisting NetBox's data
 * [Redis](https://redis.io/) - an in-memory data store for caching NetBox session information
