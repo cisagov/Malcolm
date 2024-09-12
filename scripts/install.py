@@ -2628,9 +2628,12 @@ class Installer(object):
                             'upload': (sftpOpen, 8022, 22),
                         }.items():
                             if service in data['services']:
-                                data['services'][service]['ports'] = [
-                                    f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
-                                ]
+                                if malcolmProfile == PROFILE_HEDGEHOG:
+                                    data['services'][service].pop('ports', None)
+                                else:
+                                    data['services'][service]['ports'] = [
+                                        f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
+                                    ]
                         ###################################
 
                         ###################################
@@ -2648,13 +2651,16 @@ class Installer(object):
                                 ]
 
                             # set bind IPs and ports based on whether it should be externally exposed or not
-                            data['services']['nginx-proxy']['ports'] = [
-                                f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
-                            ]
-                            if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
-                                data['services']['nginx-proxy']['ports'].append(
-                                    f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
-                                )
+                            if malcolmProfile == PROFILE_HEDGEHOG:
+                                data['services']['nginx-proxy'].pop('ports', None)
+                            else:
+                                data['services']['nginx-proxy']['ports'] = [
+                                    f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
+                                ]
+                                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                                    data['services']['nginx-proxy']['ports'].append(
+                                        f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                                    )
 
                             # enable/disable/configure traefik labels if applicable
                             for label in (
