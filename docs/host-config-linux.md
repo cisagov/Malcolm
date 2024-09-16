@@ -58,6 +58,13 @@ vm.dirty_background_ratio=40
 vm.dirty_ratio=80
 ```
 
+* In addition, the [some suggest](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config-tcpretries.html) lowering the TCP retransmission timeout to `5`. However, if your host communicates with other systems over a low-quality network, this low of a setting may be detrimental to those communications. To set this value, add the following to `/etc/sysctl.conf`:
+
+```
+# maximum number of TCP retransmissions
+net.ipv4.tcp_retries2=5
+```
+
 * Depending on your distribution, create **either** the file `/etc/security/limits.d/limits.conf` containing:
 
 ```
@@ -86,7 +93,9 @@ DefaultLimitMEMLOCK=infinity
 blockdev --setra 512 /dev/sda
 ```
 
-* Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub2`
+* Change the I/O scheduler to `deadline` or `noop`. Again, this can be done in a variety of ways. The simplest is to add `elevator=deadline` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub`.
+
+* Enable cgroup accounting for memory and swap space. This can be done by adding `cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem` to the arguments in `GRUB_CMDLINE_LINUX` in `/etc/default/grub`, then running `sudo update-grub`.
 
 * If you are planning on using very large data sets, consider formatting the drive containing the `opensearch` volume as XFS.
 

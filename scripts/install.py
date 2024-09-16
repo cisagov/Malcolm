@@ -3325,6 +3325,13 @@ class LinuxInstaller(Installer):
                 ['# maximum % of dirty system memory before committing everything', 'vm.dirty_ratio=80'],
             ),
             ConfigLines(
+                [],
+                '/etc/sysctl.conf',
+                'net.ipv4.tcp_retries2=',
+                'net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions',
+                ['# maximum number of TCP retransmissions', 'net.ipv4.tcp_retries2=5'],
+            ),
+            ConfigLines(
                 ['centos', 'core'],
                 '/etc/systemd/system.conf.d/limits.conf',
                 '',
@@ -3391,6 +3398,36 @@ class LinuxInstaller(Installer):
                             f"mkdir -p {os.path.dirname(config.filename)} && echo -n -e '{echoNewLineJoin}{echoNewLineJoin.join(config.lines)}{echoNewLineJoin}' >> '{config.filename}'",
                         ],
                         privileged=True,
+                    )
+
+        # tweak other kernel parameters
+
+        # cgroup accounting in GRUB_CMDLINE_LINUX in /etc/default/grub
+        if (
+            (grubFileName := '/etc/default/grub')
+            and os.path.isfile(grubFileName)
+            and (not [line.rstrip('\n') for line in open(grubFileName) if 'cgroup' in line.lower()])
+            and InstallerYesOrNo(
+                f'\ncgroup parameters appear to be missing from {grubFileName}, set them?',
+                default=True,
+            )
+        ):
+            err, out = self.run_process(
+                [
+                    'bash',
+                    '-c',
+                    f'sed -i \'s/^GRUB_CMDLINE_LINUX="/&cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem /\' {grubFileName}',
+                ],
+                privileged=True,
+            )
+            if err == 0:
+                if which('update-grub', debug=self.debug):
+                    err, out = self.run_process(['update-grub'], privileged=True)
+                elif which('update-grub2', debug=self.debug):
+                    err, out = self.run_process(['update-grub2'], privileged=True)
+                else:
+                    InstallerDisplayMessage(
+                        f"{grubFileName} has been modified, consult your distribution's documentation generate new grub config file"
                     )
 
 

@@ -23,7 +23,13 @@ The `build.sh` script can build Malcolm's images from scratch. See [Building fro
 The scripts to control Malcolm require Python 3. The [`install.py`](malcolm-config.md#ConfigAndTuning) script requires the [dotenv](https://github.com/theskumar/python-dotenv), [requests](https://docs.python-requests.org/en/latest/) and [ruamel.yaml](https://yaml.readthedocs.io/en/latest/) modules for Python 3, and will make use of the [pythondialog](https://pythondialog.sourceforge.io/) module for user interaction (on Linux) if it is available.
 
 You must run [`auth_setup`](authsetup.md#AuthSetup) prior to pulling Malcolm's images. You should also ensure your system configuration and Malcolm settings are tuned by running `./scripts/install.py` and `./scripts/configure` (see [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)).
-    
+
+Users may wish to read the documentation on platform-specific host configuration:
+
+* [Linux host system configuration](host-config-linux.md#HostSystemConfigLinux)
+* [macOS host system configuration](host-config-macos.md#HostSystemConfigMac)
+* [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows)
+
 ### Pull Malcolm's Container images
 
 Malcolm's images are periodically built and hosted on [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm). If you already have [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/), these prebuilt images can be pulled by navigating into the Malcolm directory (containing the `docker-compose.yml` file) and running `docker compose --profile malcolm pull` like this:
