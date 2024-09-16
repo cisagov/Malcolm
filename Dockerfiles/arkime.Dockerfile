@@ -1,8 +1,6 @@
-ARG TARGETPLATFORM=linux/amd64
-
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

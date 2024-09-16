@@ -75,6 +75,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-ge-srtp"
   "https://github.com/cisagov/icsnpp-genisys"
+  "https://github.com/cisagov/icsnpp-hart-ip"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-profinet-io-cm"

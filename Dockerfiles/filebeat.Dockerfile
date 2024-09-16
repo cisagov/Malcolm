@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} docker.elastic.co/beats/filebeat-oss:8.15.1
+FROM docker.elastic.co/beats/filebeat-oss:8.15.1
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
