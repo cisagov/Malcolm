@@ -2541,7 +2541,7 @@ class Installer(object):
                             deep_set(
                                 data,
                                 ['services', service, 'logging', 'driver'],
-                                'journald' if args.runtimeBin.startswith('podman') else 'local',
+                                'json-file' if args.runtimeBin.startswith('podman') else 'local',
                             )
 
                             # whether or not to restart services automatically (on boot, etc.)
