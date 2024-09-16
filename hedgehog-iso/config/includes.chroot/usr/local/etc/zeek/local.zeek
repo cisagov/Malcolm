@@ -150,7 +150,8 @@ event zeek_init() &priority=-5 {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_GE_SRTP_TCP);
   }
   if (disable_ics_all || disable_ics_hart_ip) {
-    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_HART_IP_UDP);
   }
   if (disable_ics_all || disable_ics_opcua_binary) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_ICSNPP_OPCUA_BINARY);
