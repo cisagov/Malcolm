@@ -115,7 +115,7 @@ function PullAndTagGithubWorkflowImages() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
-  echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as ${VERSION}${IMAGE_ARCH_SUFFIX}..."
+  echo "Pulling images with $MALCOLM_CONTAINER_RUNTIME from ghcr.io/$OWNER ($BRANCH) and tagging as ${VERSION}${IMAGE_ARCH_SUFFIX}..."
   for IMG in $($GREP image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
@@ -126,7 +126,7 @@ function PullAndTagGithubWorkflowISOImages() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
-  echo "Pulling ISO wrapper images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
+  echo "Pulling ISO wrapper images with $MALCOLM_CONTAINER_RUNTIME from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
   for IMG in malcolm/{malcolm,hedgehog}; do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
