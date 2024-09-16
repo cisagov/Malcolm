@@ -223,9 +223,11 @@ def main():
             if ('node' in stat) and (stat['node'] != 'UNASSIGNED'):
                 esDiskUsageStats.append(
                     {
-                        key: humanfriendly.parse_size(value)
-                        if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
-                        else value
+                        key: (
+                            humanfriendly.parse_size(value)
+                            if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
+                            else value
+                        )
                         for (key, value) in stat.items()
                     }
                 )

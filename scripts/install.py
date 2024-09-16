@@ -1369,10 +1369,7 @@ class Installer(object):
                     diskUsageManagementPrompt = InstallerYesOrNo(
                         (
                             'Should Malcolm delete the oldest database indices and capture artifacts based on available storage?'
-                            if (
-                                (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal)
-                                and (malcolmProfile == PROFILE_MALCOLM)
-                            )
+                            if (malcolmProfile == PROFILE_MALCOLM)
                             else 'Should Malcolm delete the oldest capture artifacts based on available storage?'
                         ),
                         default=args.arkimeManagePCAP
@@ -1384,14 +1381,10 @@ class Installer(object):
                     if diskUsageManagementPrompt:
 
                         # delete oldest indexes based on index pattern size
-                        if (
-                            (malcolmProfile == PROFILE_MALCOLM)
-                            and (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal)
-                            and InstallerYesOrNo(
-                                'Delete the oldest indices when the database exceeds a certain size?',
-                                default=bool(args.indexPruneSizeLimit),
-                                extraLabel=BACK_LABEL,
-                            )
+                        if (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
+                            'Delete the oldest indices when the database exceeds a certain size?',
+                            default=bool(args.indexPruneSizeLimit),
+                            extraLabel=BACK_LABEL,
                         ):
                             indexPruneSizeLimit = ''
                             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid index threshold')
