@@ -38,7 +38,7 @@
 "gquic": ["network"]
 "hart_ip_common_commands": ["ot", "network"]
 "hart_ip_direct_pdu_command": ["ot", "network"]
-"hart_ip_general": ["ot", "network"]
+"hart_ip": ["ot", "network"]
 "hart_ip_session_record": ["ot", "network"]
 "hart_ip_universal_commands": ["ot", "network"]
 "http": ["web", "network"]
