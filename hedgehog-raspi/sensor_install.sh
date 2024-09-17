@@ -377,23 +377,13 @@ install_files() {
     echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\"" >> "$sensor_ver_file"
     echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\"" >> "$sensor_ver_file"
 
-    # Setup MaxMind Geo IP info
+    # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
     mkdir -p /opt/arkime/etc
     pushd /opt/arkime/etc >/dev/null 2>&1
-    MAXMIND_GEOIP_DB_LICENSE_KEY=""
-
-    if [[ -f "$SHARED_DIR/maxmind_license.txt" ]]; then
-    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SHARED_DIR/maxmind_license.txt" | head -n 1)"
-        if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
-            for DB in ASN Country City; do
-                curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
-                if [[ -f "GeoLite2-$DB.mmdb.tar.gz" ]]; then
-                    tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 --no-same-owner
-                    rm -f "GeoLite2-$DB.mmdb.tar.gz"
-                fi
-            done
-        fi
-    fi
+    bash "/usr/local/bin/maxmind-mmdb-download.sh" \
+        -f "$SHARED_DIR/maxmind_license.txt" \
+        -r "$SHARED_DIR/maxmind_url.txt" \
+        -o "$(pwd)"
     curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
     popd >/dev/null 2>&1

@@ -28,9 +28,24 @@ Expand **✴ Secrets and variables** in the left menu panel under **Security**, 
 
 Malcolm uses MaxMind's free GeoLite2 databases for GeoIP lookups. As of December 30, 2019, these databases are [no longer available](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/) for download via a public URL. Instead, they must be downloaded using a MaxMind license key (available without charge [from MaxMind](https://www.maxmind.com/en/geolite2/signup)). This license key should be specified here as a repository secret so that the workflows may download the GeoLite2 databases to embed into the container images that use them. Keep in mind that MaxMind has a daily rate for the number of downloads allowed per license key.
 
-Click **New repository secret** and create a secret with the name `MAXMIND_GEOIP_DB_LICENSE_KEY` and the **Secret** value containing the user's free license key obtained from MaxMind. Then click **Add secret**. Click **New repository secret** and create a secret with the name `MAXMIND_GEOIP_DB_LICENSE_KEY` and the **Secret** value containing the user's free license key obtained from MaxMind. Then click **Add secret**.
+Click **New repository secret** and create a secret with the name `MAXMIND_GEOIP_DB_LICENSE_KEY` and the **Secret** value containing the user's free license key obtained from MaxMind. Then click **Add secret**. Click **New repository secret** and create a secret with the name `MAXMIND_GEOIP_DB_LICENSE_KEY` and the **Secret** value containing the user's free license key obtained from MaxMind. Then click **Add secret**. 
 
 ![GitHub Actions secrets and variables](./images/screenshots/github-actions-secret.png)
+
+As an alternative to (or fallback for) `MAXMIND_GEOIP_DB_LICENSE_KEY`, a URL prefix may be specified in `MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL` (e.g., `https://example.org/foo/bar`) which will be used as a fallback. This URL should serve up `.tar.gz` files in the same format as those provided by the official source:
+
+```bash
+$ ls
+GeoLite2-ASN.mmdb.tar.gz  GeoLite2-City.mmdb.tar.gz  GeoLite2-Country.mmdb.tar.gz
+
+$ for FILE in *.tar.gz; do tar -tvf "$FILE"; done
+drwxr-xr-x user/user 0 2024-09-17 14:34 GeoLite2-ASN/
+-rw-r--r-- user/user 8655479 2024-09-17 13:48 GeoLite2-ASN/GeoLite2-ASN.mmdb
+drwxr-xr-x user/user 0 2024-09-17 14:34 GeoLite2-City/
+-rw-r--r-- user/user 61133703 2024-09-17 13:48 GeoLite2-City/GeoLite2-City.mmdb
+drwxr-xr-x user/user 0 2024-09-17 14:34 GeoLite2-Country/
+-rw-r--r-- user/user 7529760 2024-09-17 13:48 GeoLite2-Country/GeoLite2-Country.mmdb
+```
 
 ### Enabling workflows
 

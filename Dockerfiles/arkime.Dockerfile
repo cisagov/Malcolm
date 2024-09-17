@@ -64,6 +64,7 @@ ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
 ARG PCAP_NODE_NAME=malcolm
 ARG MAXMIND_GEOIP_DB_LICENSE_KEY=""
+ARG MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL=""
 
 # Declare envs vars for each arg
 ENV MALCOLM_USERNAME $MALCOLM_USERNAME
@@ -161,6 +162,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
 COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/maxmind-mmdb-download.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/opensearch_status.sh /opt
 COPY --chmod=755 shared/bin/pcap_processor.py /opt/
@@ -179,15 +181,9 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 #   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
 #   see https://github.com/arkime/arkime/issues/1350
 #   see https://github.com/arkime/arkime/issues/1352
-RUN [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ] && for DB in ASN Country City; do \
-      cd /tmp && \
-      curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
-      tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      mv -v "GeoLite2-$DB.mmdb" $ARKIME_DIR/etc/; \
-      rm -f "GeoLite2-$DB*"; \
-    done; \
-  curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
-  curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
+RUN ( /usr/local/bin/maxmind-mmdb-download.sh -o $ARKIME_DIR/etc || true ) && \
+    curl -s -S -L -o $ARKIME_DIR/etc/ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv" && \
+    curl -s -S -L -o $ARKIME_DIR/etc/oui.txt "https://www.wireshark.org/download/automated/data/manuf"
 
 RUN groupadd --gid $DEFAULT_GID $PGROUP && \
     useradd -M --uid $DEFAULT_UID --gid $DEFAULT_GID --home $ARKIME_DIR $PUSER && \
