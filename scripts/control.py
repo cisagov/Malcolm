@@ -216,7 +216,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
 
         # compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         # open up the docker-compose file and "grep" for the line where the keystore file
         # is bind-mounted into the service container (once and only once). the bind
@@ -422,7 +423,8 @@ def status():
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps']
         if args.service is not None:
@@ -492,7 +494,8 @@ def netboxBackup(backupFileName=None):
     if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         dockerCmd = [
             dockerComposeBin,
@@ -582,7 +585,8 @@ def netboxRestore(backupFileName=None):
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
             # docker-compose use local temporary path
             osEnv = os.environ.copy()
-            osEnv['TMPDIR'] = MalcolmTmpPath
+            if not args.noTmpDirOverride:
+                osEnv['TMPDIR'] = MalcolmTmpPath
 
             dockerCmdBase = [
                 dockerComposeBin,
@@ -732,7 +736,8 @@ def logs():
 
     osEnv = os.environ.copy()
     # use local temporary path
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if not args.noTmpDirOverride:
+        osEnv['TMPDIR'] = MalcolmTmpPath
 
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
@@ -844,7 +849,8 @@ def stop(wipe=False):
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         if args.service is not None:
             # stopping a single (or multiple services)
@@ -1106,7 +1112,8 @@ def start():
         osEnv = os.environ.copy()
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
         # docker-compose use local temporary path
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         # start docker
         cmd = [
@@ -2109,6 +2116,16 @@ def main():
         default=os.getenv('MALCOLM_CONTAINER_RUNTIME', ''),
         help='Container runtime binary (e.g., docker, podman)',
     )
+    parser.add_argument(
+        '--no-tmpdir-override',
+        required=False,
+        dest='noTmpDirOverride',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('MALCOLM_NO_TMPDIR_OVERRIDE', default='False')),
+        help="Don't override TMPDIR for compose commands",
+    )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -2394,7 +2411,8 @@ def main():
 
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # identify runtime engine
