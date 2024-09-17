@@ -48,6 +48,7 @@ WORKDIR="$(mktemp -d -t dlmmdb-XXXXXX)"
 
 # cleanup - on exit ensure the leftover files cleaned up
 function cleanup {
+  popd >/dev/null 2>&1
   if ! rm -rf "${WORKDIR}"; then
     echo "Failed to remove temporary directory \"${WORKDIR}\"" >&2
     exit 1
@@ -55,6 +56,7 @@ function cleanup {
 }
 
 if [[ -d "${WORKDIR}" ]]; then
+  pushd "${WORKDIR}" >/dev/null 2>&1
   trap "cleanup" EXIT
 
   if [[ -n "${MAXMIND_GEOIP_DB_LICENSE_KEY}" ]]; then
