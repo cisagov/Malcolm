@@ -4149,7 +4149,7 @@ def main():
         metavar='<string>',
         type=str2percent,
         default=0,
-        help=f'Delete zeek-extracted files when the file system exceeds this percentage full (e.g., 90%, etc.)',
+        help=f'Delete zeek-extracted files when the file system exceeds this percentage full (e.g., 90٪, etc.)',
     )
     storageArgGroup.add_argument(
         '--delete-index-threshold',
