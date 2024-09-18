@@ -32,6 +32,7 @@ from malcolm_common import (
     AskForString,
     BoundPath,
     ChooseOne,
+    CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
@@ -117,7 +118,7 @@ pyPlatform = platform.system()
 
 args = None
 dockerBin = None
-# dockerComposeBin might be e.g., ('docker', 'compose') or 'docker-compose',
+# dockerComposeBin might be e.g., ('docker', 'compose'), ('podman', 'compose'), or 'docker-compose', etc.
 #   it will be flattened in run_process
 dockerComposeBin = None
 dockerComposeYaml = None
@@ -213,9 +214,10 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
         dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
-        # docker-compose use local temporary path
+        # compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         # open up the docker-compose file and "grep" for the line where the keystore file
         # is bind-mounted into the service container (once and only once). the bind
@@ -300,6 +302,8 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                             'run',
                             # remove the container when complete
                             '--rm',
+                            # if using podman, use --userns keep-id
+                            ['--userns', 'keep-id'] if dockerBin.startswith('podman') else '',
                             # if using stdin, indicate the container is "interactive", else noop
                             '-i' if ('stdin' in run_process_kwargs and run_process_kwargs['stdin']) else '',
                             # if     dropPriv, dockerUidGuidSetup will take care of dropping privileges for the correct UID/GID
@@ -419,7 +423,8 @@ def status():
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps']
         if args.service is not None:
@@ -489,7 +494,8 @@ def netboxBackup(backupFileName=None):
     if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         dockerCmd = [
             dockerComposeBin,
@@ -579,7 +585,8 @@ def netboxRestore(backupFileName=None):
         if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
             # docker-compose use local temporary path
             osEnv = os.environ.copy()
-            osEnv['TMPDIR'] = MalcolmTmpPath
+            if not args.noTmpDirOverride:
+                osEnv['TMPDIR'] = MalcolmTmpPath
 
             dockerCmdBase = [
                 dockerComposeBin,
@@ -729,7 +736,8 @@ def logs():
 
     osEnv = os.environ.copy()
     # use local temporary path
-    osEnv['TMPDIR'] = MalcolmTmpPath
+    if not args.noTmpDirOverride:
+        osEnv['TMPDIR'] = MalcolmTmpPath
 
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
@@ -841,7 +849,8 @@ def stop(wipe=False):
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         if args.service is not None:
             # stopping a single (or multiple services)
@@ -1103,10 +1112,19 @@ def start():
         osEnv = os.environ.copy()
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
         # docker-compose use local temporary path
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         # start docker
-        cmd = [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'up', '--detach']
+        cmd = [
+            dockerComposeBin,
+            '--profile',
+            args.composeProfile,
+            '-f',
+            args.composeFile,
+            'up',
+            '--detach',
+        ]
         if args.service is not None:
             cmd.append(['--no-deps', args.service])
 
@@ -2088,6 +2106,26 @@ def main():
         default=None,
         help='docker-compose profile to enable',
     )
+    parser.add_argument(
+        '-r',
+        '--runtime',
+        required=False,
+        dest='runtimeBin',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_CONTAINER_RUNTIME', ''),
+        help='Container runtime binary (e.g., docker, podman)',
+    )
+    parser.add_argument(
+        '--no-tmpdir-override',
+        required=False,
+        dest='noTmpDirOverride',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=str2bool(os.getenv('MALCOLM_NO_TMPDIR_OVERRIDE', default='False')),
+        help="Don't override TMPDIR for compose commands",
+    )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -2373,11 +2411,32 @@ def main():
 
         # docker-compose use local temporary path
         osEnv = os.environ.copy()
-        osEnv['TMPDIR'] = MalcolmTmpPath
+        if not args.noTmpDirOverride:
+            osEnv['TMPDIR'] = MalcolmTmpPath
 
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+            # identify runtime engine
+            runtimeBinSrc = ''
+            if args.runtimeBin:
+                dockerBin = args.runtimeBin
+                runtimeBinSrc = 'specified'
+            else:
+                processEnvFile = os.path.join(args.configDir, 'process.env')
+                try:
+                    if os.path.isfile(processEnvFile):
+                        dockerBin = dotenvImported.get_key(processEnvFile, CONTAINER_RUNTIME_KEY)
+                        runtimeBinSrc = os.path.basename(processEnvFile)
+                    else:
+                        runtimeBinSrc = 'process.env not found'
+                except Exception as e:
+                    runtimeBinSrc = f'exception ({e})'
+            if not dockerBin:
+                dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
+                runtimeBinSrc = 'default'
+            if args.debug:
+                eprint(f"Container runtime ({runtimeBinSrc}): {dockerBin}")
+
             # make sure docker and docker compose are available
-            dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
             err, out = run_process([dockerBin, 'info'], debug=args.debug)
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')

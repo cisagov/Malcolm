@@ -15,13 +15,14 @@ if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP") > /dev/null; then
   exit 1
 fi
 
+MALCOLM_CONTAINER_RUNTIME="${MALCOLM_CONTAINER_RUNTIME:-docker}"
 DOCKER_COMPOSE_BIN=()
-if docker compose version >/dev/null 2>&1; then
-  DOCKER_COMPOSE_BIN=(docker compose)
-  DOCKER_BIN=docker
-elif docker-compose version >/dev/null 2>&1; then
-  DOCKER_COMPOSE_BIN=(docker-compose)
-  DOCKER_BIN=docker
+if $MALCOLM_CONTAINER_RUNTIME compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=($MALCOLM_CONTAINER_RUNTIME compose)
+  DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
+elif ${MALCOLM_CONTAINER_RUNTIME}-compose version >/dev/null 2>&1; then
+  DOCKER_COMPOSE_BIN=(${$MALCOLM_CONTAINER_RUNTIME}-compose)
+  DOCKER_BIN=$MALCOLM_CONTAINER_RUNTIME
 elif $GREP -q Microsoft /proc/version; then
   if docker.exe compose version >/dev/null 2>&1; then
     DOCKER_COMPOSE_BIN=(docker.exe compose)
@@ -121,9 +122,9 @@ fi
 # build the image(s)
 DOCKER_COMPOSE_COMMAND="${DOCKER_COMPOSE_BIN[@]} --profile malcolm -f "$CONFIG_FILE""
 if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --force-rm --no-cache --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 else
-  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
+  $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
 # we're going to do some validation that some things got pulled/built correctly

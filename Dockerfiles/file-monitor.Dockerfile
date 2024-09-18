@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -19,6 +17,8 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "monitor"
 ENV PGROUP "monitor"
 ENV PUSER_PRIV_DROP true
+# see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -88,7 +88,7 @@ ENV EXTRACTED_FILE_ENABLE_CAPA $EXTRACTED_FILE_ENABLE_CAPA
 ENV EXTRACTED_FILE_CAPA_VERBOSE $EXTRACTED_FILE_CAPA_VERBOSE
 ENV SRC_BASE_DIR "/usr/local/src"
 ENV CLAMAV_RULES_DIR "/var/lib/clamav"
-ENV YARA_VERSION "4.5.1"
+ENV YARA_VERSION "4.5.2"
 ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz"
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
@@ -100,7 +100,7 @@ ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
 ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENV SUPERCRONIC_VERSION "0.2.30"
+ENV SUPERCRONIC_VERSION "0.2.32"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -159,7 +159,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python-magic \
       stream-zip \
       supervisor \
-      watchdog==4.0.2 \
+      watchdog==5.0.2 \
       yara-python && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
@@ -237,11 +237,18 @@ COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
 COPY --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
-COPY --chmod=755 file-monitor/*update.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 WORKDIR /zeek/extract_files
 
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "$CLAMAV_RULES_DIR;$YARA_RULES_DIR;$YARA_RULES_SRC_DIR"
+
+# see PUSER_CHOWN comment above
 VOLUME ["$CLAMAV_RULES_DIR"]
 VOLUME ["$YARA_RULES_DIR"]
 VOLUME ["$YARA_RULES_SRC_DIR"]

@@ -17,3 +17,7 @@ Installing and configuring Docker to run under the Windows Subsystem for Linux (
 1. Continue with the Malcolm installation and configuration as described in the [**Quick start**](quickstart.md#QuickStart) documentation or illustrated with the **[Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
 Once the configuration is complete, Malcolm will be started and stopped from within your WSL distribution's terminal environment as described in [**Running Malcolm**](running.md).
+
+## Podman
+
+See [Docker vs. Podman](quickstart.md#DockerVPodman).

@@ -10,7 +10,7 @@
 
 ## <a name="Starting"></a>Starting Malcolm
 
-[Docker compose](https://docs.docker.com/compose/) is used to coordinate running the Docker containers. To start Malcolm, navigate to the directory containing `docker-compose.yml` and run:
+[Docker compose](https://docs.docker.com/compose/) is used to coordinate running the containers. To start Malcolm, navigate to the directory containing `docker-compose.yml` and run:
 ```
 $ ./scripts/start
 ```
@@ -22,9 +22,9 @@ You can also use `docker stats` to monitor the resource utilization of running c
 
 ## <a name="StopAndRestart"></a>Stopping and restarting Malcolm
 
-You can run `./scripts/stop` to stop the Docker containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in Docker volumes, performing these operations will not result in loss of data.
+You can run `./scripts/stop` to stop the containers and remove their virtual network. Alternatively, `./scripts/restart` will restart an instance of Malcolm. Because the data on disk is stored on the host in bind-mounted volumes, performing these operations will not result in loss of data.
 
-Malcolm can be configured to automatically restart when the Docker system daemon restarts (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or Docker daemon restart?`."
+Malcolm can be configured to automatically restart when the Docker system daemon restarts (for example, on system reboot). This behavior depends on the [value](https://docs.docker.com/config/containers/start-containers-automatically/) of the [`restart:`](https://docs.docker.com/compose/compose-file/#restart) setting for each service in the `docker-compose.yml` file. This value can be set by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) and answering "yes" to "`Restart Malcolm upon system or container daemon restart?`."
 
 ## <a name="Wipe"></a>Clearing Malcolm's data
 

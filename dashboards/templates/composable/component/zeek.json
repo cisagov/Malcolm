@@ -1,5 +1,12 @@
 {
   "template": {
+    "settings" : {
+      "index" : {
+        "mapping.total_fields.limit" : "5000",
+        "mapping.nested_fields.limit" : "250",
+        "max_docvalue_fields_search" : "200"
+      }
+    },
     "mappings": {
       "properties": {
         "zeek.analyzer.cause": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },

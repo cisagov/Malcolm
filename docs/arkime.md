@@ -13,8 +13,6 @@
     - [Statistics](#ArkimeStats)
     - [Settings](#ArkimeSettings)
 
-The Arkime interface will be accessible over HTTPS on port 443 at the docker host's IP address (e.g., **https://localhost** if connecting locally).
-
 ## <a name="ArkimeZeek"></a>Zeek log integration
 
 A stock installation of Arkime extracts all its network connection ("session") metadata ("SPI" or "Session Profile Information") from full packet capture artifacts (PCAP files). Zeek generates similar session metadata, linking network events to sessions via a connection UID. Malcolm aims to facilitate analysis of Zeek logs by mapping values from Zeek logs to the Arkime session database schema for equivalent fields, and by creating new "native" Arkime database fields for all other Zeek log values for which there is not currently an equivalent in Arkime:
@@ -93,7 +91,7 @@ Arkime's **SPI** (**S**ession **P**rofile **I**nformation) **View** provides a q
 
 Click the the plus **➕** icon to the right of a category to expand it. The values for specific fields are displayed by clicking the field description in the field list underneath the category name. The list of field names can be filtered by typing part of the field name in the *Search for fields to display in this category* text input. The **Load All** and **Unload All** buttons can be used to toggle display of all fields belonging to that category. Once displayed, a field's name or one of its values may be clicked to provide further actions for filtering or displaying that field or its values. Of particular interest may be the **Open [fieldname] SPI Graph** option when clicking on a field's name. This will open a new tab with the SPI Graph ([see below](#ArkimeSPIGraph)) populated with the field's top values.
 
-Note that because the SPIView page can run many queries, SPIView limits the search domain to 7 days (in other words, seven indices, as each index represents 1 day's worth of data). When using SPIView, users will have best results by limiting the search time frame to less than or equal to 7 days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/arkime/etc/config.ini) and rebuilding the `ghcr.io/idaholab/malcolm/arkime` docker container.
+Note that because the SPIView page can run many queries, SPIView limits the search domain to 7 days (in other words, seven indices, as each index represents 1 day's worth of data). When using SPIView, users will have best results by limiting the search time frame to less than or equal to 7 days. This limit can be adjusted by editing the `spiDataMaxIndices` setting in [config.ini]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/arkime/etc/config.ini) and rebuilding the `ghcr.io/idaholab/malcolm/arkime` container.
 
 See also Arkime's usage documentation for more information on [SPIView](https://localhost/help#spiview).
 

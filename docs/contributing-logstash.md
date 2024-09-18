@@ -50,4 +50,4 @@ Malcolm's Logstash instance will do a lot of enrichments automatically: see the 
 
 ## <a name="LogstashPlugins"></a>Logstash plugins
 
-The [logstash.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/logstash.Dockerfile) installs the Logstash plugins used by Malcolm (search for `logstash-plugin install` in that file). Additional Logstash plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `logstash` Docker image.
+The [logstash.Dockerfile]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles/logstash.Dockerfile) installs the Logstash plugins used by Malcolm (search for `logstash-plugin install` in that file). Additional Logstash plugins could be installed by modifying this Dockerfile and [rebuilding](development.md#Build) the `logstash` image.

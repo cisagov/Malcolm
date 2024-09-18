@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -26,6 +24,7 @@ ENV PGROUP "pcap"
 # a final check in supervisor.sh before startup
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

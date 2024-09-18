@@ -67,7 +67,8 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
         --extracted-file-yara \
         --netbox \
         --netbox-enrich \
-        --netbox-site-name malcolm
+        --netbox-site-name malcolm \
+        --runtime docker
 
     # username: analyst
     # password: M@lc0lm

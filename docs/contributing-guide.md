@@ -6,9 +6,9 @@ It is recommended before reviewing this guide to read the documentation on [cust
 
 <a name="ContribTableOfContents"></a>
 * [Local modifications](contributing-local-modifications.md#LocalMods)
-    + [Docker bind mounts](contributing-local-modifications.md#Bind)
-    + [Building Malcolm's Docker images](contributing-local-modifications.md#ContribBuild)
-* [Adding a new service (Docker image)](contributing-new-image.md#NewImage)
+    + [Volume bind mounts](contributing-local-modifications.md#Bind)
+    + [Building Malcolm's images](contributing-local-modifications.md#ContribBuild)
+* [Adding a new service (image)](contributing-new-image.md#NewImage)
     + [Networking and firewall](contributing-new-image.md#NewImageFirewall)
 * [Adding new log fields](contributing-new-log-fields.md#NewFields)
 - [Zeek](contributing-zeek.md#Zeek)

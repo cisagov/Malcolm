@@ -11,6 +11,8 @@
         "destination.geo.location": { "type": "geo_point" },
         "destination.geo.longitude": { "type": "float" },
         "destination.mac-cnt": { "type": "long" },
+        "huntId": { "type": "keyword" },
+        "huntName": { "type": "keyword" },
         "network.vlan.id-cnt": { "type": "long" },
         "source.as.full": { "type": "keyword" },
         "source.geo.country_code2": { "type": "keyword" },

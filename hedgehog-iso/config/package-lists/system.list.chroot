@@ -110,6 +110,7 @@ lm-sensors
 localepurge
 lshw
 lsof
+lua5.4
 lvm2
 lzma
 mcrypt

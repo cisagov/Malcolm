@@ -16,6 +16,7 @@ if ! (type "$REALPATH" && type "$DIRNAME" && type "$GREP" && type git) > /dev/nu
 fi
 SCRIPT_PATH="$($DIRNAME $($REALPATH -e "${BASH_SOURCE[0]}"))"
 IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
+MALCOLM_CONTAINER_RUNTIME="${MALCOLM_CONTAINER_RUNTIME:-docker}"
 
 set -uo pipefail
 shopt -s nocasematch
@@ -106,15 +107,15 @@ function _PullAndTagGithubWorkflowBuild() {
   OWNER="$(_gitowner)"
   IMAGE=$1
 
-  docker pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" && \
-    docker tag ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" ghcr.io/idaholab/"$IMAGE":"${VERSION}${IMAGE_ARCH_SUFFIX}"
+  $MALCOLM_CONTAINER_RUNTIME pull $QUIET_PULL_FLAG ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" && \
+    $MALCOLM_CONTAINER_RUNTIME tag ghcr.io/"$OWNER"/"$IMAGE":"${BRANCH}${IMAGE_ARCH_SUFFIX}" ghcr.io/idaholab/"$IMAGE":"${VERSION}${IMAGE_ARCH_SUFFIX}"
 }
 
 function PullAndTagGithubWorkflowImages() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
-  echo "Pulling images from ghcr.io/$OWNER ($BRANCH) and tagging as ${VERSION}${IMAGE_ARCH_SUFFIX}..."
+  echo "Pulling images with $MALCOLM_CONTAINER_RUNTIME from ghcr.io/$OWNER ($BRANCH) and tagging as ${VERSION}${IMAGE_ARCH_SUFFIX}..."
   for IMG in $($GREP image: "$(_gittoplevel)"/docker-compose.yml | _cols 2 | cut -d: -f1 | sort -u | sed "s/.*\/\(malcolm\)/\1/"); do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
@@ -125,7 +126,7 @@ function PullAndTagGithubWorkflowISOImages() {
   BRANCH="$(_gitbranch)"
   VERSION="$(_malcolmversion)"
   OWNER="$(_gitowner)"
-  echo "Pulling ISO wrapper images from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
+  echo "Pulling ISO wrapper images with $MALCOLM_CONTAINER_RUNTIME from ghcr.io/$OWNER ($BRANCH) and tagging as $VERSION ..."
   for IMG in malcolm/{malcolm,hedgehog}; do
     _PullAndTagGithubWorkflowBuild "$IMG"
   done
@@ -145,12 +146,12 @@ function _ExtractISOFromGithubWorkflowBuild() {
   DEST_DIR="${2:-"$(pwd)"}"
   ISO_NAME="${3:-"$TOOL-$VERSION"}"
 
-  docker run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
+  $MALCOLM_CONTAINER_RUNTIME run --rm -d --name "$TOOL"-iso-srv -p 127.0.0.1:8000:8000/tcp -e QEMU_START=false -e NOVNC_START=false \
       ghcr.io/"$OWNER"/malcolm/"$TOOL":"$BRANCH" && \
     sleep 10 && \
     curl -sSL -o "$DEST_DIR"/"$ISO_NAME".iso http://localhost:8000/live.iso && \
     curl -sSL -o "$DEST_DIR"/"$ISO_NAME"-build.log http://localhost:8000/"$TOOL"-"$VERSION"-build.log
-  docker stop "$TOOL"-iso-srv
+  $MALCOLM_CONTAINER_RUNTIME stop "$TOOL"-iso-srv
 }
 
 function ExtractISOsFromGithubWorkflowBuilds() {
@@ -173,7 +174,7 @@ function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
       if [[ -e filesystem.squashfs ]]; then
         unsquashfs filesystem.squashfs -f malcolm_images.tar.xz
         if [[ -e squashfs-root/malcolm_images.tar.xz ]]; then
-          docker load -i squashfs-root/malcolm_images.tar.xz
+          $MALCOLM_CONTAINER_RUNTIME load -i squashfs-root/malcolm_images.tar.xz
         else
           echo "Failed to images tarball" 2>&1
         fi

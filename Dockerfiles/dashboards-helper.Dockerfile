@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 # Copyright (c) 2020 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -18,7 +16,14 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "helper"
 ENV PGROUP "helper"
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/data/init"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 
@@ -37,7 +42,7 @@ ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.2.30"
+ENV SUPERCRONIC_VERSION "0.2.32"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -114,6 +119,7 @@ ENTRYPOINT ["/usr/bin/tini", \
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
+# see PUSER_CHOWN comment above
 VOLUME ["/data/init"]
 
 # to be populated at build-time:

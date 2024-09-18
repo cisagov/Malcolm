@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -32,8 +30,10 @@ ENV PGROUP "suricata"
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
 ENV PUSER_RLIMIT_UNLOCK true
+# see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
+USER root
 
-ENV SUPERCRONIC_VERSION "0.2.30"
+ENV SUPERCRONIC_VERSION "0.2.32"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -108,7 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get install -q -y --no-install-recommends -t bookworm-backports \
         suricata=${SURICATA_VERSION_PATTERN} \
         suricata-update && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==4.0.2 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==5.0.2 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
@@ -118,8 +118,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
@@ -179,9 +179,18 @@ ENV PCAP_IFACE_TWEAK $PCAP_IFACE_TWEAK
 ENV PCAP_FILTER $PCAP_FILTER
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
+# This is in part to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+# However, note that in this case (unlike most of the other Dockerfiles
+#   where I've put this workaround) in this case the PUSER_CHOWN was
+#   already being set like this, so even if I resolve that issue
+#   I probably don't want to remove this.
+ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_CUSTOM_RULES_DIR;$SURICATA_CUSTOM_CONFIG_DIR;$SURICATA_LOG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_RUN_DIR"
 
-ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_LOG_DIR;$SURICATA_RUN_DIR"
-
+# see PUSER_CHOWN comment above
 VOLUME ["$SURICATA_CONFIG_DIR"]
 VOLUME ["$SURICATA_CUSTOM_RULES_DIR"]
 VOLUME ["$SURICATA_CUSTOM_CONFIG_DIR"]
@@ -199,7 +208,6 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
-
 
 # to be populated at build-time:
 ARG BUILD_DATE
