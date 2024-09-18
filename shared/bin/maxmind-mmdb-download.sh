@@ -81,7 +81,7 @@ if [[ -d "${WORKDIR}" ]]; then
 
   if compgen -G "*.mmdb" >/dev/null 2>&1; then
     mkdir -p "${OUTPUT_DIR}"
-    mv *.mmdb "${OUTPUT_DIR}"/ && ( find "${OUTPUT_DIR}" -type f | sort )
+    mv *.mmdb "${OUTPUT_DIR}"/ && ( find "${OUTPUT_DIR}" -type f -iname "*.mmdb" | sort )
   fi
 
 else
