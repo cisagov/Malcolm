@@ -11,8 +11,6 @@ Hedgehog Linux is a Debian-based operating system built to
 * detect file transfers in network traffic and extract and scan those files for threats
 * generate and forward Zeek logs, Arkime sessions, and other information to [Malcolm]({{ site.github.repository_url }})
 
-![hedgehog-iso-build-docker-wrap-push-ghcr]({{ site.github.repository_url }}/workflows/hedgehog-iso-build-docker-wrap-push-ghcr/badge.svg)
-
 <a name="HedgehogTableOfContents"></a>
 * [Sensor installation](hedgehog-installation.md#HedgehogInstallation)
     - [Image boot options](hedgehog-installation.md#HedgehogBootOptions)
@@ -34,6 +32,7 @@ Hedgehog Linux is a Debian-based operating system built to
     - [Autostart services](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigAutostart)
     - [Managing disk usage](malcolm-hedgehog-e2e-iso-install.md#HedgehogDiskUsage)
     - [Zeek Intelligence Framework](hedgehog-config-zeek-intel.md#HedgehogZeekIntel)
+    - [Custom Rules, Scripts and Plugins](hedgehog-custom-rules.md#CustomRulesAndScripts)
     - [Tuning](live-analysis.md#LiveAnalysisTuning)
         + [Zeek](live-analysis.md#LiveAnalysisTuningZeek)
         + [Arkime](live-analysis.md#LiveAnalysisTuningArkime)

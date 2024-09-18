@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} postgres:15-alpine
+FROM postgres:16-alpine
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -20,6 +18,7 @@ ENV PUSER "postgres"
 ENV PGROUP "postgres"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_CHOWN "/run/postgresql;/var/lib/postgresql"
+USER root
 
 ENV TERM xterm
 

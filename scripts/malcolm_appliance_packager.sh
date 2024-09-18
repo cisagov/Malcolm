@@ -61,6 +61,7 @@ if mkdir "$DESTDIR"; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
+  mkdir $VERBOSE -p "$DESTDIR/arkime/lua/"
   mkdir $VERBOSE -p "$DESTDIR/arkime/rules/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
@@ -147,14 +148,14 @@ if mkdir "$DESTDIR"; then
 
   unset CONFIRMATION
   echo ""
-  read -p "Do you need to package docker images also [y/N]? " CONFIRMATION
+  read -p "Do you need to package container images also [y/N]? " CONFIRMATION
   CONFIRMATION=${CONFIRMATION:-N}
   if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
     echo "This might take a few minutes..."
     DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.xz"
     IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
     docker save "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
-    echo "Packaged Malcolm docker images to \"$DESTNAMEIMAGES\""
+    echo "Packaged Malcolm container images to \"$DESTNAMEIMAGES\""
     echo ""
   fi
   echo ""

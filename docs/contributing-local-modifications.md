@@ -2,9 +2,9 @@
 
 There are several ways to customize Malcolm's runtime behavior via local changes to configuration files. Many commonly-tweaked settings are discussed in the project [README](README.md) (see [Environment Variable Files](malcolm-config.md#MalcolmConfigEnvVars) and [Customizing event severity scoring](severity.md#SeverityConfig) for some examples).
 
-## <a name="Bind"></a>Docker bind mounts
+## <a name="Bind"></a>Volume bind mounts
 
-Some configuration changes can be put in place by modifying local copies of configuration files and then using a [Docker bind mount](https://docs.docker.com/storage/bind-mounts/) to overlay the modified file onto the running Malcolm container. This is already done for many files and directories used to persist Malcolm configuration and data. For example, the default list of bind mounted files and directories for each Malcolm service is as follows:
+Some configuration changes can be put in place by modifying local copies of configuration files and then using a [bind mount](https://docs.docker.com/storage/bind-mounts/) to overlay the modified file onto the running Malcolm container. This is already done for many files and directories used to persist Malcolm configuration and data. For example, the default list of bind mounted files and directories for each Malcolm service is as follows:
 
 `$ yq eval '.services = (.services | with_entries(.value = {"volumes": .value.volumes}))' docker-compose.yml`
 ```yaml
@@ -182,6 +182,12 @@ services:
       - type: bind
         bind:
           create_host_path: false
+        source: ./arkime/lua
+        target: /opt/arkime/lua
+        read_only: true        
+      - type: bind
+        bind:
+          create_host_path: false
         source: ./arkime/rules
         target: /opt/arkime/rules
         read_only: true
@@ -204,6 +210,12 @@ services:
         source: ./.opensearch.primary.curlrc
         target: /var/local/curlrc/.opensearch.primary.curlrc
         read_only: true
+      - type: bind
+        bind:
+          create_host_path: false
+        source: ./arkime/lua
+        target: /opt/arkime/lua
+        read_only: true        
       - type: bind
         bind:
           create_host_path: false
@@ -560,12 +572,12 @@ So, for example, if a user wanted to make a change to the `nginx-proxy` containe
 
 The change would take effect after stopping and starting Malcolm.
 
-See the documentation on [Docker bind mount](https://docs.docker.com/storage/bind-mounts/) for more information on this technique.
+See the documentation on [bind mounts](https://docs.docker.com/storage/bind-mounts/) for more information on this technique.
 
-## <a name="ContribBuild"></a>Building Malcolm's Docker images
+## <a name="ContribBuild"></a>Building Malcolm's images
 
 Another method for modifying local copies of Malcolm's services' containers is to [build custom](development.md#Build) containers with the modifications baked-in.
 
-For example, imagine a user wanted to create a Malcolm container that includes a new dashboard for OpenSearch Dashboards and a new enrichment filter `.conf` file for Logstash. After placing these files under `./dashboards/dashboards` and `./logstash/pipelines/enrichment`, respectively, in the Malcolm working copy, run `./build.sh dashboards-helper logstash` to build just those containers. After the build completes, run `docker images` to see the fresh images for `ghcr.io/idaholab/malcolm/dashboards-helper` and `ghcr.io/idaholab/malcolm/logstash-oss`. Users may need to review the contents of the [Dockerfiles]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) to determine the correct service and filesystem location within that service's Docker image depending on the nature of the task.
+For example, imagine a user wanted to create a Malcolm container that includes a new dashboard for OpenSearch Dashboards and a new enrichment filter `.conf` file for Logstash. After placing these files under `./dashboards/dashboards` and `./logstash/pipelines/enrichment`, respectively, in the Malcolm working copy, run `./build.sh dashboards-helper logstash` to build just those containers. After the build completes, run `docker images` to see the fresh images for `ghcr.io/idaholab/malcolm/dashboards-helper` and `ghcr.io/idaholab/malcolm/logstash-oss`. Users may need to review the contents of the [Dockerfiles]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/Dockerfiles) to determine the correct service and filesystem location within that service's image depending on the nature of the task.
 
-Alternately, forks of Malcolm on GitHub contain [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) that contain instructions for GitHub to build the docker images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if the GitHub user `romeogdetlevjr` has forked Malcolm, the `arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run a local instance of Malcolm using these images instead of the official ones, users would need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
+Alternately, forks of Malcolm on GitHub contain [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if the GitHub user `romeogdetlevjr` has forked Malcolm, the `arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run a local instance of Malcolm using these images instead of the official ones, users would need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.

@@ -34,7 +34,7 @@ SENSOR_DIR='/opt/sensor'
 
 ARKIME_VERSION="5.4.0"
 
-BEATS_VER="8.15.0"
+BEATS_VER="8.15.1"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -96,8 +96,6 @@ build_arkime_src(){
     ./easybutton-build.sh --dir "$arkime_dir"
 
     make install -j${build_jobs}
-
-    cp -r ./capture/plugins/lua/samples "${arkime_dir}"/lua
 
     cat NOTICE release/CAPTURENOTICE > "${arkime_dir}/NOTICE.txt"
 
@@ -214,7 +212,7 @@ build_zeek_src() {
     export PYTHONUNBUFFERED=1
 
     zeek_url=https://github.com/zeek/zeek.git
-    zeek_version=7.0.0
+    zeek_version=7.0.1
     zeek_release=1
     zeek_dir=/opt/zeek
     # Zeek's build eats a ton of resources; prevent OOM from the killing build process
@@ -379,23 +377,13 @@ install_files() {
     echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\"" >> "$sensor_ver_file"
     echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\"" >> "$sensor_ver_file"
 
-    # Setup MaxMind Geo IP info
+    # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
     mkdir -p /opt/arkime/etc
     pushd /opt/arkime/etc >/dev/null 2>&1
-    MAXMIND_GEOIP_DB_LICENSE_KEY=""
-
-    if [[ -f "$SHARED_DIR/maxmind_license.txt" ]]; then
-    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SHARED_DIR/maxmind_license.txt" | head -n 1)"
-        if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
-            for DB in ASN Country City; do
-                curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
-                if [[ -f "GeoLite2-$DB.mmdb.tar.gz" ]]; then
-                    tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 --no-same-owner
-                    rm -f "GeoLite2-$DB.mmdb.tar.gz"
-                fi
-            done
-        fi
-    fi
+    bash "/usr/local/bin/maxmind-mmdb-download.sh" \
+        -f "$SHARED_DIR/maxmind_license.txt" \
+        -r "$SHARED_DIR/maxmind_url.txt" \
+        -o "$(pwd)"
     curl -s -S -L -o ./ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
     curl -s -S -L -o ./oui.txt "https://www.wireshark.org/download/automated/data/manuf"
     popd >/dev/null 2>&1

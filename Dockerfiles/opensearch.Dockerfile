@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} opensearchproject/opensearch:2.16.0
+FROM opensearchproject/opensearch:2.17.0
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -21,6 +19,13 @@ ENV PUSER "opensearch"
 ENV PGROUP "opensearch"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_RLIMIT_UNLOCK true
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/var/local/ca-trust"
+USER root
 
 ENV TERM xterm
 
@@ -75,6 +80,7 @@ ENV logger.level "WARN"
 ENV MAX_LOCKED_MEMORY "unlimited"
 ENV path.repo "/opt/opensearch/backup"
 
+# see PUSER_CHOWN comment above
 VOLUME ["/var/local/ca-trust"]
 
 ENTRYPOINT ["/usr/bin/tini", \

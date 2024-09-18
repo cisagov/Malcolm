@@ -67,7 +67,13 @@ fields_to_urls.append([r'^zeek\.ftp\.', ['DASH:078b9aa5-9bd4-4f02-ae5e-cf80fa6f8
 fields_to_urls.append(
     [r'^zeek\.genisys.*\.', ['DASH:03207c00-d07e-11ec-b4a7-d1b4003706b7', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
 )
+fields_to_urls.append(
+    [r'^zeek\.ge_srtp.*\.', ['DASH:e233a570-45d9-11ef-96a6-432365601033', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
+)
 fields_to_urls.append([r'^zeek\.gquic\.', ['DASH:11ddd980-e388-11e9-b568-cf17de8e860c']])
+fields_to_urls.append(
+    [r'^zeek\.hart_ip.*\.', ['DASH:3a9e3440-75e2-11ef-8138-03748f839a49', 'DASH:4a4bde20-4760-11ea-949c-bbb5a9feecbf']]
+)
 fields_to_urls.append([r'^zeek\.http\.', ['DASH:37041ee1-79c0-4684-a436-3173b0e89876']])
 fields_to_urls.append([r'^zeek\.intel\.', ['DASH:36ed695f-edcc-47c1-b0ec-50d20c93ce0f']])
 fields_to_urls.append([r'^zeek\.irc\.', ['DASH:76f2f912-80da-44cd-ab66-6a73c8344cc3']])

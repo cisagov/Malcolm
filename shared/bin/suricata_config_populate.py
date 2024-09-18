@@ -702,6 +702,16 @@ def main():
         metavar='<string>',
         help="Output YAML file (take precedence over --inplace)",
     )
+    parser.add_argument(
+        '-s',
+        '--suricata',
+        dest='suricataBin',
+        type=str,
+        default=os.getenv('SURICATA_BIN', '/usr/bin/suricata'),
+        required=False,
+        metavar='<string>',
+        help="Suricata binary",
+    )
     try:
         parser.error = parser.exit
         args = parser.parse_args()
@@ -1264,7 +1274,7 @@ def main():
 
             script_return_code, output = run_process(
                 [
-                    'suricata',
+                    args.suricataBin,
                     f"-{('v' * (argsOrigVerbose-1)) if (argsOrigVerbose > 1) else 'v'}",
                     '-c',
                     os.path.join(tmpLogDir, 'suricata.yaml'),

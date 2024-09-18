@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} redis:7-alpine
+FROM redis:7-alpine
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -19,6 +17,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "redis"
 ENV PGROUP "redis"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 

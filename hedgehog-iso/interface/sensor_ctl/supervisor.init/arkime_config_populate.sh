@@ -109,6 +109,20 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     sed -r -i "s/(debug)\s*=\s*.*/\1=$ARKIME_DEBUG_LEVEL/" "$ARKIME_CONFIG_FILE"
   fi
 
+  # rules files
+  ARKIME_RULES_DIR="$SUPERVISOR_PATH"/arkime/rules
+  if [[ -d "${ARKIME_RULES_DIR}" ]]; then
+    RULES_FILES="$(find "${ARKIME_RULES_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c \( -name '*.yml' -o -name '*.yaml' \) | tr '\n' ';' | sed 's/;$//' )"
+    sed -r -i "s|(rulesFiles)\s*=\s*.*|\1=$RULES_FILES|" "$ARKIME_CONFIG_FILE"
+  fi
+
+  # lua plugins
+  ARKIME_LUA_DIR="$SUPERVISOR_PATH"/arkime/lua
+  if [[ -d "${ARKIME_LUA_DIR}" ]]; then
+    LUA_FILES="$(find "${ARKIME_LUA_DIR}" -mindepth 1 -maxdepth 1 -type f -size +0c -name '*.lua' | tr '\n' ';' | sed 's/;$//' )"
+    sed -r -i "s|(luaFiles)\s*=\s*.*|\1=$LUA_FILES|" "$ARKIME_CONFIG_FILE"
+  fi
+
   # enable ja4+ plugin if it's present
   JA4_PLUGIN_FILE="/opt/arkime/plugins/ja4plus.$(dpkg --print-architecture).so"
   if [[ -f "${JA4_PLUGIN_FILE}" ]]; then
@@ -125,7 +139,16 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   fi
 
   # identify node in session metadata for PCAP reachback
-  PRIMARY_IP=$(ip route get 255.255.255.255 | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
+  ROUTE_DEST_IP=
+  if [[ -n "$OS_HOST" ]]; then
+    if [[ "$OS_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      ROUTE_DEST_IP="$OS_HOST"
+    else
+      ROUTE_DEST_IP=$(dig +short "$OS_HOST" 2>/dev/null | head -n 1)
+    fi
+  fi
+  [[ -n "$ROUTE_DEST_IP" ]] || ROUTE_DEST_IP=255.255.255.255
+  PRIMARY_IP=$(ip route get "$ROUTE_DEST_IP" | grep -Po '(?<=src )(\d{1,3}.){4}' | sed "s/ //g")
   export ARKIME_NODE_NAME="$(hostname --long)"
   export ARKIME_NODE_HOST="$PRIMARY_IP"
 

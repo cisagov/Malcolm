@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim
+FROM debian:12-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -22,6 +20,7 @@ ENV PGROUP "watcher"
 # on a case-by-case basis so that one script (watch-pcap-uploads-folder.sh)
 # can chown uploaded files
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -68,7 +67,7 @@ RUN apt-get -q update && \
       python-magic \
       pyzmq \
       requests \
-      watchdog==4.0.2 && \
+      watchdog==5.0.2 && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

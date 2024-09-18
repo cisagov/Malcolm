@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} alpine:3.20
+FROM alpine:3.20
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -19,6 +17,7 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "dirinit"
 ENV PGROUP "dirinit"
 ENV PUSER_PRIV_DROP true
+USER root
 
 ENV TERM xterm
 

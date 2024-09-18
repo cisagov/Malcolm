@@ -15,18 +15,16 @@ import sys
 
 import malcolm_utils
 from malcolm_utils import (
-    decapitalize,
     deep_get,
     eprint,
     EscapeAnsi,
     LoadStrIfJson,
     remove_suffix,
     run_process,
-    str2bool,
 )
 
 from collections import defaultdict, namedtuple
-from enum import Flag, IntFlag, auto
+from enum import IntEnum, Flag, IntFlag, auto
 
 try:
     from pwd import getpwuid
@@ -54,6 +52,7 @@ MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 PROFILE_KEY = 'MALCOLM_PROFILE'
 PROFILE_MALCOLM = 'malcolm'
 PROFILE_HEDGEHOG = 'hedgehog'
+CONTAINER_RUNTIME_KEY = 'MALCOLM_CONTAINER_RUNTIME'
 
 ###################################################################################################
 PLATFORM_WINDOWS = "Windows"
@@ -100,6 +99,20 @@ class UserInputDefaultsBehavior(IntFlag):
 class UserInterfaceMode(IntFlag):
     InteractionDialog = auto()
     InteractionInput = auto()
+
+
+class DialogBackException(Exception):
+    pass
+
+
+class DialogCanceledException(Exception):
+    pass
+
+
+class BoolOrExtra(IntEnum):
+    FALSE = 0
+    TRUE = 1
+    EXTRA = 2
 
 
 BoundPath = namedtuple(
@@ -227,6 +240,23 @@ def ClearScreen():
 
 
 ###################################################################################################
+def str2boolorextra(v):
+    if isinstance(v, bool):
+        return BoolOrExtra.TRUE if v else BoolOrExtra.FALSE
+    elif isinstance(v, str):
+        if v.lower() in ("yes", "true", "t", "y", "1"):
+            return BoolOrExtra.TRUE
+        elif v.lower() in ("no", "false", "f", "n", "0"):
+            return BoolOrExtra.FALSE
+        elif v.lower() in ("b", "back", "p", "previous", "e", "extra"):
+            return BoolOrExtra.EXTRA
+        else:
+            raise ValueError("BoolOrExtra value expected")
+    else:
+        raise ValueError("BoolOrExtra value expected")
+
+
+###################################################################################################
 # get interactive user response to Y/N question
 def YesOrNo(
     question,
@@ -236,9 +266,11 @@ def YesOrNo(
     clearScreen=False,
     yesLabel='Yes',
     noLabel='No',
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
+    result = None
 
     if (default is not None) and (
         (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
@@ -247,20 +279,31 @@ def YesOrNo(
         reply = ""
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        defaultYes = (default is not None) and str2bool(default)
+        defaultYes = (default is not None) and str2boolorextra(default)
+        # by default the "extra" button is between "Yes" and "No" which looks janky, IMO.
+        #   so we're going to switch things around a bit.
+        yesLabelTmp = yesLabel.capitalize() if defaultYes else noLabel.capitalize()
+        noLabelTmp = noLabel.capitalize() if defaultYes else yesLabel.capitalize()
+        replyMap = {}
+        if hasExtraLabel := (extraLabel is not None):
+            replyMap[Dialog.EXTRA] = Dialog.CANCEL
+            replyMap[Dialog.CANCEL] = Dialog.EXTRA
         reply = MainDialog.yesno(
-            question,
-            yes_label=yesLabel.capitalize() if defaultYes else noLabel.capitalize(),
-            no_label=decapitalize(noLabel) if defaultYes else decapitalize(yesLabel),
+            str(question),
+            yes_label=str(yesLabelTmp),
+            no_label=str(extraLabel) if hasExtraLabel else str(noLabelTmp),
+            extra_button=hasExtraLabel,
+            extra_label=str(noLabelTmp) if hasExtraLabel else str(extraLabel),
         )
+        reply = replyMap.get(reply, reply)
         if defaultYes:
-            reply = 'y' if (reply == Dialog.OK) else 'n'
+            reply = 'y' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'n')
         else:
-            reply = 'n' if (reply == Dialog.OK) else 'y'
+            reply = 'n' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'y')
 
     elif uiMode & UserInterfaceMode.InteractionInput:
         if (default is not None) and defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt:
-            if str2bool(default):
+            if str2boolorextra(default):
                 questionStr = f"\n{question} (Y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / n{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
             else:
                 questionStr = f"\n{question} (y{'' if yesLabel == 'Yes' else ' (' + yesLabel + ')'} / N{'' if noLabel == 'No' else ' (' + noLabel + ')'}): "
@@ -271,7 +314,7 @@ def YesOrNo(
             reply = str(input(questionStr)).lower().strip()
             if len(reply) > 0:
                 try:
-                    str2bool(reply)
+                    str2boolorextra(reply)
                     break
                 except ValueError:
                     pass
@@ -282,21 +325,29 @@ def YesOrNo(
         raise RuntimeError("No user interfaces available")
 
     if (len(reply) == 0) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
-        reply = "y" if (default is not None) and str2bool(default) else "n"
+        reply = "y" if (default is not None) and str2boolorextra(default) else "n"
 
     if clearScreen is True:
         ClearScreen()
 
     try:
-        return str2bool(reply)
+        result = str2boolorextra(reply)
     except ValueError:
-        return YesOrNo(
+        result = YesOrNo(
             question,
             default=default,
             uiMode=uiMode,
             defaultBehavior=defaultBehavior - UserInputDefaultsBehavior.DefaultsAccept,
             clearScreen=clearScreen,
+            yesLabel=yesLabel,
+            noLabel=noLabel,
+            extraLabel=extraLabel,
         )
+
+    if result == BoolOrExtra.EXTRA:
+        raise DialogBackException(question)
+
+    return bool(result)
 
 
 ###################################################################################################
@@ -307,6 +358,7 @@ def AskForString(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -319,15 +371,19 @@ def AskForString(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.inputbox(
-            question,
+            str(question),
             init=(
                 default
                 if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
                 else ""
             ),
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException(question)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(question)
         else:
             reply = reply.strip()
 
@@ -357,6 +413,7 @@ def AskForPassword(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -368,9 +425,16 @@ def AskForPassword(
         reply = default
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code, reply = MainDialog.passwordbox(prompt, insecure=True)
+        code, reply = MainDialog.passwordbox(
+            str(prompt),
+            insecure=True,
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
+        )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException(prompt)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(prompt)
 
     elif uiMode & UserInterfaceMode.InteractionInput:
         reply = getpass.getpass(prompt=f"{prompt}: ")
@@ -396,6 +460,7 @@ def ChooseOne(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -410,11 +475,15 @@ def ChooseOne(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.radiolist(
-            prompt,
+            str(prompt),
             choices=validChoices,
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
         )
         if code == Dialog.CANCEL or code == Dialog.ESC:
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException(prompt)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(prompt)
 
     elif uiMode & UserInterfaceMode.InteractionInput:
         index = 0
@@ -460,6 +529,7 @@ def ChooseMultiple(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -474,11 +544,15 @@ def ChooseMultiple(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code, reply = MainDialog.checklist(
-            prompt,
+            str(prompt),
             choices=validChoices,
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
         )
         if code == Dialog.CANCEL or code == Dialog.ESC:
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException(prompt)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(prompt)
 
     elif uiMode & UserInterfaceMode.InteractionInput:
         allowedChars = set(string.digits + ',' + ' ')
@@ -529,6 +603,7 @@ def DisplayMessage(
     defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
     uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -542,10 +617,14 @@ def DisplayMessage(
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
         code = MainDialog.msgbox(
-            message,
+            str(message),
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException(message)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(message)
         else:
             reply = True
 
@@ -567,6 +646,7 @@ def DisplayProgramBox(
     fileDescriptor=None,
     text=None,
     clearScreen=False,
+    extraLabel=None,
 ):
     global Dialog
     global MainDialog
@@ -581,9 +661,13 @@ def DisplayProgramBox(
             text=text,
             width=78,
             height=20,
+            extra_button=(extraLabel is not None),
+            extra_label=str(extraLabel),
         )
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
-            raise RuntimeError("Operation cancelled")
+            raise DialogCanceledException()
+        elif code == Dialog.EXTRA:
+            raise DialogBackException()
         else:
             reply = True
 

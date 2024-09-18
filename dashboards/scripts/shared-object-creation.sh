@@ -425,6 +425,17 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             # end OpenSearch Tweaks
             #############################################################################################################################
 
+            
+            # OpenSearch Create Initial Indices
+
+            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              -XPUT "$OPENSEARCH_URL_TO_USE/${MALCOLM_NETWORK_INDEX_PATTERN%?}initial" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+
+            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              -XPUT "$OPENSEARCH_URL_TO_USE/${MALCOLM_OTHER_INDEX_PATTERN%?}initial" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+
             # before we go on to create the anomaly detectors, we need to wait for actual network log documents
             /data/opensearch_status.sh -w >/dev/null 2>&1
             sleep 60

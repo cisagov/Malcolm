@@ -12,16 +12,4 @@ wget -nv -O oui.txt_new https://www.wireshark.org/download/automated/data/manuf 
   mv -f oui.txt_new oui.txt || \
   rm -f oui.txt_new
 
-# MaxMind now requires a (free) license key to download the free versions of
-# their GeoIP databases. This should be provided as an environment variable.
-#   see https://dev.maxmind.com/geoip/geoipupdate/#Direct_Downloads
-#   see https://github.com/arkime/arkime/issues/1350
-#   see https://github.com/arkime/arkime/issues/1352
-if [ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]; then
-  for DB in ASN Country City; do
-    curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz" && \
-      tar xf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 && \
-      chmod 644 "GeoLite2-$DB.mmdb" && \
-      rm -f "GeoLite2-$DB.mmdb.tar.gz"
-  done
-fi
+/usr/local/bin/maxmind-mmdb-download.sh -o "$(pwd)"
