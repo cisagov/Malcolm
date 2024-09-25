@@ -5,6 +5,7 @@
 ##!     https://github.com/zeek/zeek/blob/master/scripts/site/local.zeek
 
 global true_regex: pattern = /^\s*(?i:t(rue)?|y(es)?|on|1)\s*$/;
+global 
 
 global disable_stats = (getenv("ZEEK_DISABLE_STATS") == true_regex) ? T : F;
 global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == true_regex) ? T : F;
@@ -16,6 +17,7 @@ global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_r
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global zeek_ja4_ssh_packet_count = getenv("ZEEK_JA4SSH_PACKET_COUNT")
 global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == true_regex) ? T : F;
@@ -41,6 +43,7 @@ global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
+
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
@@ -276,7 +279,14 @@ event zeek_init() &priority=-5 {
   redef SNIFFPASS::log_password_plaintext = T;
   redef LDAP::default_capture_password = T;
 @endif
+@if (is_num(zeek_ja4_ssh_packet_count))
+  redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = zeek_ja4_ssh_packet_count;
+@else
+  redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = 200;
+@endif
 
+
+redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = ja4_ssh_packet_count;
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
