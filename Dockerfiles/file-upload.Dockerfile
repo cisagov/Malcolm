@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:12-slim AS npmget
+FROM debian:12-slim AS npmget
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -17,7 +15,7 @@ RUN apt-get -q update && \
       filepond-plugin-file-rename \
       @jcubic/tagger
 
-FROM --platform=${TARGETPLATFORM} debian:12-slim AS runtime
+FROM debian:12-slim AS runtime
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -34,10 +32,17 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "www-data"
 ENV PGROUP "www-data"
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/var/www/upload/server/php/chroot/files"
 # not dropping privileges globally in this container as required to run SFTP server. this can
 # be handled by supervisord instead on an as-needed basis, and/or php-fpm/nginx itself
 # will drop privileges to www-data as well.
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -51,7 +56,7 @@ ENV FILEPOND_SERVER_BRANCH $FILEPOND_SERVER_BRANCH
 ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
 
-ENV SUPERCRONIC_VERSION "0.2.30"
+ENV SUPERCRONIC_VERSION "0.2.32"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -122,7 +127,9 @@ RUN mkdir -p /run/php \
       >/var/www/upload/server/php/chroot/README.txt && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
 
+# see PUSER_CHOWN comment above
 VOLUME [ "/var/www/upload/server/php/chroot/files" ]
+
 EXPOSE 22 80
 
 ENTRYPOINT ["/usr/bin/tini", \

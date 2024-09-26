@@ -30,7 +30,6 @@ fi
   -o geoLite2ASN="${SCRIPT_PATH}"/GeoLite2-ASN.mmdb \
   -o rirFile="${SCRIPT_PATH}"/ipv4-address-space.csv \
   -o ouiFile="${SCRIPT_PATH}"/oui.txt \
-  -o rulesFiles="${SCRIPT_PATH}"/rules.yml \
   -o parsersDir="${ARKIME_DIR}"/parsers \
   -o pluginsDir="${ARKIME_DIR}"/plugins \
   -o ecsEventProvider="${ARKIME_ECS_PROVIDER:-arkime}" \

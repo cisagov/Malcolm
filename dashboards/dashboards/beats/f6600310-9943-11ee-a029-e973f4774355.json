@@ -233,7 +233,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"miscbeat.systemd:*\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"calendar_interval\":\"1w\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"miscbeat.systemd:*\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"@timestamp\",\"calendar_interval\":\"1w\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

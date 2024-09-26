@@ -20,7 +20,7 @@ from watchdog.events import (
 
 from multiprocessing.pool import ThreadPool
 from threading import get_native_id
-from watchdog.utils import WatchdogShutdown
+from watchdog.utils import WatchdogShutdownError
 from watchdog.observers import Observer
 from watchdog.observers.polling import PollingObserver
 from collections import namedtuple, defaultdict, OrderedDict
@@ -327,9 +327,9 @@ def WatchAndProcessDirectory(
             observer.join(1)
 
         if shuttingDown[0]:
-            raise WatchdogShutdown()
+            raise WatchdogShutdownError()
 
-    except WatchdogShutdown:
+    except WatchdogShutdownError:
         observer.unschedule_all()
 
     finally:

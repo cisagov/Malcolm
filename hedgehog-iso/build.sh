@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.15.0"
+BEATS_VER="8.15.1"
 BEATS_OSS="-oss"
 
 ARKIME_VER="5.4.0"
@@ -176,17 +176,10 @@ if [ -d "$WORKDIR" ]; then
   # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
   mkdir -p ./config/includes.chroot/opt/arkime/etc/
   pushd ./config/includes.chroot/opt/arkime/etc/
-  MAXMIND_GEOIP_DB_LICENSE_KEY=""
-  if [[ -f "$SCRIPT_PATH/shared/maxmind_license.txt" ]]; then
-    MAXMIND_GEOIP_DB_LICENSE_KEY="$(cat "$SCRIPT_PATH/shared/maxmind_license.txt" | head -n 1)"
-    if [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]]; then
-      for DB in ASN Country City; do
-        curl -s -S -L -o "GeoLite2-$DB.mmdb.tar.gz" "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-$DB&license_key=$MAXMIND_GEOIP_DB_LICENSE_KEY&suffix=tar.gz"
-        tar xvf "GeoLite2-$DB.mmdb.tar.gz" --wildcards --no-anchored '*.mmdb' --strip=1 --no-same-owner
-        rm -f "GeoLite2-$DB.mmdb.tar.gz"
-      done
-    fi
-  fi
+  bash "$SCRIPT_PATH/shared/bin/maxmind-mmdb-download.sh" \
+    -f "$SCRIPT_PATH/shared/maxmind_license.txt" \
+    -r "$SCRIPT_PATH/shared/maxmind_url.txt" \
+    -o "$(pwd)"
   curl -s -S -L -o ipv4-address-space.csv "https://www.iana.org/assignments/ipv4-address-space/ipv4-address-space.csv"
   curl -s -S -L -o oui.txt "https://www.wireshark.org/download/automated/data/manuf"
   popd >/dev/null 2>&1

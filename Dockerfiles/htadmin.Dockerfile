@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} debian:11-slim
+FROM debian:11-slim
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -21,6 +19,7 @@ ENV PGROUP "www-data"
 # not dropping privileges globally so nginx can bind privileged ports internally.
 # nginx and php-fpm will drop privileges to "www-data" user for worker processes
 ENV PUSER_PRIV_DROP false
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm

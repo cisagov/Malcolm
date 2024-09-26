@@ -1,6 +1,4 @@
-ARG TARGETPLATFORM=linux/amd64
-
-FROM --platform=${TARGETPLATFORM} docker.elastic.co/logstash/logstash-oss:8.15.0
+FROM docker.elastic.co/logstash/logstash-oss:8.15.1
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -19,6 +17,13 @@ ENV PUSER "logstash"
 ENV PGROUP "logstash"
 ENV PUSER_PRIV_DROP true
 ENV PUSER_RLIMIT_UNLOCK true
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/logstash-persistent-queue"
+USER root
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -110,6 +115,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
 # own envrionment variable at runtime.
 ENV LOGSTASH_KEYSTORE_PASS "a410a267b1404c949284dee25518a917"
 
+# see PUSER_CHOWN comment above
 VOLUME ["/logstash-persistent-queue"]
 
 EXPOSE 5044

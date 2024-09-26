@@ -54,3 +54,7 @@ Some changes should be made for performance ([this link](http://markshust.com/20
 * **Volume mount performance** - Users can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if volumes are mounted under the home directory only, users could share /Users but remove other paths.
 
 After making these changes, right-click on the Docker 🐋 icon in the system tray and select **Restart**.
+
+## Podman
+
+See [Docker vs. Podman](quickstart.md#DockerVPodman).

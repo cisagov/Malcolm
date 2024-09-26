@@ -1,4 +1,4 @@
-# <a name="NewImage"></a>Adding a new service (Docker image)
+# <a name="NewImage"></a>Adding a new service (image)
 
 A new service can be added to Malcolm by following the following steps:
 

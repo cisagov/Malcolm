@@ -58,7 +58,22 @@ def filter(event)
   end
 
   suffix_resolved = @suffix
-  if parts = @suffix.scan(/(%{([^}]+)})/) then
+  # first handle field substitution in {{ }}
+  if parts = suffix_resolved.scan(/({{([^}]+)}})/) then
+      if parts.kind_of?(Array) then
+          parts.each do |pair|
+              if pair.kind_of?(Array) and (pair.length > 0) then
+                  bracketed_field_name = pair[1].gsub(/\s+/, '').split('.').map { |part| "[#{part}]" }.join
+                  suffix_resolved =
+                    suffix_resolved.sub(pair[0],
+                                        event.get("#{bracketed_field_name}").to_s.downcase.gsub(/[^a-z0-9_\-]/, '').gsub(/^[\-_]+/, ''))
+              end
+          end
+      end
+  end
+
+  # now handle timestamp substitution in %{}
+  if parts = suffix_resolved.scan(/(%{([^}]+)})/) then
       if parts.kind_of?(Array) then
           parts.each do |pair|
               if pair.kind_of?(Array) and (pair.length > 0) then

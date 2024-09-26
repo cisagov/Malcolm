@@ -1,5 +1,6 @@
 # <a name="CustomRulesAndScripts"></a>Custom Rules, Scripts and Plugins
 
+* [Arkime](#Arkime)
 * [Suricata](#Suricata)
 * [Zeek](#Zeek)
 * [YARA](#YARA)
@@ -8,19 +9,61 @@
 
 Much of Malcolm's behavior can be adjusted through [environment variable files](malcolm-config.md#MalcolmConfigEnvVars). However, some components allow further customization through the use of custom scripts, configuration files, and rules.
 
+## <a name="Arkime"></a>Arkime
+
+### Rules
+
+[Arkime rules](https://arkime.com/rulesformat) "allow you to specify actions to perform when criteria are met with certain fields or state."
+
+Arkime rules files (with the `*.yml` or `*.yaml` extension) may be placed in the `./arkime/rules/` subdirectory in the Malcolm installation directory. These new rules files can applied by restarting Malcolm, or this can be done manually without completely restarting Malcolm by running the following command from the Malcolm installation directory:
+
+```
+./scripts/restart -s arkime arkime-live
+```
+
+Malcolm comes with [a few Arkime rules]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/arkime/rules/) included by default. More sample Arkime rules can be found on the [Arkime web site](https://arkime.com/rules).
+
+On [Hedgehog Linux](hedgehog.md), the Arkime rules [directory]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/arkime/rules/) is `/opt/sensor/sensor_ctl/arkime/rules`. New rules can be applied by restarting capture processes:
+
+```
+/opt/sensor/sensor_ctl/shutdown && sleep 30 && /opt/sensor/sensor_ctl/supervisor.sh
+```
+
+### Lua Plugin
+
+Arkime's [Lua plugin](https://arkime.com/settings#lua) allows sessions to be modified via simple Lua scripts. See the [Arkime Lua plugin documentation](https://github.com/arkime/arkime/tree/main/capture/plugins/lua) for more information and [example scripts](https://github.com/arkime/arkime/tree/main/capture/plugins/lua/samples).
+
+Lua files for the Arkime Lua plugin (with the `*.lua` extension) may be placed in the `./arkime/lua/` subdirectory in the Malcolm installation directory. These new scripts can applied by restarting Malcolm, or this can be done manually without completely restarting Malcolm by running the following command from the Malcolm installation directory:
+
+```
+./scripts/restart -s arkime arkime-live
+```
+
+On [Hedgehog Linux](hedgehog.md), the Arkime Lua directory is `/opt/sensor/sensor_ctl/arkime/lua`. New scripts can be applied by restarting capture processes:
+
+```
+/opt/sensor/sensor_ctl/shutdown && sleep 30 && /opt/sensor/sensor_ctl/supervisor.sh
+```
+
 ## <a name="Suricata"></a>Suricata
 
 ### Rules
 
 In addition to the [default Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and [Emerging Threads Open ruleset](https://rules.emergingthreats.net/open/), users may provide custom rules files for use by Suricata in Malcolm.
 
-Suricata rules files (with the `*.rules` extension) may be placed in the `./suricata/rules/` subdirectory in the Malcolm installation directory. These new rules files will be picked up immediately for subsequent [PCAP upload](upload.md#Upload), and for [live analysis](live-analysis.md#LocalPCAP) will be applied by either restarting Malcolm or when the [automatic rule update process](https://suricata-update.readthedocs.io/en/latest/) runs (if automatic rule updates are enabled). This can also be done manually without restarting Malcolm by running the following command from the Malcolm installation directory:
+Suricata rules files (with the `*.rules` extension) may be placed in the `./suricata/rules/` subdirectory in the Malcolm installation directory. These new rules files will be picked up immediately for subsequent [PCAP upload](upload.md#Upload), and for [live analysis](live-analysis.md#LocalPCAP) will be applied by either restarting Malcolm or when the [automatic rule update process](https://suricata-update.readthedocs.io/en/latest/) runs (if automatic rule updates are enabled). This can also be done manually without completely restarting Malcolm by running the following commands from the Malcolm installation directory:
 
 ```
-docker compose exec supervisorctl suricata-live restart live-suricata
+docker compose exec suricata-live supervisorctl restart live-suricata
 ```
 
 If the `SURICATA_CUSTOM_RULES_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Suricata rulesets and use only the user-defined rules.
+
+On [Hedgehog Linux](hedgehog.md), the Suricata custom rules directory is `/opt/sensor/sensor_ctl/suricata/rules/`, and the `SURICATA_CUSTOM_RULES_ONLY` environment variable can be found in [`/opt/sensor/sensor_ctl/control_vars.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/control_vars.conf). New rules can be applied by restarting capture processes:
+
+```
+/opt/sensor/sensor_ctl/shutdown && sleep 30 && /opt/sensor/sensor_ctl/supervisor.sh
+```
 
 ### Configuration
 
@@ -46,6 +89,12 @@ docker compose exec suricata-live /usr/local/bin/docker_entrypoint.sh true
 docker compose exec suricata-live supervisorctl restart live-suricata
 ```
 
+On [Hedgehog Linux](hedgehog.md), the Suricata custom configuration directory is `/opt/sensor/sensor_ctl/suricata/include-configs/`. New configuration can be applied by restarting capture processes:
+
+```
+/opt/sensor/sensor_ctl/shutdown && sleep 30 && /opt/sensor/sensor_ctl/supervisor.sh
+```
+
 ## <a name="Zeek"></a>Zeek
 
 Some aspects of Malcolm's instance of Zeek's [local site policy]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/zeek/config/local.zeek) can be adjusted via [environment variables](malcolm-config.md#MalcolmConfigEnvVars) found in [`zeek.env`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/zeek.env.example).
@@ -55,7 +104,13 @@ For more control of Zeek's behavior, Malcolm's users may place Zeek files in the
 These new files should be picked up immediately for subsequent [PCAP upload](upload.md#Upload), and for [live analysis](live-analysis.md#LocalPCAP) they will take effect upon restarting Malcolm, or without restarting Malcolm by running the following command from the Malcolm installation directory:
 
 ```
-docker compose exec supervisorctl zeek-live restart live-zeek
+docker compose exec zeek-live supervisorctl restart live-zeek
+```
+
+On [Hedgehog Linux](hedgehog.md), the Zeek custom scripts directory is `/opt/sensor/sensor_ctl/zeek/custom/`. New configuration can be applied by restarting capture processes:
+
+```
+/opt/sensor/sensor_ctl/shutdown && sleep 30 && /opt/sensor/sensor_ctl/supervisor.sh
 ```
 
 ## <a name="YARA"></a>YARA
@@ -73,6 +128,12 @@ docker compose exec file-monitor supervisorctl restart yara
 ```
 
 If the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Yara rulesets ([Neo23x0/signature-base](https://github.com/Neo23x0/signature-base), [reversinglabs/reversinglabs-yara-rules](https://github.com/reversinglabs/reversinglabs-yara-rules), and [bartblaze/Yara-rules](https://github.com/bartblaze/Yara-rules)) and use only user-defined rules in `./yara/rules`.
+
+On [Hedgehog Linux](hedgehog.md), the Yara custom rules directory is `/opt/yara-rules/`, and the `EXTRACTED_FILE_YARA_CUSTOM_ONLY` environment variable can be found in [`/opt/sensor/sensor_ctl/control_vars.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/control_vars.conf). New rules can be applied by restarting the Yara file scanning process:
+
+```
+/opt/sensor/sensor_ctl/restart zeek:yara
+```
 
 ## <a name="NetBox"></a>NetBox Plugins
 

@@ -10,7 +10,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `arkime` - code and configuration for the `arkime` container that processes PCAP files using `capture`, which serves the Viewer application
 * `config` - a directory containing the environment variable files that define Malcolm's configuration
 * `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
-* `Dockerfiles` - a directory containing build instructions for Malcolm's docker images
+* `Dockerfiles` - a directory containing build instructions for Malcolm's images
 * `docs` - a directory containing instructions and documentation
 * `filebeat` - code and configuration for the `filebeat` container that ingests Zeek logs and forwards them to the `logstash` container
 * `file-monitor` - code and configuration for the `file-monitor` container that can scan files extracted by Zeek
@@ -43,7 +43,7 @@ and the following files of special note:
 
 ## <a name="Build"></a>Building from source
 
-Building the Malcolm docker images from scratch requires Internet access to pull source files for its components. Once Internet access is available, execute the following command to build all the Docker images used by the Malcolm appliance:
+Building the Malcolm images from scratch requires Internet access to pull source files for its components. Once Internet access is available, execute the following command to build all the images used by the Malcolm appliance:
 
 ```
 $ ./scripts/build.sh
@@ -66,18 +66,18 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/opensearch` (based on `opensearchproject/opensearch`)
 * `ghcr.io/idaholab/malcolm/pcap-capture` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/pcap-monitor` (based on `debian:12-slim`)
-* `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:14-alpine`)
+* `ghcr.io/idaholab/malcolm/postgresql` (based on `postgres:16-alpine`)
 * `ghcr.io/idaholab/malcolm/redis` (based on `redis:7-alpine`)
 * `ghcr.io/idaholab/malcolm/suricata` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/zeek` (based on `debian:12-slim`)
 
-Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the docker images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you will need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
+Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images, as well as [sensor](live-analysis.md#Hedgehog) and [Malcolm](malcolm-iso.md#ISO) installer ISOs. The resulting images are named according to the pattern `ghcr.io/owner/malcolm/image:branch` (e.g., if you have forked Malcolm with the GitHub user `romeogdetlevjr`, the `Arkime` container built for the `main` branch would be named `ghcr.io/romeogdetlevjr/malcolm/arkime:main`). To run your local instance of Malcolm using these images instead of the official ones, you will need to edit your `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script `./shared/bin/github_image_helper.sh` to pull and re-tag the images.
 
 # <a name="Packager"></a>Pre-Packaged installation files
 
 ## Creating pre-packaged installation files
 
-`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the Docker images), which can be copied to a network share or USB drive for distribution to non-networked machines. For example:
+`scripts/malcolm_appliance_packager.sh` can be run to package up the configuration files (and, if necessary, the images), which can be copied to a network share or USB drive for distribution to non-networked machines. For example:
 
 ```
 $ ./scripts/malcolm_appliance_packager.sh 
@@ -103,10 +103,10 @@ Store username/password for email alert sender account? (y/N): n
 
 Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
 
-Do you need to package docker images also [y/N]? y
+Do you need to package images also [y/N]? y
 This might take a few minutes...
 
-Packaged Malcolm docker images to "/home/user/tmp/malcolm_20190513_101117_f0d052c_images.tar.xz"
+Packaged Malcolm images to "/home/user/tmp/malcolm_20190513_101117_f0d052c_images.tar.xz"
 
 
 To install Malcolm:
@@ -142,7 +142,7 @@ If you have obtained pre-packaged installation files to install Malcolm on a non
 
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains minimal setup instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
-* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - This tarball contains the Docker images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`
-* `install.py` - This install script can load the Docker images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
+* `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - This tarball contains the images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`
+* `install.py` - This install script can load the images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
 
 Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. If you do not already have Docker and Docker Compose installed, the `install.py` script will help you install them.

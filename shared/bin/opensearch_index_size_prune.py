@@ -155,11 +155,7 @@ def main():
         sys.tracebacklimit = 0
 
     # short-circuit without printing anything else
-    if (
-        (args.limit == '0')
-        or (not args.index)
-        or (args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote)
-    ):
+    if (args.limit == '0') or (not args.index):
         return
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
@@ -223,9 +219,11 @@ def main():
             if ('node' in stat) and (stat['node'] != 'UNASSIGNED'):
                 esDiskUsageStats.append(
                     {
-                        key: humanfriendly.parse_size(value)
-                        if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
-                        else value
+                        key: (
+                            humanfriendly.parse_size(value)
+                            if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
+                            else value
+                        )
                         for (key, value) in stat.items()
                     }
                 )

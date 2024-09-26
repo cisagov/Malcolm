@@ -106,6 +106,7 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
             MAXMIND_GEOIP_DB_LICENSE_KEY=${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}
+            MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL=${{ secrets.MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL }}
           push: true
           provenance: false
           platforms: ${{ matrix.platform }}
