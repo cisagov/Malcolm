@@ -34,7 +34,7 @@ SENSOR_DIR='/opt/sensor'
 
 ARKIME_VERSION="5.4.0"
 
-BEATS_VER="8.15.1"
+BEATS_VER="8.15.2"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -212,7 +212,7 @@ build_zeek_src() {
     export PYTHONUNBUFFERED=1
 
     zeek_url=https://github.com/zeek/zeek.git
-    zeek_version=7.0.1
+    zeek_version=7.0.2
     zeek_release=1
     zeek_dir=/opt/zeek
     # Zeek's build eats a ton of resources; prevent OOM from the killing build process
