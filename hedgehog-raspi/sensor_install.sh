@@ -369,8 +369,8 @@ install_files() {
     fi
 
     echo "BUILD_ID=\"$(date +\'%Y-%m-%d\')-${IMAGE_VERSION}\""   > "$sensor_ver_file"
-    echo "VARIANT=\"Hedgehog Linux (Sensor) v${IMAGE_VERSION}\"" >> "$sensor_ver_file"
-    echo "VARIANT_ID=\"hedgehog-sensor\"" >> "$sensor_ver_file"
+    echo "VARIANT=\"Hedgehog Linux (Minihog Sensor) v${IMAGE_VERSION}\"" >> "$sensor_ver_file"
+    echo "VARIANT_ID=\"hedgehog-minihog-sensor\"" >> "$sensor_ver_file"
     echo "ID_LIKE=\"debian\"" >> "$sensor_ver_file"
     echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\"" >> "$sensor_ver_file"
     echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\"" >> "$sensor_ver_file"

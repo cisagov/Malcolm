@@ -30,24 +30,38 @@ function get_latest_github_tagged_release() {
 # zkg_install_github_repo
 #
 # zkg install the latest GitHub release tag if available (else, master/HEAD)
-# release tag/branch can be overriden by specifying the branch name with after the URL delimited by a |
-#
+# some optional overrides can be specified using | as a delimiter in the URL parameter:
+#   URL|branch|environment variables
+#   URL - the full GitHub URL to install
+#   branch - the branch to checkout and install (otherwise, the latest release tag will be used, or the default branch if no releases exist)
+#   environment variables - semicolon-separated list of environment variables to set before calling zkg (e.g., CMAKE_BUILD_TYPE=Debug;HILTI_CXX_FLAGS=-fno-var-tracking-assignments)
 function zkg_install_github_repo() {
   URL_PARAM="$1"
-  URL_BRANCH_DELIM='|'
-  URL_BRANCH_DELIM_COUNT="$(awk -F"${URL_BRANCH_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
-  if (( $URL_BRANCH_DELIM_COUNT > 0 )); then
+  URL_DELIM='|'
+  URL_DELIM_COUNT="$(awk -F"${URL_DELIM}" '{print NF-1}' <<< "${URL_PARAM}")"
+  REPO_URL=""
+  BRANCH_OVERRIDE=""
+  ENV_LIST=""
+  if (( $URL_DELIM_COUNT >= 0 )); then
     REPO_URL="$(echo "$URL_PARAM" | cut -d'|' -f1)"
+  fi
+  if (( $URL_DELIM_COUNT >= 1 )); then
     BRANCH_OVERRIDE="$(echo "$URL_PARAM" | cut -d'|' -f2)"
-  else
-    REPO_URL="$URL_PARAM"
-    BRANCH_OVERRIDE=""
+  fi
+  if (( $URL_DELIM_COUNT >= 2 )); then
+    ENV_LIST="$(echo "$URL_PARAM" | cut -d'|' -f3)"
   fi
   if [[ -n $REPO_URL ]]; then
     if [[ -n $BRANCH_OVERRIDE ]]; then
       REPO_LATEST_RELEASE="$BRANCH_OVERRIDE"
     else
       REPO_LATEST_RELEASE="$(get_latest_github_tagged_release "$REPO_URL")"
+    fi
+    if [[ -n $ENV_LIST ]]; then
+      IFS=';' read -ra ENVS <<< "${ENV_LIST}"
+      for ENV in "${ENVS[@]}"; do
+        export "$ENV"
+      done
     fi
     if [[ -n $REPO_LATEST_RELEASE ]]; then
       zkg install --nodeps --force --skiptests --version "$REPO_LATEST_RELEASE" "$REPO_URL"
@@ -75,7 +89,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-ge-srtp"
   "https://github.com/cisagov/icsnpp-genisys"
-  "https://github.com/cisagov/icsnpp-hart-ip"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-profinet-io-cm"
@@ -113,6 +126,13 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
 )
+if grep -q minihog /opt/sensor/.os-info >/dev/null 2>&1; then
+  # for some reason the icsnpp-hart-ip parser takes hours (or never finishes) in the minihog build without CMAKE_BUILD_TYPE=Debug
+  ZKG_GITHUB_URLS+=( "https://github.com/cisagov/icsnpp-hart-ip|main|CMAKE_BUILD_TYPE=Debug" )
+else
+  ZKG_GITHUB_URLS+=( "https://github.com/cisagov/icsnpp-hart-ip" )
+fi
+
 for i in ${ZKG_GITHUB_URLS[@]}; do
   zkg_install_github_repo "$i"
 done
