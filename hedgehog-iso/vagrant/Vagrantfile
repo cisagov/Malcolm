@@ -36,6 +36,16 @@ Vagrant.configure("2") do |config|
     lv.cpus = 4
   end
 
+  config.vm.provider "vmware_desktop" do |vd|
+    vd.memory = "8192"
+    vd.cpus = 4
+  end
+
+  config.vm.provider "vmware_fusion" do |vf|
+    vf.memory = "8192"
+    vf.cpus = 4
+  end
+
   config.vm.provision "shell", inline: <<-STEP1
     dpkg-reconfigure debconf -f noninteractive -p critical
     export DEBIAN_FRONTEND=noninteractive
