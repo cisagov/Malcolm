@@ -71,9 +71,12 @@ function zkg_install_github_repo() {
   fi
 }
 
-# don't consume as many resources when building spicy-analyzers, even if it's slower.
-# https://github.com/zeek/spicy-analyzers/pull/60
-export SPICY_ZKG_PROCESSES=1
+# don't consume as many resources when building spicy analyzers, even if it's slower.
+# https://docs.zeek.org/projects/spicy/en/latest/toolchain.html
+TOTAL_CPUS="$(nproc --all 2>/dev/null || echo '1')"
+TOTAL_CPUS=$(( TOTAL_CPUS / 2 ))
+(( $TOTAL_CPUS <= 0 )) && TOTAL_CPUS=1
+export HILTI_JIT_PARALLELISM=${BUILD_JOBS:-$TOTAL_CPUS}
 
 # install Zeek packages that install nicely using zkg
 ZKG_GITHUB_URLS=(
@@ -89,6 +92,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-ethercat"
   "https://github.com/cisagov/icsnpp-ge-srtp"
   "https://github.com/cisagov/icsnpp-genisys"
+  "https://github.com/cisagov/icsnpp-hart-ip"
   "https://github.com/cisagov/icsnpp-modbus"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-profinet-io-cm"
@@ -126,12 +130,6 @@ ZKG_GITHUB_URLS=(
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
 )
-if grep -q minihog /opt/sensor/.os-info >/dev/null 2>&1; then
-  # for some reason the icsnpp-hart-ip parser takes hours (or never finishes) in the minihog build without CMAKE_BUILD_TYPE=Debug
-  ZKG_GITHUB_URLS+=( "https://github.com/cisagov/icsnpp-hart-ip|main|CMAKE_BUILD_TYPE=Debug" )
-else
-  ZKG_GITHUB_URLS+=( "https://github.com/cisagov/icsnpp-hart-ip" )
-fi
 
 for i in ${ZKG_GITHUB_URLS[@]}; do
   zkg_install_github_repo "$i"
