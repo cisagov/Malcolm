@@ -1727,6 +1727,8 @@ class MalcolmSource extends WISESource {
       "zeek.known_certs.serial",
       "zeek.known_certs.subject",
       "zeek.known_modbus.device_type",
+      "zeek.known_routers.ttl",
+      "zeek.known_routers.hlim",
       "zeek.ldap.argument",
       "zeek.ldap.message_id",
       "zeek.ldap.object",

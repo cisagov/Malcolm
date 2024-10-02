@@ -56,7 +56,6 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
   redef LogAscii::use_json = T;
 @endif
 
-@load tuning/defaults
 @load frameworks/software/vulnerable
 @load frameworks/software/version-changes
 @load frameworks/software/windows-version-detection

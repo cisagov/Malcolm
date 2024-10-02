@@ -199,6 +199,8 @@
         "zeek.known_certs.issuer_subject": { "type": "keyword" },
         "zeek.known_certs.serial": { "type": "keyword" },
         "zeek.known_certs.subject": { "type": "keyword" },
+        "zeek.known_routers.ttl": { "type": "integer" },
+        "zeek.known_routers.hlim": { "type": "integer" },
         "zeek.ldap.argument": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.ldap.message_id": { "type": "keyword" },
         "zeek.ldap.object": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
