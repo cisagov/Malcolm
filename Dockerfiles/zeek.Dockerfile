@@ -35,6 +35,7 @@ USER root
 # for download and install
 ARG ZEEK_VERSION=7.0.2-0
 ENV ZEEK_VERSION $ZEEK_VERSION
+ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
 # put Zeek and Spicy in PATH
 ENV ZEEK_DIR "/opt/zeek"

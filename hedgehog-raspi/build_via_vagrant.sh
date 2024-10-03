@@ -99,6 +99,7 @@ YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-co
 [[ -n $YML_IMAGE_VERSION ]] && echo "$YML_IMAGE_VERSION" > "$SCRIPT_PATH"/shared/version.txt
 [[ ${#MAXMIND_GEOIP_DB_LICENSE_KEY} -gt 1 ]] && echo "$MAXMIND_GEOIP_DB_LICENSE_KEY" > "$SCRIPT_PATH"/shared/maxmind_license.txt
 [[ ${#MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL} -gt 1 ]] && echo "$MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL" > "$SCRIPT_PATH"/shared/maxmind_url.txt
+[[ ${#ZEEK_DEB_ALTERNATE_DOWNLOAD_URL} -gt 1 ]] && echo "$ZEEK_DEB_ALTERNATE_DOWNLOAD_URL" > "$SCRIPT_PATH"/shared/zeek_url.txt
 [[ ${#GITHUB_TOKEN} -gt 1 ]] && echo "GITHUB_TOKEN=$GITHUB_TOKEN" >> "$SCRIPT_PATH"/shared/environment.chroot
 echo "VCS_REVSION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
 trap cleanup_shared_and_docs EXIT

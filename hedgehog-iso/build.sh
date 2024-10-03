@@ -190,7 +190,7 @@ if [ -d "$WORKDIR" ]; then
     "https://github.com/arkime/arkime/releases/download/v${ARKIME_VER}/arkime_${ARKIME_VER}-1.debian12_amd64.deb"
 
   # download Zeek .deb packages
-  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/
+  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/ -f "$SCRIPT_PATH/shared/zeek_url.txt"
 
   # reclaim some space
   docker system prune --volumes --force

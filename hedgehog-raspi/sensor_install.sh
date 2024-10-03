@@ -197,7 +197,7 @@ build_yara_src() {
 build_zeek() {
     # install zeek from debs from OpenSUSE
     mkdir -p /tmp/zeek-debs
-    /bin/bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-debs
+    /bin/bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-debs -f "$SHARED_DIR/zeek_url.txt"
     dpkg -i /tmp/zeek-debs/*.deb
 }
 
