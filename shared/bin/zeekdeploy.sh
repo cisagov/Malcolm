@@ -181,6 +181,12 @@ else
 fi
 sed -r -i "s@(LogDir)\s*=\s*.*@\1 = $ARCHIVE_PATH@" ./zeekctl.cfg
 sed -r -i "s@(SpoolDir)\s*=\s*.*@\1 = $WORK_PATH@" ./zeekctl.cfg
+# We're setting FileExtract::prefix for the directory for file extraction, so we
+#   don't want this new default behavior from zeekctl. So, set FileExtractDir
+#   there to an empty value.
+# See   https://github.com/zeek/zeekctl/blob/7e1a8448083ef0013f15e67ce001836e680589a2/CHANGES#L11-L26
+#   and https://github.com/zeek/zeekctl/issues/65
+sed -r -i "s@(FileExtractDir)\s*=\s*.*@\1 =@" ./zeekctl.cfg
 
 sed -r -i "s/(MailConnectionSummary)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
 sed -r -i "s/(MinDiskSpace)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
