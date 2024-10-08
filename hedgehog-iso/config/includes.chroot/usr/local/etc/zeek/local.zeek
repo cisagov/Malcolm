@@ -56,7 +56,6 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
   redef LogAscii::use_json = T;
 @endif
 
-@load tuning/defaults
 @load frameworks/software/vulnerable
 @load frameworks/software/version-changes
 @load frameworks/software/windows-version-detection
@@ -70,6 +69,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load protocols/ftp/software
 @load protocols/http/detect-sqli
 @load protocols/http/detect-webapps
+@load protocols/http/header-names
 @load protocols/http/software
 @load protocols/http/software-browser-plugins
 @load protocols/mysql/software
@@ -282,6 +282,8 @@ event zeek_init() &priority=-5 {
   redef LDAP::default_capture_password = T;
 @endif
 
+redef HTTP::log_client_header_names = T;
+redef HTTP::log_server_header_names = T;
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;

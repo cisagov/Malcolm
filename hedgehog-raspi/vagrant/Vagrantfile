@@ -26,14 +26,24 @@ Vagrant.configure("2") do |config|
     config.vbguest.auto_update = false
   end
 
-  config.vm.provider "virtualbox" do |vb|
-    vb.memory = "8192"
-    vb.cpus = 4
+  config.vm.provider "virtualbox" do |vm|
+    vm.memory = "8192"
+    vm.cpus = 4
   end
 
-  config.vm.provider "libvirt" do |lv|
-    lv.memory = "8192"
-    lv.cpus = 4
+  config.vm.provider "libvirt" do |vm|
+    vm.memory = "8192"
+    vm.cpus = 4
+  end
+
+  config.vm.provider "vmware_desktop" do |vm|
+    vm.memory = "8192"
+    vm.cpus = 4
+  end
+
+  config.vm.provider "vmware_fusion" do |vm|
+    vm.memory = "8192"
+    vm.cpus = 4
   end
 
   config.vm.provision "shell", inline: <<-STEP1

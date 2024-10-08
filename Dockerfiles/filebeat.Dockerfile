@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.15.1
+FROM docker.elastic.co/beats/filebeat-oss:8.15.2
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -108,7 +108,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         unzip \
         xz-utils && \
     ln -s -f -r /usr/bin/python3.9 /usr/bin/python3 && \
-    python3.9 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==5.0.2 && \
+    python3.9 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==5.0.3 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \

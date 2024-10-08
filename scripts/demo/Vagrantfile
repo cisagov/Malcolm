@@ -43,6 +43,19 @@ Vagrant.configure("2") do |config|
     libvirt.storage :file, :size => '150G'
   end
 
+
+  config.vm.provider "vmware_desktop" do |vd|
+    vd.cpus   = 8
+    vd.memory = 24576
+    config.vm.disk :disk, size: "150G"
+  end
+
+  config.vm.provider "vmware_fusion" do |vf|
+    vf.cpus   = 8
+    vf.memory = 24576
+    config.vm.disk :disk, size: "150G"
+  end
+
   config.vm.provision "shell", privileged: true, inline: <<-STEP0
     yum install -y btrfs-progs
     DISK=$(lsblk -o NAME,FSTYPE -dsn | awk '$2 == "" {print $1}' | grep -P "^[a-z]+$" | tail -n 1)
