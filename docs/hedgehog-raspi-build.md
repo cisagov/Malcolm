@@ -10,19 +10,21 @@ Hedgehog Linux can [also be built]({{ site.github.repository_url }}/tree/{{ site
 
 ## Building the Image
 
-Official downloads of the Hedgehog Linux Raspberry Pi image are not provided: however, it can be built easily on an internet-connected Linux host with Vagrant:
+Official downloads of the Hedgehog Linux Raspberry Pi image [can be downloaded](download.md#DownloadISOs) from the GitHub releases page. It can also be built easily on an Internet-connected system with Vagrant:
 
 * [Vagrant](https://www.vagrantup.com/)
     - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
     - [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box
 
-The build should work with either the [VirtualBox](https://www.virtualbox.org/) provider or the [libvirt](https://libvirt.org/) provider:
+The build should work with a variety of [Vagrant providers](https://developer.hashicorp.com/vagrant/docs/providers):
 
-* [VirtualBox](https://www.virtualbox.org/) [provider](https://www.vagrantup.com/docs/providers/virtualbox)
-    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
+* [VMware](https://www.vmware.com/) [provider](https://developer.hashicorp.com/vagrant/docs/providers/vmware)
+    - [`vagrant-vmware-desktop`](https://github.com/hashicorp/vagrant-vmware-desktop) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
     - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box to `libvirt` format
+* [VirtualBox](https://www.virtualbox.org/) [provider](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox)
+    - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 
 To perform a clean build the Hedgehog Linux Raspberry Pi image, navigate to your local [Malcolm]({{ site.github.repository_url }}/) working copy and run:
 

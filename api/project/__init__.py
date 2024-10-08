@@ -743,7 +743,7 @@ def fields():
             s = SearchClass(
                 using=databaseClient,
                 index=index_from_args(args),
-            ).extra(size=5000)
+            ).extra(size=6000)
             for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
                 if (fieldname := malcolm_utils.deep_get(hit, ['dbField2'])) and (fieldname not in fields):
                     if debugApi:

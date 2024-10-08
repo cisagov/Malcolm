@@ -129,6 +129,7 @@ jobs:
           echo "${{ steps.extract_malcolm_version.outputs.mversion }}" > ./shared/version.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}" > ./shared/maxmind_license.txt
           echo "${{ secrets.MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL }}" > ./shared/maxmind_url.txt
+          echo "${{ secrets.ZEEK_DEB_ALTERNATE_DOWNLOAD_URL }}" > ./shared/zeek_url.txt
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
           echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
           echo "BUILD_JOBS=2" > ./shared/environment.chroot

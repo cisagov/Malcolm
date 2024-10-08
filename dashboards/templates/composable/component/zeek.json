@@ -2,7 +2,7 @@
   "template": {
     "settings" : {
       "index" : {
-        "mapping.total_fields.limit" : "5000",
+        "mapping.total_fields.limit" : "6000",
         "mapping.nested_fields.limit" : "250",
         "max_docvalue_fields_search" : "200"
       }
@@ -111,6 +111,7 @@
         "zeek.gquic.tag_count": { "type": "integer" },
         "zeek.gquic.user_agent": { "type": "keyword", "ignore_above": 256, "fields": { "text": { "type": "text" } } },
         "zeek.gquic.version": { "type": "keyword" },
+        "zeek.http.client_header_names": { "type": "keyword" },
         "zeek.http.host": { "type": "keyword" },
         "zeek.http.info_code": { "type": "short" },
         "zeek.http.info_msg": { "type": "keyword" },
@@ -129,6 +130,7 @@
         "zeek.http.resp_fuids": { "type": "keyword" },
         "zeek.http.resp_mime_types": { "type": "keyword" },
         "zeek.http.response_body_len": { "type": "long" },
+        "zeek.http.server_header_names": { "type": "keyword" },
         "zeek.http.status_code": { "type": "short" },
         "zeek.http.status_msg": { "type": "keyword", "ignore_above": 1024 },
         "zeek.http.tags": { "type": "keyword" },
@@ -199,6 +201,8 @@
         "zeek.known_certs.issuer_subject": { "type": "keyword" },
         "zeek.known_certs.serial": { "type": "keyword" },
         "zeek.known_certs.subject": { "type": "keyword" },
+        "zeek.known_routers.ttl": { "type": "integer" },
+        "zeek.known_routers.hlim": { "type": "integer" },
         "zeek.ldap.argument": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text", "norms": false } } },
         "zeek.ldap.message_id": { "type": "keyword" },
         "zeek.ldap.object": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
