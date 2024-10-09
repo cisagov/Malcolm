@@ -142,8 +142,14 @@ export TMP="$TMP_PATH"
 # if file extraction is enabled and file extraction script exists, set up the argument for zeek to use it
 [[ -z $ZEEK_RULESET ]] && ZEEK_RULESET="local"
 EXTRACTOR_ZEEK_SCRIPT="extractor.zeek"
+EXTRACTOR_INTERESTING_ZEEK_SCRIPT="extractor_override.interesting.zeek"
 ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRIPT"
+ZEEK_EXTRACTOR_INTERESTING_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_INTERESTING_ZEEK_SCRIPT"
 ([[ ! -r "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ "$ZEEK_EXTRACTOR_MODE" = "none" ]]) && ZEEK_EXTRACTOR_SCRIPT=""
+if [[ "$ZEEK_EXTRACTOR_MODE" = "interesting" ]] && [[ -r "$ZEEK_EXTRACTOR_INTERESTING_SCRIPT" ]]; then
+  ZEEK_EXTRACTOR_OVERRIDE_FILE="$ZEEK_EXTRACTOR_INTERESTING_SCRIPT"
+  export ZEEK_EXTRACTOR_MODE="mapped"
+fi
 ([[ ! -r "$ZEEK_EXTRACTOR_OVERRIDE_FILE" ]] || [[ -z "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ ! "$ZEEK_EXTRACTOR_MODE" = "mapped" ]]) && ZEEK_EXTRACTOR_OVERRIDE_FILE=""
 
 # make sure "intel" directory exists, even if empty
