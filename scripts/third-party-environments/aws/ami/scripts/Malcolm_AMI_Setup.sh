@@ -66,6 +66,13 @@ if [[ $EUID -eq 0 ]]; then
 else
     SUDO_CMD="sudo"
 fi
+
+$SUDO_CMD mkdir -p /etc/sudoers.d/
+echo 'Defaults umask = 0022' | ($SUDO_CMD su -c 'EDITOR="tee" visudo -f /etc/sudoers.d/99-default-umask')
+echo 'Defaults umask_override' | ($SUDO_CMD su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/99-default-umask')
+$SUDO_CMD chmod 440 /etc/sudoers.d/99-default-umask
+umask 0022
+
 MALCOLM_USER="$(id -nu $MALCOLM_UID)"
 MALCOLM_USER_GROUP="$(id -gn $MALCOLM_UID)"
 MALCOLM_USER_HOME="$(getent passwd "$MALCOLM_USER" | cut -d: -f6)"
@@ -101,16 +108,15 @@ function InstallPythonPackages {
     $SUDO_CMD yum install -y \
         python3-pip \
         python3-setuptools \
-        python3-wheel
+        python3-wheel \
+        python3-ruamel-yaml \
+        python3-requests+security
 
     $SUDO_CMD /usr/bin/python3 -m pip install $USERFLAG -U \
         dateparser \
         kubernetes \
         python-dotenv \
-        pythondialog \
-        ruamel.yaml \
-        requests \
-        urllib3==1.26.19
+        pythondialog
 }
 
 ################################################################################
@@ -331,7 +337,7 @@ EOT
 fi
 EOF
 
-    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP "$MALCOLM_USER_HOME"
+    $SUDO_CMD chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP "$MALCOLM_USER_HOME"
 }
 
 ################################################################################

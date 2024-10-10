@@ -39,6 +39,12 @@ else
   SUDO_CMD="sudo"
 fi
 
+$SUDO_CMD mkdir -p /etc/sudoers.d/
+echo 'Defaults umask = 0022' | ($SUDO_CMD su -c 'EDITOR="tee" visudo -f /etc/sudoers.d/99-default-umask')
+echo 'Defaults umask_override' | ($SUDO_CMD su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/99-default-umask')
+$SUDO_CMD chmod 440 /etc/sudoers.d/99-default-umask
+umask 0022
+
 LINUX_CPU=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 
 # default user paths
@@ -209,9 +215,7 @@ function InstallEnvPackages {
         kubernetes \
         mmguero \
         python-dotenv \
-        pythondialog \
-        requests \
-        ruamel-yaml
+        pythondialog
     fi
   fi
 
@@ -279,6 +283,8 @@ function InstallCommonPackages {
       httpd-tools
       openssl
       python3-pip
+      python3-requests+security
+      python3-ruamel-yaml
       python3-setuptools
       python3-wheel
       tmux
@@ -491,7 +497,7 @@ function InstallMalcolm {
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
       python3 ./scripts/configure \
           --defaults \
-          --runtime docker
+          --runtime docker \
           --malcolm-profile \
           --restart-malcolm \
           --auto-arkime \
