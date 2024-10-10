@@ -209,6 +209,7 @@ function InstallEnvPackages {
         kubernetes \
         mmguero \
         python-dotenv \
+        pythondialog \
         requests \
         ruamel-yaml
     fi
@@ -274,6 +275,7 @@ function InstallCommonPackages {
 
     PACKAGE_LIST=(
       cronie
+      dialog
       httpd-tools
       openssl
       python3-pip
@@ -413,6 +415,8 @@ EOT
 * hard memlock unlimited
 * soft nproc 262144
 * hard nproc 524288
+* soft core 0
+* hard core 0
 EOT
     fi # limits.conf confirmation
   fi # limits.conf check

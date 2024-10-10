@@ -39,7 +39,7 @@
         "filters": {
           "architecture": "{{user `instance_arch`}}",
           "virtualization-type": "hvm",
-          "name": "amzn2-ami-kernel-5.10-hvm-*-{{user `instance_arch`}}-gp2",
+          "name": "al2023-ami-ecs-hvm-*-kernel-6.1-{{user `instance_arch`}}",
           "root-device-type": "ebs"
         },
         "owners": [
@@ -56,7 +56,7 @@
         {
           "device_name": "/dev/xvda",
           "volume_type": "gp2",
-          "volume_size": 20,
+          "volume_size": 30,
           "delete_on_termination": true
         }
       ],
