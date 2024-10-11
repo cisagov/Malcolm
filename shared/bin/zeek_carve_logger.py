@@ -155,7 +155,7 @@ def main():
     broSigLogSpec = args.broSigLogSpec
     if broSigLogSpec is not None:
         if os.path.isdir(broSigLogSpec):
-            # _carved tag will be recognized by 12_zeek_mutate.conf in logstash
+            # _carved tag will be recognized by 1200_zeek_mutate.conf in logstash
             broSigLogSpec = os.path.join(broSigLogSpec, "signatures(_carved).log")
         else:
             # make sure path to write to zeek signatures log file exists before we start writing
@@ -265,9 +265,9 @@ def main():
                             note=ZEEK_SIGNATURE_NOTICE,
                             signature_id=scanResult[FILE_SCAN_RESULT_MESSAGE],
                             event_message=scanResult[FILE_SCAN_RESULT_DESCRIPTION],
-                            sub_message=fileSpecFields.fid
-                            if fileSpecFields.fid is not None
-                            else os.path.basename(fileName),
+                            sub_message=(
+                                fileSpecFields.fid if fileSpecFields.fid is not None else os.path.basename(fileName)
+                            ),
                             signature_count=scanResult[FILE_SCAN_RESULT_HITS],
                             host_count=scanResult[FILE_SCAN_RESULT_ENGINES],
                         )
@@ -321,7 +321,9 @@ def main():
                                     else:
                                         # delete the file
                                         os.remove(fileName)
-                                        logging.debug(f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})")
+                                        logging.debug(
+                                            f"{scriptName}:\t🚫\t{fileName} ({fileScanCount}/{len(scanners)})"
+                                        )
 
     # graceful shutdown
     logging.info(f"{scriptName}: shutting down...")
