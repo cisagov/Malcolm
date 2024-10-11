@@ -1,5 +1,4 @@
 ---
-# See https://wiki.debian.org/RaspberryPi3 for known issues and more details.
 # image.yml based on revision: __GITCOMMIT__
 
 steps:
