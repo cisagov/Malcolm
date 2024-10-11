@@ -68,11 +68,17 @@ Bookworm, you can just issue:
    make raspi_4_bookworm.img
 ```
 
+At this point; it might be wise to go do something else. The build **WILL** take a while. 
+Initial testing on a 8-core 16GB build machine took approximately 5.5 hours to complete the image.
+
 **NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
 that any variant other than RPI 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
 
-At this point; it might be wise to go do something else. The build **WILL** take a while. 
-Initial testing on a 8-core 16GB build machine took approximately 5.5 hours to complete the image.
+**NOTE:** Raspberry Pi 5 is **not yet supported** due to missing upstream kernel support. See the following resources:
+
+* [Debian Wiki](https://raspi.debian.net/faq/#faq-rpi5)
+* [Debian Mailing list, March 2024](https://lists.debian.org/debian-arm/2024/03/msg00009.html)
+* [Debian Mailing list, November 2023](https://lists.debian.org/debian-arm/2023/11/msg00025.html)
 
 ## Installing the image onto the Raspberry Pi
 
