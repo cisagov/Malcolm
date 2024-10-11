@@ -102,6 +102,7 @@
 "tds_rpc": ["database", "network"]
 "tds_sql_batch": ["database", "network"]
 "tunnel": ["network"]
+"websocket": ["web", "network"]
 "weird": ["intrusion_detection", "network"]
 "wireguard": ["network"]
 "x509": ["file", "network"]
