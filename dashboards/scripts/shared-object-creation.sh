@@ -470,8 +470,19 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
               # if the file to import is newer than the existing anomaly detector, then update it
               if (( $DETECTOR_NEW_UPDATE_TIME > $DETECTOR_EXISTING_UPDATE_TIME )); then
-                [[ "$DETECTOR_NAME" != "$DUMMY_DETECTOR_NAME" ]] && \
+
+                # If the detectors have never been started before, we need to import the "dummy" one,
+                #   but only this first time, not on subsequent runs of this script. We can do that
+                #   by checking for the existence of the .opendistro-anomaly-detection-state index.
+                curl "${CURL_CONFIG_PARAMS[@]}" --head --location --fail --silent --output /dev/null \
+                  "$OPENSEARCH_URL_TO_USE"/.opendistro-anomaly-detection-state && \
+                  DETECTORS_STARTED=1 || \
+                  DETECTORS_STARTED=0
+
+                # Import the anomaly detector
+                ( [[ $DETECTORS_STARTED == 0 ]] || [[ "$DETECTOR_NAME" != "$DUMMY_DETECTOR_NAME" ]] ) && \
                   echo "Importing detector \"${DETECTOR_NAME}\" ($DETECTOR_NEW_UPDATE_TIME > $DETECTOR_EXISTING_UPDATE_TIME) ..."
+
                 curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
                   -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" \
                   -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
@@ -480,7 +491,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             done
             rm -rf "${ANOMALY_IMPORT_DIR}"
 
-            # trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
+            # Trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
             # see:
             # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/109
             # - https://github.com/opensearch-project/anomaly-detection-dashboards-plugin/issues/155
