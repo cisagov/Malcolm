@@ -33,7 +33,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=7.0.1-0
+ARG ZEEK_VERSION=7.0.3-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 
 # put Zeek and Spicy in PATH
