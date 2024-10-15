@@ -16,6 +16,7 @@ global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_r
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
 global enip_ports_str = getenv("ZEEK_ENIP_PORTS");
+global zeek_ja4_ssh_packet_count = (getenv("ZEEK_JA4SSH_PACKET_COUNT") == "") ? 200 : to_count(getenv("ZEEK_JA4SSH_PACKET_COUNT"));
 global zeek_local_nets_str = getenv("ZEEK_LOCAL_NETS");
 
 global disable_spicy_ipsec = (getenv("ZEEK_DISABLE_SPICY_IPSEC") == true_regex) ? T : F;
