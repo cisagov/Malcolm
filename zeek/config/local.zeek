@@ -4,7 +4,7 @@
 ##!     https://docs.zeek.org/en/stable/script-reference/scripts.html
 ##!     https://github.com/zeek/zeek/blob/master/scripts/site/local.zeek
 
-global true_regex: pattern = /^\s*(?i:t(rue)?|y(es)?|on|1)\s*$/; 
+global true_regex: pattern = /^\s*(?i:t(rue)?|y(es)?|on|1)\s*$/;
 
 global disable_stats = (getenv("ZEEK_DISABLE_STATS") == true_regex) ? T : F;
 global disable_hash_all_files = (getenv("ZEEK_DISABLE_HASH_ALL_FILES") == true_regex) ? T : F;
@@ -43,7 +43,6 @@ global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
-
 
 redef Broker::default_listen_address = "127.0.0.1";
 redef ignore_checksums = T;
@@ -115,6 +114,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load custom
 
 event zeek_init() &priority=-5 {
+
   if (zeek_local_nets_str != "") {
     local nets_strs = split_string(zeek_local_nets_str, /,/);
     if (|nets_strs| > 0) {
