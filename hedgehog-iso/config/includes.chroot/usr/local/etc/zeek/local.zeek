@@ -284,7 +284,7 @@ event zeek_init() &priority=-5 {
 
 redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = ja4_ssh_packet_count;
 redef HTTP::log_client_header_names = T;
-redef HTTP::log_server_header_names = T
+redef HTTP::log_server_header_names = T;
 redef LDAP::default_log_search_attributes = F;
 redef SNIFFPASS::notice_log_enable = F;
 redef CVE_2021_44228::log = F;
