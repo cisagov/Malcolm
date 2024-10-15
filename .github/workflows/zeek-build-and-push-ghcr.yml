@@ -105,6 +105,7 @@ jobs:
             MALCOLM_VERSION=${{ steps.extract_malcolm_version.outputs.mversion }}
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
+            ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=${{ secrets.ZEEK_DEB_ALTERNATE_DOWNLOAD_URL }}
           push: true
           provenance: false
           platforms: ${{ matrix.platform }}

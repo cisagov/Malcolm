@@ -142,8 +142,14 @@ export TMP="$TMP_PATH"
 # if file extraction is enabled and file extraction script exists, set up the argument for zeek to use it
 [[ -z $ZEEK_RULESET ]] && ZEEK_RULESET="local"
 EXTRACTOR_ZEEK_SCRIPT="extractor.zeek"
+EXTRACTOR_INTERESTING_ZEEK_SCRIPT="extractor_override.interesting.zeek"
 ZEEK_EXTRACTOR_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_ZEEK_SCRIPT"
+ZEEK_EXTRACTOR_INTERESTING_SCRIPT="$ZEEK_INSTALL_PATH"/share/zeek/site/"$EXTRACTOR_INTERESTING_ZEEK_SCRIPT"
 ([[ ! -r "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ "$ZEEK_EXTRACTOR_MODE" = "none" ]]) && ZEEK_EXTRACTOR_SCRIPT=""
+if [[ "$ZEEK_EXTRACTOR_MODE" = "interesting" ]] && [[ -r "$ZEEK_EXTRACTOR_INTERESTING_SCRIPT" ]]; then
+  ZEEK_EXTRACTOR_OVERRIDE_FILE="$ZEEK_EXTRACTOR_INTERESTING_SCRIPT"
+  export ZEEK_EXTRACTOR_MODE="mapped"
+fi
 ([[ ! -r "$ZEEK_EXTRACTOR_OVERRIDE_FILE" ]] || [[ -z "$ZEEK_EXTRACTOR_SCRIPT" ]] || [[ ! "$ZEEK_EXTRACTOR_MODE" = "mapped" ]]) && ZEEK_EXTRACTOR_OVERRIDE_FILE=""
 
 # make sure "intel" directory exists, even if empty
@@ -181,6 +187,12 @@ else
 fi
 sed -r -i "s@(LogDir)\s*=\s*.*@\1 = $ARCHIVE_PATH@" ./zeekctl.cfg
 sed -r -i "s@(SpoolDir)\s*=\s*.*@\1 = $WORK_PATH@" ./zeekctl.cfg
+# We're setting FileExtract::prefix for the directory for file extraction, so we
+#   don't want this new default behavior from zeekctl. So, set FileExtractDir
+#   there to an empty value.
+# See   https://github.com/zeek/zeekctl/blob/7e1a8448083ef0013f15e67ce001836e680589a2/CHANGES#L11-L26
+#   and https://github.com/zeek/zeekctl/issues/65
+sed -r -i "s@(FileExtractDir)\s*=\s*.*@\1 =@" ./zeekctl.cfg
 
 sed -r -i "s/(MailConnectionSummary)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg
 sed -r -i "s/(MinDiskSpace)\s*=\s*.*/\1 = 0/" ./zeekctl.cfg

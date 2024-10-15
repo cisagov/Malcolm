@@ -5,7 +5,7 @@ IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.15.1"
+BEATS_VER="8.15.2"
 BEATS_OSS="-oss"
 
 ARKIME_VER="5.4.0"
@@ -190,7 +190,7 @@ if [ -d "$WORKDIR" ]; then
     "https://github.com/arkime/arkime/releases/download/v${ARKIME_VER}/arkime_${ARKIME_VER}-1.debian12_amd64.deb"
 
   # download Zeek .deb packages
-  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/
+  bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/ -f "$SCRIPT_PATH/shared/zeek_url.txt"
 
   # reclaim some space
   docker system prune --volumes --force

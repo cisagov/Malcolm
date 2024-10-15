@@ -49,6 +49,7 @@
 "known_certs": ["file"]
 "known_hosts": ["network"]
 "known_modbus": ["ot", "network"]
+"known_routers": ["network"]
 "known_services": ["network"]
 "ldap": ["authentication", "iam", "network"]
 "login": ["authentication", "network"]

@@ -67,7 +67,7 @@ RUN apt-get -q update && \
       python-magic \
       pyzmq \
       requests \
-      watchdog==5.0.2 && \
+      watchdog==5.0.3 && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
