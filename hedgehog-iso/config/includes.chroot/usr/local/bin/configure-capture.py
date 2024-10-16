@@ -173,7 +173,13 @@ class Constants:
     )
     MSG_CONFIG_ARKIME_VIEWER_PASSWORD = 'Specify password hash secret for Arkime viewer cluster'
     MSG_CONFIG_REQUEST_ACL = 'Specify IP addresses for ACL for artifact reachback from Malcolm (one per line)'
-    MSG_CONFIG_EXTRA_TAGS = 'Specify extra tags for logs forwarded to Malcolm (one per line)'
+    MSG_CONFIG_EXTRA_TAGS = (
+        'Specify extra tags for logs (captured on all interfaces) forwarded to Malcolm (one per line)'
+    )
+    MSG_CONFIG_EXTRA_TAGS_PER_INTERFACE_PROMPT = 'Specify per-interface extra tags?'
+    MSG_CONFIG_EXTRA_TAGS_PER_INTERFACE = (
+        'Specify extra tags for logs (captured on {}) forwarded to Malcolm (one per line)'
+    )
     MSG_ERR_PLEBE_REQUIRED = 'this utility should be be run as non-privileged user'
     MSG_ERROR_DIR_NOT_FOUND = 'One or more of the paths specified does not exist'
     MSG_ERROR_FILE_NOT_FOUND = 'One or more of the files specified does not exist'
@@ -1309,28 +1315,60 @@ def main():
 
                 elif fwd_mode == Constants.TAGS_CONFIGURE:
 
-                    # get list of tags for logs forwarded to Malcolm
-                    lines = previous_config_values[Constants.MALCOLM_EXTRA_TAGS].split(",")
-                    code, lines = d.editbox_str(
-                        "\n".join(list(filter(None, list(set(lines))))), title=Constants.MSG_CONFIG_EXTRA_TAGS
+                    # get list of tags for logs forwarded to Malcolm into a dictionary like:
+                    # {
+                    #     '': ['global1', 'global2', 'global3'],
+                    #     'eth0': ['specific1', 'specific2'],
+                    #     'eth1': ['specific3', 'specific4']
+                    # }
+                    prev_tags = defaultdict(lambda: [])
+                    new_tags = defaultdict(lambda: [])
+
+                    # pre-load previous config values
+                    for item in previous_config_values[Constants.MALCOLM_EXTRA_TAGS].split(","):
+                        if ':' in item:
+                            name, value = item.split(':', 1)
+                            prev_tags[name].append(value)
+                        else:
+                            prev_tags[''].append(value)
+
+                    # ask for the global tags
+                    code, new_tags_all_ifaces = d.editbox_str(
+                        "\n".join(list(filter(None, list(set(prev_tags['']))))), title=Constants.MSG_CONFIG_EXTRA_TAGS
                     )
-                    if code != Dialog.OK:
+                    if code == Dialog.OK:
+                        new_tags[''] = new_tags_all_ifaces.split('\n')
+                    else:
                         raise CancelledError
 
-                    # modify specified tags array value in-place in SENSOR_CAPTURE_CONFIG file
+                    # ask for the interface-specific tags
+                    if (
+                        d.yesno(Constants.MSG_CONFIG_EXTRA_TAGS_PER_INTERFACE_PROMPT, yes_label="No", no_label="Yes")
+                        == Dialog.OK
+                    ):
+                        # previously used capture interfaces
+                        capture_ifaces = set([x.strip() for x in capture_config_dict["CAPTURE_INTERFACE"].split(',')])
+                        if not capture_ifaces:
+                            capture_ifaces = [adapter.name for adapter in get_available_adapters()]
+                        for iface_name in capture_ifaces:
+                            code, new_tags_one_iface = d.editbox_str(
+                                "\n".join(list(filter(None, list(set(prev_tags[iface_name]))))),
+                                title=Constants.MSG_CONFIG_EXTRA_TAGS_PER_INTERFACE.format(iface_name),
+                            )
+                            if code == Dialog.OK:
+                                new_tags[iface_name] = new_tags_one_iface.split('\n')
+                            else:
+                                raise CancelledError
+
+                    # modify specified tags array value in-place in SENSOR_CAPTURE_CONFIG file,
+                    #   formatted like global1,global2,global3,eth0:specific1,eth0:specific2,eth1:specific3,eth1:specific4
+                    new_tags = {
+                        key: list(set([re.sub(r'[^A-Za-z0-9 ._-]', '', s.strip()) for s in value]))
+                        for key, value in new_tags.items()
+                    }
                     newTagsValsDict = {
                         Constants.MALCOLM_EXTRA_TAGS: ','.join(
-                            [
-                                tag
-                                for tag in list(
-                                    set(
-                                        filter(
-                                            None,
-                                            [re.sub(r'[^A-Za-z0-9 ._-]', '', x.strip()) for x in lines.split('\n')],
-                                        )
-                                    )
-                                )
-                            ]
+                            [f"{key}:{value}" if key else value for key, values in new_tags.items() for value in values]
                         )
                     }
                     rewrite_dict_to_file(newTagsValsDict, Constants.SENSOR_CAPTURE_CONFIG)
