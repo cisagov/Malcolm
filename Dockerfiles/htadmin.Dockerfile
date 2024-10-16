@@ -39,6 +39,7 @@ RUN apt-get -q update && \
     apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends install \
       ca-certificates \
       curl \
+      jq \
       libmcrypt-dev \
       libmcrypt4 \
       make \

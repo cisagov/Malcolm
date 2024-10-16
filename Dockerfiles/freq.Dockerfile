@@ -34,6 +34,7 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
       curl \
+      jq \
       procps \
       psmisc \
       python3 \

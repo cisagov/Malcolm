@@ -49,6 +49,7 @@ RUN set -x && \
         curl \
         gettext \
         git \
+        jq \
         patch \
         python3-setuptools \
         python3-pip \

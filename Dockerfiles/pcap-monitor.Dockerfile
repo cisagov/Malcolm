@@ -48,6 +48,7 @@ RUN apt-get -q update && \
     apt-get install --no-install-recommends -y -q \
       file \
       inotify-tools \
+      jq \
       libzmq5 \
       procps \
       psmisc \

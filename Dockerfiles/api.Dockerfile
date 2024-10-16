@@ -68,7 +68,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \
-    && apt-get -y -q --no-install-recommends install curl netcat-openbsd rsync tini \
+    && apt-get -y -q --no-install-recommends install curl jq netcat-openbsd rsync tini \
     && python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache /wheels/* \
     && groupadd --gid ${DEFAULT_GID} ${PGROUP} \
