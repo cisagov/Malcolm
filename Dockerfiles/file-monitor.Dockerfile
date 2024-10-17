@@ -105,7 +105,7 @@ ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
-COPY --chmod=777 shared/bin/capa-build.sh /usr/local/bin/
+COPY --chmod=755 shared/bin/capa-build.sh /usr/local/bin/
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
