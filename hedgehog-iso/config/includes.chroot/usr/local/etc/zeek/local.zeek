@@ -288,7 +288,7 @@ event zeek_init() &priority=-5 {
   redef LDAP::default_capture_password = T;
 @endif
 
-redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = ja4_ssh_packet_count;
+redef FINGERPRINT::JA4SSH::ja4_ssh_packet_count = zeek_ja4_ssh_packet_count;
 redef HTTP::log_client_header_names = T;
 redef HTTP::log_server_header_names = T;
 redef LDAP::default_log_search_attributes = F;
