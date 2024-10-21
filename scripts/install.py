@@ -48,6 +48,7 @@ from malcolm_common import (
     DotEnvDynamic,
     DownloadToFile,
     DumpYaml,
+    GetPlatformOSRelease,
     HOMEBREW_INSTALL_URLS,
     KubernetesDynamic,
     LoadYaml,
@@ -4613,13 +4614,16 @@ def main():
         # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
 
     if orchMode == OrchestrationFramework.DOCKER_COMPOSE:
-        runtimeOptions = ('docker', 'podman')
-        loopBreaker = CountUntilException(MaxAskForValueCount)
-        while (args.runtimeBin not in runtimeOptions) and loopBreaker.increment():
-            args.runtimeBin = InstallerChooseOne(
-                'Select container runtime engine',
-                choices=[(x, '', x == runtimeOptions[0]) for x in runtimeOptions],
-            )
+        if GetPlatformOSRelease() == 'hedgehog-malcolm':
+            args.runtimeBin = 'docker'
+        else:
+            runtimeOptions = ('docker', 'podman')
+            loopBreaker = CountUntilException(MaxAskForValueCount)
+            while (args.runtimeBin not in runtimeOptions) and loopBreaker.increment():
+                args.runtimeBin = InstallerChooseOne(
+                    'Select container runtime engine',
+                    choices=[(x, '', x == runtimeOptions[0]) for x in runtimeOptions],
+                )
         if args.debug:
             eprint(f"Container engine: {args.runtimeBin}")
 
