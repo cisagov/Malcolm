@@ -34,10 +34,14 @@
 -a always,exit -F path=/etc/fstab -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/hosts.deny -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/login.defs -F perm=wa -k config_file_change
+-a always,exit -F path=/etc/logrotate.conf -F perm=wa -k config_file_change
+-a always,exit -F dir=/etc/logrotate.d/ -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/profile -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/sysctl.conf -F perm=wa -k config_file_change
 -a always,exit -F dir=/etc/ufw/ -F perm=wa -k ufw_config_file_chg
 -a always,exit -F path=/sbin/apparmor_parser -F perm=x -F auid>=1000 -F auid!=4294967295 -k MAC-policy
+-a always,exit -F path=/sbin/iptables-restore -F perm=x -k iptables_restore_exec
+-a always,exit -F path=/sbin/ip6tables-restore -F perm=x -k iptables_restore_exec
 -a always,exit -F path=/sbin/pam_tally -F perm=wxa -F auid>=1000 -F auid!=4294967295 -k privileged-pam
 -a always,exit -F path=/sbin/pam_tally2 -F perm=wxa -F auid>=1000 -F auid!=4294967295 -k privileged-pam
 -a always,exit -F path=/sbin/unix_chkpwd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged-passwd
@@ -78,6 +82,7 @@
 -a always,exit -F path=/usr/bin/wget -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/bin/write.ul -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/lib/dbus-1.0/dbus-daemon-launch-helper -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/usr/lib/polkit-1/polkit-agent-helper-1 -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/lib/eject/dmcrypt-get-device -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/lib/openssh/ssh-keysign -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged-ssh
 -a always,exit -F path=/usr/lib/policykit-1/polkit-agent-helper-1 -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
@@ -87,6 +92,7 @@
 -a always,exit -F path=/usr/sbin/addgroup -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/adduser -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/exim4 -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
+-a always,exit -F path=/usr/sbin/faillock -F perm=wxa -F auid>=1000 -F auid!=4294967295 -k privileged-pam
 -a always,exit -F path=/usr/sbin/groupadd -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/mount.cifs -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged
 -a always,exit -F path=/usr/sbin/netfilter-persistent -F perm=x -F auid>=1000 -F auid!=4294967295 -k nft_persistent_use
@@ -126,6 +132,9 @@
 -w /sbin/insmod -p x -k modules
 -w /sbin/modprobe -p x -k modules
 -w /sbin/rmmod -p x -k modules
+-w /usr/sbin/netfilter-persistent -p x -F auid>=1000 -F auid!=4294967295 -k nft_persistent_use
+-w /usr/sbin/nft -p x -F auid>=1000 -F auid!=4294967295 -k nft_cmd_use
+-w /usr/share/netfilter-persistent/plugins.d/ -p wa -k nft_config_file_change
 -w /var/log/btmp -p wa -k session
 -w /var/log/faillog -p wa -k logins
 -w /var/log/lastlog -p wa -k logins
@@ -138,24 +147,35 @@
 # syscalls
 
 -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
 -a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
 -a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
 -a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
 -a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
 -a always,exit -F arch=b64 -S open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
 -a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
 -a always,exit -F arch=b64 -S open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
 -a always,exit -F arch=b64 -S execve -C gid!=egid -F key=execpriv
 -a always,exit -F arch=b64 -S execve -C uid!=euid -F key=execpriv
 -a always,exit -F arch=b64 -S init_module -S delete_module -S create_module -S finit_module -k modules
+-a always,exit -F arch=b32 -S init_module -S delete_module -S create_module -S finit_module -k modules
 -a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
 -a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
 -a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -S rmdir -F auid>=1000 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -S rmdir -F auid>=1000 -F auid!=4294967295 -k delete
 -a always,exit -F dir=/etc/audit/rules.d/ -F perm=wa -k config_file_change
 -a always,exit -F dir=/etc/pam.d/ -F perm=wa -k config_file_change
 -a always,exit -F dir=/etc/profile.d/ -F perm=wa -k config_file_change
 -a always,exit -F dir=/etc/security/ -F perm=wa -k config_file_change
 -a exit,always -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-a exit,always -F arch=b32 -S sethostname -S setdomainname -k system-locale
 
 # Make the configuration immutable -- reboot is required to change audit rules
 -e 2
