@@ -1318,6 +1318,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/upload-common.env
     - ./config/dashboards.env
     - ./config/opensearch.env
     environment:

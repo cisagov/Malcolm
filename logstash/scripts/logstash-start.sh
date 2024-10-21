@@ -10,7 +10,7 @@ HOST_PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines.available"
 # runtime pipelines parent directory
 export PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines"
 
-# runtime pipeliens configuration file
+# runtime pipelines configuration file
 export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 
 # for each pipeline in /usr/share/logstash/malcolm-pipelines, append the contents of this file to the dynamically-generated
