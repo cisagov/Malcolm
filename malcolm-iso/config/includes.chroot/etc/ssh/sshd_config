@@ -111,7 +111,7 @@ ClientAliveCountMax 0
 #ChrootDirectory none
 #VersionAddendum none
 
-Banner=/etc/issue
+Banner=/etc/issue.net
 
 # Allow client to pass locale environment variables
 AcceptEnv LANG LC_*

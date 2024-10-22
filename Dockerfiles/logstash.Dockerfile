@@ -105,6 +105,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash \
         /logstash-persistent-queue && \
+    chmod -R o-w /usr/share/logstash && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Complete."

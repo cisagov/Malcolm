@@ -251,6 +251,7 @@ clean_up() {
 
     # Set Hedgehog banner
     mv /root/hedgehog-ascii-text.txt /etc/issue
+    cp /etc/issue /etc/issue.net
 
     # Remove ethernet interface files left by installation
     # Sensor setup will create necessary files when user runs setup

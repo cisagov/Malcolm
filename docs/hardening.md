@@ -21,11 +21,15 @@ The Malcolm aggregator base operating system claims exceptions from the recommen
 
 **2.14 Add nodev option to /run/shm Partition**, **2.15 Add nosuid option to /run/shm Partition**, **2.16 Add noexec option to /run/shm Partition** - The Malcolm aggregator base operating system does not mount `/run/shm` as a separate partition, so these recommendations do not apply.
 
+**2.17 Set Sticky Bit on All World-Writable Directories** - The only directory found by [this script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/2.17_sticky_bit_world_writable_folder.sh) is `/var/mail`, which is configured as prescribed by the Debian maintainers.
+
 **2.19 Disable Mounting of freevxfs Filesystems**, **2.20 Disable Mounting of jffs2 Filesystems**, **2.21 Disable Mounting of hfs Filesystems**, **2.22 Disable Mounting of hfsplus Filesystems**, **2.23 Disable Mounting of squashfs Filesystems**, **2.24 Disable Mounting of udf Filesystems** - The Malcolm aggregator base operating system is not compiling a custom Linux kernel, so these filesystems are inherently supported as they are part Debian Linux's default kernel.
 
 **3.3 Set Boot Loader Password** - As maximizing availability is a system requirement, Malcolm should restart automatically without user intervention to ensure uninterrupted service. A boot loader password is not enabled.
 
 **4.8 Disable USB Devices** - The ability to ingest data (such as PCAP files) from a mounted USB mass storage device is a requirement of the system.
+
+**5.2 Install screen** - The Malcolm base operating system comes with `tmux`, a modern `screen` alternative. 
 
 **6.1 Ensure the X Window system is not installed**, **6.2 Ensure Avahi Server is not enabled**, **6.3 Ensure print server is not enabled** - An X Windows session is provided for displaying dashboards. The library packages `libavahi-common-data`, `libavahi-common3`, and `libcups2` are dependencies of some of the X components used by the Malcolm aggregator base operating system, but the `avahi` and `cups` services themselves are disabled.
 
@@ -54,6 +58,8 @@ Password-related recommendations under **9.2** and **10.1** - The library packag
 **10.1.6 Remove nopasswd option from the sudoers configuration** - A very limited set of operations (a single script used to run the AIDE integrity check as a non-root user) has the NOPASSWD option set to allow it to be run in the background without user intervention.
 
 **10.1.10 Set maxlogins for all accounts** and **10.5 Set Timeout on ttys** - The Malcolm aggregator base operating system does not create multiple regular user accounts: only the `root` and aggregator service accounts are used.
+
+**12.8 Find Un-owned Files and Directories** and **12.9 Find Un-grouped Files and Directories** - The files found by [these](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.8_find_unowned_files.sh) [scripts](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.9_find_ungrouped_files.sh) exist within the layers of Malcolm's Docker images. While they do not belong to any user/group the host system knows about, the ownership of these files is set correctly in each Docker container's entrypoint. These files are not accessible to any unprivileged user on the host.
 
 **12.10 Find SUID System Executables**, **12.11 Find SGID System Executables** - The few files found by [these](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.10_find_suid_files.sh) [scripts](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/12.11_find_sgid_files.sh) are valid exceptions required by the Malcolm aggregator base operating system's core requirements.
 

@@ -18,11 +18,15 @@ Hedgehog Linux claims exceptions from the recommendations in this benchmark in t
 
 **2.14 Add nodev option to /run/shm Partition**, **2.15 Add nosuid Option to /run/shm Partition**, **2.16 Add noexec Option to /run/shm Partition** - Hedgehog Linux does not mount `/run/shm` as a separate partition, so these recommendations do not apply.
 
+**2.17 Set Sticky Bit on All World-Writable Directories** - The only directory found by [this script](https://github.com/hardenedlinux/harbian-audit/blob/master/bin/hardening/2.17_sticky_bit_world_writable_folder.sh) is `/var/mail`, which is configured as prescribed by the Debian maintainers.
+
 **2.19 Disable Mounting of freevxfs Filesystems**, **2.20 Disable Mounting of jffs2 Filesystems**, **2.21 Disable Mounting of hfs Filesystems**, **2.22 Disable Mounting of hfsplus Filesystems**, **2.23 Disable Mounting of squashfs Filesystems**, **2.24 Disable Mounting of udf Filesystems** - Hedgehog Linux is not compiling a custom Linux kernel, so these filesystems are inherently supported as they are part Debian Linux's default kernel.
 
 **3.3 Set Boot Loader Password** - As maximizing availability is a system requirement, Malcolm should restart automatically without user intervention to ensured uninterrupted service. A boot loader password is not enabled.
 
 **4.8 Disable USB Devices** - The ability to ingest data (such as PCAP files) from a mounted USB mass storage device is a requirement of the system.
+
+**5.2 Install screen** - Hedgehog Linux comes with `tmux`, a modern `screen` alternative. 
 
 **6.1 Ensure the X Window system is not installed**, **6.2 Ensure Avahi Server is not enabled**, **6.3 Ensure print server is not enabled** - An X Windows session is provided for displaying dashboards. The library packages `libavahi-common-data`, `libavahi-common3`, and `libcups2` are dependencies of some of the X components used by Hedgehog Linux, but the `avahi` and `cups` services themselves are disabled.
 

@@ -204,8 +204,9 @@ db_get malcolm/dod_banner
 
 if [ "$RET" = true ]; then
   # login banner
-  OLD_ISSUE="$(grep ^Debian /etc/issue | sed -r "s@[[:space:]]\\\.*@@g")"
-  cat << 'EOF' > /etc/issue
+  for ISSUE_FILE in /etc/issue /etc/issue.net; do
+    OLD_ISSUE="$(grep ^Debian ${ISSUE_FILE} | sed -r "s@[[:space:]]\\\.*@@g")"
+    cat << 'EOF' > ${ISSUE_FILE}
 You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only.
 By using this IS (which includes any device attached to this IS), you consent to the following conditions:
 -The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations.
@@ -215,8 +216,9 @@ By using this IS (which includes any device attached to this IS), you consent to
 -Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details.
 
 EOF
-  /bin/echo -E "$OLD_ISSUE \n \l" >> /etc/issue
-  echo >> /etc/issue
+    /bin/echo -E "$OLD_ISSUE \n \l" >> ${ISSUE_FILE}
+    echo >> ${ISSUE_FILE}
+  done
 
 else
   rm -f /usr/local/bin/dod-login-banner.sh

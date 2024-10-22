@@ -117,6 +117,7 @@ sed -i "s/#user_allow_other.*/user_allow_other/" /etc/fuse.conf
 find /etc/audit -type d -exec chmod 750 "{}" \;
 find /etc/audit -type f -exec chmod 640 "{}" \;
 chmod 600 /etc/ssh/sshd_config
+chmod o-w /run/sendmail/mta/smsocket
 
 # set DIR_MODE to 750 for new users
 sed -i "s/^DIR_MODE=.*/DIR_MODE=0750/" /etc/adduser.conf
@@ -178,7 +179,7 @@ cat << 'EOF' >> /etc/fluent-bit/parsers.conf
     Format logfmt
 EOF
 
-# remove identifying operating system information
+# remove identifying operating system information from /etc/issue*
 truncate -s 0 /etc/motd
 sed -i "s/Debian/Hedgehog/g" /etc/issue
 sed -i "s/Debian/Hedgehog/g" /etc/issue.net
