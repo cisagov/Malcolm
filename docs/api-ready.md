@@ -2,7 +2,7 @@
 
 `GET` - /mapi/ready
 
-Returns `true` or `false` indicating the readiness status of various Malcolm services.
+Returns `true` or `false` indicating the readiness status of various Malcolm services. Generally speaking, Malcolm is ready to begin processing traffic when the `opensearch`, `pcap_monitor`, `logstash_lumberjack`, and `logstash_pipelines` services are `true`.
 
 **Example output:**
 
