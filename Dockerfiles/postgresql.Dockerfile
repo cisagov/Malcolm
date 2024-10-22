@@ -37,7 +37,7 @@ RUN apk update --no-cache && \
     ln -s /usr/bin /usr/local/bin && \
     ln -s /usr/share /usr/local/share && \
     ln -s /usr/lib /usr/local/lib && \
-    chmod 00775 /var/lib/postgresql /run/postgresql && \
+    chmod 00775 /var/lib/postgresql /var/lib/postgresql/data /run/postgresql && \
     apk del .build-deps
 
 USER root
