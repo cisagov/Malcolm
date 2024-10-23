@@ -1062,7 +1062,7 @@ def ready():
             pipeline in malcolm_utils.deep_get(logstashStats, ["pipelines"], {})
             for pipeline in logstash_default_pipelines
         ),
-        netbox=(malcolm_utils.deep_get(netboxStatus, ["rq-workers-running"], 0) > 0),
+        netbox=malcolm_utils.deep_get(netboxStatus, ["netbox-version"]),
         opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
