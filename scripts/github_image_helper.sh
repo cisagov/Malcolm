@@ -163,8 +163,8 @@ function ExtractISOsFromGithubWorkflowBuilds() {
 # extract the malcolm ISO wrapped in the ghcr.io docker image to a temp directory,
 # then extract and load the docker images tarball from the ISO.
 function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
-  if ! type xorriso >/dev/null 2>&1 || ! type unsquashfs >/dev/null 2>&1; then
-    echo "Cannot extract ISO file without xorriso" >&2
+  if ! type xorriso >/dev/null 2>&1 || ! type unsquashfs >/dev/null 2>&1 || ! type unxz >/dev/null 2>&1; then
+    echo "Cannot extract ISO file without xorriso, unsquashfs, and unxz" >&2
   else
     mkdir -p "$WORKDIR"
     _ExtractISOFromGithubWorkflowBuild malcolm "$WORKDIR" malcolm
@@ -174,7 +174,7 @@ function ExtractAndLoadImagesFromGithubWorkflowBuildISO() {
       if [[ -e filesystem.squashfs ]]; then
         unsquashfs filesystem.squashfs -f malcolm_images.tar.xz
         if [[ -e squashfs-root/malcolm_images.tar.xz ]]; then
-          $MALCOLM_CONTAINER_RUNTIME load -i squashfs-root/malcolm_images.tar.xz
+          unxz < squashfs-root/malcolm_images.tar.xz | $MALCOLM_CONTAINER_RUNTIME load
         else
           echo "Failed to images tarball" 2>&1
         fi
