@@ -44,7 +44,7 @@ USER root
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   yum upgrade -y && \
-  yum install -y openssl util-linux procps rsync findutils && \
+  yum install -y openssl util-linux procps jq rsync findutils && \
   yum remove -y vim-* && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \

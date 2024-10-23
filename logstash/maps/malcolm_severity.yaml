@@ -1,4 +1,4 @@
-# keys should match the event.severity_tags values set in 19_severity.conf
+# keys should match the event.severity_tags values set in 1900_severity.conf
 "Cross-segment traffic": 20
 "External traffic": 20
 "Inbound traffic": 50

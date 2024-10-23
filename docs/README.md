@@ -149,3 +149,4 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Carved file scanners](contributing-file-scanners.md#Scanners)
     - [Style](contributing-style.md#Style)
     - [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)
+    - [Preparing a Malcolm Release](contributing-release-prep.md)

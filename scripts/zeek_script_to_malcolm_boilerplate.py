@@ -10,13 +10,12 @@
 # The scripts are parsed into their constitutent records and &log fields.
 #
 # Each record is then printed out in the formats used by Malcolm for parsing and defining Zeek logs:
-# - Logstash (https://cisagov.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/11_zeek_parse.conf
+# - Logstash (https://cisagov.github.io/Malcolm/docs/contributing-logstash.html#LogstashZeek), for ./logstash/pipelines/zeek/1001_zeek_parse.conf
 # - Arkime (https://cisagov.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./arkime/etc/config.ini
 # - OpenSearch tndex templates (https://cisagov.github.io/Malcolm/docs/contributing-new-log-fields.html#NewFields), for ./dashboards/templates/composable/component/zeek*.json
 #
-# For Logstash boilerplate, pay close attention to the comment in the logstash filter:
-#    # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP
-# If you are copy/pasting, ensure your editor doesn't lose the TAB characters.
+# The logstash/scripts/logstash-start.sh container startup script should automatically fix any issues
+#   with parsing the Zeek tab delimiter (e.g., converting spaces in the `dissect` and `split` filters to tabs)
 #
 
 import argparse
@@ -490,7 +489,6 @@ def main():
                         f'  if ("_jsonparsesuccess" not in [tags]) {{',
                         f'    dissect {{',
                         f'      id => "dissect_zeek_{rName}"',
-                        f"      # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
                         f'      mapping => {{',
                         f'        "[message]" => "{rFieldsDissect}"',
                         f'      }}',
@@ -499,7 +497,6 @@ def main():
                         f'    if ("_dissectfailure" in [tags]) {{',
                         f'      mutate {{',
                         f'        id => "mutate_split_zeek_{rName}"',
-                        f"        # zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP",
                         f'        split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
                         f'      }}',
                         f'      ruby {{',

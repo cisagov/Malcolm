@@ -167,7 +167,7 @@ systemctl disable htpdate || true
 sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
 sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
-# remove identifying operating system information from /etc/issue
+# remove identifying operating system information from /etc/issue*
 truncate -s 0 /etc/motd
 sed -i "s/Debian/Hedgehog/g" /etc/issue
 sed -i "s/Debian/Hedgehog/g" /etc/issue.net

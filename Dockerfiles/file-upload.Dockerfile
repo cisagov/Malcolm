@@ -56,7 +56,7 @@ ENV FILEPOND_SERVER_BRANCH $FILEPOND_SERVER_BRANCH
 ARG STALE_UPLOAD_DELETE_MIN=360
 ENV STALE_UPLOAD_DELETE_MIN $STALE_UPLOAD_DELETE_MIN
 
-ENV SUPERCRONIC_VERSION "0.2.32"
+ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -74,6 +74,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ca-certificates \
       curl \
       file \
+      jq \
       less \
       nginx-light \
       openssh-server \

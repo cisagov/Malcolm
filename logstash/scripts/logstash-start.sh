@@ -10,7 +10,7 @@ HOST_PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines.available"
 # runtime pipelines parent directory
 export PIPELINES_DIR="/usr/share/logstash/malcolm-pipelines"
 
-# runtime pipeliens configuration file
+# runtime pipelines configuration file
 export PIPELINES_CFG="/usr/share/logstash/config/pipelines.yml"
 
 # for each pipeline in /usr/share/logstash/malcolm-pipelines, append the contents of this file to the dynamically-generated
@@ -123,6 +123,11 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_O
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_PRIMARY_DATASTORE_TYPE_/${OPENSEARCH_PRIMARY_TYPE}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_SECONDARY_DATASTORE_TYPE_/${OPENSEARCH_SECONDARY_TYPE}/g" "{}" \; 2>/dev/null
 
+# make sure that the delimiter for zeek TSV parsing is set correctly in that pipeline (i.e., spaces to tabs)
+if [[ -d "$PIPELINES_DIR"/zeek ]]; then
+  sed -i -E 's/(split\s*=>\s*\{\s*"\[message\]"\s*=>\s*"\s*)\s+("\s*\})/\1\t\2/g' "$PIPELINES_DIR"/zeek/*.conf
+  sed -i -E 's/\s\s*(%\{\[zeek_cols\]\[)/\t\1/g' "$PIPELINES_DIR"/zeek/*.conf
+fi
 
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true

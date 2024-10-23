@@ -18,7 +18,7 @@ if len(sys.argv) != 3:
     sys.exit(1)
 
 version = sys.argv[1]
-if version not in ["1", "2", "3", "4"]:
+if version not in ["4", "5"]:
     print("E: unsupported version %s" % version, file=sys.stderr)
     sys.exit(1)
 
@@ -32,15 +32,7 @@ target_yaml = 'raspi_%s_%s.yaml' % (version, suite)
 ### Setting variables based on suite and version starts here
 
 # Arch, kernel, DTB:
-if version == '1':
-    arch = 'armel'
-    linux = 'linux-image-rpi'
-    dtb = '/usr/lib/linux-image-*-rpi/bcm*rpi-*.dtb'
-elif version == '2':
-    arch = 'armhf'
-    linux = 'linux-image-armmp'
-    dtb = '/usr/lib/linux-image-*-armmp/bcm*rpi*.dtb'
-elif version in ['3', '4']:
+if version in ['4', '5']:
     arch = 'arm64'
     linux = 'linux-image-arm64'
     dtb = '/usr/lib/linux-image-*-arm64/broadcom/bcm*rpi*.dtb'
@@ -53,28 +45,20 @@ firmware_component = 'non-free-firmware'
 firmware_component_old = 'non-free'
 
 # wireless firmware:
-if version != '2':
-    wireless_firmware = 'firmware-brcm80211'
-else:
-    wireless_firmware = ''
+wireless_firmware = 'firmware-brcm80211'
 
 # bluetooth firmware:
-if version != '2':
-    bluetooth_firmware = 'bluez-firmware'
-else:
-    bluetooth_firmware = ''
+bluetooth_firmware = 'bluez-firmware'
 
 # We're pulling suricata from backports
 backports_enable = True
 backports_suite = '%s-backports' % suite
 
 # Serial console:
-if version in ['1', '2']:
-    serial = 'ttyAMA0,115200'
-elif version in ['3', '4']:
+if version in ['4', '5']:
     serial = 'ttyS1,115200'
 
-# CMA fixup:
+# CMA fixup (TODO: does this apply to Rpi5?):
 extra_chroot_shell_cmds = []
 if version == '4':
     extra_chroot_shell_cmds = [
@@ -111,7 +95,6 @@ extra_root_shell_cmds = [
     % MALCOLM_DIR,
 ]
 
-# Extend list just in case version is 4
 extra_chroot_shell_cmds.extend(
     [
         'chmod 755 /root/sensor_install.sh',

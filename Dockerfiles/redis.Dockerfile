@@ -27,7 +27,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk --no-cache add bash psmisc rsync shadow tini && \
+    apk --no-cache add bash jq psmisc rsync shadow tini && \
     addgroup ${PUSER} tty
 
 WORKDIR /home/${PUSER}

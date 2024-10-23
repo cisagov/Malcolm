@@ -28,7 +28,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
-    apk add --no-cache bash procps psmisc rsync shadow tini && \
+    apk add --no-cache bash jq procps psmisc rsync shadow tini && \
     apk add --no-cache --virtual .build-deps rsync && \
     rsync -a /usr/local/bin/ /usr/bin/ && \
     rsync -a /usr/local/share/ /usr/share/ && \
@@ -37,6 +37,7 @@ RUN apk update --no-cache && \
     ln -s /usr/bin /usr/local/bin && \
     ln -s /usr/share /usr/local/share && \
     ln -s /usr/lib /usr/local/lib && \
+    chmod 00775 /var/lib/postgresql /var/lib/postgresql/data /run/postgresql && \
     apk del .build-deps
 
 USER root

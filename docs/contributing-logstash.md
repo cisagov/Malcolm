@@ -34,12 +34,12 @@ Finally, in the [`./config/logstash.env` file](malcolm-config.md#MalcolmConfigEn
 
 The following modifications must be made in order for Malcolm to parse new Zeek log files:
 
-1. Add a parsing section to [`logstash/pipelines/zeek/11_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/11_zeek_parse.conf)
+1. Add a parsing filter file named so that it sorts after [`logstash/pipelines/zeek/1001_zeek_parse.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1001_zeek_parse.conf) but before [`logstash/pipelines/zeek/1199_zeek_unknown.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1199_zeek_unknown.conf)
     * Follow patterns for existing log files as an example
     * For common Zeek fields such as the `id` four-tuple, timestamp, etc., use the same convention used by existing Zeek logs in that file (e.g., `ts`, `uid`, `orig_h`, `orig_p`, `resp_h`, `resp_p`)
-    * Take care, especially when copy-pasting filter code, the Zeek delimiter isn't modified from a tab character to a space character (see "*zeek's default delimiter is a literal tab, MAKE SURE YOUR EDITOR DOESN'T SCREW IT UP*" warnings in that file)
-1. If necessary, perform log normalization in [`logstash/pipelines/zeek/13_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/13_zeek_normalize.conf) for values such as action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
-1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/14_zeek_convert.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/14_zeek_convert.conf)
+    * The [`logstash/scripts/logstash-start.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/scripts/logstash-start.sh) Logstash container startup script should automatically fix any issues with parsing the Zeek tab delimiter (e.g., converting spaces in the `dissect` and `split` filters to tabs)
+1. If necessary, perform log normalization in [`logstash/pipelines/zeek/1300_zeek_normalize.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1300_zeek_normalize.conf) for values such as action (`event.action`), result (`event.result`), application protocol version (`network.protocol_version`), etc.
+1. If necessary, define conversions for floating point or integer values in [`logstash/pipelines/zeek/1400_zeek_convert.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/logstash/pipelines/zeek/1400_zeek_convert.conf)
 1. Identify the new fields and add them as described in [Adding new log fields](contributing-new-log-fields.md#NewFields)
 
 The script [`scripts/zeek_script_to_malcolm_boilerplate.py`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/zeek_script_to_malcolm_boilerplate.py) may help by autogenerating these filters.

@@ -54,25 +54,31 @@ you'll need to execute `make` as root.
 The argument to `make` is constructed as follows:
 `raspi_<model>_<release>.<result-type>`
 
-Whereby <model\> is one of `1`, `2`, `3` or `4`, <release\> is either
-`bullseye`, `bookworm`, or `trixie`; and <result-type\> is `img` or `yaml`.
+Whereby <model\> is one of `4` or `5`; <release\> is `bookworm`; and <result-type\> is `img` or `yaml`.
 
 Model `1` should be used for the Raspberry Pi 0, 0w and 1, models A and
 B. Model `2` for the Raspberry Pi 2 models A and B. Model `3` for all
-models of the Raspberry Pi 3 and model `4` for all models of the
-Raspberry Pi 4.
-So if you want to build the default image for a Raspberry Pi 3B+ with
-Bullseye, you can just issue:
+models of the Raspberry Pi 3, model `4` for all models of the
+Raspberry Pi 4, and model `5` for all models of the
+Raspberry Pi 5.
+So if you want to build the default image for a Raspberry Pi 4 with
+Bookworm, you can just issue:
 
 ```shell
    make raspi_4_bookworm.img
 ```
 
-**NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
-that any variant other than RPI 4 (8GB version) will have adequate resources to function effectively as a sensor.
-
 At this point; it might be wise to go do something else. The build **WILL** take a while. 
 Initial testing on a 8-core 16GB build machine took approximately 5.5 hours to complete the image.
+
+**NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
+that any variant other than RPI 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
+
+**NOTE:** Raspberry Pi 5 is **not yet supported** due to missing upstream kernel support. See the following resources:
+
+* [Debian Wiki](https://raspi.debian.net/faq/#faq-rpi5)
+* [Debian Mailing list, March 2024](https://lists.debian.org/debian-arm/2024/03/msg00009.html)
+* [Debian Mailing list, November 2023](https://lists.debian.org/debian-arm/2023/11/msg00025.html)
 
 ## Installing the image onto the Raspberry Pi
 
@@ -94,25 +100,25 @@ important parts of your system.  Double check it's the correct
 device!), copy the image onto the SD card:
 
 ```shell
-bmaptool copy raspi_3_bullseye.img.xz /dev/mmcblk0
+bmaptool copy raspi_3_bookworm.img.xz /dev/mmcblk0
 ```
 
 Alternatively, if you don't have `bmap-tools` installed, you can use
 `dd` with the compressed image:
 
 ```shell
-xzcat raspi_3_bullseye.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+xzcat raspi_3_bookworm.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Or with the uncompressed image:
 
 ```shell
-dd if=raspi_3_bullseye.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+dd if=raspi_3_bookworm.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Then, plug the SD card into the Raspberry Pi, and power it up.
 
-The image uses the hostname `Hedgehog-rpi-0w`, `Hedgehog-rpi-2`, `Hedgehog-rpi-3`, or `Hedgehog-rpi-4` depending on the
+The image uses the hostname `Hedgehog-rpi-0w`, `Hedgehog-rpi-2`, `Hedgehog-rpi-3`, `Hedgehog-rpi-4`, `Hedgehog-rpi-5` depending on the
 target build. The provided image will allow you to log in with the
 `sensor` account with a default password of `Hedgehog_Linux` or 
 `root` account with a default password of `Hedgehog_Linux_Root`, but only logging in at the

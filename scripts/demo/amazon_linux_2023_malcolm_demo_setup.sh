@@ -3,12 +3,12 @@
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################
-# for setting up a Malcolm demo instance on an Amazon Linux 2 instance from scratch
+# for setting up a Malcolm demo instance on an Amazon Linux 2023 instance from scratch
 #
-# so far I have had the best luck on c4.4xlarge (16 CPU, 30 GB RAM) and
-# t3a.2xlarge (8 CPU, 32 GB RAM)
+# I've used:
+# - for x86-64 instances `c4.4xlarge`, `t2.2xlarge`, and `t3a.2xlarge`
+# - for arm64 instances `m6gd.2xlarge`, `m6g.2xlarge`, `m7g.2xlarge`, and `t4g.2xlarge`
 #
-
 ###################################################################################
 # initialize
 
@@ -17,8 +17,8 @@ if [[ -z "$BASH_VERSION" ]]; then
   exit 1
 fi
 
-if ! type amazon-linux-extras >/dev/null 2>&1; then
-  echo "This command only targets Amazon Linux 2" >&2
+if [[ "$(awk -F= '$1=="PLATFORM_ID" { print $2 ;}' /etc/os-release | tr -d '"')" != "platform:al2023" ]]; then
+  echo "This command only targets Amazon Linux 2023" >&2
   exit 1
 fi
 
@@ -39,6 +39,14 @@ else
   SUDO_CMD="sudo"
 fi
 
+$SUDO_CMD mkdir -p /etc/sudoers.d/
+echo 'Defaults umask = 0022' | ($SUDO_CMD su -c 'EDITOR="tee" visudo -f /etc/sudoers.d/99-default-umask')
+echo 'Defaults umask_override' | ($SUDO_CMD su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/99-default-umask')
+$SUDO_CMD chmod 440 /etc/sudoers.d/99-default-umask
+umask 0022
+
+LINUX_CPU=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
 # default user paths
 LOCAL_DATA_PATH=${XDG_DATA_HOME:-$HOME/.local/share}
 LOCAL_BIN_PATH=$HOME/.local/bin
@@ -51,10 +59,16 @@ MALCOLM_SETUP_NONINTERACTIVE=${MALCOLM_SETUP_NONINTERACTIVE:-0}
 # variables for env development environments and tools
 ENV_LIST=(
   age
+  bat
+  direnv
+  eza
   fd
+  fzf
   jq
-  yq
+  peco
   ripgrep
+  viddy
+  yq
 )
 
 ###################################################################################
@@ -99,7 +113,7 @@ function InstallEssentialPackages {
   else
     echo "Installing curl, git, and jq..." >&2
     $SUDO_CMD yum update -y >/dev/null 2>&1 && \
-      $SUDO_CMD yum install -y curl git jq
+      $SUDO_CMD yum install -y curl-minimal git jq
   fi
 }
 
@@ -198,8 +212,10 @@ function InstallEnvPackages {
     if python3 -m pip -V >/dev/null 2>&1; then
       python3 -m pip install --user -U \
         dateparser \
+        kubernetes \
         mmguero \
-        requests
+        python-dotenv \
+        pythondialog
     fi
   fi
 
@@ -207,7 +223,7 @@ function InstallEnvPackages {
 }
 
 ################################################################################
-# InstallDocker - install Docker and enable it as a service, and install docker-compose
+# InstallDocker - install Docker and enable it as a service, and install docker compose
 function InstallDocker {
 
   # install docker-ce, if needed
@@ -218,7 +234,7 @@ function InstallDocker {
       InstallEssentialPackages
 
       $SUDO_CMD yum update -y >/dev/null 2>&1 && \
-        $SUDO_CMD amazon-linux-extras install -y docker
+        $SUDO_CMD yum install -y docker
 
       $SUDO_CMD systemctl enable docker
       $SUDO_CMD systemctl start docker
@@ -253,42 +269,26 @@ function InstallDocker {
 }
 
 ################################################################################
-# InstallCommonPackages - install yum and amazon-linux-extras packages, and build
-# the non-GUI version of wireshark from source (for editcap/capinfos/tshark)
+# InstallCommonPackages - install packages from yum
 function InstallCommonPackages {
 
   CONFIRMATION=$(_GetConfirmation "Install common packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
 
     $SUDO_CMD yum update -y >/dev/null 2>&1
-    $SUDO_CMD yum groupinstall -y 'Development Tools'
 
     PACKAGE_LIST=(
-      python3.8
-    )
-    # install the packages from amazon-linux-extras
-    for i in ${PACKAGE_LIST[@]}; do
-      $SUDO_CMD amazon-linux-extras install -y "$i"
-    done
-    $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
-    $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
-
-    PACKAGE_LIST=(
-      c-ares-devel
-      flex
-      gcc
-      gcc-c++
-      glib2-devel
+      cronie
+      dialog
       httpd-tools
-      libgcrypt-devel
-      libpcap-devel
-      lua-devel
-      make
-      ninja-build
       openssl
-      openssl-devel
+      python3-pip
+      python3-requests+security
+      python3-ruamel-yaml
+      python3-setuptools
+      python3-wheel
       tmux
-      zlib-devel
+      wireshark-cli
       xz
     )
     # install the packages from yum
@@ -296,68 +296,28 @@ function InstallCommonPackages {
       $SUDO_CMD yum install -y "$i"
     done
 
-    # wireshark (for capinfos/editcap) in repo is FLIPPIN' old, why?
-    # guess we'll have to build from source
-    if ! type tshark >/dev/null 2>&1; then
-      export SOURCE_DIR="$(mktemp -d)"
-      pushd "$SOURCE_DIR" >/dev/null 2>&1
-
-      # cmake
-      if ! type cmake >/dev/null 2>&1; then
-        CMAKE_VERSION=3.26.4
-        curl -sSL -O -J "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz"
-        tar xvf cmake-"${CMAKE_VERSION}".tar.gz
-        pushd cmake-"${CMAKE_VERSION}" >/dev/null 2>&1
-        ./bootstrap --prefix=/usr
-        make
-        $SUDO_CMD make install
-        popd >/dev/null 2>&1
-      fi
-
-      # wireshark
-      WIRESHARK_VERSION=3.6.14
-      curl -sSL -O -J "https://2.na.dl.wireshark.org/src/wireshark-${WIRESHARK_VERSION}.tar.xz"
-      tar xvf wireshark-"${WIRESHARK_VERSION}".tar.xz
-      pushd wireshark-"${WIRESHARK_VERSION}" >/dev/null 2>&1
-      mkdir -p build
-      pushd "build" >/dev/null 2>&1
-      cmake -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_wireshark=OFF -G Ninja ..
-      ninja-build
-      $SUDO_CMD ninja-build install
-      popd >/dev/null 2>&1
-      popd >/dev/null 2>&1
-
-      popd >/dev/null 2>&1
-      rm -rf "$SOURCE_DIR"
-    fi
-
   fi # install common packages confirmation
 }
 
 ################################################################################
 # _InstallCroc - schollz/croc: easily and securely send things from one computer to another
 function _InstallCroc {
-  mkdir -p "$LOCAL_BIN_PATH" "$LOCAL_DATA_PATH"/bash-completion/completions
-
-  CROC_RELEASE="$(_GitLatestRelease schollz/croc | sed 's/^v//')"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/schollz/croc/releases/download/v${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}"
-  cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
-  cp -f "${TMP_CLONE_DIR}"/bash_autocomplete "$LOCAL_DATA_PATH"/bash-completion/completions/croc.bash
-  chmod 755 "$LOCAL_BIN_PATH"/croc
-  rm -rf "$TMP_CLONE_DIR"
-}
-
-################################################################################
-# _InstallBat - sharkdp/bat: a cat(1) clone with wings
-function _InstallBat {
   mkdir -p "$LOCAL_BIN_PATH"
 
-  BAT_RELEASE="$(_GitLatestRelease sharkdp/bat)"
+  CROC_RELEASE="$(_GitLatestRelease schollz/croc)"
   TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L "https://github.com/sharkdp/bat/releases/download/${BAT_RELEASE}/bat-${BAT_RELEASE}-x86_64-unknown-linux-musl.tar.gz" | tar xvzf - -C "${TMP_CLONE_DIR}" --strip-components 1
-  cp -f "${TMP_CLONE_DIR}"/bat "$LOCAL_BIN_PATH"/bat
-  chmod 755 "$LOCAL_BIN_PATH"/bat
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-ARM64.tar.gz"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz"
+  else
+    CROC_URL=
+  fi
+  if [[ -n "$CROC_URL" ]]; then
+    curl -sSL "$CROC_URL" | tar xvzf - -C "${TMP_CLONE_DIR}"
+    cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
+    chmod 755 "$LOCAL_BIN_PATH"/croc
+  fi
   rm -rf "$TMP_CLONE_DIR"
 }
 
@@ -367,27 +327,19 @@ function _InstallBoringProxy {
   mkdir -p "$LOCAL_BIN_PATH"
 
   BORING_RELEASE="$(_GitLatestRelease boringproxy/boringproxy)"
-  curl -L -o "${LOCAL_BIN_PATH}"/boringproxy.new "https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-x86_64"
-  chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
-  [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && rm -f "$LOCAL_BIN_PATH"/boringproxy
-  mv "$LOCAL_BIN_PATH"/boringproxy.new "$LOCAL_BIN_PATH"/boringproxy
-}
-
-################################################################################
-# _InstallNgrok - inconshreveable/ngrok: secure introspectable tunnels to localhost
-function _InstallNgrok {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  TMP_CLONE_DIR="$(mktemp -d)"
-  curl -L -o "${TMP_CLONE_DIR}"/ngrok.zip -L "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
-  pushd "$TMP_CLONE_DIR" >/dev/null 2>&1
-  unzip ./ngrok.zip
-  mv ./ngrok "$LOCAL_BIN_PATH"/ngrok.new
-  chmod 755 "$LOCAL_BIN_PATH"/ngrok.new
-  [[ -f "$LOCAL_BIN_PATH"/ngrok ]] && rm -f "$LOCAL_BIN_PATH"/ngrok
-  mv "$LOCAL_BIN_PATH"/ngrok.new "$LOCAL_BIN_PATH"/ngrok
-  popd >/dev/null 2>&1
-  rm -rf "$TMP_CLONE_DIR"
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-arm64"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-x86_64"
+  else
+    BORING_URL=
+  fi
+  if [[ -n "$BORING_URL" ]]; then
+    curl -sSL -o "${LOCAL_BIN_PATH}"/boringproxy.new "$BORING_URL"
+    chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
+    [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && rm -f "$LOCAL_BIN_PATH"/boringproxy
+    mv "$LOCAL_BIN_PATH"/boringproxy.new "$LOCAL_BIN_PATH"/boringproxy
+  fi
 }
 
 ################################################################################
@@ -396,8 +348,6 @@ function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
-    [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
-    [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
     [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
   fi
 }
@@ -413,8 +363,7 @@ function CreateCommonLinuxConfig {
 
     mkdir -p "$HOME/tmp" \
              "$HOME/devel" \
-             "$LOCAL_BIN_PATH" \
-             "$LOCAL_DATA_PATH"/bash-completion/completions
+             "$LOCAL_BIN_PATH"
 
     [[ ! -f ~/.vimrc ]] && echo "set nocompatible" > ~/.vimrc
 
@@ -438,7 +387,7 @@ function SystemConfig {
 kernel.dmesg_restrict=0
 
 # the maximum number of open file handles
-fs.file-max=65536
+fs.file-max=518144
 
 # the maximum number of user inotify watches
 fs.inotify.max_user_watches=131072
@@ -470,6 +419,10 @@ EOT
 * hard nofile 65535
 * soft memlock unlimited
 * hard memlock unlimited
+* soft nproc 262144
+* hard nproc 524288
+* soft core 0
+* hard core 0
 EOT
     fi # limits.conf confirmation
   fi # limits.conf check
@@ -477,7 +430,7 @@ EOT
   if [[ -f /etc/default/grub ]] && ! grep -q cgroup /etc/default/grub; then
     CONFIRMATION=$(_GetConfirmation "Tweak kernel parameters in grub (cgroup, etc.) [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      $SUDO_CMD sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& random.trust_cpu=on cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem/' /etc/default/grub
+      $SUDO_CMD sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem random.trust_cpu=on preempt=voluntary/' /etc/default/grub
       $SUDO_CMD grub2-mkconfig -o /boot/grub2/grub.cfg
     fi # grub confirmation
   fi # grub check
@@ -515,9 +468,6 @@ function SGroverDotfiles {
     [[ -r "$SGROVER_GITHUB_PATH"/git/gitignore_global ]] && rm -vf ~/.gitignore_global && \
       ln -vrs "$SGROVER_GITHUB_PATH"/git/gitignore_global ~/.gitignore_global
 
-    [[ -r "$SGROVER_GITHUB_PATH"/git/git_clone_all.sh ]] && rm -vf "$LOCAL_BIN_PATH"/git_clone_all.sh && \
-      ln -vrs "$SGROVER_GITHUB_PATH"/git/git_clone_all.sh "$LOCAL_BIN_PATH"/git_clone_all.sh
-
     [[ -r "$SGROVER_GITHUB_PATH"/linux/tmux/tmux.conf ]] && rm -vf ~/.tmux.conf && \
       ln -vrs "$SGROVER_GITHUB_PATH"/linux/tmux/tmux.conf ~/.tmux.conf
 
@@ -545,46 +495,41 @@ function InstallMalcolm {
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     if _GitClone https://github.com/cisagov/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
-      python3 ./scripts/install.py -c -d
-      CONFIG_PAIRS=(
-        "CAPA_MAX_REQUESTS:2"
-        "CLAMD_MAX_REQUESTS:4"
-        "EXTRACTED_FILE_ENABLE_CAPA:'true'"
-        "EXTRACTED_FILE_ENABLE_CLAMAV:'true'"
-        "EXTRACTED_FILE_ENABLE_YARA:'true'"
-        "EXTRACTED_FILE_HTTP_SERVER_ENABLE:'true'"
-        "EXTRACTED_FILE_IGNORE_EXISTING:'true'"
-        "EXTRACTED_FILE_PRESERVATION:'all'"
-        "FREQ_LOOKUP:'true'"
-        "LOGSTASH_OUI_LOOKUP:'true'"
-        "LOGSTASH_REVERSE_DNS:'true'"
-        "LOGSTASH_SEVERITY_SCORING:'true'"
-        "PCAP_PIPELINE_IGNORE_PREEXISTING:'true'"
-        "PCAP_PIPELINE_POLLING:'true'"
-        "YARA_MAX_REQUESTS:4"
-        "ZEEK_AUTO_ANALYZE_PCAP_FILES:'true'"
-        "ZEEK_DISABLE_BEST_GUESS_ICS:''"
-        "ZEEK_EXTRACTOR_MODE:'all'"
-        # "NGINX_BASIC_AUTH:'no_authentication'"
-      )
-      for i in ${CONFIG_PAIRS[@]}; do
-        KEY="$(echo "$i" | cut -d':' -f1)"
-        VALUE="$(echo "$i" | cut -d':' -f2)"
-        for CONFIG in docker-compose-dev.yml docker-compose.yml; do
-          sed -i "s/\(^[[:space:]]*$KEY[[:space:]]*:[[:space:]]*\).*/\1$VALUE/g" "$CONFIG"
-        done
-      done
-      mkdir -p ./config
-      touch ./config/auth.env
+      python3 ./scripts/configure \
+          --defaults \
+          --runtime docker \
+          --malcolm-profile \
+          --restart-malcolm \
+          --auto-arkime \
+          --auto-suricata \
+          --auto-zeek \
+          --zeek-ics \
+          --zeek-ics-best-guess \
+          --auto-oui \
+          --auto-freq \
+          --file-extraction notcommtxt \
+          --file-preservation quarantined \
+          --extracted-file-server \
+          --extracted-file-server-password infected \
+          --extracted-file-server-zip \
+          --extracted-file-capa \
+          --extracted-file-clamav \
+          --extracted-file-yara \
+          --netbox \
+          --netbox-enrich \
+          --netbox-autopopulate \
+          --netbox-auto-prefixes \
+          --netbox-site-name "$(hostname -s)"
+
       grep image: docker-compose.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1
     fi
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
-    curl -sSL -J -O https://raw.githubusercontent.com/cisagov/Malcolm/main/scripts/demo/reset_and_auto_populate.sh
+    ln -f -s -r "$MALCOLM_PATH"/scripts/demo/reset_and_auto_populate.sh ./reset_and_auto_populate.sh
     curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
-    chmod 755 reset_and_auto_populate.sh pcap_time_shift.py
+    chmod 755 pcap_time_shift.py
     popd >/dev/null 2>&1
 
     CONFIRMATION=$(_GetConfirmation "Set up crontab for starting/resetting Malcolm? [y/N]?" N)
@@ -624,22 +569,6 @@ function SetupConnectivity {
     fi
   fi
 
-  # ngrok
-  if ! ( crontab -l | grep -q ngrok ); then
-    CONFIRMATION=$(_GetConfirmation "Configure ngrok [y/N]?" N)
-    if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      [[ ! -f "${LOCAL_BIN_PATH}"/ngrok ]] && _InstallNgrok
-      TOKEN=$(_GetString "ngrok token:" "")
-      if [[ -n "$TOKEN" ]]; then
-        "${LOCAL_BIN_PATH}"/ngrok authtoken "$TOKEN"
-        ((echo 'SHELL=/bin/bash') ; \
-         (( crontab -l | grep . | grep -v ^SHELL= ; \
-            echo "@reboot sleep 180 && ( nohup ${LOCAL_BIN_PATH}/ngrok http https://localhost >/dev/null 2>&1 </dev/null & )" ) \
-            | sort | uniq )) | crontab -
-      fi
-    fi
-  fi
-
   # boringproxy
   if ! ( crontab -l | grep -q boringproxy ); then
     CONFIRMATION=$(_GetConfirmation "Configure boringproxy [y/N]?" N)
@@ -653,7 +582,7 @@ function SetupConnectivity {
         mkdir -p "${LOCAL_CONFIG_PATH}"/boringproxy/certs
         ((echo 'SHELL=/bin/bash') ; \
          (( crontab -l | grep . | grep -v ^SHELL= ; \
-            echo "@reboot sleep 180 && ( nohup ${LOCAL_BIN_PATH}/boringproxy client -client-name ${CLIENT} -acme-email example@example.com -cert-dir ${LOCAL_CONFIG_PATH}/boringproxy/certs -user ${USER} -token ${TOKEN} -server ${SERVER} >/dev/null 2>&1 </dev/null & )" ) \
+            echo "@reboot sleep 120 && ( nohup ${LOCAL_BIN_PATH}/boringproxy client -client-name ${CLIENT} -acme-email example@example.com -cert-dir ${LOCAL_CONFIG_PATH}/boringproxy/certs -user ${USER} -token ${TOKEN} -server ${SERVER} >/dev/null 2>&1 </dev/null & )" ) \
             | sort | uniq )) | crontab -
       fi
     fi

@@ -169,6 +169,15 @@ missing_field_map['integer'] = 0
 missing_field_map['ip'] = '0.0.0.0'
 missing_field_map['long'] = 0
 
+logstash_default_pipelines = [
+    "malcolm-beats",
+    "malcolm-enrichment",
+    "malcolm-input",
+    "malcolm-output",
+    "malcolm-suricata",
+    "malcolm-zeek",
+]
+
 urllib3.disable_warnings()
 warnings.filterwarnings(
     "ignore",
@@ -181,9 +190,29 @@ app.config.from_object("project.config.Config")
 
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
-opensearchUrl = app.config["OPENSEARCH_URL"]
+arkimeHost = app.config["ARKIME_HOST"]
+arkimePort = app.config["ARKIME_PORT"]
+arkimeStatusUrl = f'https://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
 dashboardsUrl = app.config["DASHBOARDS_URL"]
+dashboardsHelperHost = app.config["DASHBOARDS_HELPER_HOST"]
+dashboardsMapsPort = app.config["DASHBOARDS_MAPS_PORT"]
 databaseMode = malcolm_utils.DatabaseModeStrToEnum(app.config["OPENSEARCH_PRIMARY"])
+filebeatHost = app.config["FILEBEAT_HOST"]
+filebeatTcpJsonPort = app.config["FILEBEAT_TCP_JSON_PORT"]
+freqUrl = app.config["FREQ_URL"]
+logstashApiPort = app.config["LOGSTASH_API_PORT"]
+logstashHost = app.config["LOGSTASH_HOST"]
+logstashLJPort = app.config["LOGSTASH_LJ_PORT"]
+logstashMapsPort = app.config["LOGSTASH_LJ_PORT"]
+logstashUrl = f'http://{logstashHost}:{logstashApiPort}'
+netboxUrl = app.config["NETBOX_URL"]
+opensearchUrl = app.config["OPENSEARCH_URL"]
+pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
+pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
+zeekExtractedFileLoggerHost = app.config["ZEEK_EXTRACTED_FILE_LOGGER_HOST"]
+zeekExtractedFileLoggerTopicPort = app.config["ZEEK_EXTRACTED_FILE_LOGGER_TOPIC_PORT"]
+zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
+zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
 
 opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
     opensearchUrl == 'http://opensearch:9200'
@@ -881,6 +910,163 @@ def version():
         machine=platform.machine(),
         boot_time=datetime.fromtimestamp(psutil.boot_time(), tz=pytz.utc).isoformat().replace('+00:00', 'Z'),
         opensearch=opensearchStats,
+    )
+
+
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ready", methods=['GET']
+)
+def ready():
+    """Return ready status (true or false) for various Malcolm components
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    arkime
+        true or false, the ready status of Arkime
+    dashboards
+        true or false, the ready status of Dashboards (or Kibana)
+    dashboards_maps
+        true or false, the ready status of the dashboards-helper offline map server
+    filebeat_tcp
+        true or false, the ready status of Filebeat's JSON-OVER-TCP
+    freq
+        true or false, the ready status of freq
+    logstash_lumberjack
+        true or false, the ready status of Logstash's lumberjack protocol listener
+    logstash_pipelines
+        true or false, the ready status of Logstash's default pipelines
+    netbox
+        true or false, the ready status of NetBox
+    opensearch
+        true or false, the ready status of OpenSearch (or Elasticsearch)
+    pcap_monitor
+        true or false, the ready status of the PCAP monitoring process
+    zeek_extracted_file_logger
+        true or false, the ready status of the Zeek extracted file results logging process
+    zeek_extracted_file_monitor
+        true or false, the ready status of the Zeek extracted file monitoring process
+    """
+    global databaseClient
+
+    try:
+        arkimeResponse = requests.get(
+            arkimeStatusUrl,
+            verify=False,
+        )
+        arkimeResponse.raise_for_status()
+        arkimeStatus = True
+    except Exception as e:
+        arkimeStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Arkime status")
+
+    try:
+        dashboardsStatus = requests.get(
+            f'{dashboardsUrl}/api/status',
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json()
+    except Exception as e:
+        dashboardsStatus = {}
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Dashboards status")
+
+    try:
+        dashboardsMapsStatus = malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort)
+    except Exception as e:
+        dashboardsMapsStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Logstash offline map server")
+
+    try:
+        filebeatTcpJsonStatus = malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort)
+    except Exception as e:
+        filebeatTcpJsonStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting filebeat TCP JSON listener status")
+
+    try:
+        freqResponse = requests.get(freqUrl)
+        freqResponse.raise_for_status()
+        freqStatus = True
+    except Exception as e:
+        freqStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting freq status")
+
+    try:
+        logstashStats = requests.get(f'{logstashUrl}/_node').json()
+    except Exception as e:
+        logstashStats = {}
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Logstash node status")
+
+    try:
+        logstashLJStatus = malcolm_utils.check_socket(logstashHost, logstashLJPort)
+    except Exception as e:
+        logstashLJStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Logstash lumberjack listener status")
+
+    try:
+        netboxStatus = requests.get(f'{netboxUrl}/api/status').json()
+    except Exception as e:
+        netboxStatus = {}
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting NetBox status")
+
+    try:
+        openSearchHealth = dict(databaseClient.cluster.health())
+    except Exception as e:
+        openSearchHealth = {}
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting OpenSearch health")
+
+    try:
+        pcapMonitorStatus = malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort)
+    except Exception as e:
+        pcapMonitorStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting PCAP monitor topic status")
+
+    try:
+        zeekExtractedFileMonitorStatus = malcolm_utils.check_socket(
+            zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort
+        )
+    except Exception as e:
+        zeekExtractedFileMonitorStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Zeek extracted file monitor topic status")
+
+    try:
+        zeekExtractedFileLoggerStatus = malcolm_utils.check_socket(
+            zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort
+        )
+    except Exception as e:
+        zeekExtractedFileLoggerStatus = False
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} getting Zeek extracted file logger topic status")
+
+    return jsonify(
+        arkime=arkimeStatus,
+        dashboards=(malcolm_utils.deep_get(dashboardsStatus, ["status", "overall", "state"]) == "green"),
+        dashboards_maps=dashboardsMapsStatus,
+        filebeat_tcp=filebeatTcpJsonStatus,
+        freq=freqStatus,
+        logstash_lumberjack=logstashLJStatus,
+        logstash_pipelines=(malcolm_utils.deep_get(logstashStats, ["status"]) == "green")
+        and all(
+            pipeline in malcolm_utils.deep_get(logstashStats, ["pipelines"], {})
+            for pipeline in logstash_default_pipelines
+        ),
+        netbox=bool(malcolm_utils.deep_get(netboxStatus, ["netbox-version"])),
+        opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
+        pcap_monitor=pcapMonitorStatus,
+        zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
+        zeek_extracted_file_monitor=zeekExtractedFileMonitorStatus,
     )
 
 

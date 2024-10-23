@@ -6,6 +6,7 @@
 * [Fields](api-fields.md)
 * [Indices](api-indices.md)
 * [Ping](api-ping.md)
+* [Ready](api-ready.md)
 * [Version](api-version.md)
 * [Examples](api-examples.md)
 

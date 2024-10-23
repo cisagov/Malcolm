@@ -9,16 +9,13 @@ on:
       - 'file-upload/**'
       - 'Dockerfiles/file-upload.Dockerfile'
       - 'shared/bin/*'
-      - '!shared/bin/agg-init.sh'
       - '!shared/bin/capa-build.sh'
       - '!shared/bin/common-init.sh'
-      - '!shared/bin/sensor-init.sh'
       - '!shared/bin/extracted_files_http_server.py'
       - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/os-disk-config.py'
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
-      - '!shared/bin/configure-capture.py'
       - '!shared/bin/suricata*'
       - '!shared/bin/zeek*'
       - '.trigger_workflow_build'
@@ -113,7 +110,9 @@ jobs:
         name: Run Trivy vulnerability scanner
         if: ${{ matrix.platform == 'linux/amd64' }}
         id: trivy-scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
         with:
           scan-type: 'image'
           scanners: 'vuln'

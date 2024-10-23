@@ -52,7 +52,7 @@ ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 
-ENV SUPERCRONIC_VERSION "0.2.32"
+ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 

@@ -42,7 +42,7 @@ Building the ISO may take 30 minutes or more depending on the system. As the bui
 
 ```
 …
-Finished, created "/malcolm-build/malcolm-iso/malcolm-24.10.0.iso"
+Finished, created "/malcolm-build/malcolm-iso/malcolm-24.10.1.iso"
 …
 ```
 

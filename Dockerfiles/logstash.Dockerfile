@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.15.2
+FROM docker.elastic.co/logstash/logstash-oss:8.15.3
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -49,6 +49,7 @@ RUN set -x && \
         curl \
         gettext \
         git \
+        jq \
         patch \
         python3-setuptools \
         python3-pip \
@@ -82,7 +83,6 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/manuf-oui-parse.py /usr/local/bin/
 COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
 ADD logstash/maps/*.yaml /etc/
@@ -105,6 +105,7 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     chown --silent -R ${PUSER}:root \
         /usr/share/logstash \
         /logstash-persistent-queue && \
+    chmod -R o-w /usr/share/logstash && \
     echo "Retrieving and parsing Wireshark manufacturer database..." && \
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Complete."

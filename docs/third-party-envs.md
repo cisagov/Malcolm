@@ -43,7 +43,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     amazon-ebs: output will be in this color.
 
     ==> amazon-ebs: Prevalidating any provided VPC information
-    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v24.10.0-arm64-2024-05-30T13-57-31Z
+    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v24.10.1-x86_64-2024-10-10T15-41-32Z
         amazon-ebs: Found Image ID: ami-xxxxxxxxxxxxxxxxx
 
     ...
@@ -53,16 +53,16 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     ==> amazon-ebs: Adding tags to AMI (ami-xxxxxxxxxxxxxxxxx)...
     ==> amazon-ebs: Tagging snapshot: snap-xxxxxxxxxxxxxxxxx
     ==> amazon-ebs: Creating AMI tags
-        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v24.10.0"
-        amazon-ebs: Adding tag: "source_ami_name": "amzn2-ami-kernel-5.10-hvm-2.0.20240521.0-arm64-gp2"
+        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v24.10.1"
+        amazon-ebs: Adding tag: "source_ami_name": "al2023-ami-ecs-hvm-2023.0.20241003-kernel-6.1-x86_64"
     ==> amazon-ebs: Creating snapshot tags
     ==> amazon-ebs: Terminating the source AWS instance...
     ==> amazon-ebs: Cleaning up any extra volumes...
     ==> amazon-ebs: No volumes to clean up, skipping
     ==> amazon-ebs: Deleting temporary keypair...
-    Build 'amazon-ebs' finished after 23 minutes 58 seconds.
+    Build 'amazon-ebs' finished after 19 minutes 57 seconds.
 
-    ==> Wait completed after 23 minutes 58 seconds
+    ==> Wait completed after 19 minutes 57 seconds
 
     ==> Builds finished. The artifacts of successful builds are:
     --> amazon-ebs: AMIs were created:
@@ -76,10 +76,10 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     {
         "Images": [
             {
-                "Architecture": "arm64",
+                "Architecture": "x86_64",
                 "CreationDate": "2024-05-30T14:02:21.000Z",
                 "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-                "ImageLocation": "xxxxxxxxxxxx/malcolm-v24.10.0-arm64-2024-05-30T13-57-31Z",
+                "ImageLocation": "xxxxxxxxxxxx/malcolm-v24.10.1-arm64-2024-05-30T13-57-31Z",
                 "ImageType": "machine",
                 "Public": false,
                 "OwnerId": "xxxxxxxxxxxx",
@@ -92,7 +92,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                         "Ebs": {
                             "DeleteOnTermination": true,
                             "SnapshotId": "snap-xxxxxxxxxxxxxxxxx",
-                            "VolumeSize": 20,
+                            "VolumeSize": 30,
                             "VolumeType": "gp2",
                             "Encrypted": false
                         }
@@ -100,18 +100,18 @@ The files referenced in this section can be found in [scripts/third-party-enviro
                 ],
                 "EnaSupport": true,
                 "Hypervisor": "xen",
-                "Name": "malcolm-v24.10.0-arm64-2024-05-30T13-57-31Z",
+                "Name": "malcolm-v24.10.1-arm64-2024-05-30T13-57-31Z",
                 "RootDeviceName": "/dev/xvda",
                 "RootDeviceType": "ebs",
                 "SriovNetSupport": "simple",
                 "Tags": [
                     {
                         "Key": "Malcolm",
-                        "Value": "idaholab/Malcolm/v24.10.0"
+                        "Value": "idaholab/Malcolm/v24.10.1"
                     },
                     {
                         "Key": "source_ami_name",
-                        "Value": "amzn2-ami-kernel-5.10-hvm-2.0.20240521.0-arm64-gp2"
+                        "Value": "al2023-ami-ecs-hvm-2023.0.20241003-kernel-6.1-x86_64"
                     }
                 ],
                 "VirtualizationType": "hvm",

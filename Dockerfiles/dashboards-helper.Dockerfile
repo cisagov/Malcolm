@@ -42,7 +42,7 @@ ENV OPENSEARCH_DEFAULT_DASHBOARD $OPENSEARCH_DEFAULT_DASHBOARD
 ENV DASHBOARDS_DARKMODE $DASHBOARDS_DARKMODE
 ENV PATH="/data:${PATH}"
 
-ENV SUPERCRONIC_VERSION "0.2.32"
+ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -60,8 +60,6 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/opensearch_status.sh /data/
-COPY --chmod=755 shared/bin/opensearch_index_size_prune.py /data/
-COPY --chmod=755 shared/bin/opensearch_read_only.py /data/
 ADD scripts/malcolm_utils.py /data/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \

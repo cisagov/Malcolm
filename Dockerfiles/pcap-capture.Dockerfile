@@ -67,6 +67,7 @@ RUN apt-get -q update && \
     apt-get install --no-install-recommends -y -q \
       bc \
       ethtool \
+      jq \
       libcap2-bin \
       netsniff-ng \
       openssl \

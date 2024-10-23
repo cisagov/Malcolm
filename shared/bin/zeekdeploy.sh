@@ -301,7 +301,7 @@ for IFACE in ${CAPTURE_INTERFACE//,/ }; do
 type=worker
 host=localhost
 interface=$IFACE
-env_vars=ZEEK_EXTRACTOR_MODE=$ZEEK_EXTRACTOR_MODE,ZEEK_EXTRACTOR_PATH=$EXTRACT_FILES_PATH/,TMP=$TMP_PATH
+env_vars=ZEEK_CAPTURE_INTERFACE=$IFACE,ZEEK_EXTRACTOR_MODE=$ZEEK_EXTRACTOR_MODE,ZEEK_EXTRACTOR_PATH=$EXTRACT_FILES_PATH/,TMP=$TMP_PATH
 EOF
   # if af_packet is available in the kernel, write it out as well
   if [ $AF_PACKET_SUPPORT -gt 0 ] && [ $WORKER_LB_PROCS -gt 0 ]; then

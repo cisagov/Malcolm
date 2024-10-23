@@ -26,7 +26,7 @@ if "$HOME"/.local/bin/fetch --version >/dev/null 2>&1; then
     "https://github.com/FiloSottile/age|^age-v.+-linux-amd64\.tar\.gz$|/tmp/age.tar.gz"
     "https://github.com/neilotoole/sq|^sq-.+amd64-amd64\.tar\.gz$|/tmp/sq.tar.gz"
     "https://github.com/peco/peco|^peco_linux_amd64\.tar\.gz$|/tmp/peco.tar.gz"
-    "https://github.com/sachaos/viddy|^viddy_Linux_x86_64\.tar\.gz$|/tmp/viddy.tar.gz"
+    "https://github.com/sachaos/viddy|^viddy-.+-linux-x86_64\.tar\.gz$|/tmp/viddy.tar.gz"
     "https://github.com/schollz/croc|^croc_.+_Linux-64bit\.tar\.gz$|/tmp/croc.tar.gz"
     "https://github.com/schollz/hostyoself|^hostyoself_.+_Linux-64bit\.tar\.gz$|/tmp/hostyoself.tar.gz"
     "https://github.com/smallstep/cli|^step_linux_.+_amd64\.tar\.gz$|/tmp/step.tar.gz"

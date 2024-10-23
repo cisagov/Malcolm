@@ -2,7 +2,7 @@
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 
-# Configure Amazon Linux 2 and install Malcolm
+# Configure Amazon Linux 2023 and install Malcolm
 
 ###############################################################################
 # script options
@@ -18,9 +18,9 @@ if [[ -z "$BASH_VERSION" ]]; then
     exit 1
 fi
 
-if ! command -v amazon-linux-extras >/dev/null 2>&1; then
-    echo "This script only targets Amazon Linux 2" >&2
-    exit 1
+if [[ "$(awk -F= '$1=="PLATFORM_ID" { print $2 ;}' /etc/os-release | tr -d '"')" != "platform:al2023" ]]; then
+  echo "This command only targets Amazon Linux 2023" >&2
+  exit 1
 fi
 
 ###############################################################################
@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v24.10.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v24.10.1}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -66,10 +66,18 @@ if [[ $EUID -eq 0 ]]; then
 else
     SUDO_CMD="sudo"
 fi
+
+$SUDO_CMD mkdir -p /etc/sudoers.d/
+echo 'Defaults umask = 0022' | ($SUDO_CMD su -c 'EDITOR="tee" visudo -f /etc/sudoers.d/99-default-umask')
+echo 'Defaults umask_override' | ($SUDO_CMD su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/99-default-umask')
+$SUDO_CMD chmod 440 /etc/sudoers.d/99-default-umask
+umask 0022
+
 MALCOLM_USER="$(id -nu $MALCOLM_UID)"
 MALCOLM_USER_GROUP="$(id -gn $MALCOLM_UID)"
 MALCOLM_USER_HOME="$(getent passwd "$MALCOLM_USER" | cut -d: -f6)"
 MALCOLM_URL="https://codeload.github.com/$MALCOLM_REPO/tar.gz/$MALCOLM_TAG"
+LINUX_CPU=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 IMAGE_ARCH_SUFFIX="$(uname -m | sed 's/^x86_64$//' | sed 's/^arm64$/-arm64/' | sed 's/^aarch64$/-arm64/')"
 
 ###################################################################################
@@ -79,36 +87,36 @@ function InstallEssentialPackages {
 
     # install the package(s) from yum
     $SUDO_CMD yum install -y \
-        curl \
+        cronie \
+        curl-minimal \
         dialog \
+        git \
         httpd-tools \
         make \
         openssl \
         tmux \
         xz
-
 }
 
 ################################################################################
 # InstallPythonPackages - install specific python packages
 function InstallPythonPackages {
-    echo "Installing Python 3.8 and pip packages..." >&2
+    echo "Installing Python 3 and pip packages..." >&2
 
     [[ $EUID -eq 0 ]] && USERFLAG="" || USERFLAG="--user"
 
-    # install the package(s) from amazon-linux-extras
-    $SUDO_CMD amazon-linux-extras install -y \
-        python3.8
+    $SUDO_CMD yum install -y \
+        python3-pip \
+        python3-setuptools \
+        python3-wheel \
+        python3-ruamel-yaml \
+        python3-requests+security
 
-    $SUDO_CMD ln -s -r -f /usr/bin/python3.8 /usr/bin/python3
-    $SUDO_CMD ln -s -r -f /usr/bin/pip3.8 /usr/bin/pip3
-
-    $SUDO_CMD /usr/bin/python3.8 -m pip install $USERFLAG -U \
+    $SUDO_CMD /usr/bin/python3 -m pip install $USERFLAG -U \
+        dateparser \
+        kubernetes \
         python-dotenv \
-        pythondialog \
-        ruamel.yaml \
-        requests \
-        urllib3==1.26.19
+        pythondialog
 }
 
 ################################################################################
@@ -119,7 +127,8 @@ function InstallDocker {
     # install docker, if needed
     if ! command -v docker >/dev/null 2>&1 ; then
 
-        $SUDO_CMD amazon-linux-extras install -y docker
+        $SUDO_CMD yum update -y >/dev/null 2>&1 && \
+            $SUDO_CMD yum install -y docker
 
         $SUDO_CMD systemctl enable docker
         $SUDO_CMD systemctl start docker
@@ -163,7 +172,7 @@ function SystemConfig {
 kernel.dmesg_restrict=0
 
 # the maximum number of open file handles
-fs.file-max=65536
+fs.file-max=518144
 
 # the maximum number of user inotify watches
 fs.inotify.max_user_watches=131072
@@ -200,9 +209,69 @@ EOT
     fi # limits.conf check
 
     if [[ -f /etc/default/grub ]] && ! grep -q cgroup /etc/default/grub; then
-        $SUDO_CMD sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& random.trust_cpu=on cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem/' /etc/default/grub
+        $SUDO_CMD sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="[^"]*/& systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem random.trust_cpu=on preempt=voluntary/' /etc/default/grub
         $SUDO_CMD grub2-mkconfig -o /boot/grub2/grub.cfg
     fi # grub check
+}
+
+###################################################################################
+# _GitLatestRelease - query the latest version from a github project's releases
+function _GitLatestRelease {
+  if [[ -n "$1" ]]; then
+    (set -o pipefail && curl -sL -f "https://api.github.com/repos/$1/releases/latest" | jq '.tag_name' | sed -e 's/^"//' -e 's/"$//' ) || \
+      (set -o pipefail && curl -sL -f "https://api.github.com/repos/$1/releases" | jq '.[0].tag_name' | sed -e 's/^"//' -e 's/"$//' ) || \
+      echo unknown
+  else
+    echo "unknown">&2
+  fi
+}
+
+################################################################################
+# _InstallCroc - schollz/croc: easily and securely send things from one computer to another
+function _InstallCroc {
+  CROC_RELEASE="$(_GitLatestRelease schollz/croc)"
+  TMP_CLONE_DIR="$(mktemp -d)"
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-ARM64.tar.gz"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz"
+  else
+    CROC_URL=
+  fi
+  if [[ -n "$CROC_URL" ]]; then
+    curl -sSL "$CROC_URL" | tar xvzf - -C "${TMP_CLONE_DIR}"
+    $SUDO_CMD cp -f "${TMP_CLONE_DIR}"/croc /usr/bin/croc
+    $SUDO_CMD chmod 755 /usr/bin/croc
+    $SUDO_CMD chown root:root /usr/bin/croc
+  fi
+  rm -rf "$TMP_CLONE_DIR"
+}
+
+################################################################################
+# _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
+function _InstallBoringProxy {
+  BORING_RELEASE="$(_GitLatestRelease boringproxy/boringproxy)"
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-arm64"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-x86_64"
+  else
+    BORING_URL=
+  fi
+  if [[ -n "$BORING_URL" ]]; then
+    curl -sSL -o "${LOCAL_BIN_PATH}"/boringproxy.new "$BORING_URL"
+    chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
+    [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && $SuDO_CMD rm -f /usr/bin/boringproxy
+    $SUDO_CMD mv "$LOCAL_BIN_PATH"/boringproxy.new /usr/bin/boringproxy
+    $SUDO_CMD chown root:root /usr/bin/boringproxy
+  fi
+}
+
+################################################################################
+# InstallUserLocalBinaries - install various tools to LOCAL_BIN_PATH
+function InstallUserLocalBinaries {
+    [[ ! -f /usr/bin/croc ]] && _InstallCroc
+    [[ ! -f /usr/bin/boringproxy ]] && _InstallBoringProxy
 }
 
 ################################################################################
@@ -268,7 +337,7 @@ EOT
 fi
 EOF
 
-    chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP "$MALCOLM_USER_HOME"
+    $SUDO_CMD chown -R $MALCOLM_USER:$MALCOLM_USER_GROUP "$MALCOLM_USER_HOME"
 }
 
 ################################################################################
@@ -276,6 +345,7 @@ EOF
 
 SystemConfig
 InstallEssentialPackages
+InstallUserLocalBinaries
 InstallPythonPackages
 InstallDocker
 InstallMalcolm

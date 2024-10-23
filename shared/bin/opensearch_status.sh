@@ -102,21 +102,24 @@ if (( $WAIT_FOR_LOG_DATA == 1 )); then
 
   echo "Waiting until $OPENSEARCH_PRIMARY has logs..." >&2
 
-  # wait until at least one network traffic log index exists
+  # wait until at least one network traffic log index exists (get index count where docs.count > 0)
   FOUND_INDEX=
   while true; do
-    if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN" 2>/dev/null | wc -l) > 0 )); then
-      FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
-    elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN" 2>/dev/null | wc -l) > 0 )); then
-      FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
+    # use jq if it's available to parse the machine-readable index list as JSON, fall back to awk if it's not
+    if command -v jq >/dev/null 2>&1; then
+      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select(.["docs.count"] != "0")] | length' 2>/dev/null) > 0 )); then
+        FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
+      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN?format=json" 2>/dev/null | jq '[.[] | select(.["docs.count"] != "0")] | length' 2>/dev/null) > 0 )); then
+        FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
+      fi
+    else
+      if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$MALCOLM_NETWORK_INDEX_PATTERN" 2>/dev/null | awk '$7 != "0"' | wc -l) > 0 )); then
+        FOUND_INDEX="$MALCOLM_NETWORK_INDEX_PATTERN"
+      elif [[ "$MALCOLM_NETWORK_INDEX_PATTERN" != "$ARKIME_NETWORK_INDEX_PATTERN" ]] && (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XGET "$OPENSEARCH_URL/_cat/indices/$ARKIME_NETWORK_INDEX_PATTERN" 2>/dev/null | awk '$7 != "0"' | wc -l) > 0 )); then
+        FOUND_INDEX="$ARKIME_NETWORK_INDEX_PATTERN"
+      fi
     fi
     [[ -n "$FOUND_INDEX" ]] && break || sleep 5
-  done
-  echo "Log indices exist." >&2
-
-  # wait until at least one record with @timestamp exists
-  until curl "${CURL_CONFIG_PARAMS[@]}" -fs -H'Content-Type: application/json' -XPOST "$OPENSEARCH_URL/$FOUND_INDEX/_search" -d'{ "sort": { "@timestamp" : "desc" }, "size" : 1 }' >/dev/null 2>&1 ; do
-    sleep 5
   done
   echo "Logs exist." >&2
 fi

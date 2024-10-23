@@ -157,6 +157,14 @@ OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | Orche
 
 
 ##################################################################################################
+def GetPlatformOSRelease():
+    try:
+        return platform.freedesktop_os_release().get('VARIANT_ID', None)
+    except Exception:
+        return None
+
+
+##################################################################################################
 def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
     localPath = None
     if service and dockerComposeContents and containerPath:

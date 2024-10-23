@@ -201,6 +201,7 @@ curl "${GITHUB_API_CURL_ARGS[@]}" "${yq_tar_url}" | tar -xzf - ./yq_linux_${ARCH
 
 mv ./yq_linux_${ARCH} /usr/bin/yq
 chmod 755 /usr/bin/yq
+chown root:root /usr/bin/yq
 ###
 
 # supercronic
@@ -220,6 +221,7 @@ curl "${GITHUB_API_CURL_ARGS[@]}" "${croc_tar_url}" | tar -xzf - croc
 
 mv ./croc /usr/local/bin/croc
 chmod 755 /usr/local/bin/croc
+chown root:root /usr/local/bin/croc
 ###
 
 # update clamav signatures
