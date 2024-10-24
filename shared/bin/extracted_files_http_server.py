@@ -24,6 +24,7 @@ from dominate.tags import *
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from stat import S_IFREG
 from stream_zip import ZIP_32, stream_zip
+from urllib.parse import urlparse, parse_qs
 
 from malcolm_utils import (
     eprint,
@@ -129,6 +130,42 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                     with div(cls='container'):
                         h1(pageTitle, cls='mb-5', style='text-align: center')
                         with div(cls='container').add(div(cls="row")).add(div(cls="col-lg-12")):
+                            
+                            itemsPerPage = 50  
+
+                            # parse the query parameters to get the page number
+                            parsedUrl = urlparse(self.path)
+                            queryParams = parse_qs(parsedUrl.query)
+                            page = int(queryParams.get('page', ['1'])[0])
+                            page = max(page, 1)
+
+                            items = []
+
+                            for dirpath, dirnames, filenames in os.walk(fullpath):
+                                # list directories first
+                                for dirname in sorted(dirnames, key=natural_sort_key):
+                                    child = os.path.join(dirpath, dirname)
+                                    if args.links or (not os.path.islink(child)):
+                                        items.append(('dir', dirname, child))
+                                # list files
+                                for filename in sorted(filenames, key=natural_sort_key):
+                                    child = os.path.join(dirpath, filename)
+                                    if args.links or (not os.path.islink(child)):
+                                        items.append(('file', filename, child))
+                                # only process the current directory
+                                break
+
+                            totalItems = len(items)
+                            totalPages = (totalItems + itemsPerPage - 1) // itemsPerPage
+
+                            # ensure the page number is within valid range
+                            page = min(page, totalPages) if totalPages > 0 else 1
+
+                            # get items for the current page
+                            startIndex = (page - 1) * itemsPerPage
+                            endIndex = startIndex + itemsPerPage
+                            itemsOnPage = items[startIndex:endIndex]
+
                             with table(cls='table-bordered', width='100%').add(tbody()):
                                 # header row
                                 t = tr(style="text-align: center")
@@ -155,150 +192,163 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     if showMalcolmCols:
                                         t.add(th(), th(), th())
 
-                                # content rows (files and directories)
-                                for dirpath, dirnames, filenames in os.walk(fullpath):
-                                    # list directories first
-                                    for dirname in sorted(dirnames, key=natural_sort_key):
-                                        try:
-                                            child = os.path.join(dirpath, dirname)
-                                            if args.links or (not os.path.islink(child)):
-                                                t = tr()
-                                                t.add(
-                                                    td(a(dirname, href=f'{dirname}/')),
-                                                    td("Directory"),
-                                                    td(''),
-                                                )
-                                                if showMalcolmCols:
-                                                    t.add(th(), th(), th())
-                                        except Exception as e:
-                                            eprint(f'Error with directory "{dirname}"": {e}')
+                                # content rows
+                                for itemType, name, child in itemsOnPage:
+                                    try:
+                                        if itemType == 'dir':
+                                            t = tr()
+                                            t.add(
+                                                td(a(name, href=f'{name}/?page=1')),
+                                                td("Directory"),
+                                                td(''),
+                                            )
+                                            if showMalcolmCols:
+                                                t.add(th(), th(), th())
+                                        elif itemType == 'file':
+                                            t = tr()
 
-                                    # list files after directories
-                                    for filename in sorted(filenames, key=natural_sort_key):
-                                        try:
-                                            child = os.path.join(dirpath, filename)
-                                            if args.links or (not os.path.islink(child)):
-                                                t = tr()
+                                            filename = name
 
-                                                # calculate some of the stuff for representing Malcolm files
-                                                timestamp = None
-                                                timestampStr = ''
-                                                timestampStartFilterStr = ''
-                                                fmatch = None
-                                                fsource = ''
-                                                fids = list()
-                                                if showMalcolmCols:
-                                                    # determine if filename is in a pattern we recognize
-                                                    fmatch = carvedFileRegex.search(filename)
-                                                    if fmatch is None:
-                                                        fmatch = carvedFileRegexAlt.search(filename)
-                                                    if fmatch is not None:
-                                                        # format timestamp as ISO date/time
-                                                        timestampStr = fmatch.groupdict().get('timestamp', '')
-                                                        try:
-                                                            timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
-                                                            timestampStr = timestamp.isoformat()
-                                                            timestampStartFilterStr = (
-                                                                (timestamp - timedelta(days=1))
-                                                                .isoformat()
-                                                                .split('.')[0]
-                                                            )
-                                                        except Exception as te:
-                                                            if timestampStr:
-                                                                eprint(f'Error with time "{str(timestampStr)}": {te}')
-                                                        # put UIDs and FUIDs into a single event.id-filterable column
-                                                        fids = list(
-                                                            [
-                                                                x
-                                                                for x in [
-                                                                    fmatch.groupdict().get('uid', ''),
-                                                                    fmatch.groupdict().get('fuid', ''),
-                                                                ]
-                                                                if x and x != 'unknown'
-                                                            ]
+                                            # Malcolm file info
+                                            timestamp = None
+                                            timestampStr = ''
+                                            timestampStartFilterStr = ''
+                                            fmatch = None
+                                            fsource = ''
+                                            fids = list()
+                                            if showMalcolmCols:
+                                                # determine if filename matches known patterns
+                                                fmatch = carvedFileRegex.search(filename)
+                                                if fmatch is None:
+                                                    fmatch = carvedFileRegexAlt.search(filename)
+                                                if fmatch is not None:
+                                                    # format timestamp
+                                                    timestampStr = fmatch.groupdict().get('timestamp', '')
+                                                    try:
+                                                        timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
+                                                        timestampStr = timestamp.isoformat()
+                                                        timestampStartFilterStr = (
+                                                            (timestamp - timedelta(days=1))
+                                                            .isoformat()
+                                                            .split('.')[0]
                                                         )
-                                                        # massage source a little bit (remove '<error>' and handle
-                                                        #   'XOR decrypted from...')
-                                                        fsource = fmatch.groupdict().get('source', '')
-                                                        if fsource == '<error>':
-                                                            fsource = ''
-                                                        elif xorMatch := xorRegex.search(fsource):
-                                                            fsource = xorMatch.groupdict().get('source', '')
-                                                            fids.append(xorMatch.groupdict().get('fuid', ''))
+                                                    except Exception as te:
+                                                        if timestampStr:
+                                                            eprint(f'Error with time "{str(timestampStr)}": {te}')
+                                                    # gather IDs
+                                                    fids = list(
+                                                        [
+                                                            x
+                                                            for x in [
+                                                                fmatch.groupdict().get('uid', ''),
+                                                                fmatch.groupdict().get('fuid', ''),
+                                                            ]
+                                                            if x and x != 'unknown'
+                                                        ]
+                                                    )
+                                                    # process source
+                                                    fsource = fmatch.groupdict().get('source', '')
+                                                    if fsource == '<error>':
+                                                        fsource = ''
+                                                    elif xorRegex.search(fsource):
+                                                        xorMatch = xorRegex.search(fsource)
+                                                        fsource = xorMatch.groupdict().get('source', '')
+                                                        fids.append(xorMatch.groupdict().get('fuid', ''))
 
-                                                # only request mime type for files if specified in arguments
-                                                fileinfo = (
-                                                    magic.from_file(os.path.realpath(child), mime=True)
-                                                    if args.magic
-                                                    else os.path.splitext(filename)[1]
-                                                )
+                                            # determine file info
+                                            fileinfo = (
+                                                magic.from_file(os.path.realpath(child), mime=True)
+                                                if args.magic
+                                                else os.path.splitext(filename)[1]
+                                            )
 
-                                                # show filename, file type (with link to IANA if MIME type is shown), and file size
-                                                t.add(
+                                            # add file row to table
+                                            t.add(
+                                                td(
+                                                    a(
+                                                        (filename[:fnameDispLen] + '...') if len(filename) > fnameDispLen else filename,
+                                                        href=f'{filename}',
+                                                    ),
+                                                    title=filename,
+                                                ),
+                                                (
                                                     td(
                                                         a(
-                                                            (
-                                                                (filename[:fnameDispLen] + '...')
-                                                                if len(filename) > fnameDispLen
-                                                                else filename
-                                                            ),
-                                                            href=f'{filename}',
+                                                            fileinfo,
+                                                            href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
+                                                            target="_blank",
                                                         ),
-                                                        title=filename,
-                                                    ),
-                                                    (
+                                                    )
+                                                    if args.magic
+                                                    else td(fileinfo)
+                                                ),
+                                                td(sizeof_fmt(os.path.getsize(child)), style="text-align: right"),
+                                            )
+                                            
+                                            # show special malcolm columns if requested
+                                            if showMalcolmCols:
+                                                if fmatch is not None:
+                                                    # list carve source, IDs, and timestamp
+                                                    t.add(
                                                         td(
-                                                            a(
-                                                                fileinfo,
-                                                                href=f'https://www.iana.org/assignments/media-types/{fileinfo}',
-                                                                target="_blank",
+                                                            fsource,
+                                                            style="text-align: center",
+                                                        ),
+                                                        td(
+                                                            [
+                                                                a(
+                                                                    fid,
+                                                                    href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
+                                                                    target="_blank",
+                                                                )
+                                                                for fid in fids
+                                                            ],
+                                                            style="text-align: center",
+                                                        ),
+                                                        td(
+                                                            (
+                                                                timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                                                                if timestamp
+                                                                else timestampStr
                                                             ),
-                                                        )
-                                                        if args.magic
-                                                        else td(fileinfo)
-                                                    ),
-                                                    td(sizeof_fmt(os.path.getsize(child)), style="text-align: right"),
-                                                )
+                                                            title=timestampStr,
+                                                            style="text-align: center",
+                                                        ),
+                                                    )
+                                                else:
+                                                    # file name format was not recognized, so extra columns are empty
+                                                    t.add(th(), th(), th())
 
-                                                # show special malcolm columns if requested
-                                                if showMalcolmCols:
-                                                    if fmatch is not None:
-                                                        # list carve source, IDs, and timestamp
-                                                        t.add(
-                                                            td(
-                                                                fsource,
-                                                                style="text-align: center",
-                                                            ),
-                                                            td(
-                                                                [
-                                                                    a(
-                                                                        fid,
-                                                                        href=f'/arkime/idark2dash/filter?start={timestampStartFilterStr}&stop={tomorrowStr}&field=event.id&value={fid}',
-                                                                        target="_blank",
-                                                                    )
-                                                                    for fid in fids
-                                                                ],
-                                                                style="text-align: center",
-                                                            ),
-                                                            td(
-                                                                (
-                                                                    timestamp.strftime("%Y-%m-%d %H:%M:%S")
-                                                                    if timestamp
-                                                                    else timestampStr
-                                                                ),
-                                                                title=timestampStr,
-                                                                style="text-align: center",
-                                                            ),
-                                                        )
-                                                    else:
-                                                        # file name format was not recognized, so extra columns are empty
-                                                        t.add(th(), th(), th())
+                                    except Exception as e:
+                                        eprint(f'Error with file "{filename}": {e}')
+                            
+                            # Add pagination controls
+                            with div(cls='pagination'):
+                                with ul(
+                                    cls='pagination-list',
+                                    style='display: flex; list-style: none; justify-content: center; padding: 0;',
+                                ):
+                                    # Previous page link
+                                    if page > 1:
+                                        prevPageUrl = f'?page={page - 1}'
+                                        li(a('Previous', href=prevPageUrl, cls='page-link'), cls='page-item')
+                                    else:
+                                        li(span('Previous', cls='page-link disabled'), cls='page-item')
 
-                                        except Exception as e:
-                                            eprint(f'Error with file "{filename}": {e}')
+                                    # Page number links
+                                    for p in range(1, totalPages + 1):
+                                        page_url = f'?page={p}'
+                                        if p == page:
+                                            li(a(str(p), href=page_url, cls='page-link active'), cls='page-item')
+                                        else:
+                                            li(a(str(p), href=page_url, cls='page-link'), cls='page-item')
 
-                                    # our "walk" is not recursive right now, we only need to go one level deep
-                                    break
+                                    # Next page link
+                                    if page < totalPages:
+                                        nextPageUrl = f'?page={page + 1}'
+                                        li(a('Next', href=nextPageUrl, cls='page-link'), cls='page-item')
+                                    else:
+                                        li(span('Next', cls='page-link disabled'), cls='page-item')
 
                 # footer decoration
                 with footer(cls='footer bg-light').add(div(cls='container')).add(div(cls='row')):
