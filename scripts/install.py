@@ -3760,7 +3760,7 @@ def main():
         metavar='<string>',
         type=str,
         default='',
-        help='Malcolm container images .tar.gz file for installation',
+        help='Malcolm container images .tar.xz file for installation',
     )
 
     runtimeOptionsArgGroup = parser.add_argument_group('Runtime options')
