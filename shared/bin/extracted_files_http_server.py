@@ -130,14 +130,17 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                     with div(cls='container'):
                         h1(pageTitle, cls='mb-5', style='text-align: center')
                         with div(cls='container').add(div(cls="row")).add(div(cls="col-lg-12")):
-                            
-                            itemsPerPage = 50  
 
                             # parse the query parameters to get the page number
                             parsedUrl = urlparse(self.path)
                             queryParams = parse_qs(parsedUrl.query)
                             page = int(queryParams.get('page', ['1'])[0])
                             page = max(page, 1)
+
+                            # now get # of elements to display per page
+                            elements = int(queryParams.get('elements', ['1'])[0])
+                            elements = max(elements, 20)
+                            itemsPerPage = elements
 
                             items = []
 
@@ -198,7 +201,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         if itemType == 'dir':
                                             t = tr()
                                             t.add(
-                                                td(a(name, href=f'{name}/?page=1')),
+                                                td(a(name, href=f'{name}/?page=1&elements={elements}')),
                                                 td("Directory"),
                                                 td(''),
                                             )
@@ -330,22 +333,21 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                 ):
                                     # Previous page link
                                     if page > 1:
-                                        prevPageUrl = f'?page={page - 1}'
+                                        prevPageUrl = f'?page={page - 1}&elements={elements}'
                                         li(a('Previous', href=prevPageUrl, cls='page-link'), cls='page-item')
                                     else:
                                         li(span('Previous', cls='page-link disabled'), cls='page-item')
 
-                                    # Page number links
-                                    for p in range(1, totalPages + 1):
-                                        page_url = f'?page={p}'
-                                        if p == page:
-                                            li(a(str(p), href=page_url, cls='page-link active'), cls='page-item')
-                                        else:
-                                            li(a(str(p), href=page_url, cls='page-link'), cls='page-item')
+                                    # add a space between text
+                                    li(
+                                        ' ',
+                                        cls='page-item spacer',
+                                        style='width: 10px;'
+                                    )
 
-                                    # Next page link
+                                    # # Next page link
                                     if page < totalPages:
-                                        nextPageUrl = f'?page={page + 1}'
+                                        nextPageUrl = f'?page={page + 1}&elements={elements}'
                                         li(a('Next', href=nextPageUrl, cls='page-link'), cls='page-item')
                                     else:
                                         li(span('Next', cls='page-link disabled'), cls='page-item')
