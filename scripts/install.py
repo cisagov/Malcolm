@@ -4014,7 +4014,7 @@ def main():
         required=False,
         metavar='<integer>',
         type=int,
-        default=None,
+        default=0,
         help='Number of Logstash workers (e.g., 4, 8, etc.)',
     )
     opensearchArgGroup.add_argument(
