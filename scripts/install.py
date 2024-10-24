@@ -4569,7 +4569,8 @@ def main():
     try:
         parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
+    except SystemExit as e:
+        eprint(f'Invalid arguments: {e}')
         parser.print_help()
         exit(2)
 
