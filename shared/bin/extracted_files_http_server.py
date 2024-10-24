@@ -139,7 +139,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                             # now get # of elements to display per page
                             elements = int(queryParams.get('elements', ['1'])[0])
-                            elements = max(elements, 20)
+                            elements = max(elements, 50)
                             itemsPerPage = elements
 
                             items = []
@@ -325,13 +325,13 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     except Exception as e:
                                         eprint(f'Error with file "{filename}": {e}')
                             
-                            # Add pagination controls
+                            # pagination controls
                             with div(cls='pagination'):
                                 with ul(
                                     cls='pagination-list',
                                     style='display: flex; list-style: none; justify-content: center; padding: 0;',
                                 ):
-                                    # Previous page link
+                                    # previous page link
                                     if page > 1:
                                         prevPageUrl = f'?page={page - 1}&elements={elements}'
                                         li(a('Previous', href=prevPageUrl, cls='page-link'), cls='page-item')
@@ -345,7 +345,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         style='width: 10px;'
                                     )
 
-                                    # # Next page link
+                                    # next page link
                                     if page < totalPages:
                                         nextPageUrl = f'?page={page + 1}&elements={elements}'
                                         li(a('Next', href=nextPageUrl, cls='page-link'), cls='page-item')
