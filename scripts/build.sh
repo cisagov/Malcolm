@@ -127,37 +127,39 @@ else
   $DOCKER_COMPOSE_COMMAND --progress=plain build --build-arg TARGETPLATFORM="$TARGET_PLATFORM" --build-arg GITHUB_TOKEN="$GITHUB_API_TOKEN" --build-arg MAXMIND_GEOIP_DB_LICENSE_KEY="$MAXMIND_API_KEY" --build-arg MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL="${MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg ZEEK_DEB_ALTERNATE_DOWNLOAD_URL="${ZEEK_DEB_ALTERNATE_DOWNLOAD_URL:-}" --build-arg BUILD_DATE="$BUILD_DATE" --build-arg MALCOLM_VERSION="$MALCOLM_VERSION" --build-arg VCS_REVISION="$VCS_REVISION" "$@"
 fi
 
-# we're going to do some validation that some things got pulled/built correctly
-FILES_IN_IMAGES=(
-  "/usr/share/filebeat-logs/filebeat-logs.yml;filebeat-oss"
-  "/var/www/upload/filepond/dist/filepond.js;file-upload"
-  "/opt/freq_server/freq_server.py;freq"
-  "/usr/local/bin/capa;file-monitor"
-  "/var/www/htadmin/htadmin.php;htadmin"
-  "/etc/ip_protocol_name_to_number.yaml;logstash"
-  "/etc/vendor_macs.yaml;logstash"
-  "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
-  "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"
-  "/opt/arkime/etc/ipv4-address-space.csv;arkime"
-  "/opt/arkime/etc/oui.txt;arkime"
-  "/opt/arkime/bin/capture;arkime"
-  "/opt/netbox-devicetype-library-import/repo/schema/components.json;netbox"
-  "/opt/zeek/bin/zeek;zeek"
-  "/opt/zeek/bin/spicyz;zeek"
-  "/usr/share/nginx/html/index.html;nginx-proxy"
-)
-for i in ${FILES_IN_IMAGES[@]}; do
-  FILE="$(echo "$i" | cut -d';' -f1)"
-  IMAGE="$(echo "$i" | cut -d';' -f2)"
-  (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
-done
+if (( $# == 0 )); then
+  # if we built *all* the images, we're going to do some validation that some things got pulled/built correctly
+  FILES_IN_IMAGES=(
+    "/usr/share/filebeat-logs/filebeat-logs.yml;filebeat-oss"
+    "/var/www/upload/filepond/dist/filepond.js;file-upload"
+    "/opt/freq_server/freq_server.py;freq"
+    "/usr/local/bin/capa;file-monitor"
+    "/var/www/htadmin/htadmin.php;htadmin"
+    "/etc/ip_protocol_name_to_number.yaml;logstash"
+    "/etc/vendor_macs.yaml;logstash"
+    "/opt/arkime/etc/GeoLite2-ASN.mmdb;arkime"
+    "/opt/arkime/etc/GeoLite2-Country.mmdb;arkime"
+    "/opt/arkime/etc/ipv4-address-space.csv;arkime"
+    "/opt/arkime/etc/oui.txt;arkime"
+    "/opt/arkime/bin/capture;arkime"
+    "/opt/netbox-devicetype-library-import/repo/schema/components.json;netbox"
+    "/opt/zeek/bin/zeek;zeek"
+    "/opt/zeek/bin/spicyz;zeek"
+    "/usr/share/nginx/html/index.html;nginx-proxy"
+  )
+  for i in ${FILES_IN_IMAGES[@]}; do
+    FILE="$(echo "$i" | cut -d';' -f1)"
+    IMAGE="$(echo "$i" | cut -d';' -f2)"
+    (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
+  done
 
-DIRS_IN_IMAGES=(
-  "/var/lib/clamav;file-monitor;200000000"
-)
-for i in ${DIRS_IN_IMAGES[@]}; do
-  DIR="$(echo "$i" | cut -d';' -f1)"
-  IMAGE="$(echo "$i" | cut -d';' -f2)"
-  MINSIZE="$(echo "$i" | cut -d';' -f3)"
-  (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
-done
+  DIRS_IN_IMAGES=(
+    "/var/lib/clamav;file-monitor;200000000"
+  )
+  for i in ${DIRS_IN_IMAGES[@]}; do
+    DIR="$(echo "$i" | cut -d';' -f1)"
+    IMAGE="$(echo "$i" | cut -d';' -f2)"
+    MINSIZE="$(echo "$i" | cut -d';' -f3)"
+    (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
+  done
+fi
