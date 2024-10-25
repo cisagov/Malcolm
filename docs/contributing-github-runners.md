@@ -104,7 +104,7 @@ Each container build workflow actually runs two paths in parallel: one for build
 
 ## Convenience scripts for development
 
-As mentioned earlier, Malcolm images built using the instructions in this document are are named according to the pattern `ghcr.io/username/malcolm/image:branch`. However, note that the `image:` values found in [`docker-compose.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/docker-compose.yml) (and in the [Kubernetes](kubernetes.md#Kubernetes) [manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/)) look like `ghcr.io/idaholab/malcolm/opensearch:24.10.1`, using the OpenSearch container as an example. To run a local instance of Malcolm using these images instead of the official `ghcr.io/idaholab` ones, users will need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) to pull the repository images and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.10.1`).
+As mentioned earlier, Malcolm images built using the instructions in this document are are named according to the pattern `ghcr.io/username/malcolm/image:branch`. However, note that the `image:` values found in [`docker-compose.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/docker-compose.yml) (and in the [Kubernetes](kubernetes.md#Kubernetes) [manifests]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/)) look like `ghcr.io/idaholab/malcolm/opensearch:24.11.0`, using the OpenSearch container as an example. To run a local instance of Malcolm using these images instead of the official `ghcr.io/idaholab` ones, users will need to edit their `docker-compose.yml` file(s) and replace the `image:` tags according to this new pattern, or use the bash helper script [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) to pull the repository images and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.11.0`).
 
 Before explaining that script, a discussion of the workflow files for the [Hedgehog Linux](live-analysis.md#Hedgehog) ([hedgehog-iso-build-docker-wrap-push-ghcr.yml
 ]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml)) and [Malcolm](malcolm-iso.md#ISO) ([malcolm-iso-build-docker-wrap-push-ghcr.yml
@@ -141,9 +141,9 @@ These menu options are described below:
 3. GithubTriggerPackagesBuild
     * This option will trigger a [repository dispatch](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch) via the [GitHub API](https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28#create-a-workflow-dispatch-event) using `curl`. In order for this operation to work, an environment variable named `GITHUB_OAUTH_TOKEN` must be defined containing a [personal access token](https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api?apiVersion=2022-11-28#basic-authentication) created for your GitHub user account with the "Actions (write)" repository permission.
 4. PullAndTagGithubWorkflowImages
-    * This option will pull latest Malcolm container images (excluding the installer ISO wrapper container images) from ghcr.io for the user's Malcolm fork, and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.10.1`) so that they may be run without modifying the local `docker-compose.yml` file. This is probably the option users will select most often. Note that this is different from the action performed in steps 1 and 0 above: this pulls the images directly from the container registry, it does **not** extract them from the Malcolm installer ISO wrapper container image.
+    * This option will pull latest Malcolm container images (excluding the installer ISO wrapper container images) from ghcr.io for the user's Malcolm fork, and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.11.0`) so that they may be run without modifying the local `docker-compose.yml` file. This is probably the option users will select most often. Note that this is different from the action performed in steps 1 and 0 above: this pulls the images directly from the container registry, it does **not** extract them from the Malcolm installer ISO wrapper container image.
 5. PullAndTagGithubWorkflowISOImages
-    * This option will pull latest Malcolm installer ISO wrapper container images from ghcr.io for the user's Malcolm fork, and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.10.1`).
+    * This option will pull latest Malcolm installer ISO wrapper container images from ghcr.io for the user's Malcolm fork, and re-tag them with `ghcr.io/idaholab` and the current Malcolm version (e.g., `24.11.0`).
     
 The script can also be run non-interactively by specifying the option number on the command line (e.g., `./scripts/github_image_helper.sh 4`).
 
@@ -182,7 +182,7 @@ $ ./scripts/github_image_helper.sh
 5   PullAndTagGithubWorkflowISOImages
 Operation:4
 PullAndTagGithubWorkflowImages
-Pulling images from ghcr.io/romeogdetlevjr (main) and tagging as 24.10.1...
+Pulling images from ghcr.io/romeogdetlevjr (main) and tagging as 24.11.0...
 main: Pulling from romeogdetlevjr/malcolm/api
 Digest: sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Status: Image is up to date for ghcr.io/romeogdetlevjr/malcolm/api:main
@@ -196,46 +196,46 @@ ghcr.io/romeogdetlevjr/malcolm/zeek:main
 xxxxxxxxxxxx: Pull complete 
 ```
 
-Verify that the images were pulled. Note that users will see two tags for each image: one tagged with the username and branch (e.g., `ghcr.io/romeogdetlevjr/malcolm/api:main`) and another tagged with `ghcr.io/idaholab` and the Malcolm version (e.g., `ghcr.io/idaholab/malcolm/api:24.10.1`).
+Verify that the images were pulled. Note that users will see two tags for each image: one tagged with the username and branch (e.g., `ghcr.io/romeogdetlevjr/malcolm/api:main`) and another tagged with `ghcr.io/idaholab` and the Malcolm version (e.g., `ghcr.io/idaholab/malcolm/api:24.11.0`).
 
 ```bash
 $ docker images | grep romeogdetlevjr/malcolm
-ghcr.io/idaholab/malcolm/zeek                   24.10.1       xxxxxxxxxxxx   10 minutes ago   1.39GB
+ghcr.io/idaholab/malcolm/zeek                   24.11.0       xxxxxxxxxxxx   10 minutes ago   1.39GB
 ghcr.io/romeogdetlevjr/malcolm/zeek             main          xxxxxxxxxxxx   10 minutes ago   1.39GB
-ghcr.io/idaholab/malcolm/dashboards             24.10.1       xxxxxxxxxxxx   13 minutes ago   1.55GB
+ghcr.io/idaholab/malcolm/dashboards             24.11.0       xxxxxxxxxxxx   13 minutes ago   1.55GB
 ghcr.io/romeogdetlevjr/malcolm/dashboards       main          xxxxxxxxxxxx   13 minutes ago   1.55GB
-ghcr.io/idaholab/malcolm/suricata               24.10.1       xxxxxxxxxxxx   14 minutes ago   339MB
+ghcr.io/idaholab/malcolm/suricata               24.11.0       xxxxxxxxxxxx   14 minutes ago   339MB
 ghcr.io/romeogdetlevjr/malcolm/suricata         main          xxxxxxxxxxxx   14 minutes ago   339MB
-ghcr.io/idaholab/malcolm/file-monitor           24.10.1       xxxxxxxxxxxx   15 minutes ago   712MB
+ghcr.io/idaholab/malcolm/file-monitor           24.11.0       xxxxxxxxxxxx   15 minutes ago   712MB
 ghcr.io/romeogdetlevjr/malcolm/file-monitor     main          xxxxxxxxxxxx   15 minutes ago   712MB
-ghcr.io/idaholab/malcolm/redis                  24.10.1       xxxxxxxxxxxx   15 minutes ago   55.4MB
+ghcr.io/idaholab/malcolm/redis                  24.11.0       xxxxxxxxxxxx   15 minutes ago   55.4MB
 ghcr.io/romeogdetlevjr/malcolm/redis            main          xxxxxxxxxxxx   15 minutes ago   55.4MB
-ghcr.io/idaholab/malcolm/nginx-proxy            24.10.1       xxxxxxxxxxxx   16 minutes ago   160MB
+ghcr.io/idaholab/malcolm/nginx-proxy            24.11.0       xxxxxxxxxxxx   16 minutes ago   160MB
 ghcr.io/romeogdetlevjr/malcolm/nginx-proxy      main          xxxxxxxxxxxx   16 minutes ago   160MB
-ghcr.io/idaholab/malcolm/pcap-capture           24.10.1       xxxxxxxxxxxx   16 minutes ago   137MB
+ghcr.io/idaholab/malcolm/pcap-capture           24.11.0       xxxxxxxxxxxx   16 minutes ago   137MB
 ghcr.io/romeogdetlevjr/malcolm/pcap-capture     main          xxxxxxxxxxxx   16 minutes ago   137MB
-ghcr.io/idaholab/malcolm/htadmin                24.10.1       xxxxxxxxxxxx   16 minutes ago   246MB
+ghcr.io/idaholab/malcolm/htadmin                24.11.0       xxxxxxxxxxxx   16 minutes ago   246MB
 ghcr.io/romeogdetlevjr/malcolm/htadmin          main          xxxxxxxxxxxx   16 minutes ago   246MB
 ghcr.io/romeogdetlevjr/malcolm/file-upload      main          xxxxxxxxxxxx   16 minutes ago   250MB
-ghcr.io/idaholab/malcolm/file-upload            24.10.1       xxxxxxxxxxxx   16 minutes ago   250MB
-ghcr.io/idaholab/malcolm/logstash-oss           24.10.1       xxxxxxxxxxxx   16 minutes ago   1.49GB
+ghcr.io/idaholab/malcolm/file-upload            24.11.0       xxxxxxxxxxxx   16 minutes ago   250MB
+ghcr.io/idaholab/malcolm/logstash-oss           24.11.0       xxxxxxxxxxxx   16 minutes ago   1.49GB
 ghcr.io/romeogdetlevjr/malcolm/logstash-oss     main          xxxxxxxxxxxx   16 minutes ago   1.49GB
-ghcr.io/idaholab/malcolm/netbox                 24.10.1       xxxxxxxxxxxx   17 minutes ago   1.66GB
+ghcr.io/idaholab/malcolm/netbox                 24.11.0       xxxxxxxxxxxx   17 minutes ago   1.66GB
 ghcr.io/romeogdetlevjr/malcolm/netbox           main          xxxxxxxxxxxx   17 minutes ago   1.66GB
 ghcr.io/romeogdetlevjr/malcolm/filebeat-oss     main          xxxxxxxxxxxx   18 minutes ago   405MB
-ghcr.io/idaholab/malcolm/filebeat-oss           24.10.1       xxxxxxxxxxxx   18 minutes ago   405MB
+ghcr.io/idaholab/malcolm/filebeat-oss           24.11.0       xxxxxxxxxxxx   18 minutes ago   405MB
 ghcr.io/romeogdetlevjr/malcolm/postgresql       main          xxxxxxxxxxxx   18 minutes ago   303MB
-ghcr.io/idaholab/malcolm/postgresql             24.10.1       xxxxxxxxxxxx   18 minutes ago   303MB
-ghcr.io/idaholab/malcolm/arkime                 24.10.1       xxxxxxxxxxxx   18 minutes ago   802MB
+ghcr.io/idaholab/malcolm/postgresql             24.11.0       xxxxxxxxxxxx   18 minutes ago   303MB
+ghcr.io/idaholab/malcolm/arkime                 24.11.0       xxxxxxxxxxxx   18 minutes ago   802MB
 ghcr.io/romeogdetlevjr/malcolm/arkime           main          xxxxxxxxxxxx   18 minutes ago   802MB
-ghcr.io/idaholab/malcolm/opensearch             24.10.1       xxxxxxxxxxxx   18 minutes ago   1.42GB
+ghcr.io/idaholab/malcolm/opensearch             24.11.0       xxxxxxxxxxxx   18 minutes ago   1.42GB
 ghcr.io/romeogdetlevjr/malcolm/opensearch       main          xxxxxxxxxxxx   18 minutes ago   1.42GB
-ghcr.io/idaholab/malcolm/pcap-monitor           24.10.1       xxxxxxxxxxxx   18 minutes ago   176MB
+ghcr.io/idaholab/malcolm/pcap-monitor           24.11.0       xxxxxxxxxxxx   18 minutes ago   176MB
 ghcr.io/romeogdetlevjr/malcolm/pcap-monitor     main          xxxxxxxxxxxx   18 minutes ago   176MB
-ghcr.io/idaholab/malcolm/dashboards-helper      24.10.1       xxxxxxxxxxxx   18 minutes ago   233MB
+ghcr.io/idaholab/malcolm/dashboards-helper      24.11.0       xxxxxxxxxxxx   18 minutes ago   233MB
 ghcr.io/romeogdetlevjr/malcolm/dashboards-helpermain          xxxxxxxxxxxx   18 minutes ago   233MB
-ghcr.io/idaholab/malcolm/freq                   24.10.1       xxxxxxxxxxxx   18 minutes ago   153MB
+ghcr.io/idaholab/malcolm/freq                   24.11.0       xxxxxxxxxxxx   18 minutes ago   153MB
 ghcr.io/romeogdetlevjr/malcolm/freq             main          xxxxxxxxxxxx   18 minutes ago   153MB
-ghcr.io/idaholab/malcolm/api                    24.10.1       xxxxxxxxxxxx   18 minutes ago   169MB
+ghcr.io/idaholab/malcolm/api                    24.11.0       xxxxxxxxxxxx   18 minutes ago   169MB
 ghcr.io/romeogdetlevjr/malcolm/api              main          xxxxxxxxxxxx   18 minutes ago   169MB
 ```
