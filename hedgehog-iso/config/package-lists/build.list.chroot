@@ -12,6 +12,7 @@ libkrb5-dev
 libmagic-dev
 libmaxminddb-dev
 libnl-3-dev
+librdkafka-dev
 libpcap-dev
 libsodium-dev
 libssl-dev

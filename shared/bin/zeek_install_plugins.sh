@@ -63,10 +63,15 @@ function zkg_install_github_repo() {
         export "$ENV"
       done
     fi
+    EXTRA_ZKG_PARAMS=()
+    if [[ "$REPO_URL" =~ "zeek-kafka" ]]; then
+      EXTRA_ZKG_PARAMS+=( --user-var )
+      EXTRA_ZKG_PARAMS+=( LIBRDKAFKA_ROOT=/usr/include/librdkafka )
+    fi
     if [[ -n $REPO_LATEST_RELEASE ]]; then
-      zkg install --nodeps --force --skiptests --version "$REPO_LATEST_RELEASE" "$REPO_URL"
+      zkg install --nodeps --force --skiptests "${EXTRA_ZKG_PARAMS[@]}" --version "$REPO_LATEST_RELEASE" "$REPO_URL"
     else
-      zkg install --nodeps --force --skiptests "$REPO_URL"
+      zkg install --nodeps --force --skiptests "${EXTRA_ZKG_PARAMS[@]}" "$REPO_URL"
     fi
   fi
 }
@@ -127,6 +132,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/ncsa/bro-simple-scan"
   "https://github.com/precurse/zeek-httpattacks"
   "https://github.com/mmguero-dev/GQUIC_Protocol_Analyzer"
+  "https://github.com/SeisoLLC/zeek-kafka"
   "https://github.com/zeek/spicy-tftp"
   "https://github.com/zeek/spicy-zip"
 )

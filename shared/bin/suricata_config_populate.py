@@ -1282,7 +1282,7 @@ def main():
                     tmpLogDir,
                     '-T',
                 ],
-                debug=args.verbose > logging.DEBUG,
+                debug=args.verbose <= logging.DEBUG,
                 logger=logging,
             )
             logging.info(f'suricata configuration test returned {script_return_code}')
