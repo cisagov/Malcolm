@@ -3365,7 +3365,14 @@ class LinuxInstaller(Installer):
                 '/etc/security/limits.d/limits.conf',
                 '',
                 '/etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments',
-                ['* soft nofile 65535', '* hard nofile 65535', '* soft memlock unlimited', '* hard memlock unlimited'],
+                [
+                    '* soft nofile 65535',
+                    '* hard nofile 65535',
+                    '* soft memlock unlimited',
+                    '* hard memlock unlimited',
+                    '* soft nproc 262144',
+                    '* hard nproc 524288',
+                ],
             ),
         ]
 
