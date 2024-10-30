@@ -205,27 +205,29 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 td("Directory"),
                                                 td(''),
                                             )
+
                                             if showMalcolmCols:
                                                 t.add(th(), th(), th())
                                         elif itemType == 'file':
                                             t = tr()
 
                                             filename = name
-
-                                            # Malcolm file info
                                             timestamp = None
                                             timestampStr = ''
                                             timestampStartFilterStr = ''
                                             fmatch = None
                                             fsource = ''
                                             fids = list()
+
                                             if showMalcolmCols:
-                                                # determine if filename matches known patterns
+                                                # determine if filename is in a pattern we recognize
                                                 fmatch = carvedFileRegex.search(filename)
+
                                                 if fmatch is None:
                                                     fmatch = carvedFileRegexAlt.search(filename)
+
                                                 if fmatch is not None:
-                                                    # format timestamp
+                                                    # format timestamp as ISO date/time
                                                     timestampStr = fmatch.groupdict().get('timestamp', '')
                                                     try:
                                                         timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
@@ -238,7 +240,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     except Exception as te:
                                                         if timestampStr:
                                                             eprint(f'Error with time "{str(timestampStr)}": {te}')
-                                                    # gather IDs
+
+                                                    # put UIDs and FUIDs into a single event.id-filterable column
                                                     fids = list(
                                                         [
                                                             x
@@ -249,7 +252,8 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                             if x and x != 'unknown'
                                                         ]
                                                     )
-                                                    # process source
+                                                    # massage source a little bit (remove '<error>' and handle
+                                                    #   'XOR decrypted from...')
                                                     fsource = fmatch.groupdict().get('source', '')
                                                     if fsource == '<error>':
                                                         fsource = ''
@@ -258,14 +262,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                         fsource = xorMatch.groupdict().get('source', '')
                                                         fids.append(xorMatch.groupdict().get('fuid', ''))
 
-                                            # determine file info
+                                            # only request mime type for files if specified in arguments
                                             fileinfo = (
                                                 magic.from_file(os.path.realpath(child), mime=True)
                                                 if args.magic
                                                 else os.path.splitext(filename)[1]
                                             )
 
-                                            # add file row to table
+                                            # show filename, file type (with link to IANA if MIME type is shown), and file size
                                             t.add(
                                                 td(
                                                     a(
@@ -324,7 +328,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                                     except Exception as e:
                                         eprint(f'Error with file "{filename}": {e}')
-                            
+
                             # pagination controls
                             with div(cls='pagination'):
                                 with ul(
