@@ -259,8 +259,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     fsource = fmatch.groupdict().get('source', '')
                                                     if fsource == '<error>':
                                                         fsource = ''
-                                                    elif xorRegex.search(fsource):
-                                                        xorMatch = xorRegex.search(fsource)
+                                                    elif xorMatch := xorRegex.search(fsource):
                                                         fsource = xorMatch.groupdict().get('source', '')
                                                         fids.append(xorMatch.groupdict().get('fuid', ''))
 
