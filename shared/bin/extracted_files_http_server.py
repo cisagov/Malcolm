@@ -147,15 +147,21 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                             for dirpath, dirnames, filenames in os.walk(fullpath):
                                 # list directories first
                                 for dirname in sorted(dirnames, key=natural_sort_key):
-                                    child = os.path.join(dirpath, dirname)
-                                    if args.links or (not os.path.islink(child)):
-                                        items.append(('dir', dirname, child))
+                                    try:
+                                        child = os.path.join(dirpath, dirname)
+                                        if args.links or (not os.path.islink(child)):
+                                            items.append(('dir', dirname, child))
+                                    except Exception as e:
+                                        eprint(f'Error with directory "{dirname}"": {e}')
                                 # list files
                                 for filename in sorted(filenames, key=natural_sort_key):
-                                    child = os.path.join(dirpath, filename)
-                                    if args.links or (not os.path.islink(child)):
-                                        items.append(('file', filename, child))
-                                # only process the current directory
+                                    try:
+                                        child = os.path.join(dirpath, filename)
+                                        if args.links or (not os.path.islink(child)):
+                                            items.append(('file', filename, child))
+                                    except Exception as e:
+                                        eprint(f'Error with file "{filename}"": {e}')
+                                # our "walk" is not recursive right now, we only need to go one level deep
                                 break
 
                             totalItems = len(items)
@@ -196,12 +202,12 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         t.add(th(), th(), th())
 
                                 # content rows
-                                for itemType, name, child in itemsOnPage:
+                                for itemType, filename, child in itemsOnPage:
                                     try:
                                         if itemType == 'dir':
                                             t = tr()
                                             t.add(
-                                                td(a(name, href=f'{name}/?page=1&elements={elements}')),
+                                                td(a(filename, href=f'{filename}/?page=1&elements={elements}')),
                                                 td("Directory"),
                                                 td(''),
                                             )
@@ -211,21 +217,18 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         elif itemType == 'file':
                                             t = tr()
 
-                                            filename = name
+                                            # calculate some of the stuff for representing Malcolm files
                                             timestamp = None
                                             timestampStr = ''
                                             timestampStartFilterStr = ''
                                             fmatch = None
                                             fsource = ''
                                             fids = list()
-
                                             if showMalcolmCols:
                                                 # determine if filename is in a pattern we recognize
                                                 fmatch = carvedFileRegex.search(filename)
-
                                                 if fmatch is None:
                                                     fmatch = carvedFileRegexAlt.search(filename)
-
                                                 if fmatch is not None:
                                                     # format timestamp as ISO date/time
                                                     timestampStr = fmatch.groupdict().get('timestamp', '')
@@ -240,7 +243,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                     except Exception as te:
                                                         if timestampStr:
                                                             eprint(f'Error with time "{str(timestampStr)}": {te}')
-
                                                     # put UIDs and FUIDs into a single event.id-filterable column
                                                     fids = list(
                                                         [
@@ -273,7 +275,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                             t.add(
                                                 td(
                                                     a(
-                                                        (filename[:fnameDispLen] + '...') if len(filename) > fnameDispLen else filename,
+                                                        (
+                                                            (filename[:fnameDispLen] + '...')
+                                                            if len(filename) > fnameDispLen
+                                                            else filename
+                                                        ),
                                                         href=f'{filename}',
                                                     ),
                                                     title=filename,
