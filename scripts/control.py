@@ -1341,7 +1341,7 @@ def authSetup():
             'netbox',
             "(Re)generate internal passwords for NetBox",
             False,
-            args.cmdAuthSetupNonInteractive and args.authGenNetBoxPasswords,
+            (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
             [],
         ),
         (
