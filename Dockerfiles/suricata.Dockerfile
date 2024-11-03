@@ -108,7 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get install -q -y --no-install-recommends -t bookworm-backports \
         suricata=${SURICATA_VERSION_PATTERN} \
         suricata-update && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==5.0.3 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==6.0.0 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
