@@ -31,6 +31,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV NETBOX_INITIALIZERS_VERSION "50d077d"
 ENV NETBOX_TOPOLOGY_VERSION "4.0.1"
+ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
 ENV YQ_VERSION "4.44.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
@@ -86,6 +87,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
       "git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}" \
       "git+https://github.com/netbox-community/netbox-topology-views@v${NETBOX_TOPOLOGY_VERSION}" \
+      "git+https://github.com/netbox-community/netbox-healthcheck-plugin@v${NETBOX_HEALTHCHECK_VERSION}" \
       psycopg2 \
       pynetbox \
       python-magic \
