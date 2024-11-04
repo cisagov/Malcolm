@@ -15,7 +15,7 @@ import warnings
 
 from collections import defaultdict, OrderedDict
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
@@ -239,14 +239,14 @@ else:
 
 if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
     import elasticsearch as DatabaseImport
-    from elasticsearch_dsl import Search as SearchClass
+    from elasticsearch_dsl import Search as SearchClass, A as AggregationClass
 
     DatabaseClass = DatabaseImport.Elasticsearch
     if opensearchHttpAuth:
         DatabaseInitArgs['basic_auth'] = opensearchHttpAuth
 else:
     import opensearchpy as DatabaseImport
-    from opensearchpy import Search as SearchClass
+    from opensearchpy import Search as SearchClass, A as AggregationClass
 
     DatabaseClass = DatabaseImport.OpenSearch
     if opensearchHttpAuth:
@@ -1071,6 +1071,48 @@ def ready():
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
         zeek_extracted_file_monitor=zeekExtractedFileMonitorStatus,
+    )
+
+
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ingest-stats",
+    methods=['GET'],
+)
+def ingest_stats():
+    """Provide an aggregation of each log source (host.name) with it's latest event.ingested
+    time. This can be used to know the most recent time a document was written from each
+    network sensor.
+
+    Parameters
+    ----------
+    request : Request
+        Uses 'doctype' from request arguments
+    Returns
+    -------
+    fields
+        A dict where key is host.name and value is max(event.ingested) for that host
+    """
+    global databaseClient
+    global SearchClass
+    global AggregationClass
+
+    s = SearchClass(
+        using=databaseClient,
+        index=index_from_args(get_request_arguments(request)),
+    ).extra(size=0)
+
+    hostAgg = AggregationClass('terms', field='host.name')
+    maxIngestAgg = AggregationClass('max', field='event.ingested')
+    s.aggs.bucket('host_names', hostAgg).metric('max_event_ingested', maxIngestAgg)
+    response = s.execute()
+
+    return jsonify(
+        {
+            bucket.key: datetime.fromtimestamp(bucket.max_event_ingested.value / 1000, timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            for bucket in response.aggregations.host_names.buckets
+        }
     )
 
 
