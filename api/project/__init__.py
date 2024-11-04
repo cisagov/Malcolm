@@ -1012,7 +1012,7 @@ def ready():
             print(f"{type(e).__name__}: {str(e)} getting Logstash lumberjack listener status")
 
     try:
-        netboxStatus = requests.get(f'{netboxUrl}/api/status').json()
+        netboxStatus = requests.get(f'{netboxUrl}/plugins/netbox_healthcheck_plugin/healthcheck/?format=json').json()
     except Exception as e:
         netboxStatus = {}
         if debugApi:
@@ -1062,7 +1062,11 @@ def ready():
             pipeline in malcolm_utils.deep_get(logstashStats, ["pipelines"], {})
             for pipeline in logstash_default_pipelines
         ),
-        netbox=bool(malcolm_utils.deep_get(netboxStatus, ["netbox-version"])),
+        netbox=bool(
+            isinstance(netboxStatus, dict)
+            and netboxStatus
+            and all(value == "working" for value in netboxStatus.values())
+        ),
         opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
