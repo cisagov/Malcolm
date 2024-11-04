@@ -1096,24 +1096,29 @@ def ingest_stats():
     global SearchClass
     global AggregationClass
 
-    s = SearchClass(
-        using=databaseClient,
-        index=index_from_args(get_request_arguments(request)),
-    ).extra(size=0)
+    result = {}
+    try:
+        s = SearchClass(
+            using=databaseClient,
+            index=index_from_args(get_request_arguments(request)),
+        ).extra(size=0)
 
-    hostAgg = AggregationClass('terms', field='host.name')
-    maxIngestAgg = AggregationClass('max', field='event.ingested')
-    s.aggs.bucket('host_names', hostAgg).metric('max_event_ingested', maxIngestAgg)
-    response = s.execute()
+        hostAgg = AggregationClass('terms', field='host.name')
+        maxIngestAgg = AggregationClass('max', field='event.ingested')
+        s.aggs.bucket('host_names', hostAgg).metric('max_event_ingested', maxIngestAgg)
+        response = s.execute()
 
-    return jsonify(
-        {
+        result = {
             bucket.key: datetime.fromtimestamp(bucket.max_event_ingested.value / 1000, timezone.utc)
             .replace(microsecond=0)
             .isoformat()
             for bucket in response.aggregations.host_names.buckets
         }
-    )
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: \"{str(e)}\" getting ingest stats")
+
+    return jsonify(result)
 
 
 @app.route(
