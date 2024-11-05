@@ -135,7 +135,7 @@ if [ -d "$WORKDIR" ]; then
   echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                              >> ./config/includes.chroot/opt/sensor/.os-info
   echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\""  >> ./config/includes.chroot/opt/sensor/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""                >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""                           >> ./config/includes.chroot/opt/sensor/.os-info
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \

@@ -174,7 +174,7 @@ if [ -d "$WORKDIR" ]; then
   echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                >> "$MALCOLM_DEST_DIR"/.os-info
   echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""       >> "$MALCOLM_DEST_DIR"/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""  >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""             >> "$MALCOLM_DEST_DIR"/.os-info
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
