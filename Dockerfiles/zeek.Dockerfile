@@ -116,7 +116,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       vim-tiny \
       xxd \
       zlib1g-dev && \
-    python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    python3 -m pip install --break-system-packages --no-cache-dir \
+      dateparser \
+      git+https://github.com/google/mandiant-ti-client \
+      pymisp \
+      stix2 \
+      taxii2-client && \
     mkdir -p /tmp/zeek-packages && \
       bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
       dpkg -i /tmp/zeek-packages/*.deb && \
