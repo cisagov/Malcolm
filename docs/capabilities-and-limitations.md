@@ -111,7 +111,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
     - Support
         + The organizations supporting Malcolm's development do not offer paid professional services or any contract-based support. Any support provided is done the same way most other open-source projects do so, which is through GitHub, for example:
             * [Community discussions board](https://github.com/cisagov/Malcolm/discussions)
-            * [Issue and feature tracking](https://github.com/idaholab/malcolm/issues?q=is%3Aissue+is%3Aopen+-label%3Atraining)
+            * [Issue and feature tracking](https://github.com/cisagov/malcolm/issues?q=is%3Aissue+is%3Aopen+-label%3Atraining)
             * [Project roadmap tracking](https://github.com/orgs/idaholab/projects/1)
         + Beyond engagement via the forums listed here, no expectation of any particular level of support should be assumed.
 * User experience/UI/intuitive

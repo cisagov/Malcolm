@@ -602,7 +602,7 @@ The Malcolm [user interface](quickstart.md#UserInterfaceURLs) should be accessib
 
 # <a name="Future"></a> Future Enhancements
 
-Deploying Malcolm with Kubernetes is a new (and still somewhat experimental) feature, and does not yet support the full range of Malcolm features. Development around these features is [ongoing](https://github.com/idaholab/Malcolm/issues?q=is%3Aissue+is%3Aopen+kubernetes). Some of the notable features that are still a work in progress for Kubernetes deployment include:
+Deploying Malcolm with Kubernetes is a new (and still somewhat experimental) feature, and does not yet support the full range of Malcolm features. Development around these features is [ongoing](https://github.com/cisagov/Malcolm/issues?q=is%3Aissue+is%3Aopen+kubernetes). Some of the notable features that are still a work in progress for Kubernetes deployment include:
 
 ## <a name="FutureLiveCap"></a> Live Traffic Analysis
 
