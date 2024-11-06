@@ -835,9 +835,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                         elif isinstance(inarg, dict):
                             ##################################################################################
                             # Connection parameters specified in dict (e.g., Mandiant Threat Intel)
-                            if 'type' in inarg:
+                            if ('type' in inarg) and (threatFeedType := str(inarg['type'])):
 
-                                if str(inarg['type']).lower() == 'mandiant':
+                                if threatFeedType.lower() == 'mandiant':
                                     if mati_client := mandiant_threatintel.ThreatIntelClient(
                                         api_key=inarg.get('api_key', None),
                                         secret_key=inarg.get('secret_key', None),
@@ -860,9 +860,9 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                     )
 
                                     else:
-                                        raise Exception(f"Could not connect to Mandiant threat intelligence service")
+                                        raise Exception("Could not connect to Mandiant threat intelligence service")
                                 else:
-                                    raise Exception(f"Could not handle identify threat feed type '{inarg["type"]}'")
+                                    raise Exception(f"Could not handle identify threat feed type '{threatFeedType}'")
                             else:
                                 raise Exception(f"Could not identify threat feed type in '{inarg}'")
 
