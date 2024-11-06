@@ -846,9 +846,14 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         client_name=inarg.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
                                     ):
                                         for indicator in mati_client.Indicators.get_list(
+                                            start_epoch=since if since else datetime.now() - relativedelta(weeks=1),
                                             minimum_mscore=inarg.get('minimum_mscore', 60),
                                             exclude_osint=inarg.get('exclude_osint', False),
-                                            start_epoch=since if since else datetime.now() - relativedelta(months=1),
+                                            include_campaigns=inarg.get('include_campaigns', False),
+                                            include_reports=inarg.get('include_reports', False),
+                                            include_threat_rating=inarg.get('include_threat_rating', False),
+                                            include_misp=inarg.get('include_misp', True),
+                                            include_category=inarg.get('include_category', True),
                                         ):
                                             try:
                                                 if zeekPrinter.ProcessMandiant(indicator):
