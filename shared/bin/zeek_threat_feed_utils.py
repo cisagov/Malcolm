@@ -255,6 +255,9 @@ def map_mandiant_indicator_to_zeek(
         tags = []
 
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+
+        if hasattr(indicator, 'id'):
+            zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
         if hasattr(indicator, 'mscore'):
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
         if hasattr(indicator, 'first_seen'):
@@ -281,9 +284,6 @@ def map_mandiant_indicator_to_zeek(
 
         if tags:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
-
-        # ZEEK_INTEL_META_DESC = 'meta.desc'
-        # ZEEK_INTEL_META_URL = 'meta.url'
 
         if isinstance(indicator, mandiant_threatintel.MD5Indicator):
             pass
