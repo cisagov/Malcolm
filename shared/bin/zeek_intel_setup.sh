@@ -47,7 +47,7 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
         done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
 
         rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
-        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX || true
+        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant || true
     fi
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
@@ -95,14 +95,14 @@ EOF
         done
 
         # process STIX and MISP inputs by converting them to Zeek intel format
-        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \
                 --output ./.threat_autogen.zeek."${INSTANCE_UID}" \
                 --input "${THREAT_JSON_FILES[@]}" \
-                --input-file ./STIX/.stix_input.txt ./MISP/.misp_input.txt
+                --input-file ./STIX/.stix_input.txt ./MISP/.misp_input.txt ./Mandiant/mandiant.yaml
             if [[ $? -eq 0 ]]; then
                 rm -f ./.threat_autogen.zeek.old
                 mv --backup=simple --suffix=.old ./.threat_autogen.zeek."${INSTANCE_UID}" ./.threat_autogen.zeek

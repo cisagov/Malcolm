@@ -11,6 +11,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from multiprocessing import RawValue
 from pymisp import MISPEvent, MISPAttribute, PyMISP
 from pytz import utc as UTCTimeZone
@@ -28,10 +29,13 @@ from taxii2client.v21 import Collection as TaxiiCollection_v21
 from taxii2client.v21 import Server as TaxiiServer_v21
 from threading import Lock
 from time import sleep, mktime
+from types import GeneratorType, FunctionType, LambdaType
 from typing import Tuple, Union
 from urllib.parse import urljoin, urlparse
 from logging import DEBUG as LOGGING_DEBUG
+import copy
 import json
+import mandiant_threatintel
 import os
 import re
 import requests
@@ -39,7 +43,7 @@ import urllib3
 
 from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
 
-# keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
+# keys for dict returned by map_*_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
 ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
 ZEEK_INTEL_META_SOURCE = 'meta.source'
@@ -115,6 +119,16 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "x509-fingerprint-sha1": "CERT_HASH",
 }
 
+# See the documentation for the Zeek INTEL framework [1] and Mandiant threat intel API [2]
+# [1] https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+# [2] https://docs.mandiant.com/home/mati-threat-intelligence-api-v4#tag/Indicators
+MANDIANT_ZEEK_INTEL_TYPE_MAP = {
+    mandiant_threatintel.FQDNIndicator: 'DOMAIN',
+    mandiant_threatintel.URLIndicator: 'URL',
+    mandiant_threatintel.IPIndicator: 'ADDR',
+    mandiant_threatintel.MD5Indicator: 'FILE_HASH',
+}
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -166,6 +180,135 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
         if fExists:
             os.remove(tmpDownloadedFileSpec)
         return None
+
+
+def mandiant_json_serializer(obj):
+    """
+    JSON serializer for mandiant_threatintel.APIResponse object (for debug output)
+    """
+
+    if isinstance(obj, datetime):
+        return obj.astimezone(UTCTimeZone).isoformat()
+
+    elif isinstance(obj, GeneratorType):
+        return list(map(mandiant_json_serializer, obj))
+
+    elif isinstance(obj, list):
+        return [mandiant_json_serializer(item) for item in obj]
+
+    elif isinstance(obj, dict):
+        return {key: mandiant_json_serializer(value) for key, value in obj.items()}
+
+    elif isinstance(obj, set):
+        return {mandiant_json_serializer(item) for item in obj}
+
+    elif isinstance(obj, tuple):
+        return tuple(mandiant_json_serializer(item) for item in obj)
+
+    elif isinstance(obj, FunctionType):
+        return f"function {obj.__name__}" if obj.__name__ != "<lambda>" else "lambda"
+
+    elif isinstance(obj, LambdaType):
+        return "lambda"
+
+    elif (not hasattr(obj, "__str__") or obj.__str__ is object.__str__) and (
+        not hasattr(obj, "__repr__") or obj.__repr__ is object.__repr__
+    ):
+        return obj.__class__.__name__
+
+    else:
+        return str(obj)
+
+
+def mandiant_indicator_as_json_str(indicator):
+    return json.dumps(
+        {
+            key: getattr(indicator, key)
+            for key in indicator.__dir__()
+            if (not key.startswith("_"))
+            and (not key == 'attributed_associations')
+            and (not callable(getattr(indicator, key)))
+        },
+        default=mandiant_json_serializer,
+    )
+
+
+def map_mandiant_indicator_to_zeek(
+    indicator: mandiant_threatintel.APIResponse,
+    logger=None,
+) -> Union[Tuple[defaultdict], None]:
+    """
+    Maps a Mandiant threat intelligence indicator object to Zeek intel items
+    @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+    @param indicator The indicator object (mandiant_threatintel.APIResponse) to convert
+    @return a list containing the Zeek intel dict(s) from the indicator
+    """
+    results = []
+
+    # get matching Zeek intel type
+    if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator), None):
+
+        if logger is not None:
+            logger.debug(mandiant_indicator_as_json_str(indicator))
+
+        zeekItem = defaultdict(lambda: '-')
+        tags = []
+
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+        if hasattr(indicator, 'mscore'):
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
+        if hasattr(indicator, 'first_seen'):
+            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
+        if hasattr(indicator, 'last_seen'):
+            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
+        if hasattr(indicator, 'sources'):
+            zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join(
+                list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry})
+            )
+            if categories := list(
+                {
+                    category
+                    for item in indicator.sources
+                    if 'category' in item and item['category']
+                    for category in item['category']
+                }
+            ):
+                tags.extend(categories)
+
+        if hasattr(indicator, 'misp'):
+            if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
+                tags.extend(trueMispAttrs)
+
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
+
+        # ZEEK_INTEL_META_DESC = 'meta.desc'
+        # ZEEK_INTEL_META_URL = 'meta.url'
+
+        if isinstance(indicator, mandiant_threatintel.MD5Indicator):
+            pass
+            # the MD5Indicator class can actually have multiple types of hashes,
+            #   and we want to create a zeek intel item for each
+            for hashName in ["md5", "sha1", "sha256"]:
+                if hasattr(indicator, hashName) and (val := getattr(indicator, hashName)):
+                    tmpItem = copy.deepcopy(zeekItem)
+                    tmpItem[ZEEK_INTEL_INDICATOR] = val
+                    results.append(tmpItem)
+                    if logger is not None:
+                        logger.debug(tmpItem)
+
+        elif hasattr(indicator, 'value') and (val := indicator.value):
+            # handle other types besides the file hash
+            zeekItem[ZEEK_INTEL_INDICATOR] = val
+            results.append(zeekItem)
+            if logger is not None:
+                logger.debug(zeekItem)
+
+    else:
+        if logger is not None:
+            logger.warning(f"No matching Zeek type found for Mandiant indicator type '{indicator.__class__.__name__}'")
+
+    return results
 
 
 def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[STIX_Pattern_v21, STIX_Pattern_v20, None]:
@@ -482,6 +625,26 @@ class FeedParserZeekPrinter(object):
                     print('\t'.join(['#fields'] + self.fields), file=self.outFile)
                     self.printedHeader = True
 
+    def ProcessMandiant(
+        self,
+        indicator,
+    ):
+        result = False
+        try:
+            if isinstance(indicator, mandiant_threatintel.APIResponse):
+                # map indicator object to Zeek value(s)
+                if vals := map_mandiant_indicator_to_zeek(indicator=indicator, logger=self.logger):
+                    for val in vals:
+                        self.PrintHeader()
+                        with self.lock:
+                            # print the intelligence item fields according to the columns in 'fields'
+                            print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+
+        except Exception as e:
+            if self.logger is not None:
+                self.logger.warning(f"{type(e).__name__} for {mandiant_indicator_as_json_str(indicator)}: {e}")
+        return result
+
     def ProcessSTIX(
         self,
         toParse,
@@ -635,7 +798,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                 sleep(1)
             else:
                 try:
-                    with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
+                    with (
+                        open(inarg)
+                        if (isinstance(inarg, (str, bytes, os.PathLike, int)) and os.path.isfile(inarg))
+                        else nullcontext()
+                    ) as infile:
                         if infile:
                             ##################################################################################
                             # JSON FILE (STIX or MISP)
@@ -663,6 +830,41 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                     raise Exception(f"Could not identify content in '{inarg}'")
                             else:
                                 raise Exception(f"Could not parse JSON in '{inarg}'")
+
+                        elif isinstance(inarg, dict):
+                            ##################################################################################
+                            # Connection parameters specified in dict (e.g., Mandiant Threat Intel)
+                            if 'type' in inarg:
+
+                                if str(inarg['type']).lower() == 'mandiant':
+                                    if mati_client := mandiant_threatintel.ThreatIntelClient(
+                                        api_key=inarg.get('api_key', None),
+                                        secret_key=inarg.get('secret_key', None),
+                                        bearer_token=inarg.get('bearer_token', None),
+                                        api_base_url=inarg.get('api_base_url', mandiant_threatintel.API_BASE_URL),
+                                        client_name=inarg.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
+                                    ):
+                                        print(since)
+                                        for indicator in mati_client.Indicators.get_list(
+                                            minimum_mscore=inarg.get('minimum_mscore', 60),
+                                            exclude_osint=inarg.get('exclude_osint', False),
+                                            start_epoch=since if since else datetime.now() - relativedelta(years=10),
+                                        ):
+                                            try:
+                                                if zeekPrinter.ProcessMandiant(indicator):
+                                                    successCount.increment()
+                                            except Exception as e:
+                                                if logger is not None:
+                                                    logger.warning(
+                                                        f"[{workerId}]: {type(e).__name__} for Mandiant indicator {indicator.id if isinstance(indicator, mandiant_threatintel.APIResponse) else ''}: {e}"
+                                                    )
+
+                                    else:
+                                        raise Exception(f"Could not connect to Mandiant threat intelligence service")
+                                else:
+                                    raise Exception(f"Could not handle identify threat feed type '{inarg["type"]}'")
+                            else:
+                                raise Exception(f"Could not identify threat feed type in '{inarg}'")
 
                         elif inarg.lower().startswith('misp'):
                             ##################################################################################

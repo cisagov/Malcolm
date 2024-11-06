@@ -12,7 +12,9 @@ from time import sleep
 import argparse
 import logging
 import os
+import re
 import sys
+import yaml
 import zeek_threat_feed_utils
 
 import malcolm_utils
@@ -103,7 +105,7 @@ def main():
         nargs='*',
         type=str,
         default=None,
-        help="Read --input arguments from a local or external file (one per line)",
+        help="Read --input arguments from a local or external file (one per line, or YAML definitions)",
     )
     parser.add_argument(
         '-o',
@@ -148,6 +150,7 @@ def main():
 
     if args.input is None:
         args.input = []
+    yamlInputs = []
     since = (
         ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
     )
@@ -164,9 +167,15 @@ def main():
             for infileArg in args.inputFile:
                 try:
                     if os.path.isfile(infileArg):
-                        # read inputs from local file
-                        with open(infileArg) as f:
-                            args.input.extend(f.read().splitlines())
+                        # read inputs from local file (delimited lines or YAML file)
+                        infileParts = os.path.splitext(infileArg)
+                        if re.search(r"\.ya?ml$", infileParts[1], re.IGNORECASE):
+                            with open(infileArg, 'r') as f:
+                                inputParams = yaml.safe_load(f)
+                            yamlInputs.append(inputParams)
+                        else:
+                            with open(infileArg) as f:
+                                args.input.extend(f.read().splitlines())
 
                     elif '://' in infileArg:
                         # download from URL and read input from remote file
@@ -189,11 +198,15 @@ def main():
         # deduplicate input sources
         seenInput = {}
         args.input = [seenInput.setdefault(x, x) for x in args.input if x not in seenInput]
-        logging.debug(f"Input: {args.input}")
 
         # we'll queue and then process all of the input arguments in workers
         inputQueue = deque()
-        inputQueue.extend(args.input)
+        if args.input:
+            inputQueue.extend(args.input)
+        if yamlInputs:
+            inputQueue.extend(yamlInputs)
+        logging.debug(f"Inputs: {list(inputQueue)}")
+
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
         ThreadPool(
             args.threads,

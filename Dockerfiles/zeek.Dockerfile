@@ -108,6 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-setuptools \
       python3-tz \
       python3-wheel \
+      python3-yaml \
       python3-zmq \
       rsync \
       supervisor \

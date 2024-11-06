@@ -3,6 +3,8 @@
 * [Zeek Intelligence Framework](#ZeekIntel)
     - [STIX™ and TAXII™](#ZeekIntelSTIX)
     - [MISP](#ZeekIntelMISP)
+    - [Mandiant](#ZeekIntelMandiant)
+    - [Endorsement Disclaimer](#IntelFeedDisclaimer)
 
 To quote Zeek's [Intelligence Framework](https://docs.zeek.org/en/master/frameworks/intel.html) documentation, "The goals of Zeek’s Intelligence Framework are to consume intelligence data, make it available for matching, and provide infrastructure to improve performance and memory utilization. Data in the Intelligence Framework is an atomic piece of intelligence such as an IP address or an e-mail address. This atomic data will be packed with metadata such as a freeform source field, a freeform descriptive field, and a URL which might lead to more information about the specific item." Zeek [intelligence](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html) [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type) include IP addresses, URLs, file names, hashes, email addresses, and more.
 
@@ -42,6 +44,8 @@ Malcolm will attempt to query the TAXII feed(s) for `indicator` STIX objects and
 
 Note that only **indicators** of [**cyber-observable objects**](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_mlbmudhl16lr) matched with the **equals (`=`)** [comparison operator](https://docs.oasis-open.org/cti/stix/v2.1/cs01/stix-v2.1-cs01.html#_t11hn314cr7w) against a **single value** can be expressed as Zeek intelligence items. More complex STIX indicators will be silently ignored.
 
+Malcolm uses the [stix2](https://pypi.org/project/stix2/) and [taxii2-client](https://pypi.org/project/taxii2-client/) Python libraries to access STIX™/TAXII™ threat intelligence feeds.
+
 ## <a name="ZeekIntelMISP"></a>MISP
 
 In addition to loading Zeek intelligence files on startup, Malcolm will [automatically generate]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/zeek_intel_from_threat_feed.py) a Zeek intelligence file for all [Malware Information Sharing Platform (MISP)](https://www.misp-project.org/datamodels/) JSON files found under `./zeek/intel/MISP`.
@@ -73,3 +77,30 @@ Upon Malcolm connects to the URLs for the MISP feeds in `.misp_input.txt`, it wi
 * a list of [Attributes](https://www.misp-project.org/openapi/#tag/Attributes) returned for a request via the [MISP Automation API](https://www.misp-project.org/openapi/) made to a MISP platform's [`/attributes` endpoint](https://www.misp-project.org/openapi/#tag/Attributes/operation/restSearchAttributes)
 
 Note that only a subset of MISP [attribute types](https://www.misp-project.org/datamodels/#attribute-categories-vs-types) can be expressed with the Zeek intelligence [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type). MISP attributes with other types will be silently ignored.
+
+Malcolm uses the [MISP/PyMISP](https://github.com/MISP/PyMISP) Python library to access MISP threat intelligence feeds.
+
+## <a name="ZeekIntelMandiant"></a>Mandiant
+
+If a [YAML](https://yaml.org/) file named `mandiant.yaml` is found in `./zeek/intel/Mandiant`, that file will be read and processed as parameters for the [Mandiant Threat Intelligence](https://www.mandiant.com/threats) service. This file should minimally include:
+
+```yaml
+type: mandiant
+api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+secret_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+These other parameters can also optionally be provided:
+
+```yaml
+minimum_mscore: 60
+exclude_osint: False
+bearer_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+api_base_url: https://api.intelligence.mandiant.com
+```
+
+Malcolm uses the [google/mandiant-ti-client](https://github.com/google/mandiant-ti-client) Python library to access Mandiant threat intelligence feeds.
+
+## <a name="IntelFeedDisclaimer"></a>Disclaimer
+
+Neither Malcolm's development team nor its funding sources endorse any commercial product or service, nor do they attest to the suitability or effectiveness of these products and services for any particular use case. Any reference to specific commercial products, processes, or services by trademark, manufacturer, or otherwise should not be interpreted as an endorsement, recommendation, or preference.
