@@ -258,6 +258,7 @@ def map_mandiant_indicator_to_zeek(
 
         if hasattr(indicator, 'id'):
             zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
+            zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
         if hasattr(indicator, 'mscore'):
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
         if hasattr(indicator, 'first_seen'):
