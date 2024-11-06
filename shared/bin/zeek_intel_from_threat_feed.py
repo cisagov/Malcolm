@@ -34,6 +34,7 @@ def main():
                 'Outputs a Zeek intelligence framework file from various formats used to represent threat information:',
                 ' - "Indicator" objects in STIX™ v2.0/v2.1 JSON files',
                 ' - MISP attributes or core format JSON files',
+                ' - Indicators from Mantiant Threat Intelligence',
                 '',
                 'See:',
                 ' - Malcolm documentation: https://idaholab.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',
@@ -47,6 +48,7 @@ def main():
                 ' - MISP default feeds: https://www.misp-project.org/feeds/',
                 ' - Managing MISP feeds: https://misp.gitbooks.io/misp-book/content/managing-feeds/',
                 ' - Expand MISP usage: https://github.com/idaholab/Malcolm/issues/336',
+                ' - Mandiant Threat Intelligence Indicators API: https://docs.mandiant.com/home/mati-threat-intelligence-api-v4#tag/Indicators'
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
                 'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',

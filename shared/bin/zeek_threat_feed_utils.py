@@ -845,11 +845,10 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         api_base_url=inarg.get('api_base_url', mandiant_threatintel.API_BASE_URL),
                                         client_name=inarg.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
                                     ):
-                                        print(since)
                                         for indicator in mati_client.Indicators.get_list(
                                             minimum_mscore=inarg.get('minimum_mscore', 60),
                                             exclude_osint=inarg.get('exclude_osint', False),
-                                            start_epoch=since if since else datetime.now() - relativedelta(years=10),
+                                            start_epoch=since if since else datetime.now() - relativedelta(months=1),
                                         ):
                                             try:
                                                 if zeekPrinter.ProcessMandiant(indicator):
