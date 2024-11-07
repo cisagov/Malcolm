@@ -57,12 +57,20 @@ ZEEK_INTEL_CIF_DESCRIPTION = 'meta.cif_description'
 ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
+ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
+
 TAXII_INDICATOR_FILTER = {'type': 'indicator'}
 TAXII_PAGE_SIZE = 50
 MISP_PAGE_SIZE_ATTRIBUTES = 500
 MISP_PAGE_SIZE_EVENTS = 10
-ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
-
+MANDIANT_PAGE_SIZE_DEFAULT = 100
+MANDIANT_MINIMUM_MSCORE_DEFAULT = 60
+MANDIANT_EXCLUDE_OSINT_DEFAULT = False
+MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT = False
+MANDIANT_INCLUDE_REPORTS_DEFAULT = False
+MANDIANT_INCLUDE_THREAT_RATING_DEFAULT = False
+MANDIANT_INCLUDE_MISP_DEFAULT = True
+MANDIANT_INCLUDE_CATEGORY_DEFAULT = True
 
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -849,13 +857,22 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         for indicator in mati_client.Indicators.get_list(
                                             start_epoch=since if since else nowTime - relativedelta(hours=24),
                                             end_epoch=nowTime,
-                                            minimum_mscore=inarg.get('minimum_mscore', 60),
-                                            exclude_osint=inarg.get('exclude_osint', False),
-                                            include_campaigns=inarg.get('include_campaigns', False),
-                                            include_reports=inarg.get('include_reports', False),
-                                            include_threat_rating=inarg.get('include_threat_rating', False),
-                                            include_misp=inarg.get('include_misp', True),
-                                            include_category=inarg.get('include_category', True),
+                                            page_size=inarg.get('page_size', MANDIANT_PAGE_SIZE_DEFAULT),
+                                            minimum_mscore=inarg.get('minimum_mscore', MANDIANT_MINIMUM_MSCORE_DEFAULT),
+                                            exclude_osint=inarg.get('exclude_osint', MANDIANT_EXCLUDE_OSINT_DEFAULT),
+                                            include_campaigns=inarg.get(
+                                                'include_campaigns', MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT
+                                            ),
+                                            include_reports=inarg.get(
+                                                'include_reports', MANDIANT_INCLUDE_REPORTS_DEFAULT
+                                            ),
+                                            include_threat_rating=inarg.get(
+                                                'include_threat_rating', MANDIANT_INCLUDE_THREAT_RATING_DEFAULT
+                                            ),
+                                            include_misp=inarg.get('include_misp', MANDIANT_INCLUDE_MISP_DEFAULT),
+                                            include_category=inarg.get(
+                                                'include_category', MANDIANT_INCLUDE_CATEGORY_DEFAULT
+                                            ),
                                         ):
                                             try:
                                                 if zeekPrinter.ProcessMandiant(indicator):
