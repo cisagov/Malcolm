@@ -86,8 +86,9 @@ EOF
             elif [[ -f "${DIR}"/__load__.zeek ]]; then
                 # this intel feed has its own load directive and should take care of itself
                 echo "@load ${DIR}" >> ./__load__.zeek."${INSTANCE_UID}"
-            else
-                # this directory contains "loose" intel files we'll need to load explicitly
+
+            elif [[ "${DIR}" != "./Mandiant" ]]; then
+                # this custom directory contains "loose" intel files we'll need to load explicitly
                 while IFS= read -r line; do
                     LOOSE_INTEL_FILES+=( "$line" )
                 done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
