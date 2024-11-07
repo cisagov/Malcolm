@@ -845,8 +845,10 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         api_base_url=inarg.get('api_base_url', mandiant_threatintel.API_BASE_URL),
                                         client_name=inarg.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
                                     ):
+                                        nowTime = datetime.now().astimezone(UTCTimeZone)
                                         for indicator in mati_client.Indicators.get_list(
-                                            start_epoch=since if since else datetime.now() - relativedelta(weeks=1),
+                                            start_epoch=since if since else nowTime - relativedelta(hours=24),
+                                            end_epoch=nowTime,
                                             minimum_mscore=inarg.get('minimum_mscore', 60),
                                             exclude_osint=inarg.get('exclude_osint', False),
                                             include_campaigns=inarg.get('include_campaigns', False),
