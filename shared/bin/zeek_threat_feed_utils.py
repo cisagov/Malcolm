@@ -228,13 +228,13 @@ def mandiant_json_serializer(obj):
         return str(obj)
 
 
-def mandiant_indicator_as_json_str(indicator):
+def mandiant_indicator_as_json_str(indicator, skip_attr_map={}):
     return json.dumps(
         {
             key: getattr(indicator, key)
             for key in indicator.__dir__()
-            if (not key.startswith("_"))
-            and (not key == 'attributed_associations')
+            if (skip_attr_map.get(key, False) == False)
+            and (not key.startswith("_"))
             and (not callable(getattr(indicator, key)))
         },
         default=mandiant_json_serializer,
@@ -243,6 +243,7 @@ def mandiant_indicator_as_json_str(indicator):
 
 def map_mandiant_indicator_to_zeek(
     indicator: mandiant_threatintel.APIResponse,
+    skip_attr_map={},
     logger=None,
 ) -> Union[Tuple[defaultdict], None]:
     """
@@ -257,7 +258,7 @@ def map_mandiant_indicator_to_zeek(
     if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator), None):
 
         if logger is not None:
-            logger.debug(mandiant_indicator_as_json_str(indicator))
+            logger.debug(mandiant_indicator_as_json_str(indicator, skip_attr_map=skip_attr_map))
 
         zeekItem = defaultdict(lambda: '-')
         tags = []
@@ -634,15 +635,14 @@ class FeedParserZeekPrinter(object):
                     print('\t'.join(['#fields'] + self.fields), file=self.outFile)
                     self.printedHeader = True
 
-    def ProcessMandiant(
-        self,
-        indicator,
-    ):
+    def ProcessMandiant(self, indicator, skip_attr_map={}):
         result = False
         try:
             if isinstance(indicator, mandiant_threatintel.APIResponse):
                 # map indicator object to Zeek value(s)
-                if vals := map_mandiant_indicator_to_zeek(indicator=indicator, logger=self.logger):
+                if vals := map_mandiant_indicator_to_zeek(
+                    indicator=indicator, skip_attr_map=skip_attr_map, logger=self.logger
+                ):
                     for val in vals:
                         self.PrintHeader()
                         with self.lock:
@@ -651,7 +651,9 @@ class FeedParserZeekPrinter(object):
 
         except Exception as e:
             if self.logger is not None:
-                self.logger.warning(f"{type(e).__name__} for {mandiant_indicator_as_json_str(indicator)}: {e}")
+                self.logger.warning(
+                    f"{type(e).__name__} for {indicator.id if hasattr(indicator, 'id') else 'indicator'}: {e}"
+                )
         return result
 
     def ProcessSTIX(
@@ -853,6 +855,23 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                         api_base_url=inarg.get('api_base_url', mandiant_threatintel.API_BASE_URL),
                                         client_name=inarg.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
                                     ):
+                                        skip_attr_map = defaultdict(lambda: False)
+                                        skip_attr_map['campaigns'] = not bool(
+                                            inarg.get('include_campaigns', MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT)
+                                        )
+                                        skip_attr_map['category'] = not bool(
+                                            inarg.get('include_category', MANDIANT_INCLUDE_CATEGORY_DEFAULT)
+                                        )
+                                        skip_attr_map['misp'] = not bool(
+                                            inarg.get('include_misp', MANDIANT_INCLUDE_MISP_DEFAULT)
+                                        )
+                                        skip_attr_map['reports'] = not bool(
+                                            inarg.get('include_reports', MANDIANT_INCLUDE_REPORTS_DEFAULT)
+                                        )
+                                        skip_attr_map['threat_rating'] = not bool(
+                                            inarg.get('include_threat_rating', MANDIANT_INCLUDE_THREAT_RATING_DEFAULT)
+                                        )
+                                        skip_attr_map['attributed_associations'] = True
                                         nowTime = datetime.now().astimezone(UTCTimeZone)
                                         for indicator in mati_client.Indicators.get_list(
                                             start_epoch=since if since else nowTime - relativedelta(hours=24),
@@ -860,22 +879,14 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                             page_size=inarg.get('page_size', MANDIANT_PAGE_SIZE_DEFAULT),
                                             minimum_mscore=inarg.get('minimum_mscore', MANDIANT_MINIMUM_MSCORE_DEFAULT),
                                             exclude_osint=inarg.get('exclude_osint', MANDIANT_EXCLUDE_OSINT_DEFAULT),
-                                            include_campaigns=inarg.get(
-                                                'include_campaigns', MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT
-                                            ),
-                                            include_reports=inarg.get(
-                                                'include_reports', MANDIANT_INCLUDE_REPORTS_DEFAULT
-                                            ),
-                                            include_threat_rating=inarg.get(
-                                                'include_threat_rating', MANDIANT_INCLUDE_THREAT_RATING_DEFAULT
-                                            ),
-                                            include_misp=inarg.get('include_misp', MANDIANT_INCLUDE_MISP_DEFAULT),
-                                            include_category=inarg.get(
-                                                'include_category', MANDIANT_INCLUDE_CATEGORY_DEFAULT
-                                            ),
+                                            include_campaigns=not skip_attr_map['campaigns'],
+                                            include_reports=not skip_attr_map['reports'],
+                                            include_threat_rating=not skip_attr_map['threat_rating'],
+                                            include_misp=not skip_attr_map['misp'],
+                                            include_category=skip_attr_map['category'],
                                         ):
                                             try:
-                                                if zeekPrinter.ProcessMandiant(indicator):
+                                                if zeekPrinter.ProcessMandiant(indicator, skip_attr_map=skip_attr_map):
                                                     successCount.increment()
                                             except Exception as e:
                                                 if logger is not None:
