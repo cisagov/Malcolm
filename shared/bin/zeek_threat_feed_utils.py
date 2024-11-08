@@ -231,7 +231,7 @@ def map_mandiant_indicator_to_zeek(
         if hasattr(indicator, 'last_seen'):
             zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
         if hasattr(indicator, 'sources'):
-            zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join(
+            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join(
                 list(
                     {
                         entry['source_name'].replace(',', '\\x2c')
@@ -455,7 +455,7 @@ def map_stix_indicator_to_zeek(
         zeekItem = defaultdict(lambda: '-')
 
         zeekItem[ZEEK_INTEL_META_SOURCE] = (
-            ','.join([x.replace(',', '\\x2c') for x in source])
+            '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
             if source is not None and len(source) > 0
             else str(indicator.id)
         )
@@ -539,7 +539,7 @@ def map_misp_attribute_to_zeek(
         zeekItem = defaultdict(lambda: '-')
 
         if source is not None and len(source) > 0:
-            zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join([x.replace(',', '\\x2c') for x in source])
+            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
         if description is not None:
             zeekItem[ZEEK_INTEL_META_DESC] = description
         if url is not None:
