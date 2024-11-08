@@ -218,11 +218,13 @@ def map_mandiant_indicator_to_zeek(
 
         zeekItem = defaultdict(lambda: '-')
         tags = []
+        sources = []
 
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
 
         if hasattr(indicator, 'id'):
             zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
         if hasattr(indicator, 'mscore'):
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
@@ -231,15 +233,7 @@ def map_mandiant_indicator_to_zeek(
         if hasattr(indicator, 'last_seen'):
             zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
         if hasattr(indicator, 'sources'):
-            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join(
-                list(
-                    {
-                        entry['source_name'].replace(',', '\\x2c')
-                        for entry in indicator.sources
-                        if 'source_name' in entry
-                    }
-                )
-            )
+            sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
             if categories := list(
                 {
                     category
@@ -276,6 +270,10 @@ def map_mandiant_indicator_to_zeek(
                     tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
                     if newId := hashish.get('id', None):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
+                    if ZEEK_INTEL_META_URL in tmpItem:
+                        sources.append(tmpItem[ZEEK_INTEL_META_URL])
+                    if sources:
+                        tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
                     results.append(tmpItem)
                     if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                         logger.debug(tmpItem)
@@ -283,6 +281,10 @@ def map_mandiant_indicator_to_zeek(
         elif hasattr(indicator, 'value') and (val := indicator.value):
             # handle other types besides the file hash
             zeekItem[ZEEK_INTEL_INDICATOR] = val
+            if ZEEK_INTEL_META_URL in zeekItem:
+                sources.append(zeekItem[ZEEK_INTEL_META_URL])
+            if sources:
+                zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
             results.append(zeekItem)
             if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                 logger.debug(zeekItem)
@@ -465,6 +467,7 @@ def map_stix_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
                 [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
             )
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             # some of these are from CFM, what the heck...
             # if 'description' in indicator:
             #   "description": "severity level: Low\n\nCONFIDENCE: High",
@@ -542,6 +545,7 @@ def map_misp_attribute_to_zeek(
             zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
         if description is not None:
             zeekItem[ZEEK_INTEL_META_DESC] = description
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
         if url is not None:
             zeekItem[ZEEK_INTEL_META_URL] = url
         zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
@@ -553,7 +557,7 @@ def map_misp_attribute_to_zeek(
         else:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
         if confidence is not None:
-            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(confidence)
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
 
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
