@@ -311,7 +311,7 @@ def map_mandiant_indicator_to_zeek(
             for hashish in hashes:
                 if hashVal := hashish.get('value', None):
                     tmpItem = copy.deepcopy(zeekItem)
-                    tmpItem[ZEEK_INTEL_INDICATOR] = hashish
+                    tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
                     if newId := hashish.get('id', None):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
                     results.append(tmpItem)
