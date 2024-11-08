@@ -295,14 +295,25 @@ def map_mandiant_indicator_to_zeek(
         if tags:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
 
-        if isinstance(indicator, mandiant_threatintel.MD5Indicator):
-            pass
-            # the MD5Indicator class can actually have multiple types of hashes,
-            #   and we want to create a zeek intel item for each
-            for hashName in ["md5", "sha1", "sha256"]:
-                if hasattr(indicator, hashName) and (val := getattr(indicator, hashName)):
+        # The MD5Indicator class can actually have multiple types of hashes,
+        #   and we want to create a zeek intel item for each. I'm accessing
+        #   the underlying API response directly here (rather than through getattr)
+        #   to avoid extra GET requests to the API attempting to find a value
+        #   that didn't come with the initial request.
+        #   Performance-wise, if we didn't get it with the indicator object in
+        #   the first place it's not something we need to make an entire extra
+        #   network communication to attempt.
+        if (
+            isinstance(indicator, mandiant_threatintel.MD5Indicator)
+            and indicator._api_response
+            and (hashes := indicator._api_response.get('associated_hashes', []))
+        ):
+            for hashish in hashes:
+                if hashVal := hashish.get('value', None):
                     tmpItem = copy.deepcopy(zeekItem)
-                    tmpItem[ZEEK_INTEL_INDICATOR] = val
+                    tmpItem[ZEEK_INTEL_INDICATOR] = hashish
+                    if newId := hashish.get('id', None):
+                        tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
                     results.append(tmpItem)
                     if logger is not None:
                         logger.debug(tmpItem)
