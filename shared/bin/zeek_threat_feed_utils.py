@@ -177,7 +177,7 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
                 f.write(chunk)
     fExists = os.path.isfile(tmpDownloadedFileSpec)
     fSize = os.path.getsize(tmpDownloadedFileSpec)
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(
             f"Download of {url} to {tmpDownloadedFileSpec} {'succeeded' if fExists else 'failed'} ({fSize} bytes)"
         )
@@ -213,7 +213,7 @@ def map_mandiant_indicator_to_zeek(
     # get matching Zeek intel type
     if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator), None):
 
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(mandiant_indicator_as_json_str(indicator, skip_attr_map=skip_attr_map))
 
         zeekItem = defaultdict(lambda: '-')
@@ -271,14 +271,14 @@ def map_mandiant_indicator_to_zeek(
                     if newId := hashish.get('id', None):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
                     results.append(tmpItem)
-                    if logger is not None:
+                    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                         logger.debug(tmpItem)
 
         elif hasattr(indicator, 'value') and (val := indicator.value):
             # handle other types besides the file hash
             zeekItem[ZEEK_INTEL_INDICATOR] = val
             results.append(zeekItem)
-            if logger is not None:
+            if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                 logger.debug(zeekItem)
 
     else:
@@ -420,7 +420,7 @@ def map_stix_indicator_to_zeek(
             )
         return None
 
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(indicator)
 
     results = []
@@ -474,7 +474,7 @@ def map_stix_indicator_to_zeek(
         # TODO: confidence?
 
         results.append(zeekItem)
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(zeekItem)
 
     return results
@@ -495,7 +495,7 @@ def map_misp_attribute_to_zeek(
     @param attribute The MISPAttribute to convert
     @return a list containing the Zeek intel dict(s) from the MISPAttribute object
     """
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(attribute.to_json())
 
     results = []
@@ -550,7 +550,7 @@ def map_misp_attribute_to_zeek(
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(confidence)
 
         results.append(zeekItem)
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(zeekItem)
 
     return results
@@ -765,7 +765,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
     )
 
     with workerThreadCount as workerId:
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(f"[{workerId}]: started")
 
         # the queue was fully populated before we started, so we can run until there are no more elements
@@ -1007,7 +1007,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                                         # error or unrecognized results, set this to short circuit
                                                         resultCount = 0
 
-                                                    if logger is not None:
+                                                    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
                                                         logger.debug(
                                                             f"[{workerId}]: MISP search page {mispPage} returned {resultCount}"
                                                         )
@@ -1222,5 +1222,5 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                     if logger is not None:
                         logger.warning(f"[{workerId}]: {type(e).__name__} for '{inarg}': {e}")
 
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(f"[{workerId}]: finished")
