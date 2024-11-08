@@ -232,7 +232,13 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
         if hasattr(indicator, 'sources'):
             zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join(
-                list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry})
+                list(
+                    {
+                        entry['source_name'].replace(',', '\\x2c')
+                        for entry in indicator.sources
+                        if 'source_name' in entry
+                    }
+                )
             )
             if categories := list(
                 {
@@ -249,7 +255,7 @@ def map_mandiant_indicator_to_zeek(
                 tags.extend(trueMispAttrs)
 
         if tags:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join(tags)
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
 
         # The MD5Indicator class can actually have multiple types of hashes,
         #   and we want to create a zeek intel item for each. I'm accessing
