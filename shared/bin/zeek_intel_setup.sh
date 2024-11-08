@@ -95,7 +95,7 @@ EOF
             fi
         done
 
-        # process STIX and MISP inputs by converting them to Zeek intel format
+        # process STIX/MISP/Mandiant inputs by converting them to Zeek intel format
         if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
