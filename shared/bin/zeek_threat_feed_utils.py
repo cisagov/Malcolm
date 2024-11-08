@@ -615,6 +615,8 @@ class FeedParserZeekPrinter(object):
                         with self.lock:
                             # print the intelligence item fields according to the columns in 'fields'
                             print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+                        if not result:
+                            result = True
 
         except Exception as e:
             if self.logger is not None:
