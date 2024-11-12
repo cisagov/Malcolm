@@ -254,7 +254,7 @@ services:
       target: /certs/server.key
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9600"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3

@@ -169,15 +169,6 @@ missing_field_map['integer'] = 0
 missing_field_map['ip'] = '0.0.0.0'
 missing_field_map['long'] = 0
 
-logstash_default_pipelines = [
-    "malcolm-beats",
-    "malcolm-enrichment",
-    "malcolm-input",
-    "malcolm-output",
-    "malcolm-suricata",
-    "malcolm-zeek",
-]
-
 urllib3.disable_warnings()
 warnings.filterwarnings(
     "ignore",
@@ -937,7 +928,7 @@ def ready():
     logstash_lumberjack
         true or false, the ready status of Logstash's lumberjack protocol listener
     logstash_pipelines
-        true or false, the ready status of Logstash's default pipelines
+        true or false, the ready status of Logstash's pipelines
     netbox
         true or false, the ready status of NetBox
     opensearch
@@ -998,9 +989,9 @@ def ready():
             print(f"{type(e).__name__}: {str(e)} getting freq status")
 
     try:
-        logstashStats = requests.get(f'{logstashUrl}/_node').json()
+        logstashHealth = requests.get(f'{logstashUrl}/_health_report').json()
     except Exception as e:
-        logstashStats = {}
+        logstashHealth = {}
         if debugApi:
             print(f"{type(e).__name__}: {str(e)} getting Logstash node status")
 
@@ -1057,11 +1048,8 @@ def ready():
         filebeat_tcp=filebeatTcpJsonStatus,
         freq=freqStatus,
         logstash_lumberjack=logstashLJStatus,
-        logstash_pipelines=(malcolm_utils.deep_get(logstashStats, ["status"]) == "green")
-        and all(
-            pipeline in malcolm_utils.deep_get(logstashStats, ["pipelines"], {})
-            for pipeline in logstash_default_pipelines
-        ),
+        logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"]) == "green")
+        and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"]) == "green"),
         netbox=bool(
             isinstance(netboxStatus, dict)
             and netboxStatus
