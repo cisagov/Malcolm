@@ -107,7 +107,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         unar \
         unzip \
         xz-utils && \
-    python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==6.0.0 && \
+    python3 -m pip install --no-compile --no-cache-dir --break-system-packages patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==6.0.0 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
