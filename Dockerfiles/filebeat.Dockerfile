@@ -100,15 +100,14 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         psmisc \
         python3-pip \
         python3-setuptools \
-        python3.9 \
+        python3 \
         rsync \
         tar \
         tini \
         unar \
         unzip \
         xz-utils && \
-    ln -s -f -r /usr/bin/python3.9 /usr/bin/python3 && \
-    python3.9 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==6.0.0 && \
+    python3 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==6.0.0 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
