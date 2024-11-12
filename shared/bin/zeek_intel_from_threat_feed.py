@@ -174,7 +174,15 @@ def main():
                         if re.search(r"\.ya?ml$", infileParts[1], re.IGNORECASE):
                             with open(infileArg, 'r') as f:
                                 inputParams = yaml.safe_load(f)
-                            yamlInputs.append(inputParams)
+                            if inputParams:
+                                if isinstance(inputParams, dict):
+                                    yamlInputs.append(inputParams)
+                                elif isinstance(inputParams, list):
+                                    yamlInputs.extend(inputParams)
+                                else:
+                                    logging.error(
+                                        f"Connection parameters of type '{type(inputParams).__name__}' are not supported"
+                                    )
                         else:
                             with open(infileArg) as f:
                                 args.input.extend(f.read().splitlines())
@@ -194,8 +202,9 @@ def main():
 
                     else:
                         logging.warning(f"File '{infileArg}' not found")
+
                 except Exception as e:
-                    logging.warning(f"{type(e).__name__} for '{infileArg}': {e}")
+                    logging.error(f"{type(e).__name__} for '{infileArg}': {e}")
 
         # deduplicate input sources
         seenInput = {}
