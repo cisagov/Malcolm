@@ -327,7 +327,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         eprint(f'Error with file "{filename}": {e}')
 
                             # pagination controls
-                            with div(cls='pagination'):
+                            br()
+                            with div(
+                                cls='pagination',
+                                style='text-align: center; display: flex; justify-content: center; padding: 0;',
+                            ):
                                 with ul(
                                     cls='pagination-list',
                                     style='display: flex; list-style: none; justify-content: center; padding: 0;',
@@ -335,7 +339,14 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     # previous page link
                                     if page > 1:
                                         prevPageUrl = f'?page={page - 1}&elements={elements}'
-                                        li(a('Previous', href=prevPageUrl, cls='page-link'), cls='page-item')
+                                        li(
+                                            a(
+                                                f'Previous ({page - 1})',
+                                                href=prevPageUrl,
+                                                cls='page-link',
+                                            ),
+                                            cls='page-item',
+                                        )
                                     else:
                                         li(span('Previous', cls='page-link disabled'), cls='page-item')
 
@@ -345,7 +356,10 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     # next page link
                                     if page < totalPages:
                                         nextPageUrl = f'?page={page + 1}&elements={elements}'
-                                        li(a('Next', href=nextPageUrl, cls='page-link'), cls='page-item')
+                                        li(
+                                            a(f'Next ({page + 1} of {totalPages})', href=nextPageUrl, cls='page-link'),
+                                            cls='page-item',
+                                        )
                                     else:
                                         li(span('Next', cls='page-link disabled'), cls='page-item')
 
