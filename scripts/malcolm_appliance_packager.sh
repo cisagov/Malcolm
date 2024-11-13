@@ -35,7 +35,11 @@ CURRENT_REV_SHA="$(git rev-parse --short --verify HEAD)"
 if [ -z "$CURRENT_REV_SHA" ]; then
   CURRENT_REV_TAG="$(date +%Y.%m.%d_%H:%M:%S)"
 else
-  CURRENT_REV_DATE="$(git log -1 --format="%at" | xargs -I{} date -d @{} +%Y%m%d_%H%M%S)"
+  if [[ "$(uname -s)" == 'Darwin' ]]; then
+    CURRENT_REV_DATE="$(git log -1 --format="%at" | xargs -I{} date -r {} +%Y%m%d_%H%M%S)"
+  else
+    CURRENT_REV_DATE="$(git log -1 --format="%at" | xargs -I{} date -d @{} +%Y%m%d_%H%M%S)"
+  fi
   if [ -z "$CURRENT_REV_DATE" ]; then
     CURRENT_REV_TAG="$(date +%Y.%m.%d_%H:%M:%S)"
   fi
@@ -145,7 +149,11 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
   cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
 
-  tar $VERBOSE --numeric-owner --owner=0 --group=0 -czf "$DESTNAME" "./$(basename $DESTDIR)/"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+      tar $VERBOSE -czf "$DESTNAME" "./$(basename $DESTDIR)/"
+  else
+      tar $VERBOSE --numeric-owner --owner=0 --group=0 -czf "$DESTNAME" "./$(basename $DESTDIR)/"
+  fi
   echo "Packaged Malcolm to \"$DESTNAME\""
 
   unset CONFIRMATION
