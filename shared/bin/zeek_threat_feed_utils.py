@@ -1010,15 +1010,19 @@ def UpdateFromTAXII(
     taxiiCollection = connInfo.get('collection', None)
     taxiiUsername = connInfo.get('username', None)
     taxiiPassword = connInfo.get('password', None)
-    if taxiiVersion := connInfo.get('version', None):
-        if taxiiVersion == '2.0':
-            server = TaxiiServer_v20(taxiiUrl, user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
-        elif taxiiVersion == '2.1':
-            server = TaxiiServer_v21(taxiiUrl, user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
-        else:
-            raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
+    taxiiVersion = str(connInfo.get('version', None))
+    if taxiiVersion == '2.0':
+        TaxiiServerClass = TaxiiServer_v20
+        TaxiiCollectionClass = TaxiiCollection_v20
+        TaxiiAsPagesClass = TaxiiAsPages_v20
+    elif taxiiVersion == '2.1':
+        TaxiiServerClass = TaxiiServer_v21
+        TaxiiCollectionClass = TaxiiCollection_v21
+        TaxiiAsPagesClass = TaxiiAsPages_v21
     else:
-        raise Exception(f"TAXII version not specified")
+        raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
+
+    server = TaxiiServerClass(taxiiUrl, user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
 
     # collect the collection URL(s) for the given collection name
     collectionUrls = {}
@@ -1032,25 +1036,18 @@ def UpdateFromTAXII(
 
     # connect to and retrieve indicator STIX objects from the collection URL(s)
     for title, info in collectionUrls.items():
-        collection = (
-            TaxiiCollection_v21(info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
-            if taxiiVersion == '2.1'
-            else TaxiiCollection_v20(info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
+        collection = TaxiiCollectionClass(
+            info['url'],
+            user=taxiiUsername,
+            password=taxiiPassword,
+            verify=sslVerify,
         )
         try:
             # loop over paginated results
-            for envelope in (
-                TaxiiAsPages_v21(
-                    collection.get_objects,
-                    per_request=TAXII_PAGE_SIZE,
-                    **TAXII_INDICATOR_FILTER,
-                )
-                if taxiiVersion == '2.1'
-                else TaxiiAsPages_v20(
-                    collection.get_objects,
-                    per_request=TAXII_PAGE_SIZE,
-                    **TAXII_INDICATOR_FILTER,
-                )
+            for envelope in TaxiiAsPagesClass(
+                collection.get_objects,
+                per_request=TAXII_PAGE_SIZE,
+                **TAXII_INDICATOR_FILTER,
             ):
                 if zeekPrinter.ProcessSTIX(
                     envelope,
