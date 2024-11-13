@@ -638,12 +638,13 @@ class FeedParserZeekPrinter(object):
     def ProcessSTIX(
         self,
         toParse,
+        version=None,
         source: Union[Tuple[str], None] = None,
     ):
         result = False
         try:
             # parse the STIX and process all "Indicator" objects
-            for obj in STIXParse(toParse, allow_custom=True).objects:
+            for obj in STIXParse(toParse, allow_custom=True, version=version).objects:
                 if type(obj).__name__ == "Indicator":
                     if not result:
                         result = True
@@ -1051,6 +1052,7 @@ def UpdateFromTAXII(
             ):
                 if zeekPrinter.ProcessSTIX(
                     envelope,
+                    version=taxiiVersion,
                     source=[':'.join([x for x in [server.title, title] if x is not None])],
                 ):
                     successCount.increment()
