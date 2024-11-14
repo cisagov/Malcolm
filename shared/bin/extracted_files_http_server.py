@@ -51,12 +51,6 @@ malcolm_forward_header = 'X-Malcolm-Forward'
 
 
 ###################################################################################################
-# a function for performing "natural" (case insensitive) sort
-def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
-    return [int(text) if text.isdigit() else text.lower() for text in _nsre.split(s)]
-
-
-###################################################################################################
 # return the names and flags for Zipping a list of files
 def LocalFilesForZip(names):
     now = datetime.now(UTC)
@@ -146,7 +140,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
                             for dirpath, dirnames, filenames in os.walk(fullpath):
                                 # list directories first
-                                for dirname in sorted(dirnames, key=natural_sort_key):
+                                for dirname in sorted(dirnames, key=str.casefold):
                                     try:
                                         child = os.path.join(dirpath, dirname)
                                         if args.links or (not os.path.islink(child)):
@@ -154,7 +148,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     except Exception as e:
                                         eprint(f'Error with directory "{dirname}"": {e}')
                                 # list files
-                                for filename in sorted(filenames, key=natural_sort_key):
+                                for filename in sorted(filenames, key=str.casefold):
                                     try:
                                         child = os.path.join(dirpath, filename)
                                         if args.links or (not os.path.islink(child)):
@@ -236,9 +230,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                         timestamp = datetime.strptime(timestampStr, '%Y%m%d%H%M%S')
                                                         timestampStr = timestamp.isoformat()
                                                         timestampStartFilterStr = (
-                                                            (timestamp - timedelta(days=1))
-                                                            .isoformat()
-                                                            .split('.')[0]
+                                                            (timestamp - timedelta(days=1)).isoformat().split('.')[0]
                                                         )
                                                     except Exception as te:
                                                         if timestampStr:
@@ -296,7 +288,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                 ),
                                                 td(sizeof_fmt(os.path.getsize(child)), style="text-align: right"),
                                             )
-                                            
+
                                             # show special malcolm columns if requested
                                             if showMalcolmCols:
                                                 if fmatch is not None:
@@ -335,7 +327,11 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                         eprint(f'Error with file "{filename}": {e}')
 
                             # pagination controls
-                            with div(cls='pagination'):
+                            br()
+                            with div(
+                                cls='pagination',
+                                style='text-align: center; display: flex; justify-content: center; padding: 0;',
+                            ):
                                 with ul(
                                     cls='pagination-list',
                                     style='display: flex; list-style: none; justify-content: center; padding: 0;',
@@ -343,21 +339,27 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     # previous page link
                                     if page > 1:
                                         prevPageUrl = f'?page={page - 1}&elements={elements}'
-                                        li(a('Previous', href=prevPageUrl, cls='page-link'), cls='page-item')
+                                        li(
+                                            a(
+                                                f'Previous ({page - 1})',
+                                                href=prevPageUrl,
+                                                cls='page-link',
+                                            ),
+                                            cls='page-item',
+                                        )
                                     else:
                                         li(span('Previous', cls='page-link disabled'), cls='page-item')
 
                                     # add a space between text
-                                    li(
-                                        ' ',
-                                        cls='page-item spacer',
-                                        style='width: 10px;'
-                                    )
+                                    li(' ', cls='page-item spacer', style='width: 10px;')
 
                                     # next page link
                                     if page < totalPages:
                                         nextPageUrl = f'?page={page + 1}&elements={elements}'
-                                        li(a('Next', href=nextPageUrl, cls='page-link'), cls='page-item')
+                                        li(
+                                            a(f'Next ({page + 1} of {totalPages})', href=nextPageUrl, cls='page-link'),
+                                            cls='page-item',
+                                        )
                                     else:
                                         li(span('Next', cls='page-link disabled'), cls='page-item')
 

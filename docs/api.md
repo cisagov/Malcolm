@@ -1,5 +1,6 @@
 # <a name="API"></a>API
 
+* [Dashboard Export](api-dashboard-export.md)
 * [Document Ingest Statistics](api-ingest-stats.md)
 * [Document Lookup](api-document-lookup.md)
 * [Event Logging](api-event-logging.md)

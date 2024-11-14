@@ -90,10 +90,9 @@ spec:
           - configMapRef:
               name: logstash-env
         livenessProbe:
-          httpGet:
-            path: /
-            port: 9600
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 600
           periodSeconds: 30
           timeoutSeconds: 15

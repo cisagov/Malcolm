@@ -108,6 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-setuptools \
       python3-tz \
       python3-wheel \
+      python3-yaml \
       python3-zmq \
       rsync \
       supervisor \
@@ -139,6 +140,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/Mandiant && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
       touch "${ZEEK_DIR}"/share/zeek/site/custom/__load__.zeek && \
@@ -201,8 +203,9 @@ ARG ZEEK_PCAP_PROCESSOR=true
 #Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
 ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
-#Whether or not to refresh intel at various points during processing
-ARG ZEEK_INTEL_REFRESH_ON_ENTRYPOINT=false
+#Whether or not to do first intel refresh under supervisord
+ARG ZEEK_INTEL_REFRESH_ON_STARTUP=false
+#Whether or not to do first intel refresh under zeekdeploy.sh
 ARG ZEEK_INTEL_REFRESH_ON_DEPLOY=false
 ARG ZEEK_INTEL_REFRESH_CRON_EXPRESSION=
 ARG ZEEK_INTEL_ITEM_EXPIRATION=-1min
@@ -225,7 +228,7 @@ ARG PCAP_NODE_NAME=malcolm
 
 ENV AUTO_TAG $AUTO_TAG
 ENV ZEEK_PCAP_PROCESSOR $ZEEK_PCAP_PROCESSOR
-ENV ZEEK_INTEL_REFRESH_ON_ENTRYPOINT $ZEEK_INTEL_REFRESH_ON_ENTRYPOINT
+ENV ZEEK_INTEL_REFRESH_ON_STARTUP $ZEEK_INTEL_REFRESH_ON_STARTUP
 ENV ZEEK_INTEL_REFRESH_ON_DEPLOY $ZEEK_INTEL_REFRESH_ON_DEPLOY
 ENV ZEEK_INTEL_REFRESH_CRON_EXPRESSION $ZEEK_INTEL_REFRESH_CRON_EXPRESSION
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
