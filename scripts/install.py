@@ -3365,7 +3365,14 @@ class LinuxInstaller(Installer):
                 '/etc/security/limits.d/limits.conf',
                 '',
                 '/etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments',
-                ['* soft nofile 65535', '* hard nofile 65535', '* soft memlock unlimited', '* hard memlock unlimited'],
+                [
+                    '* soft nofile 65535',
+                    '* hard nofile 65535',
+                    '* soft memlock unlimited',
+                    '* hard memlock unlimited',
+                    '* soft nproc 262144',
+                    '* hard nproc 524288',
+                ],
             ),
         ]
 
@@ -3760,7 +3767,7 @@ def main():
         metavar='<string>',
         type=str,
         default='',
-        help='Malcolm container images .tar.gz file for installation',
+        help='Malcolm container images .tar.xz file for installation',
     )
 
     runtimeOptionsArgGroup = parser.add_argument_group('Runtime options')
@@ -4014,7 +4021,7 @@ def main():
         required=False,
         metavar='<integer>',
         type=int,
-        default=None,
+        default=0,
         help='Number of Logstash workers (e.g., 4, 8, etc.)',
     )
     opensearchArgGroup.add_argument(
@@ -4569,7 +4576,8 @@ def main():
     try:
         parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
+    except SystemExit as e:
+        eprint(f'Invalid arguments: {e}')
         parser.print_help()
         exit(2)
 

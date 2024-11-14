@@ -12,7 +12,9 @@ from time import sleep
 import argparse
 import logging
 import os
+import re
 import sys
+import yaml
 import zeek_threat_feed_utils
 
 import malcolm_utils
@@ -32,6 +34,7 @@ def main():
                 'Outputs a Zeek intelligence framework file from various formats used to represent threat information:',
                 ' - "Indicator" objects in STIX™ v2.0/v2.1 JSON files',
                 ' - MISP attributes or core format JSON files',
+                ' - Indicators from Mantiant Threat Intelligence',
                 '',
                 'See:',
                 ' - Malcolm documentation: https://cisagov.github.io/Malcolm/docs/zeek-intel.html#ZeekIntel',
@@ -45,6 +48,7 @@ def main():
                 ' - MISP default feeds: https://www.misp-project.org/feeds/',
                 ' - Managing MISP feeds: https://misp.gitbooks.io/misp-book/content/managing-feeds/',
                 ' - Expand MISP usage: https://github.com/idaholab/Malcolm/issues/336',
+                ' - Mandiant Threat Intelligence Indicators API: https://docs.mandiant.com/home/mati-threat-intelligence-api-v4#tag/Indicators'
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
                 'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
@@ -103,7 +107,7 @@ def main():
         nargs='*',
         type=str,
         default=None,
-        help="Read --input arguments from a local or external file (one per line)",
+        help="Read --input arguments from a local or external file (one per line, or YAML definitions)",
     )
     parser.add_argument(
         '-o',
@@ -148,6 +152,7 @@ def main():
 
     if args.input is None:
         args.input = []
+    yamlInputs = []
     since = (
         ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
     )
@@ -164,9 +169,23 @@ def main():
             for infileArg in args.inputFile:
                 try:
                     if os.path.isfile(infileArg):
-                        # read inputs from local file
-                        with open(infileArg) as f:
-                            args.input.extend(f.read().splitlines())
+                        # read inputs from local file (delimited lines or YAML file)
+                        infileParts = os.path.splitext(infileArg)
+                        if re.search(r"\.ya?ml$", infileParts[1], re.IGNORECASE):
+                            with open(infileArg, 'r') as f:
+                                inputParams = yaml.safe_load(f)
+                            if inputParams:
+                                if isinstance(inputParams, dict):
+                                    yamlInputs.append(inputParams)
+                                elif isinstance(inputParams, list):
+                                    yamlInputs.extend(inputParams)
+                                else:
+                                    logging.error(
+                                        f"Connection parameters of type '{type(inputParams).__name__}' are not supported"
+                                    )
+                        else:
+                            with open(infileArg) as f:
+                                args.input.extend(f.read().splitlines())
 
                     elif '://' in infileArg:
                         # download from URL and read input from remote file
@@ -183,17 +202,22 @@ def main():
 
                     else:
                         logging.warning(f"File '{infileArg}' not found")
+
                 except Exception as e:
-                    logging.warning(f"{type(e).__name__} for '{infileArg}': {e}")
+                    logging.error(f"{type(e).__name__} for '{infileArg}': {e}")
 
         # deduplicate input sources
         seenInput = {}
         args.input = [seenInput.setdefault(x, x) for x in args.input if x not in seenInput]
-        logging.debug(f"Input: {args.input}")
 
         # we'll queue and then process all of the input arguments in workers
         inputQueue = deque()
-        inputQueue.extend(args.input)
+        if args.input:
+            inputQueue.extend(args.input)
+        if yamlInputs:
+            inputQueue.extend(yamlInputs)
+        logging.debug(f"Inputs: {list(inputQueue)}")
+
         workerThreadCount = malcolm_utils.AtomicInt(value=0)
         ThreadPool(
             args.threads,

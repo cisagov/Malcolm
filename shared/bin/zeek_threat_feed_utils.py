@@ -11,6 +11,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from multiprocessing import RawValue
 from pymisp import MISPEvent, MISPAttribute, PyMISP
 from pytz import utc as UTCTimeZone
@@ -28,10 +29,13 @@ from taxii2client.v21 import Collection as TaxiiCollection_v21
 from taxii2client.v21 import Server as TaxiiServer_v21
 from threading import Lock
 from time import sleep, mktime
+from types import GeneratorType, FunctionType, LambdaType
 from typing import Tuple, Union
 from urllib.parse import urljoin, urlparse
 from logging import DEBUG as LOGGING_DEBUG
+import copy
 import json
+import mandiant_threatintel
 import os
 import re
 import requests
@@ -39,7 +43,7 @@ import urllib3
 
 from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
 
-# keys for dict returned by map_stix_indicator_to_zeek for Zeek intel file fields
+# keys for dict returned by map_*_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
 ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
 ZEEK_INTEL_META_SOURCE = 'meta.source'
@@ -53,12 +57,20 @@ ZEEK_INTEL_CIF_DESCRIPTION = 'meta.cif_description'
 ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
+ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
+
 TAXII_INDICATOR_FILTER = {'type': 'indicator'}
 TAXII_PAGE_SIZE = 50
 MISP_PAGE_SIZE_ATTRIBUTES = 500
 MISP_PAGE_SIZE_EVENTS = 10
-ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
-
+MANDIANT_PAGE_SIZE_DEFAULT = 1000
+MANDIANT_MINIMUM_MSCORE_DEFAULT = 60
+MANDIANT_EXCLUDE_OSINT_DEFAULT = False
+MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT = False
+MANDIANT_INCLUDE_REPORTS_DEFAULT = False
+MANDIANT_INCLUDE_THREAT_RATING_DEFAULT = False
+MANDIANT_INCLUDE_MISP_DEFAULT = True
+MANDIANT_INCLUDE_CATEGORY_DEFAULT = True
 
 # See the documentation for the Zeek INTEL framework [1] and STIX-2 cyber observable objects [2]
 # [1] https://docs.zeek.org/en/stable/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
@@ -115,6 +127,16 @@ MISP_ZEEK_INTEL_TYPE_MAP = {
     "x509-fingerprint-sha1": "CERT_HASH",
 }
 
+# See the documentation for the Zeek INTEL framework [1] and Mandiant threat intel API [2]
+# [1] https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+# [2] https://docs.mandiant.com/home/mati-threat-intelligence-api-v4#tag/Indicators
+MANDIANT_ZEEK_INTEL_TYPE_MAP = {
+    mandiant_threatintel.FQDNIndicator: 'DOMAIN',
+    mandiant_threatintel.URLIndicator: 'URL',
+    mandiant_threatintel.IPIndicator: 'ADDR',
+    mandiant_threatintel.MD5Indicator: 'FILE_HASH',
+}
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -155,7 +177,7 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
                 f.write(chunk)
     fExists = os.path.isfile(tmpDownloadedFileSpec)
     fSize = os.path.getsize(tmpDownloadedFileSpec)
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(
             f"Download of {url} to {tmpDownloadedFileSpec} {'succeeded' if fExists else 'failed'} ({fSize} bytes)"
         )
@@ -166,6 +188,112 @@ def download_to_file(url, session=None, local_filename=None, chunk_bytes=4096, s
         if fExists:
             os.remove(tmpDownloadedFileSpec)
         return None
+
+
+def mandiant_indicator_as_json_str(indicator, skip_attr_map={}):
+    if indicator and indicator._api_response:
+        return json.dumps(indicator._api_response)
+    else:
+        return 'unknown indicator'
+
+
+def map_mandiant_indicator_to_zeek(
+    indicator: mandiant_threatintel.APIResponse,
+    skip_attr_map={},
+    logger=None,
+) -> Union[Tuple[defaultdict], None]:
+    """
+    Maps a Mandiant threat intelligence indicator object to Zeek intel items
+    @see https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+    @param indicator The indicator object (mandiant_threatintel.APIResponse) to convert
+    @return a list containing the Zeek intel dict(s) from the indicator
+    """
+    results = []
+
+    # get matching Zeek intel type
+    if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator), None):
+
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+            logger.debug(mandiant_indicator_as_json_str(indicator, skip_attr_map=skip_attr_map))
+
+        zeekItem = defaultdict(lambda: '-')
+        tags = []
+        sources = []
+
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+
+        if hasattr(indicator, 'id'):
+            zeekItem[ZEEK_INTEL_META_DESC] = indicator.id
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
+            zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
+        if hasattr(indicator, 'mscore'):
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
+        if hasattr(indicator, 'first_seen'):
+            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
+        if hasattr(indicator, 'last_seen'):
+            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
+        if hasattr(indicator, 'sources'):
+            sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
+            if categories := list(
+                {
+                    category
+                    for item in indicator.sources
+                    if 'category' in item and item['category']
+                    for category in item['category']
+                }
+            ):
+                tags.extend(categories)
+
+        if hasattr(indicator, 'misp'):
+            if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
+                tags.extend(trueMispAttrs)
+
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
+
+        # The MD5Indicator class can actually have multiple types of hashes,
+        #   and we want to create a zeek intel item for each. I'm accessing
+        #   the underlying API response directly here (rather than through getattr)
+        #   to avoid extra GET requests to the API attempting to find a value
+        #   that didn't come with the initial request.
+        #   Performance-wise, if we didn't get it with the indicator object in
+        #   the first place it's not something we need to make an entire extra
+        #   network communication to attempt.
+        if (
+            isinstance(indicator, mandiant_threatintel.MD5Indicator)
+            and indicator._api_response
+            and (hashes := indicator._api_response.get('associated_hashes', []))
+        ):
+            for hashish in hashes:
+                if hashVal := hashish.get('value', None):
+                    tmpItem = copy.deepcopy(zeekItem)
+                    tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
+                    if newId := hashish.get('id', None):
+                        tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
+                    if ZEEK_INTEL_META_URL in tmpItem:
+                        sources.append(tmpItem[ZEEK_INTEL_META_URL])
+                    if sources:
+                        tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
+                    results.append(tmpItem)
+                    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+                        logger.debug(tmpItem)
+
+        elif hasattr(indicator, 'value') and (val := indicator.value):
+            # handle other types besides the file hash
+            zeekItem[ZEEK_INTEL_INDICATOR] = val
+            if ZEEK_INTEL_META_URL in zeekItem:
+                sources.append(zeekItem[ZEEK_INTEL_META_URL])
+            if sources:
+                zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
+            results.append(zeekItem)
+            if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+                logger.debug(zeekItem)
+
+    else:
+        if logger is not None:
+            logger.warning(f"No matching Zeek type found for Mandiant indicator type '{indicator.__class__.__name__}'")
+
+    return results
 
 
 def stix_pattern_from_str(indicator_type: type, pattern_str: str) -> Union[STIX_Pattern_v21, STIX_Pattern_v20, None]:
@@ -300,7 +428,7 @@ def map_stix_indicator_to_zeek(
             )
         return None
 
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(indicator)
 
     results = []
@@ -329,7 +457,7 @@ def map_stix_indicator_to_zeek(
         zeekItem = defaultdict(lambda: '-')
 
         zeekItem[ZEEK_INTEL_META_SOURCE] = (
-            ','.join([x.replace(',', '\\x2c') for x in source])
+            '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
             if source is not None and len(source) > 0
             else str(indicator.id)
         )
@@ -339,6 +467,7 @@ def map_stix_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
                 [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
             )
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             # some of these are from CFM, what the heck...
             # if 'description' in indicator:
             #   "description": "severity level: Low\n\nCONFIDENCE: High",
@@ -354,7 +483,7 @@ def map_stix_indicator_to_zeek(
         # TODO: confidence?
 
         results.append(zeekItem)
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(zeekItem)
 
     return results
@@ -375,7 +504,7 @@ def map_misp_attribute_to_zeek(
     @param attribute The MISPAttribute to convert
     @return a list containing the Zeek intel dict(s) from the MISPAttribute object
     """
-    if logger is not None:
+    if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
         logger.debug(attribute.to_json())
 
     results = []
@@ -413,9 +542,10 @@ def map_misp_attribute_to_zeek(
         zeekItem = defaultdict(lambda: '-')
 
         if source is not None and len(source) > 0:
-            zeekItem[ZEEK_INTEL_META_SOURCE] = ','.join([x.replace(',', '\\x2c') for x in source])
+            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in source])
         if description is not None:
             zeekItem[ZEEK_INTEL_META_DESC] = description
+            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
         if url is not None:
             zeekItem[ZEEK_INTEL_META_URL] = url
         zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
@@ -427,10 +557,10 @@ def map_misp_attribute_to_zeek(
         else:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
         if confidence is not None:
-            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(confidence)
+            zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
 
         results.append(zeekItem)
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(zeekItem)
 
     return results
@@ -482,15 +612,39 @@ class FeedParserZeekPrinter(object):
                     print('\t'.join(['#fields'] + self.fields), file=self.outFile)
                     self.printedHeader = True
 
+    def ProcessMandiant(self, indicator, skip_attr_map={}):
+        result = False
+        try:
+            if isinstance(indicator, mandiant_threatintel.APIResponse):
+                # map indicator object to Zeek value(s)
+                if vals := map_mandiant_indicator_to_zeek(
+                    indicator=indicator, skip_attr_map=skip_attr_map, logger=self.logger
+                ):
+                    for val in vals:
+                        self.PrintHeader()
+                        with self.lock:
+                            # print the intelligence item fields according to the columns in 'fields'
+                            print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+                        if not result:
+                            result = True
+
+        except Exception as e:
+            if self.logger is not None:
+                self.logger.warning(
+                    f"{type(e).__name__} for {indicator.id if hasattr(indicator, 'id') else 'indicator'}: {e}"
+                )
+        return result
+
     def ProcessSTIX(
         self,
         toParse,
+        version=None,
         source: Union[Tuple[str], None] = None,
     ):
         result = False
         try:
             # parse the STIX and process all "Indicator" objects
-            for obj in STIXParse(toParse, allow_custom=True).objects:
+            for obj in STIXParse(toParse, allow_custom=True, version=version).objects:
                 if type(obj).__name__ == "Indicator":
                     if not result:
                         result = True
@@ -611,6 +765,354 @@ class FeedParserZeekPrinter(object):
         return result
 
 
+def UpdateFromMISP(
+    connInfo,
+    since,
+    nowTime,
+    sslVerify,
+    zeekPrinter,
+    logger,
+    successCount,
+    workerId,
+):
+    with requests.Session() as mispSession:
+        mispSession.headers.update({'Accept': 'application/json;q=1.0,text/plain;q=0.9,text/html;q=0.9'})
+        if mispAuthKey := connInfo.get('auth_key', None):
+            mispSession.headers.update({'Authorization': mispAuthKey})
+
+        mispUrl = connInfo.get('url', None)
+
+        # download the URL and parse as JSON to figure out what it is. it could be:
+        # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
+        # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
+        # - a directory listing of misc. JSON files without a manifest.json
+        # - an array of Attributes returned for a request via the MISP Automation API to an /attributes endpoint
+        # - an array of Events returned for a request via the MISP Automation API to an /events endpoint
+        mispResponse = mispSession.get(
+            mispUrl,
+            allow_redirects=True,
+            verify=sslVerify,
+        )
+        mispResponse.raise_for_status()
+        if mispJson := LoadStrIfJson(mispResponse.content):
+            # the contents are JSON. determine if this is:
+            #   - a single Event
+            #   - an array of Events
+            #   - an array of Attributes
+            #   - a manifest
+
+            if isinstance(mispJson, dict) and (len(mispJson.keys()) == 1) and ('Event' in mispJson):
+                # this is a single MISP Event, process it
+                if zeekPrinter.ProcessMISP(
+                    mispJson,
+                    url=mispUrl,
+                ):
+                    successCount.increment()
+
+            elif isinstance(mispJson, list) and (len(mispJson) > 0):
+                # are these Attributes or Events?
+                if isinstance(mispJson[0], dict) and ('id' in mispJson[0]) and ('type' in mispJson[0]):
+                    controllerType = 'attributes'
+                    resultKey = 'Attribute'
+                    pageSize = MISP_PAGE_SIZE_ATTRIBUTES
+                elif isinstance(mispJson[0], dict) and ('info' in mispJson[0]):
+                    controllerType = 'events'
+                    resultKey = 'Event'
+                    pageSize = MISP_PAGE_SIZE_EVENTS
+                else:
+                    controllerType = None
+                    resultKey = None
+                    pageSize = None
+
+                if controllerType:
+                    # this is an array of either Attributes or Events.
+                    #   rather than handling it via additional calls with request,
+                    #   let's use the MISP API to do the searching/pulling
+                    #   (yeah, we're duplicating the effort of pulling the
+                    #   first page, but meh, who cares?)
+                    if mispObject := PyMISP(
+                        mispUrl,
+                        mispAuthKey,
+                        sslVerify,
+                        debug=logger and (LOGGING_DEBUG >= logger.root.level),
+                    ):
+                        # search, looping over the pages pageSize at a time
+                        mispPage = 0
+                        while True:
+                            mispPage += 1
+                            resultCount = 0
+                            mispResults = mispObject.search(
+                                controller=controllerType,
+                                return_format='json',
+                                limit=pageSize,
+                                page=mispPage,
+                                type_attribute=list(MISP_ZEEK_INTEL_TYPE_MAP.keys()),
+                                timestamp=since,
+                            )
+                            if mispResults and isinstance(mispResults, dict) and (resultKey in mispResults):
+                                # Attributes results
+                                resultCount = len(mispResults[resultKey])
+                                for item in mispResults[resultKey]:
+                                    try:
+                                        if zeekPrinter.ProcessMISP(
+                                            item,
+                                            url=mispUrl,
+                                        ):
+                                            successCount.increment()
+                                    except Exception as e:
+                                        if logger is not None:
+                                            logger.warning(
+                                                f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
+                                            )
+
+                            elif mispResults and isinstance(mispResults, list):
+                                # Events results
+                                resultCount = len(mispResults)
+                                for item in mispResults:
+                                    if item and isinstance(item, dict) and (resultKey in item):
+                                        try:
+                                            if zeekPrinter.ProcessMISP(
+                                                item[resultKey],
+                                                url=mispUrl,
+                                            ):
+                                                successCount.increment()
+                                        except Exception as e:
+                                            if logger is not None:
+                                                logger.warning(
+                                                    f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
+                                                )
+
+                            else:
+                                # error or unrecognized results, set this to short circuit
+                                resultCount = 0
+
+                            if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+                                logger.debug(f"[{workerId}]: MISP search page {mispPage} returned {resultCount}")
+                            if not mispResults or (resultCount < pageSize):
+                                break
+
+                else:
+                    # not an Event or an Attribute? what the heck are we even doing?
+                    raise Exception(f"Unknown MISP object '{json.dumps(mispJson)}'")
+
+            elif isinstance(mispJson, dict):
+                # this is a manifest, loop over, retrieve and process the MISP events it references
+                for uri in mispJson:
+                    try:
+                        newUrl = urljoin(mispUrl, f'{uri}.json')
+                        eventTime = (
+                            datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(UTCTimeZone)
+                            if 'timestamp' in mispJson[uri]
+                            else defaultNow
+                        )
+                        if (since is None) or (eventTime >= since):
+                            mispObjectReponse = mispSession.get(
+                                newUrl,
+                                allow_redirects=True,
+                                verify=sslVerify,
+                            )
+                            mispObjectReponse.raise_for_status()
+                            if zeekPrinter.ProcessMISP(
+                                mispObjectReponse.json(),
+                                url=newUrl,
+                            ):
+                                successCount.increment()
+                    except Exception as e:
+                        if logger is not None:
+                            logger.warning(f"[{workerId}]: {type(e).__name__} for MISP object at '{newUrl}': {e}")
+
+            else:
+                raise Exception(f"Unknown MISP format '{type(mispJson)}'")
+
+        else:
+            # the contents are NOT JSON, it's probably an HTML-formatted directory listing
+
+            # retrieve the links listed (non-recursive, all .json files in this directory)
+            paths = get_url_paths_from_response(mispResponse.text, parent_url=mispUrl, ext='.json')
+
+            # see if manifest.json exists in this directory
+            manifestPaths = [x for x in paths if x.endswith('/manifest.json')]
+            if len(manifestPaths) > 0:
+                # the manifest.json exists!
+                # retrieve it, then loop over it and retrieve and process the MISP events it references
+                for url in manifestPaths:
+                    try:
+                        mispManifestResponse = mispSession.get(
+                            url,
+                            allow_redirects=True,
+                            verify=sslVerify,
+                        )
+                        mispManifestResponse.raise_for_status()
+                        mispManifest = mispManifestResponse.json()
+                        for uri in mispManifest:
+                            try:
+                                eventTime = (
+                                    datetime.utcfromtimestamp(int(mispManifest[uri]['timestamp'])).astimezone(
+                                        UTCTimeZone
+                                    )
+                                    if 'timestamp' in mispManifest[uri]
+                                    else defaultNow
+                                )
+                                if (since is None) or (eventTime >= since):
+                                    newUrl = f'{mispUrl.strip("/")}/{uri}.json'
+                                    mispObjectReponse = mispSession.get(
+                                        newUrl,
+                                        allow_redirects=True,
+                                        verify=sslVerify,
+                                    )
+                                    mispObjectReponse.raise_for_status()
+                                    if zeekPrinter.ProcessMISP(
+                                        mispObjectReponse.json(),
+                                        url=newUrl,
+                                    ):
+                                        successCount.increment()
+                            except Exception as e:
+                                if logger is not None:
+                                    logger.warning(
+                                        f"[{workerId}]: {type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
+                                    )
+                    except Exception as e:
+                        if logger is not None:
+                            logger.warning(f"[{workerId}]: {type(e).__name__} for manifest at '{url}': {e}")
+
+            else:
+                # the manifest.json does not exist!
+                # just loop over, retrieve and process the .json files in this directory
+                for url in paths:
+                    try:
+                        mispObjectReponse = mispSession.get(
+                            url,
+                            allow_redirects=True,
+                            verify=sslVerify,
+                        )
+                        mispObjectReponse.raise_for_status()
+                        if zeekPrinter.ProcessMISP(
+                            mispObjectReponse.json(),
+                            url=url,
+                        ):
+                            successCount.increment()
+                    except Exception as e:
+                        if logger is not None:
+                            logger.warning(f"[{workerId}]: {type(e).__name__} for MISP object at '{url}': {e}")
+
+
+def UpdateFromTAXII(
+    connInfo,
+    since,
+    nowTime,
+    sslVerify,
+    zeekPrinter,
+    logger,
+    successCount,
+    workerId,
+):
+    # connect to the server     with the appropriate API for the TAXII version
+    taxiiUrl = connInfo.get('url', None)
+    taxiiCollection = connInfo.get('collection', None)
+    taxiiUsername = connInfo.get('username', None)
+    taxiiPassword = connInfo.get('password', None)
+    taxiiVersion = str(connInfo.get('version', None))
+    if taxiiVersion == '2.0':
+        TaxiiServerClass = TaxiiServer_v20
+        TaxiiCollectionClass = TaxiiCollection_v20
+        TaxiiAsPagesClass = TaxiiAsPages_v20
+    elif taxiiVersion == '2.1':
+        TaxiiServerClass = TaxiiServer_v21
+        TaxiiCollectionClass = TaxiiCollection_v21
+        TaxiiAsPagesClass = TaxiiAsPages_v21
+    else:
+        raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
+
+    server = TaxiiServerClass(taxiiUrl, user=taxiiUsername, password=taxiiPassword, verify=sslVerify)
+
+    # collect the collection URL(s) for the given collection name
+    collectionUrls = {}
+    for api_root in server.api_roots:
+        for collection in api_root.collections:
+            if (taxiiCollection == '*') or (collection.title.lower() == taxiiCollection.lower()):
+                collectionUrls[collection.title] = {
+                    'id': collection.id,
+                    'url': collection.url,
+                }
+
+    # connect to and retrieve indicator STIX objects from the collection URL(s)
+    for title, info in collectionUrls.items():
+        collection = TaxiiCollectionClass(
+            info['url'],
+            user=taxiiUsername,
+            password=taxiiPassword,
+            verify=sslVerify,
+        )
+        try:
+            # loop over paginated results
+            for envelope in TaxiiAsPagesClass(
+                collection.get_objects,
+                per_request=TAXII_PAGE_SIZE,
+                **TAXII_INDICATOR_FILTER,
+            ):
+                if zeekPrinter.ProcessSTIX(
+                    envelope,
+                    version=taxiiVersion,
+                    source=[':'.join([x for x in [server.title, title] if x is not None])],
+                ):
+                    successCount.increment()
+
+        except Exception as e:
+            if logger is not None:
+                logger.warning(f"[{workerId}]: {type(e).__name__} for object of collection '{title}': {e}")
+
+
+def UpdateFromMandiant(
+    connInfo,
+    since,
+    nowTime,
+    sslVerify,
+    zeekPrinter,
+    logger,
+    successCount,
+    workerId,
+):
+    if mati_client := mandiant_threatintel.ThreatIntelClient(
+        api_key=connInfo.get('api_key', None),
+        secret_key=connInfo.get('secret_key', None),
+        bearer_token=connInfo.get('bearer_token', None),
+        api_base_url=connInfo.get('api_base_url', mandiant_threatintel.API_BASE_URL),
+        client_name=connInfo.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
+    ):
+        skip_attr_map = defaultdict(lambda: False)
+        skip_attr_map['campaigns'] = not bool(connInfo.get('include_campaigns', MANDIANT_INCLUDE_CAMPAIGNS_DEFAULT))
+        skip_attr_map['category'] = not bool(connInfo.get('include_category', MANDIANT_INCLUDE_CATEGORY_DEFAULT))
+        skip_attr_map['misp'] = not bool(connInfo.get('include_misp', MANDIANT_INCLUDE_MISP_DEFAULT))
+        skip_attr_map['reports'] = not bool(connInfo.get('include_reports', MANDIANT_INCLUDE_REPORTS_DEFAULT))
+        skip_attr_map['threat_rating'] = not bool(
+            connInfo.get('include_threat_rating', MANDIANT_INCLUDE_THREAT_RATING_DEFAULT)
+        )
+        skip_attr_map['attributed_associations'] = True
+        for indicator in mati_client.Indicators.get_list(
+            start_epoch=since if since else nowTime - relativedelta(hours=24),
+            end_epoch=nowTime,
+            page_size=connInfo.get('page_size', MANDIANT_PAGE_SIZE_DEFAULT),
+            minimum_mscore=connInfo.get('minimum_mscore', MANDIANT_MINIMUM_MSCORE_DEFAULT),
+            exclude_osint=connInfo.get('exclude_osint', MANDIANT_EXCLUDE_OSINT_DEFAULT),
+            include_campaigns=not skip_attr_map['campaigns'],
+            include_reports=not skip_attr_map['reports'],
+            include_threat_rating=not skip_attr_map['threat_rating'],
+            include_misp=not skip_attr_map['misp'],
+            include_category=skip_attr_map['category'],
+        ):
+            try:
+                if zeekPrinter.ProcessMandiant(indicator, skip_attr_map=skip_attr_map):
+                    successCount.increment()
+            except Exception as e:
+                if logger is not None:
+                    logger.warning(
+                        f"[{workerId}]: {type(e).__name__} for Mandiant indicator {indicator.id if isinstance(indicator, mandiant_threatintel.APIResponse) else ''}: {e}"
+                    )
+
+    else:
+        raise Exception("Could not connect to Mandiant threat intelligence service")
+
+
 def ProcessThreatInputWorker(threatInputWorkerArgs):
     inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, successCount, logger = (
         threatInputWorkerArgs[0],
@@ -624,7 +1126,7 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
     )
 
     with workerThreadCount as workerId:
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(f"[{workerId}]: started")
 
         # the queue was fully populated before we started, so we can run until there are no more elements
@@ -635,7 +1137,11 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                 sleep(1)
             else:
                 try:
-                    with open(inarg) if ((inarg is not None) and os.path.isfile(inarg)) else nullcontext() as infile:
+                    with (
+                        open(inarg)
+                        if (isinstance(inarg, (str, bytes, os.PathLike, int)) and os.path.isfile(inarg))
+                        else nullcontext()
+                    ) as infile:
                         if infile:
                             ##################################################################################
                             # JSON FILE (STIX or MISP)
@@ -664,269 +1170,77 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             else:
                                 raise Exception(f"Could not parse JSON in '{inarg}'")
 
-                        elif inarg.lower().startswith('misp'):
+                        elif isinstance(inarg, dict):
+                            ##################################################################################
+                            # Connection parameters specified in dict (e.g., Mandiant Threat Intel) from a YAML file
+                            if ('type' in inarg) and (threatFeedType := str(inarg['type'])):
+                                if threatFeedType.lower() == 'misp':
+                                    UpdateFromMISP(
+                                        inarg,
+                                        since,
+                                        defaultNow,
+                                        sslVerify,
+                                        zeekPrinter,
+                                        logger,
+                                        successCount,
+                                        workerId,
+                                    )
+                                elif threatFeedType.lower() == 'taxii':
+                                    UpdateFromTAXII(
+                                        inarg,
+                                        since,
+                                        defaultNow,
+                                        sslVerify,
+                                        zeekPrinter,
+                                        logger,
+                                        successCount,
+                                        workerId,
+                                    )
+                                elif threatFeedType.lower() == 'mandiant':
+                                    UpdateFromMandiant(
+                                        inarg,
+                                        since,
+                                        defaultNow,
+                                        sslVerify,
+                                        zeekPrinter,
+                                        logger,
+                                        successCount,
+                                        workerId,
+                                    )
+                                else:
+                                    raise Exception(f"Could not handle identify threat feed type '{threatFeedType}'")
+                            else:
+                                raise Exception(f"Could not identify threat feed type in '{inarg}'")
+
+                        elif isinstance(inarg, str) and inarg.lower().startswith('misp'):
                             ##################################################################################
                             # MISP URL
+                            # this is a MISP URL, connect and retrieve MISP indicators from it
 
-                            # this is a MISP URL, connect and retrieve STIX indicators from it
+                            mispConnInfoDict = defaultdict(lambda: None)
+                            mispConnInfoDict['type'] = 'misp'
                             # misp|misp_url|auth_key
-
-                            mispConnInfo = [base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]]
-                            mispUrl, mispAuthKey = (
-                                None,
-                                None,
+                            mispConnInfoParts = [base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]]
+                            mispConnInfoDict['url'] = mispConnInfoParts[0]
+                            if len(mispConnInfoParts) >= 2:
+                                mispConnInfoDict['auth_key'] = mispConnInfoParts[1]
+                            UpdateFromMISP(
+                                mispConnInfoDict,
+                                since,
+                                defaultNow,
+                                sslVerify,
+                                zeekPrinter,
+                                logger,
+                                successCount,
+                                workerId,
                             )
-                            mispUrl = mispConnInfo[0]
-                            if len(mispConnInfo) >= 2:
-                                mispAuthKey = mispConnInfo[1]
 
-                            with requests.Session() as mispSession:
-                                mispSession.headers.update(
-                                    {'Accept': 'application/json;q=1.0,text/plain;q=0.9,text/html;q=0.9'}
-                                )
-                                if mispAuthKey is not None:
-                                    mispSession.headers.update({'Authorization': mispAuthKey})
-
-                                # download the URL and parse as JSON to figure out what it is. it could be:
-                                # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
-                                # - a directory listing *containing* a manifest.json (https://www.circl.lu/doc/misp/feed-osint/)
-                                # - a directory listing of misc. JSON files without a manifest.json
-                                # - an array of Attributes returned for a request via the MISP Automation API to an /attributes endpoint
-                                # - an array of Events returned for a request via the MISP Automation API to an /events endpoint
-                                mispResponse = mispSession.get(
-                                    mispUrl,
-                                    allow_redirects=True,
-                                    verify=sslVerify,
-                                )
-                                mispResponse.raise_for_status()
-                                if mispJson := LoadStrIfJson(mispResponse.content):
-                                    # the contents are JSON. determine if this is:
-                                    #   - a single Event
-                                    #   - an array of Events
-                                    #   - an array of Attributes
-                                    #   - a manifest
-
-                                    if (
-                                        isinstance(mispJson, dict)
-                                        and (len(mispJson.keys()) == 1)
-                                        and ('Event' in mispJson)
-                                    ):
-                                        # this is a single MISP Event, process it
-                                        if zeekPrinter.ProcessMISP(
-                                            mispJson,
-                                            url=mispUrl,
-                                        ):
-                                            successCount.increment()
-
-                                    elif isinstance(mispJson, list) and (len(mispJson) > 0):
-                                        # are these Attributes or Events?
-                                        if (
-                                            isinstance(mispJson[0], dict)
-                                            and ('id' in mispJson[0])
-                                            and ('type' in mispJson[0])
-                                        ):
-                                            controllerType = 'attributes'
-                                            resultKey = 'Attribute'
-                                            pageSize = MISP_PAGE_SIZE_ATTRIBUTES
-                                        elif isinstance(mispJson[0], dict) and ('info' in mispJson[0]):
-                                            controllerType = 'events'
-                                            resultKey = 'Event'
-                                            pageSize = MISP_PAGE_SIZE_EVENTS
-                                        else:
-                                            controllerType = None
-                                            resultKey = None
-                                            pageSize = None
-
-                                        if controllerType:
-                                            # this is an array of either Attributes or Events.
-                                            #   rather than handling it via additional calls with request,
-                                            #   let's use the MISP API to do the searching/pulling
-                                            #   (yeah, we're duplicating the effort of pulling the
-                                            #   first page, but meh, who cares?)
-                                            if mispObject := PyMISP(
-                                                mispUrl,
-                                                mispAuthKey,
-                                                sslVerify,
-                                                debug=logger and (LOGGING_DEBUG >= logger.root.level),
-                                            ):
-                                                # search, looping over the pages pageSize at a time
-                                                mispPage = 0
-                                                while True:
-                                                    mispPage += 1
-                                                    resultCount = 0
-                                                    mispResults = mispObject.search(
-                                                        controller=controllerType,
-                                                        return_format='json',
-                                                        limit=pageSize,
-                                                        page=mispPage,
-                                                        type_attribute=list(MISP_ZEEK_INTEL_TYPE_MAP.keys()),
-                                                        timestamp=since,
-                                                    )
-                                                    if (
-                                                        mispResults
-                                                        and isinstance(mispResults, dict)
-                                                        and (resultKey in mispResults)
-                                                    ):
-                                                        # Attributes results
-                                                        resultCount = len(mispResults[resultKey])
-                                                        for item in mispResults[resultKey]:
-                                                            try:
-                                                                if zeekPrinter.ProcessMISP(
-                                                                    item,
-                                                                    url=mispUrl,
-                                                                ):
-                                                                    successCount.increment()
-                                                            except Exception as e:
-                                                                if logger is not None:
-                                                                    logger.warning(
-                                                                        f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
-                                                                    )
-
-                                                    elif mispResults and isinstance(mispResults, list):
-                                                        # Events results
-                                                        resultCount = len(mispResults)
-                                                        for item in mispResults:
-                                                            if item and isinstance(item, dict) and (resultKey in item):
-                                                                try:
-                                                                    if zeekPrinter.ProcessMISP(
-                                                                        item[resultKey],
-                                                                        url=mispUrl,
-                                                                    ):
-                                                                        successCount.increment()
-                                                                except Exception as e:
-                                                                    if logger is not None:
-                                                                        logger.warning(
-                                                                            f"[{workerId}]: {type(e).__name__} for MISP {resultKey}: {e}"
-                                                                        )
-
-                                                    else:
-                                                        # error or unrecognized results, set this to short circuit
-                                                        resultCount = 0
-
-                                                    if logger is not None:
-                                                        logger.debug(
-                                                            f"[{workerId}]: MISP search page {mispPage} returned {resultCount}"
-                                                        )
-                                                    if not mispResults or (resultCount < pageSize):
-                                                        break
-
-                                        else:
-                                            # not an Event or an Attribute? what the heck are we even doing?
-                                            raise Exception(f"Unknown MISP object '{json.dumps(mispJson)}'")
-
-                                    elif isinstance(mispJson, dict):
-                                        # this is a manifest, loop over, retrieve and process the MISP events it references
-                                        for uri in mispJson:
-                                            try:
-                                                newUrl = urljoin(mispUrl, f'{uri}.json')
-                                                eventTime = (
-                                                    datetime.utcfromtimestamp(
-                                                        int(mispJson[uri]['timestamp'])
-                                                    ).astimezone(UTCTimeZone)
-                                                    if 'timestamp' in mispJson[uri]
-                                                    else defaultNow
-                                                )
-                                                if (since is None) or (eventTime >= since):
-                                                    mispObjectReponse = mispSession.get(
-                                                        newUrl,
-                                                        allow_redirects=True,
-                                                        verify=sslVerify,
-                                                    )
-                                                    mispObjectReponse.raise_for_status()
-                                                    if zeekPrinter.ProcessMISP(
-                                                        mispObjectReponse.json(),
-                                                        url=newUrl,
-                                                    ):
-                                                        successCount.increment()
-                                            except Exception as e:
-                                                if logger is not None:
-                                                    logger.warning(
-                                                        f"[{workerId}]: {type(e).__name__} for MISP object at '{newUrl}': {e}"
-                                                    )
-
-                                    else:
-                                        raise Exception(f"Unknown MISP format '{type(mispJson)}'")
-
-                                else:
-                                    # the contents are NOT JSON, it's probably an HTML-formatted directory listing
-
-                                    # retrieve the links listed (non-recursive, all .json files in this directory)
-                                    paths = get_url_paths_from_response(
-                                        mispResponse.text, parent_url=mispUrl, ext='.json'
-                                    )
-
-                                    # see if manifest.json exists in this directory
-                                    manifestPaths = [x for x in paths if x.endswith('/manifest.json')]
-                                    if len(manifestPaths) > 0:
-                                        # the manifest.json exists!
-                                        # retrieve it, then loop over it and retrieve and process the MISP events it references
-                                        for url in manifestPaths:
-                                            try:
-                                                mispManifestResponse = mispSession.get(
-                                                    url,
-                                                    allow_redirects=True,
-                                                    verify=sslVerify,
-                                                )
-                                                mispManifestResponse.raise_for_status()
-                                                mispManifest = mispManifestResponse.json()
-                                                for uri in mispManifest:
-                                                    try:
-                                                        eventTime = (
-                                                            datetime.utcfromtimestamp(
-                                                                int(mispManifest[uri]['timestamp'])
-                                                            ).astimezone(UTCTimeZone)
-                                                            if 'timestamp' in mispManifest[uri]
-                                                            else defaultNow
-                                                        )
-                                                        if (since is None) or (eventTime >= since):
-                                                            newUrl = f'{mispUrl.strip("/")}/{uri}.json'
-                                                            mispObjectReponse = mispSession.get(
-                                                                newUrl,
-                                                                allow_redirects=True,
-                                                                verify=sslVerify,
-                                                            )
-                                                            mispObjectReponse.raise_for_status()
-                                                            if zeekPrinter.ProcessMISP(
-                                                                mispObjectReponse.json(),
-                                                                url=newUrl,
-                                                            ):
-                                                                successCount.increment()
-                                                    except Exception as e:
-                                                        if logger is not None:
-                                                            logger.warning(
-                                                                f"[{workerId}]: {type(e).__name__} for MISP object at '{mispUrl}/{uri}.json': {e}"
-                                                            )
-                                            except Exception as e:
-                                                if logger is not None:
-                                                    logger.warning(
-                                                        f"[{workerId}]: {type(e).__name__} for manifest at '{url}': {e}"
-                                                    )
-
-                                    else:
-                                        # the manifest.json does not exist!
-                                        # just loop over, retrieve and process the .json files in this directory
-                                        for url in paths:
-                                            try:
-                                                mispObjectReponse = mispSession.get(
-                                                    url,
-                                                    allow_redirects=True,
-                                                    verify=sslVerify,
-                                                )
-                                                mispObjectReponse.raise_for_status()
-                                                if zeekPrinter.ProcessMISP(
-                                                    mispObjectReponse.json(),
-                                                    url=url,
-                                                ):
-                                                    successCount.increment()
-                                            except Exception as e:
-                                                if logger is not None:
-                                                    logger.warning(
-                                                        f"[{workerId}]: {type(e).__name__} for MISP object at '{url}': {e}"
-                                                    )
-
-                        elif inarg.lower().startswith('taxii'):
+                        elif isinstance(inarg, str) and inarg.lower().startswith('taxii'):
                             ##################################################################################
                             # TAXI (STIX) URL
+
+                            taxiiConnInfoDict = defaultdict(lambda: None)
+                            taxiiConnInfoDict['type'] = 'taxii'
 
                             # this is a TAXII URL, connect and retrieve STIX indicators from it
                             # taxii|2.0|discovery_url|collection_name|username|password
@@ -936,87 +1250,32 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                             # - "taxii|2.0|https://limo.anomali.com/api/v1/taxii2/taxii/|CyberCrime|guest|guest"
                             #
                             # collection_name can be specified as * to retrieve all collections (careful!)
-
                             taxiiConnInfo = [base64_decode_if_prefixed(x) for x in inarg.split('|')[1::]]
-                            taxiiVersion, taxiiDisoveryURL, taxiiCollectionName, taxiiUsername, taxiiPassword = (
-                                None,
-                                None,
-                                None,
-                                None,
-                                None,
-                            )
                             if len(taxiiConnInfo) >= 3:
-                                taxiiVersion, taxiiDisoveryURL, taxiiCollectionName = taxiiConnInfo[0:3]
+                                (
+                                    taxiiConnInfoDict['version'],
+                                    taxiiConnInfoDict['url'],
+                                    taxiiConnInfoDict['collection'],
+                                ) = taxiiConnInfo[0:3]
                             if len(taxiiConnInfo) >= 4:
-                                taxiiUsername = taxiiConnInfo[3]
+                                taxiiConnInfoDict['username'] = taxiiConnInfo[3]
                             if len(taxiiConnInfo) >= 5:
-                                taxiiPassword = taxiiConnInfo[4]
+                                taxiiConnInfoDict['password'] = taxiiConnInfo[4]
 
-                            # connect to the server with the appropriate API for the TAXII version
-                            if taxiiVersion == '2.0':
-                                server = TaxiiServer_v20(
-                                    taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword, verify=sslVerify
-                                )
-                            elif taxiiVersion == '2.1':
-                                server = TaxiiServer_v21(
-                                    taxiiDisoveryURL, user=taxiiUsername, password=taxiiPassword, verify=sslVerify
-                                )
-                            else:
-                                raise Exception(f"Unsupported TAXII version '{taxiiVersion}'")
-
-                            # collect the collection URL(s) for the given collection name
-                            collectionUrls = {}
-                            for api_root in server.api_roots:
-                                for collection in api_root.collections:
-                                    if (taxiiCollectionName == '*') or (
-                                        collection.title.lower() == taxiiCollectionName.lower()
-                                    ):
-                                        collectionUrls[collection.title] = {
-                                            'id': collection.id,
-                                            'url': collection.url,
-                                        }
-
-                            # connect to and retrieve indicator STIX objects from the collection URL(s)
-                            for title, info in collectionUrls.items():
-                                collection = (
-                                    TaxiiCollection_v21(
-                                        info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify
-                                    )
-                                    if taxiiVersion == '2.1'
-                                    else TaxiiCollection_v20(
-                                        info['url'], user=taxiiUsername, password=taxiiPassword, verify=sslVerify
-                                    )
-                                )
-                                try:
-                                    # loop over paginated results
-                                    for envelope in (
-                                        TaxiiAsPages_v21(
-                                            collection.get_objects,
-                                            per_request=TAXII_PAGE_SIZE,
-                                            **TAXII_INDICATOR_FILTER,
-                                        )
-                                        if taxiiVersion == '2.1'
-                                        else TaxiiAsPages_v20(
-                                            collection.get_objects,
-                                            per_request=TAXII_PAGE_SIZE,
-                                            **TAXII_INDICATOR_FILTER,
-                                        )
-                                    ):
-                                        if zeekPrinter.ProcessSTIX(
-                                            envelope,
-                                            source=[':'.join([x for x in [server.title, title] if x is not None])],
-                                        ):
-                                            successCount.increment()
-
-                                except Exception as e:
-                                    if logger is not None:
-                                        logger.warning(
-                                            f"[{workerId}]: {type(e).__name__} for object of collection '{title}': {e}"
-                                        )
+                            UpdateFromTAXII(
+                                taxiiConnInfoDict,
+                                since,
+                                defaultNow,
+                                sslVerify,
+                                zeekPrinter,
+                                logger,
+                                successCount,
+                                workerId,
+                            )
 
                 except Exception as e:
                     if logger is not None:
                         logger.warning(f"[{workerId}]: {type(e).__name__} for '{inarg}': {e}")
 
-        if logger is not None:
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(f"[{workerId}]: finished")

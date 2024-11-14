@@ -5,10 +5,10 @@ IMAGE_PUBLISHER=cisagov
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=bookworm
 
-BEATS_VER="8.15.3"
+BEATS_VER="8.16.0"
 BEATS_OSS="-oss"
 
-ARKIME_VER="5.4.0"
+ARKIME_VER="5.5.0"
 
 BUILD_ERROR_CODE=1
 
@@ -135,7 +135,7 @@ if [ -d "$WORKDIR" ]; then
   echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                              >> ./config/includes.chroot/opt/sensor/.os-info
   echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\""  >> ./config/includes.chroot/opt/sensor/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                                  >> ./config/includes.chroot/opt/sensor/.os-info
-  echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\""                >> ./config/includes.chroot/opt/sensor/.os-info
+  echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""                           >> ./config/includes.chroot/opt/sensor/.os-info
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \

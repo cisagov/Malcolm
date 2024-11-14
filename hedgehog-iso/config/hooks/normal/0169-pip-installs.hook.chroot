@@ -13,6 +13,7 @@ pip3 install --break-system-packages --no-compile --no-cache-dir --force-reinsta
   dateparser \
   debinterface \
   dominate \
+  git+https://github.com/google/mandiant-ti-client \
   humanfriendly \
   pymisp \
   python-dotenv \
@@ -20,4 +21,4 @@ pip3 install --break-system-packages --no-compile --no-cache-dir --force-reinsta
   stix2 \
   stream-zip \
   taxii2-client \
-  watchdog==5.0.3
+  watchdog==6.0.0

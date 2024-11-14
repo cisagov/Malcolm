@@ -32,9 +32,9 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.4.0"
+ARKIME_VERSION="5.5.0"
 
-BEATS_VER="8.15.3"
+BEATS_VER="8.16.0"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -376,7 +376,7 @@ install_files() {
     echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\"" >> "$sensor_ver_file"
     echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm/docs/hedgehog.html\"" >> "$sensor_ver_file"
     echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\"" >> "$sensor_ver_file"
-    echo "BUG_REPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}/malcolm/issues\"" >> "$sensor_ver_file"
+    echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\"" >> "$sensor_ver_file"
 
     # grab maxmind geoip database files, iana ipv4 address ranges, wireshark oui lists, etc.
     mkdir -p /opt/arkime/etc

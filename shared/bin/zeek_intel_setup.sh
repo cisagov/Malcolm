@@ -47,7 +47,7 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
         done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
 
         rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
-        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX || true
+        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant || true
     fi
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
@@ -75,34 +75,40 @@ EOF
                 # this directory contains STIX JSON files we'll need to convert to zeek intel files then load
                 while IFS= read -r line; do
                     THREAT_JSON_FILES+=( "$line" )
-                done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
+                done < <( find "${INTEL_DIR}/${DIR}" \( -type f -a ! -name ".*" -a ! -name "taxii.yaml" \) 2>/dev/null )
 
             elif [[ "${DIR}" == "./MISP" ]]; then
                 # this directory contains MISP JSON files we'll need to convert to zeek intel files then load
                 while IFS= read -r line; do
                     THREAT_JSON_FILES+=( "$line" )
-                done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" ! -name "manifest.json" ! -name "hashes.csv" 2>/dev/null )
+                done < <( find "${INTEL_DIR}/${DIR}" \( -type f -a ! -name ".*" -a ! -name "misp.yaml" -a ! -name "manifest.json" -a ! -name "hashes.csv" \) 2>/dev/null )
 
             elif [[ -f "${DIR}"/__load__.zeek ]]; then
                 # this intel feed has its own load directive and should take care of itself
                 echo "@load ${DIR}" >> ./__load__.zeek."${INSTANCE_UID}"
+
             else
-                # this directory contains "loose" intel files we'll need to load explicitly
+                # this custom directory contains "loose" intel files we'll need to load explicitly
                 while IFS= read -r line; do
                     LOOSE_INTEL_FILES+=( "$line" )
-                done < <( find "${INTEL_DIR}/${DIR}" -type f ! -name ".*" 2>/dev/null )
+                done < <( find "${INTEL_DIR}/${DIR}" \( -type f -a ! -name ".*" -a ! -name "*.yaml" \) 2>/dev/null )
             fi
         done
 
-        # process STIX and MISP inputs by converting them to Zeek intel format
-        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./MISP/.misp_input.txt ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        # process STIX/MISP/Mandiant inputs by converting them to Zeek intel format
+        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/taxii.yaml ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./MISP/misp.yaml ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
                 --threads ${ZEEK_INTEL_REFRESH_THREADS} \
                 --output ./.threat_autogen.zeek."${INSTANCE_UID}" \
                 --input "${THREAT_JSON_FILES[@]}" \
-                --input-file ./STIX/.stix_input.txt ./MISP/.misp_input.txt
+                --input-file \
+                    ./STIX/.stix_input.txt \
+                    ./STIX/taxii.yaml \
+                    ./MISP/.misp_input.txt \
+                    ./MISP/misp.yaml \
+                    ./Mandiant/mandiant.yaml
             if [[ $? -eq 0 ]]; then
                 rm -f ./.threat_autogen.zeek.old
                 mv --backup=simple --suffix=.old ./.threat_autogen.zeek."${INSTANCE_UID}" ./.threat_autogen.zeek

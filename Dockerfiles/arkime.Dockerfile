@@ -33,7 +33,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_VERSION "5.4.0"
+ENV ARKIME_VERSION "5.5.0"
 ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -149,7 +149,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     mkdir -p "${ARKIME_DIR}"/plugins && \
       curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
       chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog==5.0.3 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog==6.0.0 && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \

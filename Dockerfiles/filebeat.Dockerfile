@@ -1,4 +1,4 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.15.3
+FROM docker.elastic.co/beats/filebeat-oss:8.16.0
 
 # Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -74,7 +74,7 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 ENV YQ_VERSION "4.44.3"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV EVTX_VERSION "0.8.3"
+ENV EVTX_VERSION "0.8.4"
 ENV EVTX_URL "https://github.com/omerbenamram/evtx/releases/download/v${EVTX_VERSION}/evtx_dump-v${EVTX_VERSION}-XXX-unknown-linux-gnu"
 
 USER root
@@ -100,15 +100,14 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         psmisc \
         python3-pip \
         python3-setuptools \
-        python3.9 \
+        python3 \
         rsync \
         tar \
         tini \
         unar \
         unzip \
         xz-utils && \
-    ln -s -f -r /usr/bin/python3.9 /usr/bin/python3 && \
-    python3.9 -m pip install --no-compile --no-cache-dir patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==5.0.3 && \
+    python3 -m pip install --no-compile --no-cache-dir --break-system-packages patool entrypoint2 pyunpack python-magic ordered-set supervisor watchdog==6.0.0 && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \

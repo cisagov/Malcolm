@@ -87,6 +87,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       libmaxminddb0 \
       libpcap-dev \
       libpcap0.8 \
+      librdkafka-dev \
       libssl-dev \
       libssl3 \
       libtcmalloc-minimal4 \
@@ -107,6 +108,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-setuptools \
       python3-tz \
       python3-wheel \
+      python3-yaml \
       python3-zmq \
       rsync \
       supervisor \
@@ -115,7 +117,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       vim-tiny \
       xxd \
       zlib1g-dev && \
-    python3 -m pip install --break-system-packages --no-cache-dir pymisp stix2 taxii2-client dateparser && \
+    python3 -m pip install --break-system-packages --no-cache-dir \
+      dateparser \
+      git+https://github.com/google/mandiant-ti-client \
+      pymisp \
+      stix2 \
+      taxii2-client && \
     mkdir -p /tmp/zeek-packages && \
       bash /usr/local/bin/zeek-deb-download.sh -o /tmp/zeek-packages -z "${ZEEK_VERSION}" && \
       dpkg -i /tmp/zeek-packages/*.deb && \
@@ -133,6 +140,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/Mandiant && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
       touch "${ZEEK_DIR}"/share/zeek/site/custom/__load__.zeek && \
@@ -174,7 +182,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka)"
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-38647/omigod|CVE-2021-31166/detect|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-22954/main|cve-2022-26809/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja4/main|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-sniffpass/__load__|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
@@ -183,7 +191,7 @@ RUN mkdir -p /tmp/logs && \
     export ZEEK_THIRD_PARTY_SCRIPTS_COUNT=$(echo "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" | grep -P -o "\([^)]+\)" | head -n 1 | sed "s/^(//" | sed "s/)$//" | tr '|' '\n' | wc -l) && \
     "$ZEEK_DIR"/bin/zeek-offline -NN local >zeeknn.log 2>/dev/null && \
       bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo $ZEEK_THIRD_PARTY_PLUGINS_COUNT' Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
-    "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts 2>/dev/null && \
+    "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts >loaded_scripts.log 2>/dev/null && \
       bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo $ZEEK_THIRD_PARTY_SCRIPTS_COUNT' Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
     cd /tmp && \
     rm -rf /tmp/logs /tmp/pcaps
@@ -195,8 +203,9 @@ ARG ZEEK_PCAP_PROCESSOR=true
 #Whether or not to run "zeek -r XXXXX.pcap local" on each pcap file
 ARG ZEEK_AUTO_ANALYZE_PCAP_FILES=false
 ARG ZEEK_AUTO_ANALYZE_PCAP_THREADS=1
-#Whether or not to refresh intel at various points during processing
-ARG ZEEK_INTEL_REFRESH_ON_ENTRYPOINT=false
+#Whether or not to do first intel refresh under supervisord
+ARG ZEEK_INTEL_REFRESH_ON_STARTUP=false
+#Whether or not to do first intel refresh under zeekdeploy.sh
 ARG ZEEK_INTEL_REFRESH_ON_DEPLOY=false
 ARG ZEEK_INTEL_REFRESH_CRON_EXPRESSION=
 ARG ZEEK_INTEL_ITEM_EXPIRATION=-1min
@@ -219,7 +228,7 @@ ARG PCAP_NODE_NAME=malcolm
 
 ENV AUTO_TAG $AUTO_TAG
 ENV ZEEK_PCAP_PROCESSOR $ZEEK_PCAP_PROCESSOR
-ENV ZEEK_INTEL_REFRESH_ON_ENTRYPOINT $ZEEK_INTEL_REFRESH_ON_ENTRYPOINT
+ENV ZEEK_INTEL_REFRESH_ON_STARTUP $ZEEK_INTEL_REFRESH_ON_STARTUP
 ENV ZEEK_INTEL_REFRESH_ON_DEPLOY $ZEEK_INTEL_REFRESH_ON_DEPLOY
 ENV ZEEK_INTEL_REFRESH_CRON_EXPRESSION $ZEEK_INTEL_REFRESH_CRON_EXPRESSION
 ENV ZEEK_AUTO_ANALYZE_PCAP_FILES $ZEEK_AUTO_ANALYZE_PCAP_FILES
@@ -249,8 +258,6 @@ ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
 ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
 ARG ZEEK_DISABLE_DETECT_ROUTERS=true
 ARG ZEEK_DISABLE_BEST_GUESS_ICS=true
-# TODO: assess spicy-analyzer that replace built-in Zeek parsers
-# for now, disable them by default when a Zeek parser exists
 ARG ZEEK_DISABLE_SPICY_IPSEC=
 ARG ZEEK_DISABLE_SPICY_LDAP=
 ARG ZEEK_DISABLE_SPICY_OPENVPN=
@@ -260,6 +267,9 @@ ARG ZEEK_DISABLE_SPICY_TAILSCALE=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 ARG ZEEK_SYNCHROPHASOR_DETAILED=
+ARG ZEEK_KAFKA_ENABLED=
+ARG ZEEK_KAFKA_BROKERS=kafka.local:9091
+ARG ZEEK_KAFKA_TOPIC=zeek
 
 ENV ZEEK_DISABLE_STATS $ZEEK_DISABLE_STATS
 ENV ZEEK_DISABLE_HASH_ALL_FILES $ZEEK_DISABLE_HASH_ALL_FILES
@@ -278,6 +288,9 @@ ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 ENV ZEEK_SYNCHROPHASOR_DETAILED $ZEEK_SYNCHROPHASOR_DETAILED
+ENV ZEEK_KAFKA_ENABLED $ZEEK_KAFKA_ENABLED
+ENV ZEEK_KAFKA_BROKERS $ZEEK_KAFKA_BROKERS
+ENV ZEEK_KAFKA_TOPIC $ZEEK_KAFKA_TOPIC
 
 # This is in part to handle an issue when running with rootless podman and
 #   "userns_mode: keep-id". It seems that anything defined as a VOLUME
