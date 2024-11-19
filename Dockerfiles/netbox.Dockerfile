@@ -33,7 +33,7 @@ ENV NETBOX_INITIALIZERS_VERSION "50d077d"
 ENV NETBOX_TOPOLOGY_VERSION "4.0.1"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
-ENV YQ_VERSION "4.44.3"
+ENV YQ_VERSION "4.44.5"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
