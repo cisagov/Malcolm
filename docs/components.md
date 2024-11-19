@@ -47,6 +47,7 @@ Malcolm leverages the following excellent open source tools, among others.
     * Corelight's [OpenSSL RCE buffer overrun vulnerability (CVE-2022-3602)](https://github.com/corelight/CVE-2022-3602) plugin
     * Corelight's [pingback](https://github.com/corelight/pingback) plugin
     * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
+    * Corelight's [QuasarRAT](https://github.com/corelight/zeek-quasarrat-detector) plugin
     * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
     * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
     * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
