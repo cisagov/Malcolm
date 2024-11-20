@@ -1808,6 +1808,7 @@ class Installer(object):
                     pcapIface = 'lo'
                     tweakIface = False
                     pcapFilter = ''
+                    captureStats = False
                     captureSelection = (
                         'c'
                         if (
@@ -1835,6 +1836,7 @@ class Installer(object):
                         pcapNetSniff = not liveArkime
                         liveSuricata = True
                         liveZeek = True
+                        captureStats = True
                         tweakIface = True
                     elif captureSelection == 'c':
                         if InstallerYesOrNo(
@@ -1889,6 +1891,11 @@ class Installer(object):
                                 default=args.tweakIface,
                                 extraLabel=BACK_LABEL,
                             )
+                        captureStats = (liveZeek or liveSuricata) and InstallerYesOrNo(
+                            'Enable live packet capture statistics?',
+                            default=args.captureStats,
+                            extraLabel=BACK_LABEL,
+                        )
 
                     if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
                         pcapIface = ''
@@ -2313,6 +2320,17 @@ class Installer(object):
                 'SURICATA_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveSuricata),
             ),
+            # live capture statistics for Suricata
+            EnvValue(
+                os.path.join(args.configDir, 'suricata-live.env'),
+                'SURICATA_STATS_ENABLED',
+                TrueOrFalseNoQuote(captureStats),
+            ),
+            EnvValue(
+                os.path.join(args.configDir, 'suricata-live.env'),
+                'SURICATA_STATS_EVE_ENABLED',
+                TrueOrFalseNoQuote(captureStats),
+            ),
             # rotated captured PCAP analysis with Suricata (not live capture)
             EnvValue(
                 os.path.join(args.configDir, 'suricata-offline.env'),
@@ -2420,6 +2438,12 @@ class Installer(object):
                 os.path.join(args.configDir, 'zeek-live.env'),
                 'ZEEK_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveZeek),
+            ),
+            # live capture statistics for Zeek
+            EnvValue(
+                os.path.join(args.configDir, 'zeek-live.env'),
+                'ZEEK_DISABLE_STATS',
+                TrueOrFalseNoQuote(not captureStats),
             ),
             # rotated captured PCAP analysis with Zeek (not live capture)
             EnvValue(
@@ -4503,6 +4527,16 @@ def main():
         const=True,
         default=True,
         help="Disable capture interface hardware offloading and adjust ring buffer sizes",
+    )
+    captureArgGroup.add_argument(
+        '--live-capture-stats',
+        dest='captureStats',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Enable live packet capture statistics for Zeek and/or Suricata",
     )
     captureArgGroup.add_argument(
         '--live-capture-arkime',

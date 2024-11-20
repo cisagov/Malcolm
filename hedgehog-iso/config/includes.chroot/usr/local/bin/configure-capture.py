@@ -147,6 +147,7 @@ class Constants:
     MSG_IDENTIFY_NICS = 'Do you need help identifying network interfaces?'
     MSG_BACKGROUND_TITLE = 'Sensor Configuration'
     MSG_CONFIG_AUTOSTARTS = 'Specify autostart processes'
+    MSG_CONFIG_CAPTURE_STATS = 'Enable live packet capture statistics for Zeek and Suricata?'
     MSG_CONFIG_ICS_ANALYZERS = (
         'Is the sensor being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?'
     )
@@ -488,6 +489,8 @@ def main():
                 available_adapters = get_available_adapters()
                 # previously used capture interfaces
                 preselected_ifaces = set([x.strip() for x in capture_config_dict["CAPTURE_INTERFACE"].split(',')])
+                # generate capture statistics
+                capture_stats = False
 
                 while (len(available_adapters) > 0) and (
                     d.yesno(Constants.MSG_IDENTIFY_NICS, yes_label="No", no_label="Yes") != Dialog.OK
@@ -558,6 +561,8 @@ def main():
                                 )
                             )
                         prev_capture_filter = capture_filter
+
+                    capture_stats = d.yesno(Constants.MSG_CONFIG_CAPTURE_STATS) == Dialog.OK
 
                 # get paths for captured PCAP and Zeek files
                 while True:
@@ -776,6 +781,9 @@ def main():
                 capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"] = zeek_carved_file_http_serve_encrypt_key
                 capture_config_dict["ZEEK_DISABLE_ICS_ALL"] = '' if ics_network else 'true'
                 capture_config_dict["ZEEK_DISABLE_BEST_GUESS_ICS"] = '' if ics_best_guess else 'true'
+                capture_config_dict["ZEEK_DISABLE_STATS"] = '' if capture_stats else 'true'
+                capture_config_dict["SURICATA_STATS_ENABLED"] = 'true' if capture_stats else 'false'
+                capture_config_dict["SURICATA_STATS_EVE_ENABLED"] = 'true' if capture_stats else 'false'
 
                 # get confirmation from user that we really want to do this
                 code = d.yesno(
@@ -799,6 +807,9 @@ def main():
                         {
                             "CAPTURE_FILTER": '"' + capture_config_dict["CAPTURE_FILTER"] + '"',
                             "CAPTURE_INTERFACE": capture_config_dict["CAPTURE_INTERFACE"],
+                            "ZEEK_DISABLE_STATS": capture_config_dict["ZEEK_DISABLE_STATS"],
+                            "SURICATA_STATS_ENABLED": capture_config_dict["SURICATA_STATS_ENABLED"],
+                            "SURICATA_STATS_EVE_ENABLED": capture_config_dict["SURICATA_STATS_EVE_ENABLED"],
                             "EXTRACTED_FILE_HTTP_SERVER_KEY": '"'
                             + capture_config_dict["EXTRACTED_FILE_HTTP_SERVER_KEY"]
                             + '"',
