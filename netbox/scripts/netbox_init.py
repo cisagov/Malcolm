@@ -165,22 +165,6 @@ def main():
         help="Site(s) to create",
     )
     parser.add_argument(
-        '--default-group',
-        dest='defaultGroupName',
-        type=str,
-        default=os.getenv('REMOTE_AUTH_DEFAULT_GROUPS', 'standard'),
-        required=False,
-        help="Name of default group for automatic NetBox user creation",
-    )
-    parser.add_argument(
-        '--staff-group',
-        dest='staffGroupName',
-        type=str,
-        default=os.getenv('REMOTE_AUTH_STAFF_GROUPS', 'administrator'),
-        required=False,
-        help="Name of staff group for automatic NetBox user creation",
-    )
-    parser.add_argument(
         '-m',
         '--manufacturer',
         dest='manufacturers',
@@ -501,8 +485,6 @@ def main():
             threading=True,
         )
         sites = {}
-        groups = {}
-        permissions = {}
         prefixes = {}
         devices = {}
         interfaces = {}
@@ -521,94 +503,6 @@ def main():
                 logging.info(f"{type(e).__name__}: {e}")
                 logging.debug("retrying in a few seconds...")
                 time.sleep(5)
-
-        # GROUPS #####################################################################################################
-        DEFAULT_GROUP_NAMES = (
-            args.staffGroupName,
-            args.defaultGroupName,
-        )
-
-        try:
-            groupsPreExisting = {x.name: x for x in nb.users.groups.all()}
-            logging.debug(f"groups (before): { {k:v.id for k, v in groupsPreExisting.items()} }")
-
-            # create groups that don't already exist
-            for groupName in [x for x in DEFAULT_GROUP_NAMES if x not in groupsPreExisting]:
-                try:
-                    nb.users.groups.create({'name': groupName})
-                except pynetbox.RequestError as nbe:
-                    logging.warning(f"{type(nbe).__name__} processing group \"{groupName}\": {nbe}")
-
-            groups = {x.name: x for x in nb.users.groups.all()}
-            logging.debug(f"groups (after): { {k:v.id for k, v in groups.items()} }")
-        except Exception as e:
-            logging.error(f"{type(e).__name__} processing groups: {e}")
-
-        # PERMISSIONS ##################################################################################################
-        DEFAULT_PERMISSIONS = {
-            f'{args.staffGroupName}_permission': {
-                'name': f'{args.staffGroupName}_permission',
-                'enabled': True,
-                'groups': [args.staffGroupName],
-                'actions': [
-                    'view',
-                    'add',
-                    'change',
-                    'delete',
-                ],
-                'exclude_objects': [],
-            },
-            f'{args.defaultGroupName}_permission': {
-                'name': f'{args.defaultGroupName}_permission',
-                'enabled': True,
-                'groups': [args.defaultGroupName],
-                'actions': [
-                    'view',
-                    'add',
-                    'change',
-                    'delete',
-                ],
-                'exclude_objects': [
-                    'admin.logentry',
-                    'auth.group',
-                    'auth.permission',
-                    'auth.user',
-                    'users.admingroup',
-                    'users.adminuser',
-                    'users.objectpermission',
-                    'users.token',
-                    'users.userconfig',
-                ],
-            },
-        }
-
-        try:
-            # get all content types (for creating new permissions)
-            allObjectTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
-
-            permsPreExisting = {x.name: x for x in nb.users.permissions.all()}
-            logging.debug(f"permissions (before): { {k:v.id for k, v in permsPreExisting.items()} }")
-
-            # create permissions that don't already exist
-            for permName, permConfig in {
-                k: v
-                for (k, v) in DEFAULT_PERMISSIONS.items()
-                if v.get('name', None) and v['name'] not in permsPreExisting
-            }.items():
-                permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
-                permConfig['object_types'] = [
-                    ct for ct in allObjectTypeNames if ct not in permConfig['exclude_objects']
-                ]
-                permConfig.pop('exclude_objects', None)
-                try:
-                    nb.users.permissions.create(permConfig)
-                except pynetbox.RequestError as nbe:
-                    logging.warning(f"{type(nbe).__name__} processing permission \"{permConfig['name']}\": {nbe}")
-
-            permissions = {x.name: x for x in nb.users.permissions.all()}
-            logging.debug(f"permissions (after): { {k:v.id for k, v in permissions.items()} }")
-        except Exception as e:
-            logging.error(f"{type(e).__name__} processing permissions: {e}")
 
         # ###### MANUFACTURERS #########################################################################################
         try:

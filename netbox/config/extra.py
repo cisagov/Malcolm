@@ -29,7 +29,7 @@
 
 
 ## Remote authentication support
-# REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
+REMOTE_AUTH_DEFAULT_PERMISSIONS = {'*': None}
 
 
 ## By default uploaded media is stored on the local filesystem. Using Django-storages is also supported. Provide the
