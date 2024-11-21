@@ -10,6 +10,7 @@ import logging
 import os
 import pynetbox
 import sys
+import time
 
 ###################################################################################################
 args = None
@@ -133,24 +134,28 @@ def main():
         },
     }
 
+    result = {}
     try:
         # get all content types
-        allObjectTypeNames = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
+        result['objects'] = [f'{x.app_label}.{x.model}' for x in nb.extras.object_types.all()]
+        result['permissions'] = {}
 
         # generate the cross-product between the object types and the actions
         for permName, permConfig in {k: v for (k, v) in DEFAULT_PERMISSIONS.items()}.items():
-            permConfig['object_types'] = [ct for ct in allObjectTypeNames if ct not in permConfig['exclude_objects']]
+            permConfig['object_types'] = [ct for ct in result['objects'] if ct not in permConfig['exclude_objects']]
             permissionProduct = {
                 f"{obj.split('.')[0]}.{action}_{obj.split('.')[1]}": None
                 for action, obj in itertools.product(permConfig["actions"], permConfig["object_types"])
             }
             try:
-                print({permName: permissionProduct})
+                result['permissions'][permName] = permissionProduct
             except pynetbox.RequestError as nbe:
                 logging.warning(f"{type(nbe).__name__} processing permission \"{permName}\": {nbe}")
 
     except Exception as e:
         logging.error(f"{type(e).__name__} processing permissions: {e}")
+
+    print(json.dumps(result))
 
 
 ###################################################################################################
