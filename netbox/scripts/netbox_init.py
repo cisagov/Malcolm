@@ -599,21 +599,6 @@ def main():
                     'users.userconfig',
                 ],
             },
-            f'{args.defaultGroupName}_user_view_permission': {
-                'name': f'{args.defaultGroupName}_user_view_permission',
-                'enabled': True,
-                'groups': [args.defaultGroupName],
-                'actions': [
-                    'view',
-                ],
-                'constraints': {
-                    "username": "$user",
-                },
-                'include_objects': [
-                    'users.user',
-                ],
-                'exclude_objects': [],
-            },
             f'{args.defaultGroupName}_user_config_permission': {
                 'name': f'{args.defaultGroupName}_user_config_permission',
                 'enabled': True,
@@ -623,7 +608,7 @@ def main():
                     'change',
                 ],
                 'constraints': {
-                    "username": "$user",
+                    "user": "$user",
                 },
                 'include_objects': [
                     'users.userconfig',
