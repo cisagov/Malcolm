@@ -75,7 +75,7 @@ ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"
 ENV cluster.routing.allocation.node_initial_primaries_recoveries 8
 ENV discovery.type "single-node"
-ENV indices.query.bool.max_clause_count 4096
+ENV indices.query.bool.max_clause_count 8192
 ENV logger.level "WARN"
 ENV MAX_LOCKED_MEMORY "unlimited"
 ENV path.repo "/opt/opensearch/backup"
