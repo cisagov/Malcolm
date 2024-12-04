@@ -2506,6 +2506,50 @@ class Installer(object):
             except Exception as e:
                 eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
 
+        # if any arbitrary extra .env settings were specified, handle those last (e.g., foobar.env:VARIABLE_NAME=value)
+        if args.extraSettings:
+            extraVarRegex = re.compile(r"^([^:]+):([^=]+)=(.*)$")
+            for extraSetting in args.extraSettings:
+                if extraVarParts := extraVarRegex.match(extraSetting):
+                    extraFile, extraVar, extraVal = [str(x).strip() for x in extraVarParts.groups()]
+                    extraFile = os.path.join(args.configDir, os.path.basename(extraFile))
+                    if not extraFile.endswith('.env'):
+                        continue
+
+                    if self.debug:
+                        eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
+
+                    try:
+                        touch(extraFile)
+                    except Exception:
+                        pass
+
+                    try:
+                        oldDotEnvVersion = False
+                        try:
+                            dotenv_imported.set_key(
+                                extraFile,
+                                extraVar,
+                                extraVal,
+                                quote_mode='never',
+                                encoding='utf-8',
+                            )
+                        except TypeError:
+                            oldDotEnvVersion = True
+
+                        if oldDotEnvVersion:
+                            dotenv_imported.set_key(
+                                extraFile,
+                                extraVar,
+                                extraVal,
+                                quote_mode='never',
+                            )
+
+                    except Exception as e:
+                        eprint(
+                            f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
+                        )
+
         # change ownership of .envs file to match puid/pgid
         if (
             ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
@@ -4605,6 +4649,16 @@ def main():
         type=str,
         default=os.getenv('HOSTNAME', os.getenv('COMPUTERNAME', platform.node())).split('.')[0],
         help='The node name to associate with network traffic metadata',
+    )
+
+    extrasArgGroup = parser.add_argument_group('Additional configuration options')
+    extrasArgGroup.add_argument(
+        '--extra',
+        dest='extraSettings',
+        nargs='*',
+        type=str,
+        default=[],
+        help="Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)",
     )
 
     try:
