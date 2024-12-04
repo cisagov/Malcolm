@@ -2513,42 +2513,61 @@ class Installer(object):
                 if extraVarParts := extraVarRegex.match(extraSetting):
                     extraFile, extraVar, extraVal = [str(x).strip() for x in extraVarParts.groups()]
                     extraFile = os.path.join(args.configDir, os.path.basename(extraFile))
+
                     if not extraFile.endswith('.env'):
-                        continue
-
-                    if self.debug:
-                        eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
-
-                    try:
-                        touch(extraFile)
-                    except Exception:
-                        pass
-
-                    try:
-                        oldDotEnvVersion = False
-                        try:
-                            dotenv_imported.set_key(
-                                extraFile,
-                                extraVar,
-                                extraVal,
-                                quote_mode='never',
-                                encoding='utf-8',
-                            )
-                        except TypeError:
-                            oldDotEnvVersion = True
-
-                        if oldDotEnvVersion:
-                            dotenv_imported.set_key(
-                                extraFile,
-                                extraVar,
-                                extraVal,
-                                quote_mode='never',
-                            )
-
-                    except Exception as e:
+                        # only allow extra settings to modify .env files
                         eprint(
-                            f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
+                            f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (not .env file)"
                         )
+
+                    elif any(
+                        [
+                            x
+                            for x in EnvValues
+                            if (os.path.basename(x.envFile) == os.path.basename(extraFile)) and (x.key == extraVar)
+                        ]
+                    ):
+                        # if this is one of the values that's settable through one of the
+                        #   normal command-line arguments, don't allow it: force them
+                        #   to use the appropriate command-line argument instead
+                        eprint(
+                            f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (use dedicated CLI argument)"
+                        )
+
+                    else:
+                        if self.debug:
+                            eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
+
+                        try:
+                            touch(extraFile)
+                        except Exception:
+                            pass
+
+                        try:
+                            oldDotEnvVersion = False
+                            try:
+                                dotenv_imported.set_key(
+                                    extraFile,
+                                    extraVar,
+                                    extraVal,
+                                    quote_mode='never',
+                                    encoding='utf-8',
+                                )
+                            except TypeError:
+                                oldDotEnvVersion = True
+
+                            if oldDotEnvVersion:
+                                dotenv_imported.set_key(
+                                    extraFile,
+                                    extraVar,
+                                    extraVal,
+                                    quote_mode='never',
+                                )
+
+                        except Exception as e:
+                            eprint(
+                                f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
+                            )
 
         # change ownership of .envs file to match puid/pgid
         if (
