@@ -227,7 +227,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   MALCOLM_FILE="$(basename $($REALPATH -e "$MALCOLM_DOCKER_COMPOSE"))"
 
   # if possible, time shift a temporary copy of the PCAP file(s)
-  # see https://github.com/mmguero-dev/Malcolm-PCAP/blob/main/tools/pcap_time_shift.py
+  # see https://raw.githubusercontent.com/idaholab/Malcolm-Test-Artifacts/refs/heads/main/tools/pcap_time_shift.py
   pushd "$WORKDIR" >/dev/null 2>&1
 
   PCAP_FILES_ADJUSTED=()
