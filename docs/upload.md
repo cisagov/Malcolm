@@ -21,6 +21,8 @@ The types of files supported are:
 
 Files uploaded via these methods are monitored and moved automatically to other directories for processing, generally within 1 minute of completion of the upload.
 
+The upload UI features a readiness indicator at the bottom of the form. Hovering over this text reveals more details about the individual Malcolm components' [readiness](api-ready.md). When the minimal set of components required for ingestion are running, this indicator will read **✅ Ready to ingest data.** This indicator does not auto-refresh: users will need to manually refresh the page to update its status. It's recommended to wait until Malcolm is ready before uploading artifacts for processing.
+
 ## <a name="Tagging"></a>Tagging
 
 In addition to being processed for uploading, Malcolm events will be tagged according to the components of the filenames of the PCAP files or Zeek log archives files from which the events were parsed. For example, records created from a PCAP file named `ACME_Scada_VLAN10.pcap` would be tagged with `ACME`, `Scada`, and `VLAN10`. Tags are extracted from filenames by splitting on the characters `,` (comma), `-` (dash), and `_` (underscore). These tags are viewable and searchable (via the `tags` field) in Arkime and OpenSearch Dashboards. This behavior can be changed by modifying the `AUTO_TAG` [environment variable in `upload-common.env`](malcolm-config.md#MalcolmConfigEnvVars).
