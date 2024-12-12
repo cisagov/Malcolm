@@ -63,6 +63,49 @@
             font-size: 14px;
             padding: 12px;
         }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        #malcolm-readiness-container {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        }
+        /* Tooltip styling */
+        #malcolm-details {
+            display: none;
+            text-align: left;
+            position: absolute;
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            white-space: normal;
+        }
+        /* Show tooltip on hover */
+        #malcolm-readiness-container:hover #malcolm-details {
+            display: block;
+        }
+        /* Grid layout for aligning key-value pairs */
+        #malcolm-details ul {
+            display: grid;
+            grid-template-columns: auto auto; /* Two columns */
+            gap: 5px 10px; /* Spacing between rows and columns */
+            margin: 0;
+            padding: 0;
+            list-style: none; /* Remove default list styling */
+        }
+        #malcolm-details ul li {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -230,8 +273,40 @@
                     siteDropdown.style.display = 'none';
                 });
 
+
+            const summaryLabel = document.getElementById('malcolm-summary');
+            const detailsContainer = document.getElementById('malcolm-details');
+
+            function populateMalcolmReadiness(data) {
+                const isEssentialReady = data.arkime && data.logstash_lumberjack && data.logstash_pipelines && data.opensearch && data.pcap_monitor;
+
+                summaryLabel.textContent = isEssentialReady ? '✅ Ready to ingest data' : '❌ Not ready to ingest data';
+
+                const detailedList = Object.entries(data)
+                    .map(([key, value]) => `<li>${key}</li><li>${value ? '✅' : '❌'}</li>`)
+                    .join('');
+                detailsContainer.innerHTML = `<ul>${detailedList}</ul>`;
+            }
+
+            // Fetch readiness from the Malcolm API
+            fetch('/mapi/ready')
+                .then(response => response.json())
+                .then(data => {
+                    populateMalcolmReadiness(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching Malcolm readiness:', error);
+                    summaryLabel.textContent = '';
+                    detailsContainer.innerHTML = '<p></p>';
+                });
+
         })
     </script>
-
+<footer>
+    <div id="malcolm-readiness-container">
+        <span id="malcolm-summary"></span>
+        <div id="malcolm-details"></div>
+    </div>
+</footer>
 </body>
 </html>
