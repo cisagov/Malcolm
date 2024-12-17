@@ -428,6 +428,8 @@ Lookup extracted file hashes with VirusTotal? (y / N): n
 
 Download updated file scanner signatures periodically? (y / N): y
 
+Configure pulling from threat intelligence feeds for Zeek intelligence framework? (y / N): n
+
 Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): y
 
 Should Malcolm enrich network traffic using NetBox? (Y / n): y
