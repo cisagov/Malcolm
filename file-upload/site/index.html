@@ -63,6 +63,49 @@
             font-size: 14px;
             padding: 12px;
         }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        #malcolm-readiness-container {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        }
+        /* Tooltip styling */
+        #malcolm-details {
+            display: none;
+            text-align: left;
+            position: absolute;
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 14px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            white-space: normal;
+        }
+        /* Show tooltip on hover */
+        #malcolm-readiness-container:hover #malcolm-details {
+            display: block;
+        }
+        /* Grid layout for aligning key-value pairs */
+        #malcolm-details ul {
+            display: grid;
+            grid-template-columns: auto auto; /* Two columns */
+            gap: 5px 10px; /* Spacing between rows and columns */
+            margin: 0;
+            padding: 0;
+            list-style: none; /* Remove default list styling */
+        }
+        #malcolm-details ul li {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
 <body>
@@ -170,19 +213,25 @@
             }
             setInterval(checkSubmitEnabler, 5000);
 
-            const siteDropdown = document.getElementById('site-dropdown');
+            const netBoxSiteDropdown = document.getElementById('site-dropdown');
 
             // Function to populate the NetBox site dropdown
-            function populateSiteDropdown(data) {
+            function populatenetBoxSiteDropdown(data) {
                 // Clear any existing options
-                siteDropdown.innerHTML = '';
+                netBoxSiteDropdown.innerHTML = '';
 
                 // Create and append options from the API result data
                 if (data.results && data.results.length > 0) {
-                    let lowestId = data.results[0].id;
-                    let lowestIdIndex = 0;
+
+                    // Create and append "skip enrichment" item (netbox site id 0 == "skip")
+                    const option = document.createElement('option');
+                    option.value = 0;
+                    option.textContent = "No NetBox Enrichment";
+                    netBoxSiteDropdown.appendChild(option);
 
                     // Find the index of the item with the lowest id
+                    let lowestId = data.results[0].id;
+                    let lowestIdIndex = 0;
                     data.results.forEach((item, index) => {
                         if (item.id < lowestId) {
                             lowestId = item.id;
@@ -199,32 +248,76 @@
                         if (index === lowestIdIndex) {
                             option.selected = true;
                         }
-                        siteDropdown.appendChild(option);
+                        netBoxSiteDropdown.appendChild(option);
                     });
 
+
                     // Make the dropdown visible
-                    siteDropdown.style.display = 'block';
+                    netBoxSiteDropdown.style.display = 'block';
 
                 } else {
                     // Hide the dropdown if no results
-                    siteDropdown.style.display = 'none';
+                    netBoxSiteDropdown.style.display = 'none';
                 }
             }
 
-            // Fetch data from the NetBox dcim/sites REST API
-            fetch('/netbox/api/dcim/sites/?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    populateSiteDropdown(data);
-                })
-                .catch(error => {
-                    console.error('Error fetching NetBox sites:', error);
-                    // Hide the dropdown on error
-                    siteDropdown.style.display = 'none';
-                });
+            function fetchNetBoxSites() {
+                // Fetch data from the NetBox dcim/sites REST API
+                fetch('/netbox/api/dcim/sites/?format=json')
+                    .then(response => response.json())
+                    .then(data => {
+                        populatenetBoxSiteDropdown(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching NetBox sites:', error);
+                        // Hide the dropdown on error
+                        netBoxSiteDropdown.style.display = 'none';
+                    });
+            }
+
+
+            const readinessIndicator = document.getElementById('malcolm-summary');
+            const readinessDetailsContainer = document.getElementById('malcolm-details');
+
+            function populateMalcolmReadiness(data) {
+                const isEssentialReady = data.arkime && data.logstash_lumberjack && data.logstash_pipelines && data.opensearch && data.pcap_monitor;
+
+                readinessIndicator.textContent = isEssentialReady ? '✅ Ready to ingest data' : '❌ Not ready to ingest data 🔄';
+
+                const detailedList = Object.entries(data)
+                    .map(([key, value]) => `<li>${key}</li><li>${value ? '✅' : '❌'}</li>`)
+                    .join('');
+                readinessDetailsContainer.innerHTML = `<ul>${detailedList}</ul>`;
+            }
+
+            function fetchMalcolmReadiness() {
+                fetch('/mapi/ready')
+                    .then(response => response.json())
+                    .then(data => {
+                        populateMalcolmReadiness(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching Malcolm readiness:', error);
+                        readinessIndicator.textContent = '';
+                        readinessDetailsContainer.innerHTML = '<p></p>';
+                    });
+            }
+
+            fetchNetBoxSites();
+            fetchMalcolmReadiness();
+
+            readinessIndicator.addEventListener('click', function () {
+                fetchNetBoxSites();
+                fetchMalcolmReadiness();
+            });
 
         })
     </script>
-
+<footer>
+    <div id="malcolm-readiness-container">
+        <span id="malcolm-summary"></span>
+        <div id="malcolm-details"></div>
+    </div>
+</footer>
 </body>
 </html>

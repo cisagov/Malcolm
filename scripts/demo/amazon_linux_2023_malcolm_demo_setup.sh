@@ -528,7 +528,7 @@ function InstallMalcolm {
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
     ln -f -s -r "$MALCOLM_PATH"/scripts/demo/reset_and_auto_populate.sh ./reset_and_auto_populate.sh
-    curl -sSL -J -O https://raw.githubusercontent.com/mmguero-dev/Malcolm-PCAP/main/tools/pcap_time_shift.py
+    curl -sSL -J -O https://raw.githubusercontent.com/idaholab/Malcolm-Test-Artifacts/refs/heads/main/tools/pcap_time_shift.py
     chmod 755 pcap_time_shift.py
     popd >/dev/null 2>&1
 
