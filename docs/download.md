@@ -26,18 +26,18 @@ For example, having downloaded the following files from Malcolm's releases page 
 ```bash
 $ ls -l
 total 5446119424
--rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-24.03.0.iso.01
--rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-24.03.0.iso.02
--rw-r--r-- 1 user user 1446103040 Mar 14 20:03 malcolm-24.03.0.iso.03
--rw-r--r-- 1 user user         86 Mar 14 20:03 malcolm-24.03.0.iso.sha
+-rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 user user 2000000000 Mar 14 20:03 malcolm-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 user user 1446103040 Mar 14 20:03 malcolm-{{ site.malcolm.version }}.iso.03
+-rw-r--r-- 1 user user         86 Mar 14 20:03 malcolm-{{ site.malcolm.version }}.iso.sha
 -rwxr-xr-x 1 user user       3133 Mar 14 20:02 release_cleaver.sh
 
-$ ./release_cleaver.sh malcolm-24.03.0.iso.*
+$ ./release_cleaver.sh malcolm-{{ site.malcolm.version }}.iso.*
 Joining...
-malcolm-24.03.0.iso: OK
+malcolm-{{ site.malcolm.version }}.iso: OK
 
 $ ls -l *.iso
--rw-r--r-- 1 user user 5446103040 Mar 14 20:04 malcolm-24.03.0.iso
+-rw-r--r-- 1 user user 5446103040 Mar 14 20:04 malcolm-{{ site.malcolm.version }}.iso
 ```
 
 Similarly, in Microsoft Windows using PowerShell:
@@ -47,22 +47,22 @@ PS C:\Download> dir
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
--a----         3/14/2024   2:16 PM     2000000000 malcolm-24.03.0.iso.01
--a----         3/14/2024   2:16 PM     2000000000 malcolm-24.03.0.iso.02
--a----         3/14/2024   2:16 PM     1446103040 malcolm-24.03.0.iso.03
--a----         3/14/2024   2:16 PM            176 malcolm-24.03.0.iso.sha
+-a----         3/14/2024   2:16 PM     2000000000 malcolm-{{ site.malcolm.version }}.iso.01
+-a----         3/14/2024   2:16 PM     2000000000 malcolm-{{ site.malcolm.version }}.iso.02
+-a----         3/14/2024   2:16 PM     1446103040 malcolm-{{ site.malcolm.version }}.iso.03
+-a----         3/14/2024   2:16 PM            176 malcolm-{{ site.malcolm.version }}.iso.sha
 -a----         3/14/2024   2:00 PM           6806 release_cleaver.ps1
 
 
-PS C:\Download> .\release_cleaver.ps1 .\malcolm-24.03.0.iso.*
+PS C:\Download> .\release_cleaver.ps1 .\malcolm-{{ site.malcolm.version }}.iso.*
 Joining...
-"malcolm-24.03.0.iso" OK
+"malcolm-{{ site.malcolm.version }}.iso" OK
 
 PS C:\Download> dir *.iso
 
 Mode                 LastWriteTime         Length Name
 ----                 -------------         ------ ----
--a----         3/14/2024   2:17 PM     5446103040 malcolm-24.03.0.iso
+-a----         3/14/2024   2:17 PM     5446103040 malcolm-{{ site.malcolm.version }}.iso
 ```
 
 ### <a name="ISOsWarning"></a> Warning

@@ -147,7 +147,7 @@ jobs:
         name: Run Trivy vulnerability scanner
         if: ${{ matrix.platform == 'linux/amd64' }}
         id: trivy-scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.29.0
         env:
           TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
         with:

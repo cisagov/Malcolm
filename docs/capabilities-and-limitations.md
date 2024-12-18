@@ -106,13 +106,13 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
                 - 8+ CPU cores (amd64 supported, arm64 supported for Raspberry Pi image)
                 - As much storage (preferably solid-state or RAID) as necessary to meet data retention requirements
     - License
-        + Malcolm is [distributed](https://github.com/idaholab/Malcolm/blob/main/LICENSE.txt) under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) on an as-is basis, without warranties or conditions of any kind, either express or implied.
+        + Malcolm is [distributed](https://github.com/cisagov/Malcolm/blob/main/LICENSE.txt) under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0) on an as-is basis, without warranties or conditions of any kind, either express or implied.
         + Malcolm's [components](components.md) are for the most part permissive open-source licenses as well. In cases where underlying system components are released under more restrictive copyleft license terms (e.g., GPL), Malcolm interfaces with those tools or libraries in a loosely-coupled way that is, for example,  satisfied by the GPLv2's "mere aggregation" clause and the GPLv3 "aggregates" clause, in addition to the fact that in Malcolm's software containers those tools run as "separate and independent" processes. [This article from opensource.com](https://opensource.com/article/18/1/containers-gpl-and-copyleft) explains the ramifications of GPL and copyleft as it pertains to Linux containers.
     - Support
         + The organizations supporting Malcolm's development do not offer paid professional services or any contract-based support. Any support provided is done the same way most other open-source projects do so, which is through GitHub, for example:
             * [Community discussions board](https://github.com/cisagov/Malcolm/discussions)
             * [Issue and feature tracking](https://github.com/cisagov/malcolm/issues?q=is%3Aissue+is%3Aopen+-label%3Atraining)
-            * [Project roadmap tracking](https://github.com/orgs/idaholab/projects/1)
+            * [Project roadmap tracking](https://github.com/orgs/cisagov/projects/98)
         + Beyond engagement via the forums listed here, no expectation of any particular level of support should be assumed.
 * User experience/UI/intuitive
     - Malcolm's user-friendly analyst-facing interfaces are accessible via an easy-to-nagivate [landing page](images/screenshots/malcolm_landing_page.png).

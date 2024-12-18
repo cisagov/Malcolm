@@ -87,7 +87,7 @@ PCAP_RELATIVE_ADJUST="false"
 PCAP_PROCESS_PRE_WAIT=120
 PCAP_PROCESS_IDLE_SECONDS=180
 PCAP_PROCESS_IDLE_MAX_SECONDS=3600
-NETBOX_INIT_MAX_SECONDS=300
+READY_INIT_MAX_SECONDS=600
 while getopts 'vwronlb:m:i:x:s:d:p:' OPTION; do
   case "$OPTION" in
     v)
@@ -140,7 +140,7 @@ while getopts 'vwronlb:m:i:x:s:d:p:' OPTION; do
 
     i)
       if [[ $OPTARG =~ $NUMERIC_REGEX ]] ; then
-         NETBOX_INIT_MAX_SECONDS=$OPTARG
+         READY_INIT_MAX_SECONDS=$OPTARG
       fi
       ;;
 
@@ -227,7 +227,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   MALCOLM_FILE="$(basename $($REALPATH -e "$MALCOLM_DOCKER_COMPOSE"))"
 
   # if possible, time shift a temporary copy of the PCAP file(s)
-  # see https://github.com/mmguero-dev/Malcolm-PCAP/blob/main/tools/pcap_time_shift.py
+  # see https://raw.githubusercontent.com/idaholab/Malcolm-Test-Artifacts/refs/heads/main/tools/pcap_time_shift.py
   pushd "$WORKDIR" >/dev/null 2>&1
 
   PCAP_FILES_ADJUSTED=()
@@ -289,30 +289,31 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" pause nginx-proxy
   fi
 
-  # wait for logstash to be ready for Zeek logs to be ingested
-  until ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" logs logstash 2>/dev/null | $GREP -q "Pipelines running"; do
-    [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready for PCAP data..." >&2
+  # wait for Malcolm to become ready
+  if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
+    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .netbox and .opensearch and .pcap_monitor and .zeek_extracted_file_logger and .zeek_extracted_file_monitor) then 1 else 0 end'
+  else
+    JQ_READY_FILTER='if (.arkime and .logstash_lumberjack and .logstash_pipelines and .opensearch and .pcap_monitor and .zeek_extracted_file_logger and .zeek_extracted_file_monitor) then 1 else 0 end'
+  fi
+  CURRENT_TIME=$(date -u +%s)
+  FIRST_READY_INIT_CHECK_TIME=$CURRENT_TIME
+  until [[ "$( ${DOCKER_COMPOSE_BIN[@]} \
+           --profile "$MALCOLM_PROFILE" \
+           -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+           curl -sSL -XGET 'http://localhost:5000/mapi/ready' | jq "$JQ_READY_FILTER" )" == "1" ]]; do
+    [[ -n $VERBOSE_FLAG ]] && echo "waiting for Malcolm to become ready data..." >&2
     sleep 10
+    # if it's been more than the maximum wait time, bail
+    CURRENT_TIME=$(date -u +%s)
+    if (( ($CURRENT_TIME - $FIRST_READY_INIT_CHECK_TIME) >= $READY_INIT_MAX_SECONDS )); then
+      [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for readiness, YOLO!" >&2
+      break
+    fi
   done
   sleep 30
 
   if [[ -n "$NETBOX_BACKUP_FILE" ]] && [[ -f "$NETBOX_BACKUP_FILE" ]]; then
     # restore the netbox backup
-    [[ -n $VERBOSE_FLAG ]] && echo "Restoring NetBox database backup" >&2
-    # wait for NetBox to be ready with the initial startup before we go mucking around
-    CURRENT_TIME=$(date -u +%s)
-    FIRST_NETBOX_INIT_CHECK_TIME=$CURRENT_TIME
-    until ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" logs netbox 2>/dev/null | $GREP -q "Unit configuration loaded successfully"; do
-      [[ -n $VERBOSE_FLAG ]] && echo "waiting for NetBox initialization to complete..." >&2
-      sleep 10
-      # if it's been more than the maximum wait time, bail
-      CURRENT_TIME=$(date -u +%s)
-      if (( ($CURRENT_TIME - $FIRST_NETBOX_INIT_CHECK_TIME) >= $NETBOX_INIT_MAX_SECONDS )); then
-        [[ -n $VERBOSE_FLAG ]] && echo "Max wait time expired waiting for netbox_init" >&2
-        break
-      fi
-    done
-    sleep 20
     ./scripts/netbox-restore $VERBOSE_FLAG -f "$MALCOLM_FILE" --netbox-restore "$NETBOX_BACKUP_FILE" || true
   fi
 
@@ -337,10 +338,10 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         fi
 
         # get the total number of session records in the database
-        NEW_LOG_COUNT=$(( ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
-                          curl -sSL "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
-                          jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
-                          awk '{s+=$1} END {print s}') 2>/dev/null )
+        NEW_LOG_COUNT=$( ( ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+                           curl -sSL -XGET "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
+                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
+                           awk '{s+=$1} END {print s}' ) 2>/dev/null )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
           [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
           NEW_LOG_COUNT_TIME=$CURRENT_TIME

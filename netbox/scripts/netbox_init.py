@@ -556,6 +556,8 @@ def main():
                     'change',
                     'delete',
                 ],
+                'constraints': {},
+                'include_objects': ['*'],
                 'exclude_objects': [],
             },
             f'{args.defaultGroupName}_permission': {
@@ -568,17 +570,66 @@ def main():
                     'change',
                     'delete',
                 ],
+                'constraints': {},
+                'include_objects': ['*'],
                 'exclude_objects': [
-                    'admin.logentry',
+                    'account.usertoken',
                     'auth.group',
                     'auth.permission',
-                    'auth.user',
-                    'users.admingroup',
-                    'users.adminuser',
+                    'contenttypes.contenttype',
+                    'core.autosyncrecord',
+                    'core.configrevision',
+                    'core.datafile',
+                    'core.datasource',
+                    'core.job',
+                    'core.managedfile',
+                    'core.objectchange',
+                    'core.objecttype',
+                    'db.testmodel',
+                    'django_rq.queue',
+                    'social_django.association',
+                    'social_django.code',
+                    'social_django.nonce',
+                    'social_django.partial',
+                    'social_django.usersocialauth',
+                    'users.group',
                     'users.objectpermission',
                     'users.token',
+                    'users.user',
                     'users.userconfig',
                 ],
+            },
+            f'{args.defaultGroupName}_user_config_permission': {
+                'name': f'{args.defaultGroupName}_user_config_permission',
+                'enabled': True,
+                'groups': [args.defaultGroupName],
+                'actions': [
+                    'view',
+                    'change',
+                ],
+                'constraints': {
+                    "user": "$user",
+                },
+                'include_objects': [
+                    'users.userconfig',
+                ],
+                'exclude_objects': [],
+            },
+            f'{args.defaultGroupName}_token_manage_permission': {
+                'name': f'{args.defaultGroupName}_token_manage_permission',
+                'enabled': True,
+                'groups': [args.defaultGroupName],
+                'actions': [
+                    'add',
+                    'view',
+                    'change',
+                    'delete',
+                ],
+                'constraints': {
+                    "user": "$user",
+                },
+                'include_objects': ['users.token'],
+                'exclude_objects': [],
             },
         }
 
@@ -597,9 +648,14 @@ def main():
             }.items():
                 permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
                 permConfig['object_types'] = [
-                    ct for ct in allObjectTypeNames if ct not in permConfig['exclude_objects']
+                    ct
+                    for ct in (
+                        allObjectTypeNames if ('*' in permConfig['include_objects']) else permConfig['include_objects']
+                    )
+                    if ct not in permConfig['exclude_objects']
                 ]
                 permConfig.pop('exclude_objects', None)
+                permConfig.pop('include_objects', None)
                 try:
                     nb.users.permissions.create(permConfig)
                 except pynetbox.RequestError as nbe:

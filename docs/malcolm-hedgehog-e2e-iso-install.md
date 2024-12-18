@@ -239,39 +239,49 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + Users should answer **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
 * **Enable file extraction with Zeek?**
     - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
-* **Select file extraction behavior**
-    - This determines which files Zeek should extract for scanning:
-        + `none`: no file extraction
-        + `interesting`: extraction of files with mime types of common attack vectors
-        + `mapped`: extraction of files with recognized mime types
-        + `known`: extraction of files for which any mime type can be determined
-        + `all`: extract all files
-        + `notcommtxt`: extract all files except common plain text files
-* **Select file preservation behavior**
-    - This determines the behavior for preservation of Zeek-extracted files:
-        +  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
-        + `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
-        + `none`: preserve no extracted files
-* **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
-    - Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
-* **Expose web interface for downloading preserved files?**
-    - Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
-* **ZIP downloaded preserved files?**
-    - Answering **Y** will cause that Zeek-extracted files downloaded as described under the previous question will be archived using the ZIP file format.
-* **Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)** and **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
-    - A non-blank value will be used as either the ZIP archive file password (if the previous question was answered **Y**) or as the encryption key for the file to be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
-* **Scan extracted files with ClamAV?**
-    - Answer **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
-* **Scan extracted files with Yara?**
-    - Answer **Y** to scan extracted files with [Yara](https://github.com/VirusTotal/yara), a tool used to identify and classify malware samples.
-* **Scan extracted PE files with Capa?**
-    - Answer **Y** to scan extracted executable files with [Capa](https://github.com/fireeye/capa), a tool for detecting capabilities in executable files.
-* **Lookup extracted file hashes with VirusTotal?**
-    - Answer **Y** to be prompted for a [**VirusTotal**](https://www.virustotal.com/en/#search) API key, which will be used for submitting the hashes of extracted files. Only specify this option if the Malcolm instance has Internet connectivity.
-* **Enter VirusTotal API key**
-    - Specify the [**VirusTotal**](https://www.virustotal.com/en/#search) [API key](https://support.virustotal.com/hc/en-us/articles/115002100149-API) as indicated under the previous question.
-* **Download updated file scanner signatures periodically?**
-    - If the Malcolm instance has Internet connectivity, answer **Y** to enable periodic downloads of signatures used by ClamAV and YARA.
+    - **Select file extraction behavior**
+        + This determines which files Zeek should extract for scanning:
+            * `none`: no file extraction
+            * `interesting`: extraction of files with mime types of common attack vectors
+            * `mapped`: extraction of files with recognized mime types
+            * `known`: extraction of files for which any mime type can be determined
+            * `all`: extract all files
+            * `notcommtxt`: extract all files except common plain text files
+    - **Select file preservation behavior**
+        + This determines the behavior for preservation of Zeek-extracted files:
+            *  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
+            * `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+            * `none`: preserve no extracted files
+    - **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
+        + Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
+    - **Expose web interface for downloading preserved files?**
+        + Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
+    - **ZIP downloaded preserved files?**
+        + Answering **Y** will cause that Zeek-extracted files downloaded as described under the previous question will be archived using the ZIP file format.
+    - **Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)** and **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
+        + A non-blank value will be used as either the ZIP archive file password (if the previous question was answered **Y**) or as the encryption key for the file to be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
+    - **Scan extracted files with ClamAV?**
+        + Answer **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
+    - **Scan extracted files with Yara?**
+        + Answer **Y** to scan extracted files with [Yara](https://github.com/VirusTotal/yara), a tool used to identify and classify malware samples.
+    - **Scan extracted PE files with Capa?**
+        + Answer **Y** to scan extracted executable files with [Capa](https://github.com/fireeye/capa), a tool for detecting capabilities in executable files.
+    - **Lookup extracted file hashes with VirusTotal?**
+        + Answer **Y** to be prompted for a [**VirusTotal**](https://www.virustotal.com/en/#search) API key, which will be used for submitting the hashes of extracted files. Only specify this option if the Malcolm instance has Internet connectivity.
+    - **Enter VirusTotal API key**
+        + Specify the [**VirusTotal**](https://www.virustotal.com/en/#search) [API key](https://support.virustotal.com/hc/en-us/articles/115002100149-API) as indicated under the previous question.
+    - **Download updated file scanner signatures periodically?**
+        + If the Malcolm instance has Internet connectivity, answer **Y** to enable periodic downloads of signatures used by ClamAV and YARA.
+* **Configure pulling from threat intelligence feeds for Zeek intelligence framework?**
+    - Answer **Y** to configure pulling from threat intelligence feeds to populate the [Zeek intelligence framework](zeek-intel.md#ZeekIntel). Answer **N** to leave settings for pulling from threat intelligence feeds unmodified.
+    - **Pull from threat intelligence feeds on startup?**
+        + Answer **Y** for Malcolm to pull from threat intelligence feeds when the `zeek-offline` container starts up.
+    - **Cron expression for scheduled pulls from threat intelligence feeds**
+        + Specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) (using [`cronexpr`](https://github.com/aptible/supercronic/tree/master/cronexpr#implementation)-compatible syntax) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files.
+    - **Threat indicator "since" period**
+        + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`7 days ago`).
+    - **`Intel::item_expiration` timeout for intelligence items (`-1min` to disable)**
+        + Specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration).
 * **Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?**
     - Answer **Y** to enable [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets.
 * **Should Malcolm enrich network traffic using NetBox?**
@@ -298,8 +308,10 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`.
     - **Disable capture interface hardware offloading and adjust ring buffer sizes?**
         - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If unsure, users should probably answer **N**.
-* **Specify capture interface(s) (comma-separated)**
-    - Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
+    - **Enable live packet capture statistics?**
+        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will enable statistics collection for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats), which data is used to populate the **Packet Capture Statistics** dashboard.
+    - **Specify capture interface(s) (comma-separated)**
+        + Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
 * **Enable dark mode for OpenSearch Dashboards?**
     - Answer **Y** for dark-themed dashboards or **N** for light-themed ones.
 
@@ -457,6 +469,8 @@ Users will be presented with a list of network interfaces and prompted to select
 Upon choosing the capture interfaces and selecting OK, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([`zeek`](https://www.zeek.org/) and [`suricata`](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate Hedgehog should ignore the ports it uses to communicate with Malcolm, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`. Clicking **OK** will attempt to validate the capture filter, if specified, and will present a warning if the filter is invalid.
 
 ![Specify capture filters](./images/hedgehog/images/capture_filter.png)
+
+Users will be prompted whether or not they wish to enable live packet capture statistics [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats). If enabled, these statistics will be used to populate Malcolm's **Packet Capture Statistics** dashboard.
 
 Next users must specify the paths where captured PCAP files and logs will be stored locally on the sensor. If the installation worked as expected, these paths should be prepopulated to reflect paths on the volumes formatted at install time for the purpose storing these artifacts. Usually these paths will exist on separate storage volumes. Enabling the PCAP and log pruning autostart services (see the section on autostart services below) will enable monitoring of these paths to ensure that their contents do not consume more than 90% of their respective volumes' space. Choose **OK** to continue.
 

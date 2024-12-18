@@ -107,7 +107,7 @@ MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/
 
 BACK_LABEL = 'Go Back'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx2500m -Xms2500m -Xss1536k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx2500m -Xms2500m -Xss2048k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xmx10g -Xms10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
@@ -116,6 +116,7 @@ origPath = os.getcwd()
 
 ###################################################################################################
 args = None
+raw_args = None
 requests_imported = None
 yaml_imported = None
 kube_imported = None
@@ -152,10 +153,11 @@ class ConfigOptions(IntEnum):
     Enrichment = 19
     OpenPorts = 20
     FileCarving = 21
-    NetBox = 22
-    Capture = 23
-    DarkMode = 24
-    PostConfig = 25
+    ZeekIntel = 22
+    NetBox = 23
+    Capture = 24
+    DarkMode = 25
+    PostConfig = 26
 
 
 ###################################################################################################
@@ -520,6 +522,7 @@ class Installer(object):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def tweak_malcolm_runtime(self, malcolm_install_path):
         global args
+        global raw_args
         global dotenv_imported
 
         configFiles = []
@@ -622,6 +625,11 @@ class Installer(object):
         indexSnapshotCompressed = False
         behindReverseProxy = False
         dockerNetworkExternalName = ""
+        zeekIntelParamsProvided = False
+        zeekIntelCronExpression = '0 0 * * *'
+        zeekIntelFeedSince = '7 days ago'
+        zeekIntelItemExipration = '-1min'
+        zeekIntelOnStartup = True
 
         prevStep = None
         currentStep = ConfigOptions.Preconfig
@@ -1762,6 +1770,73 @@ class Installer(object):
                         vtotApiKey = '0'
 
                 ###################################################################################
+                elif currentStep == ConfigOptions.ZeekIntel:
+                    if zeekIntelParamsProvided := InstallerYesOrNo(
+                        'Configure pulling from threat intelligence feeds for Zeek intelligence framework?',
+                        default=any(
+                            [
+                                x in raw_args
+                                for x in [
+                                    '--zeek-intel-on-startup',
+                                    '--zeek-intel-feed-since',
+                                    '--zeek-intel-cron-expression',
+                                    '--zeek-intel-item-expiration',
+                                ]
+                            ]
+                        ),
+                        extraLabel=BACK_LABEL,
+                    ):
+                        zeekIntelOnStartup = InstallerYesOrNo(
+                            'Pull from threat intelligence feeds on startup?',
+                            default=args.zeekIntelOnStartup,
+                            extraLabel=BACK_LABEL,
+                        )
+
+                        # https://stackoverflow.com/a/67419837
+                        cronRegex = re.compile(
+                            r"(^((\*\/)?([0-5]?[0-9])((\,|\-|\/)([0-5]?[0-9]))*|\*)\s+((\*\/)?((2[0-3]|1[0-9]|[0-9]|00))((\,|\-|\/)(2[0-3]|1[0-9]|[0-9]|00))*|\*)\s+((\*\/)?([1-9]|[12][0-9]|3[01])((\,|\-|\/)([1-9]|[12][0-9]|3[01]))*|\*)\s+((\*\/)?([1-9]|1[0-2])((\,|\-|\/)([1-9]|1[0-2]))*|\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|des))\s+((\*\/)?[0-6]((\,|\-|\/)[0-6])*|\*|00|(sun|mon|tue|wed|thu|fri|sat))\s*$)|@(annually|yearly|monthly|weekly|daily|hourly)"
+                        )
+                        zeekIntelCronExpression = '_invalid_'
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid cron expression')
+                        while loopBreaker.increment():
+                            zeekIntelCronExpression = InstallerAskForString(
+                                'Cron expression for scheduled pulls from threat intelligence feeds',
+                                default=args.zeekIntelCronExpression,
+                                extraLabel=BACK_LABEL,
+                            )
+                            if len(zeekIntelCronExpression) == 0:
+                                if InstallerYesOrNo(
+                                    'An empty cron expression will disable scheduled threat intelligence updates, are you sure?',
+                                    default=False,
+                                    extraLabel=BACK_LABEL,
+                                ):
+                                    break
+                            elif cronRegex.match(zeekIntelCronExpression):
+                                break
+
+                        zeekIntelFeedSince = ''
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid "since" period')
+                        while (len(zeekIntelFeedSince) <= 0) and loopBreaker.increment():
+                            zeekIntelFeedSince = InstallerAskForString(
+                                'Threat indicator "since" period',
+                                default=args.zeekIntelFeedSince,
+                                extraLabel=BACK_LABEL,
+                            )
+
+                        zeekIntelItemExipration = ''
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Intel::item_expiration timeout')
+                        while (len(zeekIntelItemExipration) <= 0) and loopBreaker.increment():
+                            zeekIntelItemExipration = InstallerAskForString(
+                                "Intel::item_expiration timeout for intelligence items (-1min to disable)",
+                                default=args.zeekIntelItemExipration,
+                                extraLabel=BACK_LABEL,
+                            )
+
+                        InstallerDisplayMessage(
+                            f'Place feed definitions in\n\n  * TAXII - {os.path.join(malcolm_install_path, "zeek/intel/STIX/taxii.yaml")}\n  * MISP - {os.path.join(malcolm_install_path, "zeek/intel/MISP/misp.yaml")}\n  * Mandiant - {os.path.join(malcolm_install_path, "zeek/intel/Mandiant/mandiant.yaml")}\n\nSee Zeek Intelligence Framework in Malcolm documentation.',
+                        )
+
+                ###################################################################################
                 elif currentStep == ConfigOptions.NetBox:
                     # NetBox
                     netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
@@ -1808,6 +1883,7 @@ class Installer(object):
                     pcapIface = 'lo'
                     tweakIface = False
                     pcapFilter = ''
+                    captureStats = False
                     captureSelection = (
                         'c'
                         if (
@@ -1835,6 +1911,7 @@ class Installer(object):
                         pcapNetSniff = not liveArkime
                         liveSuricata = True
                         liveZeek = True
+                        captureStats = True
                         tweakIface = True
                     elif captureSelection == 'c':
                         if InstallerYesOrNo(
@@ -1889,6 +1966,11 @@ class Installer(object):
                                 default=args.tweakIface,
                                 extraLabel=BACK_LABEL,
                             )
+                        captureStats = (liveZeek or liveSuricata) and InstallerYesOrNo(
+                            'Enable live packet capture statistics?',
+                            default=args.captureStats,
+                            extraLabel=BACK_LABEL,
+                        )
 
                     if pcapNetSniff or pcapTcpDump or liveArkime or liveZeek or liveSuricata:
                         pcapIface = ''
@@ -1956,503 +2038,633 @@ class Installer(object):
                     shutil.copyfile(envExampleFile, envFile)
 
         # define environment variables to be set in .env files
-        EnvValue = namedtuple("EnvValue", ["envFile", "key", "value"], rename=False)
+        EnvValue = namedtuple("EnvValue", ["provided", "envFile", "key", "value"], rename=False)
 
         EnvValues = [
             # Whether or not Arkime is allowed to delete uploaded/captured PCAP
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'MANAGE_PCAP_FILES',
                 TrueOrFalseNoQuote(arkimeManagePCAP),
             ),
             # Threshold for Arkime PCAP deletion
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'ARKIME_FREESPACEG',
                 arkimeFreeSpaceG,
             ),
             # live traffic analysis with Arkime capture (only available with remote opensearch or elasticsearch)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime-live.env'),
                 'ARKIME_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveArkime),
             ),
             # capture source "node host" for live Arkime capture
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime-live.env'),
                 'ARKIME_LIVE_NODE_HOST',
                 liveArkimeNodeHost,
             ),
             # rotated captured PCAP analysis with Arkime (not live capture)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime-offline.env'),
                 'ARKIME_ROTATED_PCAP',
                 TrueOrFalseNoQuote(autoArkime and (not liveArkime)),
             ),
             # automatic uploaded pcap analysis with Arkime
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime-offline.env'),
                 'ARKIME_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoArkime),
             ),
             # Should Arkime use an ILM policy?
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_ENABLED',
                 TrueOrFalseNoQuote(indexManagementPolicy),
             ),
             # Should Arkime use a hot/warm design in which non-session data is stored in a warm index? (see https://https://arkime.com/faq#ilm)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_HOT_WARM_ENABLED',
                 TrueOrFalseNoQuote(indexManagementHotWarm),
             ),
             # Time in hours/days before moving (Arkime indexes to warm) and force merge (number followed by h or d), default 30
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_OPTIMIZATION_PERIOD',
                 indexManagementOptimizationTimePeriod,
             ),
             # Time in hours/days before deleting Arkime indexes (number followed by h or d), default 90
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_RETENTION_TIME',
                 indexManagementSpiDataRetention,
             ),
             # Number of replicas for older sessions indices in the ILM policy, default 0
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS',
                 indexManagementReplicas,
             ),
             # Number of weeks of history to keep, default 13
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS',
                 indexManagementHistoryInWeeks,
             ),
             # Number of segments to optimize sessions to in the ILM policy, default 1
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_SEGMENTS',
                 indexManagementOptimizeSessionSegments,
             ),
             # authentication method: basic (true), ldap (false) or no_authentication
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_BASIC_AUTH',
                 allowedAuthModes.get(authMode, TrueOrFalseNoQuote(True)),
             ),
             # StartTLS vs. ldap:// or ldaps://
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'auth-common.env'),
                 'NGINX_LDAP_TLS_STUNNEL',
                 TrueOrFalseNoQuote(('ldap' in authMode.lower()) and ldapStartTLS),
             ),
             # Logstash host and port
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'beats-common.env'),
                 'LOGSTASH_HOST',
                 logstashHost,
             ),
             # OpenSearch Dashboards URL
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'dashboards.env'),
                 'DASHBOARDS_URL',
                 dashboardsUrl,
             ),
             # turn on dark mode, or not
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'dashboards-helper.env'),
                 'DASHBOARDS_DARKMODE',
                 TrueOrFalseNoQuote(dashboardsDarkMode),
             ),
             # OpenSearch index state management snapshot compression
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'dashboards-helper.env'),
                 'ISM_SNAPSHOT_COMPRESSED',
                 TrueOrFalseNoQuote(indexSnapshotCompressed),
             ),
             # delete based on index pattern size
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'dashboards-helper.env'),
                 'OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT',
                 indexPruneSizeLimit,
             ),
             # delete based on index pattern size (sorted by name vs. creation time)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'dashboards-helper.env'),
                 'OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT',
                 TrueOrFalseNoQuote(indexPruneNameSort),
             ),
             # expose a filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_LISTEN',
                 TrueOrFalseNoQuote(filebeatTcpOpen),
             ),
             # log format expected for events sent to the filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_LOG_FORMAT',
                 filebeatTcpFormat,
             ),
             # source field name to parse for events sent to the filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_SOURCE_FIELD',
                 filebeatTcpSourceField,
             ),
             # target field name to store decoded JSON fields for events sent to the filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_TARGET_FIELD',
                 filebeatTcpTargetField,
             ),
             # field to drop in events sent to the filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_PARSE_DROP_FIELD',
                 filebeatTcpDropField,
             ),
             # tag to append to events sent to the filebeat TCP input listener
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_TAG',
                 filebeatTcpTag,
             ),
             # logstash memory allowance
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'logstash.env'),
                 'LS_JAVA_OPTS',
                 re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{lsMemory}', LOGSTASH_JAVA_OPTS_DEFAULT),
             ),
             # automatic local reverse dns lookup
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_REVERSE_DNS',
                 TrueOrFalseNoQuote(reverseDns),
             ),
             # automatic MAC OUI lookup
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'logstash.env'),
                 'LOGSTASH_OUI_LOOKUP',
                 TrueOrFalseNoQuote(autoOui),
             ),
             # logstash pipeline workers
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'logstash.env'),
                 'pipeline.workers',
                 lsWorkers,
             ),
             # freq.py string randomness calculations
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'lookup-common.env'),
                 'FREQ_LOOKUP',
                 TrueOrFalseNoQuote(autoFreq),
             ),
             # enrich network traffic metadata via NetBox API calls
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_ENRICHMENT',
                 TrueOrFalseNoQuote(netboxLogstashEnrich),
             ),
             # create missing NetBox subnet prefixes based on observed network traffic
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_AUTO_CREATE_PREFIX',
                 TrueOrFalseNoQuote(netboxLogstashAutoSubnets),
             ),
             # populate the NetBox inventory based on observed network traffic
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_AUTO_POPULATE',
                 TrueOrFalseNoQuote(netboxAutoPopulate),
             ),
             # NetBox default site name
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DEFAULT_SITE',
                 netboxSiteName,
             ),
             # enable/disable netbox
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # enable/disable netbox (postgres)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_POSTGRES_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # enable/disable netbox (redis)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_REDIS_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'nginx.env'),
                 'NGINX_SSL',
                 TrueOrFalseNoQuote(nginxSSL),
             ),
             # OpenSearch primary instance is local vs. remote
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_PRIMARY',
                 DATABASE_MODE_LABELS[opensearchPrimaryMode],
             ),
             # OpenSearch primary instance URL
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_URL',
                 opensearchPrimaryUrl,
             ),
             # OpenSearch primary instance needs SSL verification
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SSL_CERTIFICATE_VERIFICATION',
                 TrueOrFalseNoQuote(opensearchPrimarySslVerify),
             ),
             # OpenSearch secondary instance URL
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY_URL',
                 opensearchSecondaryUrl,
             ),
             # OpenSearch secondary instance needs SSL verification
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION',
                 TrueOrFalseNoQuote(opensearchSecondarySslVerify),
             ),
             # OpenSearch secondary remote instance is enabled
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_SECONDARY',
                 DATABASE_MODE_LABELS[opensearchSecondaryMode],
             ),
             # OpenSearch memory allowance
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'opensearch.env'),
                 'OPENSEARCH_JAVA_OPTS',
                 re.sub(r'(-Xm[sx])(\w+)', fr'\g<1>{osMemory}', OPENSEARCH_JAVA_OPTS_DEFAULT),
             ),
             # capture pcaps via netsniff-ng
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_ENABLE_NETSNIFF',
                 TrueOrFalseNoQuote(pcapNetSniff),
             ),
             # capture pcaps via tcpdump
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_ENABLE_TCPDUMP',
                 TrueOrFalseNoQuote(pcapTcpDump and (not pcapNetSniff)),
             ),
             # disable NIC hardware offloading features and adjust ring buffers
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_IFACE_TWEAK',
                 TrueOrFalseNoQuote(tweakIface),
             ),
             # capture interface(s)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_IFACE',
                 pcapIface,
             ),
             # capture filter
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'pcap-capture.env'),
                 'PCAP_FILTER',
                 pcapFilter,
             ),
             # process UID
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'process.env'),
                 'PUID',
                 puid,
             ),
             # process GID
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'process.env'),
                 'PGID',
                 pgid,
             ),
             # Container runtime engine (e.g., docker, podman)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'process.env'),
                 CONTAINER_RUNTIME_KEY,
                 'kubernetes' if (self.orchMode is OrchestrationFramework.KUBERNETES) else args.runtimeBin,
             ),
             # Malcolm run profile (malcolm vs. hedgehog)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'process.env'),
                 PROFILE_KEY,
                 malcolmProfile,
             ),
             # Suricata signature updates (via suricata-update)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'suricata.env'),
                 'SURICATA_UPDATE_RULES',
                 TrueOrFalseNoQuote(suricataRuleUpdate),
             ),
             # disable/enable ICS analyzers
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'suricata.env'),
                 'SURICATA_DISABLE_ICS_ALL',
                 TrueOrFalseNoQuote(not malcolmIcs),
             ),
             # live traffic analysis with Suricata
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'suricata-live.env'),
                 'SURICATA_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveSuricata),
             ),
+            # live capture statistics for Suricata
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'suricata-live.env'),
+                'SURICATA_STATS_ENABLED',
+                TrueOrFalseNoQuote(captureStats),
+            ),
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'suricata-live.env'),
+                'SURICATA_STATS_EVE_ENABLED',
+                TrueOrFalseNoQuote(captureStats),
+            ),
             # rotated captured PCAP analysis with Suricata (not live capture)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'suricata-offline.env'),
                 'SURICATA_ROTATED_PCAP',
                 TrueOrFalseNoQuote(autoSuricata and (not liveSuricata)),
             ),
             # automatic uploaded pcap analysis with suricata
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'suricata-offline.env'),
                 'SURICATA_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoSuricata),
             ),
             # capture source "node name" for locally processed PCAP files
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_NODE_NAME',
                 pcapNodeName,
             ),
             # zeek file extraction mode
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_EXTRACTOR_MODE',
                 fileCarveMode,
             ),
             # zeek file preservation mode
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_PRESERVATION',
                 filePreserveMode,
             ),
             # total disk fill threshold for pruning zeek extracted files
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT',
                 extractedFileMaxPercentThreshold,
             ),
             # zeek extracted files maximum consumption threshold
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_PRUNE_THRESHOLD_MAX_SIZE',
                 extractedFileMaxSizeThreshold,
             ),
             # HTTP server for extracted files
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_ENABLE',
                 TrueOrFalseNoQuote(fileCarveHttpServer),
             ),
             # ZIP HTTP server for extracted files
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_ZIP',
                 TrueOrFalseNoQuote(fileCarveHttpServerZip),
             ),
             # key for encrypted HTTP-served extracted files (' -> '' for escaping in YAML)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek-secret.env'),
                 'EXTRACTED_FILE_HTTP_SERVER_KEY',
                 fileCarveHttpServeEncryptKey,
             ),
             # virustotal API key
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek-secret.env'),
                 'VTOT_API2_KEY',
                 vtotApiKey,
             ),
             # file scanning via yara
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_YARA',
                 TrueOrFalseNoQuote(yaraScan),
             ),
             # PE file scanning via capa
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_CAPA',
                 TrueOrFalseNoQuote(capaScan),
             ),
             # file scanning via clamav
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_ENABLE_CLAMAV',
                 TrueOrFalseNoQuote(clamAvScan),
             ),
             # rule updates (yara/capa via git, clamav via freshclam)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_UPDATE_RULES',
                 TrueOrFalseNoQuote(fileScanRuleUpdate),
             ),
             # disable/enable ICS analyzers
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_DISABLE_ICS_ALL',
                 '' if malcolmIcs else TrueOrFalseNoQuote(not malcolmIcs),
             ),
             # disable/enable ICS best guess
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'ZEEK_DISABLE_BEST_GUESS_ICS',
                 '' if zeekICSBestGuess else TrueOrFalseNoQuote(not zeekICSBestGuess),
             ),
             # live traffic analysis with Zeek
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek-live.env'),
                 'ZEEK_LIVE_CAPTURE',
                 TrueOrFalseNoQuote(liveZeek),
             ),
+            # live capture statistics for Zeek
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'zeek-live.env'),
+                'ZEEK_DISABLE_STATS',
+                TrueOrFalseNoQuote(not captureStats),
+            ),
             # rotated captured PCAP analysis with Zeek (not live capture)
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek-offline.env'),
                 'ZEEK_ROTATED_PCAP',
                 TrueOrFalseNoQuote(autoZeek and (not liveZeek)),
             ),
             # automatic uploaded pcap analysis with Zeek
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek-offline.env'),
                 'ZEEK_AUTO_ANALYZE_PCAP_FILES',
                 TrueOrFalseNoQuote(autoZeek),
             ),
+            # Pull from threat intelligence feeds on container startup
+            EnvValue(
+                zeekIntelParamsProvided,
+                os.path.join(args.configDir, 'zeek-offline.env'),
+                'ZEEK_INTEL_REFRESH_ON_STARTUP',
+                TrueOrFalseNoQuote(zeekIntelOnStartup),
+            ),
+            # Cron expression for scheduled pulls from threat intelligence feeds
+            EnvValue(
+                zeekIntelParamsProvided,
+                os.path.join(args.configDir, 'zeek-offline.env'),
+                'ZEEK_INTEL_REFRESH_CRON_EXPRESSION',
+                zeekIntelCronExpression,
+            ),
+            # Threat indicator "since" period
+            EnvValue(
+                zeekIntelParamsProvided,
+                os.path.join(args.configDir, 'zeek.env'),
+                'ZEEK_INTEL_FEED_SINCE',
+                zeekIntelFeedSince,
+            ),
+            # Intel::item_expiration timeout for intelligence items
+            EnvValue(
+                zeekIntelParamsProvided,
+                os.path.join(args.configDir, 'zeek.env'),
+                'ZEEK_INTEL_ITEM_EXPIRATION',
+                zeekIntelItemExipration,
+            ),
             # Use polling for file watching vs. native
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'zeek.env'),
                 'EXTRACTED_FILE_WATCHER_POLLING',
                 TrueOrFalseNoQuote(self.orchMode is OrchestrationFramework.KUBERNETES),
             ),
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'upload-common.env'),
                 'PCAP_PIPELINE_POLLING',
                 TrueOrFalseNoQuote(self.orchMode is OrchestrationFramework.KUBERNETES),
             ),
             EnvValue(
+                True,
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_WATCHER_POLLING',
                 TrueOrFalseNoQuote(self.orchMode is OrchestrationFramework.KUBERNETES),
             ),
         ]
 
-        # now, go through and modify the values in the .env files
-        for val in EnvValues:
+        # now, go through and modify the provided values in the .env files
+        for val in [v for v in EnvValues if v.provided]:
             try:
                 touch(val.envFile)
             except Exception:
@@ -2481,6 +2693,69 @@ class Installer(object):
 
             except Exception as e:
                 eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+
+        # if any arbitrary extra .env settings were specified, handle those last (e.g., foobar.env:VARIABLE_NAME=value)
+        if args.extraSettings:
+            extraVarRegex = re.compile(r"^([^:]+):([^=]+)=(.*)$")
+            for extraSetting in args.extraSettings:
+                if extraVarParts := extraVarRegex.match(extraSetting):
+                    extraFile, extraVar, extraVal = [str(x).strip() for x in extraVarParts.groups()]
+                    extraFile = os.path.join(args.configDir, os.path.basename(extraFile))
+
+                    if not extraFile.endswith('.env'):
+                        # only allow extra settings to modify .env files
+                        eprint(
+                            f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (not .env file)"
+                        )
+
+                    elif any(
+                        [
+                            x
+                            for x in EnvValues
+                            if (os.path.basename(x.envFile) == os.path.basename(extraFile)) and (x.key == extraVar)
+                        ]
+                    ):
+                        # if this is one of the values that's settable through one of the
+                        #   normal command-line arguments, don't allow it: force them
+                        #   to use the appropriate command-line argument instead
+                        eprint(
+                            f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (use dedicated CLI argument)"
+                        )
+
+                    else:
+                        if self.debug:
+                            eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
+
+                        try:
+                            touch(extraFile)
+                        except Exception:
+                            pass
+
+                        try:
+                            oldDotEnvVersion = False
+                            try:
+                                dotenv_imported.set_key(
+                                    extraFile,
+                                    extraVar,
+                                    extraVal,
+                                    quote_mode='never',
+                                    encoding='utf-8',
+                                )
+                            except TypeError:
+                                oldDotEnvVersion = True
+
+                            if oldDotEnvVersion:
+                                dotenv_imported.set_key(
+                                    extraFile,
+                                    extraVar,
+                                    extraVal,
+                                    quote_mode='never',
+                                )
+
+                        except Exception as e:
+                            eprint(
+                                f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
+                            )
 
         # change ownership of .envs file to match puid/pgid
         if (
@@ -3682,6 +3957,7 @@ class MacInstaller(Installer):
 # main
 def main():
     global args
+    global raw_args
     global requests_imported
     global kube_imported
     global yaml_imported
@@ -4326,6 +4602,45 @@ def main():
         help='Perform string randomness scoring on some fields',
     )
 
+    zeekIntelGroup = parser.add_argument_group('Threat intelligence feed options')
+    zeekIntelGroup.add_argument(
+        '--zeek-intel-on-startup',
+        dest='zeekIntelOnStartup',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help='Pull from threat intelligence feeds on container startup',
+    )
+    zeekIntelGroup.add_argument(
+        '--zeek-intel-feed-since',
+        dest='zeekIntelFeedSince',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='7 days ago',
+        help=f"When pulling from threat intelligence feeds, only process indicators created or modified since the time represented by this value; either a fixed date (01/01/2021) or relative interval (7 days ago)",
+    )
+    zeekIntelGroup.add_argument(
+        '--zeek-intel-cron-expression',
+        dest='zeekIntelCronExpression',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='0 0 * * *',
+        help=f'Cron expression for scheduled pulls from threat intelligence feeds',
+    )
+    zeekIntelGroup.add_argument(
+        '--zeek-intel-item-expiration',
+        dest='zeekIntelItemExipration',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='-1min',
+        help=f"Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)",
+    )
+
     fileCarveArgGroup = parser.add_argument_group('File extraction options')
     fileCarveArgGroup.add_argument(
         '--file-extraction',
@@ -4505,6 +4820,16 @@ def main():
         help="Disable capture interface hardware offloading and adjust ring buffer sizes",
     )
     captureArgGroup.add_argument(
+        '--live-capture-stats',
+        dest='captureStats',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help=f"Enable live packet capture statistics for Zeek and/or Suricata",
+    )
+    captureArgGroup.add_argument(
         '--live-capture-arkime',
         dest='liveArkime',
         type=str2bool,
@@ -4573,6 +4898,20 @@ def main():
         help='The node name to associate with network traffic metadata',
     )
 
+    extrasArgGroup = parser.add_argument_group('Additional configuration options')
+    extrasArgGroup.add_argument(
+        '--extra',
+        dest='extraSettings',
+        nargs='*',
+        type=str,
+        default=[],
+        help="Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)",
+    )
+
+    try:
+        raw_args = sys.argv[1:]
+    except Exception:
+        pass
     try:
         parser.error = parser.exit
         args = parser.parse_args()

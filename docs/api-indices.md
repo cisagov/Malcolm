@@ -8,6 +8,9 @@ Lists [information related to the underlying OpenSearch indices](https://opensea
 
 ```json
 {
+    "malcolm_network_index_pattern": "arkime_sessions3-*",
+    "malcolm_other_index_pattern": "malcolm_beats_*",
+    "arkime_network_index_pattern": "arkime_sessions3-*",
     "indices": [
 …
         {

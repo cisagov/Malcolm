@@ -29,28 +29,12 @@ Malcolm leverages the following excellent open source tools, among others.
 * [Florian Roth](https://github.com/Neo23x0)'s [Signature-Base](https://github.com/Neo23x0/signature-base) Yara ruleset
 * [Bart Blaze](https://github.com/bartblaze)'s [Yara ruleset](https://github.com/bartblaze/Yara-rules)
 * [ReversingLabs'](https://github.com/reversinglabs) [Yara ruleset](https://github.com/reversinglabs/reversinglabs-yara-rules)
-* These Zeek plugins:
+* These [Zeek packages]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/zeek_install_plugins.sh):
     * some of Amazon.com, Inc.'s [ICS protocol](https://github.com/amzn?q=zeek) analyzers
     * Andrew Klaus's [Sniffpass](https://github.com/cybera/zeek-sniffpass) plugin for detecting cleartext passwords in HTTP POST requests
     * Andrew Klaus's [zeek-httpattacks](https://github.com/precurse/zeek-httpattacks) plugin for detecting noncompliant HTTP requests
     * ICS protocol analyzers for Zeek published by [DHS CISA](https://github.com/cisagov/ICSNPP) and [Idaho National Lab](https://github.com/idaholab/ICSNPP)
-    * Corelight's ["bad neighbor" (CVE-2020-16898)](https://github.com/corelight/CVE-2020-16898) plugin
-    * Corelight's ["Log4Shell" (CVE-2021-44228)](https://github.com/corelight/cve-2021-44228) plugin
-    * Corelight's ["OMIGOD" (CVE-2021-38647)](https://github.com/corelight/CVE-2021-38647) plugin
-    * Corelight's [Apache HTTP server 2.4.49-2.4.50 path traversal/RCE vulnerability (CVE-2021-41773)](https://github.com/corelight/CVE-2021-41773) plugin
-    * Corelight's [bro-xor-exe](https://github.com/corelight/bro-xor-exe-plugin) plugin
-    * Corelight's [callstranger-detector](https://github.com/corelight/callstranger-detector) plugin
-    * Corelight's [DCE/RPC remote code execution vulnerability (CVE-2022-26809)](https://github.com/corelight/cve-2022-26809) plugin
-    * Corelight's [HASSH](https://github.com/corelight/hassh) SSH fingerprinting plugin
-    * Corelight's [HTTP More Filenames](https://github.com/corelight/http-more-files-names) plugin
-    * Corelight's [HTTP protocol stack vulnerability (CVE-2021-31166)](https://github.com/corelight/CVE-2021-31166) plugin
-    * Corelight's [OpenSSL RCE buffer overrun vulnerability (CVE-2022-3602)](https://github.com/corelight/CVE-2022-3602) plugin
-    * Corelight's [pingback](https://github.com/corelight/pingback) plugin
-    * Corelight's [ripple20](https://github.com/corelight/ripple20) plugin
-    * Corelight's [SIGred](https://github.com/corelight/SIGred) plugin
-    * Corelight's [VMware Workspace ONE Access and Identity Manager RCE vulnerability (CVE-2022-22954)](https://github.com/corelight/cve-2022-22954) plugin
-    * Corelight's [Zerologon](https://github.com/corelight/zerologon) plugin
-    * Corelight's [Microsoft Excel privilege escalation detection (CVE-2021-42292)](https://github.com/corelight/CVE-2021-42292) plugin
+    * Many packages developed by [Corelight, Inc.](https://github.com/corelight)
     * FoxIO's [JA4+](https://blog.foxio.io/ja4%2B-network-fingerprinting) network fingerprinting plugin
     * J-Gras' [Zeek::AF_Packet](https://github.com/J-Gras/zeek-af_packet-plugin) plugin
     * Johanna Amann's [CVE-2020-0601](https://github.com/0xxon/cve-2020-0601) ECC certificate validation plugin and [CVE-2020-13777](https://github.com/0xxon/cve-2020-13777) GnuTLS unencrypted session ticket detection plugin

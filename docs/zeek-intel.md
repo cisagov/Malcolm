@@ -20,6 +20,8 @@ docker compose exec --user $(id -u) zeek /usr/local/bin/docker_entrypoint.sh tru
 
 As multiple instances of this container may be running in a Malcolm deployment (i.e., a `zeek-live` container for [monitoring local network interfaces](live-analysis.md#LocalPCAP) and a `zeek` container for scanning [uploaded PCAPs](upload.md#Upload)), only the non-live container is responsible for creating and managing the Zeek intel files, which are then shared and used by both types of container instances.
 
+Additional settings governing Malcolm's behavior when pulling from threat intelligence feeds may be specified during Malcolm configuration (see the [**end-to-end Malcolm installation example**](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)).
+
 For a public example of Zeek intelligence files, see Critical Path Security's [repository](https://github.com/CriticalPathSecurity/Zeek-Intelligence-Feeds), which aggregates data from various other threat feeds into Zeek's format.
 
 ## <a name="ZeekIntelSTIX"></a>STIX™ and TAXII™

@@ -4,7 +4,6 @@ import malcolm_utils
 import os
 import platform
 import psutil
-import pytz
 import random
 import re
 import requests
@@ -230,14 +229,14 @@ else:
 
 if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
     import elasticsearch as DatabaseImport
-    from elasticsearch_dsl import Search as SearchClass, A as AggregationClass
+    from elasticsearch_dsl import Search as SearchClass, A as AggregationClass, Q as QueryClass
 
     DatabaseClass = DatabaseImport.Elasticsearch
     if opensearchHttpAuth:
         DatabaseInitArgs['basic_auth'] = opensearchHttpAuth
 else:
     import opensearchpy as DatabaseImport
-    from opensearchpy import Search as SearchClass, A as AggregationClass
+    from opensearchpy import Search as SearchClass, A as AggregationClass, Q as QueryClass
 
     DatabaseClass = DatabaseImport.OpenSearch
     if opensearchHttpAuth:
@@ -247,6 +246,10 @@ databaseClient = DatabaseClass(
     hosts=[opensearchUrl],
     **DatabaseInitArgs,
 )
+
+
+def doctype_is_host_logs(d):
+    return any([str(d).lower().startswith(x) for x in ['host', 'beat', 'miscbeat']])
 
 
 def random_id(length=20):
@@ -353,12 +356,12 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
         a list of URLs relevant to the field
     """
     start_time_str = (
-        f"'{start_time.astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')}'"
+        f"'{start_time.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')}'"
         if start_time is not None
         else 'now-1d'
     )
     end_time_str = (
-        f"'{end_time.astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')}'" if end_time is not None else 'now'
+        f"'{end_time.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')}'" if end_time is not None else 'now'
     )
     translated = []
 
@@ -391,7 +394,7 @@ def doctype_from_args(args):
     return doctype
         network|host
     """
-    return malcolm_utils.deep_get(args, ["doctype"], app.config["DOCTYPE_DEFAULT"])
+    return str(malcolm_utils.deep_get(args, ["doctype"], app.config["DOCTYPE_DEFAULT"])).lower()
 
 
 def index_from_args(args):
@@ -412,8 +415,8 @@ def index_from_args(args):
         app.config["MALCOLM_NETWORK_INDEX_PATTERN"],
     """
     index = None
-    if dtype := str(doctype_from_args(args)).lower():
-        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+    if dtype := doctype_from_args(args):
+        if doctype_is_host_logs(dtype):
             index = app.config["MALCOLM_OTHER_INDEX_PATTERN"]
         elif dtype.startswith('arkime') or dtype.startswith('session'):
             index = app.config["ARKIME_NETWORK_INDEX_PATTERN"]
@@ -440,8 +443,8 @@ def timefield_from_args(args):
         app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"],
     """
     timefield = None
-    if dtype := str(doctype_from_args(args)).lower():
-        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+    if dtype := doctype_from_args(args):
+        if doctype_is_host_logs(dtype):
             timefield = app.config["MALCOLM_OTHER_INDEX_TIME_FIELD"]
         elif dtype.startswith('arkime') or dtype.startswith('session'):
             timefield = app.config["ARKIME_NETWORK_INDEX_TIME_FIELD"]
@@ -718,15 +721,21 @@ def indices():
     Returns
     -------
     indices
-        The output of _cat/indices?format=json from the OpenSearch API
+        A dict where "indices" contains the array from output of _cat/indices?format=json from the OpenSearch API,
+        and malcolm_network_index_pattern, malcolm_other_index_pattern, and arkime_network_index_pattern contain
+        their respective index pattern names
     """
-    return jsonify(
-        indices=requests.get(
-            f'{opensearchUrl}/_cat/indices?format=json',
-            auth=opensearchReqHttpAuth,
-            verify=opensearchSslVerify,
-        ).json()
-    )
+    result = {}
+    result["indices"] = requests.get(
+        f'{opensearchUrl}/_cat/indices?format=json',
+        auth=opensearchReqHttpAuth,
+        verify=opensearchSslVerify,
+    ).json()
+    result["malcolm_network_index_pattern"] = app.config["MALCOLM_NETWORK_INDEX_PATTERN"]
+    result["malcolm_other_index_pattern"] = app.config["MALCOLM_OTHER_INDEX_PATTERN"]
+    result["arkime_network_index_pattern"] = app.config["ARKIME_NETWORK_INDEX_PATTERN"]
+
+    return jsonify(result)
 
 
 @app.route(
@@ -899,7 +908,7 @@ def version():
         sha=app.config["VCS_REVISION"],
         mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
         machine=platform.machine(),
-        boot_time=datetime.fromtimestamp(psutil.boot_time(), tz=pytz.utc).isoformat().replace('+00:00', 'Z'),
+        boot_time=datetime.fromtimestamp(psutil.boot_time(), tz=timezone.utc).isoformat().replace('+00:00', 'Z'),
         opensearch=opensearchStats,
     )
 
@@ -1043,13 +1052,13 @@ def ready():
 
     return jsonify(
         arkime=arkimeStatus,
-        dashboards=(malcolm_utils.deep_get(dashboardsStatus, ["status", "overall", "state"]) == "green"),
+        dashboards=(malcolm_utils.deep_get(dashboardsStatus, ["status", "overall", "state"], "red") != "red"),
         dashboards_maps=dashboardsMapsStatus,
         filebeat_tcp=filebeatTcpJsonStatus,
         freq=freqStatus,
         logstash_lumberjack=logstashLJStatus,
-        logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"]) == "green")
-        and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"]) == "green"),
+        logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"], "red") != "red")
+        and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"], "red") != "red"),
         netbox=bool(
             isinstance(netboxStatus, dict)
             and netboxStatus
@@ -1168,30 +1177,68 @@ def ingest_stats():
     Returns
     -------
     fields
-        A dict where key is host.name and value is max(event.ingested) for that host
+        A dict where "sources" contains a sub-dict where key is host.name and value is max(event.ingested)
+        for that host, and "latest_ingest_age_seconds" is the age (in seconds) of the most recently
+        ingested log
     """
     global databaseClient
     global SearchClass
     global AggregationClass
 
     result = {}
+    result['latest_ingest_age_seconds'] = 0
     try:
-        s = SearchClass(
-            using=databaseClient,
-            index=index_from_args(get_request_arguments(request)),
-        ).extra(size=0)
+        # do the aggregation bucket query for the max event.ingested value for each data source
+        request_args = get_request_arguments(request)
+        s = (
+            SearchClass(
+                using=databaseClient,
+                index=index_from_args(request_args),
+            ).extra(size=0)
+            # Exclusions:
+            #   NGINX access and error logs: we want to exclude nginx error and
+            #       access logs, otherwise the very act of accessing Malcolm will
+            #       update the latest ingest time returned from this function.
+            #   event() webhook: we want to exclude alerts written by the event()
+            #       webhook API (see below) and limit our results to actual
+            #       network logs ingested via PCAP, etc.
+            .query(
+                QueryClass(
+                    'bool',
+                    must_not=[
+                        QueryClass(
+                            'term',
+                            **{
+                                'event.module': (
+                                    'nginx' if doctype_is_host_logs(doctype_from_args(request_args)) else 'alerting'
+                                )
+                            },
+                        )
+                    ],
+                )
+            )
+        )
 
         hostAgg = AggregationClass('terms', field='host.name')
         maxIngestAgg = AggregationClass('max', field='event.ingested')
         s.aggs.bucket('host_names', hostAgg).metric('max_event_ingested', maxIngestAgg)
         response = s.execute()
 
-        result = {
-            bucket.key: datetime.fromtimestamp(bucket.max_event_ingested.value / 1000, timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            for bucket in response.aggregations.host_names.buckets
-        }
+        # put the result array together while tracking the most recent ingest time
+        nowTime = datetime.now().astimezone(timezone.utc)
+        maxTime = None
+        result['sources'] = {}
+        for bucket in response.aggregations.host_names.buckets:
+            sourceTime = datetime.fromtimestamp(bucket.max_event_ingested.value / 1000, timezone.utc)
+            result['sources'][bucket.key] = sourceTime.replace(microsecond=0).isoformat()
+            if (maxTime is None) or (sourceTime > maxTime):
+                maxTime = sourceTime
+
+        # calculate the age of the most recent ingest time
+        if maxTime:
+            diffTime = nowTime - maxTime
+            result['latest_ingest_age_seconds'] = max(round(diffTime.total_seconds()), 0)
+
     except Exception as e:
         if debugApi:
             print(f"{type(e).__name__}: \"{str(e)}\" getting ingest stats")
@@ -1282,7 +1329,7 @@ def event():
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)
-    nowTimeStr = datetime.now().astimezone(pytz.utc).isoformat().replace('+00:00', 'Z')
+    nowTimeStr = datetime.now().astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')
     if 'alert' in data:
         alert[app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"]] = malcolm_utils.deep_get(
             data,

@@ -16,6 +16,7 @@ from typing import Any, Callable, Tuple
 # NetBox-Docker Helper functions
 ###
 
+
 # Read secret from file
 def _read_secret(secret_name: str, default: str | None = None) -> str | None:
     try:
@@ -26,11 +27,14 @@ def _read_secret(secret_name: str, default: str | None = None) -> str | None:
         with f:
             return f.readline().strip()
 
+
 # If the `map_fn` isn't defined, then the value that is read from the environment (or the default value if not found) is returned.
 # If the `map_fn` is defined, then `map_fn` is invoked and the value (that was read from the environment or the default value if not found)
 # is passed to it as a parameter. The value returned from `map_fn` is then the return value of this function.
 # The `map_fn` is not invoked, if the value (that was read from the environment or the default value if not found) is None.
-def _environ_get_and_map(variable_name: str, default: str | None = None, map_fn: Callable[[str], Any | None] = None) -> Any | None:
+def _environ_get_and_map(
+    variable_name: str, default: str | None = None, map_fn: Callable[[str], Any | None] = None
+) -> Any | None:
     env_value = environ.get(variable_name, default)
 
     if env_value == None:
@@ -38,12 +42,13 @@ def _environ_get_and_map(variable_name: str, default: str | None = None, map_fn:
 
     if not map_fn:
         return env_value
-    
+
     return map_fn(env_value)
 
-_AS_BOOL = lambda value : value.lower() == 'true'
-_AS_INT = lambda value : int(value)
-_AS_LIST = lambda value : list(filter(None, value.split(' ')))
+
+_AS_BOOL = lambda value: value.lower() == 'true'
+_AS_INT = lambda value: int(value)
+_AS_LIST = lambda value: list(filter(None, value.split(' ')))
 
 _BASE_DIR = dirname(dirname(abspath(__file__)))
 
@@ -65,18 +70,18 @@ if '*' not in ALLOWED_HOSTS and 'localhost' not in ALLOWED_HOSTS:
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
 DATABASE = {
-    'NAME': environ.get('DB_NAME', 'netbox'),       # Database name
-    'USER': environ.get('DB_USER', ''),             # PostgreSQL username
+    'NAME': environ.get('DB_NAME', 'netbox'),  # Database name
+    'USER': environ.get('DB_USER', ''),  # PostgreSQL username
     'PASSWORD': _read_secret('db_password', environ.get('DB_PASSWORD', '')),
-                                                    # PostgreSQL password
-    'HOST': environ.get('DB_HOST', 'localhost'),    # Database server
-    'PORT': environ.get('DB_PORT', ''),             # Database port (leave blank for default)
+    # PostgreSQL password
+    'HOST': environ.get('DB_HOST', 'localhost'),  # Database server
+    'PORT': environ.get('DB_PORT', ''),  # Database port (leave blank for default)
     'OPTIONS': {'sslmode': environ.get('DB_SSLMODE', 'prefer')},
-                                                    # Database connection SSLMODE
+    # Database connection SSLMODE
     'CONN_MAX_AGE': _environ_get_and_map('DB_CONN_MAX_AGE', '300', _AS_INT),
-                                                    # Max database connection age
+    # Max database connection age
     'DISABLE_SERVER_SIDE_CURSORS': _environ_get_and_map('DB_DISABLE_SERVER_SIDE_CURSORS', 'False', _AS_BOOL),
-                                                    # Disable the use of server-side cursors transaction pooling
+    # Disable the use of server-side cursors transaction pooling
 }
 
 # Redis database settings. Redis is used for caching and for queuing background tasks such as webhook events. A separate
@@ -86,7 +91,9 @@ REDIS = {
     'tasks': {
         'HOST': environ.get('REDIS_HOST', 'localhost'),
         'PORT': _environ_get_and_map('REDIS_PORT', 6379, _AS_INT),
-        'SENTINELS': [tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_SENTINELS', '', _AS_LIST) if uri != ''],
+        'SENTINELS': [
+            tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_SENTINELS', '', _AS_LIST) if uri != ''
+        ],
         'SENTINEL_SERVICE': environ.get('REDIS_SENTINEL_SERVICE', 'default'),
         'SENTINEL_TIMEOUT': _environ_get_and_map('REDIS_SENTINEL_TIMEOUT', 10, _AS_INT),
         'USERNAME': environ.get('REDIS_USERNAME', ''),
@@ -98,13 +105,21 @@ REDIS = {
     'caching': {
         'HOST': environ.get('REDIS_CACHE_HOST', environ.get('REDIS_HOST', 'localhost')),
         'PORT': _environ_get_and_map('REDIS_CACHE_PORT', environ.get('REDIS_PORT', '6379'), _AS_INT),
-        'SENTINELS': [tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_CACHE_SENTINELS', '', _AS_LIST) if uri != ''],
-        'SENTINEL_SERVICE': environ.get('REDIS_CACHE_SENTINEL_SERVICE', environ.get('REDIS_SENTINEL_SERVICE', 'default')),
+        'SENTINELS': [
+            tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_CACHE_SENTINELS', '', _AS_LIST) if uri != ''
+        ],
+        'SENTINEL_SERVICE': environ.get(
+            'REDIS_CACHE_SENTINEL_SERVICE', environ.get('REDIS_SENTINEL_SERVICE', 'default')
+        ),
         'USERNAME': environ.get('REDIS_CACHE_USERNAME', environ.get('REDIS_USERNAME', '')),
-        'PASSWORD': _read_secret('redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))),
+        'PASSWORD': _read_secret(
+            'redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))
+        ),
         'DATABASE': _environ_get_and_map('REDIS_CACHE_DATABASE', '1', _AS_INT),
         'SSL': _environ_get_and_map('REDIS_CACHE_SSL', environ.get('REDIS_SSL', 'False'), _AS_BOOL),
-        'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL),
+        'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map(
+            'REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL
+        ),
     },
 }
 
@@ -203,10 +218,10 @@ if 'CENSUS_REPORTING_ENABLED' in environ:
 EXEMPT_VIEW_PERMISSIONS = _environ_get_and_map('EXEMPT_VIEW_PERMISSIONS', '', _AS_LIST)
 
 # HTTP proxies NetBox should use when sending outbound HTTP requests (e.g. for webhooks).
-# HTTP_PROXIES = {
-#     'http': 'http://10.10.1.10:3128',
-#     'https': 'http://10.10.1.10:1080',
-# }
+HTTP_PROXIES = {
+    'http': environ.get('HTTP_PROXY', None),
+    'https': environ.get('HTTPS_PROXY', None),
+}
 
 # IP addresses recognized as internal to the system. The debugging toolbar will be available only to clients accessing
 # NetBox from an internal IP.
@@ -224,8 +239,8 @@ if 'GRAPHQL_ENABLED' in environ:
 # authenticated to NetBox indefinitely.
 LOGIN_PERSISTENCE = _environ_get_and_map('LOGIN_PERSISTENCE', 'False', _AS_BOOL)
 
-# Setting this to True will permit only authenticated users to access any part of NetBox. By default, anonymous users
-# are permitted to access most data in NetBox (excluding secrets) but not make any changes.
+# When enabled, only authenticated users are permitted to access any part of NetBox.
+# Disabling this will allow unauthenticated users to access most areas of NetBox (but not make any changes).
 LOGIN_REQUIRED = _environ_get_and_map('LOGIN_REQUIRED', 'False', _AS_BOOL)
 
 # The length of time (in seconds) for which a user will remain logged into the web UI before being prompted to
@@ -289,12 +304,23 @@ if 'RACK_ELEVATION_DEFAULT_UNIT_WIDTH' in environ:
     RACK_ELEVATION_DEFAULT_UNIT_WIDTH = _environ_get_and_map('RACK_ELEVATION_DEFAULT_UNIT_WIDTH', None, _AS_INT)
 
 # Remote authentication support
-REMOTE_AUTH_ENABLED = _environ_get_and_map('REMOTE_AUTH_ENABLED', 'False', _AS_BOOL)
-REMOTE_AUTH_BACKEND = _environ_get_and_map('REMOTE_AUTH_BACKEND', 'netbox.authentication.RemoteUserBackend', _AS_LIST)
-REMOTE_AUTH_HEADER = environ.get('REMOTE_AUTH_HEADER', 'HTTP_REMOTE_USER')
+REMOTE_AUTH_AUTO_CREATE_GROUPS = _environ_get_and_map('REMOTE_AUTH_AUTO_CREATE_GROUPS', 'False', _AS_BOOL)
 REMOTE_AUTH_AUTO_CREATE_USER = _environ_get_and_map('REMOTE_AUTH_AUTO_CREATE_USER', 'False', _AS_BOOL)
+REMOTE_AUTH_BACKEND = _environ_get_and_map('REMOTE_AUTH_BACKEND', 'netbox.authentication.RemoteUserBackend', _AS_LIST)
 REMOTE_AUTH_DEFAULT_GROUPS = _environ_get_and_map('REMOTE_AUTH_DEFAULT_GROUPS', '', _AS_LIST)
-# REMOTE_AUTH_DEFAULT_PERMISSIONS = {}
+# REMOTE_AUTH_DEFAULT_PERMISSIONS = {} # dicts can't be configured via environment variables. See extra.py instead.
+REMOTE_AUTH_ENABLED = _environ_get_and_map('REMOTE_AUTH_ENABLED', 'False', _AS_BOOL)
+REMOTE_AUTH_GROUP_HEADER = _environ_get_and_map('REMOTE_AUTH_GROUP_HEADER', 'HTTP_REMOTE_USER_GROUP')
+REMOTE_AUTH_GROUP_SEPARATOR = _environ_get_and_map('REMOTE_AUTH_GROUP_SEPARATOR', '|')
+REMOTE_AUTH_GROUP_SYNC_ENABLED = _environ_get_and_map('REMOTE_AUTH_GROUP_SYNC_ENABLED', 'False', _AS_BOOL)
+REMOTE_AUTH_HEADER = environ.get('REMOTE_AUTH_HEADER', 'HTTP_REMOTE_USER')
+REMOTE_AUTH_USER_EMAIL = environ.get('REMOTE_AUTH_USER_EMAIL', 'HTTP_REMOTE_USER_EMAIL')
+REMOTE_AUTH_USER_FIRST_NAME = environ.get('REMOTE_AUTH_USER_FIRST_NAME', 'HTTP_REMOTE_USER_FIRST_NAME')
+REMOTE_AUTH_USER_LAST_NAME = environ.get('REMOTE_AUTH_USER_LAST_NAME', 'HTTP_REMOTE_USER_LAST_NAME')
+REMOTE_AUTH_SUPERUSER_GROUPS = _environ_get_and_map('REMOTE_AUTH_SUPERUSER_GROUPS', '', _AS_LIST)
+REMOTE_AUTH_SUPERUSERS = _environ_get_and_map('REMOTE_AUTH_SUPERUSERS', '', _AS_LIST)
+REMOTE_AUTH_STAFF_GROUPS = _environ_get_and_map('REMOTE_AUTH_STAFF_GROUPS', '', _AS_LIST)
+REMOTE_AUTH_STAFF_USERS = _environ_get_and_map('REMOTE_AUTH_STAFF_USERS', '', _AS_LIST)
 
 # This repository is used to check whether there is a new release of NetBox available. Set to None to disable the
 # version check or use the URL below to check for release in the official NetBox repository.
@@ -339,4 +365,3 @@ SESSION_FILE_PATH = environ.get('SESSION_FILE_PATH', environ.get('SESSIONS_ROOT'
 
 # Time zone (default: UTC)
 TIME_ZONE = environ.get('TIME_ZONE', 'UTC')
-
