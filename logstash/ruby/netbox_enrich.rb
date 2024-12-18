@@ -298,6 +298,11 @@ def filter(
   #   or via the fallback @lookup_site value. If we can't get (or create) the site, we can't determine which
   #   hashes to look up the _key by @lookup_type in, nor where to autopopulate, etc.
   _lookup_site_id_str = @lookup_site_id.nil? ? nil : event.get("#{@lookup_site_id}").to_s
+  if (_lookup_site_id_str == "0")
+    # A site ID of 0 is a way to shortcut and say "skip netbox enrichment completely" on a per-event basis.
+    #   As the "default" site ID is 1, this will only be a 0 if it's explicitly set as such.
+    return [event]
+  end
   _lookup_site_name_str =  (@lookup_site.nil? || @lookup_site.empty?) ? "default" : @lookup_site
   _lookup_site_obj = lookup_or_create_site(_lookup_site_id_str, _lookup_site_name_str, nil)
   if _lookup_site_obj.is_a?(Hash) && ((_lookup_site_id = _lookup_site_obj.fetch(:id, 0).to_i) > 0)

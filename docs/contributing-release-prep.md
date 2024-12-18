@@ -4,11 +4,11 @@ This document outlines the steps a Malcolm developer goes through to publish a r
 
 ## 1. Review the project milestone and the branch from which the release will be staged
 
-Malcolm tracks issues (whether they be bugs, new features, enhancements, etc.) for release milestones using a [GitHub project](https://github.com/orgs/idaholab/projects/1). Before building release candidate images, Romeo reviews the items for the upcoming release in the corresponding project milestone and ensures that all items assigned to it have their status set to **Done**, each item having been completed and tested locally by the developer to which the issue was assigned.
+Malcolm tracks issues (whether they be bugs, new features, enhancements, etc.) for release milestones using a [GitHub project](https://github.com/orgs/cisagov/projects/98). Before building release candidate images, Romeo reviews the items for the upcoming release in the corresponding project milestone and ensures that all items assigned to it have their status set to **Done**, each item having been completed and tested locally by the developer to which the issue was assigned.
 
 Romeo also ensures that all work towards this release has been pulled into the branch on his fork from which the release will be cut. If [pull requests]({{ site.github.repository_url }}/pulls) have been submitted upstream which resolve the issues assigned to this release, those pull requests should be merged into the branch at `romeogdetlevjr/Malcolm`, whether they were submitted initially against that fork or pulled in manually by Romeo as part of this release process. Pull requests are not accepted directly into the `main` branch of the official [upstream fork]({{ site.github.repository_url }}). In other words, the branch of Malcolm in Romeo's development fork should contain **everything** that is going to comprise this release of Malcolm.
 
-There are several places in the Malcolm source code where the release version itself (e.g., `24.10.1`) needs to be present. Most of these places are in the documentation, consisting of markdown files, but others include [docker-compose.yml]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docker-compose.yml), [docker-compose-dev.yml]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docker-compose-dev.yml), and the [Kubernetes manifests]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/kubernetes). Most likely Romeo's first commit into his branch as he worked on this release was to bump those version strings ([like this](https://github.com/romeogdetlevjr/Malcolm/commit/cc7d0d8855b5cc4f04cd38ae22d1421c627444cc)), but he should verify now that he did so.
+There are several places in the Malcolm source code where the release version itself (e.g., `{{ site.malcolm.version }}`) needs to be present. Most of these places are in the documentation, consisting of markdown files, but others include [docker-compose.yml]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docker-compose.yml), [docker-compose-dev.yml]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docker-compose-dev.yml), and the [Kubernetes manifests]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/kubernetes). Most likely Romeo's first commit into his branch as he worked on this release was to bump those version strings ([like this](https://github.com/romeogdetlevjr/Malcolm/commit/cc7d0d8855b5cc4f04cd38ae22d1421c627444cc)), but he should verify now that he did so.
 
 ## 2. Build Malcolm container images using GitHub runners
 
@@ -23,7 +23,7 @@ The [workflow for building the Hedgehog Linux installer ISO]({{ site.github.repo
 Once all of the release candidate images have been built by their respective GitHub actions, Romeo can use the [convenience helper script](contributing-github-runners.md#convenience-scripts-for-development) (found at [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) in the Malcolm source code) which has the following purposes:
 
 1. To pull the freshly-built container images from ghcr.io named with his fork's tags (e.g., `ghcr.io/romeogdetlevjr/malcolm/zeek:main`)
-2. To tag these images with their "official" tags (e.g., `ghcr.io/idaholab/malcolm/zeek:24.10.1`)
+2. To tag these images with their "official" tags (e.g., `ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}`)
 3. To extract the ISO 9660-formatted ISO files for the Malcolm and Hedgehog Linux installer ISOs
 
 Romeo carefully reviews the documentation on this [convenience helper script](contributing-github-runners.md#convenience-scripts-for-development), then runs it. When it has completed, he verifies with `docker images` that he pulled the new container images (checking the containers' ages with the `CREATED` column) and that he has the `.iso` files he expects to have.
@@ -32,13 +32,11 @@ Romeo carefully reviews the documentation on this [convenience helper script](co
 
 Now that he's got the `.iso` files for Malcolm and Hedgehog Linux, Romeo fires up some virtualization software ([VMware Workstation](https://www.vmware.com/products/desktop-hypervisor/workstation-and-fusion), [VirtualBox](https://www.virtualbox.org/), or, his personal favorite, [virt-manager](https://virt-manager.org/)) and installs the ISOs into their respective VMs. He makes sure his VMs are configured to meet the [recommended system requirements](system-requirements.md#SystemRequirements). He follows the [end-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample) example in the documentation to install and configure Malcolm and Hedgehog Linux, resulting in a configuration where the VMs are successfully communicating with each other.
 
-Part of Romeo's testing includes uploading PCAP files to test the parsers for Malcolm's [supported protocols](protocols.md#Protocols), so he uses a [set of PCAP files](https://github.com/mmguero-dev/Malcolm-PCAP) curated by another Malcolm developer for this purpose.
+Romeo knows that verifying live traffic capture is an important part of testing both [Hedgehog Linux](live-analysis.md#Hedgehog) and [Malcolm](live-analysis.md#LocalPCAP). He has used a few open-source tools to generate "real" live Internet traffic in his VMs, including [PartyLoud](https://github.com/mmguero-dev/PartyLoud), [alphasoc/flightsim](https://github.com/alphasoc/flightsim), and [3CORESec/testmynids.org](https://github.com/3CORESec/testmynids.org). He downloads these utilities into both VMs and configures both Malcolm and Hedgehog Linux to capture the live traffic generated, and validates the resulting traffic metadata generated by Zeek, Suricata, and Arkime looks correct in both [OpenSearch Dashboards](dashboards.md#Dashboards) and [Arkime](arkime.md#Arkime). He makes a special note to use [Arkime's sessions interface](arkime.md#ArkimeSessions) to retrieve a PCAP payload for an Arkime session captured on each VM.
 
-He also knows that verifying live traffic capture is an important part of testing both [Hedgehog Linux](live-analysis.md#Hedgehog) and [Malcolm](live-analysis.md#LocalPCAP). He has used a few open-source tools to generate "real" live Internet traffic in his VMs, including [PartyLoud](https://github.com/mmguero-dev/PartyLoud), [alphasoc/flightsim](https://github.com/alphasoc/flightsim), and [3CORESec/testmynids.org](https://github.com/3CORESec/testmynids.org). He downloads these utilities into both VMs and configures both Malcolm and Hedgehog Linux to capture the live traffic generated.
+### `malcolm-test`: Malcolm System Tests
 
-Having [uploaded](upload.md#Upload) a variety of PCAP files and configured [live traffic analysis](live-analysis.md), Romeo validates the resulting traffic metadata generated by Zeek, Suricata, and Arkime looks correct in both [OpenSearch Dashboards](dashboards.md#Dashboards) and [Arkime](arkime.md#Arkime). He makes a special note to use [Arkime's sessions interface](arkime.md#ArkimeSessions) to retrieve a PCAP payload for an Arkime session captured on each VM.
-
-Romeo knows that soon™ the Malcolm project will include a [robust automated system testing framework](https://github.com/idaholab/Malcolm/issues/11), but until then he realizes it's on him to do his best to ensure the quality of this Malcolm release. He carefully reviews and tests each issue assigned to this milestone on the [GitHub project board](https://github.com/orgs/idaholab/projects/1).
+In addition to the `.iso` spot checks described above, Romeo uses [`malcolm-test`](contributing-malcolm-test.md#MalcolmTest) to ensure that the release candidate does not introduce any regressions. He also carefully reviews each issue assigned to this milestone on the [GitHub project board](https://github.com/orgs/cisagov/projects/98) and verifies that new [tests](https://github.com/idaholab/Malcolm-Test/tree/main/src/maltest/tests) were [created](https://github.com/idaholab/Malcolm-test?tab=readme-ov-file#TestCreation) to cover new features and bug fixes wherever possible.
 
 ## 6. Build Hedgehog Linux Raspberry Pi image
 
@@ -151,37 +149,37 @@ As described in the documentation for [downloading Malcolm](download.md#JoinISOs
 ```bash
 $ ls -l
 total 8,502,263,808
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-24.10.1-build.log
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-24.10.1.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-24.10.1-build.log
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-24.10.1.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
 
 $ for ISO in *.iso; do ~/Malcolm/scripts/release_cleaver.sh "$ISO"; done
 Splitting...
-bf6e71385046b39d265af3dfc5b77677a0ac5eeac86bdc5be48791d0900715df  hedgehog-24.10.1.iso
+bf6e71385046b39d265af3dfc5b77677a0ac5eeac86bdc5be48791d0900715df  hedgehog-{{ site.malcolm.version }}.iso
 Splitting...
-b4957741420ec06988d975cdb7f71eaa201918245f6fcb7ee2641d7d0ad97c52  malcolm-24.10.1.iso
+b4957741420ec06988d975cdb7f71eaa201918245f6fcb7ee2641d7d0ad97c52  malcolm-{{ site.malcolm.version }}.iso
 
 $ ls -l
 total 17,002,364,928
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-24.10.1-build.log
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-24.10.1.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:40 hedgehog-24.10.1.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 22 10:40 hedgehog-24.10.1.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 22 10:40 hedgehog-24.10.1.iso.sha
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-24.10.1-build.log
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-24.10.1.iso
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-24.10.1.iso.01
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-24.10.1.iso.02
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 22 10:41 malcolm-24.10.1.iso.03
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 22 10:41 malcolm-24.10.1.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     1,209,240 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}-build.log
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,664,972,288 Oct 22 09:50 hedgehog-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr   664,972,288 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            87 Oct 22 10:40 hedgehog-{{ site.malcolm.version }}.iso.sha
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr       963,775 Oct 22 09:49 malcolm-{{ site.malcolm.version }}-build.log
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 5,835,110,400 Oct 22 09:49 malcolm-{{ site.malcolm.version }}.iso
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.01
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 2,000,000,000 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.02
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 1,835,110,400 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.03
+-rw-r--r-- 1 romeogdetlevjr romeogdetlevjr            86 Oct 22 10:41 malcolm-{{ site.malcolm.version }}.iso.sha
 ```
 
 The resultant files (with the `.iso.##` and `.iso.sha` extensions) are the files ready to be included as assets in the Malcolm release on GitHub.
 
 ## 11. Publish the release
 
-Romeo goes to the [releases]({{ site.github.repository_url }}/releases) page of the upstream repository. He clicks **Draft a new release**. On the new release page, he enters the release tag under **Choose a tag** (e.g., `v24.10.1`) with `main` as the target. He puts **Malcolm v24.10.1** as the release title, and pastes the content of the markdown release notes he wrote into the **Write** input where it prompts him to **Describe this release**.
+Romeo goes to the [releases]({{ site.github.repository_url }}/releases) page of the upstream repository. He clicks **Draft a new release**. On the new release page, he enters the release tag under **Choose a tag** (e.g., `v{{ site.malcolm.version }}`) with `main` as the target. He puts **Malcolm v{{ site.malcolm.version }}** as the release title, and pastes the content of the markdown release notes he wrote into the **Write** input where it prompts him to **Describe this release**.
 
 Romeo attaches the asset files from the previous step where it says "↓ Attach binaries by dropping them here or selecting them." He ensures that **Set as the latest release** is checked.
 
