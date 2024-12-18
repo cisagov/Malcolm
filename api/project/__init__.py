@@ -229,14 +229,14 @@ else:
 
 if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
     import elasticsearch as DatabaseImport
-    from elasticsearch_dsl import Search as SearchClass, A as AggregationClass
+    from elasticsearch_dsl import Search as SearchClass, A as AggregationClass, Q as QueryClass
 
     DatabaseClass = DatabaseImport.Elasticsearch
     if opensearchHttpAuth:
         DatabaseInitArgs['basic_auth'] = opensearchHttpAuth
 else:
     import opensearchpy as DatabaseImport
-    from opensearchpy import Search as SearchClass, A as AggregationClass
+    from opensearchpy import Search as SearchClass, A as AggregationClass, Q as QueryClass
 
     DatabaseClass = DatabaseImport.OpenSearch
     if opensearchHttpAuth:
@@ -246,6 +246,10 @@ databaseClient = DatabaseClass(
     hosts=[opensearchUrl],
     **DatabaseInitArgs,
 )
+
+
+def doctype_is_host_logs(d):
+    return any([str(d).lower().startswith(x) for x in ['host', 'beat', 'miscbeat']])
 
 
 def random_id(length=20):
@@ -390,7 +394,7 @@ def doctype_from_args(args):
     return doctype
         network|host
     """
-    return malcolm_utils.deep_get(args, ["doctype"], app.config["DOCTYPE_DEFAULT"])
+    return str(malcolm_utils.deep_get(args, ["doctype"], app.config["DOCTYPE_DEFAULT"])).lower()
 
 
 def index_from_args(args):
@@ -411,8 +415,8 @@ def index_from_args(args):
         app.config["MALCOLM_NETWORK_INDEX_PATTERN"],
     """
     index = None
-    if dtype := str(doctype_from_args(args)).lower():
-        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+    if dtype := doctype_from_args(args):
+        if doctype_is_host_logs(dtype):
             index = app.config["MALCOLM_OTHER_INDEX_PATTERN"]
         elif dtype.startswith('arkime') or dtype.startswith('session'):
             index = app.config["ARKIME_NETWORK_INDEX_PATTERN"]
@@ -439,8 +443,8 @@ def timefield_from_args(args):
         app.config["MALCOLM_NETWORK_INDEX_TIME_FIELD"],
     """
     timefield = None
-    if dtype := str(doctype_from_args(args)).lower():
-        if dtype.startswith('host') or dtype.startswith('beat') or dtype.startswith('miscbeat'):
+    if dtype := doctype_from_args(args):
+        if doctype_is_host_logs(dtype):
             timefield = app.config["MALCOLM_OTHER_INDEX_TIME_FIELD"]
         elif dtype.startswith('arkime') or dtype.startswith('session'):
             timefield = app.config["ARKIME_NETWORK_INDEX_TIME_FIELD"]
@@ -1185,10 +1189,35 @@ def ingest_stats():
     result['latest_ingest_age_seconds'] = 0
     try:
         # do the aggregation bucket query for the max event.ingested value for each data source
-        s = SearchClass(
-            using=databaseClient,
-            index=index_from_args(get_request_arguments(request)),
-        ).extra(size=0)
+        request_args = get_request_arguments(request)
+        s = (
+            SearchClass(
+                using=databaseClient,
+                index=index_from_args(request_args),
+            ).extra(size=0)
+            # Exclusions:
+            #   NGINX access and error logs: we want to exclude nginx error and
+            #       access logs, otherwise the very act of accessing Malcolm will
+            #       update the latest ingest time returned from this function.
+            #   event() webhook: we want to exclude alerts written by the event()
+            #       webhook API (see below) and limit our results to actual
+            #       network logs ingested via PCAP, etc.
+            .query(
+                QueryClass(
+                    'bool',
+                    must_not=[
+                        QueryClass(
+                            'term',
+                            **{
+                                'event.module': (
+                                    'nginx' if doctype_is_host_logs(doctype_from_args(request_args)) else 'alerting'
+                                )
+                            },
+                        )
+                    ],
+                )
+            )
+        )
 
         hostAgg = AggregationClass('terms', field='host.name')
         maxIngestAgg = AggregationClass('max', field='event.ingested')
