@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 YARA_URL="https://github.com/VirusTotal/YARA"
 YARA_VER="$(curl -sqI "$YARA_URL/releases/latest" | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}' | sed 's/^v//')"
