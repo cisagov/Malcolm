@@ -1,6 +1,6 @@
 # release_cleaver.ps1
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # release_cleaver.sh
 # Split and join large files into 2 gigabyte chunks. sha256 sum is

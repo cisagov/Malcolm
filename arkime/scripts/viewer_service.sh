@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 # note: when setting the node name, the docker_entrypoint.sh script around
 #   MALCOLM_PCAP_NODE_NAME as it gets written into config.ini needs to match
