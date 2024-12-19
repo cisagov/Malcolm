@@ -6,7 +6,7 @@
 #   see https://github.com/arkime/arkime/issues/1350
 #   see https://github.com/arkime/arkime/issues/1352
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 unset VERBOSE
 MAXMIND_GEOIP_DB_LICENSE_KEY=${MAXMIND_GEOIP_DB_LICENSE_KEY:-}

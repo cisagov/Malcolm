@@ -367,7 +367,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                 with footer(cls='footer bg-light').add(div(cls='container')).add(div(cls='row')):
                     with div(cls="col-lg-6 h-100 text-center text-lg-start my-auto"):
                         p(
-                            "Malcolm © 2024 Battelle Energy Alliance, LLC; developed at INL and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.",
+                            "Malcolm © 2025 Battelle Energy Alliance, LLC; developed at INL and released through the cooperation of the Cybersecurity and Infrastructure Security Agency of the U.S. Department of Homeland Security.",
                             cls="text-muted small mb-4 mb-lg-0",
                         )
 
