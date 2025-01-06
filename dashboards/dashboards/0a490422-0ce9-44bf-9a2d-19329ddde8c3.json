@@ -368,7 +368,7 @@
         ],
         "sort": [
           [
-            "@timestamp",
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
             "desc"
           ]
         ],
