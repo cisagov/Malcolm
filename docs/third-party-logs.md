@@ -15,12 +15,14 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek, and Suricata. Please refer to the [Malcolm Contributor Guide](contributing-guide.md) for information on integrating a new network traffic analysis provider.
 
 <a name="ThirdPartyLogsTableOfContents"></a>
+
 * [Configuring Malcolm](#Malcolm)
     - [Secure communication](#MalcolmTLS)
 * [Fluent Bit](#FluentBit)
     - [Convenience Script for Linux/macOS](#FluentBitBash)
     - [Convenience Script for Windows](#FluentBitPowerShell)
 * [Beats](#Beats)
+* [Syslog](#Syslog)
 * [Uploading Third-Party Logs](#ThirdPartyUpload)
 * [Data Format and Visualization](#Data)
 * [Document Indices](#Indices)
@@ -308,6 +310,12 @@ output.logstash:
 The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless creating a custom [Logstash pipeline](contributing-logstash.md#LogstashNewSource), users probably want to use `_malcolm_beats` in order for logs to be picked up and ingested through Malcolm's `beats` pipeline. This applies regardless of the specific Beats forwarder being used (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
 
 Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform, and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
+
+## <a name="Syslog"></a>Syslog
+
+Malcolm can accept [syslog](https://en.wikipedia.org/wiki/Syslog) messages directly. During [configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig), select **customize** when prompted **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?** to specify whether Malcolm should accept syslog over TCP, UDP, or both, and the respective ports on which the messages should be accepted.
+
+Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
 
 ## <a name="ThirdPartyUpload"></a>Uploading Third-Party Logs
 
