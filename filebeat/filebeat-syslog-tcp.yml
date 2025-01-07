@@ -2,19 +2,15 @@
 
 name: "${PCAP_NODE_NAME:malcolm}"
 
-logging:
-  to_console: false
-  metrics.enabled: false
+logging.metrics.enabled: false
 
 #================================ Inputs =======================================
 
 filebeat.inputs:
-- type: syslog
-  format: ${FILEBEAT_SYSLOG_TCP_FORMAT:auto}
+- type: tcp
+  host: "0.0.0.0:${FILEBEAT_SYSLOG_TCP_PORT:514}"
   max_message_size: ${FILEBEAT_SYSLOG_TCP_MAX_MESSAGE_SIZE:20MiB}
   max_connections: ${FILEBEAT_SYSLOG_TCP_MAX_CONNECTIONS:1024}
-  protocol.tcp:
-    host: "0.0.0.0:${FILEBEAT_SYSLOG_TCP_PORT:514}"
   ssl.enabled: ${FILEBEAT_SYSLOG_TCP_SSL:false}
   ssl.certificate_authorities: ["/certs/ca.crt"]
   ssl.certificate: "/certs/client.crt"
@@ -24,6 +20,9 @@ filebeat.inputs:
 
 #================================ Processors ===================================
 processors:
+  - syslog:
+      field: message
+      format: ${FILEBEAT_SYSLOG_TCP_FORMAT:auto}
   - add_tags:
       tags: [ "${FILEBEAT_TCP_TAG:_malcolm_beats}" ]
 
