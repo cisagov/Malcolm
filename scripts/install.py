@@ -4440,7 +4440,7 @@ def main():
         default=False,
         help="Expose SFTP server (for PCAP upload) to external hosts",
     )
-    logstashArgGroup.add_argument(
+    openPortsArgGroup.add_argument(
         '--syslog-tcp-port',
         dest='syslogTcpPort',
         required=False,
@@ -4449,7 +4449,7 @@ def main():
         default=0,
         help='Listen for Syslog (TCP) on this port',
     )
-    logstashArgGroup.add_argument(
+    openPortsArgGroup.add_argument(
         '--syslog-udp-port',
         dest='syslogUdpPort',
         required=False,
