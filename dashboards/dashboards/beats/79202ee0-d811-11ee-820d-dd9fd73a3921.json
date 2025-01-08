@@ -5,10 +5,10 @@
         "description": "Windows event logs",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"43028c5f-84f4-44fd-af4b-45103d59b07f\"},\"panelIndex\":\"43028c5f-84f4-44fd-af4b-45103d59b07f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":18,\"h\":20,\"i\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\"},\"panelIndex\":\"346bb696-5fa2-4504-a1d8-5a6f51244c7b\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"sortColumn\":{\"colIndex\":3,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_1\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":26,\"y\":0,\"w\":22,\"h\":20,\"i\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\"},\"panelIndex\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":20,\"w\":18,\"h\":34,\"i\":\"1372927d-8b1d-4531-94fb-377dbccfff6b\"},\"panelIndex\":\"1372927d-8b1d-4531-94fb-377dbccfff6b\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_3\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":26,\"y\":20,\"w\":22,\"h\":34,\"i\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\"},\"panelIndex\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":8,\"h\":19,\"i\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\"},\"panelIndex\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"table\":null,\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":54,\"w\":16,\"h\":39,\"i\":\"3ce8c85f-ded2-4ff2-9a91-e85523bd2516\"},\"panelIndex\":\"3ce8c85f-ded2-4ff2-9a91-e85523bd2516\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_6\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":16,\"y\":54,\"w\":32,\"h\":39,\"i\":\"197395c9-4133-47ad-9290-1cb15f09e1ce\"},\"panelIndex\":\"197395c9-4133-47ad-9290-1cb15f09e1ce\",\"embeddableConfig\":{\"sort\":[[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"desc\"]]},\"panelRefName\":\"panel_7\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":93,\"w\":48,\"h\":30,\"i\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\"},\"panelIndex\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
+        "panelsJSON": "[{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"43028c5f-84f4-44fd-af4b-45103d59b07f\"},\"panelIndex\":\"43028c5f-84f4-44fd-af4b-45103d59b07f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":18,\"h\":20,\"i\":\"c80d237f-1036-4b28-8294-493be2526d80\"},\"panelIndex\":\"c80d237f-1036-4b28-8294-493be2526d80\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":26,\"y\":0,\"w\":22,\"h\":20,\"i\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\"},\"panelIndex\":\"9c39d8b3-ad8c-4247-b97f-9736e469c988\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":20,\"w\":18,\"h\":34,\"i\":\"1372927d-8b1d-4531-94fb-377dbccfff6b\"},\"panelIndex\":\"1372927d-8b1d-4531-94fb-377dbccfff6b\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_3\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":26,\"y\":20,\"w\":22,\"h\":34,\"i\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\"},\"panelIndex\":\"bccfb126-a864-4c11-a8c7-a9a1286c8f0f\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":8,\"h\":19,\"i\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\"},\"panelIndex\":\"bc116b54-f251-4e77-833c-c557b5d5c1d7\",\"embeddableConfig\":{\"hidePanelTitles\":true,\"table\":null,\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":54,\"w\":16,\"h\":39,\"i\":\"3ce8c85f-ded2-4ff2-9a91-e85523bd2516\"},\"panelIndex\":\"3ce8c85f-ded2-4ff2-9a91-e85523bd2516\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_6\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":16,\"y\":54,\"w\":32,\"h\":39,\"i\":\"197395c9-4133-47ad-9290-1cb15f09e1ce\"},\"panelIndex\":\"197395c9-4133-47ad-9290-1cb15f09e1ce\",\"embeddableConfig\":{\"sort\":[[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"desc\"]]},\"panelRefName\":\"panel_7\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":93,\"w\":48,\"h\":30,\"i\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\"},\"panelIndex\":\"49f38efc-1ab3-4e38-96e5-b0458c026491\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
         "timeRestore": false,
         "title": "Windows Events",
         "version": 1
@@ -68,8 +68,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-01-07T16:03:35.952Z",
-      "version": "WzEwNzUsMV0="
+      "updated_at": "2025-01-08T21:21:36.883Z",
+      "version": "WzEwNzAsMV0="
     },
     {
       "attributes": {
@@ -91,8 +91,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:03.736Z",
-      "version": "WzkyOCwxXQ=="
+      "updated_at": "2025-01-08T20:43:42.858Z",
+      "version": "WzEwNTAsMV0="
     },
     {
       "attributes": {
@@ -102,9 +102,9 @@
         },
         "savedSearchRefName": "search_0",
         "title": "Windows Events by Host",
-        "uiStateJSON": "{}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
         "version": 1,
-        "visState": "{\"title\":\"Windows Events by Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Last Log\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Origin\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Computer Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Windows Events by Host\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Last Log\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"host.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Computer Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "0100b010-d811-11ee-820d-dd9fd73a3921",
       "migrationVersion": {
@@ -121,8 +121,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3MywxXQ=="
+      "updated_at": "2025-01-08T21:20:43.195Z",
+      "version": "WzEwNjksMV0="
     },
     {
       "attributes": {
@@ -151,8 +151,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3NCwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk4OSwxXQ=="
     },
     {
       "attributes": {
@@ -181,8 +181,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T16:02:27.195Z",
-      "version": "WzEwNzQsMV0="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5MCwxXQ=="
     },
     {
       "attributes": {
@@ -211,8 +211,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3NSwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5MSwxXQ=="
     },
     {
       "attributes": {
@@ -241,8 +241,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3NiwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5MiwxXQ=="
     },
     {
       "attributes": {
@@ -271,8 +271,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3OCwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5MywxXQ=="
     },
     {
       "attributes": {
@@ -305,8 +305,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk3OSwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5NCwxXQ=="
     },
     {
       "attributes": {
@@ -342,8 +342,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-01-07T15:10:08.874Z",
-      "version": "Wzk4MCwxXQ=="
+      "updated_at": "2025-01-08T20:43:36.786Z",
+      "version": "Wzk5NSwxXQ=="
     }
   ],
   "version": "2.18.0"
