@@ -284,14 +284,21 @@ Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data 
 
 In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
 
-The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
+The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [winlogbeat.yml](https://www.elastic.co/guide/en/beats/winlogbeat/current/configuring-howto-winlogbeat.html) file:
 
 
 ```yml
-filebeat.inputs:
-- type: log
-  paths:
-    - /home/user/logs/*.log
+winlogbeat.event_logs:
+  - name: Application
+    ignore_older: 72h
+  - name: System
+  - name: Security
+  - name: ForwardedEvents
+    tags: [forwarded]
+  - name: Windows PowerShell
+    event_id: 400, 403, 600, 800
+  - name: Microsoft-Windows-PowerShell/Operational
+    event_id: 4103, 4104, 4105, 4106
 
 processors:
   - add_tags:
