@@ -343,15 +343,74 @@ def main():
                 fieldFormatInfo['id'] = 'url'
                 fieldFormatInfo['params'] = {}
 
-                # for Arkime to query by database field name, see arkime issue/PR 1461/1463
-                valQuote = '"' if field['type'] == 'string' else ''
-                valDbPrefix = (
-                    '' if (field['name'].startswith('zeek') or field['name'].startswith('suricata')) else 'db:'
-                )
+                if field['name'].endswith('.segment.id'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/ipam/prefixes/{{value}}'
 
-                fieldFormatInfo['params']['urlTemplate'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(
-                    valDbPrefix, field['name'], valQuote, valQuote
-                )
+                elif field['name'].endswith('.segment.name') or (field['name'] == 'network.name'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'
+
+                elif field['name'].endswith('.segment.tenant'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=tenancy.tenant&lookup=iexact'
+
+                elif field['name'].endswith('.device.id') or (field['name'] == 'related.device_id'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/dcim/devices/{{value}}'
+
+                elif field['name'].endswith('.device.name') or (field['name'] == 'related.device_name'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
+
+                elif field['name'].endswith('.device.cluster'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=virtualization.cluster&lookup=iexact'
+
+                elif field['name'].endswith('.device.device_type') or (field['name'] == 'related.device_type'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.devicetype&lookup=iexact'
+
+                elif field['name'].endswith('.device.manufacturer') or (field['name'] == 'related.manufacturer'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.manufacturer&lookup=iexact'
+
+                elif field['name'].endswith('.device.role') or (field['name'] == 'related.role'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.devicerole&lookup=iexact'
+
+                elif field['name'].endswith('.device.service') or (field['name'] == 'related.service'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=ipam.service&lookup=iexact'
+
+                elif field['name'].endswith('.device.url') or field['name'].endswith('.segment.url'):
+                    fieldFormatInfo['params']['urlTemplate'] = '{{value}}'
+
+                elif (
+                    field['name'].endswith('.device.site')
+                    or field['name'].endswith('.segment.site')
+                    or (field['name'] == 'related.site')
+                ):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'
+
+                else:
+                    # for Arkime to query by database field name, see arkime issue/PR 1461/1463
+                    valQuote = '"' if field['type'] == 'string' else ''
+                    valDbPrefix = (
+                        '' if (field['name'].startswith('zeek') or field['name'].startswith('suricata')) else 'db:'
+                    )
+                    fieldFormatInfo['params']['urlTemplate'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(
+                        valDbPrefix, field['name'], valQuote, valQuote
+                    )
+
                 fieldFormatInfo['params']['labelTemplate'] = '{{value}}'
                 fieldFormatInfo['params']['openLinkInCurrentTab'] = False
 
