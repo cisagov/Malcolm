@@ -267,23 +267,26 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           [[ "${TEMPLATES_IMPORTED}" == "true" ]] && SHOW_IMPORT_ERROR="--show-error" || SHOW_IMPORT_ERROR=
 
           # Save off any custom field formatting prior to an overwrite
-          FIELD_FORMAT_MAP="$( curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
-                                 "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}" 2>/dev/null | \
-                                 jq -r '.attributes.fieldFormatMap' 2>/dev/null | \
-                                 jq -c 'with_entries(.value.params.parsedUrl? = null | del(.value.params.parsedUrl))' 2>/dev/null )" || true
+          MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp)"
+          ( curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+                 "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}" 2>/dev/null | \
+                 jq -r '.attributes.fieldFormatMap' 2>/dev/null | \
+                 jq -c 'with_entries(.value.params.parsedUrl? = null | del(.value.params.parsedUrl))' 2>/dev/null | \
+                 jq '@json' >"$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" 2>/dev/null ) || true
+          MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
 
           # Create index pattern (preserving custom field formatting)
           MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp)"
           echo "{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
-          if [[ -n "$FIELD_FORMAT_MAP" ]] && [[ "$FIELD_FORMAT_MAP" != "null" ]]; then
-            echo "Preserving existing field formatting..."
-            jq --arg fieldFormatMap "$FIELD_FORMAT_MAP" '.attributes.fieldFormatMap = $fieldFormatMap' "$MALCOLM_INDEX_PATTERN_FILE_TEMP" | sponge "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+          if (( $MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE > 64 )); then
+            echo "Preserving existing field formatting for \"$INDEX_PATTERN\"..."
+            jq --slurpfile fieldFormatMap "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" '.attributes.fieldFormatMap = $fieldFormatMap[0]' "$MALCOLM_INDEX_PATTERN_FILE_TEMP" | sponge "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
           fi
           echo "Creating index pattern \"$INDEX_PATTERN\"..."
           curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}?overwrite=${TEMPLATES_IMPORTED}" \
             -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" 2>&1 || true
-          rm -f "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+          rm -f "$MALCOLM_INDEX_PATTERN_FILE_TEMP" "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP"
 
           echo "Setting default index pattern..."
 
@@ -297,11 +300,29 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             IDX_ID="$(echo "$i" | cut -d';' -f1)"
             IDX_NAME="$(echo "$i" | cut -d';' -f2)"
             IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
+
+            # Save off any custom field formatting prior to an overwrite
+            MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp)"
+            ( curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+                   "$DASHB_URL/api/saved_objects/index-pattern/${IDX_ID}" 2>/dev/null | \
+                   jq -r '.attributes.fieldFormatMap' 2>/dev/null | \
+                   jq -c 'with_entries(.value.params.parsedUrl? = null | del(.value.params.parsedUrl))' 2>/dev/null | \
+                   jq '@json' >"$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" 2>/dev/null ) || true
+            MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
+
+            MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp)"
+            echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+            if (( $MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE > 64 )); then
+              echo "Preserving existing field formatting for \"$IDX_NAME\"..."
+              jq --slurpfile fieldFormatMap "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" '.attributes.fieldFormatMap = $fieldFormatMap[0]' "$MALCOLM_INDEX_PATTERN_FILE_TEMP" | sponge "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+            fi
+
             echo "Creating index pattern \"$IDX_NAME\"..."
             curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
               "$DASHB_URL/api/saved_objects/index-pattern/${IDX_ID}?overwrite=${TEMPLATES_IMPORTED}" \
-              -d"{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" 2>&1 || true
-          done
+              -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" 2>&1 || true
+            rm -f "$MALCOLM_INDEX_PATTERN_FILE_TEMP" "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP"
+          done # i in OTHER_INDEX_PATTERNS
 
           # end Index pattern
           #############################################################################################################################
