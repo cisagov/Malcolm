@@ -67,6 +67,7 @@
 "ocsp": ["file", "network"]
 "openvpn": ["network"]
 "pe": ["file"]
+"postgresql": ["database", "network"]
 "profinet": ["ot", "network"]
 "profinet_dce_rpc": ["ot", "network"]
 "profinet_io_cm": ["ot", "network"]
