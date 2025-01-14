@@ -132,7 +132,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zeek-quasarrat-detector"
   "https://github.com/corelight/zeek-spicy-ipsec"
   "https://github.com/corelight/zeek-spicy-openvpn"
-  "https://github.com/corelight/zeek-spicy-ospf"
+  "https://github.com/corelight/zeek-spicy-ospf|master"
   "https://github.com/corelight/zeek-spicy-stun"
   "https://github.com/corelight/zeek-spicy-wireguard"
   "https://github.com/corelight/zeek-strrat-detector"
