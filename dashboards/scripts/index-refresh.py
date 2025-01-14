@@ -370,24 +370,16 @@ def main():
                     ] = '/netbox/search/?q={{value}}&obj_types=virtualization.cluster&lookup=iexact'
 
                 elif field['name'].endswith('.device.device_type') or (field['name'] == 'related.device_type'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.devicetype&lookup=iexact'
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicetype'
 
                 elif field['name'].endswith('.device.manufacturer') or (field['name'] == 'related.manufacturer'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.manufacturer&lookup=iexact'
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.manufacturer'
 
                 elif field['name'].endswith('.device.role') or (field['name'] == 'related.role'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.devicerole&lookup=iexact'
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicerole'
 
                 elif field['name'].endswith('.device.service') or (field['name'] == 'related.service'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=ipam.service&lookup=iexact'
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=ipam.service'
 
                 elif field['name'].endswith('.device.url') or field['name'].endswith('.segment.url'):
                     fieldFormatInfo['params']['urlTemplate'] = '{{value}}'
