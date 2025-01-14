@@ -121,6 +121,8 @@ openvpn:
 pop3:
   - 110
   - 995
+postgresql:
+  - 5432
 profinet:
   - 4800
   - 4900
