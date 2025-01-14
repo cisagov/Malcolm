@@ -336,9 +336,13 @@ def main():
         #        },
         #        ...
         #    }
-
+        pivotIgnoreTypes = ['date']
         if args.opensearchMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
-            for field in [x for x in getFieldsList if x['name'][:1].isalpha() and x['name'] not in fieldFormatMap]:
+            for field in [
+                x
+                for x in getFieldsList
+                if x['name'][:1].isalpha() and (x['name'] not in fieldFormatMap) and (x['type'] not in pivotIgnoreTypes)
+            ]:
                 fieldFormatInfo = {}
                 fieldFormatInfo['id'] = 'url'
                 fieldFormatInfo['params'] = {}
