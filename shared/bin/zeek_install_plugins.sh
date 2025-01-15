@@ -99,6 +99,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-genisys"
   "https://github.com/cisagov/icsnpp-hart-ip"
   "https://github.com/cisagov/icsnpp-modbus"
+  "https://github.com/cisagov/icsnpp-omron-fins"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-profinet-io-cm"
   "https://github.com/cisagov/icsnpp-s7comm"
