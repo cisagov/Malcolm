@@ -65,6 +65,8 @@
 "ntlm": ["authentication", "iam", "network"]
 "ntp": ["network"]
 "ocsp": ["file", "network"]
+"omron_fins": ["ot", "network"]
+"opcua-binary": ["ot", "network"]
 "openvpn": ["network"]
 "pe": ["file"]
 "postgresql": ["database", "network"]
