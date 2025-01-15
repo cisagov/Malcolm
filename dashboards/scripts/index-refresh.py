@@ -397,6 +397,9 @@ def main():
                         'urlTemplate'
                     ] = '/netbox/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'
 
+                elif field['name'] == 'zeek.files.extracted_uri':
+                    fieldFormatInfo['params']['urlTemplate'] = '/{{value}}'
+
                 else:
                     # for Arkime to query by database field name, see arkime issue/PR 1461/1463
                     valQuote = '"' if field['type'] == 'string' else ''
