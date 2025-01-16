@@ -37,6 +37,7 @@ from pcap_utils import (
 )
 import malcolm_utils
 from malcolm_utils import eprint, str2bool, AtomicInt, run_process
+from suricata_socket import SuricataSocketClient
 
 from multiprocessing.pool import ThreadPool
 from collections import deque
@@ -82,7 +83,6 @@ TAGS_NOSHOW = (
 
 
 ###################################################################################################
-
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
@@ -403,7 +403,6 @@ def suricataFileWorker(suricataWorkerArgs):
         pcapBaseDir,
         autoSuricata,
         forceSuricata,
-        suricataBin,
         extraTags,
         autoTag,
         uploadDir,
@@ -419,7 +418,6 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[6],
         suricataWorkerArgs[7],
         suricataWorkerArgs[8],
-        suricataWorkerArgs[9],
     )
 
     if not logger:
@@ -427,96 +425,75 @@ def suricataFileWorker(suricataWorkerArgs):
 
     logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
 
-    # loop forever, or until we're told to shut down
+    # create a single socket client for this worker
+    try:
+        suricata = SuricataSocketClient(logger=logger, output_dir=uploadDir)
+    except Exception as e:
+        logger.error(f"Failed to create Suricata socket client: {e}")
+        return
+
     while not shuttingDown:
         try:
             # pull an item from the queue of files that need to be processed
             fileInfo = newFileQueue.popleft()
         except IndexError:
             time.sleep(1)
-        else:
-            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-                # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
-                # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
-                # as Suricata now does its own network capture in Malcolm standalone mode.
-                if (
-                    autoSuricata
-                    or (
-                        (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+            continue
+
+        if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+            if (
+                autoSuricata
+                or (
+                    (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                )
+            ) and (
+                forceSuricata
+                or (
+                    not any(
+                        os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                        for prefix in ('mnetsniff', 'mtcpdump')
                     )
-                ) and (
-                    forceSuricata
-                    or (
-                        not any(
-                            os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
-                            for prefix in ('mnetsniff', 'mtcpdump')
-                        )
+                )
+            ):
+                if pcapBaseDir and os.path.isdir(pcapBaseDir):
+                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+                    # finalize tags list
+                    fileInfo[FILE_INFO_DICT_TAGS] = (
+                        [x for x in fileInfo[FILE_INFO_DICT_TAGS] if x not in TAGS_NOSHOW]
+                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
+                        else list()
                     )
-                ):
-                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+                    if extraTags and isinstance(extraTags, list):
+                        fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
+                    fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
+                    logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
 
-                    if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                        # finalize tags list
-                        fileInfo[FILE_INFO_DICT_TAGS] = (
-                            [
-                                x
-                                for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
-                            ]
-                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
-                            else list()
-                        )
-                        if extraTags and isinstance(extraTags, list):
-                            fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                        fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
-                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                    # Create unique output directory for this PCAP
+                    processTimeUsec = int(round(time.time() * 1000000))
+                    output_dir = os.path.join(
+                        uploadDir,
+                        f"suricata-{processTimeUsec}-{scanWorkerId}"
+                    )
 
-                        # create a temporary work directory where suricata will be executed to generate the log files
-                        with tempfile.TemporaryDirectory() as tmpLogDir:
-                            if os.path.isdir(tmpLogDir):
-                                processTimeUsec = int(round(time.time() * 1000000))
-
-                                # put together suricata execution command
-                                cmd = [
-                                    suricataBin,
-                                    '-r',
-                                    fileInfo[FILE_INFO_DICT_NAME],
-                                    '-l',
-                                    tmpLogDir,
-                                    '-c',
-                                    suricataConfig,
-                                ]
-
-                                # execute suricata-capture for pcap file
-                                retcode, output = run_process(cmd, logger=logger)
-
-                                eveJsonFile = os.path.join(tmpLogDir, "eve.json")
-                                if os.path.isfile(eveJsonFile):
-                                    # relocate the .json to be processed (do it this way instead of with a shutil.move because of
-                                    # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
-                                    # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
-                                    shutil.copy(
-                                        eveJsonFile,
-                                        os.path.join(
-                                            uploadDir,
-                                            f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json",
-                                        ),
-                                    )
-
-                                if retcode == 0:
-                                    logger.info(
-                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                                    )
-                                else:
-                                    logger.warning(
-                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
-                                    )
-
+                    try:
+                        logger.info(f"{scriptName}[{scanWorkerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata")
+                        if suricata.process_pcap(fileInfo[FILE_INFO_DICT_NAME], output_dir):
+                            logger.info(f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+                            
+                            # Handle the eve.json output
+                            eveJsonFile = os.path.join(output_dir, "eve.json")
+                            if os.path.isfile(eveJsonFile):
+                                output_name = f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json"
+                                shutil.copy(eveJsonFile, os.path.join(uploadDir, output_name))
+                                logger.info(f"{scriptName}[{scanWorkerId}]:\t📄\tGenerated {output_name}")
                             else:
-                                logger.warning(
-                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
-                                )
+                                logger.warning(f"{scriptName}[{scanWorkerId}]:\t⚠️\tNo eve.json generated for {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+                        else:
+                            logger.error(f"{scriptName}[{scanWorkerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}")
+                    except Exception as e:
+                        logger.error(f"{scriptName}[{scanWorkerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}")
 
     logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
 
@@ -859,7 +836,6 @@ def main():
                     args.pcapBaseDir,
                     args.autoSuricata,
                     args.forceSuricata,
-                    args.executable,
                     args.extraTags,
                     args.autoTag,
                     args.suricataUploadDir,
