@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [[ -z $MALCOLM_USERNAME || -z $MALCOLM_PASSWORD ]]; then
   echo "Please set the SSH username and (openssl-encrypted then base64-encoded) password by adding the following arguments to docker run/create:"

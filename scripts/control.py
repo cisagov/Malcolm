@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import sys
 
@@ -210,7 +210,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     keystoreBinProc = f"/usr/share/{service}/bin/{service}-keystore"
     uidGidDict = GetUidGidFromEnv(args.configDir)
 
-    if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
+    if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # if we're using docker-uid-gid-setup.sh to drop privileges as we spin up a container
         dockerUidGuidSetup = "/usr/local/bin/docker-uid-gid-setup.sh"
 
@@ -401,10 +401,6 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             for podname, podResults in podsResults.items():
                 dbgStr = f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
                 eprint(dbgStr)
-
-    elif args.composeProfile == PROFILE_HEDGEHOG:
-        # keystore operation doesn't mean anything in hedgehog mode, just return "Ok"
-        err = 0
 
     else:
         raise Exception(

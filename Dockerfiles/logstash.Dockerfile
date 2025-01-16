@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.16.0
+FROM docker.elastic.co/logstash/logstash-oss:8.17.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

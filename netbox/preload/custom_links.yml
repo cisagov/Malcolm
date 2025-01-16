@@ -13,6 +13,11 @@
   link_url: "/dashboards/app/dashboards#/view/677ee170-809e-11ed-8d5b-07069f823b6f?_g=(filters:!((meta:(key:related.role,negate:!f,params:(query:1),type:phrase),query:(match_phrase:(related.role:'{{ object.name }}')))))"
   new_window: True
   content_type: devicerole
+- name: site_link_to_dashboards
+  link_text: 'Asset Interaction Analysis'
+  link_url: "/dashboards/app/dashboards#/view/677ee170-809e-11ed-8d5b-07069f823b6f?_g=(filters:!((meta:(key:related.site,negate:!f,params:(query:1),type:phrase),query:(match_phrase:(related.site:'{{ object.name }}')))))"
+  new_window: True
+  content_type: site
 - name: device_link_to_arkime
   link_text: 'Arkime'
   link_url: '/arkime/sessions?expression=(related.device_id == {{ object.id }})'
@@ -28,3 +33,8 @@
   link_url: '/arkime/sessions?expression=(related.role == "{{ object.name }}")'
   new_window: True
   content_type: devicerole
+- name: site_link_to_arkime
+  link_text: 'Arkime'
+  link_url: '/arkime/sessions?expression=(related.site == "{{ object.name }}")'
+  new_window: True
+  content_type: site

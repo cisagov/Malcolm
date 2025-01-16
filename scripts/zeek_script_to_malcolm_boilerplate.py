@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 #
 # This script takes as input the filenames of one or more .zeek scripts which
@@ -472,6 +472,7 @@ def main():
 
     # output boilerplate Logstash filter for use in Malcolm
     with open(args.logstashOutFile, "w") as f:
+        print(f'filter {{', file=f)
         for record in [r for r in records if len(r["fields"]) > 0]:
             # default to the record's log path, fall back to the slugified record name
             rName = record['path'] if ('path' in record) and record['path'] else record['name']
@@ -481,45 +482,48 @@ def main():
             print(
                 '\n'.join(
                     (
-                        f'}} else if ([log_source] == "{rName}") {{',
-                        f'  #############################################################################################################################',
-                        f'  # {rName}.log',
-                        f'  # {os.path.basename(val)} ({args.url})',
                         '',
-                        f'  if ("_jsonparsesuccess" not in [tags]) {{',
-                        f'    dissect {{',
-                        f'      id => "dissect_zeek_{rName}"',
-                        f'      mapping => {{',
-                        f'        "[message]" => "{rFieldsDissect}"',
+                        f'  if ([log_source] == "{rName}") {{',
+                        f'    #############################################################################################################################',
+                        f'    # {rName}.log',
+                        f'    # {os.path.basename(val)} ({args.url})',
+                        '',
+                        f'    if ("_jsonparsesuccess" not in [tags]) {{',
+                        f'      dissect {{',
+                        f'        id => "dissect_zeek_{rName}"',
+                        f'        mapping => {{',
+                        f'          "[message]" => "{rFieldsDissect}"',
+                        f'        }}',
+                        f'      }}',
+                        '',
+                        f'      if ("_dissectfailure" in [tags]) {{',
+                        f'        mutate {{',
+                        f'          id => "mutate_split_zeek_{rName}"',
+                        f'          split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
+                        f'        }}',
+                        f'        ruby {{',
+                        f'          id => "ruby_zip_zeek_{rName}"',
+                        f'          init => "@zeek_{rName}_field_names = [ {rFieldsZip} ]"',
+                        f"          code => \"event.set('[zeek_cols]', @zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
+                        f'        }}',
                         f'      }}',
                         f'    }}',
                         '',
-                        f'    if ("_dissectfailure" in [tags]) {{',
-                        f'      mutate {{',
-                        f'        id => "mutate_split_zeek_{rName}"',
-                        f'        split => {{ "[message]" => "{ZEEK_DELIMITER_CHAR}" }}',
+                        f'    mutate {{',
+                        f'      id => "mutate_add_fields_zeek_{rName}"',
+                        f'      add_field => {{',
+                        f'        "[zeek_cols][proto]" => "{args.protocol}"',
+                        f'        "[zeek_cols][service]" => "{args.service}"',
                         f'      }}',
-                        f'      ruby {{',
-                        f'        id => "ruby_zip_zeek_{rName}"',
-                        f'        init => "$zeek_{rName}_field_names = [ {rFieldsZip} ]"',
-                        f"        code => \"event.set('[zeek_cols]', $zeek_{rName}_field_names.zip(event.get('[message]')).to_h)\"",
-                        f'      }}',
+                        f'      add_tag => [ {tags} ]' if tags else '',
                         f'    }}',
-                        f'  }}',
-                        '',
-                        f'  mutate {{',
-                        f'    id => "mutate_add_fields_zeek_{rName}"',
-                        f'    add_field => {{',
-                        f'      "[zeek_cols][proto]" => "{args.protocol}"',
-                        f'      "[zeek_cols][service]" => "{args.service}"',
-                        f'    }}',
-                        f'    add_tag => [ {tags} ]' if tags else '',
                         f'  }}',
                         '',
                     )
                 ),
                 file=f,
             )
+        print('\n'.join((f'}}', '')), file=f)
 
     # output boilerplate Arkime definitions for use in Malcolm
     with open(args.arkimeOutFile, "w") as f:
@@ -531,7 +535,7 @@ def main():
             # https://github.com/cisagov/ICSNPP
             for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
                 print(
-                    f"zeek.{rName}.{field['name']}=db:zeek.{rName}.{field['name']};group:zeek_{rName};kind:{ZEEK_TO_ARKIME_TYPES[field['type']]};friendly:{field['name']};help:{field['name']}",
+                    f"zeek.{rName}.{field['name']}=db:zeek.{rName}.{field['name']};group:zeek_{rName};kind:{ZEEK_TO_ARKIME_TYPES[field['type']]};viewerOnly:true;friendly:{field['name']};help:{field['name']}",
                     file=f,
                 )
             print("", file=f)
