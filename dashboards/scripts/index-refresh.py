@@ -16,7 +16,7 @@ from requests.auth import HTTPBasicAuth
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
 GET_FIELDS_URI = 'api/index_patterns/_fields_for_wildcard'
-PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
+GET_PUT_INDEX_PATTERN_URI = 'api/saved_objects/index-pattern'
 OS_GET_INDEX_TEMPLATE_URI = '_index_template'
 OS_GET_COMPONENT_TEMPLATE_URI = '_component_template'
 GET_SHARDS_URL = '_cat/shards?h=index,state'
@@ -155,6 +155,12 @@ def main():
     opensearchCreds = (
         malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
     )
+
+    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        xsrfHeader = "kbn-xsrf"
+    else:
+        xsrfHeader = "osd-xsrf"
+
     if not args.opensearchUrl:
         if opensearchIsLocal:
             args.opensearchUrl = 'http://opensearch:9200'
@@ -176,7 +182,7 @@ def main():
     statusInfo = statusInfoResponse.json()
     dashboardsVersion = statusInfo['version']['number']
     if debug:
-        malcolm_utils.eprint('OpenSearch Dashboards version is {}'.format(dashboardsVersion))
+        malcolm_utils.eprint('Dashboards version is {}'.format(dashboardsVersion))
 
     opensearchInfoResponse = requests.get(
         args.opensearchUrl,
@@ -298,136 +304,116 @@ def main():
         if debug:
             malcolm_utils.eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
+        # first get the previous field format map as a starting point, if any
+        getResponse = requests.get(
+            '{}/{}/{}'.format(args.dashboardsUrl, GET_PUT_INDEX_PATTERN_URI, indexId),
+            headers={
+                'Content-Type': 'application/json',
+                xsrfHeader: 'true',
+            },
+            auth=opensearchReqHttpAuth,
+            verify=args.opensearchSslVerify,
+        )
+        getResponse.raise_for_status()
+        try:
+            fieldFormatMap = json.loads(
+                malcolm_utils.deep_get(getResponse.json(), ['attributes', 'fieldFormatMap'], default="{}")
+            )
+        except Exception as e:
+            fieldFormatMap = {}
+
         # define field formatting map for Dashboards -> Arkime drilldown and other URL drilldowns
-        #
-        # see: https://github.com/cisagov/Malcolm/issues/133
-        #      https://github.com/mmguero-dev/kibana-plugin-drilldownmenu
         #
         # fieldFormatMap is
         #    {
-        #        "source.ip": {
-        #            "id": "drilldown",
-        #            "params": {
-        #                "parsedUrl": {
-        #                    "origin": "https://malcolm.local.lan",
-        #                    "pathname": "/kibana/app/kibana",
-        #                    "basePath": "/kibana"
-        #                },
-        #                "urlTemplates": [
-        #                    null,
-        #                    {
-        #                        "url": "/iddash2ark/source.ip == {{value}}",
-        #                        "label": "Arkime: source.ip == {{value}}"
-        #                    }
-        #                ]
-        #            }
+        #        "destination.port": {
+        #           "id": "url",
+        #           "params": {
+        #             "urlTemplate": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}",
+        #             "labelTemplate": "{{value}}",
+        #             "openLinkInCurrentTab": false
+        #           }
         #        },
         #        ...
         #    }
-        fieldFormatMap = {}
-        for field in getFieldsList:
-            if field['name'][:1].isalpha():
-                # for Arkime to query by database field name, see arkime issue/PR 1461/1463
-                valQuote = '"' if field['type'] == 'string' else ''
-                valDbPrefix = '' if field['name'].startswith('zeek') else 'db:'
-                drilldownInfoParamsUrlTemplateValues = {}
-                drilldownInfoParamsUrlTemplateValues['url'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(
-                    valDbPrefix, field['name'], valQuote, valQuote
-                )
-                drilldownInfoParamsUrlTemplateValues['label'] = 'Arkime {}: {}{{{{value}}}}{}'.format(
-                    field['name'], valQuote, valQuote
-                )
-                drilldownInfoParamsUrlTemplates = [None, drilldownInfoParamsUrlTemplateValues]
+        pivotIgnoreTypes = ['date']
+        if args.opensearchMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+            for field in [
+                x
+                for x in getFieldsList
+                if x['name'][:1].isalpha() and (x['name'] not in fieldFormatMap) and (x['type'] not in pivotIgnoreTypes)
+            ]:
+                fieldFormatInfo = {}
+                fieldFormatInfo['id'] = 'url'
+                fieldFormatInfo['params'] = {}
 
-                if (field['type'] == 'ip') or (re.search(r'[_\.-](h|ip)$', field['name'], re.IGNORECASE) is not None):
-                    # add drilldown for searching IANA for IP addresses
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.virustotal.com/en/ip-address/{{value}}/information/'
-                    )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal IP: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+                if field['name'].endswith('.segment.id'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/ipam/prefixes/{{value}}'
 
-                elif re.search(r'(^|[\b_\.-])(md5|sha(1|256|384|512))\b', field['name'], re.IGNORECASE) is not None:
-                    # add drilldown for searching VirusTotal for hash signatures
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.virustotal.com/gui/file/{{value}}/detection'
-                    )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'VirusTotal Hash: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+                elif field['name'].endswith('.segment.name') or (field['name'] == 'network.name'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'
 
-                elif re.search(r'(^|[\b_\.-])(hit|signature(_?id))?s?$', field['name'], re.IGNORECASE) is not None:
-                    # add drilldown for searching the web for signature IDs
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = 'https://duckduckgo.com/?q="{{value}}"'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Web Search: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+                elif field['name'].endswith('.segment.tenant'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=tenancy.tenant&lookup=iexact'
+
+                elif field['name'].endswith('.device.id') or (field['name'] == 'related.device_id'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/dcim/devices/{{value}}'
+
+                elif field['name'].endswith('.device.name') or (field['name'] == 'related.device_name'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
+
+                elif field['name'].endswith('.device.cluster'):
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=virtualization.cluster&lookup=iexact'
+
+                elif field['name'].endswith('.device.device_type') or (field['name'] == 'related.device_type'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicetype'
+
+                elif field['name'].endswith('.device.manufacturer') or (field['name'] == 'related.manufacturer'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.manufacturer'
+
+                elif field['name'].endswith('.device.role') or (field['name'] == 'related.role'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicerole'
+
+                elif field['name'].endswith('.device.service') or (field['name'] == 'related.service'):
+                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=ipam.service'
+
+                elif field['name'].endswith('.device.url') or field['name'].endswith('.segment.url'):
+                    fieldFormatInfo['params']['urlTemplate'] = '{{value}}'
 
                 elif (
-                    re.search(r'(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$', field['name'], re.IGNORECASE)
-                    is not None
+                    field['name'].endswith('.device.site')
+                    or field['name'].endswith('.segment.site')
+                    or (field['name'] == 'related.site')
                 ):
-                    # add drilldown for searching IANA for ports
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'
+
+                elif field['name'] == 'zeek.files.extracted_uri':
+                    fieldFormatInfo['params']['urlTemplate'] = '/{{value}}'
+
+                else:
+                    # for Arkime to query by database field name, see arkime issue/PR 1461/1463
+                    valQuote = '"' if field['type'] == 'string' else ''
+                    valDbPrefix = (
+                        '' if (field['name'].startswith('zeek') or field['name'].startswith('suricata')) else 'db:'
                     )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Port Registry: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-
-                elif re.search(r'^(protocol?|network\.protocol)$', field['name'], re.IGNORECASE) is not None:
-                    # add drilldown for searching IANA for services
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}'
+                    fieldFormatInfo['params']['urlTemplate'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(
+                        valDbPrefix, field['name'], valQuote, valQuote
                     )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Service Registry: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
 
-                elif re.search(r'^(network\.transport|ipProtocol)$', field['name'], re.IGNORECASE) is not None:
-                    # add URL link for assigned transport protocol numbers
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml'
-                    )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Protocol Registry'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
+                fieldFormatInfo['params']['labelTemplate'] = '{{value}}'
+                fieldFormatInfo['params']['openLinkInCurrentTab'] = False
 
-                elif re.search(r'(as\.number|(src|dst)ASN|asn\.(src|dst))$', field['name'], re.IGNORECASE) is not None:
-                    # add drilldown for searching ARIN for ASN
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://search.arin.net/rdap/?query={{value}}&searchFilter=asn'
-                    )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'ARIN ASN: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-
-                elif re.search(r'mime[_\.-]?type', field['name'], re.IGNORECASE) is not None:
-                    # add drilldown for searching mime/media/content types
-                    # TODO: '/' in URL is getting messed up somehow, maybe we need to url encode it manually? not sure...
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = (
-                        'https://www.iana.org/assignments/media-types/{{value}}'
-                    )
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Media Type Registry: {{value}}'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-
-                elif re.search(r'(^zeek\.files\.extracted$)', field['name'], re.IGNORECASE) is not None:
-                    # add download for extracted zeek files
-                    drilldownInfoParamsUrlTemplateValues = {}
-                    drilldownInfoParamsUrlTemplateValues['url'] = '/extracted-files/{{value}}'
-                    drilldownInfoParamsUrlTemplateValues['label'] = 'Download'
-                    drilldownInfoParamsUrlTemplates.append(drilldownInfoParamsUrlTemplateValues)
-
-                drilldownInfoParams = {}
-                drilldownInfoParams['urlTemplates'] = drilldownInfoParamsUrlTemplates
-
-                drilldownInfo = {}
-                drilldownInfo['id'] = 'drilldown'
-                drilldownInfo['params'] = drilldownInfoParams
-
-                fieldFormatMap[field['name']] = drilldownInfo
+                fieldFormatMap[field['name']] = fieldFormatInfo
 
         # set the index pattern with our complete list of fields
         putIndexInfo = {}
@@ -438,11 +424,10 @@ def main():
 
         if not args.dryrun:
             putResponse = requests.put(
-                '{}/{}/{}'.format(args.dashboardsUrl, PUT_INDEX_PATTERN_URI, indexId),
+                '{}/{}/{}'.format(args.dashboardsUrl, GET_PUT_INDEX_PATTERN_URI, indexId),
                 headers={
                     'Content-Type': 'application/json',
-                    'osd-xsrf': 'true',
-                    'osd-version': dashboardsVersion,
+                    xsrfHeader: 'true',
                 },
                 data=json.dumps(putIndexInfo),
                 auth=opensearchReqHttpAuth,
@@ -474,7 +459,7 @@ def main():
                     '{}/{}/{}'.format(args.opensearchUrl, shardInfo[0], '_settings'),
                     headers={
                         'Content-Type': 'application/json',
-                        'osd-xsrf': 'true',
+                        xsrfHeader: 'true',
                     },
                     data=json.dumps({'index': {'number_of_replicas': 0}}),
                     auth=opensearchReqHttpAuth,

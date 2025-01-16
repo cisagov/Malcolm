@@ -1,0 +1,32 @@
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+
+name: "${PCAP_NODE_NAME:malcolm}"
+
+logging.metrics.enabled: false
+
+#================================ Inputs =======================================
+
+filebeat.inputs:
+- type: udp
+  host: "0.0.0.0:${FILEBEAT_SYSLOG_UDP_PORT:514}"
+  max_message_size: ${FILEBEAT_SYSLOG_UDP_MAX_MESSAGE_SIZE:10KiB}
+
+#================================ Processors ===================================
+processors:
+  - syslog:
+      field: message
+      format: ${FILEBEAT_SYSLOG_UDP_FORMAT:auto}
+  - add_tags:
+      tags: [ "${FILEBEAT_TCP_TAG:_malcolm_beats}" ]
+
+#================================ Outputs ======================================
+
+#-------------------------- Logstash Output ------------------------------------
+output.logstash:
+  hosts: ["${LOGSTASH_HOST:logstash:5044}"]
+  ssl.enabled: ${BEATS_SSL:false}
+  ssl.certificate_authorities: ["/certs/ca.crt"]
+  ssl.certificate: "/certs/client.crt"
+  ssl.key: "/certs/client.key"
+  ssl.supported_protocols: "TLSv1.2"
+  ssl.verification_mode: "none"

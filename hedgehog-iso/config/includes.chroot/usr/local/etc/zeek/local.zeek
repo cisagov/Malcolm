@@ -13,6 +13,7 @@ global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") =
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == true_regex) ? T : F;
 global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == true_regex) ? T : F;
 global disable_detect_routers = (getenv("ZEEK_DISABLE_DETECT_ROUTERS") == true_regex) ? T : F;
+global omron_fins_detailed = (getenv("ZEEK_OMRON_FINS_DETAILED") == true_regex) ? T : F;
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_regex) ? T : F;
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
 global genisys_ports_str = getenv("ZEEK_GENISYS_PORTS");
@@ -38,6 +39,7 @@ global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex
 global disable_ics_genisys = (getenv("ZEEK_DISABLE_ICS_GENISYS") == true_regex) ? T : F;
 global disable_ics_ge_srtp = (getenv("ZEEK_DISABLE_ICS_GE_SRTP") == true_regex) ? T : F;
 global disable_ics_hart_ip = (getenv("ZEEK_DISABLE_ICS_HART_IP") == true_regex) ? T : F;
+global disable_ics_omron_fins = (getenv("ZEEK_DISABLE_ICS_OMRON_FINS") == true_regex) ? T : F;
 global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == true_regex) ? T : F;
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
@@ -167,6 +169,10 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_modbus) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_MODBUS);
+  }
+  if (disable_ics_all || disable_ics_omron_fins) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_OMRON_FINS_UDP);
   }
   if (disable_ics_all || disable_ics_profinet) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_PROFINET);
@@ -314,6 +320,14 @@ redef CVE_2021_44228::log = F;
 
   hook SYNCHROPHASOR::log_policy_sychrophasor_data(
     rec : SYNCHROPHASOR::Synchrophasor_Data,
+    id : Log::ID,
+    filter : Log::Filter) {
+      break;
+  }
+@endif
+@if ((!disable_ics_all) && (!disable_ics_omron_fins) && (!omron_fins_detailed))
+  hook OMRON_FINS::log_policy_detail(
+    rec : OMRON_FINS::detail_log,
     id : Log::ID,
     filter : Log::Filter) {
       break;
