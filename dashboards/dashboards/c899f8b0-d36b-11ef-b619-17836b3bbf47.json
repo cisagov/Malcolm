@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":33,\"i\":\"93a55ef0-2531-4e0f-b541-007b15675877\"},\"panelIndex\":\"93a55ef0-2531-4e0f-b541-007b15675877\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":10,\"h\":33,\"i\":\"1feca6e6-3466-4ff7-bcbf-267e3e78df54\"},\"panelIndex\":\"1feca6e6-3466-4ff7-bcbf-267e3e78df54\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":30,\"h\":14,\"i\":\"cfb1f39f-52c9-4e69-938a-8ea3a7d98449\"},\"panelIndex\":\"cfb1f39f-52c9-4e69-938a-8ea3a7d98449\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":18,\"y\":14,\"w\":30,\"h\":19,\"i\":\"8af980bf-56dd-4d6e-b7bf-8edf0d2fb319\"},\"panelIndex\":\"8af980bf-56dd-4d6e-b7bf-8edf0d2fb319\",\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":33,\"w\":9,\"h\":19,\"i\":\"438627ba-9c90-4820-a50d-afe9a7bb2d6d\"},\"panelIndex\":\"438627ba-9c90-4820-a50d-afe9a7bb2d6d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":9,\"y\":33,\"w\":10,\"h\":19,\"i\":\"4924e5a6-8301-4eb0-897a-fe4f434a423a\"},\"panelIndex\":\"4924e5a6-8301-4eb0-897a-fe4f434a423a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":19,\"y\":33,\"w\":17,\"h\":19,\"i\":\"f470af29-165f-405f-b7d7-645daa139a33\"},\"panelIndex\":\"f470af29-165f-405f-b7d7-645daa139a33\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":36,\"y\":33,\"w\":12,\"h\":19,\"i\":\"a98fe06a-c49c-47ee-a696-555df58f7fbb\"},\"panelIndex\":\"a98fe06a-c49c-47ee-a696-555df58f7fbb\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":52,\"w\":13,\"h\":19,\"i\":\"daf32d2d-164d-418a-b1f1-1f329ce71ff0\"},\"panelIndex\":\"daf32d2d-164d-418a-b1f1-1f329ce71ff0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":13,\"y\":52,\"w\":16,\"h\":19,\"i\":\"140856ec-a808-4b4d-b576-083f94388bf5\"},\"panelIndex\":\"140856ec-a808-4b4d-b576-083f94388bf5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":29,\"y\":52,\"w\":19,\"h\":19,\"i\":\"15fb5c1b-0f41-42fc-9bb5-06402e78e215\"},\"panelIndex\":\"15fb5c1b-0f41-42fc-9bb5-06402e78e215\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.18.0\",\"gridData\":{\"x\":0,\"y\":71,\"w\":48,\"h\":29,\"i\":\"d8e534f2-e1e2-4a4d-a5a9-d086db6116af\"},\"panelIndex\":\"d8e534f2-e1e2-4a4d-a5a9-d086db6116af\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":33,\"i\":\"93a55ef0-2531-4e0f-b541-007b15675877\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"93a55ef0-2531-4e0f-b541-007b15675877\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":33,\"i\":\"1feca6e6-3466-4ff7-bcbf-267e3e78df54\",\"w\":10,\"x\":8,\"y\":0},\"panelIndex\":\"1feca6e6-3466-4ff7-bcbf-267e3e78df54\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":14,\"i\":\"cfb1f39f-52c9-4e69-938a-8ea3a7d98449\",\"w\":30,\"x\":18,\"y\":0},\"panelIndex\":\"cfb1f39f-52c9-4e69-938a-8ea3a7d98449\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"8af980bf-56dd-4d6e-b7bf-8edf0d2fb319\",\"w\":30,\"x\":18,\"y\":14},\"panelIndex\":\"8af980bf-56dd-4d6e-b7bf-8edf0d2fb319\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"438627ba-9c90-4820-a50d-afe9a7bb2d6d\",\"w\":9,\"x\":0,\"y\":33},\"panelIndex\":\"438627ba-9c90-4820-a50d-afe9a7bb2d6d\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"4924e5a6-8301-4eb0-897a-fe4f434a423a\",\"w\":10,\"x\":9,\"y\":33},\"panelIndex\":\"4924e5a6-8301-4eb0-897a-fe4f434a423a\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"f470af29-165f-405f-b7d7-645daa139a33\",\"w\":17,\"x\":19,\"y\":33},\"panelIndex\":\"f470af29-165f-405f-b7d7-645daa139a33\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"a98fe06a-c49c-47ee-a696-555df58f7fbb\",\"w\":12,\"x\":36,\"y\":33},\"panelIndex\":\"a98fe06a-c49c-47ee-a696-555df58f7fbb\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"daf32d2d-164d-418a-b1f1-1f329ce71ff0\",\"w\":13,\"x\":0,\"y\":52},\"panelIndex\":\"daf32d2d-164d-418a-b1f1-1f329ce71ff0\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"140856ec-a808-4b4d-b576-083f94388bf5\",\"w\":16,\"x\":13,\"y\":52},\"panelIndex\":\"140856ec-a808-4b4d-b576-083f94388bf5\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"15fb5c1b-0f41-42fc-9bb5-06402e78e215\",\"w\":19,\"x\":29,\"y\":52},\"panelIndex\":\"15fb5c1b-0f41-42fc-9bb5-06402e78e215\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"d8e534f2-e1e2-4a4d-a5a9-d086db6116af\",\"w\":48,\"x\":0,\"y\":71},\"panelIndex\":\"d8e534f2-e1e2-4a4d-a5a9-d086db6116af\",\"version\":\"2.18.0\",\"panelRefName\":\"panel_11\"}]",
         "timeRestore": false,
         "title": "Omron FINS",
         "version": 1
@@ -83,8 +83,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-01-15T22:37:50.583Z",
-      "version": "WzEwOTQsMV0="
+      "updated_at": "2025-01-16T15:46:51.481Z",
+      "version": "WzEwODcsMV0="
     },
     {
       "attributes": {
@@ -106,8 +106,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:43.578Z",
-      "version": "WzEwNzAsMV0="
+      "updated_at": "2025-01-16T14:55:17.645Z",
+      "version": "WzEwNzUsMV0="
     },
     {
       "attributes": {
@@ -136,7 +136,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:15.240Z",
+      "updated_at": "2025-01-16T14:54:49.054Z",
       "version": "Wzc2NiwxXQ=="
     },
     {
@@ -166,7 +166,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:15.240Z",
+      "updated_at": "2025-01-16T14:54:49.054Z",
       "version": "Wzc2NywxXQ=="
     },
     {
@@ -196,8 +196,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:55:57.482Z",
-      "version": "WzEwODEsMV0="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc2OCwxXQ=="
     },
     {
       "attributes": {
@@ -226,7 +226,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:15.240Z",
+      "updated_at": "2025-01-16T14:54:49.054Z",
       "version": "Wzc2OSwxXQ=="
     },
     {
@@ -256,7 +256,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:15.240Z",
+      "updated_at": "2025-01-16T14:54:49.054Z",
       "version": "Wzc3MCwxXQ=="
     },
     {
@@ -286,8 +286,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T22:09:12.731Z",
-      "version": "WzEwODMsMV0="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc3MSwxXQ=="
     },
     {
       "attributes": {
@@ -316,8 +316,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T22:23:30.148Z",
-      "version": "WzEwOTAsMV0="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc3MiwxXQ=="
     },
     {
       "attributes": {
@@ -346,8 +346,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T21:49:15.240Z",
-      "version": "Wzc2OCwxXQ=="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc3MywxXQ=="
     },
     {
       "attributes": {
@@ -376,8 +376,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T22:12:38.367Z",
-      "version": "WzEwODUsMV0="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc3NCwxXQ=="
     },
     {
       "attributes": {
@@ -387,9 +387,9 @@
         },
         "savedSearchRefName": "search_0",
         "title": "Omron FINS - Address, Node, and Unit",
-        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":6,\"direction\":\"desc\"}}}",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":7,\"direction\":\"desc\"}}}",
         "version": 1,
-        "visState": "{\"title\":\"Omron FINS - Address, Node, and Unit\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_network_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Net Addr\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_node_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Node Num\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_unit_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Unit Addr\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_network_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Net Addr\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_node_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Node Num\"},\"schema\":\"bucket\"},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_unit_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Unit Addr\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+        "visState": "{\"title\":\"Omron FINS - Address, Node, and Unit\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_network_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Net Addr\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_node_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Node Num\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.source_unit_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Src Unit Addr\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_network_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Net Addr\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_node_number\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Node Num\"},\"schema\":\"bucket\"},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.destination_unit_address\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Dst Unit Addr\"},\"schema\":\"bucket\"},{\"id\":\"8\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.omron_fins.service_id\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Service ID\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
       },
       "id": "27315d80-d391-11ef-8ae2-0dd19e7f01ed",
       "migrationVersion": {
@@ -406,8 +406,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-01-15T22:36:25.304Z",
-      "version": "WzEwOTMsMV0="
+      "updated_at": "2025-01-16T15:46:38.688Z",
+      "version": "WzEwODYsMV0="
     },
     {
       "attributes": {
@@ -424,7 +424,7 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:omron*\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"time_zone\":\"America/Denver\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:omron*\",\"language\":\"lucene\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [],
         "title": "Omron FINS - All Logs",
@@ -445,8 +445,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-01-15T21:49:15.240Z",
-      "version": "Wzc3MSwxXQ=="
+      "updated_at": "2025-01-16T14:54:49.054Z",
+      "version": "Wzc3NiwxXQ=="
     }
   ],
   "version": "2.18.0"
