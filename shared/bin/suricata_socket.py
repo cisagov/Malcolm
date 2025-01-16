@@ -21,7 +21,7 @@ class SuricataSocketClient:
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.output_dir = output_dir
-        self.debug_enabled = True # change this to True to enable debug logging
+        self.debug_enabled = False # change this to True to enable debug logging
         self.debug_log = os.path.join(self.output_dir, 'socket_debug.log')
         
         # Ensure log directory exists
