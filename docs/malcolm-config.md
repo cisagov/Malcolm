@@ -43,6 +43,7 @@ Although the configuration script automates many of the following configuration 
     - The following variables configure Malcolm's ability to [accept syslog](https://www.elastic.co/guide/en/beats/filebeat/current/syslog.html) messages:
         + `FILEBEAT_SYSLOG_TCP_LISTEN` and `FILEBEAT_SYSLOG_UDP_LISTEN` - if set to `true`, Malcolm will accept syslog messages over TCP and/or UDP, respectively
         + `FILEBEAT_SYSLOG_TCP_PORT` and `FILEBEAT_SYSLOG_UDP_PORT` - the port on which Malcolm will accept syslog messages over TCP and/or UDP, respectively
+            * If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
         + `FILEBEAT_SYSLOG_TCP_FORMAT` and `FILEBEAT_SYSLOG_UDP_FORMAT` - one of `auto`, `rfc3164`, or `rfc5424`, to specify the allowed format for syslog messages over TCP and/or UDP, respectively (default `auto`)
         + `FILEBEAT_SYSLOG_TCP_MAX_MESSAGE_SIZE` and `FILEBEAT_SYSLOG_UDP_MAX_MESSAGE_SIZE` - defines the maximum message size of the message received over TCP and/or UDP, respectively (default: `10KiB` for UDP, `20MiB` for TCP)
         + `FILEBEAT_SYSLOG_TCP_MAX_CONNECTIONS` - specifies the maximum current number of TCP connections for syslog messages

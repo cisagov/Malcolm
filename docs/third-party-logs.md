@@ -23,6 +23,7 @@ The types of third-party logs and metrics discussed in this document are *not* t
     - [Convenience Script for Windows](#FluentBitPowerShell)
 * [Beats](#Beats)
 * [Syslog](#Syslog)
+    - [ISO-installed Desktop Environment Firewall](#SyslogISOFirewall)
 * [Uploading Third-Party Logs](#ThirdPartyUpload)
 * [Data Format and Visualization](#Data)
 * [Document Indices](#Indices)
@@ -323,6 +324,18 @@ Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats
 Malcolm can accept [syslog](https://en.wikipedia.org/wiki/Syslog) messages directly. During [configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig), select **customize** when prompted **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?** to specify whether Malcolm should accept syslog over TCP, UDP, or both, and the respective ports on which the messages should be accepted.
 
 Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
+
+
+### <a name="SyslogISOFirewall"></a>ISO-installed Desktop Environment Firewall
+
+If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), the system's software firewall needs to be manually updated to open the port(s) for Syslog messages. This can be performed via the command line inside a terminal on the Malcolm system, using the port(s) specified during the configuration mentioned above. For example:
+
+```bash
+$ sudo ufw allow 514/tcp
+Rule added
+$ sudo ufw allow 514/udp
+Rule added
+```
 
 ## <a name="ThirdPartyUpload"></a>Uploading Third-Party Logs
 

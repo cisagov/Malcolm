@@ -241,6 +241,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + Answer **Y** for Malcolm to accept syslog messages according to the RFC3164 and RFC5424 standards over TCP or UDP.
             * **Enter port for syslog over TCP (e.g., 514) or 0 to disable** and **Enter port for syslog over UDP (e.g., 514) or 0 to disable**
                 - Specify the port numbers on which to accept syslog messages for TCP or UDP, respectively. Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
+                - If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
 * **Enable file extraction with Zeek?**
     - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
     - **Select file extraction behavior**
