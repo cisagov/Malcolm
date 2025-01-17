@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 HTPDATE_URL="https://github.com/twekkel/htpdate"
 HTPDATE_VER="$(curl -sqI "$HTPDATE_URL/releases/latest" | awk -F '/' '/^location/ {print  substr($NF, 1, length($NF)-1)}' | sed 's/^v//')"

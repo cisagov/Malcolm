@@ -1,6 +1,6 @@
 FROM debian:12-slim
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -33,7 +33,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=7.0.5-0
+ARG ZEEK_VERSION=7.1.0-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -182,7 +182,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_OMRON_FINS_TCP|ANALYZER_OMRON_FINS_UDP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka)"
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-1675/main|CVE-2021-31166/detect|CVE-2021-38647/omigod|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-21907/main|cve-2022-22954/main|CVE-2022-23270-PPTP/main|CVE-2022-24491/main|CVE-2022-24497/main|cve-2022-26809/main|CVE-2022-26937/main|CVE-2022-30216/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja4/main|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-agenttesla-detector/main|zeek-asyncrat-detector/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-netsupport-detector/main|zeek-quasarrat-detector/main|zeek-sniffpass/__load__|zeek-strrat-detector/main|zerologon/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
@@ -190,9 +190,9 @@ RUN mkdir -p /tmp/logs && \
     export ZEEK_THIRD_PARTY_PLUGINS_COUNT=$(echo "$ZEEK_THIRD_PARTY_PLUGINS_GREP" | grep -P -o "\([^)]+\)" | head -n 1 | sed "s/^(//" | sed "s/)$//" | tr '|' '\n' | wc -l) && \
     export ZEEK_THIRD_PARTY_SCRIPTS_COUNT=$(echo "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" | grep -P -o "\([^)]+\)" | head -n 1 | sed "s/^(//" | sed "s/)$//" | tr '|' '\n' | wc -l) && \
     "$ZEEK_DIR"/bin/zeek-offline -NN local >zeeknn.log 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT)) && echo $ZEEK_THIRD_PARTY_PLUGINS_COUNT' Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_PLUGINS_GREP" zeeknn.log) >= $ZEEK_THIRD_PARTY_PLUGINS_COUNT )) && echo $ZEEK_THIRD_PARTY_PLUGINS_COUNT' Zeek plugins loaded correctly' || (echo 'One or more Zeek plugins did not load correctly' && cat zeeknn.log && exit 1)" && \
     "$ZEEK_DIR"/bin/zeek-offline -C -r /tmp/pcaps/udp.pcap local policy/misc/loaded-scripts >loaded_scripts.log 2>/dev/null && \
-      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT)) && echo $ZEEK_THIRD_PARTY_SCRIPTS_COUNT' Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
+      bash -c "(( $(grep -cP "$ZEEK_THIRD_PARTY_SCRIPTS_GREP" loaded_scripts.log) == $ZEEK_THIRD_PARTY_SCRIPTS_COUNT )) && echo $ZEEK_THIRD_PARTY_SCRIPTS_COUNT' Zeek scripts loaded correctly' || (echo 'One or more Zeek scripts did not load correctly' && cat loaded_scripts.log && exit 1)" && \
     cd /tmp && \
     rm -rf /tmp/logs /tmp/pcaps
 
@@ -267,6 +267,7 @@ ARG ZEEK_DISABLE_SPICY_TAILSCALE=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
 ARG ZEEK_SYNCHROPHASOR_DETAILED=
+ARG ZEEK_OMRON_FINS_DETAILED=true
 ARG ZEEK_KAFKA_ENABLED=
 ARG ZEEK_KAFKA_BROKERS=kafka.local:9091
 ARG ZEEK_KAFKA_TOPIC=zeek
@@ -288,6 +289,7 @@ ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
 ENV ZEEK_SYNCHROPHASOR_DETAILED $ZEEK_SYNCHROPHASOR_DETAILED
+ENV ZEEK_OMRON_FINS_DETAILED $ZEEK_OMRON_FINS_DETAILED
 ENV ZEEK_KAFKA_ENABLED $ZEEK_KAFKA_ENABLED
 ENV ZEEK_KAFKA_BROKERS $ZEEK_KAFKA_BROKERS
 ENV ZEEK_KAFKA_TOPIC $ZEEK_KAFKA_TOPIC

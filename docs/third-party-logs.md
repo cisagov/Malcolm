@@ -15,12 +15,15 @@ Malcolm uses [OpenSearch](https://opensearch.org/) and [OpenSearch Dashboards](h
 The types of third-party logs and metrics discussed in this document are *not* the same as the network session metadata provided by Arkime, Zeek, and Suricata. Please refer to the [Malcolm Contributor Guide](contributing-guide.md) for information on integrating a new network traffic analysis provider.
 
 <a name="ThirdPartyLogsTableOfContents"></a>
+
 * [Configuring Malcolm](#Malcolm)
     - [Secure communication](#MalcolmTLS)
 * [Fluent Bit](#FluentBit)
     - [Convenience Script for Linux/macOS](#FluentBitBash)
     - [Convenience Script for Windows](#FluentBitPowerShell)
 * [Beats](#Beats)
+* [Syslog](#Syslog)
+    - [ISO-installed Desktop Environment Firewall](#SyslogISOFirewall)
 * [Uploading Third-Party Logs](#ThirdPartyUpload)
 * [Data Format and Visualization](#Data)
 * [Document Indices](#Indices)
@@ -282,14 +285,21 @@ Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data 
 
 In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
 
-The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [filebeat.yml](https://www.elastic.co/guide/en/beats/filebeat/current/configuring-howto-filebeat.html) file:
+The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [winlogbeat.yml](https://www.elastic.co/guide/en/beats/winlogbeat/current/configuring-howto-winlogbeat.html) file:
 
 
 ```yml
-filebeat.inputs:
-- type: log
-  paths:
-    - /home/user/logs/*.log
+winlogbeat.event_logs:
+  - name: Application
+    ignore_older: 72h
+  - name: System
+  - name: Security
+  - name: ForwardedEvents
+    tags: [forwarded]
+  - name: Windows PowerShell
+    event_id: 400, 403, 600, 800
+  - name: Microsoft-Windows-PowerShell/Operational
+    event_id: 4103, 4104, 4105, 4106
 
 processors:
   - add_tags:
@@ -308,6 +318,24 @@ output.logstash:
 The important bits to note in this example are the settings under [`output.logstash`](https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html) (including the TLS-related files described above in **Configuring Malcolm**) and the `_malcolm_beats` value in [`tags`](https://www.elastic.co/guide/en/beats/filebeat/current/add-tags.html): unless creating a custom [Logstash pipeline](contributing-logstash.md#LogstashNewSource), users probably want to use `_malcolm_beats` in order for logs to be picked up and ingested through Malcolm's `beats` pipeline. This applies regardless of the specific Beats forwarder being used (e.g., Filebeat, Metricbeat, Winlogbeat, etc.).
 
 Most Beats forwarders can use [processors](https://www.elastic.co/guide/en/beats/filebeat/current/defining-processors.html) to filter, transform, and enhance data prior to sending it to Malcolm. Consult each forwarder's [documentation](https://www.elastic.co/beats/) to learn more about what processors are available and how to configure them. Use the [Console output](https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html) for debugging and experimenting with how Beats forwarders format the logs they generate.
+
+## <a name="Syslog"></a>Syslog
+
+Malcolm can accept [syslog](https://en.wikipedia.org/wiki/Syslog) messages directly. During [configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig), select **customize** when prompted **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?** to specify whether Malcolm should accept syslog over TCP, UDP, or both, and the respective ports on which the messages should be accepted.
+
+Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
+
+
+### <a name="SyslogISOFirewall"></a>ISO-installed Desktop Environment Firewall
+
+If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), the system's software firewall needs to be manually updated to open the port(s) for Syslog messages. This can be performed via the command line inside a terminal on the Malcolm system, using the port(s) specified during the configuration mentioned above. For example:
+
+```bash
+$ sudo ufw allow 514/tcp
+Rule added
+$ sudo ufw allow 514/udp
+Rule added
+```
 
 ## <a name="ThirdPartyUpload"></a>Uploading Third-Party Logs
 

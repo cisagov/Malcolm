@@ -216,7 +216,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
 * **Perform string randomness scoring on some fields?**
     - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to answer **Y** to this question.
 * **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?**
-    - Answer **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following several questions in this list. Answer **customize** to proceed to answer the following related questions individually.
+    - Answer **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following several questions in this list. Answer **customize** to proceed to answer the following related questions individually:
     - **Expose OpenSearch port to external hosts?**
         + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
     - **Expose Logstash port to external hosts?**
@@ -237,6 +237,11 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
     - **Expose SFTP server (for PCAP upload) to external hosts?**
         + Users should answer **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
+    - **Accept standard syslog messages?**
+        + Answer **Y** for Malcolm to accept syslog messages according to the RFC3164 and RFC5424 standards over TCP or UDP.
+            * **Enter port for syslog over TCP (e.g., 514) or 0 to disable** and **Enter port for syslog over UDP (e.g., 514) or 0 to disable**
+                - Specify the port numbers on which to accept syslog messages for TCP or UDP, respectively. Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
+                - If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
 * **Enable file extraction with Zeek?**
     - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
     - **Select file extraction behavior**

@@ -114,6 +114,8 @@ ntlm:
   - 445
 ntp:
   - 123
+omron_fins:
+  - 9600
 openvpn:
   - 443
   - 1193
@@ -121,6 +123,8 @@ openvpn:
 pop3:
   - 110
   - 995
+postgresql:
+  - 5432
 profinet:
   - 4800
   - 4900

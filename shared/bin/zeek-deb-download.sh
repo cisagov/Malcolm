@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 unset VERBOSE
 command -v dpkg >/dev/null 2>&1 && ARCH="$(dpkg --print-architecture)" || ARCH=amd64
 DISTRO=Debian_12
 OUTPUT_DIR=/tmp
-ZEEK_VERSION=7.0.5-0
+ZEEK_VERSION=7.1.0-0
 PRESERVE_HIERARCHY=false
 ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=${ZEEK_DEB_ALTERNATE_DOWNLOAD_URL:-}
 ZEEK_DEB_ALTERNATE_DOWNLOAD_URL_FILE=${ZEEK_DEB_ALTERNATE_DOWNLOAD_URL_FILE:-}

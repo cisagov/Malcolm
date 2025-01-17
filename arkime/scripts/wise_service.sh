@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 while true; do
   if [[ (("$WISE" == "on") || ("$ARKIME_LIVE_CAPTURE" == "true")) && (-f /var/run/arkime/runwise) && (-f $ARKIME_DIR/etc/wise.ini) ]]; then

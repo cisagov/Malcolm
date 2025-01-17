@@ -40,6 +40,14 @@ Although the configuration script automates many of the following configuration 
     - `OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT` - the maximum cumulative size of OpenSearch indices are allowed to consume before the oldest indices are deleted, see [**Managing disk usage**](#DiskUsage) below
 * **`filebeat.env`** - settings specific to [Filebeat](https://www.elastic.co/products/beats/filebeat), particularly for how Filebeat watches for new log files to parse and how it receives and stores [third-Party logs](third-party-logs.md#ThirdPartyLogs)
     - `LOG_CLEANUP_MINUTES` and `ZIP_CLEANUP_MINUTES` - these variables deal cleaning up already-processed log files, see [**Managing disk usage**](#DiskUsage) below
+    - The following variables configure Malcolm's ability to [accept syslog](https://www.elastic.co/guide/en/beats/filebeat/current/syslog.html) messages:
+        + `FILEBEAT_SYSLOG_TCP_LISTEN` and `FILEBEAT_SYSLOG_UDP_LISTEN` - if set to `true`, Malcolm will accept syslog messages over TCP and/or UDP, respectively
+        + `FILEBEAT_SYSLOG_TCP_PORT` and `FILEBEAT_SYSLOG_UDP_PORT` - the port on which Malcolm will accept syslog messages over TCP and/or UDP, respectively
+            * If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
+        + `FILEBEAT_SYSLOG_TCP_FORMAT` and `FILEBEAT_SYSLOG_UDP_FORMAT` - one of `auto`, `rfc3164`, or `rfc5424`, to specify the allowed format for syslog messages over TCP and/or UDP, respectively (default `auto`)
+        + `FILEBEAT_SYSLOG_TCP_MAX_MESSAGE_SIZE` and `FILEBEAT_SYSLOG_UDP_MAX_MESSAGE_SIZE` - defines the maximum message size of the message received over TCP and/or UDP, respectively (default: `10KiB` for UDP, `20MiB` for TCP)
+        + `FILEBEAT_SYSLOG_TCP_MAX_CONNECTIONS` - specifies the maximum current number of TCP connections for syslog messages
+        + `FILEBEAT_SYSLOG_TCP_SSL` - if set to `true`, syslog messages over TCP will require the use of TLS. When [`./scripts/auth_setup`](authsetup.md#AuthSetup) is run, self-signed certificates are generated which may be used by remote log forwarders. Located in the `filebeat/certs/` directory, the certificate authority and client certificate and key files should be copied to the host on which the forwarder is running and used when defining its settings for connecting to Malcolm.
 * **`logstash.env`** - settings specific to [Logstash](https://www.elastic.co/products/logstash)
     - `LOGSTASH_OUI_LOOKUP` – if set to `true`, Logstash will map MAC addresses to vendors for all source and destination MAC addresses when analyzing Zeek logs (default `true`)
     - `LOGSTASH_REVERSE_DNS` – if set to `true`, Logstash will perform a reverse DNS lookup for all external source and destination IP address values when analyzing Zeek logs (default `false`)

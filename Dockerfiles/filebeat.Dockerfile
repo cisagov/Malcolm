@@ -1,6 +1,6 @@
-FROM docker.elastic.co/beats/filebeat-oss:8.16.0
+FROM docker.elastic.co/beats/filebeat-oss:8.17.0
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
 LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
@@ -65,13 +65,15 @@ ARG FILEBEAT_TCP_PARSE_SOURCE_FIELD="message"
 ARG FILEBEAT_TCP_PARSE_TARGET_FIELD=""
 ARG FILEBEAT_TCP_PARSE_DROP_FIELD=""
 ARG FILEBEAT_TCP_TAG="_malcolm_beats"
+ARG FILEBEAT_SYSLOG_TCP_LISTEN=false
+ARG FILEBEAT_SYSLOG_UDP_LISTEN=false
 ARG PCAP_NODE_NAME=malcolm
 
 ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.44.6"
+ENV YQ_VERSION "4.45.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV EVTX_VERSION "0.8.4"
@@ -125,12 +127,14 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD filebeat/filebeat-logs.yml /usr/share/filebeat-logs/filebeat-logs.yml
 ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
+ADD filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/filebeat-syslog-udp.yml
+ADD filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD scripts/malcolm_utils.py /usr/local/bin/
 ADD shared/bin/watch_common.py /usr/local/bin/
 ADD shared/bin/opensearch_status.sh /usr/local/bin/
 ADD filebeat/supervisord.conf /etc/supervisord.conf
-RUN for INPUT in logs nginx tcp; do \
+RUN for INPUT in logs nginx tcp syslog-tcp syslog-udp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
       chown -R root:${PGROUP} /usr/share/filebeat-$INPUT; \
       cp -a /usr/share/filebeat/module /usr/share/filebeat-$INPUT/module; \
@@ -172,6 +176,8 @@ ENV FILEBEAT_TCP_PARSE_SOURCE_FIELD $FILEBEAT_TCP_PARSE_SOURCE_FIELD
 ENV FILEBEAT_TCP_PARSE_TARGET_FIELD $FILEBEAT_TCP_PARSE_TARGET_FIELD
 ENV FILEBEAT_TCP_PARSE_DROP_FIELD $FILEBEAT_TCP_PARSE_DROP_FIELD
 ENV FILEBEAT_TCP_TAG $FILEBEAT_TCP_TAG
+ENV FILEBEAT_SYSLOG_TCP_LISTEN $FILEBEAT_SYSLOG_TCP_LISTEN
+ENV FILEBEAT_SYSLOG_UDP_LISTEN $FILEBEAT_SYSLOG_UDP_LISTEN
 ENV FILEBEAT_REGISTRY_FILE "/usr/share/filebeat-logs/data/registry/filebeat/log.json"
 ENV FILEBEAT_ZEEK_DIR "/zeek/"
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME

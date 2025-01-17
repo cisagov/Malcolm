@@ -1,11 +1,11 @@
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 services:
   opensearch:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:24.12.0
+    image: ghcr.io/idaholab/malcolm/opensearch:25.01.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -83,7 +83,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:24.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -137,7 +137,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:24.12.0
+    image: ghcr.io/idaholab/malcolm/dashboards:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -184,7 +184,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:24.12.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -299,7 +299,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:24.12.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -376,7 +376,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:24.12.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -462,7 +462,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:24.12.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -547,7 +547,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:24.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -620,7 +620,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:24.12.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -685,7 +685,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:24.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -745,7 +745,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:24.12.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -803,7 +803,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:24.12.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -859,7 +859,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:24.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -906,7 +906,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:24.12.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.01.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -961,7 +961,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:24.12.0
+    image: ghcr.io/idaholab/malcolm/file-upload:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1003,7 +1003,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:24.12.0
+    image: ghcr.io/idaholab/malcolm/htadmin:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1056,7 +1056,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:24.12.0
+    image: ghcr.io/idaholab/malcolm/freq:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1094,7 +1094,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:24.12.0
+    image: ghcr.io/idaholab/malcolm/netbox:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1161,7 +1161,7 @@ services:
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:24.12.0
+    image: ghcr.io/idaholab/malcolm/postgresql:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1205,7 +1205,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:24.12.0
+    image: ghcr.io/idaholab/malcolm/redis:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1253,7 +1253,7 @@ services:
       retries: 3
       start_period: 45s
   netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:24.12.0
+    image: ghcr.io/idaholab/malcolm/redis:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1296,7 +1296,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:24.12.0
+    image: ghcr.io/idaholab/malcolm/api:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1346,7 +1346,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:24.12.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.01.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:

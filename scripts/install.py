@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import sys
 
@@ -622,6 +622,8 @@ class Installer(object):
         opensearchSecondaryLabel = 'remote OpenSearch'
         dashboardsUrl = 'http://dashboards:5601/dashboards'
         logstashHost = 'logstash:5044'
+        syslogPortDict = defaultdict(lambda: 0)
+        sftpOpen = False
         indexSnapshotCompressed = False
         behindReverseProxy = False
         dockerNetworkExternalName = ""
@@ -1504,9 +1506,20 @@ class Installer(object):
                 elif currentStep == ConfigOptions.OpenPorts:
                     openPortsSelection = (
                         'c'
-                        if (args.exposeLogstash or args.exposeOpenSearch or args.exposeFilebeatTcp or args.exposeSFTP)
+                        if (
+                            args.exposeLogstash
+                            or args.exposeOpenSearch
+                            or args.exposeFilebeatTcp
+                            or args.exposeSFTP
+                            or args.syslogUdpPort
+                            or args.syslogTcpPort
+                        )
                         else 'unset'
                     )
+                    if args.syslogTcpPort:
+                        syslogPortDict['tcp'] = args.syslogTcpPort
+                    if args.syslogUdpPort:
+                        syslogPortDict['udp'] = args.syslogUdpPort
                     if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
                         if malcolmProfile == PROFILE_MALCOLM:
                             openPortsOptions = ('no', 'yes', 'customize')
@@ -1603,16 +1616,51 @@ class Installer(object):
                             extraLabel=BACK_LABEL,
                         )
 
-                    sftpOpen = (
+                    # Expose SFTP and/or Syslog servers?
+                    if (
                         (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
                         and (malcolmProfile == PROFILE_MALCOLM)
                         and (openPortsSelection == 'c')
-                        and InstallerYesOrNo(
+                    ):
+                        sftpOpen = InstallerYesOrNo(
                             'Expose SFTP server (for PCAP upload) to external hosts?',
                             default=args.exposeSFTP,
                             extraLabel=BACK_LABEL,
                         )
-                    )
+                        if InstallerYesOrNo(
+                            'Accept standard syslog messages?',
+                            default=any([x > 0 for x in [args.syslogUdpPort, args.syslogTcpPort]]),
+                            extraLabel=BACK_LABEL,
+                        ):
+                            syslogTransports = ('tcp', 'udp')
+                            for transport in syslogTransports:
+                                loopBreaker = CountUntilException(
+                                    MaxAskForValueCount, f'Invalid syslog over {transport.upper()} port'
+                                )
+                                syslogPortStr = ''
+                                while (
+                                    (not syslogPortStr.isdigit())
+                                    or (int(syslogPortStr) < 0)
+                                    or (int(syslogPortStr) > 65535)
+                                    or (
+                                        not InstallerYesOrNo(
+                                            f'Setting port {syslogPortStr} for syslog over {transport.upper()}. Is this OK?',
+                                            default=True,
+                                            extraLabel=BACK_LABEL,
+                                        )
+                                    )
+                                ) and loopBreaker.increment():
+                                    syslogPortStr = InstallerAskForString(
+                                        f'Enter port for syslog over {transport.upper()} (e.g., 514) or 0 to disable',
+                                        extraLabel=BACK_LABEL,
+                                        default=str(syslogPortDict[transport]),
+                                    )
+                                if (
+                                    syslogPortStr.isdigit()
+                                    and (int(syslogPortStr) > 0)
+                                    and (int(syslogPortStr) <= 65535)
+                                ):
+                                    syslogPortDict[transport] = int(syslogPortStr)
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.FileCarving:
@@ -1640,7 +1688,9 @@ class Installer(object):
                     fileCarveHttpServerZip = False
                     fileCarveHttpServeEncryptKey = ''
 
-                    if InstallerYesOrNo('Enable file extraction with Zeek?', default=bool(fileCarveModeDefault)):
+                    if InstallerYesOrNo(
+                        'Enable file extraction with Zeek?', extraLabel=BACK_LABEL, default=bool(fileCarveModeDefault)
+                    ):
                         loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid file extraction behavior')
                         while fileCarveMode not in allowedFileCarveModes.keys() and loopBreaker.increment():
                             fileCarveMode = InstallerChooseOne(
@@ -2229,6 +2279,32 @@ class Installer(object):
                 os.path.join(args.configDir, 'filebeat.env'),
                 'FILEBEAT_TCP_TAG',
                 filebeatTcpTag,
+            ),
+            # Syslog over TCP
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_SYSLOG_TCP_LISTEN',
+                TrueOrFalseNoQuote(syslogPortDict['tcp'] > 0),
+            ),
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_SYSLOG_TCP_PORT',
+                syslogPortDict['tcp'],
+            ),
+            # Syslog over UDP
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_SYSLOG_UDP_LISTEN',
+                TrueOrFalseNoQuote(syslogPortDict['udp'] > 0),
+            ),
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'filebeat.env'),
+                'FILEBEAT_SYSLOG_UDP_PORT',
+                syslogPortDict['udp'],
             ),
             # logstash memory allowance
             EnvValue(
@@ -2889,20 +2965,33 @@ class Installer(object):
                         ###################################
 
                         ###################################
-                        # filebeat/logstash/upload port bind IPs (0.0.0.0 vs. 127.0.0.1)
-                        # set bind IPs based on whether it should be externally exposed or not
-                        for service, portInfo in {
-                            'filebeat': (filebeatTcpOpen, 5045, 5045),
-                            'logstash': (logstashOpen, 5044, 5044),
-                            'upload': (sftpOpen, 8022, 22),
+                        # port bind IPs (0.0.0.0 vs. 127.0.0.1)
+                        # set bind IPs based on whether services should be externally exposed or not
+                        for service, portInfos in {
+                            'filebeat': [
+                                [filebeatTcpOpen, 5045, 5045, 'tcp'],
+                                [syslogPortDict['tcp'] > 0, syslogPortDict['tcp'], syslogPortDict['tcp'], 'tcp'],
+                                [syslogPortDict['udp'] > 0, syslogPortDict['udp'], syslogPortDict['udp'], 'udp'],
+                            ],
+                            'logstash': [
+                                [logstashOpen, 5044, 5044, 'tcp'],
+                            ],
+                            'upload': [
+                                [sftpOpen, 8022, 22, 'tcp'],
+                            ],
                         }.items():
                             if service in data['services']:
                                 if malcolmProfile == PROFILE_HEDGEHOG:
                                     data['services'][service].pop('ports', None)
                                 else:
-                                    data['services'][service]['ports'] = [
-                                        f"{'0.0.0.0' if portInfo[0] is True else '127.0.0.1'}:{portInfo[1]}:{portInfo[2]}"
-                                    ]
+                                    data['services'][service]['ports'] = []
+                                    for portInfo in portInfos:
+                                        if all(x for x in portInfo):
+                                            data['services'][service]['ports'].append(
+                                                f"0.0.0.0:{portInfo[1]}:{portInfo[2]}/{portInfo[3]}"
+                                            )
+                                    if not data['services'][service]['ports']:
+                                        data['services'][service].pop('ports', None)
                         ###################################
 
                         ###################################
@@ -2924,11 +3013,11 @@ class Installer(object):
                                 data['services']['nginx-proxy'].pop('ports', None)
                             else:
                                 data['services']['nginx-proxy']['ports'] = [
-                                    f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443",
+                                    f"{'0.0.0.0:443' if nginxSSL else '127.0.0.1:80'}:443/tcp",
                                 ]
-                                if opensearchPrimaryMode == DatabaseMode.OpenSearchLocal:
+                                if (opensearchPrimaryMode == DatabaseMode.OpenSearchLocal) and opensearchOpen:
                                     data['services']['nginx-proxy']['ports'].append(
-                                        f"{'0.0.0.0' if opensearchOpen else '127.0.0.1'}:{'9200' if nginxSSL else '9201'}:9200"
+                                        f"0.0.0.0:{'9200' if nginxSSL else '9201'}:9200/tcp"
                                     )
 
                             # enable/disable/configure traefik labels if applicable
@@ -4350,6 +4439,24 @@ def main():
         const=True,
         default=False,
         help="Expose SFTP server (for PCAP upload) to external hosts",
+    )
+    openPortsArgGroup.add_argument(
+        '--syslog-tcp-port',
+        dest='syslogTcpPort',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=0,
+        help='Listen for Syslog (TCP) on this port',
+    )
+    openPortsArgGroup.add_argument(
+        '--syslog-udp-port',
+        dest='syslogUdpPort',
+        required=False,
+        metavar='<integer>',
+        type=int,
+        default=0,
+        help='Listen for Syslog (UDP) on this port',
     )
 
     storageArgGroup = parser.add_argument_group('Storage options')

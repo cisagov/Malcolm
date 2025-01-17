@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2024 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 if [ -z "$BASH_VERSION" ]; then
   echo "Wrong interpreter, please run \"$0\" with bash"
@@ -99,6 +99,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/cisagov/icsnpp-genisys"
   "https://github.com/cisagov/icsnpp-hart-ip"
   "https://github.com/cisagov/icsnpp-modbus"
+  "https://github.com/cisagov/icsnpp-omron-fins"
   "https://github.com/cisagov/icsnpp-opcua-binary"
   "https://github.com/cisagov/icsnpp-profinet-io-cm"
   "https://github.com/cisagov/icsnpp-s7comm"
@@ -132,7 +133,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/zeek-quasarrat-detector"
   "https://github.com/corelight/zeek-spicy-ipsec"
   "https://github.com/corelight/zeek-spicy-openvpn"
-  "https://github.com/corelight/zeek-spicy-ospf"
+  "https://github.com/corelight/zeek-spicy-ospf|master"
   "https://github.com/corelight/zeek-spicy-stun"
   "https://github.com/corelight/zeek-spicy-wireguard"
   "https://github.com/corelight/zeek-strrat-detector"

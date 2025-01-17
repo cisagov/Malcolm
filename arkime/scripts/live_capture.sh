@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2023 Battelle Energy Alliance, LLC.  All rights reserved.
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ARKIME_DIR=${ARKIME_DIR:-"/opt/arkime"}
 CERT_FILE="${ARKIME_DIR}"/etc/viewer.crt
