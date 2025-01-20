@@ -128,6 +128,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         autoTag,
         notLocked,
         logger,
+        debug,
     ) = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
@@ -140,6 +141,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         arkimeWorkerArgs[8],
         arkimeWorkerArgs[9],
         arkimeWorkerArgs[10],
+        arkimeWorkerArgs[11],
     )
 
     if not logger:
@@ -245,6 +247,7 @@ def zeekFileWorker(zeekWorkerArgs):
         uploadDir,
         defaultExtractFileMode,
         logger,
+        debug,
     ) = (
         zeekWorkerArgs[0],
         zeekWorkerArgs[1],
@@ -256,6 +259,7 @@ def zeekFileWorker(zeekWorkerArgs):
         zeekWorkerArgs[7],
         zeekWorkerArgs[8],
         zeekWorkerArgs[9],
+        zeekWorkerArgs[10],
     )
 
     if not logger:
@@ -393,6 +397,7 @@ def suricataFileWorker(suricataWorkerArgs):
         uploadDir,
         suricataConfig,
         logger,
+        debug,
     ) = (
         suricataWorkerArgs[0],
         suricataWorkerArgs[1],
@@ -404,6 +409,7 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[7],
         suricataWorkerArgs[8],
         suricataWorkerArgs[9],
+        suricataWorkerArgs[10],
     )
 
     if not logger:
@@ -413,7 +419,12 @@ def suricataFileWorker(suricataWorkerArgs):
 
     # create a single socket client for this worker
     try:
-        suricata = SuricataSocketClient(socket_path=socketPath, logger=logger, output_dir=uploadDir)
+        suricata = SuricataSocketClient(
+            socket_path=socketPath,
+            logger=logger,
+            debug=debug,
+            output_dir=uploadDir,
+        )
     except Exception as e:
         logger.error(f"Failed to create Suricata socket client: {e}")
         suricata = None
@@ -804,6 +815,7 @@ def main():
                     args.autoTag,
                     args.notLocked,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )
@@ -823,6 +835,7 @@ def main():
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )
@@ -842,6 +855,7 @@ def main():
                     args.suricataUploadDir,
                     args.suricataConfigFile,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )
