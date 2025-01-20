@@ -53,7 +53,7 @@ PCAP_PROCESSING_MODE_SURICATA = "suricata"
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
-SURICATA_PATH = "/usr/bin/suricata-offline"
+SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command.socket"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
 SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
@@ -387,6 +387,7 @@ def suricataFileWorker(suricataWorkerArgs):
         pcapBaseDir,
         autoSuricata,
         forceSuricata,
+        socketPath,
         extraTags,
         autoTag,
         uploadDir,
@@ -402,6 +403,7 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[6],
         suricataWorkerArgs[7],
         suricataWorkerArgs[8],
+        suricataWorkerArgs[9],
     )
 
     if not logger:
@@ -411,7 +413,7 @@ def suricataFileWorker(suricataWorkerArgs):
 
     # create a single socket client for this worker
     try:
-        suricata = SuricataSocketClient(logger=logger, output_dir=uploadDir)
+        suricata = SuricataSocketClient(socket_path=socketPath, logger=logger, output_dir=uploadDir)
     except Exception as e:
         logger.error(f"Failed to create Suricata socket client: {e}")
         suricata = None
@@ -464,7 +466,10 @@ def suricataFileWorker(suricataWorkerArgs):
                         logger.info(
                             f"{scriptName}[{scanWorkerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
                         )
-                        if suricata.process_pcap(fileInfo[FILE_INFO_DICT_NAME], output_dir):
+                        if suricata.process_pcap(
+                            pcap_file=fileInfo[FILE_INFO_DICT_NAME],
+                            output_dir=output_dir,
+                        ):
                             logger.info(
                                 f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
                             )
@@ -690,11 +695,11 @@ def main():
         parser.add_argument(
             '--suricata',
             required=False,
-            dest='executable',
-            help="suricata executable path",
+            dest='suricataSocketPath',
+            help="suricata socket path",
             metavar='<STR>',
             type=str,
-            default=SURICATA_PATH,
+            default=SURICATA_SOCKET_PATH,
         )
         parser.add_argument(
             '--autosuricata',
@@ -831,6 +836,7 @@ def main():
                     args.pcapBaseDir,
                     args.autoSuricata,
                     args.forceSuricata,
+                    args.suricataSocketPath,
                     args.extraTags,
                     args.autoTag,
                     args.suricataUploadDir,
