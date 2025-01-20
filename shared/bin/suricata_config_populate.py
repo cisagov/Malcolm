@@ -1227,6 +1227,7 @@ def main():
     cfg.pop('run-as', None)
     cfg.pop('coredump', None)
     deep_set(cfg, ['coredump', 'max-dump'], 0)
+    deep_set(cfg, ['security', 'limit-noproc'], False)
 
     if DEFAULT_VARS['RUN_DIR'] is not None:
         cfg.pop('unix-command', None)
