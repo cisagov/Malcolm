@@ -480,6 +480,7 @@ def suricataFileWorker(suricataWorkerArgs):
                         if suricata.process_pcap(
                             pcap_file=fileInfo[FILE_INFO_DICT_NAME],
                             output_dir=output_dir,
+                            wait_until_finished=True,
                         ):
                             logger.info(
                                 f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
