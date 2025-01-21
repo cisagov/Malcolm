@@ -472,7 +472,7 @@ def suricataFileWorker(suricataWorkerArgs):
                     fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
                     logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
-                    # Create unique output directory for this PCAP
+                    # Create unique output directory for this PCAP's suricata output
                     processTimeUsec = int(round(time.time() * 1000000))
                     output_dir = os.path.join(uploadDir, f"suricata-{processTimeUsec}-{workerId}")
 
@@ -484,6 +484,10 @@ def suricataFileWorker(suricataWorkerArgs):
                             pcap_file=fileInfo[FILE_INFO_DICT_NAME],
                             output_dir=output_dir,
                         ):
+                            # suricata over socket mode doesn't let us know when a PCAP file is done processing,
+                            #   so all we do here is store some information about it in suricataOutputDirMap and
+                            #   move on to the next one. suricataResultsMonitor will watch for the PCAP finished
+                            #   message in suricata.log and handle processing the eve.json at that point.
                             suricataOutputDirMap[fileInfo[FILE_INFO_DICT_NAME]] = (
                                 output_dir,
                                 workerId,

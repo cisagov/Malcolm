@@ -926,6 +926,7 @@ LOG_IGNORE_REGEX = re.compile(
   | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
   | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
+  | i:\s+pcap:\s+read\s+\d+\s+file
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
   | "netbox"\s+application\s+started
