@@ -924,6 +924,8 @@ LOG_IGNORE_REGEX = re.compile(
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
   | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
+  | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
+  | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
   | "netbox"\s+application\s+started
@@ -946,6 +948,7 @@ LOG_IGNORE_REGEX = re.compile(
   | throttling\s+index
   | update_mapping
   | updating\s+number_of_replicas
+  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | use_field_mapping
   | Using\s+geoip\s+database
 )

@@ -5,41 +5,51 @@ import logging
 import os
 import socket
 import time
+import malcolm_utils
 from typing import Optional, Dict, Any, Union
+
 
 class SuricataSocketClient:
     """Client for communicating with Suricata's unix socket interface"""
-    
-    def __init__(self, 
-                 socket_path: str = '/var/run/suricata/suricata-command.socket',
-                 logger: Optional[logging.Logger] = None,
-                 max_retries: int = 30,
-                 retry_delay: int = 1,
-                 output_dir: str = '/var/log/suricata'):
+
+    def __init__(
+        self,
+        socket_path: str = '/var/run/suricata/suricata-command.socket',
+        logger: Optional[logging.Logger] = None,
+        debug: bool = False,
+        max_retries: int = 30,
+        retry_delay: int = 1,
+        process_pcap_wait_delay: int = 1,
+        output_dir: str = '/var/log/suricata',
+    ):
         self.socket_path = socket_path
         self.logger = logger or logging.getLogger(__name__)
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.process_pcap_wait_delay = process_pcap_wait_delay
         self.output_dir = output_dir
-        self.debug_enabled = False # change this to True to enable debug logging
+        self.debug_enabled = debug
         self.debug_log = os.path.join(self.output_dir, 'socket_debug.log')
-        
+
         # Ensure log directory exists
         os.makedirs(os.path.dirname(self.debug_log), exist_ok=True)
-        
+
         # Open debug log file
-        if(self.debug_enabled):
+        if self.debug_enabled:
             try:
                 with open(self.debug_log, 'a') as f:
                     f.write("\n\n=== New Session Started ===\n\n")
             except Exception as e:
                 self.logger.error(f"Failed to write to debug log {self.debug_log}: {e}")
-        
+
         self._connect()
 
-    def _debug(self, msg: str) -> None:
-        if(not self.debug_enabled):
-           return
+    def _debug(
+        self,
+        msg: str,
+    ) -> None:
+        if not self.debug_enabled:
+            return
 
         """Write a debug message to the log file and logger"""
         try:
@@ -50,11 +60,13 @@ class SuricataSocketClient:
         # Always log through logger as well
         self.logger.debug(msg)
 
-    def _connect(self) -> None:
+    def _connect(
+        self,
+    ) -> None:
         """Establish connection to Suricata socket with retries"""
         attempts = 0
         last_error = None
-        
+
         while attempts < self.max_retries:
             try:
                 self._debug(f"Attempt {attempts + 1}: Connecting to socket at {self.socket_path}")
@@ -62,16 +74,16 @@ class SuricataSocketClient:
                 self.sock.settimeout(5)  # 5 second timeout
                 self.sock.connect(self.socket_path)
                 self._debug(f"Successfully connected to Suricata socket after {attempts+1} attempts")
-                
+
                 # Initial version handshake - this is a special case, not a command
                 handshake = json.dumps({"version": "0.1"}) + "\n"
                 self._debug(f"Sending handshake: {handshake.strip()}")
                 self.sock.send(handshake.encode('utf-8'))
-                
+
                 # Read response
                 response = self.sock.recv(4096).decode('utf-8')
                 self._debug(f"Handshake response: {response.strip()}")
-                
+
                 try:
                     handshake_json = json.loads(response)
                     if handshake_json.get("return") == "OK":
@@ -84,7 +96,7 @@ class SuricataSocketClient:
                     self._debug(f"ERROR: Failed to decode handshake response: {e}")
                     self._debug(f"ERROR: Raw response was: {repr(response)}")
                     raise ConnectionError(f"Failed to decode handshake response: {e}")
-                
+
             except socket.error as e:
                 last_error = e
                 attempts += 1
@@ -92,12 +104,16 @@ class SuricataSocketClient:
                     self._debug(f"ERROR: Socket connection failed: {e}")
                     self._debug(f"Retrying in {self.retry_delay}s...")
                     time.sleep(self.retry_delay)
-        
+
         error_msg = f"Failed to connect after {self.max_retries} attempts: {last_error}"
         self._debug(f"ERROR: {error_msg}")
         raise ConnectionError(error_msg)
 
-    def _send_command(self, command: Dict[str, Any], retries: int = 3) -> Union[Dict[str, Any], None]:
+    def _send_command(
+        self,
+        command: Dict[str, Any],
+        retries: int = 3,
+    ) -> Union[Dict[str, Any], None]:
         """Send a command to Suricata socket and return the response"""
         attempts = 0
         while attempts < retries:
@@ -139,11 +155,16 @@ class SuricataSocketClient:
 
         return None
 
-    def process_pcap(self, pcap_file: str, output_dir: str) -> bool:
+    def process_pcap(
+        self,
+        pcap_file: str,
+        output_dir: str,
+        wait_until_finished: bool = True,
+    ) -> bool:
         """Submit a PCAP file to Suricata for processing"""
         try:
             self._debug(f"\nProcessing PCAP: {pcap_file}")
-            
+
             # Create output directory if it doesn't exist
             try:
                 os.makedirs(output_dir, exist_ok=True)
@@ -151,28 +172,52 @@ class SuricataSocketClient:
             except Exception as e:
                 self._debug(f"ERROR: Failed to create output directory {output_dir}: {e}")
                 return False
-            
-            command = {
-                "command": "pcap-file",
-                "arguments": {
-                    "filename": pcap_file,
-                    "output-dir": output_dir
-                }
-            }
-            submit_response = self._send_command(command)
+            eve_json_file = os.path.join(output_dir, "eve.json")
 
+            submit_response = self._send_command(
+                {
+                    "command": "pcap-file",
+                    "arguments": {
+                        "filename": pcap_file,
+                        "output-dir": output_dir,
+                    },
+                }
+            )
             if not submit_response or submit_response.get("return") != "OK":
                 self._debug(f"ERROR: Failed to process PCAP: {submit_response}")
                 return False
 
-            self._debug(f"Successfully processed PCAP: {pcap_file}")
+            self._debug(f"Successfully queued PCAP: {pcap_file}")
+            # There's not really a good way to know if our PCAP has been processed, but here's
+            #   an assumption we can make:
+            # * if the PCAP file is still in the pcap-file-list, then it's not done yet
+            # * if the PCAP file ISN'T in the pcap-file-list, and the output eve.json file
+            #     exists (and is n seconds since the last modification?) then we can assume
+            #     it's finished processing
+            while wait_until_finished:
+                if pcap_file in malcolm_utils.deep_get(
+                    self._send_command({"command": "pcap-file-list"}), ["message", "files"], []
+                ):
+                    # This PCAP file is still in the processing queue, so it's not done yet
+                    continue
+                # Either the pcap-file-list command failed or came back bogus (yikes) or it came back clean
+                #   but the PCAP file name is not in the processing files queue, which means it's
+                #   hopefully finished being processed, as long as the eve.json exists.
+                if os.path.isfile(eve_json_file):
+                    self._debug(f"Successfully generated {eve_json_file} for {pcap_file}")
+                    break
+                else:
+                    time.sleep(self.process_pcap_wait_delay)
+
             return True
 
         except Exception as e:
             self._debug(f"ERROR: Exception processing PCAP: {e}")
             return False
 
-    def close(self) -> None:
+    def close(
+        self,
+    ) -> None:
         """Close the socket connection"""
         try:
             self.sock.close()
