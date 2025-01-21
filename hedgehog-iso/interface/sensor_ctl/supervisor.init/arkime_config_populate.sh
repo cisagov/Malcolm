@@ -3,6 +3,9 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export ARKIME_HTTPS_FLAG=""
+ARKIME_WISE_PLUGIN=${ARKIME_WISE_PLUGIN-"false"}
+ARKIME_WISE_URL=${ARKIME_WISE_URL-"127.0.0.1"}
+
 
 if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; then
 
@@ -156,18 +159,22 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
   rsync -a --update /opt/arkime/etc/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb} /opt/sensor/sensor_ctl/arkime/
   chmod 600 /opt/sensor/sensor_ctl/arkime/{ipv4-address-space.csv,oui.txt,GeoLite2-Country.mmdb,GeoLite2-ASN.mmdb}
 
-  # generate self-signed TLS keys for arkime viewer if they don't already exist
-  if ( [[ -n "$ARKIME_VIEWER_CERT" ]] && [[ -n "$ARKIME_VIEWER_KEY" ]] ); then
+   if ( [[ -n "$ARKIME_VIEWER_CERT" ]] && [[ -n "$ARKIME_VIEWER_KEY" ]] ); then
     CRT_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_CERT"
     KEY_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_KEY"
     if ( [[ ! -f "$CRT_FILESPEC" ]] || [[ ! -f "$KEY_FILESPEC" ]] ) && [[ -x /usr/local/bin/self_signed_key_gen.sh ]]; then
-      pushd "$SUPERVISOR_PATH"/arkime >/dev/null 2>&1
+      pushd "$SUPERVISOR_PATH"/ar1kime >/dev/null 2>&1
       /usr/local/bin/self_signed_key_gen.sh -n -o ./newcerts >/dev/null 2>&1
       mv ./newcerts/server.crt "$CRT_FILESPEC"
       mv ./newcerts/server.key "$KEY_FILESPEC"
       rm -rf ./newcerts
-      popd >/dev/null 2>&1      
+      popd >/dev/null 2>&1
     fi
+  fi
+
+  if [[ ${ARKIME_WISE_PLUGIN}  == "true" ]]; then
+    sed -i "s|^\(plugins=\).*|\1"";wise.so""|" "${ARKIME_CONFIG_FILE}"
+    sed -i "s|^\(wiseURL=\).*|\1""${ARKIME_WISE_URL}""|" "${ARKIME_CONFIG_FILE}"
   fi
 
   # update the firewall ACL (via ufw) to allow retrieval of packets
