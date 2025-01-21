@@ -43,7 +43,7 @@ from itertools import chain, repeat
 
 try:
     from suricata_socket import SuricataSocketClient
-except ImportError:
+except ModuleNotFoundError:
     # this will blow up later on instantiation, of course
     SuricataSocketClient = object
 
