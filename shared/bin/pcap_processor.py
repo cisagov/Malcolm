@@ -44,7 +44,8 @@ from itertools import chain, repeat
 try:
     from suricata_socket import SuricataSocketClient
 except ImportError:
-    SuricataSocketClient = None
+    # this will blow up later on instantiation, of course
+    SuricataSocketClient = object
 
 ###################################################################################################
 MAX_WORKER_PROCESSES_DEFAULT = 1
