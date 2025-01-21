@@ -159,7 +159,6 @@ class SuricataSocketClient:
         self,
         pcap_file: str,
         output_dir: str,
-        wait_until_finished: bool = True,
     ) -> bool:
         """Submit a PCAP file to Suricata for processing"""
         try:
@@ -188,27 +187,6 @@ class SuricataSocketClient:
                 return False
 
             self._debug(f"Successfully queued PCAP: {pcap_file}")
-            # There's not really a good way to know if our PCAP has been processed, but here's
-            #   an assumption we can make:
-            # * if the PCAP file is still in the pcap-file-list, then it's not done yet
-            # * if the PCAP file ISN'T in the pcap-file-list, and the output eve.json file
-            #     exists (and is n seconds since the last modification?) then we can assume
-            #     it's finished processing
-            while wait_until_finished:
-                if pcap_file in malcolm_utils.deep_get(
-                    self._send_command({"command": "pcap-file-list"}), ["message", "files"], []
-                ):
-                    # This PCAP file is still in the processing queue, so it's not done yet
-                    continue
-                # Either the pcap-file-list command failed or came back bogus (yikes) or it came back clean
-                #   but the PCAP file name is not in the processing files queue, which means it's
-                #   hopefully finished being processed, as long as the eve.json exists.
-                if os.path.isfile(eve_json_file):
-                    self._debug(f"Successfully generated {eve_json_file} for {pcap_file}")
-                    break
-                else:
-                    time.sleep(self.process_pcap_wait_delay)
-
             return True
 
         except Exception as e:
