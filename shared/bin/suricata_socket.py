@@ -199,6 +199,7 @@ class SuricataSocketClient:
                     self._send_command({"command": "pcap-file-list"}), ["message", "files"], []
                 ):
                     # This PCAP file is still in the processing queue, so it's not done yet
+                    self._debug(f"Still waiting to process {pcap_file}")
                     continue
                 # Either the pcap-file-list command failed or came back bogus (yikes) or it came back clean
                 #   but the PCAP file name is not in the processing files queue, which means it's

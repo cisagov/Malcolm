@@ -488,12 +488,15 @@ def suricataFileWorker(suricataWorkerArgs):
 
                             eveJsonFile = os.path.join(output_dir, "eve.json")
                             if os.path.isfile(eveJsonFile):
+                                eveJsonFileStats = os.stat(eveJsonFile)
                                 # relocate the .json to be processed (do it this way instead of with a shutil.move because of
                                 # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
                                 # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
                                 output_name = f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json"
                                 shutil.copy(eveJsonFile, os.path.join(uploadDir, output_name))
-                                logger.info(f"{scriptName}[{scanWorkerId}]:\t📄\tGenerated {output_name}")
+                                logger.info(
+                                    f"{scriptName}[{scanWorkerId}]:\t📄\tGenerated {output_name} ({eveJsonFileStats.st_size})"
+                                )
                             else:
                                 logger.warning(
                                     f"{scriptName}[{scanWorkerId}]:\t⚠️\tNo eve.json generated for {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
