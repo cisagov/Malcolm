@@ -36,12 +36,15 @@ from pcap_utils import (
     tags_from_filename,
 )
 from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or_dir
-from suricata_socket import SuricataSocketClient
-
 from multiprocessing.pool import ThreadPool
 from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
 from collections import deque, defaultdict
 from itertools import chain, repeat
+
+try:
+    from suricata_socket import SuricataSocketClient
+except ImportError:
+    SuricataSocketClient = None
 
 ###################################################################################################
 MAX_WORKER_PROCESSES_DEFAULT = 1
