@@ -138,6 +138,7 @@ COPY --chmod=755 netbox/scripts/* /usr/local/bin/
 COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 COPY --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
+COPY --chmod=755 netbox/scripts/container_health_netbox.sh /usr/local/bin/
 
 EXPOSE 9001
 

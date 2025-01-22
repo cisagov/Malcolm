@@ -59,10 +59,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "arkime.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /_ns_/nstest.html
-            port: 8005
-            scheme: HTTPS
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 210
           periodSeconds: 90
           timeoutSeconds: 30
