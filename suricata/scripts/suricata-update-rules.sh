@@ -43,6 +43,14 @@ if type suricata-update >/dev/null 2>&1; then
     --suricata-conf "${SURICATA_CONFIG_FILE:-/etc/suricata/suricata.yaml}" \
     --fail 2>&1 | grep $UPDATE_IGNORE_FLAG "$UPDATE_IGNORE"
 
+
+    SURICATA_RUN_DIR="${SURICATA_RUN_DIR:-}"
+    [[ -z "$SURICATA_RUN_DIR" ]] && SURICATA_RUN_DIR="${SUPERVISOR_PATH:-/var/run}/suricata"
+    SURICATA_SOCKET="$SURICATA_RUN_DIR"/suricata-command.socket
+
+    test -S "$SURICATA_SOCKET" >/dev/null 2>&1 && \
+      suricatasc "$SURICATA_SOCKET" -c ruleset-reload-nonblocking >/dev/null 2>&1
+
 else
   exit 1
 fi

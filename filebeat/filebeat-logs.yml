@@ -72,7 +72,7 @@ filebeat.inputs:
 #-------------------------- Suricata EVE JSON logs -----------------------------
 - type: log
   paths:
-    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/eve*.json
+    - ${FILEBEAT_SURICATA_LOG_PATH:/suricata}/suricata-*/eve*.json
   symlinks: true
   fields_under_root: true
   tags: ["_filebeat_suricata_malcolm_upload"]
@@ -80,10 +80,15 @@ filebeat.inputs:
   scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
   clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
   ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
-  close_inactive: ${FILEBEAT_CLOSE_INACTIVE:120s}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
   close_renamed: ${FILEBEAT_CLOSE_RENAMED:true}
   close_removed: ${FILEBEAT_CLOSE_REMOVED:true}
-  close_eof: ${FILEBEAT_CLOSE_EOF:true}
+  # We're now submitting uploaded PCAP to Suricata over a socket,
+  #   but Suricata doesn't let us know when processing is complete.
+  #   Reaching EOF doesn't necessarily mean the file is done
+  #   being written to. We need to treat the results more like "live"
+  #   even though the traffic itself isn't.
+  close_eof: false
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
 - type: log

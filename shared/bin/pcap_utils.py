@@ -3,13 +3,7 @@
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import os
 import re
-import sys
-
-from subprocess import PIPE, Popen
-from multiprocessing import RawValue
-from threading import Lock
 
 ###################################################################################################
 PCAP_TOPIC_PORT = 30441

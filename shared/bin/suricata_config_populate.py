@@ -179,7 +179,7 @@ DEFAULT_VARS.update(
         'RFB_EVE_ENABLED': False,
         'RFB_PORTS': "[5900,5901,5902,5903,5904,5905,5906,5907,5908,5909]",
         'RUNMODE': 'autofp',
-        'RUN_DIR': os.path.join(os.getenv('SUPERVISOR_PATH', '/var/run'), 'suricata'),
+        'RUN_DIR': os.getenv('SURICATA_RUN_DIR', os.path.join(os.getenv('SUPERVISOR_PATH', '/var/run'), 'suricata')),
         'SHELLCODE_PORTS': '!80',
         'SIP_ENABLED': True,
         'SIP_EVE_ENABLED': False,
@@ -1227,6 +1227,7 @@ def main():
     cfg.pop('run-as', None)
     cfg.pop('coredump', None)
     deep_set(cfg, ['coredump', 'max-dump'], 0)
+    deep_set(cfg, ['security', 'limit-noproc'], False)
 
     if DEFAULT_VARS['RUN_DIR'] is not None:
         cfg.pop('unix-command', None)
