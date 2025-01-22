@@ -37,8 +37,7 @@ from pcap_utils import (
 )
 from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or_dir
 from multiprocessing.pool import ThreadPool
-from subprocess import PIPE, STDOUT, DEVNULL, Popen, TimeoutExpired
-from collections import deque, defaultdict
+from collections import deque
 from itertools import chain, repeat
 
 try:
@@ -400,7 +399,6 @@ def suricataFileWorker(suricataWorkerArgs):
 
     (
         newFileQueue,
-        suricataOutputDirMap,
         pcapBaseDir,
         autoSuricata,
         forceSuricata,
@@ -423,7 +421,6 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[8],
         suricataWorkerArgs[9],
         suricataWorkerArgs[10],
-        suricataWorkerArgs[11],
     )
 
     if not logger:
@@ -485,7 +482,9 @@ def suricataFileWorker(suricataWorkerArgs):
 
                     # Create unique output directory for this PCAP's suricata output
                     processTimeUsec = int(round(time.time() * 1000000))
-                    output_dir = os.path.join(uploadDir, f"suricata-{processTimeUsec}-{workerId}")
+                    output_dir = os.path.join(
+                        uploadDir, f"suricata-{processTimeUsec}-{workerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])})"
+                    )
 
                     try:
                         logger.info(
@@ -496,15 +495,8 @@ def suricataFileWorker(suricataWorkerArgs):
                             output_dir=output_dir,
                         ):
                             # suricata over socket mode doesn't let us know when a PCAP file is done processing,
-                            #   so all we do here is store some information about it in suricataOutputDirMap and
-                            #   move on to the next one. suricataResultsMonitor will watch for the PCAP finished
-                            #   message in suricata.log and handle processing the eve.json at that point.
-                            suricataOutputDirMap[fileInfo[FILE_INFO_DICT_NAME]] = (
-                                output_dir,
-                                workerId,
-                                processTimeUsec,
-                                fileInfo[FILE_INFO_DICT_TAGS],
-                            )
+                            #   so all we do here is submit it and then we'll let filebeat tail the results
+                            #   as long as it needs to
                             logger.info(
                                 f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
                             )
@@ -519,125 +511,6 @@ def suricataFileWorker(suricataWorkerArgs):
                         )
 
     logger.info(f"{scriptName}[{workerId}]:\tfinished")
-
-
-###################################################################################################
-def suricataResultsMonitor(suricataResultsMonitorArgs):
-    global shuttingDown
-    global workersCount
-
-    # There is no good way to know if a PCAP file has finished processing with Suricata in socket
-    #   mode (see https://forum.suricata.io/t/suricata-in-socket-mode-determining-if-a-pcap-is-done-processing).
-    #   So what we have to do is tail suricata.log and watch for the "end of file reached" message
-    #   to know we can process its eve.log. This is a pain in the 🍑.
-
-    workerId = workersCount.increment()  # unique ID for this thread
-
-    (
-        suricataOutputDirMap,
-        suricataLogPath,
-        uploadDir,
-        logger,
-        debug,
-    ) = (
-        suricataResultsMonitorArgs[0],
-        suricataResultsMonitorArgs[1],
-        suricataResultsMonitorArgs[2],
-        suricataResultsMonitorArgs[3],
-        suricataResultsMonitorArgs[4],
-    )
-
-    if not logger:
-        logger = logging
-
-    logger.info(f"{scriptName}[{workerId}]:\t🪵\tstarted")
-
-    finishedRegEx = re.compile(r'pcap file (.+?) end of file reached')
-
-    process = None
-
-    while not shuttingDown:
-
-        if process is not None:
-            try:
-                process.terminate()
-                try:
-                    process.wait(timeout=5.0)
-                except TimeoutExpired:
-                    process.kill()
-            except Exception:
-                pass
-            process = None
-
-        if os.path.isfile(suricataLogPath):
-            if process := Popen(
-                ['tail', '-n', '1000', '-F', suricataLogPath],
-                stdout=PIPE,
-                stderr=None if debug else DEVNULL,
-            ):
-                logger.info(f"{scriptName}[{workerId}]:\t🪵\tmonitoring {suricataLogPath}")
-                while not shuttingDown:
-
-                    if output := process.stdout.readline():
-                        try:
-                            if pcapDoneMsgMatch := finishedRegEx.search(output.decode('utf-8').strip()):
-                                pcapFileSpec = pcapDoneMsgMatch.group(1)
-                                outputDir, origWorkerId, processTimeUsec, tags = suricataOutputDirMap.pop(
-                                    pcapFileSpec, (None, workerId, 0, None)
-                                )
-                                if outputDir and os.path.isdir(str(outputDir)):
-                                    logger.debug(
-                                        f"{scriptName}[{workerId}]:\t🏁\t{pcapFileSpec} done processing in {outputDir}"
-                                    )
-                                    eveJsonFile = os.path.join(outputDir, "eve.json")
-                                    if os.path.isfile(eveJsonFile):
-                                        eveJsonFileStats = os.stat(eveJsonFile)
-                                        if eveJsonFileStats.st_size > 0:
-                                            # relocate the .json to be processed (do it this way instead of with a shutil.move because of
-                                            # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
-                                            eveJsonFileFinal = f"eve-{processTimeUsec}-{origWorkerId}-({','.join(tags if tags else [])}).json"
-                                            shutil.copy(eveJsonFile, os.path.join(uploadDir, eveJsonFileFinal))
-                                            logger.info(
-                                                f"{scriptName}[{workerId}]:\t📄\tGenerated {eveJsonFileFinal} ({eveJsonFileStats.st_size}) for {os.path.basename(pcapFileSpec)}"
-                                            )
-                                        else:
-                                            logger.info(
-                                                f"{scriptName}[{workerId}]:\t🫙\tEmpty eve.json generated for {os.path.basename(pcapFileSpec)}"
-                                            )
-                                        os.unlink(eveJsonFile)
-
-                                    else:
-                                        logger.warning(
-                                            f"{scriptName}[{workerId}]:\t⚠️\tNo eve.json generated for {os.path.basename(pcapFileSpec)}"
-                                        )
-
-                                    if not same_file_or_dir(uploadDir, outputDir):
-                                        shutil.rmtree(outputDir, ignore_errors=True)
-
-                                else:
-                                    logger.warning(
-                                        f"{scriptName}[{workerId}]:\t⚠️\tNo output directory for {os.path.basename(pcapFileSpec)}"
-                                    )
-
-                        except Exception as e:
-                            logger.error(f"{scriptName}[{workerId}]:\t💥\tError watching logs: {e}")
-
-                    else:
-                        if process.poll() is not None:
-                            break
-                        else:
-                            time.sleep(1)
-            else:
-                logger.error(f"{scriptName}[{workerId}]:\t💥\tUnable to tail {suricataLogPath}")
-                time.sleep(1)
-
-        else:
-            time.sleep(1)
-
-    if process is not None:
-        process.poll()
-
-    logger.info(f"{scriptName}[{workerId}]:\t🪵\tfinished")
 
 
 ###################################################################################################
@@ -844,15 +717,6 @@ def main():
             default=SURICATA_SOCKET_PATH,
         )
         parser.add_argument(
-            '--suricata-log',
-            required=False,
-            dest='suricataLogPath',
-            help="suricata.log path",
-            metavar='<STR>',
-            type=str,
-            default=SURICATA_LOG_PATH,
-        )
-        parser.add_argument(
             '--autosuricata',
             dest='autoSuricata',
             help="Autoanalyze all PCAP file with Suricata",
@@ -980,7 +844,6 @@ def main():
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
-        suricataOutputDirMap = defaultdict(lambda: None)
         ThreadPool(
             # threading is done inside of Suricata in socket mode, so just use 1 thread to submit PCAP
             1,
@@ -988,7 +851,6 @@ def main():
             (
                 [
                     newFileQueue,
-                    suricataOutputDirMap,
                     args.pcapBaseDir,
                     args.autoSuricata,
                     args.forceSuricata,
@@ -997,20 +859,6 @@ def main():
                     args.autoTag,
                     args.suricataUploadDir,
                     args.suricataConfigFile,
-                    logging,
-                    args.verbose <= logging.DEBUG,
-                ],
-            ),
-        )
-        ThreadPool(
-            # threading is done inside of Suricata in socket mode, so just use 1 thread to monitor suricata results
-            1,
-            suricataResultsMonitor,
-            (
-                [
-                    suricataOutputDirMap,
-                    args.suricataLogPath,
-                    args.suricataUploadDir,
                     logging,
                     args.verbose <= logging.DEBUG,
                 ],

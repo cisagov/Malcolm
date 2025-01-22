@@ -141,13 +141,22 @@ def pruneFiles():
                 print(f'removing dead symlink "{currentFileSpec}"')
                 silentRemove(currentFileSpec)
 
-    # clean up any old and empty directories in Zeek processed/ directory
+    # check the suricata logs (live and otherwise) as well
+    for surDir in [suricataDir, suricataLiveDir]:
+        if os.path.isdir(surDir):
+            for eve in os.listdir(surDir):
+                eveFile = os.path.join(surDir, eve)
+                if os.path.isfile(eveFile):
+                    checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
+
+    # clean up any old and empty directories in Zeek processed/ and suricata non-live directories
     cleanDirSeconds = min(i for i in (cleanLogSeconds, cleanZipSeconds) if i > 0)
     candidateDirs = []
-    if os.path.isdir(zeekProcessedDir):
-        for root, dirs, files in os.walk(zeekProcessedDir, topdown=False):
-            if root and dirs:
-                candidateDirs += [os.path.join(root, tmpDir) for tmpDir in dirs]
+    for processedDir in [zeekProcessedDir, suricataDir]:
+        if os.path.isdir(processedDir):
+            for root, dirs, files in os.walk(processedDir, topdown=False):
+                if root and dirs:
+                    candidateDirs += [os.path.join(root, tmpDir) for tmpDir in dirs]
     candidateDirs = list(set(candidateDirs))
     candidateDirs.sort(reverse=True)
     candidateDirs.sort(key=len, reverse=True)
@@ -160,14 +169,6 @@ def pruneFiles():
                 print(f'removed empty directory "{dirToRm}" (used {dirAge} seconds ago)')
             except OSError:
                 pass
-
-    # check the suricata logs (live and otherwise) as well
-    for surDir in [suricataDir, suricataLiveDir]:
-        if os.path.isdir(surDir):
-            for eve in os.listdir(surDir):
-                eveFile = os.path.join(surDir, eve)
-                if os.path.isfile(eveFile):
-                    checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
 
 
 def main():
