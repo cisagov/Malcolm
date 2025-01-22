@@ -169,10 +169,17 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
                     if (
-                        forceArkime
-                        or autoArkime
+                        autoArkime
                         or (
                             (FILE_INFO_DICT_TAGS in fileInfo) and ARKIME_AUTOARKIME_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                        )
+                    ) and (
+                        forceArkime
+                        or (
+                            not any(
+                                os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                                for prefix in ('mnetsniff', 'mtcpdump')
+                            )
                         )
                     ):
                         # finalize tags list
