@@ -34,9 +34,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - pcap-suricata
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 120
           periodSeconds: 30
           timeoutSeconds: 15

@@ -175,6 +175,7 @@ ADD arkime/etc $ARKIME_DIR/etc/
 ADD arkime/rules/*.yml $ARKIME_DIR/rules/
 ADD arkime/wise/source.*.js $ARKIME_DIR/wiseService/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+COPY --chmod=755 arkime/scripts/container_health.sh /usr/local/bin/
 
 # MaxMind now requires a (free) license key to download the free versions of
 # their GeoIP databases. This should be provided as a build argument.

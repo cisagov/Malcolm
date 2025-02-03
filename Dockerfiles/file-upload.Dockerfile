@@ -99,6 +99,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
+COPY --chmod=755 file-upload/scripts/container_health.sh /usr/local/bin/
 ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
 ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
 ADD file-upload/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini

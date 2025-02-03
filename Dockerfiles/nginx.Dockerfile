@@ -252,6 +252,7 @@ COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favic
 COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
 COPY --chmod=644 docs/images/logo/*.png /usr/share/nginx/html/assets/img/
 COPY --chmod=644 docs/images/logo/*.svg /usr/share/nginx/html/assets/img/
+COPY --chmod=755 nginx/scripts/container_health.sh /usr/local/bin/
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

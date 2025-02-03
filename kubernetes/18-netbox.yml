@@ -65,10 +65,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /netbox/api/
-            port: 8080
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health_netbox.sh
           initialDelaySeconds: 300
           periodSeconds: 60
           timeoutSeconds: 15

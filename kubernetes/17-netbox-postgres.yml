@@ -53,15 +53,8 @@ spec:
         livenessProbe:
           exec:
             command:
-             - sh
-             - "-c"
-             - |
-               /bin/bash <<'EOF'
-
-               [[ "$NETBOX_POSTGRES_DISABLED" == 'true' ]] || pg_isready -d "$POSTGRES_DB" -U "$POSTGRES_USER"
-
-               EOF
-          initialDelaySeconds: 90
+            - /usr/local/bin/container_health_postgres.sh
+          initialDelaySeconds: 45
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
