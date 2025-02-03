@@ -1259,6 +1259,7 @@ def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
 def authSetup():
     global args
     global opensslBin
+    global dotenvImported
 
     # for beats/logstash self-signed certificates
     logstashPath = os.path.join(MalcolmPath, os.path.join('logstash', 'certs'))
@@ -1873,85 +1874,133 @@ def authSetup():
 
                 elif authItem[0] == 'netbox':
                     with pushd(args.configDir):
-                        netboxPwAlphabet = string.ascii_letters + string.digits + '_'
-                        netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
-                        netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                        netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                        netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                        netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                        netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
-                        netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
 
-                        with open('netbox-postgres.env', 'w') as f:
-                            f.write('POSTGRES_DB=netbox\n')
-                            f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
-                            f.write('POSTGRES_USER=netbox\n')
-                            f.write('K8S_SECRET=True\n')
-                        os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
+                        # Check for the presence of existing passwords prior to setting new NetBox passwords.
+                        #   see cisagov/Malcolm#565 (NetBox fails to start due to invalid internal password
+                        #   if NetBox passwords have been changed).
 
-                        with open('netbox-redis-cache.env', 'w') as f:
-                            f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
-                            f.write('K8S_SECRET=True\n')
-                        os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
+                        preExistingPasswordFound = False
+                        preExistingPasswords = {
+                            'netbox-postgres.env': ('POSTGRES_PASSWORD',),
+                            'netbox-redis-cache.env': ('REDIS_PASSWORD',),
+                            'netbox-redis.env': ('REDIS_PASSWORD',),
+                            'netbox-secret.env': (
+                                'DB_PASSWORD',
+                                'REDIS_CACHE_PASSWORD',
+                                'REDIS_PASSWORD',
+                                'SECRET_KEY',
+                                'SUPERUSER_PASSWORD',
+                                'SUPERUSER_API_TOKEN',
+                            ),
+                        }
+                        for envFile, keys in preExistingPasswords.items():
+                            envValues = defaultdict(None)
+                            if os.path.isfile(envFile):
+                                envValues.update(dotenvImported.dotenv_values(envFile))
+                            for key in keys:
+                                if keyVal := envValues[key]:
+                                    if all(c in "xX" for c in keyVal) or (
+                                        (key == 'SUPERUSER_PASSWORD') and (keyVal == 'admin')
+                                    ):
+                                        # all good, no password has been set yet
+                                        pass
+                                    else:
+                                        # preexisting password was found, need to warn the user
+                                        preExistingPasswordFound = True
 
-                        with open('netbox-redis.env', 'w') as f:
-                            f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
-                            f.write('K8S_SECRET=True\n')
-                        os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
+                        if (not preExistingPasswordFound) or YesOrNo(
+                            'Internal passwords for NetBox already exist. Overwriting them will break access to a populated NetBox database. Are you sure?',
+                            default=args.cmdAuthSetupNonInteractive,
+                            defaultBehavior=defaultBehavior,
+                        ):
 
-                        if (not os.path.isfile('netbox-secret.env')) and (os.path.isfile('netbox-secret.env.example')):
-                            shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
+                            netboxPwAlphabet = string.ascii_letters + string.digits + '_'
+                            netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
+                            netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
+                            netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
 
-                        with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
-                            for line in envFile:
-                                line = line.rstrip("\n")
+                            with open('netbox-postgres.env', 'w') as f:
+                                f.write('POSTGRES_DB=netbox\n')
+                                f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
+                                f.write('POSTGRES_USER=netbox\n')
+                                f.write('K8S_SECRET=True\n')
+                            os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                                if line.startswith('DB_PASSWORD'):
-                                    line = re.sub(
-                                        r'(DB_PASSWORD\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxPostGresPassword}",
-                                        line,
-                                    )
-                                elif line.startswith('REDIS_CACHE_PASSWORD'):
-                                    line = re.sub(
-                                        r'(REDIS_CACHE_PASSWORD\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxRedisCachePassword}",
-                                        line,
-                                    )
-                                elif line.startswith('REDIS_PASSWORD'):
-                                    line = re.sub(
-                                        r'(REDIS_PASSWORD\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxRedisPassword}",
-                                        line,
-                                    )
-                                elif line.startswith('SECRET_KEY'):
-                                    line = re.sub(
-                                        r'(SECRET_KEY\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxSecretKey}",
-                                        line,
-                                    )
-                                elif line.startswith('SUPERUSER_PASSWORD'):
-                                    line = re.sub(
-                                        r'(SUPERUSER_PASSWORD\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxSuPassword}",
-                                        line,
-                                    )
-                                elif line.startswith('SUPERUSER_API_TOKEN'):
-                                    line = re.sub(
-                                        r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
-                                        fr"\g<1>{netboxSuToken}",
-                                        line,
-                                    )
-                                elif line.startswith('K8S_SECRET'):
-                                    line = re.sub(
-                                        r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
-                                        fr"\g<1>True",
-                                        line,
-                                    )
+                            with open('netbox-redis-cache.env', 'w') as f:
+                                f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
+                                f.write('K8S_SECRET=True\n')
+                            os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                                print(line)
+                            with open('netbox-redis.env', 'w') as f:
+                                f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
+                                f.write('K8S_SECRET=True\n')
+                            os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                        os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+                            if (not os.path.isfile('netbox-secret.env')) and (
+                                os.path.isfile('netbox-secret.env.example')
+                            ):
+                                shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
+
+                            with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
+                                for line in envFile:
+                                    line = line.rstrip("\n")
+
+                                    if line.startswith('DB_PASSWORD'):
+                                        line = re.sub(
+                                            r'(DB_PASSWORD\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxPostGresPassword}",
+                                            line,
+                                        )
+                                    elif line.startswith('REDIS_CACHE_PASSWORD'):
+                                        line = re.sub(
+                                            r'(REDIS_CACHE_PASSWORD\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxRedisCachePassword}",
+                                            line,
+                                        )
+                                    elif line.startswith('REDIS_PASSWORD'):
+                                        line = re.sub(
+                                            r'(REDIS_PASSWORD\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxRedisPassword}",
+                                            line,
+                                        )
+                                    elif line.startswith('SECRET_KEY'):
+                                        line = re.sub(
+                                            r'(SECRET_KEY\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxSecretKey}",
+                                            line,
+                                        )
+                                    elif line.startswith('SUPERUSER_PASSWORD'):
+                                        line = re.sub(
+                                            r'(SUPERUSER_PASSWORD\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxSuPassword}",
+                                            line,
+                                        )
+                                    elif line.startswith('SUPERUSER_API_TOKEN'):
+                                        line = re.sub(
+                                            r'(SUPERUSER_API_TOKEN\s*=\s*)(.*?)$',
+                                            fr"\g<1>{netboxSuToken}",
+                                            line,
+                                        )
+                                    elif line.startswith('K8S_SECRET'):
+                                        line = re.sub(
+                                            r'(SUPERUSER_API_TOKEN\s*=\s*)(.*?)$',
+                                            fr"\g<1>True",
+                                            line,
+                                        )
+
+                                    print(line)
+
+                            os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                        else:
+                            DisplayMessage(
+                                'Internal passwords for NetBox were left unmodified.',
+                                defaultBehavior=defaultBehavior,
+                            )
 
                 elif authItem[0] == 'arkime':
                     # prompt password
@@ -1987,7 +2036,7 @@ def authSetup():
 
                                 if arkimePassword and line.startswith('ARKIME_PASSWORD_SECRET'):
                                     line = re.sub(
-                                        r'(ARKIME_PASSWORD_SECRET\s*=\s*)(\S+)',
+                                        r'(ARKIME_PASSWORD_SECRET\s*=\s*)(.*?)$',
                                         fr"\g<1>{arkimePassword}",
                                         line,
                                     )
@@ -2044,7 +2093,7 @@ def authSetup():
 
                                 p.poll()
     finally:
-        if MainDialog:
+        if MainDialog and (not args.cmdAuthSetupNonInteractive):
             ClearScreen()
 
 
