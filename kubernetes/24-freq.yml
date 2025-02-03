@@ -49,10 +49,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "freq.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /
-            port: 10004
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

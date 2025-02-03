@@ -104,6 +104,7 @@ ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+COPY --chmod=755 file-monitor/scripts/container_health.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/capa-build.sh /usr/local/bin/
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"

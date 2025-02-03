@@ -61,6 +61,15 @@ spec:
           - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health_netbox.sh
+          initialDelaySeconds: 300
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
       initContainers:
       - name: htadmin-dirinit-container
         image: ghcr.io/idaholab/malcolm/dirinit:25.02.0

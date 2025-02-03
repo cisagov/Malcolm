@@ -62,14 +62,7 @@ spec:
         livenessProbe:
           exec:
             command:
-             - sh
-             - "-c"
-             - |
-               /bin/bash <<'EOF'
-
-               [[ "$NETBOX_REDIS_DISABLED" == 'true' ]] || ( pidof redis-server || exit 1 )
-
-               EOF
+            - /usr/local/bin/container_health_redis.sh
           initialDelaySeconds: 45
           periodSeconds: 60
           timeoutSeconds: 15

@@ -55,12 +55,9 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - cron
-            - maps
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 30
-          periodSeconds: 30
+          periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
           failureThreshold: 10

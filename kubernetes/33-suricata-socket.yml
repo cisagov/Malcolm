@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: suricata-offline-deployment
+  name: suricata-socket-deployment
   namespace: malcolm
 spec:
   selector:
     matchLabels:
-      name: suricata-offline-deployment
+      name: suricata-socket-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        name: suricata-offline-deployment
+        name: suricata-socket-deployment
     spec:
       containers:
-      - name: suricata-offline-container
-        image: ghcr.io/idaholab/malcolm/suricata:25.02.0
+      - name: suricata-socket-container
+        image: ghcr.io/idaholab/malcolm/suricata:24.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -30,11 +30,13 @@ spec:
           - configMapRef:
               name: suricata-env
           - configMapRef:
-              name: suricata-offline-env
+              name: suricata-socket-env
         livenessProbe:
           exec:
             command:
-            - /usr/local/bin/container_health.sh
+            - supervisorctl
+            - status
+            - socket-suricata
           initialDelaySeconds: 120
           periodSeconds: 30
           timeoutSeconds: 15
@@ -42,18 +44,16 @@ spec:
           failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: suricata-offline-var-local-catrust-volume
-          - mountPath: "/data/pcap"
-            name: suricata-offline-pcap-volume
-          - mountPath: "/var/log/suricata"
-            name: suricata-offline-suricata-logs-volume
+            name: suricata-socket-var-local-catrust-volume
+          - mountPath: /var/log/suricata
+            name: suricata-socket-suricata-logs-volume
           - mountPath: "/opt/suricata/rules/configmap"
-            name: suricata-offline-custom-rules-volume
+            name: suricata-socket-custom-rules-volume
           - mountPath: "/opt/suricata/include-configs/configmap"
-            name: suricata-offline-custom-configs-volume
+            name: suricata-socket-custom-configs-volume
       initContainers:
-      - name: suricata-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
+      - name: suricata-socket-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:24.12.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -62,23 +62,20 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:processed"
+            value: "/data/suricata-logs:socket"
         volumeMounts:
-          - name: suricata-offline-pcap-volume
-            mountPath: "/data/pcap"
+          - name: suricata-socket-suricata-logs-volume
+            mountPath: "/data/suricata-logs"
       volumes:
-        - name: suricata-offline-var-local-catrust-volume
+        - name: suricata-socket-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: suricata-offline-pcap-volume
-          persistentVolumeClaim:
-            claimName: pcap-claim
-        - name: suricata-offline-suricata-logs-volume
+        - name: suricata-socket-suricata-logs-volume
           persistentVolumeClaim:
             claimName: suricata-claim
-        - name: suricata-offline-custom-rules-volume
+        - name: suricata-socket-custom-rules-volume
           configMap:
             name: suricata-rules
-        - name: suricata-offline-custom-configs-volume
+        - name: suricata-socket-custom-configs-volume
           configMap:
             name: suricata-configs

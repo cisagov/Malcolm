@@ -60,6 +60,7 @@ COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --chmod=755 shared/bin/opensearch_status.sh /data/
+COPY --chmod=755 dashboards-helper/scripts/container_health.sh /usr/local/bin/
 ADD scripts/malcolm_utils.py /data/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \

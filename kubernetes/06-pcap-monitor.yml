@@ -50,10 +50,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - watch-upload
-            - pcap-publisher
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 90
           periodSeconds: 30
           timeoutSeconds: 15
