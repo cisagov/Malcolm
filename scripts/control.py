@@ -32,6 +32,7 @@ from malcolm_common import (
     AskForString,
     BoundPath,
     ChooseOne,
+    ClearScreen,
     CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DisplayMessage,
@@ -1373,638 +1374,363 @@ def authSetup():
         UserInputDefaultsBehavior.DefaultsPrompt if not args.cmdAuthSetupNonInteractive else noninteractiveBehavior
     )
 
-    for authItem in authModeChoices[1:]:
-        if (
-            (authMode == 'all')
-            and YesOrNo(
-                f'{authItem[1]}?',
-                default=authItem[3],
-                defaultBehavior=(
-                    noninteractiveBehavior
-                    if (authItem[4] and (not all([os.path.isfile(x) for x in authItem[4]])))
-                    else defaultBehavior
-                ),
-            )
-        ) or ((authMode != 'all') and (authMode == authItem[0])):
-            if authItem[0] == 'admin':
-                # prompt username and password
-                usernamePrevious = None
-                password = None
-                passwordConfirm = None
-                passwordEncrypted = ''
+    try:
+        for authItem in authModeChoices[1:]:
+            if (
+                (authMode == 'all')
+                and YesOrNo(
+                    f'{authItem[1]}?',
+                    default=authItem[3],
+                    defaultBehavior=(
+                        noninteractiveBehavior
+                        if (authItem[4] and (not all([os.path.isfile(x) for x in authItem[4]])))
+                        else defaultBehavior
+                    ),
+                )
+            ) or ((authMode != 'all') and (authMode == authItem[0])):
+                if authItem[0] == 'admin':
+                    # prompt username and password
+                    usernamePrevious = None
+                    password = None
+                    passwordConfirm = None
+                    passwordEncrypted = ''
 
-                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid administrator username')
-                while loopBreaker.increment():
-                    username = AskForString(
-                        f"Administrator username (between {UsernameMinLen} and {UsernameMaxLen} characters; alphanumeric, _, -, and . allowed)",
-                        default=args.authUserName,
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if UsernameRegex.match(username) and (UsernameMinLen <= len(username) <= UsernameMaxLen):
-                        break
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid administrator username')
+                    while loopBreaker.increment():
+                        username = AskForString(
+                            f"Administrator username (between {UsernameMinLen} and {UsernameMaxLen} characters; alphanumeric, _, -, and . allowed)",
+                            default=args.authUserName,
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if UsernameRegex.match(username) and (UsernameMinLen <= len(username) <= UsernameMaxLen):
+                            break
 
-                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
-                while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
-                    password = AskForPassword(
-                        f"{username} password  (between {PasswordMinLen} and {PasswordMaxLen} characters): ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if PasswordMinLen <= len(password) <= PasswordMaxLen:
-                        passwordConfirm = AskForPassword(
-                            f"{username} password (again): ",
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password')
+                    while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
+                        password = AskForPassword(
+                            f"{username} password  (between {PasswordMinLen} and {PasswordMaxLen} characters): ",
                             default='',
                             defaultBehavior=defaultBehavior,
                         )
-                        if password and (password == passwordConfirm):
-                            break
-
-                # get previous admin username to remove from htpasswd file if it's changed
-                authEnvFile = os.path.join(args.configDir, 'auth.env')
-                if os.path.isfile(authEnvFile):
-                    prevAuthInfo = defaultdict(str)
-                    with open(authEnvFile, 'r') as f:
-                        for line in f:
-                            try:
-                                k, v = line.rstrip().split("=")
-                                prevAuthInfo[k] = v.strip('"')
-                            except Exception:
-                                pass
-                    if len(prevAuthInfo['MALCOLM_USERNAME']) > 0:
-                        usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
-
-                # get openssl hash of password
-                if args.cmdAuthSetupNonInteractive:
-                    passwordEncrypted = args.authPasswordOpenssl
-                else:
-                    err, out = run_process(
-                        [opensslBin, 'passwd', '-1', '-stdin'],
-                        stdin=password,
-                        stderr=False,
-                        debug=args.debug,
-                    )
-                    if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
-                        passwordEncrypted = out[0]
-                    else:
-                        raise Exception('Unable to generate password hash with openssl')
-
-                # write auth.env (used by htadmin and file-upload containers)
-                with open(authEnvFile, 'w') as f:
-                    f.write(
-                        "# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)\n"
-                    )
-                    f.write(f'MALCOLM_USERNAME={username}\n')
-                    f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
-                    f.write('K8S_SECRET=True\n')
-                os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-
-                # create or update the htpasswd file
-                htpasswdFile = os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))
-                if not args.cmdAuthSetupNonInteractive:
-                    htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
-                    if not os.path.isfile(htpasswdFile):
-                        htpasswdCmd.insert(1, '-c')
-                    err, out = run_process(htpasswdCmd, stdin=password, stderr=True, debug=args.debug)
-                    if err != 0:
-                        raise Exception(f'Unable to generate htpasswd file: {out}')
-
-                if (
-                    (usernamePrevious is not None) and (usernamePrevious != username)
-                ) or args.cmdAuthSetupNonInteractive:
-                    htpasswdLines = list()
-                    if os.path.isfile(htpasswdFile):
-                        with open(htpasswdFile, 'r') as f:
-                            htpasswdLines = f.readlines()
-                    with open(htpasswdFile, 'w') as f:
-                        if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
-                            f.write(f'{username}:{args.authPasswordHtpasswd}')
-                        for line in htpasswdLines:
-                            # if the admininstrator username has changed, remove the previous administrator username from htpasswd
-                            if (
-                                (usernamePrevious is not None)
-                                and (usernamePrevious != username)
-                                and (not line.startswith(f"{usernamePrevious}:"))
-                            ):
-                                f.write(line)
-
-                # configure default LDAP stuff (they'll have to edit it by hand later)
-                ldapConfFile = os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))
-                if not os.path.isfile(ldapConfFile):
-                    ldapDefaults = defaultdict(str)
-                    if os.path.isfile(os.path.join(MalcolmPath, '.ldap_config_defaults')):
-                        ldapDefaults = defaultdict(str)
-                        with open(os.path.join(MalcolmPath, '.ldap_config_defaults'), 'r') as f:
-                            for line in f:
-                                try:
-                                    k, v = line.rstrip().split("=")
-                                    ldapDefaults[k] = v.strip('"').strip("'")
-                                except Exception:
-                                    pass
-                    ldapProto = ldapDefaults.get("LDAP_PROTO", "ldap://")
-                    ldapHost = ldapDefaults.get("LDAP_HOST", "ds.example.com")
-                    ldapPort = ldapDefaults.get("LDAP_PORT", "3268")
-                    ldapType = ldapDefaults.get("LDAP_SERVER_TYPE", "winldap")
-                    if ldapType == "openldap":
-                        ldapUri = 'DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
-                        ldapGroupAttr = "memberUid"
-                        ldapGroupAttrIsDN = "off"
-                    else:
-                        ldapUri = 'DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
-                        ldapGroupAttr = "member"
-                        ldapGroupAttrIsDN = "on"
-                    with open(ldapConfFile, 'w') as f:
-                        f.write('# This is a sample configuration for the ldap_server section of nginx.conf.\n')
-                        f.write('# Yours will vary depending on how your Active Directory/LDAP server is configured.\n')
-                        f.write(
-                            '# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.\n\n'
-                        )
-                        f.write('ldap_server ad_server {\n')
-                        f.write(f'  url "{ldapProto}{ldapHost}:{ldapPort}/{ldapUri}";\n\n')
-                        f.write('  binddn "bind_dn";\n')
-                        f.write('  binddn_passwd "bind_dn_password";\n\n')
-                        f.write(f'  group_attribute {ldapGroupAttr};\n')
-                        f.write(f'  group_attribute_is_dn {ldapGroupAttrIsDN};\n')
-                        f.write('  require group "CN=malcolm,OU=groups,DC=example,DC=com";\n')
-                        f.write('  require valid_user;\n')
-                        f.write('  satisfy all;\n')
-                        f.write('}\n\n')
-                        f.write('auth_ldap_cache_enabled on;\n')
-                        f.write('auth_ldap_cache_expiration_time 10000;\n')
-                        f.write('auth_ldap_cache_size 1000;\n')
-                    os.chmod(ldapConfFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-
-                # populate htadmin config file
-                with open(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')), 'w') as f:
-                    f.write('; HTAdmin config file.\n\n')
-                    f.write('[application]\n')
-                    f.write('; Change this to customize your title:\n')
-                    f.write('app_title = Malcolm User Management\n\n')
-                    f.write('; htpasswd file\n')
-                    f.write('secure_path  = ./auth/htpasswd\n')
-                    f.write('; metadata file\n')
-                    f.write('metadata_path  = ./config/metadata\n\n')
-                    f.write('; administrator user/password (htpasswd -b -c -B ...)\n')
-                    f.write(f'admin_user = {username}\n\n')
-                    f.write('; username field quality checks\n')
-                    f.write(';\n')
-                    f.write(f'min_username_len = {UsernameMinLen}\n')
-                    f.write(f'max_username_len = {UsernameMaxLen}\n\n')
-                    f.write('; Password field quality checks\n')
-                    f.write(';\n')
-                    f.write(f'min_password_len = {PasswordMinLen}\n')
-                    f.write(f'max_password_len = {PasswordMaxLen}\n\n')
-
-                # touch the metadata file
-                open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
-
-                DisplayMessage(
-                    'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
-                    defaultBehavior=defaultBehavior,
-                )
-
-            # generate HTTPS self-signed certificates
-            elif authItem[0] == 'webcerts':
-                with pushd(os.path.join(MalcolmPath, os.path.join('nginx', 'certs'))):
-                    # remove previous files
-                    for oldfile in glob.glob("*.pem"):
-                        os.remove(oldfile)
-
-                    # generate dhparam -------------------------------
-                    err, out = run_process(
-                        [opensslBin, 'dhparam', '-out', 'dhparam.pem', '2048'],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate dhparam.pem file: {out}')
-
-                    # generate key/cert -------------------------------
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'req',
-                            '-subj',
-                            '/CN=localhost',
-                            '-x509',
-                            '-newkey',
-                            'rsa:4096',
-                            '-nodes',
-                            '-keyout',
-                            'key.pem',
-                            '-out',
-                            'cert.pem',
-                            '-days',
-                            '3650',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate key.pem/cert.pem file(s): {out}')
-
-            elif authItem[0] == 'fwcerts':
-                with pushd(logstashPath):
-                    # make clean to clean previous files
-                    for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
-                        for oldfile in glob.glob(pat):
-                            os.remove(oldfile)
-
-                    # -----------------------------------------------
-                    # generate new ca/server/client certificates/keys
-                    # ca -------------------------------
-                    err, out = run_process(
-                        [opensslBin, 'genrsa', '-out', 'ca.key', '2048'],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate ca.key: {out}')
-
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'req',
-                            '-x509',
-                            '-new',
-                            '-nodes',
-                            '-key',
-                            'ca.key',
-                            '-sha256',
-                            '-days',
-                            '9999',
-                            '-subj',
-                            '/C=US/ST=ID/O=sensor/OU=ca',
-                            '-out',
-                            'ca.crt',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate ca.crt: {out}')
-
-                    # server -------------------------------
-                    err, out = run_process(
-                        [opensslBin, 'genrsa', '-out', 'server.key', '2048'],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate server.key: {out}')
-
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'req',
-                            '-sha512',
-                            '-new',
-                            '-key',
-                            'server.key',
-                            '-out',
-                            'server.csr',
-                            '-config',
-                            'server.conf',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate server.csr: {out}')
-
-                    err, out = run_process(
-                        [
-                            opensslBin,
-                            'x509',
-                            '-days',
-                            '3650',
-                            '-req',
-                            '-sha512',
-                            '-in',
-                            'server.csr',
-                            '-CAcreateserial',
-                            '-CA',
-                            'ca.crt',
-                            '-CAkey',
-                            'ca.key',
-                            '-out',
-                            'server.crt',
-                            '-extensions',
-                            'v3_req',
-                            '-extfile',
-                            'server.conf',
-                        ],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate server.crt: {out}')
-
-                    shutil.move("server.key", "server.key.pem")
-                    err, out = run_process(
-                        [opensslBin, 'pkcs8', '-in', 'server.key.pem', '-topk8', '-nocrypt', '-out', 'server.key'],
-                        stderr=True,
-                        debug=args.debug,
-                    )
-                    if err != 0:
-                        raise Exception(f'Unable to generate server.key: {out}')
-
-                    # client -------------------------------
-                    # mkdir filebeat/certs if it doesn't exist
-                    try:
-                        os.makedirs(filebeatPath)
-                    except OSError as exc:
-                        if (exc.errno == errno.EEXIST) and os.path.isdir(filebeatPath):
-                            pass
-                        else:
-                            raise
-
-                    # remove previous files in filebeat/certs
-                    for oldfile in glob.glob(os.path.join(filebeatPath, "*")):
-                        os.remove(oldfile)
-
-                    clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
-                        caCrt=os.path.join(logstashPath, 'ca.crt'),
-                        caKey=os.path.join(logstashPath, 'ca.key'),
-                        clientConf=os.path.join(logstashPath, 'client.conf'),
-                        outputDir=filebeatPath,
-                    )
-                    if (
-                        (not clientKey)
-                        or (not clientCrt)
-                        or (not clientCaCrt)
-                        or (not os.path.isfile(clientKey))
-                        or (not os.path.isfile(clientCrt))
-                        or (not os.path.isfile(clientCaCrt))
-                    ):
-                        raise Exception(f'Unable to generate client key/crt')
-                    # -----------------------------------------------
-
-            # create and populate connection parameters file for remote OpenSearch instance(s)
-            elif authItem[0] == 'remoteos':
-                for instance in ['primary', 'secondary']:
-                    openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
-                    if YesOrNo(
-                        f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
-                        default=False,
-                        defaultBehavior=defaultBehavior,
-                    ):
-                        prevCurlContents = ParseCurlFile(openSearchCredFileName)
-
-                        # prompt host, username and password
-                        esUsername = None
-                        esPassword = None
-                        esPasswordConfirm = None
-
-                        loopBreaker = CountUntilException(
-                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
-                        )
-                        while loopBreaker.increment():
-                            esUsername = AskForString(
-                                "OpenSearch/Elasticsearch username",
-                                default=prevCurlContents['user'],
-                                defaultBehavior=defaultBehavior,
-                            )
-                            if (len(esUsername) > 0) and (':' not in esUsername):
-                                break
-                            eprint("Username is blank (or contains a colon, which is not allowed)")
-
-                        loopBreaker = CountUntilException(
-                            MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
-                        )
-                        while loopBreaker.increment():
-                            esPassword = AskForPassword(
-                                f"{esUsername} password: ",
+                        if PasswordMinLen <= len(password) <= PasswordMaxLen:
+                            passwordConfirm = AskForPassword(
+                                f"{username} password (again): ",
                                 default='',
                                 defaultBehavior=defaultBehavior,
                             )
-                            if (
-                                (len(esPassword) == 0)
-                                and (prevCurlContents['password'] is not None)
-                                and YesOrNo(
-                                    f'Use previously entered password for "{esUsername}"?',
-                                    default=True,
-                                    defaultBehavior=defaultBehavior,
-                                )
-                            ):
-                                esPassword = prevCurlContents['password']
-                                esPasswordConfirm = esPassword
-                            else:
-                                esPasswordConfirm = AskForPassword(
-                                    f"{esUsername} password (again): ",
-                                    default='',
-                                    defaultBehavior=defaultBehavior,
-                                )
-                            if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
+                            if password and (password == passwordConfirm):
                                 break
-                            eprint("Passwords do not match")
 
-                        esSslVerify = YesOrNo(
-                            'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
-                            default=False,
-                            defaultBehavior=defaultBehavior,
-                        )
+                    # get previous admin username to remove from htpasswd file if it's changed
+                    authEnvFile = os.path.join(args.configDir, 'auth.env')
+                    if os.path.isfile(authEnvFile):
+                        prevAuthInfo = defaultdict(str)
+                        with open(authEnvFile, 'r') as f:
+                            for line in f:
+                                try:
+                                    k, v = line.rstrip().split("=")
+                                    prevAuthInfo[k] = v.strip('"')
+                                except Exception:
+                                    pass
+                        if len(prevAuthInfo['MALCOLM_USERNAME']) > 0:
+                            usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
 
-                        with open(openSearchCredFileName, 'w') as f:
-                            f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
-                            if not esSslVerify:
-                                f.write('insecure\n')
-
+                    # get openssl hash of password
+                    if args.cmdAuthSetupNonInteractive:
+                        passwordEncrypted = args.authPasswordOpenssl
                     else:
+                        err, out = run_process(
+                            [opensslBin, 'passwd', '-1', '-stdin'],
+                            stdin=password,
+                            stderr=False,
+                            debug=args.debug,
+                        )
+                        if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
+                            passwordEncrypted = out[0]
+                        else:
+                            raise Exception('Unable to generate password hash with openssl')
+
+                    # write auth.env (used by htadmin and file-upload containers)
+                    with open(authEnvFile, 'w') as f:
+                        f.write(
+                            "# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)\n"
+                        )
+                        f.write(f'MALCOLM_USERNAME={username}\n')
+                        f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
+                        f.write('K8S_SECRET=True\n')
+                    os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+                    # create or update the htpasswd file
+                    htpasswdFile = os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))
+                    if not args.cmdAuthSetupNonInteractive:
+                        htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
+                        if not os.path.isfile(htpasswdFile):
+                            htpasswdCmd.insert(1, '-c')
+                        err, out = run_process(htpasswdCmd, stdin=password, stderr=True, debug=args.debug)
+                        if err != 0:
+                            raise Exception(f'Unable to generate htpasswd file: {out}')
+
+                    if (
+                        (usernamePrevious is not None) and (usernamePrevious != username)
+                    ) or args.cmdAuthSetupNonInteractive:
+                        htpasswdLines = list()
+                        if os.path.isfile(htpasswdFile):
+                            with open(htpasswdFile, 'r') as f:
+                                htpasswdLines = f.readlines()
+                        with open(htpasswdFile, 'w') as f:
+                            if args.cmdAuthSetupNonInteractive and username and args.authPasswordHtpasswd:
+                                f.write(f'{username}:{args.authPasswordHtpasswd}')
+                            for line in htpasswdLines:
+                                # if the admininstrator username has changed, remove the previous administrator username from htpasswd
+                                if (
+                                    (usernamePrevious is not None)
+                                    and (usernamePrevious != username)
+                                    and (not line.startswith(f"{usernamePrevious}:"))
+                                ):
+                                    f.write(line)
+
+                    # configure default LDAP stuff (they'll have to edit it by hand later)
+                    ldapConfFile = os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))
+                    if not os.path.isfile(ldapConfFile):
+                        ldapDefaults = defaultdict(str)
+                        if os.path.isfile(os.path.join(MalcolmPath, '.ldap_config_defaults')):
+                            ldapDefaults = defaultdict(str)
+                            with open(os.path.join(MalcolmPath, '.ldap_config_defaults'), 'r') as f:
+                                for line in f:
+                                    try:
+                                        k, v = line.rstrip().split("=")
+                                        ldapDefaults[k] = v.strip('"').strip("'")
+                                    except Exception:
+                                        pass
+                        ldapProto = ldapDefaults.get("LDAP_PROTO", "ldap://")
+                        ldapHost = ldapDefaults.get("LDAP_HOST", "ds.example.com")
+                        ldapPort = ldapDefaults.get("LDAP_PORT", "3268")
+                        ldapType = ldapDefaults.get("LDAP_SERVER_TYPE", "winldap")
+                        if ldapType == "openldap":
+                            ldapUri = 'DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
+                            ldapGroupAttr = "memberUid"
+                            ldapGroupAttrIsDN = "off"
+                        else:
+                            ldapUri = 'DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
+                            ldapGroupAttr = "member"
+                            ldapGroupAttrIsDN = "on"
+                        with open(ldapConfFile, 'w') as f:
+                            f.write('# This is a sample configuration for the ldap_server section of nginx.conf.\n')
+                            f.write(
+                                '# Yours will vary depending on how your Active Directory/LDAP server is configured.\n'
+                            )
+                            f.write(
+                                '# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.\n\n'
+                            )
+                            f.write('ldap_server ad_server {\n')
+                            f.write(f'  url "{ldapProto}{ldapHost}:{ldapPort}/{ldapUri}";\n\n')
+                            f.write('  binddn "bind_dn";\n')
+                            f.write('  binddn_passwd "bind_dn_password";\n\n')
+                            f.write(f'  group_attribute {ldapGroupAttr};\n')
+                            f.write(f'  group_attribute_is_dn {ldapGroupAttrIsDN};\n')
+                            f.write('  require group "CN=malcolm,OU=groups,DC=example,DC=com";\n')
+                            f.write('  require valid_user;\n')
+                            f.write('  satisfy all;\n')
+                            f.write('}\n\n')
+                            f.write('auth_ldap_cache_enabled on;\n')
+                            f.write('auth_ldap_cache_expiration_time 10000;\n')
+                            f.write('auth_ldap_cache_size 1000;\n')
+                        os.chmod(ldapConfFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+                    # populate htadmin config file
+                    with open(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')), 'w') as f:
+                        f.write('; HTAdmin config file.\n\n')
+                        f.write('[application]\n')
+                        f.write('; Change this to customize your title:\n')
+                        f.write('app_title = Malcolm User Management\n\n')
+                        f.write('; htpasswd file\n')
+                        f.write('secure_path  = ./auth/htpasswd\n')
+                        f.write('; metadata file\n')
+                        f.write('metadata_path  = ./config/metadata\n\n')
+                        f.write('; administrator user/password (htpasswd -b -c -B ...)\n')
+                        f.write(f'admin_user = {username}\n\n')
+                        f.write('; username field quality checks\n')
+                        f.write(';\n')
+                        f.write(f'min_username_len = {UsernameMinLen}\n')
+                        f.write(f'max_username_len = {UsernameMaxLen}\n\n')
+                        f.write('; Password field quality checks\n')
+                        f.write(';\n')
+                        f.write(f'min_password_len = {PasswordMinLen}\n')
+                        f.write(f'max_password_len = {PasswordMaxLen}\n\n')
+
+                    # touch the metadata file
+                    open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
+
+                    DisplayMessage(
+                        'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
+                        defaultBehavior=defaultBehavior,
+                    )
+
+                # generate HTTPS self-signed certificates
+                elif authItem[0] == 'webcerts':
+                    with pushd(os.path.join(MalcolmPath, os.path.join('nginx', 'certs'))):
+                        # remove previous files
+                        for oldfile in glob.glob("*.pem"):
+                            os.remove(oldfile)
+
+                        # generate dhparam -------------------------------
+                        err, out = run_process(
+                            [opensslBin, 'dhparam', '-out', 'dhparam.pem', '2048'],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate dhparam.pem file: {out}')
+
+                        # generate key/cert -------------------------------
+                        err, out = run_process(
+                            [
+                                opensslBin,
+                                'req',
+                                '-subj',
+                                '/CN=localhost',
+                                '-x509',
+                                '-newkey',
+                                'rsa:4096',
+                                '-nodes',
+                                '-keyout',
+                                'key.pem',
+                                '-out',
+                                'cert.pem',
+                                '-days',
+                                '3650',
+                            ],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate key.pem/cert.pem file(s): {out}')
+
+                elif authItem[0] == 'fwcerts':
+                    with pushd(logstashPath):
+                        # make clean to clean previous files
+                        for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
+                            for oldfile in glob.glob(pat):
+                                os.remove(oldfile)
+
+                        # -----------------------------------------------
+                        # generate new ca/server/client certificates/keys
+                        # ca -------------------------------
+                        err, out = run_process(
+                            [opensslBin, 'genrsa', '-out', 'ca.key', '2048'],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate ca.key: {out}')
+
+                        err, out = run_process(
+                            [
+                                opensslBin,
+                                'req',
+                                '-x509',
+                                '-new',
+                                '-nodes',
+                                '-key',
+                                'ca.key',
+                                '-sha256',
+                                '-days',
+                                '9999',
+                                '-subj',
+                                '/C=US/ST=ID/O=sensor/OU=ca',
+                                '-out',
+                                'ca.crt',
+                            ],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate ca.crt: {out}')
+
+                        # server -------------------------------
+                        err, out = run_process(
+                            [opensslBin, 'genrsa', '-out', 'server.key', '2048'],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate server.key: {out}')
+
+                        err, out = run_process(
+                            [
+                                opensslBin,
+                                'req',
+                                '-sha512',
+                                '-new',
+                                '-key',
+                                'server.key',
+                                '-out',
+                                'server.csr',
+                                '-config',
+                                'server.conf',
+                            ],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate server.csr: {out}')
+
+                        err, out = run_process(
+                            [
+                                opensslBin,
+                                'x509',
+                                '-days',
+                                '3650',
+                                '-req',
+                                '-sha512',
+                                '-in',
+                                'server.csr',
+                                '-CAcreateserial',
+                                '-CA',
+                                'ca.crt',
+                                '-CAkey',
+                                'ca.key',
+                                '-out',
+                                'server.crt',
+                                '-extensions',
+                                'v3_req',
+                                '-extfile',
+                                'server.conf',
+                            ],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate server.crt: {out}')
+
+                        shutil.move("server.key", "server.key.pem")
+                        err, out = run_process(
+                            [opensslBin, 'pkcs8', '-in', 'server.key.pem', '-topk8', '-nocrypt', '-out', 'server.key'],
+                            stderr=True,
+                            debug=args.debug,
+                        )
+                        if err != 0:
+                            raise Exception(f'Unable to generate server.key: {out}')
+
+                        # client -------------------------------
+                        # mkdir filebeat/certs if it doesn't exist
                         try:
-                            os.remove(openSearchCredFileName)
-                        except Exception:
-                            pass
-                    open(openSearchCredFileName, 'a').close()
-                    os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
+                            os.makedirs(filebeatPath)
+                        except OSError as exc:
+                            if (exc.errno == errno.EEXIST) and os.path.isdir(filebeatPath):
+                                pass
+                            else:
+                                raise
 
-            # OpenSearch authenticate sender account credentials
-            # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
-            elif authItem[0] == 'email':
-                # prompt username and password
-                emailPassword = None
-                emailPasswordConfirm = None
-                emailSender = AskForString("OpenSearch alerting email sender name", defaultBehavior=defaultBehavior)
-                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account username')
-                while loopBreaker.increment():
-                    emailUsername = AskForString("Email account username", defaultBehavior=defaultBehavior)
-                    if len(emailUsername) > 0:
-                        break
+                        # remove previous files in filebeat/certs
+                        for oldfile in glob.glob(os.path.join(filebeatPath, "*")):
+                            os.remove(oldfile)
 
-                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account password')
-                while loopBreaker.increment():
-                    emailPassword = AskForPassword(
-                        f"{emailUsername} password: ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    emailPasswordConfirm = AskForPassword(
-                        f"{emailUsername} password (again): ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if emailPassword and (emailPassword == emailPasswordConfirm):
-                        break
-                    eprint("Passwords do not match")
-
-                # create OpenSearch keystore file, don't complain if it already exists, and set the keystore items
-                usernameKey = f'plugins.alerting.destination.email.{emailSender}.username'
-                passwordKey = f'plugins.alerting.destination.email.{emailSender}.password'
-
-                keystore_op('opensearch', True, 'create', stdin='N')
-                keystore_op('opensearch', True, 'remove', usernameKey)
-                keystore_op('opensearch', True, 'add', usernameKey, '--stdin', stdin=emailUsername)
-                keystore_op('opensearch', True, 'remove', passwordKey)
-                keystore_op('opensearch', True, 'add', passwordKey, '--stdin', stdin=emailPassword)
-                success, results = keystore_op('opensearch', True, 'list')
-                results = [
-                    x
-                    for x in results
-                    if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))
-                ]
-                if success and (usernameKey in results) and (passwordKey in results):
-                    eprint(f"Email alert sender account variables stored: {', '.join(results)}")
-                else:
-                    eprint("Failed to store email alert sender account variables:\n")
-                    eprint("\n".join(results))
-
-            elif authItem[0] == 'netbox':
-                with pushd(args.configDir):
-                    netboxPwAlphabet = string.ascii_letters + string.digits + '_'
-                    netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
-                    netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                    netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                    netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                    netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                    netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
-                    netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
-
-                    with open('netbox-postgres.env', 'w') as f:
-                        f.write('POSTGRES_DB=netbox\n')
-                        f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
-                        f.write('POSTGRES_USER=netbox\n')
-                        f.write('K8S_SECRET=True\n')
-                    os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
-
-                    with open('netbox-redis-cache.env', 'w') as f:
-                        f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
-                        f.write('K8S_SECRET=True\n')
-                    os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
-
-                    with open('netbox-redis.env', 'w') as f:
-                        f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
-                        f.write('K8S_SECRET=True\n')
-                    os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
-
-                    if (not os.path.isfile('netbox-secret.env')) and (os.path.isfile('netbox-secret.env.example')):
-                        shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
-
-                    with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
-                        for line in envFile:
-                            line = line.rstrip("\n")
-
-                            if line.startswith('DB_PASSWORD'):
-                                line = re.sub(
-                                    r'(DB_PASSWORD\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxPostGresPassword}",
-                                    line,
-                                )
-                            elif line.startswith('REDIS_CACHE_PASSWORD'):
-                                line = re.sub(
-                                    r'(REDIS_CACHE_PASSWORD\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxRedisCachePassword}",
-                                    line,
-                                )
-                            elif line.startswith('REDIS_PASSWORD'):
-                                line = re.sub(
-                                    r'(REDIS_PASSWORD\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxRedisPassword}",
-                                    line,
-                                )
-                            elif line.startswith('SECRET_KEY'):
-                                line = re.sub(
-                                    r'(SECRET_KEY\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxSecretKey}",
-                                    line,
-                                )
-                            elif line.startswith('SUPERUSER_PASSWORD'):
-                                line = re.sub(
-                                    r'(SUPERUSER_PASSWORD\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxSuPassword}",
-                                    line,
-                                )
-                            elif line.startswith('SUPERUSER_API_TOKEN'):
-                                line = re.sub(
-                                    r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
-                                    fr"\g<1>{netboxSuToken}",
-                                    line,
-                                )
-                            elif line.startswith('K8S_SECRET'):
-                                line = re.sub(
-                                    r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
-                                    fr"\g<1>True",
-                                    line,
-                                )
-
-                            print(line)
-
-                    os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
-
-            elif authItem[0] == 'arkime':
-                # prompt password
-                arkimePassword = None
-                arkimePasswordConfirm = None
-
-                loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password hash secret')
-                while loopBreaker.increment():
-                    arkimePassword = AskForPassword(
-                        f"Arkime password hash secret: ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    arkimePasswordConfirm = AskForPassword(
-                        f"Arkime password hash secret (again): ",
-                        default='',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if arkimePassword and (arkimePassword == arkimePasswordConfirm):
-                        break
-                    eprint("Passwords do not match")
-
-                if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
-                    arkimePassword = args.authArkimePassword
-
-                with pushd(args.configDir):
-                    if (not os.path.isfile('arkime-secret.env')) and (os.path.isfile('arkime-secret.env.example')):
-                        shutil.copy2('arkime-secret.env.example', 'arkime-secret.env')
-
-                    with fileinput.FileInput('arkime-secret.env', inplace=True, backup=None) as envFile:
-                        for line in envFile:
-                            line = line.rstrip("\n")
-
-                            if arkimePassword and line.startswith('ARKIME_PASSWORD_SECRET'):
-                                line = re.sub(
-                                    r'(ARKIME_PASSWORD_SECRET\s*=\s*)(\S+)',
-                                    fr"\g<1>{arkimePassword}",
-                                    line,
-                                )
-
-                            print(line)
-
-                    os.chmod('arkime-secret.env', stat.S_IRUSR | stat.S_IWUSR)
-
-            elif authItem[0] == 'txfwcerts':
-                DisplayMessage(
-                    'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
-                    defaultBehavior=defaultBehavior,
-                )
-                # generate new client key/crt and send it
-                with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
-                    with pushd(tmpCertDir):
                         clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
                             caCrt=os.path.join(logstashPath, 'ca.crt'),
                             caKey=os.path.join(logstashPath, 'ca.key'),
                             clientConf=os.path.join(logstashPath, 'client.conf'),
-                            outputDir=tmpCertDir,
+                            outputDir=filebeatPath,
                         )
                         if (
                             (not clientKey)
@@ -2015,30 +1741,311 @@ def authSetup():
                             or (not os.path.isfile(clientCaCrt))
                         ):
                             raise Exception(f'Unable to generate client key/crt')
+                        # -----------------------------------------------
 
-                        with Popen(
-                            [txRxScript, '-t', clientCaCrt, clientCrt, clientKey],
-                            stdout=PIPE,
-                            stderr=STDOUT,
-                            bufsize=0 if MainDialog else -1,
-                        ) as p:
-                            if MainDialog:
-                                DisplayProgramBox(
-                                    fileDescriptor=p.stdout.fileno(),
-                                    text='ssl-client-transmit',
-                                    clearScreen=True,
+                # create and populate connection parameters file for remote OpenSearch instance(s)
+                elif authItem[0] == 'remoteos':
+                    for instance in ['primary', 'secondary']:
+                        openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
+                        if YesOrNo(
+                            f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
+                            default=False,
+                            defaultBehavior=defaultBehavior,
+                        ):
+                            prevCurlContents = ParseCurlFile(openSearchCredFileName)
+
+                            # prompt host, username and password
+                            esUsername = None
+                            esPassword = None
+                            esPasswordConfirm = None
+
+                            loopBreaker = CountUntilException(
+                                MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
+                            )
+                            while loopBreaker.increment():
+                                esUsername = AskForString(
+                                    "OpenSearch/Elasticsearch username",
+                                    default=prevCurlContents['user'],
+                                    defaultBehavior=defaultBehavior,
                                 )
-                            else:
-                                while True:
-                                    output = p.stdout.readline()
-                                    if (len(output) == 0) and (p.poll() is not None):
-                                        break
-                                    if output:
-                                        print(output.decode('utf-8').rstrip())
-                                    else:
-                                        time.sleep(0.5)
+                                if (len(esUsername) > 0) and (':' not in esUsername):
+                                    break
+                                eprint("Username is blank (or contains a colon, which is not allowed)")
 
-                            p.poll()
+                            loopBreaker = CountUntilException(
+                                MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
+                            )
+                            while loopBreaker.increment():
+                                esPassword = AskForPassword(
+                                    f"{esUsername} password: ",
+                                    default='',
+                                    defaultBehavior=defaultBehavior,
+                                )
+                                if (
+                                    (len(esPassword) == 0)
+                                    and (prevCurlContents['password'] is not None)
+                                    and YesOrNo(
+                                        f'Use previously entered password for "{esUsername}"?',
+                                        default=True,
+                                        defaultBehavior=defaultBehavior,
+                                    )
+                                ):
+                                    esPassword = prevCurlContents['password']
+                                    esPasswordConfirm = esPassword
+                                else:
+                                    esPasswordConfirm = AskForPassword(
+                                        f"{esUsername} password (again): ",
+                                        default='',
+                                        defaultBehavior=defaultBehavior,
+                                    )
+                                if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
+                                    break
+                                eprint("Passwords do not match")
+
+                            esSslVerify = YesOrNo(
+                                'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
+                                default=False,
+                                defaultBehavior=defaultBehavior,
+                            )
+
+                            with open(openSearchCredFileName, 'w') as f:
+                                f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
+                                if not esSslVerify:
+                                    f.write('insecure\n')
+
+                        else:
+                            try:
+                                os.remove(openSearchCredFileName)
+                            except Exception:
+                                pass
+                        open(openSearchCredFileName, 'a').close()
+                        os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
+
+                # OpenSearch authenticate sender account credentials
+                # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
+                elif authItem[0] == 'email':
+                    # prompt username and password
+                    emailPassword = None
+                    emailPasswordConfirm = None
+                    emailSender = AskForString("OpenSearch alerting email sender name", defaultBehavior=defaultBehavior)
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account username')
+                    while loopBreaker.increment():
+                        emailUsername = AskForString("Email account username", defaultBehavior=defaultBehavior)
+                        if len(emailUsername) > 0:
+                            break
+
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid Email account password')
+                    while loopBreaker.increment():
+                        emailPassword = AskForPassword(
+                            f"{emailUsername} password: ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        emailPasswordConfirm = AskForPassword(
+                            f"{emailUsername} password (again): ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if emailPassword and (emailPassword == emailPasswordConfirm):
+                            break
+                        eprint("Passwords do not match")
+
+                    # create OpenSearch keystore file, don't complain if it already exists, and set the keystore items
+                    usernameKey = f'plugins.alerting.destination.email.{emailSender}.username'
+                    passwordKey = f'plugins.alerting.destination.email.{emailSender}.password'
+
+                    keystore_op('opensearch', True, 'create', stdin='N')
+                    keystore_op('opensearch', True, 'remove', usernameKey)
+                    keystore_op('opensearch', True, 'add', usernameKey, '--stdin', stdin=emailUsername)
+                    keystore_op('opensearch', True, 'remove', passwordKey)
+                    keystore_op('opensearch', True, 'add', passwordKey, '--stdin', stdin=emailPassword)
+                    success, results = keystore_op('opensearch', True, 'list')
+                    results = [
+                        x
+                        for x in results
+                        if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))
+                    ]
+                    if success and (usernameKey in results) and (passwordKey in results):
+                        eprint(f"Email alert sender account variables stored: {', '.join(results)}")
+                    else:
+                        eprint("Failed to store email alert sender account variables:\n")
+                        eprint("\n".join(results))
+
+                elif authItem[0] == 'netbox':
+                    with pushd(args.configDir):
+                        netboxPwAlphabet = string.ascii_letters + string.digits + '_'
+                        netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
+                        netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                        netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                        netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                        netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                        netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
+                        netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
+
+                        with open('netbox-postgres.env', 'w') as f:
+                            f.write('POSTGRES_DB=netbox\n')
+                            f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
+                            f.write('POSTGRES_USER=netbox\n')
+                            f.write('K8S_SECRET=True\n')
+                        os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                        with open('netbox-redis-cache.env', 'w') as f:
+                            f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
+                            f.write('K8S_SECRET=True\n')
+                        os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                        with open('netbox-redis.env', 'w') as f:
+                            f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
+                            f.write('K8S_SECRET=True\n')
+                        os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                        if (not os.path.isfile('netbox-secret.env')) and (os.path.isfile('netbox-secret.env.example')):
+                            shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
+
+                        with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
+                            for line in envFile:
+                                line = line.rstrip("\n")
+
+                                if line.startswith('DB_PASSWORD'):
+                                    line = re.sub(
+                                        r'(DB_PASSWORD\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxPostGresPassword}",
+                                        line,
+                                    )
+                                elif line.startswith('REDIS_CACHE_PASSWORD'):
+                                    line = re.sub(
+                                        r'(REDIS_CACHE_PASSWORD\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxRedisCachePassword}",
+                                        line,
+                                    )
+                                elif line.startswith('REDIS_PASSWORD'):
+                                    line = re.sub(
+                                        r'(REDIS_PASSWORD\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxRedisPassword}",
+                                        line,
+                                    )
+                                elif line.startswith('SECRET_KEY'):
+                                    line = re.sub(
+                                        r'(SECRET_KEY\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxSecretKey}",
+                                        line,
+                                    )
+                                elif line.startswith('SUPERUSER_PASSWORD'):
+                                    line = re.sub(
+                                        r'(SUPERUSER_PASSWORD\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxSuPassword}",
+                                        line,
+                                    )
+                                elif line.startswith('SUPERUSER_API_TOKEN'):
+                                    line = re.sub(
+                                        r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
+                                        fr"\g<1>{netboxSuToken}",
+                                        line,
+                                    )
+                                elif line.startswith('K8S_SECRET'):
+                                    line = re.sub(
+                                        r'(SUPERUSER_API_TOKEN\s*=\s*)(\S+)',
+                                        fr"\g<1>True",
+                                        line,
+                                    )
+
+                                print(line)
+
+                        os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                elif authItem[0] == 'arkime':
+                    # prompt password
+                    arkimePassword = None
+                    arkimePasswordConfirm = None
+
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password hash secret')
+                    while loopBreaker.increment():
+                        arkimePassword = AskForPassword(
+                            f"Arkime password hash secret: ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        arkimePasswordConfirm = AskForPassword(
+                            f"Arkime password hash secret (again): ",
+                            default='',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        if arkimePassword and (arkimePassword == arkimePasswordConfirm):
+                            break
+                        eprint("Passwords do not match")
+
+                    if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
+                        arkimePassword = args.authArkimePassword
+
+                    with pushd(args.configDir):
+                        if (not os.path.isfile('arkime-secret.env')) and (os.path.isfile('arkime-secret.env.example')):
+                            shutil.copy2('arkime-secret.env.example', 'arkime-secret.env')
+
+                        with fileinput.FileInput('arkime-secret.env', inplace=True, backup=None) as envFile:
+                            for line in envFile:
+                                line = line.rstrip("\n")
+
+                                if arkimePassword and line.startswith('ARKIME_PASSWORD_SECRET'):
+                                    line = re.sub(
+                                        r'(ARKIME_PASSWORD_SECRET\s*=\s*)(\S+)',
+                                        fr"\g<1>{arkimePassword}",
+                                        line,
+                                    )
+
+                                print(line)
+
+                        os.chmod('arkime-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+
+                elif authItem[0] == 'txfwcerts':
+                    DisplayMessage(
+                        'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    # generate new client key/crt and send it
+                    with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
+                        with pushd(tmpCertDir):
+                            clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
+                                caCrt=os.path.join(logstashPath, 'ca.crt'),
+                                caKey=os.path.join(logstashPath, 'ca.key'),
+                                clientConf=os.path.join(logstashPath, 'client.conf'),
+                                outputDir=tmpCertDir,
+                            )
+                            if (
+                                (not clientKey)
+                                or (not clientCrt)
+                                or (not clientCaCrt)
+                                or (not os.path.isfile(clientKey))
+                                or (not os.path.isfile(clientCrt))
+                                or (not os.path.isfile(clientCaCrt))
+                            ):
+                                raise Exception(f'Unable to generate client key/crt')
+
+                            with Popen(
+                                [txRxScript, '-t', clientCaCrt, clientCrt, clientKey],
+                                stdout=PIPE,
+                                stderr=STDOUT,
+                                bufsize=0 if MainDialog else -1,
+                            ) as p:
+                                if MainDialog:
+                                    DisplayProgramBox(
+                                        fileDescriptor=p.stdout.fileno(),
+                                        text='ssl-client-transmit',
+                                        clearScreen=True,
+                                    )
+                                else:
+                                    while True:
+                                        output = p.stdout.readline()
+                                        if (len(output) == 0) and (p.poll() is not None):
+                                            break
+                                        if output:
+                                            print(output.decode('utf-8').rstrip())
+                                        else:
+                                            time.sleep(0.5)
+
+                                p.poll()
+    finally:
+        if MainDialog:
+            ClearScreen()
 
 
 ###################################################################################################
