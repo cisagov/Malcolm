@@ -93,6 +93,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec bash -c "jq 'walk(if type == \"object\" and has(\"synthetic_source_keep\") then del(.synthetic_source_keep) else . end)' \"{}\" | sponge \"{}\"" \; && \
       rm -rf /opt/ecs && \
     chown -R ${PUSER}:${PGROUP} /data/init \
                                 /opt/alerting \
