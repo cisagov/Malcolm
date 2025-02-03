@@ -10,6 +10,7 @@ on:
       - 'Dockerfiles/file-monitor.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/common-init.sh'
+      - '!shared/bin/tx-rx-secure.sh'
       - '!shared/bin/os-disk-config.py'
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
