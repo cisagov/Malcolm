@@ -57,7 +57,7 @@ spec:
             command:
             - /usr/local/bin/container_health.sh
           initialDelaySeconds: 30
-          periodSeconds: 60
+          periodSeconds: 30
           timeoutSeconds: 15
           successThreshold: 1
           failureThreshold: 10
