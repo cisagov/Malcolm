@@ -6,6 +6,7 @@ on:
       - main
       - development
     paths:
+      - 'netbox/health-scripts/container_health_postgres.sh'
       - 'Dockerfiles/postgresql.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/capa-build.sh'
