@@ -388,7 +388,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Setting cluster to read-only" >&2
     ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/nginx/nginx.conf && nginx -s reload"
     sleep 5
-    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T dashboards-helper /data/opensearch_read_only.py -i _cluster
+    ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T dashboards-helper /usr/local/bin/opensearch_read_only.py -i _cluster
     sleep 5
     for CONTAINER in htadmin filebeat logstash upload pcap-monitor zeek zeek-live suricata suricata-live pcap-capture freq; do
       ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" pause "$CONTAINER" || true

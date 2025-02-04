@@ -14,12 +14,5 @@ else
     /usr/local/bin/suricata_config_populate.py --suricata ${SURICATA_TEST_CONFIG_BIN} ${SURICATA_TEST_CONFIG_VERBOSITY:-} >&2
 fi
 
-# Create symlink for Suricata socket and set permissions
-mkdir -p /var/run/suricata
-chmod 755 /var/run/suricata
-ln -sf /var/run/suricata/suricata-command.socket /var/run/suricata-command.socket
-chmod 666 /var/run/suricata/suricata-command.socket || true
-chmod 666 /var/run/suricata-command.socket || true
-
 # start supervisor (which will spawn pcap-suricata, cron, etc.) or whatever the default command is
 exec "$@"

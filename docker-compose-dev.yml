@@ -74,7 +74,7 @@ services:
       source: ./opensearch/opensearch.keystore
       target: /usr/share/opensearch/config/persist/opensearch.keystore
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -128,7 +128,7 @@ services:
       target: /var/local/curlrc/.opensearch.secondary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "cron", "maps"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -175,7 +175,7 @@ services:
       target: /var/local/curlrc/.opensearch.primary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -367,7 +367,7 @@ services:
       target: /certs/client.key
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "filebeat"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -453,7 +453,7 @@ services:
       target: /opt/arkime/wiseService/source.zeeklogs.js
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 90s
       timeout: 30s
       retries: 3
@@ -736,7 +736,7 @@ services:
       target: /opt/suricata/include-configs
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -850,7 +850,7 @@ services:
       target: /yara-rules/custom
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "watcher", "logger"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -952,7 +952,7 @@ services:
       source: ./pcap
       target: /pcap
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "watch-upload", "pcap-publisher"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -997,7 +997,7 @@ services:
       source: ./pcap/upload
       target: /var/www/upload/server/php/chroot/files
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -1050,7 +1050,7 @@ services:
       source: ./nginx/htpasswd
       target: /var/www/htadmin/auth/htpasswd
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1088,7 +1088,7 @@ services:
       target: /var/local/ca-trust
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:10004"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -1155,7 +1155,7 @@ services:
       target: /opt/netbox-custom-plugins
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1199,7 +1199,7 @@ services:
       source: ./netbox/postgres
       target: /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_POSTGRES_DISABLED} == 'true' ]] || pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1247,7 +1247,7 @@ services:
       source: ./netbox/redis
       target: /data
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1290,7 +1290,7 @@ services:
       target: /var/local/ca-trust
       read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1337,7 +1337,7 @@ services:
       target: /var/local/curlrc/.opensearch.primary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -1412,12 +1412,7 @@ services:
       target: /etc/nginx/dhparam/dhparam.pem
       read_only: true
     healthcheck:
-      test:
-      - CMD
-      - curl
-      - --insecure
-      - --silent
-      - https://localhost:443
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3

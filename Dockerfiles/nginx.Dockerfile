@@ -13,7 +13,7 @@ ARG GITHUB_TOKEN
 ARG VCS_REVISION
 ENV VCS_REVISION $VCS_REVISION
 
-ADD README.md _config.yml Gemfile /site/
+ADD --chmod=644 README.md _config.yml Gemfile /site/
 ADD _includes/ /site/_includes/
 ADD _layouts/ /site/_layouts/
 ADD docs/ /site/docs/
@@ -240,19 +240,18 @@ RUN set -x ; \
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
 ADD nginx/landingpage /usr/share/nginx/html
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD nginx/scripts /usr/local/bin/
-ADD nginx/*.conf /etc/nginx/
+ADD --chmod=644 nginx/*.conf /etc/nginx/
 ADD nginx/templates /etc/nginx/templates/
-ADD nginx/supervisord.conf /etc/
-COPY --chmod=644 docs/images/favicon/*.png /usr/share/nginx/html/assets/img/
-COPY --chmod=644 docs/images/icon/*.png /usr/share/nginx/html/assets/img/
-COPY --chmod=644 docs/images/icon/*.svg /usr/share/nginx/html/assets/img/
-COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
-COPY --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
-COPY --chmod=644 docs/images/logo/*.png /usr/share/nginx/html/assets/img/
-COPY --chmod=644 docs/images/logo/*.svg /usr/share/nginx/html/assets/img/
-COPY --chmod=755 nginx/scripts/container_health.sh /usr/local/bin/
+ADD --chmod=644 nginx/supervisord.conf /etc/
+ADD --chmod=644 docs/images/favicon/*.png /usr/share/nginx/html/assets/img/
+ADD --chmod=644 docs/images/icon/*.png /usr/share/nginx/html/assets/img/
+ADD --chmod=644 docs/images/icon/*.svg /usr/share/nginx/html/assets/img/
+ADD --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/assets/favicon.ico
+ADD --chmod=644 docs/images/icon/favicon.ico /usr/share/nginx/html/favicon.ico
+ADD --chmod=644 docs/images/logo/*.png /usr/share/nginx/html/assets/img/
+ADD --chmod=644 docs/images/logo/*.svg /usr/share/nginx/html/assets/img/
 
 VOLUME ["/etc/nginx/certs", "/etc/nginx/dhparam"]
 

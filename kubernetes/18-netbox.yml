@@ -67,7 +67,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /usr/local/bin/container_health_netbox.sh
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 300
           periodSeconds: 60
           timeoutSeconds: 15

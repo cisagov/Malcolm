@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # the zeek container is considered "healthy" if the intel population script OR the (live|pcap)-zeek process is running
 
