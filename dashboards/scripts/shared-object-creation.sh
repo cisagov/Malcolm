@@ -89,7 +89,7 @@ function GetDashboardJsonInfo() {
 if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
   # give OpenSearch time to start and Arkime to get its own template created before configuring dashboards
-  /data/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
+  /usr/local/bin/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
 
   CURRENT_ISO_UNIX_SECS="$(date -u +%s)"
   CURRENT_ISO_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ" -d@${CURRENT_ISO_UNIX_SECS} | sed "s/Z$/.000Z/")"
@@ -472,7 +472,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
 
             # before we go on to create the anomaly detectors, we need to wait for actual network log documents
-            /data/opensearch_status.sh -w >/dev/null 2>&1
+            /usr/local/bin/opensearch_status.sh -w >/dev/null 2>&1
             sleep 60
 
             #############################################################################################################################

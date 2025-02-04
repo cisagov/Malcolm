@@ -462,6 +462,12 @@ services:
         create_host_path: false
       source: ./pcap
       target: /data/pcap
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 90s
+      timeout: 30s
+      retries: 3
+      start_period: 210s
   zeek:
     image: ghcr.io/idaholab/malcolm/zeek:25.02.0
     profiles: ["malcolm", "hedgehog"]
@@ -582,6 +588,12 @@ services:
       source: ./zeek/custom
       target: /opt/zeek/share/zeek/site/custom
       read_only: true
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   suricata:
     image: ghcr.io/idaholab/malcolm/suricata:25.02.0
     profiles: ["malcolm", "hedgehog"]
@@ -694,6 +706,12 @@ services:
       source: ./suricata/include-configs
       target: /opt/suricata/include-configs
       read_only: true
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
   file-monitor:
     image: ghcr.io/idaholab/malcolm/file-monitor:25.02.0
     profiles: ["malcolm", "hedgehog"]
@@ -791,6 +809,12 @@ services:
         create_host_path: false
       source: ./pcap/upload
       target: /pcap
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   pcap-monitor:
     image: ghcr.io/idaholab/malcolm/pcap-monitor:25.02.0
     profiles: ["malcolm", "hedgehog"]
@@ -1029,7 +1053,7 @@ services:
       target: /opt/netbox-custom-plugins
       read_only: true
     healthcheck:
-      test: ["CMD", "/usr/local/bin/container_health_netbox.sh"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1070,7 +1094,7 @@ services:
       source: ./netbox/postgres
       target: /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "/usr/local/bin/container_health_postgres.sh"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1115,7 +1139,7 @@ services:
       source: ./netbox/redis
       target: /data
     healthcheck:
-      test: ["CMD", "/usr/local/bin/container_health_redis.sh"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -1155,7 +1179,7 @@ services:
       target: /var/local/ca-trust
       read_only: true
     healthcheck:
-      test: ["CMD", "/usr/local/bin/container_health_redis.sh"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3

@@ -53,8 +53,8 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /usr/local/bin/container_health_postgres.sh
-          initialDelaySeconds: 45
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 90
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1

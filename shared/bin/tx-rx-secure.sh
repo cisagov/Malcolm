@@ -140,7 +140,7 @@ if [[ -n "${PORTS}" ]] && [[ "${MODE}" == "tx" ]] && (( $# > 0 )); then
         else
             SEND_RELAY_IP="${SERVER}"
         fi
-        croc ${DEBUG_FLAG} "${CURVE_ARGS[@]}" relay --host "${SERVER}" --ports "${PORTS}" >${RELAY_OUTPUT_REDIR} &
+        croc ${DEBUG_FLAG} "${CURVE_ARGS[@]}" relay --host "${SERVER}" --ports "${PORTS}" >${RELAY_OUTPUT_REDIR} 2>&1 &
         RELAY_PID=$!
         sleep 5
         if [[ -n "${RELAY_PID}" ]] && kill -s 0 "${RELAY_PID}" >/dev/null 2>&1; then

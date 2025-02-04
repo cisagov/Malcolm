@@ -62,7 +62,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /usr/local/bin/container_health_redis.sh
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 45
           periodSeconds: 60
           timeoutSeconds: 15

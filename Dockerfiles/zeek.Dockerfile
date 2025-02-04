@@ -46,8 +46,8 @@ ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
 # add script for downloading zeek and building 3rd-party plugins
-ADD shared/bin/zeek-deb-download.sh /usr/local/bin/
-ADD shared/bin/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
@@ -151,22 +151,20 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*/*
 
 # add configuration and scripts
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
-COPY --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
-COPY --chmod=755 zeek/scripts/container_health.sh /usr/local/bin/
-COPY --chmod=755 zeek/scripts/docker_entrypoint.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD shared/bin/pcap_processor.py /usr/local/bin/
-ADD shared/bin/pcap_utils.py /usr/local/bin/
-ADD scripts/malcolm_utils.py /usr/local/bin/
-ADD shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
+ADD --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
+ADD zeek/scripts /usr/local/bin
+ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
+ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
-ADD zeek/supervisord.conf /etc/supervisord.conf
-ADD zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
-ADD zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
-
+ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 zeek/config/*.zeek ${ZEEK_DIR}/share/zeek/site/
+ADD --chmod=644 zeek/config/*.txt ${ZEEK_DIR}/share/zeek/site/
 
 RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \

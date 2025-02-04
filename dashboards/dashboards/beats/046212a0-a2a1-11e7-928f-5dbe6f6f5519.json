@@ -87,6 +87,7 @@
     {
       "attributes": {
         "columns": [
+          "related.user",
           "url.original",
           "http.request.method",
           "http.response.status_code",
