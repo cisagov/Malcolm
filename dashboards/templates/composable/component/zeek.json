@@ -592,7 +592,7 @@
         "zeek.syslog.severity": { "type": "keyword" },
         "zeek.tds.command": { "type": "keyword" },
         "zeek.tds_rpc.parameter": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text", "norms": false } } },
-        "zeek.tds_rpc.parameters": { "type": "nested" },
+        "zeek.tds_rpc.parameters": { "type": "flat_object" },
         "zeek.tds_rpc.procedure_name": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.tds_sql_batch.header_type": { "type": "keyword" },
         "zeek.tds_sql_batch.query": { "type": "keyword", "ignore_above": 16384, "fields": { "text": { "type": "text" } } },

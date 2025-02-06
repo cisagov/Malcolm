@@ -28,7 +28,7 @@
                 "added": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "changed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
                 "removed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "databases": { "type": "nested" }
+                "databases": { "type": "flat_object" }
               }
             },
             "cpu": {
@@ -85,8 +85,7 @@
                 "drops.tx": { "type": "long" },
                 "drops.rx": { "type": "long" },
                 "drops.total": { "type": "long" },
-                "interface": { "type": "keyword" },
-                "details": { "type": "nested" }
+                "interface": { "type": "keyword" }
               }
             },
             "syslog": {
