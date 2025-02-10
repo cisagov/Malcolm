@@ -7,8 +7,10 @@ shopt -s nocasematch
 
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_ALIAS=${MALCOLM_NETWORK_INDEX_ALIAS:-"malcolm_network"}
 INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
 OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
+OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-"malcolm_other"}
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
@@ -43,6 +45,8 @@ function DoReplacersInFile() {
     sed -i "s/MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER/${INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_PATTERN_REPLACER/${OTHER_INDEX_PATTERN}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER/${OTHER_INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_NETWORK_INDEX_ALIAS_REPLACER/${INDEX_ALIAS}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_ALIAS_REPLACER/${OTHER_INDEX_ALIAS}/g" "${REPLFILE}" || true
     if [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]]; then
       # OpenSearch - flat_object - https://opensearch.org/docs/latest/field-types/supported-field-types/flat-object/
       # Elasticsearch - flattened - https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html
