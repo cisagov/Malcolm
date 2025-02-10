@@ -22,7 +22,7 @@ As Zeek logs are parsed and enriched prior to indexing, a severity score up to `
 * large connection or file transfer
     - The size (in megabytes) threshold for this condition to trigger can be adjusted by setting the `TOTAL_MEGABYTES_SEVERITY_THRESHOLD` environment variable in [`lookup-common.env`](malcolm-config.md#MalcolmConfigEnvVars)
 * long connection duration
-    - The duration (in seconds) threshold for this condition to trigger can be adjusted by setting the `CONNECTION_SECONDS_SEVERITY_THRESHOLD` environment variable in [`lookup-common.env`](malcolm-config.md#MalcolmConfigEnvVars)
+    - Long connections are determined by the [zeek-long-connections](https://github.com/corelight/zeek-long-connections) plugin. See the corresponding environment variables in [`zeek.env`](malcolm-config.md#MalcolmConfigEnvVars) for tuning.
 
 As this [feature]({{ site.github.repository_url }}/issues/19) is improved, it is expected additional severity scoring categories will be identified and implemented.
 
