@@ -462,14 +462,6 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}" || ( cat "$CURL_OUT" && echo )
 
-            # set default query time range
-            echo "Setting $DATASTORE_TYPE default query time range..."
-            CURL_OUT=$(get_tmp_output_filename)
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-              -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\"}"}}' || ( cat "$CURL_OUT" && echo )
-
             # pin filters by default
             echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
             CURL_OUT=$(get_tmp_output_filename)
