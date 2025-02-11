@@ -21,7 +21,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `htadmin` - configuration for the `htadmin` user account management container
 * `logstash` - code and configuration for the `logstash` container that parses Zeek logs and forwards them to the `opensearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](malcolm-iso.md#ISO) for a minimal Debian-based Linux installation for running Malcolm
-* `netbox` - code and configuration for the `netbox`, `netbox-postgres`, `netbox-redis`, and `netbox-redis-cache` containers which provide asset management capabilities
+* `netbox` - code and configuration for the `netbox` and `netbox-postgres`containers which provide asset management capabilities
 * `nginx` - configuration for the `nginx` reverse-proxy container
 * `opensearch` - an initially empty directory where the OpenSearch database instance will reside
 * `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](index-management.md#IndexManagement) 

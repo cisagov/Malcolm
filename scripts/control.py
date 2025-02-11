@@ -900,7 +900,7 @@ def stop(wipe=False):
                     BoundPath("file-monitor", "/zeek/logs", True, None, None),
                     BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
                     BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
-                    BoundPath("netbox-redis", "/data", True, None, ["."]),
+                    BoundPath("redis", "/data", True, None, ["."]),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                     BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
@@ -1054,7 +1054,7 @@ def start():
                 BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
                 BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
                 BoundPath("netbox-postgres", "/var/lib/postgresql/data", False, None, None),
-                BoundPath("netbox-redis", "/data", False, None, None),
+                BoundPath("redis", "/data", False, None, None),
                 BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
                 BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
                 BoundPath("pcap-monitor", "/pcap", False, ["arkime-live", "processed", "upload"], None),
@@ -1882,8 +1882,8 @@ def authSetup():
                         preExistingPasswordFound = False
                         preExistingPasswords = {
                             'netbox-postgres.env': ('POSTGRES_PASSWORD',),
-                            'netbox-redis-cache.env': ('REDIS_PASSWORD',),
-                            'netbox-redis.env': ('REDIS_PASSWORD',),
+                            'redis-cache.env': ('REDIS_PASSWORD',),
+                            'redis.env': ('REDIS_PASSWORD',),
                             'netbox-secret.env': (
                                 'DB_PASSWORD',
                                 'REDIS_CACHE_PASSWORD',
@@ -1917,8 +1917,8 @@ def authSetup():
                             netboxPwAlphabet = string.ascii_letters + string.digits + '_'
                             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
                             netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            netboxRedisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            netboxRedisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            redisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
+                            redisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
                             netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
                             netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
                             netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
@@ -1930,15 +1930,15 @@ def authSetup():
                                 f.write('K8S_SECRET=True\n')
                             os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                            with open('netbox-redis-cache.env', 'w') as f:
-                                f.write(f'REDIS_PASSWORD={netboxRedisCachePassword}\n')
+                            with open('redis-cache.env', 'w') as f:
+                                f.write(f'REDIS_PASSWORD={redisCachePassword}\n')
                                 f.write('K8S_SECRET=True\n')
-                            os.chmod('netbox-redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
+                            os.chmod('redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                            with open('netbox-redis.env', 'w') as f:
-                                f.write(f'REDIS_PASSWORD={netboxRedisPassword}\n')
+                            with open('redis.env', 'w') as f:
+                                f.write(f'REDIS_PASSWORD={redisPassword}\n')
                                 f.write('K8S_SECRET=True\n')
-                            os.chmod('netbox-redis.env', stat.S_IRUSR | stat.S_IWUSR)
+                            os.chmod('redis.env', stat.S_IRUSR | stat.S_IWUSR)
 
                             if (not os.path.isfile('netbox-secret.env')) and (
                                 os.path.isfile('netbox-secret.env.example')
@@ -1958,13 +1958,13 @@ def authSetup():
                                     elif line.startswith('REDIS_CACHE_PASSWORD'):
                                         line = re.sub(
                                             r'(REDIS_CACHE_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxRedisCachePassword}",
+                                            fr"\g<1>{redisCachePassword}",
                                             line,
                                         )
                                     elif line.startswith('REDIS_PASSWORD'):
                                         line = re.sub(
                                             r'(REDIS_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxRedisPassword}",
+                                            fr"\g<1>{redisPassword}",
                                             line,
                                         )
                                     elif line.startswith('SECRET_KEY'):

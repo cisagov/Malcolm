@@ -6,7 +6,7 @@ on:
       - main
       - development
     paths:
-      - 'netbox/health-scripts/container_health_redis.sh'
+      - 'redis-scripts/container_health.sh'
       - 'Dockerfiles/redis.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/capa-build.sh'

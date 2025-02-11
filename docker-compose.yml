@@ -1020,8 +1020,8 @@ services:
       VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
     - netbox-postgres
-    - netbox-redis
-    - netbox-redis-cache
+    - redis
+    - redis-cache
     volumes:
     - type: bind
       bind:
@@ -1099,7 +1099,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 45s
-  netbox-redis:
+  redis:
     image: ghcr.io/idaholab/malcolm/redis:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
@@ -1112,16 +1112,16 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: netbox-redis
+    hostname: redis
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/netbox-redis.env
+    - ./config/redis.env
     environment:
-      VIRTUAL_HOST: 'netbox-redis.malcolm.local'
+      VIRTUAL_HOST: 'redis.malcolm.local'
     command:
     - sh
     - -c
@@ -1136,7 +1136,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./netbox/redis
+      source: ./redis
       target: /data
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
@@ -1144,7 +1144,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 45s
-  netbox-redis-cache:
+  redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
@@ -1157,16 +1157,16 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: netbox-redis-cache
+    hostname: redis-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/netbox-redis-cache.env
+    - ./config/redis-cache.env
     environment:
-      VIRTUAL_HOST: 'netbox-redis-cache.malcolm.local'
+      VIRTUAL_HOST: 'redis-cache.malcolm.local'
     command:
     - sh
     - -c
