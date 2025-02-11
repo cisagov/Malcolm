@@ -468,15 +468,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}' || ( cat "$CURL_OUT" && echo )
-
-            # turn off telemetry
-            echo "Disabling $DATASTORE_TYPE telemetry..."
-            CURL_OUT=$(get_tmp_output_filename)
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-              -XPOST "$DASHB_URL/api/telemetry/v2/optIn" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"enabled":false}' || ( cat "$CURL_OUT" && echo )
+              -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\"}"}}' || ( cat "$CURL_OUT" && echo )
 
             # pin filters by default
             echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
