@@ -241,6 +241,7 @@ COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 
 ADD nginx/landingpage /usr/share/nginx/html
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/nginx.sh /usr/local/bin/container_health.sh
 ADD nginx/scripts /usr/local/bin/
 ADD --chmod=644 nginx/*.conf /etc/nginx/
 ADD nginx/templates /etc/nginx/templates/

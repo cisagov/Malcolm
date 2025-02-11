@@ -128,7 +128,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/corelight/SIGRed"
   "https://github.com/corelight/zeek-agenttesla-detector"
   "https://github.com/corelight/zeek-asyncrat-detector"
-  # "https://github.com/corelight/zeek-long-connections"
+  "https://github.com/corelight/zeek-long-connections|master"
   "https://github.com/corelight/zeek-netsupport-detector"
   "https://github.com/corelight/zeek-quasarrat-detector"
   "https://github.com/corelight/zeek-spicy-ipsec"

@@ -7,8 +7,10 @@ shopt -s nocasematch
 
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_ALIAS=${MALCOLM_NETWORK_INDEX_ALIAS:-"malcolm_network"}
 INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
 OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
+OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-"malcolm_other"}
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
@@ -34,21 +36,32 @@ STARTUP_IMPORT_PERFORMED_FILE=/tmp/shared-objects-created
 function DoReplacersInFile() {
   # Index pattern and time field name may be specified via environment variable, but need
   #   to be reflected in dashboards, templates, anomaly detectors, etc.
-  # This function takes a file and performs that replacement.
+  # This function takes a file and performs those and other replacements.
   REPLFILE="$1"
+  DATASTORE_TYPE="$2"
+  FILE_TYPE="$3"
   if [[ -n "$REPLFILE" ]] && [[ -f "$REPLFILE" ]]; then
     sed -i "s/MALCOLM_NETWORK_INDEX_PATTERN_REPLACER/${INDEX_PATTERN}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER/${INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_PATTERN_REPLACER/${OTHER_INDEX_PATTERN}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER/${OTHER_INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_NETWORK_INDEX_ALIAS_REPLACER/${INDEX_ALIAS}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_ALIAS_REPLACER/${OTHER_INDEX_ALIAS}/g" "${REPLFILE}" || true
+    if [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]]; then
+      # OpenSearch - flat_object - https://opensearch.org/docs/latest/field-types/supported-field-types/flat-object/
+      # Elasticsearch - flattened - https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html
+      sed -i "s/flat_object/flattened/g" "${REPLFILE}" || true
+    fi
   fi
 }
 
 function DoReplacersForDir() {
   REPLDIR="$1"
+  DATASTORE_TYPE="$2"
+  FILE_TYPE="$3"
   if [[ -n "$REPLDIR" ]] && [[ -d "$REPLDIR" ]]; then
     while IFS= read -r fname; do
-        DoReplacersInFile "$fname"
+        DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$FILE_TYPE"
     done < <( find "$REPLDIR"/ -type f 2>/dev/null )
   fi
 }
@@ -168,7 +181,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         TEMPLATES_IMPORTED=false
         TEMPLATES_IMPORT_DIR="$(mktemp -d -t templates-XXXXXX)"
         rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
-        DoReplacersForDir "$TEMPLATES_IMPORT_DIR"
+        DoReplacersForDir "$TEMPLATES_IMPORT_DIR" "$DATASTORE_TYPE" template
         MALCOLM_TEMPLATE_FILE_ORIG_TMP="$(echo "$MALCOLM_TEMPLATE_FILE_ORIG" | sed "s@$MALCOLM_TEMPLATES_DIR@$TEMPLATES_IMPORT_DIR@")"
 
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
@@ -338,7 +351,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
           DASHBOARDS_IMPORT_DIR="$(mktemp -d -t dashboards-XXXXXX)"
           rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR"/
+          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -378,7 +391,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           # manually add load our dashboards in /opt/dashboards/beats as well.
           BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -d -t beats-XXXXXX)"
           rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR"
+          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
           for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -493,7 +506,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             # Create anomaly detectors here
             ANOMALY_IMPORT_DIR="$(mktemp -d -t anomaly-XXXXXX)"
             rsync -a /opt/anomaly_detectors/ "$ANOMALY_IMPORT_DIR"/
-            DoReplacersForDir "$ANOMALY_IMPORT_DIR"
+            DoReplacersForDir "$ANOMALY_IMPORT_DIR" "$DATASTORE_TYPE" anomaly_detector
             for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
               # identify the name of the anomaly detector, and, if it already exists, its
               #   ID and previous update time, as well as the update time of the file to import
@@ -561,6 +574,29 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             #############################################################################################################################
 
             #############################################################################################################################
+            # OpenSearch security analytics fields mappings
+            echo "Creating $DATASTORE_TYPE security analytics mappings..."
+
+            SA_MAPPINGS_IMPORT_DIR="$(mktemp -d -t sa-mappings-XXXXXX)"
+            rsync -a /opt/security_analytics_mappings/ "$SA_MAPPINGS_IMPORT_DIR"/
+            DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" sa_mapping
+            for i in "${SA_MAPPINGS_IMPORT_DIR}"/*.json; do
+              set +e
+              RULE_TOPIC="$(jq -r '.rule_topic' 2>/dev/null < "$i")"
+              INDEX_NAME="$(jq -r '.index_name' 2>/dev/null < "$i")"
+              echo "Creating mappings for \"${INDEX_NAME}\" / \"${RULE_TOPIC}\" ..." && \
+              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+                -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_security_analytics/mappings" \
+                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+                -d "@$i"
+              set -e
+            done
+            rm -rf "${SA_MAPPINGS_IMPORT_DIR}"
+
+            # end OpenSearch security analytics
+            #############################################################################################################################
+
+            #############################################################################################################################
             # OpenSearch alerting
             #   - always attempt to write the default Malcolm alerting objects, regardless of whether they exist or not
 
@@ -579,7 +615,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             # monitors
             ALERTING_IMPORT_DIR="$(mktemp -d -t alerting-XXXXXX)"
             rsync -a /opt/alerting/monitors/ "$ALERTING_IMPORT_DIR"/
-            DoReplacersForDir "$ALERTING_IMPORT_DIR"
+            DoReplacersForDir "$ALERTING_IMPORT_DIR" "$DATASTORE_TYPE" monitor
             for i in "${ALERTING_IMPORT_DIR}"/*.json; do
               curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
                 -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" \

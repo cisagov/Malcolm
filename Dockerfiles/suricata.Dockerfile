@@ -138,6 +138,7 @@ ADD --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/suricata.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
 ADD --chmod=755 suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
 ADD suricata/scripts /usr/local/bin/

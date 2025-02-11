@@ -494,7 +494,7 @@ services:
           create_host_path: false
         source: ./netbox/postgres
         target: /var/lib/postgresql/data
-  netbox-redis:
+  redis:
     volumes:
       - type: bind
         bind:
@@ -505,9 +505,9 @@ services:
       - type: bind
         bind:
           create_host_path: false
-        source: ./netbox/redis
+        source: ./redis
         target: /data
-  netbox-redis-cache:
+  redis-cache:
     volumes:
       - type: bind
         bind:

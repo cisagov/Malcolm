@@ -123,6 +123,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/filebeat.sh /usr/local/bin/container_health.sh
 ADD --chmod=644 filebeat/filebeat-logs.yml /usr/share/filebeat-logs/filebeat-logs.yml
 ADD --chmod=644 filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
 ADD --chmod=644 filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml

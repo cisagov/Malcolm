@@ -46,7 +46,7 @@ Pulling htadmin           ... done
 Pulling logstash          ... done
 Pulling netbox            ... done
 Pulling netbox-postgresql ... done
-Pulling netbox-redis      ... done
+Pulling redis             ... done
 Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done

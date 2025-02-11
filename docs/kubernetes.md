@@ -283,7 +283,7 @@ logstash-deployment-6fbc9fdcd5-hwx8s           | Running | 10.42.2.22 | ReplicaS
 netbox-deployment-cdcff4977-hbbw5              | Running | 10.42.2.23 | ReplicaSet | agent1      | 807.64m   | 702.86Mi     | netbox-container:0             | netbox:{{ site.malcolm.version }}            |
 suricata-offline-deployment-6ccdb89478-z5696   | Running | 10.42.2.19 | ReplicaSet | agent1      | 0.22m     | 34.88Mi      | suricata-offline-container:0   | suricata:{{ site.malcolm.version }}          |
 dashboards-deployment-69b5465db-vz88g          | Running | 10.42.1.14 | ReplicaSet | agent2      | 0.94m     | 100.12Mi     | dashboards-container:0         | dashboards:{{ site.malcolm.version }}        |
-netbox-redis-cache-deployment-5f77d47b8b-z7t2z | Running | 10.42.1.15 | ReplicaSet | agent2      | 3.57m     | 7.36Mi       | netbox-redis-cache-container:0 | redis:{{ site.malcolm.version }}             |
+redis-cache-deployment-5f77d47b8b-z7t2z        | Running | 10.42.1.15 | ReplicaSet | agent2      | 3.57m     | 7.36Mi       | redis-cache-container:0        | redis:{{ site.malcolm.version }}             |
 suricata-live-deployment-6494c77759-9rlnt      | Running | 10.42.1.16 | ReplicaSet | agent2      | 0.02m     | 9.69Mi       | suricata-live-container:0      | suricata:{{ site.malcolm.version }}          |
 freq-deployment-cfd84fd97-dnngf                | Running | 10.42.1.17 | ReplicaSet | agent2      | 0.2m      | 26.36Mi      | freq-container:0               | freq:{{ site.malcolm.version }}              |
 arkime-deployment-56999cdd66-s98pp             | Running | 10.42.1.18 | ReplicaSet | agent2      | 4.15m     | 113.07Mi     | arkime-container:0             | arkime:{{ site.malcolm.version }}            |
@@ -291,7 +291,7 @@ pcap-monitor-deployment-594ff674c4-fsm7m       | Running | 10.42.1.19 | ReplicaS
 pcap-capture-deployment-7c8bf6957-jzpzn        | Running | 10.42.1.20 | ReplicaSet | agent2      | 0.02m     | 9.64Mi       | pcap-capture-container:0       | pcap-capture:{{ site.malcolm.version }}      |
 netbox-postgres-deployment-5879b8dffc-kkt56    | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | netbox-postgres-container:0    | postgresql:{{ site.malcolm.version }}        |
 htadmin-deployment-6fc46888b9-sq6ln            | Running | 10.42.1.23 | ReplicaSet | agent2      | 0.14m     | 30.53Mi      | htadmin-container:0            | htadmin:{{ site.malcolm.version }}           |
-netbox-redis-deployment-5bcd8f6c96-j5xpf       | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | netbox-redis-container:0       | redis:{{ site.malcolm.version }}             |
+redis-deployment-5bcd8f6c96-j5xpf              | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | redis-container:0              | redis:{{ site.malcolm.version }}             |
 nginx-proxy-deployment-69fcc4968d-f68tq        | Running | 10.42.1.22 | ReplicaSet | agent2      | 0.31m     | 22.63Mi      | nginx-proxy-container:0        | nginx-proxy:{{ site.malcolm.version }}       |
 opensearch-deployment-75498799f6-4zmwd         | Running | 10.42.1.25 | ReplicaSet | agent2      | 89.8m     | 11.03Gi      | opensearch-container:0         | opensearch:{{ site.malcolm.version }}        |
 ```
@@ -556,8 +556,8 @@ agent1    | agent1   | 192.168.56.11 | agent1      | k3s           | 6000m     |
 agent2    | agent2   | 192.168.56.12 | agent2      | k3s           | 6000m     | 552.71m   | 9.21%       | 19.55Gi      | 13.27Gi      | 61.28Gi       | 12           |
 
 Pod Name                                       | State   | Pod IP     | Pod Kind   | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts        | Container Image              |
-netbox-redis-cache-deployment-5f77d47b8b-jr9nt | Running | 10.42.2.6  | ReplicaSet | agent2      | 1.89m     | 7.24Mi       | netbox-redis-cache-container:0 | redis:{{ site.malcolm.version }}             |
-netbox-redis-deployment-5bcd8f6c96-bkzmh       | Running | 10.42.2.5  | ReplicaSet | agent2      | 1.62m     | 7.52Mi       | netbox-redis-container:0       | redis:{{ site.malcolm.version }}             |
+redis-cache-deployment-5f77d47b8b-jr9nt        | Running | 10.42.2.6  | ReplicaSet | agent2      | 1.89m     | 7.24Mi       | redis-cache-container:0        | redis:{{ site.malcolm.version }}             |
+redis-deployment-5bcd8f6c96-bkzmh              | Running | 10.42.2.5  | ReplicaSet | agent2      | 1.62m     | 7.52Mi       | redis-container:0              | redis:{{ site.malcolm.version }}             |
 dashboards-helper-deployment-69dc54f6b6-ks7ps  | Running | 10.42.2.4  | ReplicaSet | agent2      | 12.95m    | 40.75Mi      | dashboards-helper-container:0  | dashboards-helper:{{ site.malcolm.version }} |
 freq-deployment-cfd84fd97-5bwp6                | Running | 10.42.2.8  | ReplicaSet | agent2      | 0.11m     | 26.33Mi      | freq-container:0               | freq:{{ site.malcolm.version }}              |
 pcap-capture-deployment-7c8bf6957-hkvkn        | Running | 10.42.2.12 | ReplicaSet | agent2      | 0.02m     | 9.21Mi       | pcap-capture-container:0       | pcap-capture:{{ site.malcolm.version }}      |

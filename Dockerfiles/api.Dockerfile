@@ -64,7 +64,7 @@ ADD --chmod=644 scripts/malcolm_utils.py "${APP_HOME}"/
 ADD --chmod=755 shared/bin/opensearch_status.sh "${APP_HOME}"/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-ADD api/scripts /usr/local/bin
+ADD --chmod=755 container-health-scripts/api.sh /usr/local/bin/container_health.sh
 
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \

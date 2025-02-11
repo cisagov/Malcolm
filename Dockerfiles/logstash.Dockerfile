@@ -82,6 +82,7 @@ RUN set -x && \
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/logstash.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/

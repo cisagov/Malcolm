@@ -1,0 +1,37 @@
+{
+  "index_name": "MALCOLM_NETWORK_INDEX_ALIAS_REPLACER",
+  "rule_topic": "network",
+  "partial": true,
+  "alias_mappings": {
+    "properties": {
+      "zeek.x509.certificate.serial": {
+        "type": "alias",
+        "path": "zeek.x509.certificate_serial"
+      },
+      "service": {
+        "type": "alias",
+        "path": "network.protocol"
+      },
+      "rejected": {
+        "type": "alias",
+        "path": "zeek.dns.rejected"
+      },
+      "id.resp_p": {
+        "type": "alias",
+        "path": "destination.port"
+      },
+      "id.resp_h": {
+        "type": "alias",
+        "path": "destination.ip"
+      },
+      "id.orig_h": {
+        "type": "alias",
+        "path": "source.ip"
+      },
+      "Z-flag": {
+        "type": "alias",
+        "path": "zeek.dns.Z"
+      }
+    }
+  }
+}

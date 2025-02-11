@@ -863,6 +863,7 @@ class MalcolmSource extends WISESource {
       "zeek.conn.ja4ts",
       "zeek.conn.local_orig",
       "zeek.conn.local_resp",
+      "zeek.conn.long",
       "zeek.conn.missed_bytes",
       "zeek.conn.orig_bytes",
       "zeek.conn.orig_ip_bytes",

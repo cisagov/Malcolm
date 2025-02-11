@@ -23,6 +23,7 @@
 .tmp
 .configured
 config.*/
+/redis
 
 # development
 .envrc

@@ -2383,13 +2383,6 @@ class Installer(object):
                 'NETBOX_POSTGRES_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
-            # enable/disable netbox (redis)
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_REDIS_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
-            ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
                 True,

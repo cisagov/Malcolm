@@ -25,6 +25,7 @@
         "zeek.conn.ja4ts": { "type": "keyword" },
         "zeek.conn.local_orig": { "type": "keyword" },
         "zeek.conn.local_resp": { "type": "keyword" },
+        "zeek.conn.long": { "type": "keyword" },
         "zeek.conn.missed_bytes": { "type": "long" },
         "zeek.conn.orig_bytes": { "type": "long" },
         "zeek.conn.orig_ip_bytes": { "type": "long" },
@@ -592,7 +593,12 @@
         "zeek.syslog.severity": { "type": "keyword" },
         "zeek.tds.command": { "type": "keyword" },
         "zeek.tds_rpc.parameter": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text", "norms": false } } },
-        "zeek.tds_rpc.parameters": { "type": "nested" },
+        "zeek.tds_rpc.parameters": {
+          "type": "nested",
+          "properties": {
+            "P1": { "type": "keyword" }
+          }
+        },
         "zeek.tds_rpc.procedure_name": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
         "zeek.tds_sql_batch.header_type": { "type": "keyword" },
         "zeek.tds_sql_batch.query": { "type": "keyword", "ignore_above": 16384, "fields": { "text": { "type": "text" } } },
