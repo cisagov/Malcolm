@@ -445,9 +445,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             #############################################################################################################################
             # OpenSearch Tweaks
             #   - TODO: only do these if they've NEVER been done before?
-            echo "Updating $DATASTORE_TYPE UI settings..."
 
             # set dark theme (or not)
+            echo "Setting $DATASTORE_TYPE dark mode ($DARK_MODE)..."
             [[ "$DARK_MODE" == "true" ]] && DARK_MODE_ARG='{"value":true}' || DARK_MODE_ARG='{"value":false}'
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
@@ -455,6 +455,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$DARK_MODE_ARG" || ( cat "$CURL_OUT" && echo )
 
             # set default dashboard
+            echo "Setting $DATASTORE_TYPE default dashboard ($DEFAULT_DASHBOARD)..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultRoute" \
@@ -462,6 +463,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}" || ( cat "$CURL_OUT" && echo )
 
             # set default query time range
+            echo "Setting $DATASTORE_TYPE default query time range..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings" \
@@ -469,6 +471,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}' || ( cat "$CURL_OUT" && echo )
 
             # turn off telemetry
+            echo "Disabling $DATASTORE_TYPE telemetry..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/telemetry/v2/optIn" \
@@ -476,6 +479,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -d '{"enabled":false}' || ( cat "$CURL_OUT" && echo )
 
             # pin filters by default
+            echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/filters:pinnedByDefault" \
@@ -483,17 +487,15 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
                 -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
             # enable in-session storage
+            echo "Enabled $DATASTORE_TYPE in-session storage for dashboards..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
-            echo "$DATASTORE_TYPE settings updates complete!"
-
             # end OpenSearch Tweaks
             #############################################################################################################################
-
             
             # OpenSearch Create Initial Indices
 
