@@ -171,6 +171,7 @@ ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=644 arkime/supervisord.conf /etc/supervisord.conf
+ADD --chmod=755 container-health-scripts/arkime.sh /usr/local/bin/container_health.sh
 ADD arkime/scripts /usr/local/bin/
 ADD arkime/etc $ARKIME_DIR/etc/
 ADD --chmod=644 arkime/rules/*.yml $ARKIME_DIR/rules/

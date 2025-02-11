@@ -154,6 +154,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/zeek.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/zeek_intel_setup.sh ${ZEEK_DIR}/bin/
 ADD --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
 ADD zeek/scripts /usr/local/bin

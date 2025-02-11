@@ -134,11 +134,11 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/netbox.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 netbox/scripts/* /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
-ADD --chmod=755 netbox/health-scripts/container_health_netbox.sh /usr/local/bin/container_health.sh
 
 EXPOSE 9001
 

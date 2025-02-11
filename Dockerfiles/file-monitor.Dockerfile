@@ -106,12 +106,12 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ADD --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/capa-build.sh /usr/local/bin/
-ADD file-monitor/scripts /usr/local/bin
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
 ADD --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
 ADD --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/file-monitor.sh /usr/local/bin/container_health.sh
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \

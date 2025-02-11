@@ -70,7 +70,7 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-ADD opensearch-scripts /usr/local/bin
+ADD --chmod=755 container-health-scripts/opensearch.sh /usr/local/bin/container_health.sh
 
 ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"

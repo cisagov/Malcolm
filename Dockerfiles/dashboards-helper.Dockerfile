@@ -58,6 +58,7 @@ ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /usr/local/bin
 ADD --chmod=644 dashboards/supervisord.conf /etc/supervisord.conf
 ADD dashboards/templates /opt/templates
+ADD --chmod=755 container-health-scripts/dashboards-helper.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
@@ -107,7 +108,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
                                 /opt/templates && \
     chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    ln -sfr /usr/local/bin/container_health_helper.sh /usr/local/bin/container_health.sh && \
     (echo "*/2 * * * * /usr/local/bin/shared-object-creation.sh\n0 10 * * * /usr/local/bin/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /usr/local/bin/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /usr/local/bin/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT

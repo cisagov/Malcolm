@@ -79,6 +79,7 @@ ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/pcap_watcher.py /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/pcap-monitor.sh /usr/local/bin/container_health.sh
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD pcap-monitor/scripts /usr/local/bin
 
