@@ -55,7 +55,7 @@ spec:
           - configMapRef:
               name: netbox-common-env
           - secretRef:
-              name: redis-cache-env
+              name: redis-env
         env:
           - name: VIRTUAL_HOST
             value: "redis-cache.malcolm.local"

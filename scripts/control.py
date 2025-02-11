@@ -1881,13 +1881,12 @@ def authSetup():
 
                         preExistingPasswordFound = False
                         preExistingPasswords = {
-                            'netbox-postgres.env': ('POSTGRES_PASSWORD',),
-                            'redis-cache.env': ('REDIS_PASSWORD',),
+                            'netbox-postgres.env': (
+                                'POSTGRES_PASSWORD',
+                                'DB_PASSWORD',
+                            ),
                             'redis.env': ('REDIS_PASSWORD',),
                             'netbox-secret.env': (
-                                'DB_PASSWORD',
-                                'REDIS_CACHE_PASSWORD',
-                                'REDIS_PASSWORD',
                                 'SECRET_KEY',
                                 'SUPERUSER_PASSWORD',
                                 'SUPERUSER_API_TOKEN',
@@ -1918,24 +1917,24 @@ def authSetup():
                             netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
                             netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
                             redisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            redisCachePassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
                             netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
                             netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
                             netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
 
                             with open('netbox-postgres.env', 'w') as f:
+                                f.write('DB_HOST=netbox-postgres\n')
                                 f.write('POSTGRES_DB=netbox\n')
-                                f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
+                                f.write('DB_NAME=netbox\n')
                                 f.write('POSTGRES_USER=netbox\n')
+                                f.write('DB_USER=netbox\n')
+                                f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
+                                f.write(f'DB_PASSWORD={netboxPostGresPassword}\n')
                                 f.write('K8S_SECRET=True\n')
                             os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
 
-                            with open('redis-cache.env', 'w') as f:
-                                f.write(f'REDIS_PASSWORD={redisCachePassword}\n')
-                                f.write('K8S_SECRET=True\n')
-                            os.chmod('redis-cache.env', stat.S_IRUSR | stat.S_IWUSR)
-
                             with open('redis.env', 'w') as f:
+                                f.write(f'REDIS_HOST=redis\n')
+                                f.write(f'REDIS_CACHE_HOST=redis-cache\n')
                                 f.write(f'REDIS_PASSWORD={redisPassword}\n')
                                 f.write('K8S_SECRET=True\n')
                             os.chmod('redis.env', stat.S_IRUSR | stat.S_IWUSR)
@@ -1949,25 +1948,7 @@ def authSetup():
                                 for line in envFile:
                                     line = line.rstrip("\n")
 
-                                    if line.startswith('DB_PASSWORD'):
-                                        line = re.sub(
-                                            r'(DB_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxPostGresPassword}",
-                                            line,
-                                        )
-                                    elif line.startswith('REDIS_CACHE_PASSWORD'):
-                                        line = re.sub(
-                                            r'(REDIS_CACHE_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{redisCachePassword}",
-                                            line,
-                                        )
-                                    elif line.startswith('REDIS_PASSWORD'):
-                                        line = re.sub(
-                                            r'(REDIS_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{redisPassword}",
-                                            line,
-                                        )
-                                    elif line.startswith('SECRET_KEY'):
+                                    if line.startswith('SECRET_KEY'):
                                         line = re.sub(
                                             r'(SECRET_KEY\s*=\s*)(.*?)$',
                                             fr"\g<1>{netboxSecretKey}",

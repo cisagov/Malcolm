@@ -1016,6 +1016,8 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
+    - ./config/netbox-postgres.env
+    - ./config/redis.env
     environment:
       VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
@@ -1164,7 +1166,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/redis-cache.env
+    - ./config/redis.env
     environment:
       VIRTUAL_HOST: 'redis-cache.malcolm.local'
     command:

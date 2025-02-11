@@ -793,7 +793,6 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'redis-cache.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
