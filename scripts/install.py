@@ -2991,16 +2991,6 @@ class Installer(object):
                         # nginx-proxy has got a lot going on
                         if 'nginx-proxy' in data['services']:
 
-                            # set nginx-proxy health check based on whether they're using HTTPS or not
-                            if 'healthcheck' in data['services']['nginx-proxy']:
-                                data['services']['nginx-proxy']['healthcheck']['test'] = [
-                                    "CMD",
-                                    "curl",
-                                    "--insecure",
-                                    "--silent",
-                                    f"{'https' if nginxSSL else 'http'}://localhost:443",
-                                ]
-
                             # set bind IPs and ports based on whether it should be externally exposed or not
                             if malcolmProfile == PROFILE_HEDGEHOG:
                                 data['services']['nginx-proxy'].pop('ports', None)
