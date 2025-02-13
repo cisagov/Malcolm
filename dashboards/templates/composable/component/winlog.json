@@ -1652,6 +1652,9 @@
                 "OriginalFileName": {
                   "type": "keyword"
                 },
+                "Owner": {
+                  "type": "keyword"
+                },
                 "OutrankedDrivers": {
                   "type": "keyword"
                 },
