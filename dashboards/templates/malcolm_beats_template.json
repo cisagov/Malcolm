@@ -22,8 +22,8 @@
     "ecs_user",
     "ecs_user_agent",
     "custom_miscbeat",
-    "custom_evtx",
     "custom_suricata_stats",
+    "custom_winlog",
     "custom_zeek_diagnostic"
   ],
   "template" :{
