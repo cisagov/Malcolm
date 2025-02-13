@@ -470,6 +470,9 @@
                 "Contents": {
                   "type": "keyword"
                 },
+                "Context": {
+                  "type": "keyword"
+                },
                 "ContextInfo": {
                   "type": "keyword"
                 },
