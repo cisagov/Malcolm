@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'redis-scripts/container_health.sh'
       - 'Dockerfiles/redis.Dockerfile'

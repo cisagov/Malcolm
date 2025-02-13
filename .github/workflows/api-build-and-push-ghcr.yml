@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'api/**'
       - 'Dockerfiles/api.Dockerfile'

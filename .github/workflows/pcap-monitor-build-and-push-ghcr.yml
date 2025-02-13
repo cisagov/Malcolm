@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'pcap-monitor/**'
       - 'Dockerfiles/pcap-monitor.Dockerfile'
