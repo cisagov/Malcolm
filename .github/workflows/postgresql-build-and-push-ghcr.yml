@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'netbox/health-scripts/container_health_postgres.sh'
       - 'Dockerfiles/postgresql.Dockerfile'

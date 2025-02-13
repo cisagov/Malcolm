@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'malcolm-iso/**'
       - 'shared/bin/*'
