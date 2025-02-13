@@ -4,57 +4,233 @@
       "properties": {
         "zeek": {
           "properties": {
-            "broker.event_type": { "type": "keyword" },
-            "broker.event_action": { "type": "keyword" },
-            "broker.peer_ip": { "type": "keyword" },
-            "broker.peer_port": { "type": "integer" },
-            "broker.peer_message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "capture_loss.ts_delta": { "type": "float" },
-            "capture_loss.peer": { "type": "keyword" },
-            "capture_loss.gaps": { "type": "long" },
-            "capture_loss.acks": { "type": "long" },
-            "capture_loss.percent_lost": { "type": "float" },
-            "cluster.node": { "type": "keyword" },
-            "cluster.node_message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "config.value_name": { "type": "keyword" },
-            "config.value_old": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "config.value_new": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "config.location": { "type": "keyword" },
-            "packet_filter.node": { "type": "keyword" },
-            "packet_filter.filter": { "type": "keyword" },
-            "packet_filter.init": { "type": "keyword" },
-            "packet_filter.success": { "type": "keyword" },
-            "packet_filter.failure_reason": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "print.vals": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "reporter.level": { "type": "keyword" },
-            "reporter.msg": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-            "reporter.location": { "type": "keyword" },
-            "stats.peer": { "type": "keyword" },
-            "stats.mem": { "type": "long" },
-            "stats.pkts_proc": { "type": "long" },
-            "stats.bytes_recv": { "type": "long" },
-            "stats.pkts_dropped": { "type": "long" },
-            "stats.pkts_link": { "type": "long" },
-            "stats.pkt_lag": { "type": "float" },
-            "stats.pkts_filtered": { "type": "long" },
-            "stats.events_proc": { "type": "long" },
-            "stats.events_queued": { "type": "long" },
-            "stats.active_tcp_conns": { "type": "long" },
-            "stats.active_udp_conns": { "type": "long" },
-            "stats.active_icmp_conns": { "type": "long" },
-            "stats.tcp_conns": { "type": "long" },
-            "stats.udp_conns": { "type": "long" },
-            "stats.icmp_conns": { "type": "long" },
-            "stats.timers": { "type": "long" },
-            "stats.active_timers": { "type": "long" },
-            "stats.files": { "type": "long" },
-            "stats.active_files": { "type": "long" },
-            "stats.dns_requests": { "type": "long" },
-            "stats.active_dns_requests": { "type": "long" },
-            "stats.reassem_tcp_size": { "type": "long" },
-            "stats.reassem_file_size": { "type": "long" },
-            "stats.reassem_frag_size": { "type": "long" },
-            "stats.reassem_unknown_size": { "type": "long" }
+            "broker": {
+              "properties": {
+                "event_type": {
+                  "type": "keyword"
+                },
+                "event_action": {
+                  "type": "keyword"
+                },
+                "peer_ip": {
+                  "type": "keyword"
+                },
+                "peer_port": {
+                  "type": "integer"
+                },
+                "peer_message": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "capture_loss": {
+              "properties": {
+                "ts_delta": {
+                  "type": "float"
+                },
+                "peer": {
+                  "type": "keyword"
+                },
+                "gaps": {
+                  "type": "long"
+                },
+                "acks": {
+                  "type": "long"
+                },
+                "percent_lost": {
+                  "type": "float"
+                }
+              }
+            },
+            "cluster": {
+              "properties": {
+                "node": {
+                  "type": "keyword"
+                },
+                "node_message": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "config": {
+              "properties": {
+                "value_name": {
+                  "type": "keyword"
+                },
+                "value_old": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "value_new": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "location": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "packet_filter": {
+              "properties": {
+                "node": {
+                  "type": "keyword"
+                },
+                "filter": {
+                  "type": "keyword"
+                },
+                "init": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "failure_reason": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "print": {
+              "properties": {
+                "vals": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                }
+              }
+            },
+            "reporter": {
+              "properties": {
+                "level": {
+                  "type": "keyword"
+                },
+                "msg": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "location": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "stats": {
+              "properties": {
+                "peer": {
+                  "type": "keyword"
+                },
+                "mem": {
+                  "type": "long"
+                },
+                "pkts_proc": {
+                  "type": "long"
+                },
+                "bytes_recv": {
+                  "type": "long"
+                },
+                "pkts_dropped": {
+                  "type": "long"
+                },
+                "pkts_link": {
+                  "type": "long"
+                },
+                "pkt_lag": {
+                  "type": "float"
+                },
+                "pkts_filtered": {
+                  "type": "long"
+                },
+                "events_proc": {
+                  "type": "long"
+                },
+                "events_queued": {
+                  "type": "long"
+                },
+                "active_tcp_conns": {
+                  "type": "long"
+                },
+                "active_udp_conns": {
+                  "type": "long"
+                },
+                "active_icmp_conns": {
+                  "type": "long"
+                },
+                "tcp_conns": {
+                  "type": "long"
+                },
+                "udp_conns": {
+                  "type": "long"
+                },
+                "icmp_conns": {
+                  "type": "long"
+                },
+                "timers": {
+                  "type": "long"
+                },
+                "active_timers": {
+                  "type": "long"
+                },
+                "files": {
+                  "type": "long"
+                },
+                "active_files": {
+                  "type": "long"
+                },
+                "dns_requests": {
+                  "type": "long"
+                },
+                "active_dns_requests": {
+                  "type": "long"
+                },
+                "reassem_tcp_size": {
+                  "type": "long"
+                },
+                "reassem_file_size": {
+                  "type": "long"
+                },
+                "reassem_frag_size": {
+                  "type": "long"
+                },
+                "reassem_unknown_size": {
+                  "type": "long"
+                }
+              }
+            }
           }
         }
       }
