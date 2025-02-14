@@ -43,7 +43,7 @@ Malcolm is a tool suite that incorporates many open source components (some of w
 
 ### <a name="BaseImagesForContainersAndInstalledEnvironments"></a> Base Images for Containers and Installed Environments
 
-The main source of the underlying core tools and libraries that make up Malcolm are the "base images" that Malcolm is built on top of. These base images are defined in:
+The main sources of Malcolm’s core tools and libraries are the 'base images' on which Malcolm is built. These base images are defined in:
 
 * [Dockerfiles](https://github.com/cisagov/Malcolm/tree/main/Dockerfiles) used to build container images
 * scripts that use the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build the x86_64 ISO and ARM64 [Raspberry Pi installer](hedgehog-raspi-build.md#HedgehogRaspiBuild) images
@@ -73,7 +73,7 @@ Using these official images as the base of Malcolm's Docker images relies on a t
 
 #### <a name="ISOInstalledEnvironments"></a> ISO-Installed Environments
 
-For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild)](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
+For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
 
 Beyond building on this solid foundation, and as these environments are full-fledged operating systems, the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks are used as a basis for additional hardening that targets the following guidelines for establishing a secure configuration posture:
 
@@ -106,15 +106,25 @@ To reduce build time, some small standalone tools included in Malcolm are downlo
 
 ### <a name="CodeBuiltFromSource"></a> Code Built From Source
 
-A few packages in Malcolm are not installed from packages containing precompiled binaries, and are instead compiled from code. In order to ensure the code compiled is of legitimate origin, it is always downloaded directly from its originator (i.e., the author or organization that has released the source code). Usually this means downloading it from GitHub or from an organization's official website over HTTPS. See [**Standards of Trust for Providers of Upstream Code**](#StandardsOfTrustForProvidersOfUpstreamCode) for more details about determining trustworthiness of third-party code.
+Some packages in Malcolm are not available as precompiled binaries and must be built from source. In order to ensure the code compiled is of legitimate origin, it is always downloaded directly from its originator (i.e., the author or organization that has released the source code). Usually this means downloading it from GitHub or from an organization's official website over HTTPS. See [**Standards of Trust for Providers of Upstream Code**](#StandardsOfTrustForProvidersOfUpstreamCode) for more details about determining trustworthiness of third-party code.
 
 ### <a name="StandardsOfTrustForProvidersOfUpstreamCode"></a> Standards of Trust for Providers of Upstream Code
 
-Determining the trustworthiness of third-party source code is essential for maintaining the security and integrity of Malcolm's software supply chain. One key factor used to evaluate a project's suitability for inclusion in Malcolm is the size and activity of the project's community. Open-source projects with active issue tracking, regular releases, and responsive maintainers are generally more reliable than those with little engagement. A strong community presence — evident through GitHub stars, pull requests, discussions in Slack channels, or forums — indicates that many developers are invested in the project's health, making it less likely that malicious code goes unnoticed. Frequent updates and well-documented changes also suggest that the maintainers are proactive in addressing security vulnerabilities and improving the software.
+Determining the trustworthiness of third-party source code is essential for maintaining the security and integrity of Malcolm's software supply chain.
+
+#### Community Size and Activity
+
+One key factor used to evaluate a project's suitability for inclusion in Malcolm is the size and activity of the project's community. Open-source projects with active issue tracking, regular releases, and responsive maintainers are generally more reliable than those with little engagement. A strong community presence — evident through GitHub stars, pull requests, discussions in Slack channels, or forums — indicates that many developers are invested in the project's health, making it less likely that malicious code goes unnoticed. Frequent updates and well-documented changes also suggest that the maintainers are proactive in addressing security vulnerabilities and improving the software.
+
+#### Popularity and Adoption
 
 Another critical aspect is project popularity and adoption. The more widely used a piece of software is, the more scrutiny it receives from developers, security researchers, and organizations relying on it. Large-scale adoption reduces the likelihood of undetected vulnerabilities or hidden backdoors since many independent contributors and companies have a vested interest in keeping the project secure. However, popularity alone isn't enough — it's important to check if reputable organizations use the project and whether they contribute back to its development. Reviewing security audits, dependency transparency, and any history of security incidents can further help in assessing whether a project can be trusted.
 
+#### Technical Security
+
 Beyond community activity and popularity, other technical factors should be considered. Reviewing a candidate project's dependency tree can reveal if it relies on well-maintained and trusted libraries or if it introduces risky, obscure dependencies. Checking for reproducible builds and signed releases ensures that the distributed code matches the source and hasn’t been tampered with. Additionally, verifying that the project follows security best practices — such as enforcing code reviews, providing cryptographic signatures for releases, and maintaining a clear disclosure process for vulnerabilities — can provide confidence in its reliability.
+
+#### Relationships of Trust
 
 Finally, the Malcolm team has developed professional working relationships and friendships with some of the teams behind many Malcolm components. Malcolm developers are active members of many of the communities surrounding those projects, and know those working on the code. This familiarity bolsters the Malcolm team's confidence and trust in those projects.
 
@@ -124,7 +134,7 @@ By combining these factors, the Malcolm team can make informed decisions about i
 
 For software that is installed via [Linux distributions' package repositories](#LinuxDistroRepos), the Malcolm developers mostly take a "hands-off" approach: these packages are included in new Malcolm builds automatically as they are updated upstream. Infrequently, when a new major version of a base image is released (for example, the next stable release of Debian every few years or a new image for the next release of Alpine Linux), the Malcolm team will review changelogs and release notes and manually bump the Malcolm dependency up to the latest version. This is advisable as most new releases of distributions include improvements to features, performance, and security.
 
-For [Python libraries](#PyPI) a mixed approach is used: some Python libraries are ["pinned"](https://pip.pypa.io/en/stable/topics/repeatable-installs/#pinning-the-package-versions) to a specific version which is manually updated when [a security vulnerability](#SecurityVulnerabilityScanning) is reported, new functionality is added, or for other reasons at a Malcolm developer's discretion. Other libraries are not version pinned, meaning the latest official release of the package is installed whenever Malcolm is built. Generally package pinning is preferable as it prevents encountering bugs or incompatibilities in newly released versions.
+For [Python libraries](#PyPI) a mixed approach is used: some Python libraries are ["pinned"](https://pip.pypa.io/en/stable/topics/repeatable-installs/#pinning-the-package-versions) to a specific version which is manually updated when [a security vulnerability](#SecurityVulnerabilityScanning) is reported, new functionality is added, or for other reasons at a Malcolm developer's discretion. Other libraries are not version pinned, meaning the latest official release of the package is installed whenever Malcolm is built. Package pinning is generally preferable as it prevents unexpected bugs or compatibility issues when new versions are released.
 
 For other components of Malcolm, whether they are major components ([Arkime](https://github.com/arkime/arkime/releases), [OpenSearch](version), [Zeek](https://github.com/zeek/zeek/releases), etc.) or smaller tools ([Tini](https://github.com/krallin/tini/releases), [yq](https://github.com/mikefarah/yq), [supercronic](https://github.com/aptible/supercronic)), the Malcolm team stays abreast of new releases primarily through [GitHub notifications](https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/about-notifications) triggered when a new release of that component is published. A Malcolm developer reviews the release notes accompanying new releases before deciding if and when to update the version included in Malcolm. The thoroughness of this review — from a cursory perusal of the release notes to a more in-depth review of the changed code itself — will vary depending on the team's familiarity and experience with the project in question.
 
