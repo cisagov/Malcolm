@@ -25,14 +25,14 @@ Malcolm's source code and release artifacts are made up of the following:
     - These contain the majority of the "brains" of Malcolm, and are used as the basis of all deployment models, whether ISO-installer based, Docker/Podman based, or cloud (Kubernetes) based.
 * Desktop OS environments for [Malcolm](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig)
     - These are ISO-installed environments that are primarily used for bare-metal or virtual machine installations. The Malcolm environment includes the container images mentioned above.
-* The actual "[Malcolm source code](https://github.com/cisagov/malcolm/)", which consists of:
-    - [scripts](https://github.com/cisagov/Malcolm/tree/main/scripts) for installing and configuring Malcolm
+* The actual "[Malcolm source code](({{ site.github.repository_url }}))", which consists of:
+    - [scripts]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/main/scripts/) for installing and configuring Malcolm
     - "recipes" and contents used for building images
-        + [container](https://github.com/cisagov/Malcolm/tree/main/Dockerfiles) images
-        + [Malcolm](https://github.com/cisagov/Malcolm/tree/main/malcolm-iso) ISO installer
-        + [Hedgehog Linux](https://github.com/cisagov/Malcolm/tree/main/hedgehog-iso) ISO installer
-    - [documentation](https://github.com/cisagov/Malcolm/tree/main/docs)
-    - [configuration files](https://github.com/cisagov/Malcolm/tree/main/config) storing user preferences
+        + [container]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) images
+        + [Malcolm]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso) ISO installer
+        + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso) ISO installer
+    - [documentation]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docs)
+    - [configuration files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/config) storing user preferences
     - etc.
 
 ## <a name="UpstreamComponents"></a> Upstream Components
@@ -45,7 +45,7 @@ Malcolm is a tool suite that incorporates many open source components (some of w
 
 The main sources of Malcolm’s core tools and libraries are the 'base images' on which Malcolm is built. These base images are defined in:
 
-* [Dockerfiles](https://github.com/cisagov/Malcolm/tree/main/Dockerfiles) used to build container images
+* [Dockerfiles]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) used to build container images
 * scripts that use the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build the x86_64 ISO and ARM64 [Raspberry Pi installer](hedgehog-raspi-build.md#HedgehogRaspiBuild) images
 
 #### <a name="ContainerImages"></a> Container Images
