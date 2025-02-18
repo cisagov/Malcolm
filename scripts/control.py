@@ -157,9 +157,63 @@ def shutdown_handler(signum, frame):
 def checkEnvFilesAndValues():
     global args
     global dotenvImported
+    global yamlImported
 
     # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
     if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
+
+        # process copies, removes, etc. from env-var-actions.yml
+        envVarActionsFile = os.path.join(examplesConfigDir, 'env-var-actions.yml')
+        if os.path.isfile(envVarActionsFile):
+            with open(envVarActionsFile, 'r') as f:
+                envVarActionsYaml = yamlImported.YAML(typ='safe', pure=True).load(f)
+            if envVarActionsYaml and isinstance(envVarActionsYaml, dict):
+
+                # copied_environment_variables contains values that used to be in one environment variable file
+                #   but are now in another. This section only does the creation, not the removal (which should
+                #   also be reflected in removed_environment_variables). This is non-destructive, meaning
+                #   values already existing in the destination aren't overwritten.
+                if 'copied_environment_variables' in envVarActionsYaml:
+                    # top level in this hash represents the destination .env file
+                    for destEnv, sourceEnvs in envVarActionsYaml['copied_environment_variables'].items():
+                        # if the destination .env file already exists, read its current values
+                        destEnvFileName = os.path.join(args.configDir, destEnv.replace('_', '-') + '.env')
+                        destVars = (
+                            dotenvImported.dotenv_values(destEnvFileName) if os.path.isfile(destEnvFileName) else dict()
+                        )
+                        # next level in this hash represents the source .env file
+                        for sourceEnv, keys in sourceEnvs.items():
+                            # read the source .env file's values
+                            sourceEnvFileName = os.path.join(
+                                args.configDir, next(iter(get_iterable(sourceEnv))).replace('_', '-') + '.env'
+                            )
+                            if not os.path.isfile(sourceEnvFileName):
+                                sourceEnvFileName = os.path.join(
+                                    examplesConfigDir, next(iter(get_iterable(sourceEnv))).replace('_', '-') + '.env'
+                                )
+                            if os.path.isfile(sourceEnvFileName):
+                                sourceVars = dotenvImported.dotenv_values(sourceEnvFileName)
+                                # open the destination file for writing new values
+                                with open(destEnvFileName, "a") as destEnvFileHandle:
+                                    for destKey, sourceKey in keys.items():
+                                        # if a key exists in the source, but not in the dest, it needs to be written
+                                        if (sourceKey in sourceVars) and (destKey not in destVars):
+                                            if args.debug:
+                                                eprint(f"Creating {destEnv}.{destKey} from {sourceEnv}.{sourceKey}")
+                                            print(f"{destKey}={sourceEnv[sourceKey]}", file=destEnvFileHandle)
+
+                # removed_environment_variables contains values that used to be in an environment variable file, but
+                #   no longer belong there
+                if 'removed_environment_variables' in envVarActionsYaml:
+                    # top level in this hash represents the .env file to modify
+                    for envFile, keys in envVarActionsYaml['removed_environment_variables'].items():
+                        envFileName = os.path.join(args.configDir, envFile.replace('_', '-') + '.env')
+                        if os.path.isfile(envFileName):
+                            with open(envFileName, 'r') as f:
+                                allLines = f.readlines()
+                            # TODO: filter lines and write back out
+
+        # creating missing .env file from .env.example file
         for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
             envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
             if not os.path.isfile(envFile):
