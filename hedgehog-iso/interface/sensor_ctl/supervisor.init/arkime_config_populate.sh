@@ -163,7 +163,7 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
     CRT_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_CERT"
     KEY_FILESPEC="$SUPERVISOR_PATH"/arkime/"$ARKIME_VIEWER_KEY"
     if ( [[ ! -f "$CRT_FILESPEC" ]] || [[ ! -f "$KEY_FILESPEC" ]] ) && [[ -x /usr/local/bin/self_signed_key_gen.sh ]]; then
-      pushd "$SUPERVISOR_PATH"/ar1kime >/dev/null 2>&1
+      pushd "$SUPERVISOR_PATH"/arkime >/dev/null 2>&1
       /usr/local/bin/self_signed_key_gen.sh -n -o ./newcerts >/dev/null 2>&1
       mv ./newcerts/server.crt "$CRT_FILESPEC"
       mv ./newcerts/server.key "$KEY_FILESPEC"

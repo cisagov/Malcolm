@@ -30,7 +30,7 @@ ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI-"false"}
 ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG-"false"}
 ARKIME_WISE_CONFIG_PIN_CODE=${ARKIME_WISE_CONFIG_PIN_CODE-"WISE2019"}
 ARKIME_WISE_CONFIG_FILE="${ARKIME_DIR}"/etc/wise.ini
-ARKIME_WISE_SERVICE_SCRIPT=/opt/wise_service.sh
+ARKIME_WISE_SERVICE_SCRIPT=/usr/local/bin/wise_service.sh
 
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
@@ -260,7 +260,6 @@ if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
   if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1"" --webcode ${ARKIME_WISE_CONFIG_PIN_CODE} --webconfig --insecure -c $ARKIME_DIR/etc/wise.ini""|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
-
 fi
 
 unset OPENSEARCH_URL_FINAL
