@@ -199,19 +199,45 @@ def checkEnvFilesAndValues():
                                         # if a key exists in the source, but not in the dest, it needs to be written
                                         if (sourceKey in sourceVars) and (destKey not in destVars):
                                             if args.debug:
-                                                eprint(f"Creating {destEnv}.{destKey} from {sourceEnv}.{sourceKey}")
-                                            print(f"{destKey}={sourceEnv[sourceKey]}", file=destEnvFileHandle)
+                                                eprint(
+                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceKey}"
+                                                )
+                                            print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
 
-                # removed_environment_variables contains values that used to be in an environment variable file, but
-                #   no longer belong there
+                # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:
+                    keyPattern = re.compile(r'^\s*([A-Za-z0-9_]+)\s*=')
                     # top level in this hash represents the .env file to modify
                     for envFile, keys in envVarActionsYaml['removed_environment_variables'].items():
                         envFileName = os.path.join(args.configDir, envFile.replace('_', '-') + '.env')
                         if os.path.isfile(envFileName):
+                            # read the keys and filter out the ones to be removed
                             with open(envFileName, 'r') as f:
-                                allLines = f.readlines()
-                            # TODO: filter lines and write back out
+                                allLines = [x.strip() for x in f.readlines()]
+                            filteredLines = [
+                                line
+                                for line in allLines
+                                if (not keyPattern.match(line)) or (keyPattern.match(line).group(1) not in keys)
+                            ]
+                            # if changes were made, update the .env file
+                            if allLines != filteredLines:
+                                # if all that remains are comments, blank lines, or the K8S_SECRET key, just delete the .env file
+                                remainingLines = [
+                                    x
+                                    for x in filteredLines
+                                    if (len(x) > 0) and (not x.startswith('#')) and (not x.startswith('K8S_SECRET'))
+                                ]
+                                if remainingLines:
+                                    # write the remaining unfiltered lines to the .env file
+                                    if args.debug:
+                                        eprint(f"Removing {keys} from {os.path.basename(envFileName)}")
+                                    with open(envFileName, 'w') as f:
+                                        f.write("\n".join(filteredLines))
+                                else:
+                                    # nothing left, no reason to save this .env file
+                                    if args.debug:
+                                        eprint(f"Removing {keys}, deleting {os.path.basename(envFileName)}")
+                                    os.unlink(envFileName)
 
         # creating missing .env file from .env.example file
         for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
@@ -231,7 +257,9 @@ def checkEnvFilesAndValues():
                 missingVars = list(set(exampleValues.keys()).difference(set(envValues.keys())))
                 if missingVars:
                     if args.debug:
-                        eprint(f"Missing {missingVars} in {envFile} from {os.path.basename(envExampleFile)}")
+                        eprint(
+                            f"Missing {missingVars} in {os.path.basename(envFile)} from {os.path.basename(envExampleFile)}"
+                        )
                     with open(envFile, "a") as envFileHandle:
                         print('', file=envFileHandle)
                         print('', file=envFileHandle)
