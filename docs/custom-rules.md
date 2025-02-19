@@ -67,6 +67,8 @@ $ docker compose exec -u $(id -u) suricata bash -c 'suricata_config_populate.py 
 
 Alternately, both Suricata services could be completely restarted with `./scripts/restart -s suricata suricata-live`.
 
+For [Kubernetes deployments of Malcolm](kubernetes.md#Kubernetes), recreating the `suricata-offline-custom-rules-volume` and `suricata-live-custom-rules-volume` configMaps used by the [`suricata`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/11-suricata.yml) and [`suricata-live`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/22-suricata-live.yml) containers, respectively, and restarting those containers, will cause changes to custom rules files to be applied.
+
 If the `SURICATA_CUSTOM_RULES_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Suricata rulesets and use only the user-defined rules.
 
 On [Hedgehog Linux](hedgehog.md), the Suricata custom rules directory is `/opt/sensor/sensor_ctl/suricata/rules/`, and the `SURICATA_CUSTOM_RULES_ONLY` environment variable can be found in [`/opt/sensor/sensor_ctl/control_vars.conf`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/hedgehog-iso/interface/sensor_ctl/control_vars.conf). New rules can be applied by restarting capture processes:
