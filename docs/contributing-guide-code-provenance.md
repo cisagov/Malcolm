@@ -25,7 +25,7 @@ Malcolm's source code and release artifacts are made up of the following:
     - These contain the majority of the "brains" of Malcolm, and are used as the basis of all deployment models, whether ISO-installer based, Docker/Podman based, or cloud (Kubernetes) based.
 * Desktop OS environments for [Malcolm](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig)
     - These are ISO-installed environments that are primarily used for bare-metal or virtual machine installations. The Malcolm environment includes the container images mentioned above.
-* The actual "[Malcolm source code](({{ site.github.repository_url }}))", which consists of:
+* The actual "[Malcolm source code](({{ site.github.repository_url }}))", which includes:
     - [scripts]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/main/scripts/) for installing and configuring Malcolm
     - "recipes" and contents used for building images
         + [container]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) images
@@ -33,7 +33,6 @@ Malcolm's source code and release artifacts are made up of the following:
         + [Hedgehog Linux]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso) ISO installer
     - [documentation]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/docs)
     - [configuration files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/config) storing user preferences
-    - etc.
 
 ## <a name="UpstreamComponents"></a> Upstream Components
 
@@ -54,16 +53,16 @@ Malcolm uses the official container images curated by Docker Hub or maintained b
 
 The base images used to build Malcolm's images are:
 
-* [alpine](https://hub.docker.com/_/alpine) (🏅 Docker Official Image)
-* [debian](https://hub.docker.com/_/debian) (🏅 Docker Official Image)
-* [docker.elastic.co](https://www.docker.elastic.co/)/[beats](https://www.docker.elastic.co/r/beats)/filebeat-oss (🗸 Elasticsearch Official Image)
-* [docker.elastic.co](https://www.docker.elastic.co/)/[logstash](https://www.docker.elastic.co/r/logstash)/logstash-oss (🗸 Elasticsearch Official Image)
-* [netboxcommunity/netbox](https://hub.docker.com/r/netboxcommunity/netbox) (🗸 Official Community-Maintained Docker-Sponsored OSS Image)
-* [opensearchproject/opensearch](https://hub.docker.com/r/opensearchproject/opensearch) (🗸 Docker-Verified Official Publisher Image)
-* [opensearchproject/opensearch-dashboards](https://hub.docker.com/r/opensearchproject/opensearch-dashboards) (🗸 Docker-Verified Official Publisher Image)
-* [postgres:alpine](https://hub.docker.com/_/postgres) (🏅 Docker Official Image)
-* [python:3-slim](https://hub.docker.com/_/python) (🏅 Docker Official Image)
-* [redis:alpine](https://hub.docker.com/_/redis) (🏅 Docker Official Image)
+* [alpine](https://hub.docker.com/_/alpine) (Docker Official Image)
+* [debian](https://hub.docker.com/_/debian) (Docker Official Image)
+* [docker.elastic.co](https://www.docker.elastic.co/)/[beats](https://www.docker.elastic.co/r/beats)/filebeat-oss (Elasticsearch Official Image)
+* [docker.elastic.co](https://www.docker.elastic.co/)/[logstash](https://www.docker.elastic.co/r/logstash)/logstash-oss (Elasticsearch Official Image)
+* [netboxcommunity/netbox](https://hub.docker.com/r/netboxcommunity/netbox) (Official Community-Maintained Docker-Sponsored OSS Image)
+* [opensearchproject/opensearch](https://hub.docker.com/r/opensearchproject/opensearch) (Docker-Verified Official Publisher Image)
+* [opensearchproject/opensearch-dashboards](https://hub.docker.com/r/opensearchproject/opensearch-dashboards) (Docker-Verified Official Publisher Image)
+* [postgres:alpine](https://hub.docker.com/_/postgres) (Docker Official Image)
+* [python:3-slim](https://hub.docker.com/_/python) (Docker Official Image)
+* [redis:alpine](https://hub.docker.com/_/redis) (Docker Official Image)
 
 As described on the [Docker Hub documentation](https://docs.docker.com/docker-hub/image-library/trusted-content/):
 
