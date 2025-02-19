@@ -51,11 +51,23 @@ On [Hedgehog Linux](hedgehog.md), the Arkime Lua directory is `/opt/sensor/senso
 
 In addition to the [default Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and [Emerging Threads Open ruleset](https://rules.emergingthreats.net/open/), users may provide custom rules files for use by Suricata in Malcolm.
 
-Suricata rules files (with the `*.rules` extension) may be placed in the `./suricata/rules/` subdirectory in the Malcolm installation directory. These new rules files will be picked up immediately for subsequent [PCAP upload](upload.md#Upload), and for [live analysis](live-analysis.md#LocalPCAP) will be applied by either restarting Malcolm or when the [automatic rule update process](https://suricata-update.readthedocs.io/en/latest/) runs (if automatic rule updates are enabled). This can also be done manually without completely restarting Malcolm by running the following commands from the Malcolm installation directory:
+Suricata rules files (with the `*.rules` extension) may be placed in the `./suricata/rules/` subdirectory in the Malcolm installation directory. These new rules files will be picked up immediately for subsequent [PCAP upload](upload.md#Upload), and for [live analysis](live-analysis.md#LocalPCAP) will be applied by restarting Malcolm. This can also be done manually without interrupting the Suricata processes by running the following commands from the Malcolm installation directory.
 
+First, for the `suricata-live` container:
+
+```bash
+$ docker compose exec -u $(id -u) suricata-live bash -c 'suricata_config_populate.py --suricata /usr/bin/suricata-offline && kill -USR2 $(pidof suricata)'
 ```
-docker compose exec suricata-live supervisorctl restart live-suricata
+
+Then, for the `suricata` container:
+
+```bash
+$ docker compose exec -u $(id -u) suricata bash -c 'suricata_config_populate.py --suricata /usr/bin/suricata-offline && kill -USR2 $(pidof suricata-offline)'
 ```
+
+Alternately, both Suricata services could be completely restarted with `./scripts/restart -s suricata suricata-live`.
+
+For [Kubernetes deployments of Malcolm](kubernetes.md#Kubernetes), recreating the `suricata-offline-custom-rules-volume` and `suricata-live-custom-rules-volume` configMaps used by the [`suricata`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/11-suricata.yml) and [`suricata-live`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/22-suricata-live.yml) containers, respectively, and restarting those containers, will cause changes to custom rules files to be applied.
 
 If the `SURICATA_CUSTOM_RULES_ONLY` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) is set to `true`, Malcolm will bypass the default Suricata rulesets and use only the user-defined rules.
 
