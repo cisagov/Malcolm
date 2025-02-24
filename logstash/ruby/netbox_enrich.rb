@@ -286,6 +286,33 @@ def register(
 
 end
 
+class NetBoxConnLazy
+  def initialize(
+    url,
+    token
+  )
+    @object = nil
+    @url = url
+    @token = token
+  end
+
+  def method_missing(method, *args, &block)
+    initialize_object unless @object
+    @object.send(method, *args, &block)
+  end
+
+  private
+
+  def initialize_object
+    @object = Faraday.new(@url) do |conn|
+      conn.request :authorization, 'Token', @token
+      conn.request :url_encoded
+      conn.response :json, :parser_options => { :symbolize_names => true }
+    end
+  end
+end
+
+
 def filter(
   event
 )
@@ -501,14 +528,6 @@ def shorten_string(
   end
 end
 
-def netbox_connection()
-  Faraday.new(@netbox_url) do |conn|
-    conn.request :authorization, 'Token', @netbox_token
-    conn.request :url_encoded
-    conn.response :json, :parser_options => { :symbolize_names => true }
-  end
-end
-
 def lookup_or_create_site(
   site_id,
   site_name,
@@ -527,7 +546,7 @@ def lookup_or_create_site(
         _site = nil
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token) if _nb_to_use.nil?
 
         # look it up by ID
         _query = { :offset => 0,
@@ -558,7 +577,7 @@ def lookup_or_create_site(
         _site_id = 0
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token) if _nb_to_use.nil?
 
         # try to look it up by name
         _query = { :offset => 0,
@@ -1187,7 +1206,7 @@ def netbox_lookup(
   _key_ip = IPAddr.new(ip_key) rescue nil
   if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
 
-    _nb = netbox_connection()
+    _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token)
 
     _site_obj = lookup_or_create_site(site_id, '', _nb)
     _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i
