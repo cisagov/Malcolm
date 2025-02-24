@@ -59,21 +59,35 @@ fi
 function add_to_yml {
   local ACTION_ARG=$1
   local -n RULE_ARG=$2
-  export ACTION_ENV=$ACTION_ARG
-  export RULE_ENV="$(IFS=,; echo "${RULE_ARG[*]}")"
-  export DATE_ENV=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  "$YQ" -i '.rules += [{"action": strenv(ACTION_ENV), "rule": (strenv(RULE_ENV) | split(",")), "timestamp": strenv(DATE_ENV)}]' "$UFW_STATUS_YML"
+  if [[ -n "$UFW_STATUS_YML" ]]; then
+    if [[ ! -f "$UFW_STATUS_YML" ]] || [[ ! -s "$UFW_STATUS_YML" ]]; then
+      echo 'rules: []' > "$UFW_STATUS_YML"
+      chown 1000:1000 "$UFW_STATUS_YML"
+      chmod 600 "$UFW_STATUS_YML"
+    fi
+    export ACTION_ENV=$ACTION_ARG
+    export RULE_ENV="$(IFS=,; echo "${RULE_ARG[*]}")"
+    export DATE_ENV=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    "$YQ" -i '.rules += [{"action": strenv(ACTION_ENV), "rule": (strenv(RULE_ENV) | split(",")), "timestamp": strenv(DATE_ENV)}]' "$UFW_STATUS_YML"
+  fi
 }
 
 function delete_from_yml {
   local ACTION_ARG=$1
   local -n RULE_ARG=$2
-  export ACTION_ENV=$ACTION_ARG
-  export RULE_ENV="$(IFS=,; echo "${RULE_ARG[*]}")"
-  "$YQ" -i '.rules |= map(select(
-    (.action != strenv(ACTION_ENV)) or
-    (.rule | join(",")) != (strenv(RULE_ENV) | split(",") | join(","))
-  ))' "$UFW_STATUS_YML" || true # a failed delete is non-fatal
+  if [[ -n "$UFW_STATUS_YML" ]]; then
+    if [[ ! -f "$UFW_STATUS_YML" ]] || [[ ! -s "$UFW_STATUS_YML" ]]; then
+      echo 'rules: []' > "$UFW_STATUS_YML"
+      chown 1000:1000 "$UFW_STATUS_YML"
+      chmod 600 "$UFW_STATUS_YML"
+    fi
+    export ACTION_ENV=$ACTION_ARG
+    export RULE_ENV="$(IFS=,; echo "${RULE_ARG[*]}")"
+    "$YQ" -i '.rules |= map(select(
+      (.action != strenv(ACTION_ENV)) or
+      (.rule | join(",")) != (strenv(RULE_ENV) | split(",") | join(","))
+    ))' "$UFW_STATUS_YML" || true # a failed delete is non-fatal
+  fi
 }
 
 if [[ $ACTION == "status" ]]; then

@@ -95,6 +95,7 @@ dpkg -s docker-compose-plugin && \
 # yq
 RELEASE_URL="https://api.github.com/repos/mikefarah/yq/releases/latest"
 RELEASE_FILE_REGEX="yq_linux_amd64\\\.tar\\\.gz$"
+cd /usr/local/bin
 curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$(curl "${GITHUB_API_CURL_ARGS[@]}" "$RELEASE_URL" | jq '.assets_url' | tr -d '"')" | jq ".[] | select(.browser_download_url|test(\"$RELEASE_FILE_REGEX\")) | .browser_download_url" | tr -d '"')" | tar zxf - ./yq_linux_amd64
 mv ./yq_linux_amd64 ./yq
 chmod 755 ./yq
