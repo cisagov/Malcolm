@@ -150,7 +150,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"source.segment:* OR destination.segment:*\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"source.segment.id:* OR destination.segment.id:*\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -650,7 +650,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"tags:netbox OR ((source.segment:* OR destination.segment:*) AND (NOT (network.direction:external)))\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"tags:netbox OR ((source.segment.id:* OR destination.segment.id:*) AND (NOT (network.direction:external)))\",\"language\":\"kuery\"},\"highlightAll\":false,\"version\":true,\"aggs\":{\"2\":{\"date_histogram\":{\"field\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"fixed_interval\":\"30d\",\"min_doc_count\":1}}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [
