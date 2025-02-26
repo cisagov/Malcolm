@@ -43,6 +43,14 @@ def get_register_ttl_cache(
 end
 
 ##############################################################################################
+# These global variables are used for generating performance profiling stats for
+#   NetBox API calls and are not used by default
+$method_timings_logging_thread_started = Concurrent::AtomicFixnum.new(0)
+$method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
+$method_timings_logging_thread = nil
+$method_timings_logging_thread_running = false
+
+##############################################################################################
 class NetBoxConnLazy
   def initialize(
     url,
@@ -86,14 +94,6 @@ class NetBoxConnLazy
     end
   end
 end
-
-##############################################################################################
-# These global variables are used for generating performance profiling stats for
-#   NetBox API calls and are not used by default
-$method_timings_logging_thread_started = Concurrent::AtomicFixnum.new(0)
-$method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
-$method_timings_logging_thread = nil
-$method_timings_logging_thread_running = false
 
 ##############################################################################################
 def register(
