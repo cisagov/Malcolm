@@ -2,19 +2,103 @@ def concurrency
   :shared
 end
 
+require 'date'
+require 'faraday'
+require 'fuzzystringmatch'
+require 'ipaddr'
+require 'json'
+require 'lru_reredux'
+require 'psych'
+require 'stringex_lite'
+
+##############################################################################################
+# Despite the warning against globla variables, we are using them here in order to make sure that
+#   we don't have duplicate caches for things cross different clones of the filter,
+#   which is what happens if you just use @instance_variables. However, we should
+#   be safe because 1) we are using Concurrent::Hash to maintain these per-type caches, and
+#   2) because the caches themselves are threadsafe. Note that this will share these values
+#   across filters and pipelines, though, as far as I understand it.
+# See "Avoiding Concurrency Issues"
+#   https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html#plugins-filters-ruby-concurrency
+# Note that these calls are intended to be used during the "register" method.
+
+$global_caches_hash = Concurrent::Hash.new
+$global_ttl_caches_hash = Concurrent::Hash.new
+
+def get_register_cache(
+  cache_type,
+  cache_size,
+  getset_ignores_nil
+)
+  $global_caches_hash[cache_type] ||= LruReredux::ThreadSafeCache.new(cache_size, getset_ignores_nil)
+end
+
+def get_register_ttl_cache(
+  cache_type,
+  cache_size,
+  cache_ttl,
+  getset_ignores_nil
+)
+  $global_ttl_caches_hash[cache_type] ||= LruRedux::TTL::ThreadSafeCache.new(cache_size, cache_ttl, getset_ignores_nil)
+end
+
+##############################################################################################
+# These global variables are used for generating performance profiling stats for
+#   NetBox API calls and are not used by default
+$method_timings_logging_thread_started = Concurrent::AtomicFixnum.new(0)
+$method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
+$method_timings_logging_thread = nil
+$method_timings_logging_thread_running = false
+
+##############################################################################################
+class NetBoxConnLazy
+  def initialize(
+    url,
+    token,
+    debug
+  )
+    @object = nil
+    @url = url
+    @token = token
+    @netboxConnDebug = debug
+  end
+
+  def method_missing(method, *args, &block)
+
+    puts "#{method}(#{args.map(&:inspect).join(', ')})" if @netboxConnDebug
+
+    if $method_timings_logging_thread_running
+      key = "#{method} #{args[0]}"
+      key = key.to_sym
+      start_time = Time.now
+    end
+
+    initialize_object unless @object
+    result = @object.send(method, *args, &block)
+
+    if $method_timings_logging_thread_running
+      duration = (Time.now - start_time) * 1000
+      $method_timings[key] << duration
+    end
+
+    result
+  end
+
+  private
+
+  def initialize_object
+    @object = Faraday.new(@url) do |conn|
+      conn.request :authorization, 'Token', @token
+      conn.request :url_encoded
+      conn.response :json, :parser_options => { :symbolize_names => true }
+    end
+  end
+end
+
+##############################################################################################
 def register(
   params
 )
-
-  require 'date'
-  require 'faraday'
-  require 'fuzzystringmatch'
-  require 'ipaddr'
-  require 'json'
-  require 'lru_reredux'
-  require 'psych'
-  require 'stringex_lite'
-
   # enable/disable based on script parameters and global environment variable
   _enabled_str = params["enabled"]
   _enabled_env = params["enabled_env"]
@@ -58,9 +142,9 @@ def register(
   @lookup_service_port_source = params.fetch("lookup_service_port_source", "[destination][port]")
 
   # API parameters
-  @page_size = params.fetch("page_size", 50)
+  @page_size = params.fetch("page_size", 1000)
 
-  # caching parameters (default cache size = 1000, default cache TTL = 30 seconds)
+  # caching parameters (default cache size = 10000, default cache TTL = 300 seconds)
   _cache_size_val = params["cache_size"]
   _cache_size_env = params["cache_size_env"]
   if (!_cache_size_val.is_a?(Integer) || _cache_size_val <= 0) && !_cache_size_env.nil?
@@ -69,7 +153,7 @@ def register(
   if _cache_size_val.is_a?(Integer) && (_cache_size_val > 0)
     @cache_size = _cache_size_val
   else
-    @cache_size = 1000
+    @cache_size = 10000
   end
   _cache_ttl_val = params["cache_ttl"]
   _cache_ttl_env = params["cache_ttl_env"]
@@ -79,7 +163,7 @@ def register(
   if _cache_ttl_val.is_a?(Integer) && (_cache_ttl_val > 0)
     @cache_ttl = _cache_ttl_val
   else
-    @cache_ttl = 30
+    @cache_ttl = 300
   end
 
   # target field to store looked-up value
@@ -110,6 +194,13 @@ def register(
   @debug_verbose = ['verbose', 'v', 'extra'].include?(_debug_str.to_s.downcase)
   @debug = (@debug_verbose || [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_str.to_s.downcase))
 
+  _debug_timings_str = params["debug_timings"]
+  _debug_timings_env = params["debug_timings_env"]
+  if _debug_timings_str.nil? && !_debug_timings_env.nil?
+    _debug_timings_str = ENV[_debug_timings_env]
+  end
+  @debug_timings = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_timings_str.to_s.downcase)
+
   # connection URL for netbox
   @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
   @netbox_url_suffix = "/netbox/api"
@@ -124,7 +215,7 @@ def register(
 
   # hash of hashes, where key = site ID and value = hash of lookup types (from @lookup_type),
   #   each of which contains the respective looked-up values
-  @site_lookup_types_hash = LruReredux::ThreadSafeCache.new(128, true)
+  @site_lookup_types_hash = get_register_cache(:site_lookup_types_hash, 256, true)
   @lookup_cache_size = params.fetch("lookup_cache_size", 512)
 
   # these are used for autopopulation only, not lookup/enrichment
@@ -231,16 +322,16 @@ def register(
   @autopopulate_create_prefix = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_prefix_str.to_s.downcase)
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
-  @manuf_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("manuf_cache_size", 2048), @cache_ttl, true)
+  @manuf_hash = get_register_ttl_cache(:manuf_hash, params.fetch("manuf_cache_size", 4096), @cache_ttl, true)
 
   # case-insensitive hash of role names to IDs
-  @role_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("role_cache_size", 256), @cache_ttl, true)
+  @role_hash = get_register_ttl_cache(:role_hash, params.fetch("role_cache_size", 512), @cache_ttl, true)
 
   # case-insensitive hash of site names to site IDs
-  @site_name_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl, true)
+  @site_name_hash = get_register_ttl_cache(:site_name_hash, params.fetch("site_cache_size", 256), @cache_ttl, true)
 
   # hash of site IDs to site objects
-  @site_id_hash = LruReredux::TTL::ThreadSafeCache.new(params.fetch("site_cache_size", 128), @cache_ttl, true)
+  @site_id_hash = get_register_ttl_cache(:site_id_hash, params.fetch("site_cache_size", 256), @cache_ttl, true)
 
   # end of autopopulation arguments
 
@@ -284,8 +375,27 @@ def register(
 
   @virtual_machine_device_type_name = "Virtual Machine".freeze
 
+  if @debug_timings && ($method_timings_logging_thread_started.value == 0) && $method_timings_logging_thread_started.compare_and_set(0, 1)
+     $method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
+     $method_timings_logging_thread = Thread.new { log_method_timings_thread_proc }
+     $method_timings_logging_thread_running = true
+   end
 end
 
+##############################################################################################
+def log_method_timings_thread_proc
+  while $method_timings_logging_thread_running
+    sleep 60
+    puts "Method Execution Timings ---------------- :"
+    $method_timings.each do |method, times|
+      total_time = times.empty? ? 0 : times.sum
+      avg_time = times.empty? ? 0 : total_time / times.size
+      puts "#{method}: total #{total_time.round(2)} ms, avg #{avg_time.round(2)} ms over #{times.size} calls"
+    end
+  end
+end
+
+##############################################################################################
 def filter(
   event
 )
@@ -501,14 +611,6 @@ def shorten_string(
   end
 end
 
-def netbox_connection()
-  Faraday.new(@netbox_url) do |conn|
-    conn.request :authorization, 'Token', @netbox_token
-    conn.request :url_encoded
-    conn.response :json, :parser_options => { :symbolize_names => true }
-  end
-end
-
 def lookup_or_create_site(
   site_id,
   site_name,
@@ -527,7 +629,7 @@ def lookup_or_create_site(
         _site = nil
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose) if _nb_to_use.nil?
 
         # look it up by ID
         _query = { :offset => 0,
@@ -539,12 +641,15 @@ def lookup_or_create_site(
            (_tmp_sites.length() > 0)
         then
            _site = _tmp_sites.first
+        elsif @debug
+          puts('lookup_or_create_site (%{id}): _sites_response: %{result}' % { id: _site_id_str, result: JSON.generate(_sites_response) })
         end
 
       rescue Faraday::Error => e
         # give up aka do nothing
         puts "lookup_or_create_site (#{_site_id_str}): #{e.message}" if @debug
       end
+
       _site
     }.dup
   end
@@ -558,7 +663,7 @@ def lookup_or_create_site(
         _site_id = 0
 
         # this shouldn't be too often, once the hash gets populated
-        _nb_to_use = netbox_connection() if _nb_to_use.nil?
+        _nb_to_use = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose) if _nb_to_use.nil?
 
         # try to look it up by name
         _query = { :offset => 0,
@@ -570,6 +675,8 @@ def lookup_or_create_site(
            (_tmp_sites.length() > 0)
         then
            _site = _tmp_sites.first
+        elsif @debug
+          puts('lookup_or_create_site (%{name}): _sites_response: %{result}' % { name: _site_name_key_str, result: JSON.generate(_sites_response) })
         end
 
         if _site.is_a?(Hash)
@@ -1187,7 +1294,7 @@ def netbox_lookup(
   _key_ip = IPAddr.new(ip_key) rescue nil
   if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
 
-    _nb = netbox_connection()
+    _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
     _site_obj = lookup_or_create_site(site_id, '', _nb)
     _lookup_service_port = (@lookup_service ? event.get("#{@lookup_service_port_source}") : nil).to_i

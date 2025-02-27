@@ -35,12 +35,16 @@ from pcap_utils import (
     PCAP_TOPIC_PORT,
     tags_from_filename,
 )
-import malcolm_utils
-from malcolm_utils import eprint, str2bool, AtomicInt, run_process
-
+from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or_dir
 from multiprocessing.pool import ThreadPool
 from collections import deque
 from itertools import chain, repeat
+
+try:
+    from suricata_socket import SuricataSocketClient
+except ModuleNotFoundError:
+    # this will blow up later on instantiation, of course
+    SuricataSocketClient = object
 
 ###################################################################################################
 MAX_WORKER_PROCESSES_DEFAULT = 1
@@ -52,8 +56,9 @@ PCAP_PROCESSING_MODE_SURICATA = "suricata"
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
-SURICATA_PATH = "/usr/bin/suricata-offline"
+SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command.socket"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
+SURICATA_LOG_PATH = os.path.join(SURICATA_LOG_DIR, 'suricata.log')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
 SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
 
@@ -67,7 +72,6 @@ ZEEK_EXTRACTOR_SCRIPT_INTERESTING = "extractor_override.interesting.zeek"
 ZEEK_LOCAL_SCRIPT = 'local'
 ZEEK_STATE_DIR = '.state'
 ZEEK_AUTOZEEK_TAG = 'AUTOZEEK'
-ZEEK_AUTOCARVE_TAG_PREFIX = 'AUTOCARVE'
 ZEEK_EXTRACTOR_MODE_ENV_VAR = 'ZEEK_EXTRACTOR_MODE'
 ZEEK_LOG_COMPRESSION_LEVEL = 6
 NETBOX_SITE_ID_TAG_PREFIX = 'NBSITEID'
@@ -82,14 +86,13 @@ TAGS_NOSHOW = (
 
 
 ###################################################################################################
-
 pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 shuttingDown = False
-scanWorkersCount = AtomicInt(value=0)
+workersCount = AtomicInt(value=0)
 arkimeProvider = os.getenv('ARKIME_ECS_PROVIDER', 'arkime')
 arkimeDataset = os.getenv('ARKIME_ECS_DATASET', 'session')
 
@@ -111,11 +114,11 @@ def pdb_handler(sig, frame):
 ###################################################################################################
 def arkimeCaptureFileWorker(arkimeWorkerArgs):
     global shuttingDown
-    global scanWorkersCount
+    global workersCount
     global arkimeProvider
     global arkimeDataset
 
-    scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
@@ -129,6 +132,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         autoTag,
         notLocked,
         logger,
+        debug,
     ) = (
         arkimeWorkerArgs[0],
         arkimeWorkerArgs[1],
@@ -141,12 +145,13 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         arkimeWorkerArgs[8],
         arkimeWorkerArgs[9],
         arkimeWorkerArgs[10],
+        arkimeWorkerArgs[11],
     )
 
     if not logger:
         logger = logging
 
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    logger.info(f"{scriptName}[{workerId}]:\tstarted")
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
@@ -163,10 +168,17 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
                     if (
-                        forceArkime
-                        or autoArkime
+                        autoArkime
                         or (
                             (FILE_INFO_DICT_TAGS in fileInfo) and ARKIME_AUTOARKIME_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+                        )
+                    ) and (
+                        forceArkime
+                        or (
+                            not any(
+                                os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                                for prefix in ('mnetsniff', 'mtcpdump')
+                            )
                         )
                     ):
                         # finalize tags list
@@ -174,9 +186,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                             [
                                 x
                                 for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x not in TAGS_NOSHOW)
-                                and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
-                                and (not x.startswith(NETBOX_SITE_ID_TAG_PREFIX))
+                                if (x not in TAGS_NOSHOW) and (not x.startswith(NETBOX_SITE_ID_TAG_PREFIX))
                             ]
                             if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()
@@ -184,7 +194,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         if extraTags and isinstance(extraTags, list):
                             fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
                         fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
-                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
                         # if this is an uploaded PCAP (not captured "live"")
                         #   append -upload to the node name used (which originates from PCAP_NODE_NAME)
@@ -220,22 +230,22 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         retcode, output = run_process(cmd, logger=logger)
                         if retcode == 0:
                             logger.info(
-                                f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
                             )
                         else:
                             logger.warning(
-                                f"{scriptName}[{scanWorkerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
+                                f"{scriptName}[{workerId}]:\t❗\t{arkimeBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
                             )
 
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
+    logger.info(f"{scriptName}[{workerId}]:\tfinished")
 
 
 ###################################################################################################
 def zeekFileWorker(zeekWorkerArgs):
     global shuttingDown
-    global scanWorkersCount
+    global workersCount
 
-    scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
@@ -248,6 +258,7 @@ def zeekFileWorker(zeekWorkerArgs):
         uploadDir,
         defaultExtractFileMode,
         logger,
+        debug,
     ) = (
         zeekWorkerArgs[0],
         zeekWorkerArgs[1],
@@ -259,12 +270,13 @@ def zeekFileWorker(zeekWorkerArgs):
         zeekWorkerArgs[7],
         zeekWorkerArgs[8],
         zeekWorkerArgs[9],
+        zeekWorkerArgs[10],
     )
 
     if not logger:
         logger = logging
 
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    logger.info(f"{scriptName}[{workerId}]:\tstarted")
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
@@ -295,31 +307,18 @@ def zeekFileWorker(zeekWorkerArgs):
                         )
                     ):
                         extractFileMode = defaultExtractFileMode
-
-                        # if file carving was specified via tag, make note of it
-                        if FILE_INFO_DICT_TAGS in fileInfo:
-                            for autocarveTag in filter(
-                                lambda x: x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX), fileInfo[FILE_INFO_DICT_TAGS]
-                            ):
-                                fileInfo[FILE_INFO_DICT_TAGS].remove(autocarveTag)
-                                extractFileMode = autocarveTag[len(ZEEK_AUTOCARVE_TAG_PREFIX) :]
-
                         extractFileMode = extractFileMode.lower() if extractFileMode else ZEEK_EXTRACTOR_MODE_NONE
 
                         # finalize tags list
                         fileInfo[FILE_INFO_DICT_TAGS] = (
-                            [
-                                x
-                                for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
-                            ]
+                            [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x not in TAGS_NOSHOW)]
                             if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
                             else list()
                         )
                         if extraTags and isinstance(extraTags, list):
                             fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
                         fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
-                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
                         # create a temporary work directory where zeek will be executed to generate the log files
                         with tempfile.TemporaryDirectory() as tmpLogDir:
@@ -342,11 +341,11 @@ def zeekFileWorker(zeekWorkerArgs):
                                 retcode, output = run_process(zeekCmd, cwd=tmpLogDir, env=zeekEnv, logger=logger)
                                 if retcode == 0:
                                     logger.info(
-                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                        f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
                                     )
                                 else:
                                     logger.info(
-                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
+                                        f"{scriptName}[{workerId}]:\t❗\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
                                     )
 
                                 # clean up the .state directory we don't care to keep
@@ -375,40 +374,41 @@ def zeekFileWorker(zeekWorkerArgs):
                                     # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
                                     # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
                                     shutil.copy(tgzFileName, uploadDir)
-                                    logger.debug(f"{scriptName}[{scanWorkerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
+                                    logger.debug(f"{scriptName}[{workerId}]:\t⏩\t{tgzFileName} → {uploadDir}")
 
                                 else:
                                     # zeek returned no log files (or an error)
                                     logger.warning(
-                                        f"{scriptName}[{scanWorkerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files"
+                                        f"{scriptName}[{workerId}]:\t❓\t{zeekBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} generated no log files"
                                     )
 
                             else:
                                 logger.warning(
-                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
+                                    f"{scriptName}[{workerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
                                 )
 
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
+    logger.info(f"{scriptName}[{workerId}]:\tfinished")
 
 
 ###################################################################################################
 def suricataFileWorker(suricataWorkerArgs):
     global shuttingDown
-    global scanWorkersCount
+    global workersCount
 
-    scanWorkerId = scanWorkersCount.increment()  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
         pcapBaseDir,
         autoSuricata,
         forceSuricata,
-        suricataBin,
+        socketPath,
         extraTags,
         autoTag,
         uploadDir,
         suricataConfig,
         logger,
+        debug,
     ) = (
         suricataWorkerArgs[0],
         suricataWorkerArgs[1],
@@ -420,105 +420,97 @@ def suricataFileWorker(suricataWorkerArgs):
         suricataWorkerArgs[7],
         suricataWorkerArgs[8],
         suricataWorkerArgs[9],
+        suricataWorkerArgs[10],
     )
 
     if not logger:
         logger = logging
 
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tstarted")
+    logger.info(f"{scriptName}[{workerId}]:\tstarted")
+
+    # create a single socket client for this worker
+    try:
+        suricata = SuricataSocketClient(
+            socket_path=socketPath,
+            logger=logger,
+            debug=debug,
+            output_dir=uploadDir,
+        )
+    except Exception as e:
+        logger.error(f"Failed to create Suricata socket client: {e}")
+        suricata = None
 
     # loop forever, or until we're told to shut down
-    while not shuttingDown:
+    while suricata and (not shuttingDown):
         try:
             # pull an item from the queue of files that need to be processed
             fileInfo = newFileQueue.popleft()
         except IndexError:
             time.sleep(1)
-        else:
-            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-                # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
-                # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
-                # as Suricata now does its own network capture in Malcolm standalone mode.
-                if (
-                    autoSuricata
-                    or (
-                        (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
+            continue
+
+        if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+            # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
+            # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
+            # as Suricata now does its own network capture in Malcolm standalone mode.
+            if (
+                autoSuricata
+                or ((FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS])
+            ) and (
+                forceSuricata
+                or (
+                    not any(
+                        os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                        for prefix in ('mnetsniff', 'mtcpdump')
                     )
-                ) and (
-                    forceSuricata
-                    or (
-                        not any(
-                            os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
-                            for prefix in ('mnetsniff', 'mtcpdump')
-                        )
+                )
+            ):
+                if pcapBaseDir and os.path.isdir(pcapBaseDir):
+                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+                    # finalize tags list
+                    fileInfo[FILE_INFO_DICT_TAGS] = (
+                        [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x not in TAGS_NOSHOW)]
+                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
+                        else list()
                     )
-                ):
-                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+                    if extraTags and isinstance(extraTags, list):
+                        fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
+                    fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
+                    logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
-                    if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                        # finalize tags list
-                        fileInfo[FILE_INFO_DICT_TAGS] = (
-                            [
-                                x
-                                for x in fileInfo[FILE_INFO_DICT_TAGS]
-                                if (x not in TAGS_NOSHOW) and (not x.startswith(ZEEK_AUTOCARVE_TAG_PREFIX))
-                            ]
-                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
-                            else list()
+                    # Create unique output directory for this PCAP's suricata output
+                    processTimeUsec = int(round(time.time() * 1000000))
+                    output_dir = os.path.join(
+                        uploadDir, f"suricata-{processTimeUsec}-{workerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])})"
+                    )
+
+                    try:
+                        logger.info(
+                            f"{scriptName}[{workerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
                         )
-                        if extraTags and isinstance(extraTags, list):
-                            fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                        fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
-                        logger.info(f"{scriptName}[{scanWorkerId}]:\t🔎\t{fileInfo}")
+                        if suricata.process_pcap(
+                            pcap_file=fileInfo[FILE_INFO_DICT_NAME],
+                            output_dir=output_dir,
+                        ):
+                            # suricata over socket mode doesn't let us know when a PCAP file is done processing,
+                            #   so all we do here is submit it and then we'll let filebeat tail the results
+                            #   as long as it needs to
+                            logger.info(
+                                f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                            )
 
-                        # create a temporary work directory where suricata will be executed to generate the log files
-                        with tempfile.TemporaryDirectory() as tmpLogDir:
-                            if os.path.isdir(tmpLogDir):
-                                processTimeUsec = int(round(time.time() * 1000000))
+                        else:
+                            logger.error(
+                                f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                            )
+                    except Exception as e:
+                        logger.error(
+                            f"{scriptName}[{workerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}"
+                        )
 
-                                # put together suricata execution command
-                                cmd = [
-                                    suricataBin,
-                                    '-r',
-                                    fileInfo[FILE_INFO_DICT_NAME],
-                                    '-l',
-                                    tmpLogDir,
-                                    '-c',
-                                    suricataConfig,
-                                ]
-
-                                # execute suricata-capture for pcap file
-                                retcode, output = run_process(cmd, logger=logger)
-
-                                eveJsonFile = os.path.join(tmpLogDir, "eve.json")
-                                if os.path.isfile(eveJsonFile):
-                                    # relocate the .json to be processed (do it this way instead of with a shutil.move because of
-                                    # the way Docker volume mounts work, ie. avoid "OSError: [Errno 18] Invalid cross-device link").
-                                    # we don't have to explicitly delete it since this whole directory is about to leave context and be removed
-                                    shutil.copy(
-                                        eveJsonFile,
-                                        os.path.join(
-                                            uploadDir,
-                                            f"eve-{processTimeUsec}-{scanWorkerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])}).json",
-                                        ),
-                                    )
-
-                                if retcode == 0:
-                                    logger.info(
-                                        f"{scriptName}[{scanWorkerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                                    )
-                                else:
-                                    logger.warning(
-                                        f"{scriptName}[{scanWorkerId}]:\t❗\t{suricataBin} {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} returned {retcode} {output}"
-                                    )
-
-                            else:
-                                logger.warning(
-                                    f"{scriptName}[{scanWorkerId}]:\t❗\terror creating temporary directory {tmpLogDir}"
-                                )
-
-    logger.info(f"{scriptName}[{scanWorkerId}]:\tfinished")
+    logger.info(f"{scriptName}[{workerId}]:\tfinished")
 
 
 ###################################################################################################
@@ -718,11 +710,11 @@ def main():
         parser.add_argument(
             '--suricata',
             required=False,
-            dest='executable',
-            help="suricata executable path",
+            dest='suricataSocketPath',
+            help="suricata socket path",
             metavar='<STR>',
             type=str,
-            default=SURICATA_PATH,
+            default=SURICATA_SOCKET_PATH,
         )
         parser.add_argument(
             '--autosuricata',
@@ -827,6 +819,7 @@ def main():
                     args.autoTag,
                     args.notLocked,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )
@@ -846,12 +839,14 @@ def main():
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )
     elif processingMode == PCAP_PROCESSING_MODE_SURICATA:
         ThreadPool(
-            args.threads,
+            # threading is done inside of Suricata in socket mode, so just use 1 thread to submit PCAP
+            1,
             suricataFileWorker,
             (
                 [
@@ -859,12 +854,13 @@ def main():
                     args.pcapBaseDir,
                     args.autoSuricata,
                     args.forceSuricata,
-                    args.executable,
+                    args.suricataSocketPath,
                     args.extraTags,
                     args.autoTag,
                     args.suricataUploadDir,
                     args.suricataConfigFile,
                     logging,
+                    args.verbose <= logging.DEBUG,
                 ],
             ),
         )

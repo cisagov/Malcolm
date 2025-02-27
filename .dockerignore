@@ -39,8 +39,8 @@ scripts
 !scripts/malcolm_utils.py
 zeek-logs
 suricata-logs
-netbox/netbox/media
-netbox/netbox/postgres
-netbox/netbox/redis
+redis
+netbox/media
+netbox/postgres
 netbox/custom-plugins
 zeek/custom

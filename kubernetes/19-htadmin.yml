@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: htadmin-container
-        image: ghcr.io/idaholab/malcolm/htadmin:25.01.0
+        image: ghcr.io/idaholab/malcolm/htadmin:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,9 +61,18 @@ spec:
           - mountPath: /var/www/htadmin/config
             name: htadmin-config-volume
             subPath: "htadmin"
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
       initContainers:
       - name: htadmin-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

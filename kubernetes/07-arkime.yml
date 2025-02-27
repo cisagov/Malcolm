@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.01.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -59,10 +59,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "arkime.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /_ns_/nstest.html
-            port: 8005
-            scheme: HTTPS
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 210
           periodSeconds: 90
           timeoutSeconds: 30
@@ -81,7 +80,7 @@ spec:
             name: arkime-pcap-volume
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

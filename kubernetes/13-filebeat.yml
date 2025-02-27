@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.01.0
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -59,9 +59,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - filebeat
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15
@@ -83,7 +81,7 @@ spec:
             subPath: "nginx"
       initContainers:
       - name: filebeat-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

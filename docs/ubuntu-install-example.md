@@ -1,44 +1,54 @@
-# <a name="InstallationExample"></a>Installation example using Ubuntu 22.04 LTS
+# <a name="InstallationExample"></a>Installation example using Ubuntu 24.04 LTS
 
 Here's a step-by-step example of getting [Malcolm from GitHub]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}), configuring the local system and the Malcolm instance, and running it on a system running Ubuntu Linux. Installing Malcolm may require some variation depending on individual system configuration, but this should be a good starting point.
 
 For a more in-depth guide convering installing both Malcolm and a [Hedgehog Linux](hedgehog.md) sensor using the [Malcolm installer ISO](malcolm-iso.md#ISO) and [Hedgehog Linux installer ISO](hedgehog-installation.md#HedgehogInstallation), see **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#InstallationExample)**.
 
-The commands in this example should be executed as a non-root user.
+The commands in this example should be executed as a non-root user except where clearly indicated with the use of `sudo`.
 
-Use `git` to clone Malcolm into a local working copy, or download and extract the artifacts from the [latest release]({{ site.github.repository_url }}/releases/latest).
+Malcolm can be installed from a git [working copy of the source code](development.md#Build) or the from [pre-packaged installation files](development.md#Packager) downloaded as artifacts from the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest). The instructions for both methods are mostly the same, so both will shown here while indicating where the processes differ.
 
-To install Malcolm from the latest Malcolm release, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases/latest) and download at a minimum the files ending in `.py` and the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` file, then navigate to the downloads directory:
+To install Malcolm from the latest Malcolm release artifacts, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases/latest) and download the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_docker_install.zip` file, then navigate to the downloads directory and extract it. If your distribution does not have the `unzip` utility, you may need to install it with `sudo apt install unzip`.
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
-malcolm_common.py malcolm_kubernetes.py malcolm_utils.py install.py  malcolm_20190611_095410_ce2d8de.tar.gz
+malcolm_20250117_115650_d1867453_docker_install.zip
+user@host:~/Downloads$ unzip malcolm_20250117_115650_d1867453_docker_install.zip
+Archive:  malcolm_20250117_115650_d1867453_docker_install.zip
+  inflating: install.py
+  inflating: malcolm_20250117_115650_d1867453.README.txt
+  inflating: malcolm_20250117_115650_d1867453.tar.gz
+  inflating: malcolm_common.py
+  inflating: malcolm_kubernetes.py
+  inflating: malcolm_utils.py
 ```
 
 If obtaining Malcolm using `git` instead, run the following command to clone Malcolm into a local working copy:
 ```
 user@host:~$ git clone {{ site.github.repository_url }}
 Cloning into 'Malcolm'...
-remote: Enumerating objects: 443, done.
-remote: Counting objects: 100% (443/443), done.
-remote: Compressing objects: 100% (310/310), done.
-remote: Total 443 (delta 81), reused 441 (delta 79), pack-reused 0
-Receiving objects: 100% (443/443), 6.87 MiB | 18.86 MiB/s, done.
-Resolving deltas: 100% (81/81), done.
-
+remote: Enumerating objects: 45827, done.
+remote: Counting objects: 100% (648/648), done.
+remote: Compressing objects: 100% (190/190), done.
+remote: Total 45827 (delta 538), reused 470 (delta 457), pack-reused 45179 (from 3)
+Receiving objects: 100% (45827/45827), 186.07 MiB | 8.59 MiB/s, done.
+Resolving deltas: 100% (33914/33914), done.
 user@host:~$ cd Malcolm/
 ```
 
-Next, run the `install.py` script to configure the system. Replace `user` in this example with the local account username, and follow the prompts. Most questions have acceptable defaults that can be accepted by pressing the `Enter` key. Depending on whether Malcolm is being installed from the release tarball or inside of a git working copy, the questions below will be slightly different, but for the most part are the same.
+Next, use `sudo` to run the `install.py` script to configure the system. Replace `user` in this example with the local account username, and follow the prompts. Most questions have defaults that can be accepted by pressing the `Enter` key. Depending on whether Malcolm is being installed from the release artifacts (`install.py` just having been extracted from the `.zip` file) or inside of a git working copy (where it can be found in the `scripts` subdirectory), the questions below will be slightly different, but for the most part are the same.
 ```
 user@host:~/Malcolm$ sudo ./scripts/install.py
-Installing required packages: ['apache2-utils', 'make', 'openssl', 'python3-dialog']
+1: docker
+2: podman
+Select container runtime engine (docker): 1
+Installing required packages: ['apache2-utils', 'make', 'openssl', 'python3-dialog', 'python3-dotenv', 'python3-requests', 'python3-ruamel.yaml', 'xz-utils']
 
-"docker info" failed, attempt to install Docker? (Y / n): y  
+"docker info" failed, attempt to install Docker? (Y / n): y
 
 Attempt to install Docker using official repositories? (Y / n): y
 Installing required packages: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg-agent', 'software-properties-common']
-Installing docker packages: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+Installing docker packages: ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
 Installation of docker packages apparently succeeded
 
 Add a non-root user to the "docker" group?: y   
@@ -46,11 +56,6 @@ Add a non-root user to the "docker" group?: y
 Enter user account: user
 
 Add another non-root user to the "docker" group?: n
-
-"docker compose version" failed, attempt to install docker compose? (Y / n): y
-
-Install docker compose directly from docker github? (Y / n): y
-Download and installation of docker compose apparently succeeded
 
 fs.file-max increases allowed maximum for file handles
 fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
@@ -79,24 +84,24 @@ vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append i
 vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
 vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
 
+net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions
+net.ipv4.tcp_retries2= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
+
 /etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
 /etc/security/limits.d/limits.conf does not exist, create it? (Y / n): y
+
+cgroup parameters appear to be missing from /etc/default/grub, set them? (Y / n): y
 ```
 
-If Malcolm is being configured from within a git working copy, `install.py` will now exit. Run `./scripts/configure` to continue with configuration:
+If Malcolm is being installed from the downloaded release artifacts, the script will ask whether the user would like to extract the contents of the tarball and to specify the installation directory and Malcolm configuration will continue:
 ```
-user@host:~/Malcolm$ ./scripts/configure
-```
-
-Alternately, if Malcolm is being installed from the release tarball, the script will ask whether the user would like to extract the contents of the tarball and to specify the installation directory and Malcolm configuration will continue:
-```
-Extract Malcolm runtime files from /home/user/Downloads/malcolm_20190611_095410_ce2d8de.tar.gz (Y / n): y
+Extract Malcolm runtime files from /home/user/Downloads/malcolm_20250117_115650_d1867453.tar.gz (Y / n): y
 
 Enter installation path for Malcolm [/home/user/Downloads/malcolm]: /home/user/Malcolm
 Malcolm runtime files extracted to /home/user/Malcolm
 ```
 
-Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured:
+Now that any necessary system configuration changes have been made, the local Malcolm instance will be configured. For a more in-depth treatment of each of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**.
 ```
 1: docker
 2: podman
@@ -104,7 +109,7 @@ Select container runtime engine (docker): 1
 
 Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
 
-Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y / n): y
+Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y (Malcolm) / n (Hedgehog)): y
 
 Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
 
@@ -112,7 +117,7 @@ Compress local OpenSearch index snapshots? (y / N): n
 
 Forward Logstash logs to a secondary remote document store? (y / N): n
 
-Setting 10g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
+Setting 16g for OpenSearch and 2500m for Logstash. Is this OK? (Y / n): y
 
 Setting 3 workers for Logstash pipelines. Is this OK? (Y / n): y
 
@@ -138,11 +143,13 @@ Store PCAP, log and index files in /home/user/Malcolm? (Y / n): y
 
 Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 
-Should Malcolm delete the oldest database indices and capture artifacts based on available storage?? n
+Should Malcolm delete the oldest database indices and capture artifacts based on available storage? (y / N): n
+
+Automatically analyze all PCAP files with Arkime? (Y / n): y
 
 Automatically analyze all PCAP files with Suricata? (Y / n): y
 
-Download updated Suricata signatures periodically? (y / N): y
+Download updated Suricata signatures periodically? (y / N): n
 
 Automatically analyze all PCAP files with Zeek? (Y / n): y
 
@@ -157,16 +164,15 @@ Perform string randomness scoring on some fields? (Y / n): y
 1: no
 2: yes
 3: customize
-Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder? (no): 1
+Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder? (no): 2
 
-Enable file extraction with Zeek? (y / N): y
-
-1: none
-2: known
-3: mapped
-4: all
-5: interesting
-6: notcommtxt
+Enable file extraction with Zeek? (Y / n): y
+1: none - No file extraction
+2: known - Extract recognized MIME types
+3: mapped - Extract MIME types for which file extensions are known
+4: all - Extract all files
+5: interesting - Extract MIME types of common attack vectors
+6: notcommtxt - Extract all except common plain text files
 Select file extraction behavior (none): 5
 
 1: quarantined
@@ -209,7 +215,7 @@ Malcolm has been installed to /home/user/Malcolm. See README.md for more informa
 Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
 ```
 
-At this point it is recommended to **reboot the system** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or to which the git working copy was cloned).
+At this point it is recommended to **reboot the system** so that the new system settings can be applied. After rebooting, log back in and return to the directory to which Malcolm was installed (or where the git working copy was cloned).
 
 The next step is to [set up authentication](authsetup.md#AuthSetup) and generate some unique self-signed TLS certificates. Users may choose another username instead of `analyst` to log in to the Malcolm web interface.
 ```
@@ -223,15 +229,13 @@ analyst password (again):
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
-(Re)generate self-signed certificates for HTTPS access (Y / n): y 
-
-(Re)generate self-signed certificates for a remote log forwarder (Y / n): y
-
 Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
 
 Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox (Y / n): y
+
+Store password hash secret for Arkime viewer cluster? (y / N): n
 ```
 
 Users planning to install and configure sensor devices running [Hedgehog Linux](hedgehog.md) must perform an additional step to allow communication between a Malcolm instance and an installation of Hedgehog Linux. In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected above. The certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in Malcolm's `filebeat/certs/` directory; these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the Hedgehog Linux sensor.
@@ -241,47 +245,52 @@ As an alternative to manually copying the files to the sensor, Malcolm can facil
 In this example, rather than [building Malcolm from scratch](development.md#Build), images may be pulled from [GitHub](https://github.com/orgs/idaholab/packages?repo_name=Malcolm):
 ```
 user@host:~/Malcolm$ docker compose --profile malcolm pull
-Pulling api               ... done
-Pulling arkime            ... done
-Pulling dashboards        ... done
-Pulling dashboards-helper ... done
-Pulling file-monitor      ... done
-Pulling filebeat          ... done
-Pulling freq              ... done
-Pulling htadmin           ... done
-Pulling logstash          ... done
-Pulling netbox            ... done
-Pulling netbox-postgresql ... done
-Pulling netbox-redis      ... done
-Pulling nginx-proxy       ... done
-Pulling opensearch        ... done
-Pulling pcap-capture      ... done
-Pulling pcap-monitor      ... done
-Pulling suricata          ... done
-Pulling upload            ... done
-Pulling zeek              ... done
+[+] Pulling 23/23
+ ✔ suricata Skipped - Image is already being pulled by suricata-live
+ ✔ netbox-redis Skipped - Image is already being pulled by netbox-redis-cache
+ ✔ arkime-live Skipped - Image is already being pulled by arkime
+ ✔ zeek-live Skipped - Image is already being pulled by zeek
+ ✔ opensearch Pulled
+ ✔ dashboards-helper Pulled
+ ✔ pcap-capture Pulled
+ ✔ netbox Pulled
+ ✔ filebeat Pulled
+ ✔ netbox-redis-cache Pulled
+ ✔ upload Pulled
+ ✔ api Pulled
+ ✔ netbox-postgres Pulled
+ ✔ file-monitor Pulled
+ ✔ nginx-proxy Pulled
+ ✔ htadmin Pulled
+ ✔ freq Pulled
+ ✔ logstash Pulled
+ ✔ dashboards Pulled
+ ✔ suricata-live Pulled
+ ✔ pcap-monitor Pulled
+ ✔ arkime Pulled
+ ✔ zeek Pulled
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/api                                   {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   158MB
-ghcr.io/idaholab/malcolm/arkime                                {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   816MB
-ghcr.io/idaholab/malcolm/dashboards                            {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.02GB
-ghcr.io/idaholab/malcolm/dashboards-helper                     {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   184MB
-ghcr.io/idaholab/malcolm/file-monitor                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   588MB
-ghcr.io/idaholab/malcolm/file-upload                           {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   259MB
-ghcr.io/idaholab/malcolm/filebeat-oss                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   624MB
-ghcr.io/idaholab/malcolm/freq                                  {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   132MB
-ghcr.io/idaholab/malcolm/htadmin                               {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   242MB
-ghcr.io/idaholab/malcolm/logstash-oss                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.35GB
-ghcr.io/idaholab/malcolm/netbox                                {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.01GB
-ghcr.io/idaholab/malcolm/nginx-proxy                           {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/opensearch                            {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.17GB
-ghcr.io/idaholab/malcolm/pcap-capture                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   121MB
-ghcr.io/idaholab/malcolm/pcap-monitor                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   213MB
-ghcr.io/idaholab/malcolm/postgresql                            {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   268MB
-ghcr.io/idaholab/malcolm/redis                                 {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   34.2MB
-ghcr.io/idaholab/malcolm/suricata                              {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   278MB
-ghcr.io/idaholab/malcolm/zeek                                  {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1GB
+ghcr.io/idaholab/malcolm/nginx-proxy         25.01.0   ee2dac715efc   4 weeks ago   157MB
+ghcr.io/idaholab/malcolm/dashboards          25.01.0   a35265cbde35   4 weeks ago   1.55GB
+ghcr.io/idaholab/malcolm/dashboards-helper   25.01.0   7ca0c53c745f   4 weeks ago   253MB
+ghcr.io/idaholab/malcolm/logstash-oss        25.01.0   ef10cbc5053f   4 weeks ago   1.57GB
+ghcr.io/idaholab/malcolm/arkime              25.01.0   8c6bc6d79e1b   4 weeks ago   835MB
+ghcr.io/idaholab/malcolm/zeek                25.01.0   1ccdbea08109   4 weeks ago   1.35GB
+ghcr.io/idaholab/malcolm/filebeat-oss        25.01.0   6e08f4a8621e   4 weeks ago   433MB
+ghcr.io/idaholab/malcolm/netbox              25.01.0   8dcbc152a9b9   4 weeks ago   1.78GB
+ghcr.io/idaholab/malcolm/suricata            25.01.0   0c40ac0d8005   5 weeks ago   353MB
+ghcr.io/idaholab/malcolm/opensearch          25.01.0   b66dd0922d21   5 weeks ago   1.54GB
+ghcr.io/idaholab/malcolm/pcap-capture        25.01.0   830b7d682693   5 weeks ago   139MB
+ghcr.io/idaholab/malcolm/file-monitor        25.01.0   daef959d2db4   5 weeks ago   723MB
+ghcr.io/idaholab/malcolm/htadmin             25.01.0   098e5a4d1974   5 weeks ago   247MB
+ghcr.io/idaholab/malcolm/postgresql          25.01.0   11fd6170d5d5   5 weeks ago   335MB
+ghcr.io/idaholab/malcolm/api                 25.01.0   ed92d05a5485   5 weeks ago   165MB
+ghcr.io/idaholab/malcolm/redis               25.01.0   f876b484bf9d   5 weeks ago   51.1MB
+ghcr.io/idaholab/malcolm/file-upload         25.01.0   40468de667cf   5 weeks ago   250MB
+ghcr.io/idaholab/malcolm/freq                25.01.0   7a64594a7c6b   5 weeks ago   155MB
+ghcr.io/idaholab/malcolm/pcap-monitor        25.01.0   ff3fa6dec5da   5 weeks ago   178MB
 ```
 
 Finally, start Malcolm. When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.
@@ -302,8 +311,8 @@ malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              r
 malcolm-logstash-1             "/usr/local/bin/dock…"   logstash             running (starting)   …
 malcolm-netbox-1               "/usr/bin/tini -- /u…"   netbox               running (starting)   …
 malcolm-netbox-postgres-1      "/usr/bin/docker-uid…"   netbox-postgres      running (starting)   …
-malcolm-netbox-redis-1         "/sbin/tini -- /usr/…"   netbox-redis         running (starting)   …
-malcolm-netbox-redis-cache-1   "/sbin/tini -- /usr/…"   netbox-redis-cache   running (starting)   …
+malcolm-redis-1                "/sbin/tini -- /usr/…"   redis                running (starting)   …
+malcolm-redis-cache-1          "/sbin/tini -- /usr/…"   redis-cache          running (starting)   …
 malcolm-nginx-proxy-1          "/usr/local/bin/dock…"   nginx-proxy          running (starting)   …
 malcolm-opensearch-1           "/usr/local/bin/dock…"   opensearch           running (starting)   …
 malcolm-pcap-capture-1         "/usr/local/bin/dock…"   pcap-capture         running              …

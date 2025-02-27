@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: freq-container
-        image: ghcr.io/idaholab/malcolm/freq:25.01.0
+        image: ghcr.io/idaholab/malcolm/freq:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -49,10 +49,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "freq.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /
-            port: 10004
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

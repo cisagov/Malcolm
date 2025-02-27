@@ -194,7 +194,7 @@ def main():
     netboxSettingsPyDir = os.path.join(args.netboxDir, os.path.join('netbox', 'netbox'))
     if os.path.isdir(netboxSettingsPyDir):
         try:
-            localSettingsPyContents = "import os\n\nREDIS_URL = f\"redis://{os.environ.get('REDIS_USERNAME', '')}:{os.environ.get('REDIS_PASSWORD', '')}@{os.environ.get('REDIS_HOST', 'netbox-redis')}:{os.environ.get('REDIS_PORT', '6379')}/{os.environ.get('REDIS_DATABASE', '0')}\"\n"
+            localSettingsPyContents = "import os\n\nREDIS_URL = f\"redis://{os.environ.get('REDIS_USERNAME', '')}:{os.environ.get('REDIS_PASSWORD', '')}@{os.environ.get('REDIS_HOST', 'redis')}:{os.environ.get('REDIS_PORT', '6379')}/{os.environ.get('REDIS_DATABASE', '0')}\"\n"
             with open(f"{netboxSettingsPyDir}/local_settings.py", 'w') as f:
                 f.write(localSettingsPyContents)
         except Exception as e:

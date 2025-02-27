@@ -81,15 +81,16 @@ RUN apt-get -q update && \
   apt-get clean -y -q && \
   rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/* /var/www/html
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD docs/images/favicon/favicon.ico /var/www/htadmin/
-ADD htadmin/supervisord.conf /supervisord.conf
-ADD htadmin/htadmin.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/htadmin.sh /usr/local/bin/container_health.sh
+ADD --chmod=644 docs/images/favicon/favicon.ico /var/www/htadmin/
+ADD --chmod=644 htadmin/supervisord.conf /supervisord.conf
+ADD --chmod=755 htadmin/htadmin.sh /usr/local/bin/
 ADD htadmin/src /var/www/htadmin/
-ADD htadmin/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
-ADD htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
+ADD --chmod=644 htadmin/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
+ADD --chmod=644 htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 
 EXPOSE 80
 

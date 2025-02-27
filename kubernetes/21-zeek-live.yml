@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zeek-live-container
-        image: ghcr.io/idaholab/malcolm/zeek:25.01.0
+        image: ghcr.io/idaholab/malcolm/zeek:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -43,6 +43,15 @@ spec:
               name: zeek-live-env
           - configMapRef:
               name: pcap-capture-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: zeek-live-var-local-catrust-volume
@@ -61,7 +70,7 @@ spec:
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

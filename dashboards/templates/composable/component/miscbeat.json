@@ -4,67 +4,171 @@
       "properties": {
         "miscbeat": {
           "properties": {
-            "exec": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
+            "exec": {
+              "type": "keyword",
+              "ignore_above": 1024,
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
+            },
             "aide": {
               "properties": {
-                "start_time": { "type": "date" },
-                "end_time": { "type": "date" },
-                "run_time_seconds": { "type": "integer" },
-                "aide_version": { "type": "keyword" },
+                "start_time": {
+                  "type": "date"
+                },
+                "end_time": {
+                  "type": "date"
+                },
+                "run_time_seconds": {
+                  "type": "integer"
+                },
+                "aide_version": {
+                  "type": "keyword"
+                },
                 "number_of_entries": {
                   "properties": {
-                    "total": { "type": "integer" },
-                    "added": { "type": "integer" },
-                    "removed": { "type": "integer" },
-                    "changed": { "type": "integer" }
+                    "total": {
+                      "type": "integer"
+                    },
+                    "added": {
+                      "type": "integer"
+                    },
+                    "removed": {
+                      "type": "integer"
+                    },
+                    "changed": {
+                      "type": "integer"
+                    }
                   }
                 },
                 "details": {
                   "type": "nested",
                   "properties": {
-                    "path": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } }
+                    "path": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      }
+                    }
                   }
                 },
-                "added": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "changed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "removed": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "databases": { "type": "nested" }
+                "added": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "changed": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "removed": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "databases": {
+                  "type": "flat_object"
+                }
               }
             },
             "cpu": {
               "properties": {
-                "cpu_p": { "type": "float" },
-                "system_p": { "type": "float" },
-                "user_p": { "type": "float" }
+                "cpu_p": {
+                  "type": "float"
+                },
+                "system_p": {
+                  "type": "float"
+                },
+                "user_p": {
+                  "type": "float"
+                }
               }
             },
             "mem": {
               "properties": {
-                "Mem.free": { "type": "long" },
-                "Mem.total": { "type": "long" },
-                "Mem.used": { "type": "long" },
-                "Swap.free": { "type": "long" },
-                "Swap.total": { "type": "long" },
-                "Swap.used": { "type": "long" },
-                "Mem.used_p": { "type": "float" }
+                "Mem": {
+                  "properties": {
+                    "free": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    },
+                    "used": {
+                      "type": "long"
+                    },
+                    "used_p": {
+                      "type": "float"
+                    }
+                  }
+                },
+                "Swap": {
+                  "properties": {
+                    "free": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    },
+                    "used": {
+                      "type": "long"
+                    }
+                  }
+                }
               }
             },
             "disk": {
               "properties": {
-                "read_size": { "type": "long" },
-                "write_size": { "type": "long" },
+                "read_size": {
+                  "type": "long"
+                },
+                "write_size": {
+                  "type": "long"
+                },
                 "df": {
                   "properties": {
-                    "size": { "type": "long" },
-                    "used": { "type": "long" },
-                    "avail": { "type": "long" },
+                    "size": {
+                      "type": "long"
+                    },
+                    "used": {
+                      "type": "long"
+                    },
+                    "avail": {
+                      "type": "long"
+                    },
                     "details": {
                       "type": "nested",
                       "properties": {
-                        "target": { "type": "keyword" },
-                        "size": { "type": "long" },
-                        "used": { "type": "long" },
-                        "avail": { "type": "long" }
+                        "target": {
+                          "type": "keyword"
+                        },
+                        "size": {
+                          "type": "long"
+                        },
+                        "used": {
+                          "type": "long"
+                        },
+                        "avail": {
+                          "type": "long"
+                        }
                       }
                     }
                   }
@@ -73,653 +177,547 @@
             },
             "network": {
               "properties": {
-                "bytes.tx": { "type": "long" },
-                "bytes.rx": { "type": "long" },
-                "bytes.total": { "type": "long" },
-                "packets.tx": { "type": "long" },
-                "packets.rx": { "type": "long" },
-                "packets.total": { "type": "long" },
-                "errors.tx": { "type": "long" },
-                "errors.rx": { "type": "long" },
-                "errors.total": { "type": "long" },
-                "drops.tx": { "type": "long" },
-                "drops.rx": { "type": "long" },
-                "drops.total": { "type": "long" },
-                "interface": { "type": "keyword" },
-                "details": { "type": "nested" }
+                "bytes": {
+                  "properties": {
+                    "tx": {
+                      "type": "long"
+                    },
+                    "rx": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "packets": {
+                  "properties": {
+                    "tx": {
+                      "type": "long"
+                    },
+                    "rx": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "errors": {
+                  "properties": {
+                    "tx": {
+                      "type": "long"
+                    },
+                    "rx": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "drops": {
+                  "properties": {
+                    "tx": {
+                      "type": "long"
+                    },
+                    "rx": {
+                      "type": "long"
+                    },
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "interface": {
+                  "type": "keyword"
+                }
               }
             },
             "syslog": {
-              "properties": {
-              }
+              "properties": {}
             },
             "kmsg": {
               "properties": {
-                "priority": { "type": "integer" },
-                "sequence": { "type": "long" },
-                "sec": { "type": "long" },
-                "usec": { "type": "integer" }
+                "priority": {
+                  "type": "integer"
+                },
+                "sequence": {
+                  "type": "long"
+                },
+                "sec": {
+                  "type": "long"
+                },
+                "usec": {
+                  "type": "integer"
+                }
               }
             },
             "proc": {
               "properties": {
-                "alive": { "type": "keyword" },
-                "proc_name": { "type": "keyword" },
-                "pid": { "type": "long" },
-                "mem.VmPeak": { "type": "long" },
-                "mem.VmSize": { "type": "long" },
-                "mem.VmLck": { "type": "long" },
-                "mem.VmHWM": { "type": "long" },
-                "mem.VmRSS": { "type": "long" },
-                "mem.VmData": { "type": "long" },
-                "mem.VmStk": { "type": "long" },
-                "mem.VmExe": { "type": "long" },
-                "mem.VmLib": { "type": "long" },
-                "mem.VmPTE": { "type": "long" },
-                "mem.VmSwap": { "type": "long" },
-                "fd": { "type": "integer" }
+                "alive": {
+                  "type": "keyword"
+                },
+                "proc_name": {
+                  "type": "keyword"
+                },
+                "pid": {
+                  "type": "long"
+                },
+                "mem": {
+                  "properties": {
+                    "VmPeak": {
+                      "type": "long"
+                    },
+                    "VmSize": {
+                      "type": "long"
+                    },
+                    "VmLck": {
+                      "type": "long"
+                    },
+                    "VmHWM": {
+                      "type": "long"
+                    },
+                    "VmRSS": {
+                      "type": "long"
+                    },
+                    "VmData": {
+                      "type": "long"
+                    },
+                    "VmStk": {
+                      "type": "long"
+                    },
+                    "VmExe": {
+                      "type": "long"
+                    },
+                    "VmLib": {
+                      "type": "long"
+                    },
+                    "VmPTE": {
+                      "type": "long"
+                    },
+                    "VmSwap": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "fd": {
+                  "type": "integer"
+                }
               }
             },
             "systemd": {
               "properties": {
-                "audit_loginuid": { "type": "integer" },
-                "audit_session": { "type": "integer" },
-                "boot_id": { "type": "keyword" },
-                "cpu_usage_nsec": { "type": "long" },
-                "device": { "type": "keyword" },
-                "glib_domain": { "type": "keyword" },
-                "glib_old_log_api": { "type": "keyword" },
-                "hostname": { "type": "keyword" },
-                "invocation_id": { "type": "keyword" },
-                "job_id": { "type": "integer" },
-                "job_result": { "type": "keyword" },
-                "job_type": { "type": "keyword" },
-                "kernel_device": { "type": "keyword" },
-                "kernel_subsystem": { "type": "keyword" },
-                "leader": { "type": "keyword" },
-                "machine_id": { "type": "keyword" },
-                "message": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "message_id": { "type": "keyword" },
-                "nm_device": { "type": "keyword" },
-                "nm_log_domains": { "type": "keyword" },
-                "nm_log_level": { "type": "keyword" },
-                "priority": { "type": "integer" },
-                "runtime_scope": { "type": "keyword" },
-                "selinux_context": { "type": "keyword" },
-                "session_id": { "type": "keyword" },
-                "source_monotonic_timestamp": { "type": "long" },
-                "source_realtime_timestamp" : { "type": "date" },
-                "stream_id": { "type": "keyword" },
-                "syslog_raw": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "syslog_timestamp": { "type": "keyword" },
-                "systemd_cgroup": { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "systemd_invocation_id": { "type": "keyword" },
-                "systemd_session": { "type": "keyword" },
-                "systemd_slice": { "type": "keyword" },
-                "systemd_unit": { "type": "keyword" },
-                "systemd_user_slice": { "type": "keyword" },
-                "systemd_user_unit": { "type": "keyword" },
-                "timestamp_boottime": { "type": "float" },
-                "timestamp_monotonic": { "type": "float" },
-                "udev_devnode": { "type": "keyword" },
-                "udev_sysname": { "type": "keyword" },
-                "unit": { "type": "keyword" },
-                "user_id": { "type": "keyword" },
-                "user_invocation_id": { "type": "keyword" },
-                "user_unit": { "type": "keyword" },
-                "userspace_usec": { "type": "integer" },
-                "wp_object": { "type": "keyword" },
-                "wp_object_type": { "type": "keyword" }
+                "audit_loginuid": {
+                  "type": "integer"
+                },
+                "audit_session": {
+                  "type": "integer"
+                },
+                "boot_id": {
+                  "type": "keyword"
+                },
+                "cpu_usage_nsec": {
+                  "type": "long"
+                },
+                "device": {
+                  "type": "keyword"
+                },
+                "glib_domain": {
+                  "type": "keyword"
+                },
+                "glib_old_log_api": {
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "type": "keyword"
+                },
+                "invocation_id": {
+                  "type": "keyword"
+                },
+                "job_id": {
+                  "type": "integer"
+                },
+                "job_result": {
+                  "type": "keyword"
+                },
+                "job_type": {
+                  "type": "keyword"
+                },
+                "kernel_device": {
+                  "type": "keyword"
+                },
+                "kernel_subsystem": {
+                  "type": "keyword"
+                },
+                "leader": {
+                  "type": "keyword"
+                },
+                "machine_id": {
+                  "type": "keyword"
+                },
+                "message": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "message_id": {
+                  "type": "keyword"
+                },
+                "nm_device": {
+                  "type": "keyword"
+                },
+                "nm_log_domains": {
+                  "type": "keyword"
+                },
+                "nm_log_level": {
+                  "type": "keyword"
+                },
+                "priority": {
+                  "type": "integer"
+                },
+                "runtime_scope": {
+                  "type": "keyword"
+                },
+                "selinux_context": {
+                  "type": "keyword"
+                },
+                "session_id": {
+                  "type": "keyword"
+                },
+                "source_monotonic_timestamp": {
+                  "type": "long"
+                },
+                "source_realtime_timestamp": {
+                  "type": "date"
+                },
+                "stream_id": {
+                  "type": "keyword"
+                },
+                "syslog_raw": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "syslog_timestamp": {
+                  "type": "keyword"
+                },
+                "systemd_cgroup": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "systemd_invocation_id": {
+                  "type": "keyword"
+                },
+                "systemd_session": {
+                  "type": "keyword"
+                },
+                "systemd_slice": {
+                  "type": "keyword"
+                },
+                "systemd_unit": {
+                  "type": "keyword"
+                },
+                "systemd_user_slice": {
+                  "type": "keyword"
+                },
+                "systemd_user_unit": {
+                  "type": "keyword"
+                },
+                "timestamp_boottime": {
+                  "type": "float"
+                },
+                "timestamp_monotonic": {
+                  "type": "float"
+                },
+                "udev_devnode": {
+                  "type": "keyword"
+                },
+                "udev_sysname": {
+                  "type": "keyword"
+                },
+                "unit": {
+                  "type": "keyword"
+                },
+                "user_id": {
+                  "type": "keyword"
+                },
+                "user_invocation_id": {
+                  "type": "keyword"
+                },
+                "user_unit": {
+                  "type": "keyword"
+                },
+                "userspace_usec": {
+                  "type": "integer"
+                },
+                "wp_object": {
+                  "type": "keyword"
+                },
+                "wp_object_type": {
+                  "type": "keyword"
+                }
               }
             },
             "thermal": {
               "properties": {
-                "name": { "type": "keyword"},
-                "temp": { "type": "float"},
-                "type": { "type": "keyword"}
+                "name": {
+                  "type": "keyword"
+                },
+                "temp": {
+                  "type": "float"
+                },
+                "type": {
+                  "type": "keyword"
+                }
               }
             },
             "auditlog": {
               "properties": {
-                "ARCH": { "type": "keyword"},
-                "AUID": { "type": "keyword"},
-                "EGID": { "type": "keyword"},
-                "EUID": { "type": "keyword"},
-                "FSGID": { "type": "keyword"},
-                "FSUID": { "type": "keyword"},
-                "GID": { "type": "keyword"},
-                "OGID": { "type": "keyword"},
-                "OLD-AUID": { "type": "keyword"},
-                "OUID": { "type": "keyword"},
-                "SADDR": { "type": "keyword"},
-                "SGID": { "type": "keyword"},
-                "SUID": { "type": "keyword"},
-                "SYSCALL": { "type": "keyword"},
-                "UID": { "type": "keyword"},
-                "a0": { "type": "keyword"},
-                "a1": { "type": "keyword"},
-                "a2": { "type": "keyword"},
-                "a3": { "type": "keyword"},
-                "acct": { "type": "keyword"},
-                "addr": { "type": "keyword"},
-                "arch": { "type": "keyword"},
-                "argc": { "type": "keyword"},
-                "auid": { "type": "keyword"},
-                "cap_fe": { "type": "keyword"},
-                "cap_fi": { "type": "keyword"},
-                "cap_fp": { "type": "keyword"},
-                "cap_frootid": { "type": "keyword"},
-                "cap_fver": { "type": "keyword"},
-                "cmd": { "type": "keyword"},
-                "comm": { "type": "keyword"},
-                "dev": { "type": "keyword"},
-                "egid": { "type": "keyword"},
-                "entries": { "type": "keyword"},
-                "euid": { "type": "keyword"},
-                "exe": { "type": "keyword"},
-                "exit": { "type": "keyword"},
-                "family": { "type": "keyword"},
-                "fsgid": { "type": "keyword"},
-                "fsuid": { "type": "keyword"},
-                "gid": { "type": "keyword"},
-                "grantors": { "type": "keyword"},
-                "hostname": { "type": "keyword"},
-                "inode": { "type": "keyword"},
-                "item": { "type": "keyword"},
-                "items": { "type": "keyword"},
-                "key": { "type": "keyword"},
-                "mode": { "type": "keyword"},
-                "msg": { "type": "keyword"},
-                "name": { "type": "keyword"},
-                "nametype": { "type": "keyword"},
-                "nlnk-fam": { "type": "keyword"},
-                "nlnk-pid": { "type": "keyword"},
-                "ogid": { "type": "keyword"},
-                "old-auid": { "type": "keyword"},
-                "old-ses": { "type": "keyword"},
-                "old_prom": { "type": "keyword"},
-                "op": { "type": "keyword"},
-                "ouid": { "type": "keyword"},
-                "pid": { "type": "keyword"},
-                "ppid": { "type": "keyword"},
-                "proctitle": { "type": "keyword"},
-                "prom": { "type": "keyword"},
-                "rdev": { "type": "keyword"},
-                "res": { "type": "keyword"},
-                "saddr": { "type": "keyword"},
-                "saddr_fam": { "type": "keyword"},
-                "ses": { "type": "keyword"},
-                "sgid": { "type": "keyword"},
-                "success": { "type": "keyword"},
-                "suid": { "type": "keyword"},
-                "syscall": { "type": "keyword"},
-                "table": { "type": "keyword"},
-                "terminal": { "type": "keyword"},
-                "tty": { "type": "keyword"},
-                "type": { "type": "keyword"},
-                "uid": { "type": "keyword"}
-              }
-            },
-            "winlog": {
-              "properties": {
-                "ActivityID" : { "type": "keyword" },
-                "Computer" : { "type": "keyword" },
-                "Data" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "EventRecordID" : { "type": "integer" },
-                "EventType" : { "type": "keyword" },
-                "Keywords" : { "type": "keyword" },
-                "Level" : { "type": "integer" },
-                "Opcode" : { "type": "keyword" },
-                "ProviderGuid" : { "type": "keyword" },
-                "ProviderName" : { "type": "keyword" },
-                "Qualifiers" : { "type": "integer" },
-                "RelatedActivityID" : { "type": "keyword" },
-                "Sid" : { "type": "keyword" },
-                "StringInserts" : { "type": "keyword", "ignore_above": 1024, "fields": { "text": { "type": "text" } } },
-                "Task" : { "type": "keyword" },
-                "TimeGenerated" : { "type": "date" },
-                "TimeWritten" : { "type": "date" },
-                "UserID" : { "type": "keyword" },
-                "Version" : { "type": "integer" },
-                "EventData": {
-                  "properties": {
-                    "AccessList": { "type": "keyword" },
-                    "AccessMask": { "type": "keyword" },
-                    "AccessReason": { "type": "keyword" },
-                    "AccountExpires": { "type": "keyword" },
-                    "AccountName": { "type": "keyword" },
-                    "Action": { "type": "keyword" },
-                    "Action_ID": { "type": "keyword" },
-                    "Action_Name": { "type": "keyword" },
-                    "Additional_Actions_String": { "type": "keyword" },
-                    "AdditionalInfo": { "type": "keyword" },
-                    "AdditionalInfo2": { "type": "keyword" },
-                    "AdvancedOptions": { "type": "keyword" },
-                    "Application": { "type": "keyword" },
-                    "Archived": { "type": "keyword" },
-                    "AttributeLDAPDisplayName": { "type": "keyword" },
-                    "AttributeSyntaxOID": { "type": "keyword" },
-                    "AttributeValue": { "type": "keyword" },
-                    "AuditPolicyChanges": { "type": "keyword" },
-                    "AuthenticationLevel": { "type": "integer" },
-                    "authenticationMechanism": { "type": "keyword" },
-                    "AuthenticationPackageName": { "type": "keyword" },
-                    "AuthenticationService": { "type": "integer" },
-                    "AvcEnabled": { "type": "integer" },
-                    "bandwidthLimit": { "type": "double" },
-                    "Binary": { "type": "keyword" },
-                    "BitlockerUserInputTime": { "type": "date" },
-                    "BootMode": { "type": "keyword" },
-                    "BootType": { "type": "keyword" },
-                    "BuildVersion": { "type": "keyword" },
-                    "bytesTotal": { "type": "double" },
-                    "bytesTransferred": { "type": "integer" },
-                    "CallerProcessId": { "type": "keyword" },
-                    "CallerProcessName": { "type": "keyword" },
-                    "CallTrace": { "type": "keyword" },
-                    "Catalog": { "type": "integer" },
-                    "Category": { "type": "keyword" },
-                    "Category_ID": { "type": "keyword" },
-                    "Category_Name": { "type": "keyword" },
-                    "CategoryId": { "type": "keyword" },
-                    "ChangeType": { "type": "keyword" },
-                    "ChannelName": { "type": "keyword" },
-                    "ClientInfo": { "type": "keyword" },
-                    "ClientIP": { "type": "keyword" },
-                    "ClientMode": { "type": "integer" },
-                    "Command": { "type": "keyword" },
-                    "Company": { "type": "keyword" },
-                    "ComplexData": { "type": "keyword" },
-                    "ComplexData_attributes.Name": { "type": "keyword" },
-                    "ComponentName": { "type": "keyword" },
-                    "ConfigAccessPolicy": { "type": "keyword" },
-                    "Configuration": { "type": "keyword" },
-                    "ConfigurationFileHash": { "type": "keyword" },
-                    "ConnectionName": { "type": "keyword" },
-                    "ConnType": { "type": "keyword" },
-                    "Consumer": { "type": "keyword" },
-                    "CorruptionActionState": { "type": "keyword" },
-                    "CreationUtcTime": { "type": "date" },
-                    "CustomLevel": { "type": "keyword" },
-                    "Data": { "type": "keyword" },
-                    "Description": { "type": "keyword" },
-                    "DestAddress": { "type": "keyword" },
-                    "Destination": { "type": "keyword" },
-                    "DestinationHostname": { "type": "keyword" },
-                    "DestinationIp": { "type": "keyword" },
-                    "DestinationIsIpv6": { "type": "keyword" },
-                    "DestinationPort": { "type": "integer" },
-                    "DestinationPortName": { "type": "keyword" },
-                    "DestPort": { "type": "keyword" },
-                    "Detail": { "type": "keyword" },
-                    "Details": { "type": "keyword" },
-                    "Detection_ID": { "type": "keyword" },
-                    "Detection_Time": { "type": "date" },
-                    "Detection_User": { "type": "keyword" },
-                    "DetectionLocation": { "type": "integer" },
-                    "Device": { "type": "keyword" },
-                    "DeviceName": { "type": "keyword" },
-                    "DeviceNameLength": { "type": "keyword" },
-                    "DeviceTime": { "type": "date" },
-                    "DeviceVersionMajor": { "type": "keyword" },
-                    "DeviceVersionMinor": { "type": "keyword" },
-                    "Direction": { "type": "keyword" },
-                    "DisableIntegrityChecks": { "type": "keyword" },
-                    "DisplayDriverName": { "type": "keyword" },
-                    "DisplayName": { "type": "keyword" },
-                    "DnsHostName": { "type": "keyword" },
-                    "DriveName": { "type": "keyword" },
-                    "DriverName": { "type": "keyword" },
-                    "DriverNameLength": { "type": "keyword" },
-                    "DSName": { "type": "keyword" },
-                    "DSType": { "type": "keyword" },
-                    "DwordVal": { "type": "keyword" },
-                    "EffectiveConsentValue": { "type": "keyword" },
-                    "ElevatedToken": { "type": "keyword" },
-                    "EnabledPrivilegeList": { "type": "keyword" },
-                    "Endpoint": { "type": "keyword" },
-                    "Engine_Version": { "type": "keyword" },
-                    "EntryCount": { "type": "keyword" },
-                    "Error": { "type": "keyword" },
-                    "Error_Code": { "type": "keyword" },
-                    "Error_Description": { "type": "keyword" },
-                    "ErrorCode": { "type": "keyword" },
-                    "errorCode": { "type": "keyword" },
-                    "Event": { "type": "integer" },
-                    "EventCountTotal": { "type": "integer" },
-                    "EventIdx": { "type": "integer" },
-                    "EventName": { "type": "keyword" },
-                    "EventNamespace": { "type": "keyword" },
-                    "EventType": { "type": "keyword" },
-                    "Execution_ID": { "type": "keyword" },
-                    "Execution_Name": { "type": "keyword" },
-                    "ExtraInfo": { "type": "keyword" },
-                    "FailureName": { "type": "keyword" },
-                    "FailureNameLength": { "type": "keyword" },
-                    "FailureReason": { "type": "keyword" },
-                    "fileCount": { "type": "integer" },
-                    "fileLength": { "type": "double" },
-                    "fileTime": { "type": "date" },
-                    "FileVersion": { "type": "keyword" },
-                    "Filter": { "type": "keyword" },
-                    "FilterRTID": { "type": "integer" },
-                    "FinalStatus": { "type": "keyword" },
-                    "FirstGraphicsReceived": { "type": "integer" },
-                    "Flags": { "type": "keyword" },
-                    "FlightSigning": { "type": "keyword" },
-                    "Function": { "type": "keyword" },
-                    "FWLink": { "type": "keyword" },
-                    "GeneratingComponent": { "type": "integer" },
-                    "GfxChannelOpened": { "type": "integer" },
-                    "GrantedAccess": { "type": "keyword" },
-                    "Group": { "type": "keyword" },
-                    "GroupMembership": { "type": "keyword" },
-                    "GUID": { "type": "keyword" },
-                    "HandleId": { "type": "keyword" },
-                    "Hash": { "type": "keyword" },
-                    "HomeDirectory": { "type": "keyword" },
-                    "HomePath": { "type": "keyword" },
-                    "hr": { "type": "long" },
-                    "HRESULT": { "type": "keyword" },
-                    "HypervisorDebug": { "type": "keyword" },
-                    "HypervisorLaunchType": { "type": "keyword" },
-                    "Id": { "type": "keyword" },
-                    "IdleImplementation": { "type": "keyword" },
-                    "IdleStateCount": { "type": "keyword" },
-                    "ignoreBandwidthLimitsOnLan": { "type": "keyword" },
-                    "Image": { "type": "keyword" },
-                    "ImageLoaded": { "type": "keyword" },
-                    "ImageName": { "type": "keyword" },
-                    "ImagePath": { "type": "keyword" },
-                    "ImpersonationLevel": { "type": "keyword" },
-                    "Initiated": { "type": "keyword" },
-                    "Installer": { "type": "keyword" },
-                    "InstanceID": { "type": "integer" },
-                    "IntegrityLevel": { "type": "keyword" },
-                    "InterfaceUuid": { "type": "keyword" },
-                    "IpAddress": { "type": "keyword" },
-                    "IpPort": { "type": "keyword" },
-                    "IsExecutable": { "type": "keyword" },
-                    "IsMachine": { "type": "keyword" },
-                    "isRoaming": { "type": "integer" },
-                    "jobId": { "type": "keyword" },
-                    "jobName": { "type": "keyword" },
-                    "jobOwner": { "type": "keyword" },
-                    "jobTitle": { "type": "keyword" },
-                    "KernelDebug": { "type": "keyword" },
-                    "KeyLength": { "type": "integer" },
-                    "LastBootGood": { "type": "keyword" },
-                    "LastShutdownGood": { "type": "keyword" },
-                    "LayerName": { "type": "keyword" },
-                    "LayerRTID": { "type": "integer" },
-                    "LmPackageName": { "type": "keyword" },
-                    "LogonGuid": { "type": "keyword" },
-                    "LogonHours": { "type": "keyword" },
-                    "LogonId": { "type": "keyword" },
-                    "LogonProcessName": { "type": "keyword" },
-                    "LogonType": { "type": "keyword" },
-                    "LSPName": { "type": "keyword" },
-                    "MajorType": { "type": "integer" },
-                    "MajorVersion": { "type": "keyword" },
-                    "MandatoryLabel": { "type": "keyword" },
-                    "Max_Calls": { "type": "integer" },
-                    "MaximumPerformancePercent": { "type": "keyword" },
-                    "MemberName": { "type": "keyword" },
-                    "MemberSid": { "type": "keyword" },
-                    "Message": { "type": "keyword" },
-                    "MessageNumber": { "type": "integer" },
-                    "MessageTotal": { "type": "integer" },
-                    "MethodName": { "type": "keyword" },
-                    "MinimumPerformancePercent": { "type": "keyword" },
-                    "MinimumThrottlePercent": { "type": "keyword" },
-                    "MinorType": { "type": "integer" },
-                    "MinorVersion": { "type": "keyword" },
-                    "MonitorHeight": { "type": "integer" },
-                    "MonitorWidth": { "type": "integer" },
-                    "Name": { "type": "keyword" },
-                    "name": { "type": "keyword" },
-                    "NetworkAddress": { "type": "keyword" },
-                    "NewProcessId": { "type": "keyword" },
-                    "NewProcessName": { "type": "keyword" },
-                    "NewSchemeGuid": { "type": "keyword" },
-                    "NewState": { "type": "integer" },
-                    "NewStateName": { "type": "keyword" },
-                    "NewTargetUserName": { "type": "keyword" },
-                    "NewThreadId": { "type": "keyword" },
-                    "NewTime": { "type": "date" },
-                    "NewUacValue": { "type": "keyword" },
-                    "NominalFrequency": { "type": "keyword" },
-                    "NotificationType": { "type": "keyword" },
-                    "Number": { "type": "keyword" },
-                    "NumberOfParameters": { "type": "integer" },
-                    "ObjectClass": { "type": "keyword" },
-                    "ObjectDN": { "type": "keyword" },
-                    "ObjectGUID": { "type": "keyword" },
-                    "ObjectName": { "type": "keyword" },
-                    "ObjectServer": { "type": "keyword" },
-                    "ObjectType": { "type": "keyword" },
-                    "OldSchemeGuid": { "type": "keyword" },
-                    "OldTargetUserName": { "type": "keyword" },
-                    "OldTime": { "type": "date" },
-                    "OpCorrelationID": { "type": "keyword" },
-                    "Operation": { "type": "keyword" },
-                    "OperationType": { "type": "keyword" },
-                    "Options": { "type": "keyword" },
-                    "Origin_ID": { "type": "keyword" },
-                    "Origin_Name": { "type": "keyword" },
-                    "OriginalFileName": { "type": "keyword" },
-                    "PackageName": { "type": "keyword" },
-                    "param1": { "type": "keyword" },
-                    "param10": { "type": "keyword" },
-                    "param11": { "type": "keyword" },
-                    "param2": { "type": "keyword" },
-                    "param3": { "type": "keyword" },
-                    "param4": { "type": "keyword" },
-                    "param5": { "type": "keyword" },
-                    "param6": { "type": "keyword" },
-                    "param7": { "type": "keyword" },
-                    "param8": { "type": "keyword" },
-                    "param9": { "type": "keyword" },
-                    "ParentCommandLine": { "type": "keyword" },
-                    "ParentImage": { "type": "keyword" },
-                    "ParentProcessGuid": { "type": "keyword" },
-                    "ParentProcessId": { "type": "keyword" },
-                    "ParentProcessName": { "type": "keyword" },
-                    "ParentUser": { "type": "keyword" },
-                    "PasswordLastSet": { "type": "keyword" },
-                    "Path": { "type": "keyword" },
-                    "PendingQueueSize": { "type": "integer" },
-                    "PerformanceImplementation": { "type": "keyword" },
-                    "PipeName": { "type": "keyword" },
-                    "Port": { "type": "integer" },
-                    "PreAuthType": { "type": "keyword" },
-                    "PreviousCreationUtcTime": { "type": "date" },
-                    "PreviousState": { "type": "integer" },
-                    "PreviousStateName": { "type": "keyword" },
-                    "PreviousTime": { "type": "date" },
-                    "PrimaryGroupId": { "type": "keyword" },
-                    "PrivilegeList": { "type": "keyword" },
-                    "Process_Name": { "type": "keyword" },
-                    "ProcessGuid": { "type": "keyword" },
-                    "ProcessId": { "type": "keyword" },
-                    "processId": { "type": "keyword" },
-                    "ProcessID": { "type": "keyword" },
-                    "ProcessName": { "type": "keyword" },
-                    "ProcessPath": { "type": "keyword" },
-                    "processPath": { "type": "keyword" },
-                    "ProcessPid": { "type": "keyword" },
-                    "ProcNum": { "type": "integer" },
-                    "Product": { "type": "keyword" },
-                    "Product_Name": { "type": "keyword" },
-                    "Product_Version": { "type": "keyword" },
-                    "ProfileIdNum": { "type": "integer" },
-                    "ProfilePath": { "type": "keyword" },
-                    "PromptForCredentials": { "type": "integer" },
-                    "PromptForCredentialsDone": { "type": "integer" },
-                    "Properties": { "type": "keyword" },
-                    "Protocol": { "type": "keyword" },
-                    "PuaCount": { "type": "keyword" },
-                    "PuaPolicyId": { "type": "keyword" },
-                    "QfeVersion": { "type": "keyword" },
-                    "Query": { "type": "keyword" },
-                    "QueryName": { "type": "keyword" },
-                    "QueryStatus": { "type": "keyword" },
-                    "Reason": { "type": "keyword" },
-                    "ReasonCode": { "type": "integer" },
-                    "ReasonString": { "type": "keyword" },
-                    "RelativeTargetName": { "type": "keyword" },
-                    "Remediation_User": { "type": "keyword" },
-                    "RemoteEventLogging": { "type": "keyword" },
-                    "RemoteMachineID": { "type": "keyword" },
-                    "RemoteUserID": { "type": "keyword" },
-                    "ResourceManager": { "type": "keyword" },
-                    "Result": { "type": "keyword" },
-                    "ReturnCode": { "type": "keyword" },
-                    "RuleName": { "type": "keyword" },
-                    "SamAccountName": { "type": "keyword" },
-                    "SchemaVersion": { "type": "keyword" },
-                    "ScriptBlockId": { "type": "keyword" },
-                    "ScriptBlockText": { "type": "keyword" },
-                    "ScriptPath": { "type": "keyword" },
-                    "SD": { "type": "keyword" },
-                    "SDSize": { "type": "integer" },
-                    "ServerName": { "type": "keyword" },
-                    "Service": { "type": "keyword" },
-                    "ServiceName": { "type": "keyword" },
-                    "ServicePrincipalNames": { "type": "keyword" },
-                    "ServiceSid": { "type": "keyword" },
-                    "ServiceType": { "type": "keyword" },
-                    "ServiceVersion": { "type": "keyword" },
-                    "Session": { "type": "keyword" },
-                    "SessionID": { "type": "keyword" },
-                    "Severity_ID": { "type": "keyword" },
-                    "Severity_Name": { "type": "keyword" },
-                    "ShareLocalPath": { "type": "keyword" },
-                    "ShareName": { "type": "keyword" },
-                    "ShutdownActionType": { "type": "keyword" },
-                    "ShutdownEventCode": { "type": "keyword" },
-                    "ShutdownReason": { "type": "keyword" },
-                    "Signature": { "type": "keyword" },
-                    "Signature_Version": { "type": "keyword" },
-                    "SignatureStatus": { "type": "keyword" },
-                    "Signed": { "type": "keyword" },
-                    "Source": { "type": "keyword" },
-                    "Source_ID": { "type": "keyword" },
-                    "Source_Name": { "type": "keyword" },
-                    "SourceAddress": { "type": "keyword" },
-                    "SourceHostname": { "type": "keyword" },
-                    "SourceImage": { "type": "keyword" },
-                    "SourceIp": { "type": "keyword" },
-                    "SourceIsIpv6": { "type": "keyword" },
-                    "SourcePort": { "type": "keyword" },
-                    "SourcePortName": { "type": "keyword" },
-                    "SourceProcessGUID": { "type": "keyword" },
-                    "SourceProcessGuid": { "type": "keyword" },
-                    "SourceProcessId": { "type": "keyword" },
-                    "SourceSid": { "type": "keyword" },
-                    "SourceThreadId": { "type": "keyword" },
-                    "SourceUser": { "type": "keyword" },
-                    "SourceUserName": { "type": "keyword" },
-                    "StartAddress": { "type": "keyword" },
-                    "StartFunction": { "type": "keyword" },
-                    "StartModule": { "type": "keyword" },
-                    "StartTime": { "type": "keyword" },
-                    "StartType": { "type": "keyword" },
-                    "State": { "type": "keyword" },
-                    "StateTransition": { "type": "keyword" },
-                    "Status": { "type": "keyword" },
-                    "Status_Code": { "type": "keyword" },
-                    "StopTime": { "type": "keyword" },
-                    "string": { "type": "keyword" },
-                    "string2": { "type": "keyword" },
-                    "SubcategoryGuid": { "type": "keyword" },
-                    "SubcategoryId": { "type": "keyword" },
-                    "SubjectDomainName": { "type": "keyword" },
-                    "SubjectLogonId": { "type": "keyword" },
-                    "SubjectUserName": { "type": "keyword" },
-                    "SubjectUserSid": { "type": "keyword" },
-                    "SubStatus": { "type": "keyword" },
-                    "TargetDomainName": { "type": "keyword" },
-                    "TargetFilename": { "type": "keyword" },
-                    "TargetImage": { "type": "keyword" },
-                    "TargetInfo": { "type": "keyword" },
-                    "TargetLinkedLogonId": { "type": "keyword" },
-                    "TargetLogonGuid": { "type": "keyword" },
-                    "TargetLogonId": { "type": "keyword" },
-                    "TargetObject": { "type": "keyword" },
-                    "TargetOutboundDomainName": { "type": "keyword" },
-                    "TargetOutboundUserName": { "type": "keyword" },
-                    "TargetProcessGUID": { "type": "keyword" },
-                    "TargetProcessGuid": { "type": "keyword" },
-                    "TargetProcessId": { "type": "keyword" },
-                    "TargetServerName": { "type": "keyword" },
-                    "TargetSid": { "type": "keyword" },
-                    "TargetUser": { "type": "keyword" },
-                    "TargetUserName": { "type": "keyword" },
-                    "TargetUserSid": { "type": "keyword" },
-                    "TaskContent": { "type": "keyword" },
-                    "TaskContentNew": { "type": "keyword" },
-                    "TaskName": { "type": "keyword" },
-                    "TerminalSessionId": { "type": "keyword" },
-                    "TestSigning": { "type": "keyword" },
-                    "Threat_ID": { "type": "keyword" },
-                    "Threat_Name": { "type": "keyword" },
-                    "TicketEncryptionType": { "type": "keyword" },
-                    "TicketOptions": { "type": "keyword" },
-                    "TimeStamp": { "type": "date" },
-                    "TimeSourceRefId": { "type": "keyword" },
-                    "TimezoneBiasHour": { "type": "keyword" },
-                    "TokenElevationType": { "type": "keyword" },
-                    "TransactionId": { "type": "keyword" },
-                    "transferId": { "type": "keyword" },
-                    "TransmittedServices": { "type": "keyword" },
-                    "TransportProtocolName": { "type": "keyword" },
-                    "TransportType": { "type": "keyword" },
-                    "TSId": { "type": "keyword" },
-                    "TunnelID": { "type": "integer" },
-                    "Type": { "type": "keyword" },
-                    "Type_ID": { "type": "keyword" },
-                    "Type_Name": { "type": "keyword" },
-                    "TypeMgrUuid": { "type": "keyword" },
-                    "url": { "type": "keyword" },
-                    "User": { "type": "keyword" },
-                    "UserAccountControl": { "type": "keyword" },
-                    "UserId": { "type": "keyword" },
-                    "username": { "type": "keyword" },
-                    "UserParameters": { "type": "keyword" },
-                    "UserSid": { "type": "keyword" },
-                    "UserWorkstations": { "type": "keyword" },
-                    "UtcTime": { "type": "date" },
-                    "Value": { "type": "keyword" },
-                    "value": { "type": "keyword" },
-                    "Version": { "type": "keyword" },
-                    "VirtualAccount": { "type": "keyword" },
-                    "VsmLaunchType": { "type": "keyword" },
-                    "Workstation": { "type": "keyword" },
-                    "WorkstationName": { "type": "keyword" }
-                  }
+                "ARCH": {
+                  "type": "keyword"
+                },
+                "AUID": {
+                  "type": "keyword"
+                },
+                "EGID": {
+                  "type": "keyword"
+                },
+                "EUID": {
+                  "type": "keyword"
+                },
+                "FSGID": {
+                  "type": "keyword"
+                },
+                "FSUID": {
+                  "type": "keyword"
+                },
+                "GID": {
+                  "type": "keyword"
+                },
+                "OGID": {
+                  "type": "keyword"
+                },
+                "OLD-AUID": {
+                  "type": "keyword"
+                },
+                "OUID": {
+                  "type": "keyword"
+                },
+                "SADDR": {
+                  "type": "keyword"
+                },
+                "SGID": {
+                  "type": "keyword"
+                },
+                "SUID": {
+                  "type": "keyword"
+                },
+                "SYSCALL": {
+                  "type": "keyword"
+                },
+                "UID": {
+                  "type": "keyword"
+                },
+                "a0": {
+                  "type": "keyword"
+                },
+                "a1": {
+                  "type": "keyword"
+                },
+                "a2": {
+                  "type": "keyword"
+                },
+                "a3": {
+                  "type": "keyword"
+                },
+                "acct": {
+                  "type": "keyword"
+                },
+                "addr": {
+                  "type": "keyword"
+                },
+                "arch": {
+                  "type": "keyword"
+                },
+                "argc": {
+                  "type": "keyword"
+                },
+                "auid": {
+                  "type": "keyword"
+                },
+                "cap_fe": {
+                  "type": "keyword"
+                },
+                "cap_fi": {
+                  "type": "keyword"
+                },
+                "cap_fp": {
+                  "type": "keyword"
+                },
+                "cap_frootid": {
+                  "type": "keyword"
+                },
+                "cap_fver": {
+                  "type": "keyword"
+                },
+                "cmd": {
+                  "type": "keyword"
+                },
+                "comm": {
+                  "type": "keyword"
+                },
+                "dev": {
+                  "type": "keyword"
+                },
+                "egid": {
+                  "type": "keyword"
+                },
+                "entries": {
+                  "type": "keyword"
+                },
+                "euid": {
+                  "type": "keyword"
+                },
+                "exe": {
+                  "type": "keyword"
+                },
+                "exit": {
+                  "type": "keyword"
+                },
+                "family": {
+                  "type": "keyword"
+                },
+                "fsgid": {
+                  "type": "keyword"
+                },
+                "fsuid": {
+                  "type": "keyword"
+                },
+                "gid": {
+                  "type": "keyword"
+                },
+                "grantors": {
+                  "type": "keyword"
+                },
+                "hostname": {
+                  "type": "keyword"
+                },
+                "inode": {
+                  "type": "keyword"
+                },
+                "item": {
+                  "type": "keyword"
+                },
+                "items": {
+                  "type": "keyword"
+                },
+                "key": {
+                  "type": "keyword"
+                },
+                "mode": {
+                  "type": "keyword"
+                },
+                "msg": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "nametype": {
+                  "type": "keyword"
+                },
+                "nlnk-fam": {
+                  "type": "keyword"
+                },
+                "nlnk-pid": {
+                  "type": "keyword"
+                },
+                "ogid": {
+                  "type": "keyword"
+                },
+                "old-auid": {
+                  "type": "keyword"
+                },
+                "old-ses": {
+                  "type": "keyword"
+                },
+                "old_prom": {
+                  "type": "keyword"
+                },
+                "op": {
+                  "type": "keyword"
+                },
+                "ouid": {
+                  "type": "keyword"
+                },
+                "pid": {
+                  "type": "keyword"
+                },
+                "ppid": {
+                  "type": "keyword"
+                },
+                "proctitle": {
+                  "type": "keyword"
+                },
+                "prom": {
+                  "type": "keyword"
+                },
+                "rdev": {
+                  "type": "keyword"
+                },
+                "res": {
+                  "type": "keyword"
+                },
+                "saddr": {
+                  "type": "keyword"
+                },
+                "saddr_fam": {
+                  "type": "keyword"
+                },
+                "ses": {
+                  "type": "keyword"
+                },
+                "sgid": {
+                  "type": "keyword"
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "suid": {
+                  "type": "keyword"
+                },
+                "syscall": {
+                  "type": "keyword"
+                },
+                "table": {
+                  "type": "keyword"
+                },
+                "terminal": {
+                  "type": "keyword"
+                },
+                "tty": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "uid": {
+                  "type": "keyword"
                 }
-              }
-            },
-            "winstat": {
-              "properties": {
-                "commit_limit" : { "type": "long" },
-                "commit_total" : { "type": "long" },
-                "cpu_idle" : { "type": "long" },
-                "cpu_kernel" : { "type": "long" },
-                "cpu_user" : { "type": "long" },
-                "cpu_utilization" : { "type": "float" },
-                "handles" : { "type": "integer" },
-                "kernel_nonpaged" : { "type": "long" },
-                "kernel_paged" : { "type": "long" },
-                "kernel_total" : { "type": "long" },
-                "physical_available" : { "type": "long" },
-                "physical_total" : { "type": "long" },
-                "physical_used" : { "type": "long" },
-                "processes" : { "type": "integer" },
-                "threads" : { "type": "integer" },
-                "uptime_human" : { "type": "keyword" },
-                "uptime_msec" : { "type": "integer" }
               }
             }
           }

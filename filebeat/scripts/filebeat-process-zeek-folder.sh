@@ -88,7 +88,7 @@ if mkdir $LOCKDIR; then
           if ! in_array TAGS "$TAG_CANDIDATE"; then
             if [[ "$TAG_CANDIDATE" = "USERTAG" ]]; then
               USERTAG=true
-            elif [[ -n "$TAG_CANDIDATE" && ! "$TAG_CANDIDATE" =~ ^[0-9-]+$ && "$TAG_CANDIDATE" != "tar" && "$TAG_CANDIDATE" != "AUTOZEEK" && ! "$TAG_CANDIDATE" =~ ^AUTOCARVE ]]; then
+            elif [[ -n "$TAG_CANDIDATE" && ! "$TAG_CANDIDATE" =~ ^[0-9-]+$ && "$TAG_CANDIDATE" != "tar" && "$TAG_CANDIDATE" != "AUTOZEEK" ]]; then
               TAGS+=("${TAG_CANDIDATE}")
               if [[ "$TAG_CANDIDATE" =~ ^NBSITEID ]]; then
                 TAGS_PRESERVED+=("${TAG_CANDIDATE}")

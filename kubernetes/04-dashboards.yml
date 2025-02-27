@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:25.01.0
+        image: ghcr.io/idaholab/malcolm/dashboards:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -49,10 +49,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "dashboards.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /dashboards/api/status
-            port: 5601
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 210
           periodSeconds: 30
           timeoutSeconds: 15

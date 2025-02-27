@@ -54,13 +54,14 @@ ENV PCAP_PATH $PCAP_PATH
 ENV PCAP_FILTER $PCAP_FILTER
 ENV PCAP_SNAPLEN $PCAP_SNAPLEN
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
-ADD pcap-capture/supervisord.conf /etc/supervisord.conf
-ADD pcap-capture/scripts/*.sh /usr/local/bin/
-ADD pcap-capture/templates/*.template /etc/supervisor.d/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/pcap-capture.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
+ADD --chmod=644 pcap-capture/supervisord.conf /etc/supervisord.conf
+ADD --chmod=755 pcap-capture/scripts/*.sh /usr/local/bin/
+ADD --chmod=644 pcap-capture/templates/*.template /etc/supervisor.d/
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \

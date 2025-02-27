@@ -43,7 +43,7 @@ docker compose exec nginx-proxy bash -c "cp /etc/nginx/nginx_readonly.conf /etc/
 Second, to set the existing OpenSearch data store to read-only:
 
 ```
-docker compose exec dashboards-helper /data/opensearch_read_only.py -i _cluster
+docker compose exec dashboards-helper /usr/local/bin/opensearch_read_only.py -i _cluster
 ```
 
 These commands must be re-run every time Malcolm is restarted.

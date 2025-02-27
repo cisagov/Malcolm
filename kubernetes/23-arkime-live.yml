@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: arkime-live-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.01.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -51,6 +51,15 @@ spec:
               name: arkime-live-env
           - secretRef:
               name: arkime-secret-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 210
+          periodSeconds: 90
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: arkime-live-var-local-catrust-volume
@@ -64,7 +73,7 @@ spec:
             name: arkime-live-pcap-volume
       initContainers:
       - name: arkime-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

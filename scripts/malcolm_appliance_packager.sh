@@ -75,7 +75,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/netbox/custom-plugins/requirements/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/media/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/postgres/"
-  mkdir $VERBOSE -p "$DESTDIR/netbox/redis/"
+  mkdir $VERBOSE -p "$DESTDIR/redis/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/preload/"
   mkdir $VERBOSE -p "$DESTDIR/nginx/ca-trust/"
   mkdir $VERBOSE -p "$DESTDIR/nginx/certs/"

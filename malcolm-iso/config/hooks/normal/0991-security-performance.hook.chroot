@@ -21,12 +21,7 @@ UFW_ALLOW_RULES=(
   https
   ntp
   ssh
-  5044/tcp
-  5045/tcp
-  5601/tcp
-  8022/tcp
   9009:9013/tcp
-  9200/tcp
 )
 for i in ${UFW_ALLOW_RULES[@]}; do
   ufw allow "$i"

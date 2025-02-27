@@ -14,7 +14,7 @@ class Config(object):
     ARKIME_NETWORK_INDEX_TIME_FIELD = f"{os.getenv('ARKIME_NETWORK_INDEX_TIME_FIELD', 'firstPacket')}"
 
     ARKIME_HOST = f"{os.getenv('ARKIME_HOST', 'arkime')}"
-    ARKIME_PORT = int(f"{os.getenv('ARKIME_PORT', '8005')}")
+    ARKIME_PORT = int(f"{os.getenv('ARKIME_PORT', '8005')}".split(':')[-1])
     BUILD_DATE = f"{os.getenv('BUILD_DATE', 'unknown')}"
     DASHBOARDS_URL = f"{os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards')}"
     DASHBOARDS_HELPER_HOST = f"{os.getenv('DASHBOARDS_HELPER_HOST', 'dashboards-helper')}"

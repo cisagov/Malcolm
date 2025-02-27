@@ -79,21 +79,22 @@ RUN set -x && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/bin/jruby \
            /root/.cache /root/.gem /root/.bundle
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
-ADD logstash/maps/*.yaml /etc/
-ADD logstash/config/log4j2.properties /usr/share/logstash/config/
-ADD logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/logstash.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
+ADD --chmod=644 logstash/maps/*.yaml /etc/
+ADD --chmod=644 logstash/config/log4j2.properties /usr/share/logstash/config/
+ADD --chmod=644 logstash/config/logstash.yml /usr/share/logstash/config/logstash.orig.yml
 ADD logstash/pipelines/ /usr/share/logstash/malcolm-pipelines/
 ADD logstash/patterns/ /usr/share/logstash/malcolm-patterns/
 ADD logstash/ruby/ /usr/share/logstash/malcolm-ruby/
 ADD logstash/scripts /usr/local/bin/
-ADD scripts/malcolm_utils.py /usr/local/bin/
-ADD logstash/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 logstash/supervisord.conf /etc/supervisord.conf
 
 RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true" && \
     usermod -a -G tty ${PUSER} && \

@@ -95,17 +95,18 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get clean -y -q && \
     rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
-ADD docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
-ADD file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
-ADD file-upload/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
-ADD file-upload/php/*.php /var/www/upload/server/php/
-ADD file-upload/site/index.html /var/www/upload/index.html
-ADD file-upload/sshd_config /tmp/sshd_config
-ADD file-upload/supervisord.conf /supervisord.conf
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 file-upload/docker-entrypoint.sh /docker-entrypoint.sh
+ADD --chmod=755 container-health-scripts/upload.sh /usr/local/bin/container_health.sh
+ADD --chmod=644 docs/images/logo/Malcolm_banner.png /var/www/upload/Malcolm_banner.png
+ADD --chmod=644 file-upload/nginx/sites-available/default /etc/nginx/sites-available/default
+ADD --chmod=644 file-upload/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
+ADD --chmod=644 file-upload/php/*.php /var/www/upload/server/php/
+ADD --chmod=644 file-upload/site/index.html /var/www/upload/index.html
+ADD --chmod=644 file-upload/sshd_config /tmp/sshd_config
+ADD --chmod=644 file-upload/supervisord.conf /supervisord.conf
 
 RUN mkdir -p /run/php \
              /var/run/sshd \

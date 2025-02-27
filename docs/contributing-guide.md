@@ -28,4 +28,5 @@ It is recommended before reviewing this guide to read the documentation on [cust
 * [Style](contributing-style.md#Style)
 * [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners)
 * [Preparing a Malcolm Release](contributing-release-prep.md)
+* [Malcolm code provenance and software supply chain](contributing-guide-code-provenance.md)
 * [`malcolm-test`: Malcolm System Tests](contributing-malcolm-test.md#MalcolmTest)

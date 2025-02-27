@@ -131,13 +131,14 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' "${NETBOX_PATH}/launch-netbox.sh" && \
     sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 netbox/scripts/* /usr/local/bin/
-COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
-COPY --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
-COPY --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/netbox.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 netbox/scripts/* /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
 
 EXPOSE 9001
 

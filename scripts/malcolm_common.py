@@ -793,8 +793,7 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis-cache.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-redis.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
@@ -924,10 +923,16 @@ LOG_IGNORE_REGEX = re.compile(
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
   | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
   | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
+  | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
+  | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
+  | Info:\s+unix-socket:
+  | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
+  | i:\s+pcap:\s+read\s+\d+\s+file
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
   | "netbox"\s+application\s+started
   | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
+  | Notice:\s+pcap:\s+read\s+(\d+)\s+file
   | kube-probe/
   | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
@@ -946,8 +951,10 @@ LOG_IGNORE_REGEX = re.compile(
   | throttling\s+index
   | update_mapping
   | updating\s+number_of_replicas
+  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | use_field_mapping
   | Using\s+geoip\s+database
+  | Warning:\s+app-layer-
 )
 """,
     re.VERBOSE | re.IGNORECASE,

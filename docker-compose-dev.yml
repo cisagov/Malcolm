@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:25.01.0
+    image: ghcr.io/idaholab/malcolm/opensearch:25.02.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -74,7 +74,7 @@ services:
       source: ./opensearch/opensearch.keystore
       target: /usr/share/opensearch/config/persist/opensearch.keystore
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:9200"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -83,7 +83,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.01.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -128,7 +128,7 @@ services:
       target: /var/local/curlrc/.opensearch.secondary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "cron", "maps"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
@@ -137,7 +137,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:25.01.0
+    image: ghcr.io/idaholab/malcolm/dashboards:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -175,7 +175,7 @@ services:
       target: /var/local/curlrc/.opensearch.primary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5601/dashboards/api/status"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -184,7 +184,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:25.01.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -299,7 +299,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.01.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -367,7 +367,7 @@ services:
       target: /certs/client.key
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "filebeat"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -376,7 +376,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:25.01.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -453,7 +453,7 @@ services:
       target: /opt/arkime/wiseService/source.zeeklogs.js
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--insecure", "--silent", "--fail", "https://localhost:8005/_ns_/nstest.html"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 90s
       timeout: 30s
       retries: 3
@@ -462,7 +462,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:25.01.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -543,11 +543,17 @@ services:
       source: ./arkime/wise/source.zeeklogs.js
       target: /opt/arkime/wiseService/source.zeeklogs.js
       read_only: true
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 90s
+      timeout: 30s
+      retries: 3
+      start_period: 210s
   zeek:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:25.01.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -620,7 +626,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:25.01.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -681,11 +687,17 @@ services:
       source: ./zeek/config/local.zeek
       target: /opt/zeek/share/zeek/site/local.zeek
       read_only: true
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   suricata:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:25.01.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -736,7 +748,7 @@ services:
       target: /opt/suricata/include-configs
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "pcap-suricata"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -745,7 +757,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:25.01.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -799,11 +811,17 @@ services:
       source: ./suricata/include-configs
       target: /opt/suricata/include-configs
       read_only: true
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 120s
   file-monitor:
     build:
       context: .
       dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:25.01.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -850,7 +868,7 @@ services:
       target: /yara-rules/custom
       read_only: true
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "watcher", "logger"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -859,7 +877,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:25.01.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -902,11 +920,17 @@ services:
         create_host_path: false
       source: ./pcap/upload
       target: /pcap
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
   pcap-monitor:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.01.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.02.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -952,7 +976,7 @@ services:
       source: ./pcap
       target: /pcap
     healthcheck:
-      test: ["CMD", "supervisorctl", "status", "watch-upload", "pcap-publisher"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -961,7 +985,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:25.01.0
+    image: ghcr.io/idaholab/malcolm/file-upload:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -997,13 +1021,13 @@ services:
       source: ./pcap/upload
       target: /var/www/upload/server/php/chroot/files
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:25.01.0
+    image: ghcr.io/idaholab/malcolm/htadmin:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1050,13 +1074,13 @@ services:
       source: ./nginx/htpasswd
       target: /var/www/htadmin/auth/htpasswd
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:25.01.0
+    image: ghcr.io/idaholab/malcolm/freq:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1088,13 +1112,13 @@ services:
       target: /var/local/ca-trust
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:10004"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:25.01.0
+    image: ghcr.io/idaholab/malcolm/netbox:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1118,12 +1142,14 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
+    - ./config/netbox-postgres.env
+    - ./config/redis.env
     environment:
       VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
     - netbox-postgres
-    - netbox-redis
-    - netbox-redis-cache
+    - redis
+    - redis-cache
     volumes:
     - type: bind
       bind:
@@ -1155,13 +1181,13 @@ services:
       target: /opt/netbox-custom-plugins
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "http://localhost:8080/netbox/api/"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 120s
   netbox-postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:25.01.0
+    image: ghcr.io/idaholab/malcolm/postgresql:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1199,13 +1225,13 @@ services:
       source: ./netbox/postgres
       target: /var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_POSTGRES_DISABLED} == 'true' ]] || pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
-  netbox-redis:
-    image: ghcr.io/idaholab/malcolm/redis:25.01.0
+  redis:
+    image: ghcr.io/idaholab/malcolm/redis:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1220,16 +1246,16 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: netbox-redis
+    hostname: redis
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/netbox-redis.env
+    - ./config/redis.env
     environment:
-      VIRTUAL_HOST: 'netbox-redis.malcolm.local'
+      VIRTUAL_HOST: 'redis.malcolm.local'
     command:
     - sh
     - -c
@@ -1244,16 +1270,16 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./netbox/redis
+      source: ./redis
       target: /data
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
-  netbox-redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:25.01.0
+  redis-cache:
+    image: ghcr.io/idaholab/malcolm/redis:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1268,16 +1294,16 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: netbox-redis-cache
+    hostname: redis-cache
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/netbox-redis-cache.env
+    - ./config/redis.env
     environment:
-      VIRTUAL_HOST: 'netbox-redis-cache.malcolm.local'
+      VIRTUAL_HOST: 'redis-cache.malcolm.local'
     command:
     - sh
     - -c
@@ -1290,13 +1316,13 @@ services:
       target: /var/local/ca-trust
       read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "[[ $${NETBOX_REDIS_DISABLED} == 'true' ]] || ( pidof redis-server || exit 1 )"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 60s
       timeout: 15s
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:25.01.0
+    image: ghcr.io/idaholab/malcolm/api:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1337,7 +1363,7 @@ services:
       target: /var/local/curlrc/.opensearch.primary.curlrc
       read_only: true
     healthcheck:
-      test: ["CMD", "curl", "--silent", "--fail", "http://localhost:5000/mapi/ping"]
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -1346,7 +1372,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.01.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.02.0
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1412,12 +1438,7 @@ services:
       target: /etc/nginx/dhparam/dhparam.pem
       read_only: true
     healthcheck:
-      test:
-      - CMD
-      - curl
-      - --insecure
-      - --silent
-      - https://localhost:443
+      test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
       timeout: 15s
       retries: 3

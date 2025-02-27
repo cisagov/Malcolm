@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:25.01.0
+        image: ghcr.io/idaholab/malcolm/api:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -63,10 +63,9 @@ spec:
           - name: VIRTUAL_HOST
             value: "api.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /mapi/ping
-            port: 5000
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 60
           periodSeconds: 30
           timeoutSeconds: 15

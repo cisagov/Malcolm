@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-live-container
-        image: ghcr.io/idaholab/malcolm/suricata:25.01.0
+        image: ghcr.io/idaholab/malcolm/suricata:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -45,6 +45,15 @@ spec:
               name: suricata-live-env
           - configMapRef:
               name: pcap-capture-env
+        livenessProbe:
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 15
+          successThreshold: 1
+          failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
             name: suricata-live-var-local-catrust-volume
@@ -56,7 +65,7 @@ spec:
             name: suricata-live-custom-configs-volume
       initContainers:
       - name: suricata-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

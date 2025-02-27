@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: netbox-postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:25.01.0
+        image: ghcr.io/idaholab/malcolm/postgresql:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -53,14 +53,7 @@ spec:
         livenessProbe:
           exec:
             command:
-             - sh
-             - "-c"
-             - |
-               /bin/bash <<'EOF'
-
-               [[ "$NETBOX_POSTGRES_DISABLED" == 'true' ]] || pg_isready -d "$POSTGRES_DB" -U "$POSTGRES_USER"
-
-               EOF
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 90
           periodSeconds: 60
           timeoutSeconds: 15
@@ -74,7 +67,7 @@ spec:
             subPath: netbox/postgres
       initContainers:
       - name: netbox-postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

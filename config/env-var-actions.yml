@@ -1,0 +1,49 @@
+copied_environment_variables:
+  # destination_env_file:
+  #   source_env_file:
+  #     destination_key:
+  #       source_key
+  netbox_postgres:
+    netbox:
+      DB_HOST:
+        DB_HOST
+    netbox_postgres:
+      DB_NAME:
+        POSTGRES_DB
+      DB_USER:
+        POSTGRES_USER
+      DB_PASSWORD:
+        POSTGRES_PASSWORD
+  redis:
+    netbox:
+      REDIS_HOST:
+        REDIS_HOST
+      REDIS_CACHE_HOST:
+        REDIS_CACHE_HOST
+    netbox_secret:
+      REDIS_PASSWORD:
+        REDIS_PASSWORD
+removed_environment_variables:
+  # env_file:
+  #   - key1
+  #   - key2
+  lookup_common:
+    - CONNECTION_SECONDS_SEVERITY_THRESHOLD
+  netbox_redis:
+    - REDIS_PASSWORD
+  netbox_common:
+    - NETBOX_REDIS_DISABLED
+  netbox_secret:
+    - DB_PASSWORD
+    - DB_USER
+    - REDIS_CACHE_PASSWORD
+    - REDIS_PASSWORD
+  netbox:
+    - DB_HOST
+    - DB_NAME
+    - REDIS_CACHE_HOST
+    - REDIS_HOST
+  netbox_redis_cache:
+    - REDIS_HOST
+    - REDIS_CACHE_HOST
+    - REDIS_PASSWORD

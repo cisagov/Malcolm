@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:25.01.0
+        image: ghcr.io/idaholab/malcolm/netbox:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,14 +61,17 @@ spec:
               name: netbox-env
           - secretRef:
               name: netbox-secret-env
+          - secretRef:
+              name: redis-env
+          - secretRef:
+              name: netbox-postgres-env
         env:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"
         livenessProbe:
-          httpGet:
-            path: /netbox/api/
-            port: 8080
-            scheme: HTTP
+          exec:
+            command:
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 300
           periodSeconds: 60
           timeoutSeconds: 15
@@ -88,7 +91,7 @@ spec:
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

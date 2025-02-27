@@ -7,8 +7,10 @@ shopt -s nocasematch
 
 DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
+INDEX_ALIAS=${MALCOLM_NETWORK_INDEX_ALIAS:-"malcolm_network"}
 INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
 OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
+OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-"malcolm_other"}
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
@@ -31,24 +33,45 @@ OPENSEARCH_SECONDARY=${OPENSEARCH_SECONDARY:-""}
 
 STARTUP_IMPORT_PERFORMED_FILE=/tmp/shared-objects-created
 
+TMP_WORK_DIR="$(mktemp -d -t shared-object-creation-XXXXXX)"
+
+function cleanup_work_dir {
+  rm -rf "$TMP_WORK_DIR"
+}
+
+function get_tmp_output_filename {
+  mktemp -p "$TMP_WORK_DIR" curl-XXXXXXX
+}
+
 function DoReplacersInFile() {
   # Index pattern and time field name may be specified via environment variable, but need
   #   to be reflected in dashboards, templates, anomaly detectors, etc.
-  # This function takes a file and performs that replacement.
+  # This function takes a file and performs those and other replacements.
   REPLFILE="$1"
+  DATASTORE_TYPE="$2"
+  FILE_TYPE="$3"
   if [[ -n "$REPLFILE" ]] && [[ -f "$REPLFILE" ]]; then
     sed -i "s/MALCOLM_NETWORK_INDEX_PATTERN_REPLACER/${INDEX_PATTERN}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER/${INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_PATTERN_REPLACER/${OTHER_INDEX_PATTERN}/g" "${REPLFILE}" || true
     sed -i "s/MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER/${OTHER_INDEX_TIME_FIELD}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_NETWORK_INDEX_ALIAS_REPLACER/${INDEX_ALIAS}/g" "${REPLFILE}" || true
+    sed -i "s/MALCOLM_OTHER_INDEX_ALIAS_REPLACER/${OTHER_INDEX_ALIAS}/g" "${REPLFILE}" || true
+    if [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]]; then
+      # OpenSearch - flat_object - https://opensearch.org/docs/latest/field-types/supported-field-types/flat-object/
+      # Elasticsearch - flattened - https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html
+      sed -i "s/flat_object/flattened/g" "${REPLFILE}" || true
+    fi
   fi
 }
 
 function DoReplacersForDir() {
   REPLDIR="$1"
+  DATASTORE_TYPE="$2"
+  FILE_TYPE="$3"
   if [[ -n "$REPLDIR" ]] && [[ -d "$REPLDIR" ]]; then
     while IFS= read -r fname; do
-        DoReplacersInFile "$fname"
+        DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$FILE_TYPE"
     done < <( find "$REPLDIR"/ -type f 2>/dev/null )
   fi
 }
@@ -85,11 +108,13 @@ function GetDashboardJsonInfo() {
   RESULT_HASH["timestamp"]="${DASHBOARD_TO_IMPORT_TIMESTAMP}"
 }
 
+trap cleanup_work_dir EXIT
+
 # is the argument to automatically create this index enabled?
 if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
   # give OpenSearch time to start and Arkime to get its own template created before configuring dashboards
-  /data/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
+  /usr/local/bin/opensearch_status.sh -l arkime_sessions3_template >/dev/null 2>&1
 
   CURRENT_ISO_UNIX_SECS="$(date -u +%s)"
   CURRENT_ISO_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ" -d@${CURRENT_ISO_UNIX_SECS} | sed "s/Z$/.000Z/")"
@@ -153,11 +178,12 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         # register the repo name/path for opensearch snapshots (but don't count this an unrecoverable failure)
         if [[ "$LOOP" == "primary" ]] && [[ "$OPENSEARCH_LOCAL" == "true" ]]; then
           echo "Registering index snapshot repository..."
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" -H "Accept: application/json" \
+          CURL_OUT=$(get_tmp_output_filename)
+          curl "${CURL_CONFIG_PARAMS[@]}" -H "Accept: application/json" \
             -H "Content-type: application/json" \
-            -XPUT --location --fail --silent --output /dev/null --show-error "$OPENSEARCH_URL_TO_USE/_snapshot/$ISM_SNAPSHOT_REPO" \
+            -XPUT --location --fail-with-body --output "$CURL_OUT" --silent "$OPENSEARCH_URL_TO_USE/_snapshot/$ISM_SNAPSHOT_REPO" \
             -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }" \
-            || true
+            || ( cat "$CURL_OUT" && echo )
         fi
 
         #############################################################################################################################
@@ -166,9 +192,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         #     (if any) does not match the files we see currently.
 
         TEMPLATES_IMPORTED=false
-        TEMPLATES_IMPORT_DIR="$(mktemp -d -t templates-XXXXXX)"
+        TEMPLATES_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t templates-XXXXXX)"
         rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
-        DoReplacersForDir "$TEMPLATES_IMPORT_DIR"
+        DoReplacersForDir "$TEMPLATES_IMPORT_DIR" "$DATASTORE_TYPE" template
         MALCOLM_TEMPLATE_FILE_ORIG_TMP="$(echo "$MALCOLM_TEMPLATE_FILE_ORIG" | sed "s@$MALCOLM_TEMPLATES_DIR@$TEMPLATES_IMPORT_DIR@")"
 
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
@@ -190,8 +216,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing ECS composable template $TEMP_FILENAME ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" \
-                "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent -XPOST -H "Content-Type: application/json" \
+                "$OPENSEARCH_URL_TO_USE/_component_template/ecs_$TEMP_FILENAME" -d "@$i" || ( cat "$CURL_OUT" && echo )
             done
           fi
 
@@ -201,8 +228,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               TEMP_BASENAME="$(basename "$i")"
               TEMP_FILENAME="${TEMP_BASENAME%.*}"
               echo "Importing custom ECS composable template $TEMP_FILENAME ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" \
-                "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent -XPOST -H "Content-Type: application/json" \
+                "$OPENSEARCH_URL_TO_USE/_component_template/custom_$TEMP_FILENAME" -d "@$i" || ( cat "$CURL_OUT" && echo )
             done
           fi
 
@@ -213,15 +241,15 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           fi
 
           # store the TEMPLATE_HASH we calculated earlier as the _meta.hash for the malcolm template
-          MALCOLM_TEMPLATE_FILE_TEMP="$(mktemp)"
+          MALCOLM_TEMPLATE_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
           ( jq "._meta.hash=\"$TEMPLATE_HASH\"" "$MALCOLM_TEMPLATE_FILE" >"$MALCOLM_TEMPLATE_FILE_TEMP" 2>/dev/null ) && \
             [[ -s "$MALCOLM_TEMPLATE_FILE_TEMP" ]] && \
-            cp -f "$MALCOLM_TEMPLATE_FILE_TEMP" "$MALCOLM_TEMPLATE_FILE" && \
-            rm -f "$MALCOLM_TEMPLATE_FILE_TEMP"
+            cp -f "$MALCOLM_TEMPLATE_FILE_TEMP" "$MALCOLM_TEMPLATE_FILE"
 
           # load malcolm_template containing malcolm data source field type mappings (merged from /opt/templates/malcolm_template.json to /data/init/malcolm_template.json in dashboard-helpers on startup)
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" \
-            "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" 2>&1
+          CURL_OUT=$(get_tmp_output_filename)
+          curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent -XPOST -H "Content-Type: application/json" \
+            "$OPENSEARCH_URL_TO_USE/_index_template/malcolm_template" -d "@$MALCOLM_TEMPLATE_FILE" || ( cat "$CURL_OUT" && echo && false )
 
           # import other templates as well
           for i in "$TEMPLATES_IMPORT_DIR"/*.json; do
@@ -229,8 +257,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             TEMP_FILENAME="${TEMP_BASENAME%.*}"
             if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
               echo "Importing template \"$TEMP_FILENAME\"..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null --show-error -XPOST -H "Content-Type: application/json" \
-                "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" 2>&1 || true
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent -XPOST -H "Content-Type: application/json" \
+                "$OPENSEARCH_URL_TO_USE/_index_template/$TEMP_FILENAME" -d "@$i" || ( cat "$CURL_OUT" && echo )
             fi
           done
 
@@ -252,8 +281,6 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           fi
         done
 
-        rm -rf "${TEMPLATES_IMPORT_DIR}"
-
         # end Templates
         #############################################################################################################################
 
@@ -267,8 +294,8 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           [[ "${TEMPLATES_IMPORTED}" == "true" ]] && SHOW_IMPORT_ERROR="--show-error" || SHOW_IMPORT_ERROR=
 
           # Save off any custom field formatting prior to an overwrite
-          MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp)"
-          ( curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+          MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
+          ( curl "${CURL_CONFIG_PARAMS[@]}" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
                  "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}" 2>/dev/null | \
                  jq -r '.attributes.fieldFormatMap' 2>/dev/null | \
                  jq -c 'with_entries(.value.params.parsedUrl? = null | del(.value.params.parsedUrl))' 2>/dev/null | \
@@ -276,24 +303,25 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
 
           # Create index pattern (preserving custom field formatting)
-          MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp)"
+          MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
           echo "{\"attributes\":{\"title\":\"$INDEX_PATTERN\",\"timeFieldName\":\"$INDEX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
           if (( $MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE > 64 )); then
             echo "Preserving existing field formatting for \"$INDEX_PATTERN\"..."
             jq --slurpfile fieldFormatMap "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" '.attributes.fieldFormatMap = $fieldFormatMap[0]' "$MALCOLM_INDEX_PATTERN_FILE_TEMP" | sponge "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
           fi
           echo "Creating index pattern \"$INDEX_PATTERN\"..."
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+          CURL_OUT=$(get_tmp_output_filename)
+          curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/saved_objects/index-pattern/${INDEX_PATTERN}?overwrite=${TEMPLATES_IMPORTED}" \
-            -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" 2>&1 || true
-          rm -f "$MALCOLM_INDEX_PATTERN_FILE_TEMP" "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP"
+            -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" || ( cat "$CURL_OUT" && echo )
 
           echo "Setting default index pattern..."
 
           # Make it the default index
-          curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+          CURL_OUT=$(get_tmp_output_filename)
+          curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
             "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultIndex" \
-            -d"{\"value\":\"$INDEX_PATTERN\"}" || true
+            -d"{\"value\":\"$INDEX_PATTERN\"}" || ( cat "$CURL_OUT" && echo )
 
           # import other index patterns from other templates discovered above
           for i in ${OTHER_INDEX_PATTERNS[@]}; do
@@ -302,15 +330,15 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             IDX_TIME_FIELD="$(echo "$i" | cut -d';' -f3)"
 
             # Save off any custom field formatting prior to an overwrite
-            MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp)"
-            ( curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
+            ( curl "${CURL_CONFIG_PARAMS[@]}" --silent --location --fail -XGET -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
                    "$DASHB_URL/api/saved_objects/index-pattern/${IDX_ID}" 2>/dev/null | \
                    jq -r '.attributes.fieldFormatMap' 2>/dev/null | \
                    jq -c 'with_entries(.value.params.parsedUrl? = null | del(.value.params.parsedUrl))' 2>/dev/null | \
                    jq '@json' >"$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" 2>/dev/null ) || true
             MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
 
-            MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp)"
+            MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
             echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
             if (( $MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE > 64 )); then
               echo "Preserving existing field formatting for \"$IDX_NAME\"..."
@@ -318,10 +346,10 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             fi
 
             echo "Creating index pattern \"$IDX_NAME\"..."
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --fail --silent --output /dev/null ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent ${SHOW_IMPORT_ERROR} -XPOST -H "Content-Type: application/json" -H "$XSRF_HEADER: anything" \
               "$DASHB_URL/api/saved_objects/index-pattern/${IDX_ID}?overwrite=${TEMPLATES_IMPORTED}" \
-              -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" 2>&1 || true
-            rm -f "$MALCOLM_INDEX_PATTERN_FILE_TEMP" "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP"
+              -d @"$MALCOLM_INDEX_PATTERN_FILE_TEMP" || ( cat "$CURL_OUT" && echo )
           done # i in OTHER_INDEX_PATTERNS
 
           # end Index pattern
@@ -336,9 +364,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           #     objects. If the dashboard doesn't already exist, or if the file-to-be-imported date is newer than the old one,
           #     then import the dashboard.
 
-          DASHBOARDS_IMPORT_DIR="$(mktemp -d -t dashboards-XXXXXX)"
+          DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t dashboards-XXXXXX)"
           rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR"/
+          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -346,7 +374,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             GetDashboardJsonInfo NEW_DASHBOARD_INFO "$i" "$CURRENT_ISO_TIMESTAMP"
 
             # get the old dashboard JSON and its info
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --show-error --output "${i}_old" \
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
               -XGET "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/export?dashboard=$DASHBOARD_TO_IMPORT_ID" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || true
             declare -A OLD_DASHBOARD_INFO
@@ -365,20 +393,20 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
               # import the dashboard
               echo "Importing dashboard \"${NEW_DASHBOARD_INFO["title"]}\" (${NEW_DASHBOARD_INFO["timestamp"]} > ${OLD_DASHBOARD_INFO["timestamp"]}) ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                 -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
+                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i" || ( cat "$CURL_OUT" && echo )
             fi # timestamp check
           done
-          rm -rf "${DASHBOARDS_IMPORT_DIR}"
 
           # beats will no longer import its dashboards into OpenSearch
           # (see opensearch-project/OpenSearch-Dashboards#656 and
           # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
           # manually add load our dashboards in /opt/dashboards/beats as well.
-          BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -d -t beats-XXXXXX)"
+          BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t beats-XXXXXX)"
           rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR"
+          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
           for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -386,7 +414,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             GetDashboardJsonInfo NEW_DASHBOARD_INFO "$i" "$CURRENT_ISO_TIMESTAMP"
 
             # get the old dashboard JSON and its info
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --show-error --output "${i}_old" \
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
               -XGET "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/export?dashboard=$DASHBOARD_TO_IMPORT_ID" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || true
             declare -A OLD_DASHBOARD_INFO
@@ -399,12 +427,12 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
               # import the dashboard
               echo "Importing dashboard \"${NEW_DASHBOARD_INFO["title"]}\" (${NEW_DASHBOARD_INFO["timestamp"]} > ${OLD_DASHBOARD_INFO["timestamp"]}) ..."
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                 -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i"
+                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i" || ( cat "$CURL_OUT" && echo )
             fi # timestamp check
           done
-          rm -rf "${BEATS_DASHBOARDS_IMPORT_DIR}"
 
           echo "$DATASTORE_TYPE Dashboards saved objects import complete!"
 
@@ -417,62 +445,56 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             #############################################################################################################################
             # OpenSearch Tweaks
             #   - TODO: only do these if they've NEVER been done before?
-            echo "Updating $DATASTORE_TYPE UI settings..."
 
             # set dark theme (or not)
+            echo "Setting $DATASTORE_TYPE dark mode ($DARK_MODE)..."
             [[ "$DARK_MODE" == "true" ]] && DARK_MODE_ARG='{"value":true}' || DARK_MODE_ARG='{"value":false}'
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/theme:darkMode" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$DARK_MODE_ARG"
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$DARK_MODE_ARG" || ( cat "$CURL_OUT" && echo )
 
             # set default dashboard
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            echo "Setting $DATASTORE_TYPE default dashboard ($DEFAULT_DASHBOARD)..."
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/defaultRoute" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}"
-
-            # set default query time range
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
-              -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"changes":{"timepicker:timeDefaults":"{\n  \"from\": \"now-24h\",\n  \"to\": \"now\",\n  \"mode\": \"quick\"}"}}'
-
-            # turn off telemetry
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
-              -XPOST "$DASHB_URL/api/telemetry/v2/optIn" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"enabled":false}'
+              -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}" || ( cat "$CURL_OUT" && echo )
 
             # pin filters by default
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/filters:pinnedByDefault" \
                 -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                -d '{"value":true}'
+                -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
             # enable in-session storage
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            echo "Enabled $DATASTORE_TYPE in-session storage for dashboards..."
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d '{"value":true}'
-
-            echo "$DATASTORE_TYPE settings updates complete!"
+              -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
             # end OpenSearch Tweaks
             #############################################################################################################################
-
             
             # OpenSearch Create Initial Indices
 
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPUT "$OPENSEARCH_URL_TO_USE/${MALCOLM_NETWORK_INDEX_PATTERN%?}initial" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || ( cat "$CURL_OUT" && echo )
 
-            curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPUT "$OPENSEARCH_URL_TO_USE/${MALCOLM_OTHER_INDEX_PATTERN%?}initial" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || ( cat "$CURL_OUT" && echo )
 
             # before we go on to create the anomaly detectors, we need to wait for actual network log documents
-            /data/opensearch_status.sh -w >/dev/null 2>&1
+            /usr/local/bin/opensearch_status.sh -w >/dev/null 2>&1
             sleep 60
 
             #############################################################################################################################
@@ -491,9 +513,9 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               DETECTORS_STARTED=0
 
             # Create anomaly detectors here
-            ANOMALY_IMPORT_DIR="$(mktemp -d -t anomaly-XXXXXX)"
+            ANOMALY_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t anomaly-XXXXXX)"
             rsync -a /opt/anomaly_detectors/ "$ANOMALY_IMPORT_DIR"/
-            DoReplacersForDir "$ANOMALY_IMPORT_DIR"
+            DoReplacersForDir "$ANOMALY_IMPORT_DIR" "$DATASTORE_TYPE" anomaly_detector
             for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
               # identify the name of the anomaly detector, and, if it already exists, its
               #   ID and previous update time, as well as the update time of the file to import
@@ -517,13 +539,13 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
                 # Import the anomaly detector
                 ( [[ $DETECTORS_STARTED == 0 ]] || [[ "$DETECTOR_NAME" != "$DUMMY_DETECTOR_NAME" ]] ) && \
                   echo "Importing detector \"${DETECTOR_NAME}\" ($DETECTOR_NEW_UPDATE_TIME > $DETECTOR_EXISTING_UPDATE_TIME) ..." && \
-                  curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+                  CURL_OUT=$(get_tmp_output_filename)
+                  curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                     -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors" \
                     -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                    -d "@$i"
+                    -d "@$i" || ( cat "$CURL_OUT" && echo )
               fi
             done
-            rm -rf "${ANOMALY_IMPORT_DIR}"
 
             # Trigger a start/stop for the dummy detector to make sure the .opendistro-anomaly-detection-state index gets created
             # see:
@@ -541,23 +563,49 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               set -e
               if [[ -n "$DUMMY_DETECTOR_ID" ]]; then
                 echo "Starting $DUMMY_DETECTOR_NAME to initialize anomaly detector engine..."
-                curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error -XPOST \
+                CURL_OUT=$(get_tmp_output_filename)
+                curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent -XPOST \
                   "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_start" \
-                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || ( cat "$CURL_OUT" && echo )
                 sleep 10
-                curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+                CURL_OUT=$(get_tmp_output_filename)
+                curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                   -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID/_stop" \
-                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || ( cat "$CURL_OUT" && echo )
                 sleep 10
-                curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+                CURL_OUT=$(get_tmp_output_filename)
+                curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                   -XDELETE "$OPENSEARCH_URL_TO_USE/_plugins/_anomaly_detection/detectors/$DUMMY_DETECTOR_ID" \
-                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json'
+                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || ( cat "$CURL_OUT" && echo )
               fi
             fi
 
             echo "$DATASTORE_TYPE anomaly detectors creation complete!"
 
             # end OpenSearch anomaly detectors
+            #############################################################################################################################
+
+            #############################################################################################################################
+            # OpenSearch security analytics fields mappings
+            echo "Creating $DATASTORE_TYPE security analytics mappings..."
+
+            SA_MAPPINGS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t sa-mappings-XXXXXX)"
+            rsync -a /opt/security_analytics_mappings/ "$SA_MAPPINGS_IMPORT_DIR"/
+            DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" sa_mapping
+            for i in "${SA_MAPPINGS_IMPORT_DIR}"/*.json; do
+              set +e
+              RULE_TOPIC="$(jq -r '.rule_topic' 2>/dev/null < "$i")"
+              INDEX_NAME="$(jq -r '.index_name' 2>/dev/null < "$i")"
+              echo "Creating mappings for \"${INDEX_NAME}\" / \"${RULE_TOPIC}\" ..." && \
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+                -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_security_analytics/mappings" \
+                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+                -d "@$i" || ( cat "$CURL_OUT" && echo )
+              set -e
+            done
+
+            # end OpenSearch security analytics
             #############################################################################################################################
 
             #############################################################################################################################
@@ -570,23 +618,24 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             # notification channels
             for i in /opt/notifications/channels/*.json; do
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                 -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_notifications/configs" \
                 -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                -d "@$i"
+                -d "@$i" || ( cat "$CURL_OUT" && echo )
             done
 
             # monitors
-            ALERTING_IMPORT_DIR="$(mktemp -d -t alerting-XXXXXX)"
+            ALERTING_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t alerting-XXXXXX)"
             rsync -a /opt/alerting/monitors/ "$ALERTING_IMPORT_DIR"/
-            DoReplacersForDir "$ALERTING_IMPORT_DIR"
+            DoReplacersForDir "$ALERTING_IMPORT_DIR" "$DATASTORE_TYPE" monitor
             for i in "${ALERTING_IMPORT_DIR}"/*.json; do
-              curl "${CURL_CONFIG_PARAMS[@]}" -w "\n" --location --silent --output /dev/null --show-error \
+              CURL_OUT=$(get_tmp_output_filename)
+              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                 -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_alerting/monitors" \
                 -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                -d "@$i"
+                -d "@$i" || ( cat "$CURL_OUT" && echo )
             done
-            rm -rf "${ALERTING_IMPORT_DIR}"
 
             echo "$DATASTORE_TYPE alerting objects creation complete!"
 

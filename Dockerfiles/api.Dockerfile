@@ -11,8 +11,8 @@ RUN    apt-get update -q \
     && python3 -m pip install --break-system-packages --no-cache-dir --upgrade pip \
     && python3 -m pip install --break-system-packages --no-cache-dir flake8
 
-COPY ./api /usr/src/app/
-COPY scripts/malcolm_utils.py /usr/src/app/
+ADD ./api /usr/src/app/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
@@ -56,15 +56,15 @@ ENV RESULT_SET_LIMIT $RESULT_SET_LIMIT
 
 WORKDIR "${APP_HOME}"
 
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
-COPY ./api "${APP_HOME}"
-COPY scripts/malcolm_utils.py "${APP_HOME}"/
-COPY shared/bin/opensearch_status.sh "${APP_HOME}"/
-
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD ./api "${APP_HOME}"
+ADD --chmod=644 scripts/malcolm_utils.py "${APP_HOME}"/
+ADD --chmod=755 shared/bin/opensearch_status.sh "${APP_HOME}"/
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/api.sh /usr/local/bin/container_health.sh
 
 RUN    apt-get -q update \
     && apt-get -y -q --no-install-recommends upgrade \

@@ -9,6 +9,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `api` - code and configuration for the `api` container, which provides a REST API to query Malcolm
 * `arkime` - code and configuration for the `arkime` container that processes PCAP files using `capture`, which serves the Viewer application
 * `config` - a directory containing the environment variable files that define Malcolm's configuration
+* `container-health-scripts` - scripts included in Malcolm's images for [Docker health checks](https://docs.docker.com/reference/dockerfile/#healthcheck) and [Kubernetes liveness checks](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command)
 * `dashboards` - code and configuration for the `dashboards` container for creating additional ad-hoc visualizations and dashboards beyond that which is provided by Arkime Viewer
 * `Dockerfiles` - a directory containing build instructions for Malcolm's images
 * `docs` - a directory containing instructions and documentation
@@ -21,20 +22,23 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `htadmin` - configuration for the `htadmin` user account management container
 * `logstash` - code and configuration for the `logstash` container that parses Zeek logs and forwards them to the `opensearch` container
 * `malcolm-iso` - code and configuration for building an [installer ISO](malcolm-iso.md#ISO) for a minimal Debian-based Linux installation for running Malcolm
-* `netbox` - code and configuration for the `netbox`, `netbox-postgres`, `netbox-redis`, and `netbox-redis-cache` containers which provide asset management capabilities
+* `netbox` - code and configuration for the `netbox` and `netbox-postgres`containers which provide asset management capabilities
 * `nginx` - configuration for the `nginx` reverse-proxy container
 * `opensearch` - an initially empty directory where the OpenSearch database instance will reside
 * `opensearch-backup` - an initially empty directory for storing OpenSearch [index snapshots](index-management.md#IndexManagement) 
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container that can capture network traffic
 * `pcap-monitor` - code and configuration for the `pcap-monitor` container that watches for new or uploaded PCAP files and notifies the other services to process them
+* `redis` - an initially empty directory where the Redis database runtime files will reside
 * `scripts` - control scripts for starting, stopping, restarting, etc., Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
 * `suricata` - code and configuration for the `suricata` container that handles PCAP processing using Suricata
 * `suricata-logs` - an initially empty directory for Suricata logs to be uploaded, processed, and stored
+* `yara` - a directory for custom user-provided YARA rules
 * `zeek` - code and configuration for the `Zeek` container that handles PCAP processing using Zeek
 * `zeek-logs` - an initially empty directory for Zeek logs to be uploaded, processed, and stored
 * `_includes` and `_layouts` - templates for the HTML version of the documentation
+* `.github` - GitHub workflow actions used to build [Malcolm using GitHub runners](contributing-github-runners.md#GitHubRunners)
 
 and the following files of special note:
 

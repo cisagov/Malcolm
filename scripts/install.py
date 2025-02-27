@@ -1277,7 +1277,7 @@ class Installer(object):
                             os.path.join(zeekLogDirFull, os.path.join('extract_files', 'quarantine')),
                         ):
                             try:
-                                if args.debug:
+                                if self.debug:
                                     eprint(f"Creating {pathToCreate}")
                                 pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
                                 if (
@@ -1285,7 +1285,7 @@ class Installer(object):
                                     and (self.scriptUser == "root")
                                     and (getpwuid(os.stat(pathToCreate).st_uid).pw_name == self.scriptUser)
                                 ):
-                                    if args.debug:
+                                    if self.debug:
                                         eprint(f"Setting permissions of {pathToCreate} to {puid}:{pgid}")
                                     # change ownership of newly-created directory to match puid/pgid
                                     os.chown(pathToCreate, int(puid), int(pgid))
@@ -2083,7 +2083,7 @@ class Installer(object):
             for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
                 envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
                 if not os.path.isfile(envFile):
-                    if args.debug:
+                    if self.debug:
                         eprint(f"Creating {envFile} from {envExampleFile}")
                     shutil.copyfile(envExampleFile, envFile)
 
@@ -2381,13 +2381,6 @@ class Installer(object):
                 True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_POSTGRES_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
-            ),
-            # enable/disable netbox (redis)
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_REDIS_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
@@ -2839,7 +2832,7 @@ class Installer(object):
             and (self.scriptUser == "root")
             and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
         ):
-            if args.debug:
+            if self.debug:
                 eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
             os.chown(args.configDir, int(puid), int(pgid))
         envFiles = []
@@ -2851,7 +2844,7 @@ class Installer(object):
                 and (self.scriptUser == "root")
                 and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
             ):
-                if args.debug:
+                if self.debug:
                     eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
                 os.chown(envFile, int(puid), int(pgid))
 
@@ -2967,6 +2960,22 @@ class Installer(object):
                         ###################################
                         # port bind IPs (0.0.0.0 vs. 127.0.0.1)
                         # set bind IPs based on whether services should be externally exposed or not
+
+                        ufwManagerCmd = 'ufw_manager.sh'
+                        if not which(ufwManagerCmd, debug=self.debug):
+                            if os.path.isfile('/usr/local/bin/ufw_manager.sh'):
+                                ufwManagerCmd = '/usr/local/bin/ufw_manager.sh'
+                            else:
+                                ufwManagerCmd = None
+
+                        if ufwManagerCmd:
+                            err, out = self.run_process(
+                                [ufwManagerCmd, '-a', 'reset'],
+                                privileged=True,
+                            )
+                            if err != 0:
+                                eprint(f"Resetting UFW firewall failed: {out}")
+
                         for service, portInfos in {
                             'filebeat': [
                                 [filebeatTcpOpen, 5045, 5045, 'tcp'],
@@ -2990,6 +2999,15 @@ class Installer(object):
                                             data['services'][service]['ports'].append(
                                                 f"0.0.0.0:{portInfo[1]}:{portInfo[2]}/{portInfo[3]}"
                                             )
+                                            if ufwManagerCmd:
+                                                err, out = self.run_process(
+                                                    [ufwManagerCmd, '-a', 'allow', f'{portInfo[1]}/{portInfo[3]}'],
+                                                    privileged=True,
+                                                )
+                                                if err != 0:
+                                                    eprint(
+                                                        f"Setting UFW 'allow {portInfo[1]}/{portInfo[3]}' failed: {out}"
+                                                    )
                                     if not data['services'][service]['ports']:
                                         data['services'][service].pop('ports', None)
                         ###################################
@@ -2997,16 +3015,6 @@ class Installer(object):
                         ###################################
                         # nginx-proxy has got a lot going on
                         if 'nginx-proxy' in data['services']:
-
-                            # set nginx-proxy health check based on whether they're using HTTPS or not
-                            if 'healthcheck' in data['services']['nginx-proxy']:
-                                data['services']['nginx-proxy']['healthcheck']['test'] = [
-                                    "CMD",
-                                    "curl",
-                                    "--insecure",
-                                    "--silent",
-                                    f"{'https' if nginxSSL else 'http'}://localhost:443",
-                                ]
 
                             # set bind IPs and ports based on whether it should be externally exposed or not
                             if malcolmProfile == PROFILE_HEDGEHOG:
@@ -3019,6 +3027,15 @@ class Installer(object):
                                     data['services']['nginx-proxy']['ports'].append(
                                         f"0.0.0.0:{'9200' if nginxSSL else '9201'}:9200/tcp"
                                     )
+                                    if ufwManagerCmd:
+                                        err, out = self.run_process(
+                                            [ufwManagerCmd, '-a', 'allow', f"{'9200' if nginxSSL else '9201'}/tcp"],
+                                            privileged=True,
+                                        )
+                                        if err != 0:
+                                            eprint(
+                                                f"Setting UFW 'allow {'9200' if nginxSSL else '9201'}/tcp' failed: {out}"
+                                            )
 
                             # enable/disable/configure traefik labels if applicable
                             for label in (

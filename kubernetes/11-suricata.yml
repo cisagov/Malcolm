@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-offline-container
-        image: ghcr.io/idaholab/malcolm/suricata:25.01.0
+        image: ghcr.io/idaholab/malcolm/suricata:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -34,9 +34,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - pcap-suricata
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 120
           periodSeconds: 30
           timeoutSeconds: 15
@@ -55,7 +53,7 @@ spec:
             name: suricata-offline-custom-configs-volume
       initContainers:
       - name: suricata-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.01.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true

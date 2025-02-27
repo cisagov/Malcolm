@@ -48,19 +48,21 @@ ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
 ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
 
+COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
+ADD dashboards/security_analytics_mappings /opt/security_analytics_mappings
 ADD dashboards/alerting /opt/alerting
 ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
-ADD dashboards/scripts /data/
-ADD dashboards/supervisord.conf /etc/supervisord.conf
+ADD dashboards/scripts /usr/local/bin
+ADD --chmod=644 dashboards/supervisord.conf /etc/supervisord.conf
 ADD dashboards/templates /opt/templates
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/opensearch_status.sh /data/
-ADD scripts/malcolm_utils.py /data/
+ADD --chmod=755 container-health-scripts/dashboards-helper.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
@@ -91,8 +93,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"match_only_text"/\1"text"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"constant_keyword"/\1"keyword"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"wildcard"/\1"keyword"/' "{}" \; && \
-      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"nested"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"flattened"/\1"flat_object"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
+      find /opt/ecs-templates-os -name "*.json" -exec bash -c "jq 'walk(if type == \"object\" and has(\"synthetic_source_keep\") then del(.synthetic_source_keep) else . end)' \"{}\" | sponge \"{}\"" \; && \
       rm -rf /opt/ecs && \
     chown -R ${PUSER}:${PGROUP} /data/init \
                                 /opt/alerting \
@@ -103,9 +106,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
                                 /opt/maps \
                                 /opt/notifications \
                                 /opt/templates && \
-    chmod 755 /data/*.sh /data/*.py /data/init && \
+    chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo "*/2 * * * * /data/shared-object-creation.sh\n0 10 * * * /data/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /data/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /data/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo "*/2 * * * * /usr/local/bin/shared-object-creation.sh\n0 10 * * * /usr/local/bin/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /usr/local/bin/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /usr/local/bin/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 

@@ -120,20 +120,21 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 filebeat/scripts/evtx_to_jsonl.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-ADD filebeat/filebeat-logs.yml /usr/share/filebeat-logs/filebeat-logs.yml
-ADD filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
-ADD filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
-ADD filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/filebeat-syslog-udp.yml
-ADD filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/filebeat.sh /usr/local/bin/container_health.sh
+ADD --chmod=644 filebeat/filebeat-logs.yml /usr/share/filebeat-logs/filebeat-logs.yml
+ADD --chmod=644 filebeat/filebeat-nginx.yml /usr/share/filebeat-nginx/filebeat-nginx.yml
+ADD --chmod=644 filebeat/filebeat-tcp.yml /usr/share/filebeat-tcp/filebeat-tcp.yml
+ADD --chmod=644 filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/filebeat-syslog-udp.yml
+ADD --chmod=644 filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
-ADD scripts/malcolm_utils.py /usr/local/bin/
-ADD shared/bin/watch_common.py /usr/local/bin/
-ADD shared/bin/opensearch_status.sh /usr/local/bin/
-ADD filebeat/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
+ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
+ADD --chmod=644 filebeat/supervisord.conf /etc/supervisord.conf
+
 RUN for INPUT in logs nginx tcp syslog-tcp syslog-udp; do \
       mkdir -p /usr/share/filebeat-$INPUT/data; \
       chown -R root:${PGROUP} /usr/share/filebeat-$INPUT; \

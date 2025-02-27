@@ -75,10 +75,12 @@ DEFAULT_VARS.update(
         'APP_LAYER_FRAMES': False,
         'ASN1_MAX_FRAMES': 256,
         'AUTOFP_SCHEDULER': 'hash',
+        'AUTO_ANALYZE_PCAP_THREADS': 0,
         'BITTORRENT_ENABLED': True,
         'BITTORRENT_EVE_ENABLED': False,
         'CAPTURE_CHECKSUM_VALIDATION': 'none',
         'CAPTURE_DISABLE_OFFLOADING': True,
+        'CORE_DUMP_MAX_DUMP': 0,
         'CUSTOM_RULES_ONLY': False,
         'DCERPC_ENABLED': True,
         'DCERPC_EVE_ENABLED': False,
@@ -131,9 +133,9 @@ DEFAULT_VARS.update(
         'HOST_PREALLOC': 1000,
         'HTTP2_ENABLED': True,
         'HTTP2_EVE_ENABLED': False,
+        'HTTP2_MAX_REASSEMBLY_SIZE': 102400,
         'HTTP2_MAX_STREAMS': 4096,
         'HTTP2_MAX_TABLE_SIZE': 65536,
-        'HTTP2_MAX_REASSEMBLY_SIZE': 102400,
         'HTTP_ENABLED': True,
         'HTTP_EVE_ENABLED': False,
         'HTTP_EXTENDED': False,
@@ -168,9 +170,9 @@ DEFAULT_VARS.update(
         'PCRE_RECURSION': 1500,
         'PGSQL_ENABLED': True,
         'PGSQL_EVE_ENABLED': False,
-        'PGSQL_STREAM_DEPTH': 0,
         'PGSQL_MAX_TX': 1024,
         'PGSQL_PASSWORDS': False,
+        'PGSQL_STREAM_DEPTH': 0,
         'QUIC_ENABLED': True,
         'QUIC_EVE_ENABLED': False,
         'RDP_ENABLED': True,
@@ -178,8 +180,9 @@ DEFAULT_VARS.update(
         'RFB_ENABLED': True,
         'RFB_EVE_ENABLED': False,
         'RFB_PORTS': "[5900,5901,5902,5903,5904,5905,5906,5907,5908,5909]",
+        'RUN_DIR': os.getenv('SURICATA_RUN_DIR', os.path.join(os.getenv('SUPERVISOR_PATH', '/var/run'), 'suricata')),
         'RUNMODE': 'autofp',
-        'RUN_DIR': os.path.join(os.getenv('SUPERVISOR_PATH', '/var/run'), 'suricata'),
+        'SECURITY_LIMIT_NOPROC': False,
         'SHELLCODE_PORTS': '!80',
         'SIP_ENABLED': True,
         'SIP_EVE_ENABLED': False,
@@ -200,18 +203,18 @@ DEFAULT_VARS.update(
         'SMTP_INSPECTED_TRACKER_CONTENT_INSPECT_MIN_SIZE': 32768,
         'SMTP_INSPECTED_TRACKER_CONTENT_INSPECT_WINDOW': 4096,
         'SMTP_INSPECTED_TRACKER_CONTENT_LIMIT': 100000,
-        'SMTP_RAW_EXTRACTION': False,
         'SMTP_MAX_TX': 256,
+        'SMTP_RAW_EXTRACTION': False,
         'SNMP_ENABLED': True,
         'SNMP_EVE_ENABLED': False,
         'SSH_ENABLED': True,
         'SSH_EVE_ENABLED': False,
         'SSH_HASSH': True,
         'SSH_PORTS': 22,
+        'STATS_DECODER_EVENTS': False,
         'STATS_ENABLED': False,
         'STATS_EVE_ENABLED': False,
         'STATS_INTERVAL': 30,
-        'STATS_DECODER_EVENTS': False,
         'STREAM_CHECKSUM_VALIDATION': False,
         'STREAM_INLINE': 'auto',
         'STREAM_MEMCAP': '64mb',
@@ -229,8 +232,8 @@ DEFAULT_VARS.update(
         'TFTP_ENABLED': True,
         'TFTP_EVE_ENABLED': False,
         'TLS_ENABLED': True,
-        'TLS_EVE_ENABLED': False,
         'TLS_ENCRYPTION_HANDLING': 'bypass',
+        'TLS_EVE_ENABLED': False,
         'TLS_EXTENDED': False,
         'TLS_JA3': 'auto',
         'TLS_PORTS': 443,
@@ -254,6 +257,8 @@ for varName, varVal in [
             newVal = True
         elif (newVal.lower() == 'no') or (newVal.lower() == 'false'):
             newVal = False
+        elif newVal.upper() == 'SURICATA_NONE':
+            newVal = None
     DEFAULT_VARS[varName.removeprefix("SURICATA_")] = newVal
 
 ###################################################################################################
@@ -1132,6 +1137,9 @@ def main():
             )
 
     # remaining protocol-related settings and global-settings not in the eve-log section
+    cfg.pop('run-as', None)
+    cfg.pop('coredump', None)
+    cfg.pop('threading', None)
     for cfgKey in (
         ['app-layer', 'protocols', 'dcerpc', 'max-tx', 'DCERPC_MAX_TX'],
         ['app-layer', 'protocols', 'ftp', 'memcap', 'FTP_MEMCAP'],
@@ -1189,6 +1197,7 @@ def main():
         ['app-layer', 'protocols', 'tls', 'encryption-handling', 'TLS_ENCRYPTION_HANDLING'],
         ['asn1-max-frames', 'ASN1_MAX_FRAMES'],
         ['autofp-scheduler', 'AUTOFP_SCHEDULER'],
+        ['coredump', 'max-dump', 'CORE_DUMP_MAX_DUMP'],
         ['default-packet-size', 'PACKET_SIZE'],
         ['default-rule-path', 'MANAGED_RULES_DIR'],
         ['defrag', 'hash-size', 'DEFRAG_HASH_SIZE'],
@@ -1208,6 +1217,7 @@ def main():
         ['pcre', 'match-limit', 'PCRE_MATCH_LIMIT'],
         ['pcre', 'match-limit-recursion', 'PCRE_RECURSION'],
         ['runmode', 'RUNMODE'],
+        ['security', 'limit-noproc', 'SECURITY_LIMIT_NOPROC'],
         ['stream', 'checksum-validation', 'STREAM_CHECKSUM_VALIDATION'],
         ['stream', 'inline', 'STREAM_INLINE'],
         ['stream', 'memcap', 'STREAM_MEMCAP'],
@@ -1222,11 +1232,28 @@ def main():
             cfg,
             cfgKey[:-1],
             DEFAULT_VARS[cfgKey[-1]],
+            deleteIfNone=True,
         )
 
-    cfg.pop('run-as', None)
-    cfg.pop('coredump', None)
-    deep_set(cfg, ['coredump', 'max-dump'], 0)
+    # Special case for setting threading for uploaded PCAP (non-live capture). If you want
+    #   more control over threading (affinity, etc.) set AUTO_ANALYZE_PCAP_THREADS=0 and
+    #   include your own config in ./suricata/include-configs/
+    #   See "Custom Rules, Scripts and Plugins > Suricata" in the documentation.
+    if (
+        ((captureIface is None) or (captureIface == 'lo'))
+        and (DEFAULT_VARS['RUNMODE'] == 'autofp')
+        and DEFAULT_VARS['AUTO_ANALYZE_PCAP_THREADS']
+    ):
+        try:
+            threadCount = max(1, int(DEFAULT_VARS['AUTO_ANALYZE_PCAP_THREADS']))
+        except Exception:
+            threadCount = 1
+        deep_set(cfg, ['threading', 'set-cpu-affinity'], True)
+        deep_set(
+            cfg,
+            ['threading', 'cpu-affinity'],
+            [{'worker-cpu-set': {'cpu': ["all"], 'mode': "balanced", 'threads': threadCount}}],
+        )
 
     if DEFAULT_VARS['RUN_DIR'] is not None:
         cfg.pop('unix-command', None)

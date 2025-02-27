@@ -104,13 +104,14 @@ ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-COPY --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/capa-build.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/yara_rules_setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/capa-build.sh /usr/local/bin/
 ADD nginx/landingpage/css "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/css"
 ADD nginx/landingpage/js "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/js"
 ADD --chmod=644 docs/images/logo/Malcolm_background.png "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/assets/img/bg-masthead.png"
-COPY --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
-COPY --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
+ADD --chmod=644 docs/images/icon/favicon.ico "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}/favicon.ico"
+ADD --chmod=755 shared/bin/web-ui-asset-download.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/file-monitor.sh /usr/local/bin/container_health.sh
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
@@ -228,16 +229,16 @@ RUN /usr/bin/freshclam freshclam --config-file=/etc/clamav/freshclam.conf
 
 USER root
 
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
-COPY --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
-COPY --chmod=644 shared/bin/watch_common.py /usr/local/bin/
-COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
-COPY --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
-COPY --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/prune_files.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
+ADD --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
+ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
+ADD --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 
 WORKDIR /zeek/extract_files
 

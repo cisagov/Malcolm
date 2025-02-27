@@ -137,7 +137,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
 * [Deploying Malcolm in Other Third-Party Environments](third-party-envs.md#ThirdPartyEnv)
 * [Hardening](hardening.md#Hardening)
     - [Compliance Exceptions](hardening.md#ComplianceExceptions)
-* [Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)
+* [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
 * [Upgrading Malcolm](malcolm-upgrade.md#UpgradePlan)
 * [Modifying or Contributing to Malcolm](contributing-guide.md#Contributing)
     - [Local modifications](contributing-local-modifications.md#LocalMods)

@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: dashboards-helper-container
-        image: ghcr.io/idaholab/malcolm/dashboards-helper:25.01.0
+        image: ghcr.io/idaholab/malcolm/dashboards-helper:25.02.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -55,10 +55,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - supervisorctl
-            - status
-            - cron
-            - maps
+            - /usr/local/bin/container_health.sh
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 15

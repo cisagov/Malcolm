@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - main
-      - development
+      - staging
     paths:
       - 'arkime/**'
       - 'Dockerfiles/arkime.Dockerfile'
       - 'shared/bin/*'
       - '!shared/bin/capa-build.sh'
       - '!shared/bin/common-init.sh'
+      - '!shared/bin/tx-rx-secure.sh'
       - '!shared/bin/extracted_files_http_server.py'
       - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/os-disk-config.py'
@@ -24,7 +25,7 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     permissions:
       actions: write
       packages: write
@@ -33,9 +34,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - linux/amd64
-          - linux/arm64
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
+            platform: linux/amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            platform: linux/arm64
     steps:
       -
         name: Cancel previous run in progress
@@ -73,12 +78,6 @@ jobs:
         run: echo "mversion=$(grep -P "^\s+image:.*/malcolm/" docker-compose-dev.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)" >> $GITHUB_OUTPUT
         id: extract_malcolm_version
       -
-        name: Set up QEMU
-        id: setup-qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: ${{ matrix.platform }}
-      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -93,7 +92,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfiles/arkime.Dockerfile

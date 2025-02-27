@@ -130,17 +130,18 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
-COPY --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
-COPY --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
-COPY --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
-COPY --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
-COPY --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
-COPY --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
-COPY --chmod=755 suricata/scripts/docker_entrypoint.sh /usr/local/bin/
-COPY --chmod=755 suricata/scripts/suricata-update-rules.sh /usr/local/bin/
-COPY --chmod=755 suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
+ADD --chmod=644 shared/bin/suricata_socket.py /usr/local/bin/
+ADD --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
+ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
+ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
+ADD --chmod=755 container-health-scripts/suricata.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 shared/bin/suricata_config_populate.py /usr/local/bin/
+ADD --chmod=755 suricata/rules-default/ "$SURICATA_DEFAULT_RULES_DIR"/
+ADD suricata/scripts /usr/local/bin/
 
 ARG PCAP_PIPELINE_VERBOSITY=""
 ARG PCAP_MONITOR_HOST=pcap-monitor
