@@ -898,6 +898,7 @@ class MalcolmSource extends WISESource {
       "zeek.dnp3.iin",
       "zeek.dnp3.iin_flags",
       "zeek.dnp3_control.block_type",
+      "zeek.dnp3_control.clear_bit",
       "zeek.dnp3_control.execute_count",
       "zeek.dnp3_control.function_code",
       "zeek.dnp3_control.index_number",

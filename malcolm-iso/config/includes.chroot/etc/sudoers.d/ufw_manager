@@ -1,0 +1,2 @@
+# allow unprivileged mgmt of UFW access for Malcolm service ports
+%netdev ALL=(root) NOPASSWD: /usr/local/bin/ufw_manager.sh

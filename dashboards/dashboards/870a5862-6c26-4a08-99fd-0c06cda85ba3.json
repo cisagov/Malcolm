@@ -444,6 +444,7 @@
           "zeek.dnp3_control.function_code",
           "zeek.dnp3_control.trip_control_code",
           "zeek.dnp3_control.operation_type",
+          "zeek.dnp3_control.clear_bit",
           "zeek.dnp3_control.status_code"
         ],
         "sort": [

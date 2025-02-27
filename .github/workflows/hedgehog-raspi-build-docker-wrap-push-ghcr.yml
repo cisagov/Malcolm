@@ -98,7 +98,7 @@ jobs:
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
           echo "VCS_REVSION=${{ steps.extract_commit_sha.outputs.sha }}" > ./shared/environment.chroot
           echo "BUILD_JOBS=2" > ./shared/environment.chroot
-          sudo make raspi_4_bookworm.img
+          sudo make raspi_4_bookworm.img.xz
           sudo chmod 644 ./raspi_4_bookworm*.*
           popd
       -
