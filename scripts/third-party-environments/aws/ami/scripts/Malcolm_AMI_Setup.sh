@@ -92,6 +92,7 @@ function InstallEssentialPackages {
         dialog \
         git \
         httpd-tools \
+        jq \
         make \
         openssl \
         tmux \
@@ -248,6 +249,24 @@ function _InstallCroc {
 }
 
 ################################################################################
+# _InstallYQ - mikefarah/yq: YAML command-line utility
+function _InstallYQ {
+  YQ_RELEASE="$(_GitLatestRelease mikefarah/yq)"
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_arm64"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_amd64"
+  else
+    YQ_URL=
+  fi
+  if [[ -n "$YQ_URL" ]]; then
+    $SUDO_CMD curl -sSL -o /usr/bin/yq "$YQ_URL"
+    $SUDO_CMD chmod 755 /usr/bin/yq
+    $SUDO_CMD chown root:root /usr/bin/yq
+  fi
+}
+
+################################################################################
 # _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
 function _InstallBoringProxy {
   BORING_RELEASE="$(_GitLatestRelease boringproxy/boringproxy)"
@@ -271,6 +290,7 @@ function _InstallBoringProxy {
 # InstallUserLocalBinaries - install various tools to LOCAL_BIN_PATH
 function InstallUserLocalBinaries {
     [[ ! -f /usr/bin/croc ]] && _InstallCroc
+    [[ ! -f /usr/bin/yq ]] && _InstallYQ
     [[ ! -f /usr/bin/boringproxy ]] && _InstallBoringProxy
 }
 
