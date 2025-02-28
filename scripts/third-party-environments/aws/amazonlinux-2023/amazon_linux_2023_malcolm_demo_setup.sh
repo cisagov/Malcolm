@@ -68,7 +68,6 @@ ENV_LIST=(
   peco
   ripgrep
   viddy
-  yq
 )
 
 ###################################################################################
@@ -336,6 +335,24 @@ function _InstallCroc {
 }
 
 ################################################################################
+# _InstallYQ - mikefarah/yq: YAML command-line utility
+function _InstallYQ {
+  mkdir -p "$LOCAL_BIN_PATH"
+  YQ_RELEASE="$(_GitLatestRelease mikefarah/yq)"
+  if [[ "$LINUX_CPU" == "arm64" ]]; then
+    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_arm64"
+  elif [[ "$LINUX_CPU" == "amd64" ]]; then
+    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_amd64"
+  else
+    YQ_URL=
+  fi
+  if [[ -n "$YQ_URL" ]]; then
+    curl -sSL -o "$LOCAL_BIN_PATH"/yq "$YQ_URL"
+    chmod 755 "$LOCAL_BIN_PATH"/yq
+  fi
+}
+
+################################################################################
 # _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
 function _InstallBoringProxy {
   mkdir -p "$LOCAL_BIN_PATH"
@@ -362,6 +379,7 @@ function InstallUserLocalBinaries {
   CONFIRMATION=$(_GetConfirmation "Install user-local binaries/packages [Y/n]?" Y)
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
+    [[ ! -f "${LOCAL_BIN_PATH}"/yq ]] && _InstallYQ
     [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
   fi
 }
@@ -541,7 +559,7 @@ function InstallMalcolm {
     fi
 
     pushd "$LOCAL_BIN_PATH" >/dev/null 2>&1
-    ln -f -s -r "$MALCOLM_PATH"/scripts/demo/reset_and_auto_populate.sh ./reset_and_auto_populate.sh
+    ln -f -s -r "$MALCOLM_PATH"/scripts/reset_and_auto_populate.sh ./reset_and_auto_populate.sh
     curl -sSL -J -O https://raw.githubusercontent.com/idaholab/Malcolm-Test-Artifacts/refs/heads/main/tools/pcap_time_shift.py
     chmod 755 pcap_time_shift.py
     popd >/dev/null 2>&1

@@ -44,7 +44,6 @@ sudo apt-get -y -q --no-install-recommends install \
     unzip \
     vim-tiny \
     xz-utils \
-    yq \
     zip \
     zlib1g
 sudo ln -s -r /usr/bin/batcat /usr/bin/bat
