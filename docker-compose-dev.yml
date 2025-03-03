@@ -1142,12 +1142,12 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
-    - ./config/netbox-postgres.env
+    - ./config/postgres.env
     - ./config/redis.env
     environment:
       VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
-    - netbox-postgres
+    - postgres
     - redis
     - redis-cache
     volumes:
@@ -1186,7 +1186,7 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
-  netbox-postgres:
+  postgres:
     image: ghcr.io/idaholab/malcolm/postgresql:25.03.0
     profiles: ["malcolm"]
     userns_mode: keep-id
@@ -1202,16 +1202,16 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: netbox-postgres
+    hostname: postgres
     networks:
     - default
     env_file:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/netbox-common.env
-    - ./config/netbox-postgres.env
+    - ./config/postgres.env
     environment:
-      VIRTUAL_HOST: 'netbox-postgres.malcolm.local'
+      VIRTUAL_HOST: 'postgres.malcolm.local'
     volumes:
     - type: bind
       bind:
@@ -1222,7 +1222,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./netbox/postgres
+      source: ./postgres
       target: /var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]

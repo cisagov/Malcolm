@@ -64,7 +64,7 @@ spec:
           - secretRef:
               name: redis-env
           - secretRef:
-              name: netbox-postgres-env
+              name: postgres-env
         env:
           - name: VIRTUAL_HOST
             value: "netbox.malcolm.local"

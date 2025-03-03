@@ -150,7 +150,7 @@ def main():
         '--token',
         dest='netboxToken',
         type=str,
-        default=None,
+        default=os.getenv('SUPERUSER_API_TOKEN', None),
         required=False,
         help="NetBox API Token",
     )
@@ -249,7 +249,7 @@ def main():
         '--postgres-host',
         dest='postgresHost',
         type=str,
-        default=os.getenv('DB_HOST', 'netbox-postgres'),
+        default=os.getenv('POSTGRES_HOST', 'postgres'),
         required=False,
         help="postgreSQL host for preloading an entire database dump .gz (specified with --preload-backup or loaded from the --preload directory)",
     )
@@ -257,7 +257,7 @@ def main():
         '--postgres-db',
         dest='postgresDB',
         type=str,
-        default=os.getenv('DB_NAME', 'netbox'),
+        default=os.getenv('POSTGRES_NETBOX_DB', 'netbox'),
         required=False,
         help="postgreSQL database name",
     )
@@ -265,7 +265,7 @@ def main():
         '--postgres-user',
         dest='postgresUser',
         type=str,
-        default=os.getenv('DB_USER', 'netbox'),
+        default=os.getenv('POSTGRES_NETBOX_USER', 'netbox'),
         required=False,
         help="postgreSQL user name",
     )
@@ -273,7 +273,7 @@ def main():
         '--postgres-password',
         dest='postgresPassword',
         type=str,
-        default=os.getenv('DB_PASSWORD', ''),
+        default=os.getenv('POSTGRES_NETBOX_PASSWORD', ''),
         required=False,
         help="postgreSQL password",
     )
@@ -353,20 +353,6 @@ def main():
             err, results = malcolm_utils.run_process(cmd, env=osEnv, logger=logging)
             if err != 0:
                 raise Exception(f'Error {err} creating new NetBox database: {results}')
-
-            # make sure permissions are set up right
-            cmd = [
-                'psql',
-                '-h',
-                args.postgresHost,
-                '-U',
-                args.postgresUser,
-                '-c',
-                f'GRANT ALL PRIVILEGES ON DATABASE {args.postgresDB} TO {args.postgresUser}',
-            ]
-            err, results = malcolm_utils.run_process(cmd, env=osEnv, logger=logging)
-            if err != 0:
-                logging.error(f'{err} setting NetBox database permissions: {results}')
 
             # load the backed-up psql dump
             cmd = [

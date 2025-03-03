@@ -48,6 +48,7 @@ from malcolm_common import (
     DotEnvDynamic,
     DownloadToFile,
     DumpYaml,
+    EnvValue,
     GetPlatformOSRelease,
     HOMEBREW_INSTALL_URLS,
     KubernetesDynamic,
@@ -68,6 +69,7 @@ from malcolm_common import (
     PROFILE_KEY,
     RequestsDynamic,
     ScriptPath,
+    UpdateEnvFiles,
     UserInputDefaultsBehavior,
     UserInterfaceMode,
     YAMLDynamic,
@@ -2087,9 +2089,6 @@ class Installer(object):
                         eprint(f"Creating {envFile} from {envExampleFile}")
                     shutil.copyfile(envExampleFile, envFile)
 
-        # define environment variables to be set in .env files
-        EnvValue = namedtuple("EnvValue", ["provided", "envFile", "key", "value"], rename=False)
-
         EnvValues = [
             # Whether or not Arkime is allowed to delete uploaded/captured PCAP
             EnvValue(
@@ -2374,13 +2373,6 @@ class Installer(object):
                 True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
-            ),
-            # enable/disable netbox (postgres)
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_POSTGRES_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
@@ -2733,35 +2725,7 @@ class Installer(object):
         ]
 
         # now, go through and modify the provided values in the .env files
-        for val in [v for v in EnvValues if v.provided]:
-            try:
-                touch(val.envFile)
-            except Exception:
-                pass
-
-            try:
-                oldDotEnvVersion = False
-                try:
-                    dotenv_imported.set_key(
-                        val.envFile,
-                        val.key,
-                        str(val.value),
-                        quote_mode='never',
-                        encoding='utf-8',
-                    )
-                except TypeError:
-                    oldDotEnvVersion = True
-
-                if oldDotEnvVersion:
-                    dotenv_imported.set_key(
-                        val.envFile,
-                        val.key,
-                        str(val.value),
-                        quote_mode='never',
-                    )
-
-            except Exception as e:
-                eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+        UpdateEnvFiles(EnvValues)
 
         # if any arbitrary extra .env settings were specified, handle those last (e.g., foobar.env:VARIABLE_NAME=value)
         if args.extraSettings:
@@ -2792,39 +2756,20 @@ class Installer(object):
                         )
 
                     else:
-                        if self.debug:
-                            eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
-
-                        try:
-                            touch(extraFile)
-                        except Exception:
-                            pass
-
-                        try:
-                            oldDotEnvVersion = False
-                            try:
-                                dotenv_imported.set_key(
+                        extraValSuccess = UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
                                     extraFile,
                                     extraVar,
                                     extraVal,
-                                    quote_mode='never',
-                                    encoding='utf-8',
-                                )
-                            except TypeError:
-                                oldDotEnvVersion = True
-
-                            if oldDotEnvVersion:
-                                dotenv_imported.set_key(
-                                    extraFile,
-                                    extraVar,
-                                    extraVal,
-                                    quote_mode='never',
-                                )
-
-                        except Exception as e:
-                            eprint(
-                                f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
-                            )
+                                ),
+                            ]
+                        )
+                    if self.debug:
+                        eprint(
+                            f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} {'succeeded' if extraValSuccess else 'failed'}"
+                        )
 
         # change ownership of .envs file to match puid/pgid
         if (

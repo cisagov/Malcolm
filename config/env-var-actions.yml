@@ -1,19 +1,30 @@
+renamed_environment_variable_files:
+  # destination_env_file:
+  #   source_env_file
+  postgres:
+    netbox_postgres
 copied_environment_variables:
   # destination_env_file:
   #   source_env_file:
   #     destination_key:
   #       source_key
-  netbox_postgres:
+  postgres:
     netbox:
       DB_HOST:
-        DB_HOST
-    netbox_postgres:
-      DB_NAME:
-        POSTGRES_DB
-      DB_USER:
-        POSTGRES_USER
-      DB_PASSWORD:
-        POSTGRES_PASSWORD
+        POSTGRES_HOST
+    postgres:
+      POSTGRES_DB:
+        DB_NAME
+      POSTGRES_USER:
+        DB_USER
+      POSTGRES_PASSWORD:
+        DB_PASSWORD
+      POSTGRES_NETBOX_DB:
+        DB_NAME
+      POSTGRES_NETBOX_USER:
+        DB_USER
+      POSTGRES_NETBOX_PASSWORD:
+        DB_PASSWORD
   redis:
     netbox:
       REDIS_HOST:
@@ -33,6 +44,7 @@ removed_environment_variables:
     - REDIS_PASSWORD
   netbox_common:
     - NETBOX_REDIS_DISABLED
+    - NETBOX_POSTGRES_DISABLED
   netbox_secret:
     - DB_PASSWORD
     - DB_USER
@@ -47,3 +59,9 @@ removed_environment_variables:
     - REDIS_HOST
     - REDIS_CACHE_HOST
     - REDIS_PASSWORD
+  postgres:
+    - DB_NAME
+    - DB_HOST
+    - DB_USER
+    - DB_PASSWORD
+

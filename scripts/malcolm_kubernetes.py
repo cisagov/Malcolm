@@ -224,7 +224,7 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
     'htadmin',
     'logstash',
     'netbox',
-    'netbox-postgres',
+    'postgres',
     'nginx-proxy',
     'opensearch',
     'pcap-capture',

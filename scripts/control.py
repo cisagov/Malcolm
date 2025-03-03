@@ -38,6 +38,7 @@ from malcolm_common import (
     DisplayMessage,
     DisplayProgramBox,
     DotEnvDynamic,
+    EnvValue,
     GetUidGidFromEnv,
     KubernetesDynamic,
     LocalPathForContainerBindMount,
@@ -54,6 +55,7 @@ from malcolm_common import (
     PROFILE_KEY,
     PROFILE_MALCOLM,
     ScriptPath,
+    UpdateEnvFiles,
     UserInputDefaultsBehavior,
     YAMLDynamic,
     YesOrNo,
@@ -162,12 +164,35 @@ def checkEnvFilesAndValues():
     # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
     if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
 
-        # process copies, removes, etc. from env-var-actions.yml
+        # process renames, copies, removes, etc. from env-var-actions.yml
         envVarActionsFile = os.path.join(examplesConfigDir, 'env-var-actions.yml')
         if os.path.isfile(envVarActionsFile):
             with open(envVarActionsFile, 'r') as f:
                 envVarActionsYaml = yamlImported.YAML(typ='safe', pure=True).load(f)
             if envVarActionsYaml and isinstance(envVarActionsYaml, dict):
+
+                # renamed_environment_variable_files renames .env files from their old to new names
+                if 'renamed_environment_variable_files' in envVarActionsYaml:
+                    for destEnv, sourceEnv in envVarActionsYaml['renamed_environment_variable_files'].items():
+                        destEnvFileName = os.path.join(args.configDir, destEnv.replace('_', '-') + '.env')
+                        sourceEnvFileName = os.path.join(
+                            args.configDir, next(iter(get_iterable(sourceEnv))).replace('_', '-') + '.env'
+                        )
+                        if os.path.isfile(sourceEnvFileName):
+                            if not os.path.isfile(destEnvFileName):
+                                shutil.move(sourceEnvFileName, destEnvFileName)
+                                if args.debug:
+                                    eprint(
+                                        f"Renamed {os.path.basename(sourceEnvFileName)} to {os.path.basename(destEnvFileName)}"
+                                    )
+                            elif args.debug:
+                                eprint(
+                                    f"{os.path.basename(destEnvFileName)} does not exist, ignoring rename from {os.path.basename(sourceEnvFileName)}"
+                                )
+                        elif args.debug:
+                            eprint(
+                                f"{os.path.basename(sourceEnvFileName)} does not exist, ignoring rename to {os.path.basename(destEnvFileName)}"
+                            )
 
                 # copied_environment_variables contains values that used to be in one environment variable file
                 #   but are now in another. This section only does the creation, not the removal (which should
@@ -565,10 +590,16 @@ def netboxBackup(backupFileName=None):
     global args
     global dockerComposeBin
     global orchMode
+    global dotenvImported
 
     backupFileName, backupMediaFileName = None, None
 
     uidGidDict = GetUidGidFromEnv(args.configDir)
+
+    postgresEnvFile = os.path.join(args.configDir, 'postgres.env')
+    postgresEnvs = dict()
+    if os.path.isfile(postgresEnvFile):
+        postgresEnvs.update(dotenvImported.dotenv_values(postgresEnvFile))
 
     if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and (args.composeProfile == PROFILE_MALCOLM):
         # docker-compose use local temporary path
@@ -588,12 +619,12 @@ def netboxBackup(backupFileName=None):
             # execute as UID:GID in docker-compose.yml file
             '-u',
             f'{uidGidDict["PUID"]}:{uidGidDict["PGID"]}',
-            'netbox-postgres',
+            'postgres',
             'pg_dump',
-            '-U',
-            'netbox',
+            '--username',
+            postgresEnvs.get('POSTGRES_NETBOX_USER', 'netbox'),
             '-d',
-            'netbox',
+            postgresEnvs.get('POSTGRES_NETBOX_DB', 'netbox'),
         ]
 
         err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
@@ -613,15 +644,15 @@ def netboxBackup(backupFileName=None):
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if podsResults := PodExec(
-            service='netbox-postgres',
-            container='netbox-postgres-container',
+            service='postgres',
+            container='postgres-container',
             namespace=args.namespace,
             command=[
                 'pg_dump',
-                '-U',
-                'netbox',
+                '--username',
+                postgresEnvs.get('POSTGRES_NETBOX_USER', 'netbox'),
                 '-d',
-                'netbox',
+                postgresEnvs.get('POSTGRES_NETBOX_DB', 'netbox'),
             ],
             maxPodsToExec=1,
         ):
@@ -980,9 +1011,6 @@ def stop(wipe=False):
                 boundPathsToWipe = (
                     BoundPath("filebeat", "/zeek", True, None, None),
                     BoundPath("file-monitor", "/zeek/logs", True, None, None),
-                    BoundPath("netbox", "/opt/netbox/netbox/media", True, None, ["."]),
-                    BoundPath("netbox-postgres", "/var/lib/postgresql/data", True, None, ["."]),
-                    BoundPath("redis", "/data", True, None, ["."]),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                     BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
@@ -1135,7 +1163,7 @@ def start():
                 BoundPath("file-monitor", "/zeek/logs", False, None, None),
                 BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
                 BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
-                BoundPath("netbox-postgres", "/var/lib/postgresql/data", False, None, None),
+                BoundPath("postgres", "/var/lib/postgresql/data", False, None, None),
                 BoundPath("redis", "/data", False, None, None),
                 BoundPath("opensearch", "/usr/share/opensearch/data", False, ["nodes"], None),
                 BoundPath("opensearch", "/opt/opensearch/backup", False, None, None),
@@ -1425,6 +1453,20 @@ def authSetup():
             [],
         ),
         (
+            'postgres',
+            "(Re)generate internal passwords for PostgreSQL (except NetBox)",
+            False,
+            (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
+            [],
+        ),
+        (
+            'redis',
+            "(Re)generate internal passwords for Redis",
+            False,
+            (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
+            [],
+        ),
+        (
             'arkime',
             "Store password hash secret for Arkime viewer cluster",
             False,
@@ -1438,7 +1480,7 @@ def authSetup():
             False,
             [],
         ),
-    )[: 9 if txRxScript else -1]
+    )[: 11 if txRxScript else -1]
 
     authMode = (
         ChooseOne(
@@ -1506,16 +1548,10 @@ def authSetup():
 
                     # get previous admin username to remove from htpasswd file if it's changed
                     authEnvFile = os.path.join(args.configDir, 'auth.env')
+                    prevAuthInfo = defaultdict(str)
                     if os.path.isfile(authEnvFile):
-                        prevAuthInfo = defaultdict(str)
-                        with open(authEnvFile, 'r') as f:
-                            for line in f:
-                                try:
-                                    k, v = line.rstrip().split("=")
-                                    prevAuthInfo[k] = v.strip('"')
-                                except Exception:
-                                    pass
-                        if len(prevAuthInfo['MALCOLM_USERNAME']) > 0:
+                        prevAuthInfo.update(dotenvImported.dotenv_values(authEnvFile))
+                        if prevAuthInfo['MALCOLM_USERNAME']:
                             usernamePrevious = prevAuthInfo['MALCOLM_USERNAME']
 
                     # get openssl hash of password
@@ -1534,14 +1570,23 @@ def authSetup():
                             raise Exception('Unable to generate password hash with openssl')
 
                     # write auth.env (used by htadmin and file-upload containers)
-                    with open(authEnvFile, 'w') as f:
-                        f.write(
-                            "# Malcolm Administrator username and encrypted password for nginx reverse proxy (and upload server's SFTP access)\n"
-                        )
-                        f.write(f'MALCOLM_USERNAME={username}\n')
-                        f.write(f'MALCOLM_PASSWORD={b64encode(passwordEncrypted.encode()).decode("ascii")}\n')
-                        f.write('K8S_SECRET=True\n')
-                    os.chmod(authEnvFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+                    UpdateEnvFiles(
+                        [
+                            EnvValue(
+                                True,
+                                authEnvFile,
+                                'MALCOLM_USERNAME',
+                                username,
+                            ),
+                            EnvValue(
+                                True,
+                                authEnvFile,
+                                'MALCOLM_PASSWORD',
+                                b64encode(passwordEncrypted.encode()).decode("ascii"),
+                            ),
+                        ],
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                    )
 
                     # create or update the htpasswd file
                     htpasswdFile = os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))
@@ -1954,34 +1999,41 @@ def authSetup():
                         eprint("Failed to store email alert sender account variables:\n")
                         eprint("\n".join(results))
 
-                elif authItem[0] == 'netbox':
+                elif authItem[0] in ['netbox', 'postgres']:
                     with pushd(args.configDir):
 
-                        # Check for the presence of existing passwords prior to setting new NetBox passwords.
+                        # Check for the presence of existing passwords prior to setting new NetBox/PostgreSQL passwords.
                         #   see cisagov/Malcolm#565 (NetBox fails to start due to invalid internal password
                         #   if NetBox passwords have been changed).
-
                         preExistingPasswordFound = False
-                        preExistingPasswords = {
-                            'netbox-postgres.env': (
-                                'POSTGRES_PASSWORD',
-                                'DB_PASSWORD',
-                            ),
-                            'redis.env': ('REDIS_PASSWORD',),
-                            'netbox-secret.env': (
-                                'SECRET_KEY',
-                                'SUPERUSER_PASSWORD',
-                                'SUPERUSER_API_TOKEN',
-                            ),
-                        }
+                        preExistingPasswords = (
+                            {
+                                'postgres.env': (
+                                    'POSTGRES_NETBOX_PASSWORD',
+                                    'DB_PASSWORD',
+                                ),
+                                'netbox-secret.env': (
+                                    'SECRET_KEY',
+                                    'SUPERUSER_PASSWORD',
+                                    'SUPERUSER_API_TOKEN',
+                                ),
+                            }
+                            if (authItem[0] == 'netbox')
+                            else {
+                                'postgres.env': ('POSTGRES_PASSWORD',),
+                            }
+                        )
+
                         for envFile, keys in preExistingPasswords.items():
                             envValues = defaultdict(None)
                             if os.path.isfile(envFile):
                                 envValues.update(dotenvImported.dotenv_values(envFile))
                             for key in keys:
-                                if keyVal := envValues[key]:
+                                if keyVal := envValues.get(key, None):
                                     if all(c in "xX" for c in keyVal) or (
-                                        (key == 'SUPERUSER_PASSWORD') and (keyVal == 'admin')
+                                        (authItem[0] == 'netbox')
+                                        and (key == 'SUPERUSER_PASSWORD')
+                                        and (keyVal == 'admin')
                                     ):
                                         # all good, no password has been set yet
                                         pass
@@ -1990,80 +2042,74 @@ def authSetup():
                                         preExistingPasswordFound = True
 
                         if (not preExistingPasswordFound) or YesOrNo(
-                            'Internal passwords for NetBox already exist. Overwriting them will break access to a populated NetBox database. Are you sure?',
+                            f'Internal passwords for {authItem[0]} already exist. Overwriting them will break access to a populated {authItem[0]} database. Are you sure?',
                             default=args.cmdAuthSetupNonInteractive,
                             defaultBehavior=defaultBehavior,
                         ):
-
-                            netboxPwAlphabet = string.ascii_letters + string.digits + '_'
-                            netboxKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
-                            netboxPostGresPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            redisPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            netboxSuPassword = ''.join(secrets.choice(netboxPwAlphabet) for i in range(24))
-                            netboxSuToken = ''.join(secrets.choice(netboxPwAlphabet) for i in range(40))
-                            netboxSecretKey = ''.join(secrets.choice(netboxKeyAlphabet) for i in range(50))
-
-                            with open('netbox-postgres.env', 'w') as f:
-                                f.write('DB_HOST=netbox-postgres\n')
-                                f.write('POSTGRES_DB=netbox\n')
-                                f.write('DB_NAME=netbox\n')
-                                f.write('POSTGRES_USER=netbox\n')
-                                f.write('DB_USER=netbox\n')
-                                f.write(f'POSTGRES_PASSWORD={netboxPostGresPassword}\n')
-                                f.write(f'DB_PASSWORD={netboxPostGresPassword}\n')
-                                f.write('K8S_SECRET=True\n')
-                            os.chmod('netbox-postgres.env', stat.S_IRUSR | stat.S_IWUSR)
-
-                            with open('redis.env', 'w') as f:
-                                f.write(f'REDIS_HOST=redis\n')
-                                f.write(f'REDIS_CACHE_HOST=redis-cache\n')
-                                f.write(f'REDIS_PASSWORD={redisPassword}\n')
-                                f.write('K8S_SECRET=True\n')
-                            os.chmod('redis.env', stat.S_IRUSR | stat.S_IWUSR)
-
-                            if (not os.path.isfile('netbox-secret.env')) and (
-                                os.path.isfile('netbox-secret.env.example')
-                            ):
-                                shutil.copy2('netbox-secret.env.example', 'netbox-secret.env')
-
-                            with fileinput.FileInput('netbox-secret.env', inplace=True, backup=None) as envFile:
-                                for line in envFile:
-                                    line = line.rstrip("\n")
-
-                                    if line.startswith('SECRET_KEY'):
-                                        line = re.sub(
-                                            r'(SECRET_KEY\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxSecretKey}",
-                                            line,
-                                        )
-                                    elif line.startswith('SUPERUSER_PASSWORD'):
-                                        line = re.sub(
-                                            r'(SUPERUSER_PASSWORD\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxSuPassword}",
-                                            line,
-                                        )
-                                    elif line.startswith('SUPERUSER_API_TOKEN'):
-                                        line = re.sub(
-                                            r'(SUPERUSER_API_TOKEN\s*=\s*)(.*?)$',
-                                            fr"\g<1>{netboxSuToken}",
-                                            line,
-                                        )
-                                    elif line.startswith('K8S_SECRET'):
-                                        line = re.sub(
-                                            r'(SUPERUSER_API_TOKEN\s*=\s*)(.*?)$',
-                                            fr"\g<1>True",
-                                            line,
-                                        )
-
-                                    print(line)
-
-                            os.chmod('netbox-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+                            pwAlphabet = string.ascii_letters + string.digits + '_'
+                            apiKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
+                            UpdateEnvFiles(
+                                (
+                                    [
+                                        EnvValue(
+                                            True,
+                                            'postgres.env',
+                                            'POSTGRES_NETBOX_PASSWORD',
+                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                        ),
+                                        EnvValue(
+                                            True,
+                                            'netbox-secret.env',
+                                            'SECRET_KEY',
+                                            ''.join(secrets.choice(apiKeyAlphabet) for i in range(50)),
+                                        ),
+                                        EnvValue(
+                                            True,
+                                            'netbox-secret.env',
+                                            'SUPERUSER_PASSWORD',
+                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                        ),
+                                        EnvValue(
+                                            True,
+                                            'netbox-secret.env',
+                                            'SUPERUSER_API_TOKEN',
+                                            ''.join(secrets.choice(pwAlphabet) for i in range(40)),
+                                        ),
+                                    ]
+                                    if authItem[0] == 'netbox'
+                                    else [
+                                        EnvValue(
+                                            True,
+                                            'postgres.env',
+                                            'POSTGRES_PASSWORD',
+                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                        ),
+                                    ]
+                                ),
+                                stat.S_IRUSR | stat.S_IWUSR,
+                            )
 
                         else:
                             DisplayMessage(
-                                'Internal passwords for NetBox were left unmodified.',
+                                f'Internal passwords for {authItem[0]} were left unmodified.',
                                 defaultBehavior=defaultBehavior,
                             )
+
+                elif authItem[0] == 'redis':
+                    with pushd(args.configDir):
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    'redis.env',
+                                    'REDIS_PASSWORD',
+                                    ''.join(
+                                        secrets.choice(string.ascii_letters + string.digits + '_') for i in range(24)
+                                    ),
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR,
+                        )
 
                 elif authItem[0] == 'arkime':
                     # prompt password
@@ -2090,23 +2136,17 @@ def authSetup():
                         arkimePassword = args.authArkimePassword
 
                     with pushd(args.configDir):
-                        if (not os.path.isfile('arkime-secret.env')) and (os.path.isfile('arkime-secret.env.example')):
-                            shutil.copy2('arkime-secret.env.example', 'arkime-secret.env')
-
-                        with fileinput.FileInput('arkime-secret.env', inplace=True, backup=None) as envFile:
-                            for line in envFile:
-                                line = line.rstrip("\n")
-
-                                if arkimePassword and line.startswith('ARKIME_PASSWORD_SECRET'):
-                                    line = re.sub(
-                                        r'(ARKIME_PASSWORD_SECRET\s*=\s*)(.*?)$',
-                                        fr"\g<1>{arkimePassword}",
-                                        line,
-                                    )
-
-                                print(line)
-
-                        os.chmod('arkime-secret.env', stat.S_IRUSR | stat.S_IWUSR)
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    'arkime-secret.env',
+                                    'ARKIME_PASSWORD_SECRET',
+                                    arkimePassword,
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR,
+                        )
 
                 elif authItem[0] == 'txfwcerts':
                     DisplayMessage(
@@ -2386,6 +2426,24 @@ def main():
         const=True,
         default=False,
         help="(Re)generate internal passwords for NetBox",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-redis-password',
+        dest='authGenRedisPassword',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate internal passwords for Redis",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-postgres-password',
+        dest='authGenPostgresPassword',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate internal passwords for PostgreSQL (except NetBox)",
     )
 
     logsAndStatusGroup = parser.add_argument_group('Logs and Status')

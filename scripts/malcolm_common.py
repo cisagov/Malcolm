@@ -21,6 +21,7 @@ from malcolm_utils import (
     LoadStrIfJson,
     remove_suffix,
     run_process,
+    touch,
 )
 
 from collections import defaultdict, namedtuple
@@ -126,6 +127,9 @@ BoundPathReplacer = namedtuple(
     ["service", "target", "source"],
     rename=False,
 )
+
+# define environment variables to be set in .env files
+EnvValue = namedtuple("EnvValue", ["provided", "envFile", "key", "value"], rename=False)
 
 # URLS for figuring things out if something goes wrong
 DOCKER_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/install/')
@@ -236,6 +240,52 @@ def GetUidGidFromEnv(configDir=None):
                 uidGidDict['PGID'] = envValues['PGID']
 
     return uidGidDict
+
+
+##################################################################################################
+# takes an array of EnvValue namedtuple (see above) and updates the values in the specified .env files
+def UpdateEnvFiles(envValues, chmodFlag=None):
+    result = False
+    if dotEnvImported := DotEnvDynamic():
+        result = True
+        for val in [v for v in envValues if v.provided]:
+            try:
+                touch(val.envFile)
+            except Exception:
+                pass
+
+            try:
+                oldDotEnvVersion = False
+                try:
+                    dotEnvImported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                        encoding='utf-8',
+                    )
+                except TypeError:
+                    oldDotEnvVersion = True
+
+                if oldDotEnvVersion:
+                    dotEnvImported.set_key(
+                        val.envFile,
+                        val.key,
+                        str(val.value),
+                        quote_mode='never',
+                    )
+
+            except Exception as e:
+                eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+                result = False
+
+            if chmodFlag is not None:
+                try:
+                    os.chmod(val.envFile, chmodFlag)
+                except Exception:
+                    pass
+
+    return result
 
 
 ###################################################################################################
@@ -792,7 +842,7 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'postgres.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
         and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))

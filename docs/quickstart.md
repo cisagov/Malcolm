@@ -45,7 +45,7 @@ Pulling freq              ... done
 Pulling htadmin           ... done
 Pulling logstash          ... done
 Pulling netbox            ... done
-Pulling netbox-postgresql ... done
+Pulling postgresql        ... done
 Pulling redis             ... done
 Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
