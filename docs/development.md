@@ -29,7 +29,7 @@ Checking out the [Malcolm source code]({{ site.github.repository_url }}/tree/{{ 
 * `pcap` - an initially empty directory for PCAP files to be uploaded, processed, and stored
 * `pcap-capture` - code and configuration for the `pcap-capture` container that can capture network traffic
 * `pcap-monitor` - code and configuration for the `pcap-monitor` container that watches for new or uploaded PCAP files and notifies the other services to process them
-* `postgres-init` - code used in the `postgres` container for database initialization
+* `postgres-scripts` - code used in the `postgres` container for database initialization
 * `redis` - an initially empty directory where the Redis database runtime files will reside
 * `scripts` - control scripts for starting, stopping, restarting, etc., Malcolm
 * `shared` - miscellaneous code used by various Malcolm components 
