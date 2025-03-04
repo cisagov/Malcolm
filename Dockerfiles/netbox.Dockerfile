@@ -105,7 +105,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     usermod -a -G tty ${PUSER} && \
-    mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" && \
+    mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
         curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
