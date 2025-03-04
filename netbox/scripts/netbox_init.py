@@ -257,7 +257,7 @@ def main():
         '--postgres-port',
         dest='postgresPort',
         type=int,
-        default=int(os.getenv('PGPORT', '5432'),
+        default=int(os.getenv('PGPORT', '5432')),
         required=False,
         help="postgreSQL port for use with --postgres-host",
     )
