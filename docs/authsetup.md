@@ -137,12 +137,18 @@ Authentication Setup:
                         Administrator password hash from "openssl -passwd -1" (for --auth-noninteractive)
   --auth-admin-password-htpasswd <string>
                         Administrator password hash from "htpasswd -n -B username | cut -d: -f2" (for --auth-noninteractive)
+  --auth-arkime-password <string>
+                        Password hash secret for Arkime viewer cluster (for --auth-noninteractive)
   --auth-generate-webcerts [AUTHGENWEBCERTS]
                         (Re)generate self-signed certificates for HTTPS access (for --auth-noninteractive)
   --auth-generate-fwcerts [AUTHGENFWCERTS]
                         (Re)generate self-signed certificates for a remote log forwarder
   --auth-generate-netbox-passwords [AUTHGENNETBOXPASSWORDS]
                         (Re)generate internal passwords for NetBox
+  --auth-generate-redis-password [AUTHGENREDISPASSWORD]
+                        (Re)generate internal passwords for Redis
+  --auth-generate-postgres-password [AUTHGENPOSTGRESPASSWORD]
+                        (Re)generate internal superuser passwords for PostgreSQL
 …
 ```
 

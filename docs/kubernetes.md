@@ -459,14 +459,16 @@ $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 5: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
 6: email - Store username/password for OpenSearch Alerting email sender account
 7: netbox - (Re)generate internal passwords for NetBox
-8: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
-
+8: postgres - (Re)generate internal superuser passwords for PostgreSQL
+9: redis - (Re)generate internal passwords for Redis
+10: arkime - Store password hash secret for Arkime viewer cluster
+11: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 1
 
 Store administrator username/password for local Malcolm access? (Y / n): y
 
-Administrator username: analyst
-analyst password:
+Administrator username (between 4 and 32 characters; alphanumeric, _, -, and . allowed) (): analyst
+analyst password  (between 8 and 128 characters):
 analyst password (again):
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
@@ -475,11 +477,17 @@ Additional local accounts can be created at https://localhost/auth/ when Malcolm
 
 (Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
 
-Store username/password for primary remote OpenSearch/Elasticsearch instance? (y / N): n
+Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
 
-Store username/password for email alert sender account? (y / N): n
+Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox? (Y / n): y
+
+(Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
+
+(Re)generate internal passwords for Redis? (Y / n): y
+
+Store password hash secret for Arkime viewer cluster? (y / N): n
 
 Transfer self-signed client certificates to a remote log forwarder? (y / N): n
 
