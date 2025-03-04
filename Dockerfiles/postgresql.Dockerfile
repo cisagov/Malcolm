@@ -26,7 +26,7 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/postgres.sh /usr/local/bin/container_health.sh
-ADD --chmod=755 netbox/initdb.d/*.sh /docker-entrypoint-initdb.d/
+ADD --chmod=755 postgres-init/*.sh /docker-entrypoint-initdb.d/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \

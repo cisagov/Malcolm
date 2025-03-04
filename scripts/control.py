@@ -1454,7 +1454,7 @@ def authSetup():
         ),
         (
             'postgres',
-            "(Re)generate internal passwords for PostgreSQL (except NetBox)",
+            "(Re)generate internal superuser passwords for PostgreSQL",
             False,
             (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
             [],
@@ -1999,15 +1999,15 @@ def authSetup():
                         eprint("Failed to store email alert sender account variables:\n")
                         eprint("\n".join(results))
 
-                elif authItem[0] in ['netbox', 'postgres']:
+                elif authItem[0] in ['netbox', 'postgres', 'keycloak']:
                     with pushd(args.configDir):
 
                         # Check for the presence of existing passwords prior to setting new NetBox/PostgreSQL passwords.
                         #   see cisagov/Malcolm#565 (NetBox fails to start due to invalid internal password
                         #   if NetBox passwords have been changed).
                         preExistingPasswordFound = False
-                        preExistingPasswords = (
-                            {
+                        if authItem[0] == 'netbox':
+                            preExistingPasswords = {
                                 'postgres.env': (
                                     'POSTGRES_NETBOX_PASSWORD',
                                     'DB_PASSWORD',
@@ -2018,11 +2018,14 @@ def authSetup():
                                     'SUPERUSER_API_TOKEN',
                                 ),
                             }
-                            if (authItem[0] == 'netbox')
-                            else {
+                        elif authItem[0] == 'keycloak':
+                            preExistingPasswords = {
+                                'postgres.env': ('POSTGRES_KEYCLOAK_PASSWORD',),
+                            }
+                        else:
+                            preExistingPasswords = {
                                 'postgres.env': ('POSTGRES_PASSWORD',),
                             }
-                        )
 
                         for envFile, keys in preExistingPasswords.items():
                             envValues = defaultdict(None)
@@ -2048,44 +2051,54 @@ def authSetup():
                         ):
                             pwAlphabet = string.ascii_letters + string.digits + '_'
                             apiKeyAlphabet = string.ascii_letters + string.digits + '%@<=>?~^_-'
+                            if authItem[0] == 'netbox':
+                                envFiles = [
+                                    EnvValue(
+                                        True,
+                                        'postgres.env',
+                                        'POSTGRES_NETBOX_PASSWORD',
+                                        ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                    ),
+                                    EnvValue(
+                                        True,
+                                        'netbox-secret.env',
+                                        'SECRET_KEY',
+                                        ''.join(secrets.choice(apiKeyAlphabet) for i in range(50)),
+                                    ),
+                                    EnvValue(
+                                        True,
+                                        'netbox-secret.env',
+                                        'SUPERUSER_PASSWORD',
+                                        ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                    ),
+                                    EnvValue(
+                                        True,
+                                        'netbox-secret.env',
+                                        'SUPERUSER_API_TOKEN',
+                                        ''.join(secrets.choice(pwAlphabet) for i in range(40)),
+                                    ),
+                                ]
+                            elif authItem[0] == 'keycloak':
+                                envFiles = [
+                                    EnvValue(
+                                        True,
+                                        'postgres.env',
+                                        'POSTGRES_KEYCLOAK_PASSWORD',
+                                        ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                    ),
+                                ]
+                            else:
+                                envFiles = [
+                                    EnvValue(
+                                        True,
+                                        'postgres.env',
+                                        'POSTGRES_PASSWORD',
+                                        ''.join(secrets.choice(pwAlphabet) for i in range(24)),
+                                    ),
+                                ]
+
                             UpdateEnvFiles(
-                                (
-                                    [
-                                        EnvValue(
-                                            True,
-                                            'postgres.env',
-                                            'POSTGRES_NETBOX_PASSWORD',
-                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
-                                        ),
-                                        EnvValue(
-                                            True,
-                                            'netbox-secret.env',
-                                            'SECRET_KEY',
-                                            ''.join(secrets.choice(apiKeyAlphabet) for i in range(50)),
-                                        ),
-                                        EnvValue(
-                                            True,
-                                            'netbox-secret.env',
-                                            'SUPERUSER_PASSWORD',
-                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
-                                        ),
-                                        EnvValue(
-                                            True,
-                                            'netbox-secret.env',
-                                            'SUPERUSER_API_TOKEN',
-                                            ''.join(secrets.choice(pwAlphabet) for i in range(40)),
-                                        ),
-                                    ]
-                                    if authItem[0] == 'netbox'
-                                    else [
-                                        EnvValue(
-                                            True,
-                                            'postgres.env',
-                                            'POSTGRES_PASSWORD',
-                                            ''.join(secrets.choice(pwAlphabet) for i in range(24)),
-                                        ),
-                                    ]
-                                ),
+                                envFiles,
                                 stat.S_IRUSR | stat.S_IWUSR,
                             )
 
@@ -2443,7 +2456,7 @@ def main():
         nargs='?',
         const=True,
         default=False,
-        help="(Re)generate internal passwords for PostgreSQL (except NetBox)",
+        help="(Re)generate internal superuser passwords for PostgreSQL",
     )
 
     logsAndStatusGroup = parser.add_argument_group('Logs and Status')

@@ -75,7 +75,7 @@ DATABASE = {
     'PASSWORD': _read_secret('db_password', environ.get('POSTGRES_NETBOX_PASSWORD', '')),
     # PostgreSQL password
     'HOST': environ.get('POSTGRES_HOST', 'localhost'),  # Database server
-    'PORT': environ.get('DB_PORT', ''),  # Database port (leave blank for default)
+    'PORT': environ.get('PGPORT', ''),  # Database port (leave blank for default)
     'OPTIONS': {'sslmode': environ.get('DB_SSLMODE', 'prefer')},
     # Database connection SSLMODE
     'CONN_MAX_AGE': _environ_get_and_map('DB_CONN_MAX_AGE', '300', _AS_INT),
