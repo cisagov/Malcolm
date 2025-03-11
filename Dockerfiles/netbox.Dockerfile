@@ -36,7 +36,7 @@ ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 ENV YQ_VERSION "4.45.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
-ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/mmguero-dev/Device-Type-Library-Import/tar.gz/develop"
+ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL "https://codeload.github.com/netbox-community/Device-Type-Library-Import/tar.gz/develop"
 ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/devicetype-library/tar.gz/master"
 
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
