@@ -223,6 +223,7 @@ def checkEnvFilesAndValues():
                                 sourceVars = dotenvImported.dotenv_values(sourceEnvFileName)
                                 # open the destination file for writing new values
                                 with open(destEnvFileName, "a") as destEnvFileHandle:
+                                    newlineAdded = False
                                     for destKey, sourceKey in keys.items():
                                         # if a key exists in the source, but not in the dest, it needs to be written
                                         if (sourceKey in sourceVars) and (destKey not in destVars):
@@ -230,6 +231,9 @@ def checkEnvFilesAndValues():
                                                 eprint(
                                                     f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceKey}"
                                                 )
+                                            if not newlineAdded:
+                                                print('', file=destEnvFileHandle)
+                                                newlineAdded = True
                                             print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
