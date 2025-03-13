@@ -30,7 +30,7 @@ copied_environment_variables:
       POSTGRES_NETBOX_PASSWORD:
         DB_PASSWORD
       POSTGRES_KEYCLOAK_PASSWORD:
-        POSTGRES_NETBOX_PASSWORD
+        DB_PASSWORD
   redis:
     netbox:
       REDIS_HOST:
