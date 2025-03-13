@@ -168,6 +168,7 @@ def checkEnvFilesAndValues():
     if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
 
         # process renames, copies, removes, etc. from env-var-actions.yml
+        envVarActionsYaml = None
         envVarActionsFile = os.path.join(examplesConfigDir, 'env-var-actions.yml')
         if os.path.isfile(envVarActionsFile):
             with open(envVarActionsFile, 'r') as f:
@@ -271,48 +272,6 @@ def checkEnvFilesAndValues():
                                         eprint(f"Removing {keys}, deleting {os.path.basename(envFileName)}")
                                     os.unlink(envFileName)
 
-                # files or directories that need to be relocated, only if:
-                #   - deployment mode is docker compose
-                #   - Malcolm is not running
-                #   - the source exists
-                #   - the destination does not exist
-                if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and ('relocated_files' in envVarActionsYaml):
-                    osEnv = os.environ.copy()
-                    if not args.noTmpDirOverride:
-                        osEnv['TMPDIR'] = MalcolmTmpPath
-                    err, out = run_process(
-                        [
-                            dockerComposeBin,
-                            '--profile',
-                            args.composeProfile,
-                            '-f',
-                            args.composeFile,
-                            'ps',
-                            '--services',
-                            '--status=running',
-                        ],
-                        env=osEnv,
-                        stderr=False,
-                        debug=args.debug,
-                    )
-                    out[:] = [x for x in out if x]
-                    if (err == 0) and (len(out) == 0):
-                        for src, dst in envVarActionsYaml['relocated_files'].items():
-                            srcPath = os.path.join(MalcolmPath, src)
-                            dstPath = os.path.join(MalcolmPath, next(iter(get_iterable(dst))))
-                            if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
-                                if args.debug:
-                                    eprint(
-                                        f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files'
-                                    )
-                            else:
-                                try:
-                                    shutil.move(srcPath, dstPath)
-                                    if args.debug:
-                                        eprint(f'Relocated "{src}" to "{dst}"')
-                                except Exception as e:
-                                    eprint(f'Error relocating "{src}" to "{dst}": {e}')
-
         # creating missing .env file from .env.example file
         for envExampleFile in sorted(glob.glob(os.path.join(examplesConfigDir, '*.env.example'))):
             envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
@@ -343,6 +302,51 @@ def checkEnvFilesAndValues():
                         )
                         for missingVar in missingVars:
                             print(f"{missingVar}={exampleValues[missingVar]}", file=envFileHandle)
+
+        # files or directories that need to be relocated, only if:
+        #   - deployment mode is docker compose
+        #   - Malcolm is not running
+        #   - the source exists
+        #   - the destination does not exist
+        if (
+            envVarActionsYaml
+            and isinstance(envVarActionsYaml, dict)
+            and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and ('relocated_files' in envVarActionsYaml)
+        ):
+            osEnv = os.environ.copy()
+            if not args.noTmpDirOverride:
+                osEnv['TMPDIR'] = MalcolmTmpPath
+            err, out = run_process(
+                [
+                    dockerComposeBin,
+                    '--profile',
+                    args.composeProfile,
+                    '-f',
+                    args.composeFile,
+                    'ps',
+                    '--services',
+                    '--status=running',
+                ],
+                env=osEnv,
+                stderr=False,
+                debug=args.debug,
+            )
+            out[:] = [x for x in out if x]
+            if (err == 0) and (len(out) == 0):
+                for src, dst in envVarActionsYaml['relocated_files'].items():
+                    srcPath = os.path.join(MalcolmPath, src)
+                    dstPath = os.path.join(MalcolmPath, next(iter(get_iterable(dst))))
+                    if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
+                        if args.debug:
+                            eprint(f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files')
+                    else:
+                        try:
+                            shutil.move(srcPath, dstPath)
+                            if args.debug:
+                                eprint(f'Relocated "{src}" to "{dst}"')
+                        except Exception as e:
+                            eprint(f'Error relocating "{src}" to "{dst}": {e}')
 
 
 ###################################################################################################
