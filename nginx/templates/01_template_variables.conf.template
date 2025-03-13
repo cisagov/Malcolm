@@ -17,3 +17,7 @@ map ${DOLLAR}host ${DOLLAR}dashboards_proxy_pass {
 map ${DOLLAR}host ${DOLLAR}dashboards_proxy_url {
   default "$NGINX_DASHBOARDS_PROXY_URL";
 }
+
+map ${DOLLAR}host ${DOLLAR}proxy_x_forwarded_proto_override {
+  default "$NGINX_X_FORWARDED_PROTO_OVERRIDE";
+}

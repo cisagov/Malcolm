@@ -47,11 +47,11 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
-              name: nginx-env
-          - configMapRef:
               name: opensearch-env
           - configMapRef:
               name: upload-common-env
+          - configMapRef:
+              name: nginx-env
           - configMapRef:
               name: beats-common-env
           - configMapRef:

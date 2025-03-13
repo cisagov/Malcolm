@@ -8,6 +8,10 @@ copied_environment_variables:
   #   source_env_file:
   #     destination_key:
   #       source_key
+  auth_common:
+    auth_common:
+      NGINX_AUTH_MODE:
+        NGINX_BASIC_AUTH
   postgres:
     netbox:
       DB_HOST:
@@ -38,6 +42,8 @@ removed_environment_variables:
   # env_file:
   #   - key1
   #   - key2
+  auth_common:
+    - NGINX_BASIC_AUTH
   lookup_common:
     - CONNECTION_SECONDS_SEVERITY_THRESHOLD
   netbox_redis:
@@ -64,4 +70,9 @@ removed_environment_variables:
     - DB_HOST
     - DB_USER
     - DB_PASSWORD
-
+relocated_files:
+  # Files/directories to relocate (relative to Malcolm installation directory)
+  # Only occurs if Malcolm is not running, source exists, and destination does not.
+  # path/to/source: path/to/destination
+  netbox/postgres: postgres
+  netbox/redis: redis

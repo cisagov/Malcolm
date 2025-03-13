@@ -3,50 +3,65 @@ set -e
 
 NGINX_LANDING_INDEX_HTML=/usr/share/nginx/html/index.html
 
-NGINX_TEMPLATES_DIR=/etc/nginx/templates
-NGINX_CONFD_DIR=/etc/nginx/conf.d
+NGINX_CONF_DIR=/etc/nginx
+NGINX_CONF=${NGINX_CONF_DIR}/nginx.conf
+NGINX_TEMPLATES_DIR=${NGINX_CONF_DIR}/templates
+NGINX_CONFD_DIR=${NGINX_CONF_DIR}/conf.d
 
 # set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
 
-# "include" file that sets 'ssl on' and indicates the locations of the PEM files
-NGINX_SSL_ON_CONF=/etc/nginx/nginx_ssl_on_config.conf
-# "include" file that sets 'ssl off'
-NGINX_SSL_OFF_CONF=/etc/nginx/nginx_ssl_off_config.conf
-# "include" symlink name which, at runtime, will point to either the ON of OFF file
-NGINX_SSL_CONF=/etc/nginx/nginx_ssl_config.conf
+# "include" file that indicates the locations of the PEM files
+NGINX_SSL_ON_CONF=${NGINX_CONF_DIR}/nginx_ssl_on_config.conf
+
+# "include" symlink name which, at runtime, will point to either the ON or OFF file
+NGINX_SSL_LINK=${NGINX_CONF_DIR}/nginx_ssl_config.conf
 
 # a blank file just to use as an "include" placeholder for the nginx's LDAP config when LDAP is not used
-NGINX_BLANK_CONF=/etc/nginx/nginx_blank.conf
+NGINX_BLANK_CONF=${NGINX_CONF_DIR}/nginx_blank.conf
 
 # "include" file for resolver directive
-NGINX_RESOLVER_CONF=/etc/nginx/nginx_system_resolver.conf
+NGINX_RESOLVER_CONF=${NGINX_CONF_DIR}/nginx_system_resolver.conf
+
+# "include" file for /auth endpoint location
+NGINX_AUTH_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_auth_location.conf
+
+# "include" file for /keycloak endpoint location
+NGINX_KEYCLOAK_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_keycloak_location_rt.conf
+NGINX_KEYCLOAK_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_keycloak_location.conf
 
 # "include" file for auth_basic, prompt, and htpasswd location
-NGINX_BASIC_AUTH_CONF=/etc/nginx/nginx_auth_basic.conf
+NGINX_BASIC_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_basic.conf
+NGINX_AUTH_BASIC_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_auth_basic_location.conf
 
 # "include" file for auth_ldap, prompt, and "auth_ldap_servers" name
-NGINX_LDAP_AUTH_CONF=/etc/nginx/nginx_auth_ldap.conf
+NGINX_LDAP_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_ldap.conf
+
+# "include" file for KeyCloak authentication
+NGINX_KEYCLOAK_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_keycloak.conf
 
 # "include" file for fully disabling authentication
-NGINX_NO_AUTH_CONF=/etc/nginx/nginx_auth_disabled.conf
+NGINX_NO_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_disabled.conf
 
 # volume-mounted user configuration containing "ldap_server ad_server" section with URL, binddn, etc.
-NGINX_LDAP_USER_CONF=/etc/nginx/nginx_ldap.conf
+NGINX_LDAP_USER_CONF=${NGINX_CONF_DIR}/nginx_ldap.conf
 
-# runtime "include" file for auth method (link to either NGINX_BASIC_AUTH_CONF or NGINX_LDAP_AUTH_CONF)
-NGINX_RUNTIME_AUTH_CONF=/etc/nginx/nginx_auth_rt.conf
+# runtime "include" file for auth method (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, NGINX_KEYCLOAK_AUTH_CONF, or NGINX_NO_AUTH_CONF)
+NGINX_RUNTIME_AUTH_LINK=${NGINX_CONF_DIR}/nginx_auth_rt.conf
+
+# runtime "include" file for opensearch endpoint auth method (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, or NGINX_NO_AUTH_CONF)
+NGINX_RUNTIME_AUTH_OPENSEARCH_LINK=${NGINX_CONF_DIR}/nginx_auth_opensearch_rt.conf
 
 # runtime "include" file for ldap config (link to either NGINX_BLANK_CONF or (possibly modified) NGINX_LDAP_USER_CONF)
-NGINX_RUNTIME_LDAP_CONF=/etc/nginx/nginx_ldap_rt.conf
+NGINX_RUNTIME_LDAP_LINK=${NGINX_CONF_DIR}/nginx_ldap_rt.conf
 
 # "include" files for idark2dash rewrite using opensearch dashboards, kibana, and runtime copy, respectively
-NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_dashboards.conf
-NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_kibana.conf
-NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF=/etc/nginx/nginx_idark2dash_rewrite_rt.conf
+NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_dashboards.conf
+NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_kibana.conf
+NGINX_RUNTIME_IDARK2DASH_REWRITE_LINK=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_rt.conf
 # do the same thing for /dashboards URLs, send to kibana if they're using elasticsearch
-NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_dashboards.conf
-NGINX_KIBANA_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_kibana.conf
-NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF=/etc/nginx/nginx_dashboards_rewrite_rt.conf
+NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_dashboards.conf
+NGINX_KIBANA_DASHBOARDS_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_kibana.conf
+NGINX_RUNTIME_DASHBOARDS_REWRITE_LINK=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_rt.conf
 
 # config file for stunnel if using stunnel to issue LDAP StartTLS function
 STUNNEL_CONF=/etc/stunnel/stunnel.conf
@@ -91,35 +106,105 @@ fi
 
 if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
   # doing encrypted HTTPS
-  ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_CONF"
+  ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_LINK"
+  SSL_FLAG=" ssl"
 else
   # doing unencrypted HTTP (not recommended)
-  ln -sf "$NGINX_SSL_OFF_CONF" "$NGINX_SSL_CONF"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_SSL_LINK"
+  SSL_FLAG=""
+fi
+# generate listen_####.conf files with appropriate SSL flag (since the NGINX
+#   listen directive doesn't allow using variables)
+if [[ -f "${NGINX_CONF}" ]]; then
+  LISTEN_PORT_CONF_PATTERN="^\s*include\s+(${NGINX_CONF_DIR}/listen_([0-9]+)\.conf)\s*;\s*$"
+  while IFS= read -r LINE; do
+    if [[ "${LINE}" =~ ${LISTEN_PORT_CONF_PATTERN} ]]; then
+      IFILE=${BASH_REMATCH[1]}
+      PORT=${BASH_REMATCH[2]}
+      [[ ! -f "${IFILE}" ]] && echo "listen ${PORT}${SSL_FLAG};" > "${IFILE}"
+    fi
+  done < "${NGINX_CONF}"
 fi
 
-if [[ -z $NGINX_BASIC_AUTH ]] || [[ "$NGINX_BASIC_AUTH" == "true" ]]; then
-  # doing HTTP basic auth instead of ldap
+# NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication
+if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGINX_AUTH_MODE" == "true" ]]; then
+  # doing HTTP basic auth
 
   # point nginx_auth_rt.conf to nginx_auth_basic.conf
-  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_CONF"
+  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
+  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
 
   # ldap configuration is empty
-  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_CONF"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
 
-elif [[ "$NGINX_BASIC_AUTH" == "no_authentication" ]]; then
+  # /auth location handling for htpasswd
+  ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+
+  # /keycloak location isn't used
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+
+elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" == "none" ]] || [[ "$NGINX_AUTH_MODE" == "no" ]]; then
   # completely disabling authentication (not recommended)
 
   # point nginx_auth_rt.conf to nginx_auth_disabled.conf
-  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_CONF"
+  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
+  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
 
   # ldap configuration is empty
-  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_CONF"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
 
-else
+  # /auth and /keycloak locations are empty
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+
+elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
+  # Keycloak (remote) authentication
+
+  # point nginx_auth_rt.conf to nginx_auth_keycloak.conf
+  ln -sf "$NGINX_KEYCLOAK_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
+
+  # TODO: we can't yet handle proxying client API requests to the opensearch
+  #   endpoint with Keycloak so we have to use basic for now
+  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+
+  # ldap configuration is empty
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
+
+  # /auth location handling for htpasswd
+  ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+
+  # /keycloak location isn't used
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+
+elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
+  # Keycloak (embedded) authentication
+
+  # point nginx_auth_rt.conf to nginx_auth_keycloak.conf
+  ln -sf "$NGINX_KEYCLOAK_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
+
+  # TODO: we can't yet handle proxying client API requests to the opensearch
+  #   endpoint with Keycloak so we have to use basic for now
+  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+
+  # ldap configuration is empty
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
+
+  # /auth location handling for htpasswd
+  ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+
+  # /keycloak location points to embedded keycloak container
+  ln -sf "$NGINX_KEYCLOAK_LOCATION_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+
+elif [[ "$NGINX_AUTH_MODE" == "ldap" ]] || [[ "$NGINX_AUTH_MODE" == "false" ]]; then
   # ldap authentication
 
   # point nginx_auth_rt.conf to nginx_auth_ldap.conf
-  ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_CONF"
+  ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
+  ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+
+  # /auth and /keycloak locations are empty
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
 
   # parse URL information out of user ldap configuration
   # example:
@@ -196,32 +281,32 @@ protocol = ldap
 EOF
 
     # rewrite modified copy of user ldap configuration to point to local end of tunnel instead of remote
-    rm -f "$NGINX_RUNTIME_LDAP_CONF"
-    touch "$NGINX_RUNTIME_LDAP_CONF"
-    chmod 600 "$NGINX_RUNTIME_LDAP_CONF"
+    rm -f "$NGINX_RUNTIME_LDAP_LINK"
+    touch "$NGINX_RUNTIME_LDAP_LINK"
+    chmod 600 "$NGINX_RUNTIME_LDAP_LINK"
     READ_LINE_NUM=0
     while IFS= read -r LINE; do
       READ_LINE_NUM=$((READ_LINE_NUM+1))
       if (( $URL_LINE_NUM == $READ_LINE_NUM )); then
-        echo "${HEADER}${OPEN_QUOTE}ldap://localhost:${LOCAL_PORT}${URI_TO_END}" >> "$NGINX_RUNTIME_LDAP_CONF"
+        echo "${HEADER}${OPEN_QUOTE}ldap://localhost:${LOCAL_PORT}${URI_TO_END}" >> "$NGINX_RUNTIME_LDAP_LINK"
       else
-        echo "$LINE" >> "$NGINX_RUNTIME_LDAP_CONF"
+        echo "$LINE" >> "$NGINX_RUNTIME_LDAP_LINK"
       fi
     done < "$NGINX_LDAP_USER_CONF"
 
   else
     # we're doing either LDAP or LDAPS, but not StartTLS, so we don't need to use stunnel.
     # however, we do want to set SSL CA trust stuff if specified, so do that
-    rm -f "$NGINX_RUNTIME_LDAP_CONF"
-    touch "$NGINX_RUNTIME_LDAP_CONF"
-    chmod 600 "$NGINX_RUNTIME_LDAP_CONF"
+    rm -f "$NGINX_RUNTIME_LDAP_LINK"
+    touch "$NGINX_RUNTIME_LDAP_LINK"
+    chmod 600 "$NGINX_RUNTIME_LDAP_LINK"
     READ_LINE_NUM=0
     while IFS= read -r LINE; do
       READ_LINE_NUM=$((READ_LINE_NUM+1))
-      echo "$LINE" >> "$NGINX_RUNTIME_LDAP_CONF"
+      echo "$LINE" >> "$NGINX_RUNTIME_LDAP_LINK"
       if (( $URL_LINE_NUM == $READ_LINE_NUM )); then
-        echo "$NGINX_LDAP_CHECK_REMOTE_CERT_LINE" >> "$NGINX_RUNTIME_LDAP_CONF"
-        echo "$NGINX_LDAP_CA_PATH_LINE" >> "$NGINX_RUNTIME_LDAP_CONF"
+        echo "$NGINX_LDAP_CHECK_REMOTE_CERT_LINE" >> "$NGINX_RUNTIME_LDAP_LINK"
+        echo "$NGINX_LDAP_CA_PATH_LINE" >> "$NGINX_RUNTIME_LDAP_LINK"
       fi
     done < "$NGINX_LDAP_USER_CONF"
 
@@ -230,10 +315,10 @@ EOF
 fi # basic vs. ldap
 
 # if the runtime htpasswd file doesn't exist but the "preseed" does, copy the preseed over for runtime
-if [[ ! -f /etc/nginx/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
-  cp /tmp/auth/default/htpasswd /etc/nginx/auth/htpasswd
-  [[ -n ${PUID} ]] && chown -f ${PUID} /etc/nginx/auth/htpasswd
-  [[ -n ${PGID} ]] && chown -f :${PGID} /etc/nginx/auth/htpasswd
+if [[ ! -f ${NGINX_CONF_DIR}/auth/htpasswd ]] && [[ -f /tmp/auth/default/htpasswd ]]; then
+  cp /tmp/auth/default/htpasswd ${NGINX_CONF_DIR}/auth/htpasswd
+  [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/auth/htpasswd
+  [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/auth/htpasswd
   rm -rf /tmp/auth/* || true
 fi
 
@@ -242,11 +327,11 @@ fi
 set +e
 
 if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "elasticsearch-remote" ]]; then
-  ln -sf "$NGINX_KIBANA_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF"
-  ln -sf "$NGINX_KIBANA_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF"
+  ln -sf "$NGINX_KIBANA_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_LINK"
+  ln -sf "$NGINX_KIBANA_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_LINK"
 else
-  ln -sf "$NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_CONF"
-  ln -sf "$NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_CONF"
+  ln -sf "$NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF" "$NGINX_RUNTIME_IDARK2DASH_REWRITE_LINK"
+  ln -sf "$NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF" "$NGINX_RUNTIME_DASHBOARDS_REWRITE_LINK"
 fi
 
 # first parse DASHBOARDS_URL and assign the resultant urlsplit named tuple to an associative array
@@ -290,11 +375,18 @@ for TEMPLATE in "$NGINX_TEMPLATES_DIR"/*.conf.template; do
   DOLLAR=$ envsubst < "$TEMPLATE" > "$NGINX_CONFD_DIR/$(basename "$TEMPLATE"| sed 's/\.template$//')"
 done
 
-# put the DNS resolver (nameserver from /etc/resolv.conf) into NGINX_RESOLVER_CONF
-DNS_SERVER="$(grep -i '^nameserver' /etc/resolv.conf | head -n1 | cut -d ' ' -f2)"
+if [[ -z "${NGINX_RESOLVER_OVERRIDE:-}" ]]; then
+  # put the DNS resolver (nameserver from /etc/resolv.conf) into NGINX_RESOLVER_CONF
+  DNS_SERVER="$(grep -i '^nameserver' /etc/resolv.conf | head -n1 | cut -d ' ' -f2)"
+else
+  DNS_SERVER=${NGINX_RESOLVER_OVERRIDE}
+fi
 [[ -z "${DNS_SERVER:-}" ]] && DNS_SERVER="127.0.0.11"
 export DNS_SERVER
-echo "resolver ${DNS_SERVER};" > "${NGINX_RESOLVER_CONF}"
+echo -n "resolver ${DNS_SERVER}" > "${NGINX_RESOLVER_CONF}"
+[[ "${NGINX_RESOLVER_IPV4_OFF:-false}" == "true" ]] && echo -n " ipv4=off" >> "${NGINX_RESOLVER_CONF}"
+[[ "${NGINX_RESOLVER_IPV6_OFF:-false}" == "true" ]] && echo -n " ipv6=off" >> "${NGINX_RESOLVER_CONF}"
+echo ";" >> "${NGINX_RESOLVER_CONF}"
 
 set -e
 
@@ -309,11 +401,35 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     MALCOLM_DASHBOARDS_URL="$(echo "$NGINX_DASHBOARDS_PREFIX" | sed 's@/$@@')/"
     MALCOLM_DASHBOARDS_ICON=opensearch_mark_default.svg
   fi
+  if [[ "$NGINX_AUTH_MODE" == "ldap" ]]; then
+    AUTH_TITLE="LDAP Authentication"
+    AUTH_DESC="Malcolm is using <a href=\"readme/docs/authsetup.html#AuthLDAP\">LDAP</a> for authentication"
+    AUTH_LINK="/readme/docs/authsetup.html#AuthLDAP"
+  elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
+    AUTH_TITLE="Keycloak Authentication"
+    AUTH_DESC="Malcolm is using <a href=\"readme/docs/authsetup.html#AuthKeycloak\">Keycloak</a> for authentication"
+    AUTH_LINK="/keycloak/"
+  elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
+    AUTH_TITLE="Keycloak Authentication"
+    AUTH_DESC="Malcolm is using a remote <a href=\"readme/docs/authsetup.html#AuthKeycloakRemote\">Keycloak</a> for authentication"
+    AUTH_LINK="${KEYCLOAK_AUTH_URL:-}"
+  elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" == "none" ]] || [[ "$NGINX_AUTH_MODE" == "no" ]]; then
+    AUTH_TITLE="Authentication is Disabled"
+    AUTH_DESC="<a href=\"/readme/docs/authsetup.html\">Authentication for Malcolm</a> is disabled"
+    AUTH_LINK="/readme/docs/authsetup.html"
+  else
+    AUTH_TITLE="Local Account Management"
+    AUTH_DESC="Manage the <a href=\"/readme/docs/authsetup.html#AuthBasicAccountManagement\">local user accounts</a> maintained by Malcolm"
+    AUTH_LINK="/auth/"
+  fi
   for HTML in "$(dirname "$(realpath "${NGINX_LANDING_INDEX_HTML}")")"/*.html; do
     sed -i "s@MALCOLM_DASHBOARDS_NAME_REPLACER@${MALCOLM_DASHBOARDS_NAME}@g" "${HTML}" || true
     sed -i "s@MALCOLM_DASHBOARDS_URL_REPLACER@${MALCOLM_DASHBOARDS_URL}@g" "${HTML}" || true
     sed -i "s@MALCOLM_DASHBOARDS_ICON_REPLACER@${MALCOLM_DASHBOARDS_ICON}@g" "${HTML}" || true
     sed -i "s/MALCOLM_VERSION_REPLACER/v${MALCOLM_VERSION:-unknown} (${VCS_REVISION:-} @ ${BUILD_DATE:-})/g" "${HTML}" || true
+    sed -i "s@MALCOLM_AUTH_TITLE_REPLACER@${AUTH_TITLE}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_AUTH_DESC_REPLACER@${AUTH_DESC}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_AUTH_URL_REPLACER@${AUTH_LINK}@g" "${HTML}" || true
   done
 fi
 

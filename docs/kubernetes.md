@@ -361,10 +361,9 @@ Setting 6 workers for Logstash pipelines. Is this OK? (Y / n): y
 
 Require encrypted HTTPS connections? (Y / n): y
 
-1: Basic
-2: Lightweight Directory Access Protocol (LDAP)
-3: None
-Select authentication method (Basic): 1
+1: ipv4 - IPv4
+2: ipv6 - IPv6
+Which IP version does the network support? (IPv4, IPv6, or both) (ipv4): 1,2
 
 Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 
@@ -453,35 +452,48 @@ Run `./scripts/auth_setup` and answer the questions to [configure authentication
 $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 
 1: all - Configure all authentication-related settings
-2: admin - Store administrator username/password for local Malcolm access
-3: webcerts - (Re)generate self-signed certificates for HTTPS access
-4: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
-5: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
-6: email - Store username/password for OpenSearch Alerting email sender account
-7: netbox - (Re)generate internal passwords for NetBox
-8: postgres - (Re)generate internal superuser passwords for PostgreSQL
-9: redis - (Re)generate internal passwords for Redis
-10: arkime - Store password hash secret for Arkime viewer cluster
-11: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
+2: method - Select authentication method (currently "basic")
+3: admin - Store administrator username/password for basic HTTP authentication
+4: webcerts - (Re)generate self-signed certificates for HTTPS access
+5: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
+6: keycloak - Configure Keycloak
+7: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
+8: email - Store username/password for OpenSearch Alerting email sender account
+9: netbox - (Re)generate internal passwords for NetBox
+10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
+11: postgres - (Re)generate internal superuser passwords for PostgreSQL
+12: redis - (Re)generate internal passwords for Redis
+13: arkime - Store password hash secret for Arkime viewer cluster
+14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 1
 
-Store administrator username/password for local Malcolm access? (Y / n): y
+Select authentication method (currently "basic")? (Y / n): y
+1: basic - Use basic HTTP authentication
+2: ldap - Use Lightweight Directory Access Protocol (LDAP) for authentication
+3: keycloak - Use embedded Keycloak for authentication
+4: keycloak_remote - Use remote Keycloak for authentication
+5: no_authentication - Disable authentication
+Select authentication method (basic): 1
 
-Administrator username (between 4 and 32 characters; alphanumeric, _, -, and . allowed) (): analyst
+Store administrator username/password for basic HTTP authentication? (Y / n): y
+
+Administrator username (between 4 and 32 characters; alphanumeric, _, -, and . allowed): analyst
 analyst password  (between 8 and 128 characters):
 analyst password (again):
-
-Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 (Re)generate self-signed certificates for HTTPS access? (Y / n): y
 
 (Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
+
+Configure Keycloak? (Y / n): n
 
 Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
 
 Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox? (Y / n): y
+
+(Re)generate internal passwords for Keycloak's PostgreSQL database? (Y / n): y
 
 (Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
 
@@ -490,7 +502,6 @@ Store username/password for OpenSearch Alerting email sender account? (y / N): n
 Store password hash secret for Arkime viewer cluster? (y / N): n
 
 Transfer self-signed client certificates to a remote log forwarder? (y / N): n
-
 ```
 
 Next, copy `./kubernetes/01-volumes-vagrant-nfs-server.yml.example` to `./kubernetes/01-volumes.yml` (when using the Vagrant provided NFS server) or copy `./kubernetes/01-volumes-nfs.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.

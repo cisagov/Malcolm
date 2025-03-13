@@ -453,7 +453,6 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch Tweaks
-            #   - TODO: only do these if they've NEVER been done before?
 
             # set dark theme (or not)
             echo "Setting $DATASTORE_TYPE dark mode ($DARK_MODE)..."

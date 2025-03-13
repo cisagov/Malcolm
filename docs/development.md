@@ -65,6 +65,7 @@ Then, go take a walk or something since it will be a while. When you are done, y
 * `ghcr.io/idaholab/malcolm/filebeat-oss` (based on `docker.elastic.co/beats/filebeat-oss`)
 * `ghcr.io/idaholab/malcolm/freq` (based on `debian:12-slim`)
 * `ghcr.io/idaholab/malcolm/htadmin` (based on `debian:11-slim`)
+* `ghcr.io/idaholab/malcolm/keycloak` (based on `quay.io/keycloak/keycloak:26.1`)
 * `ghcr.io/idaholab/malcolm/logstash-oss` (based on `docker.elastic.co/logstash/logstash-oss`)
 * `ghcr.io/idaholab/malcolm/netbox` (based on `netboxcommunity/netbox:latest`)
 * `ghcr.io/idaholab/malcolm/nginx-proxy` (based on `alpine:3.20`)
@@ -88,31 +89,11 @@ Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.gith
 $ ./scripts/malcolm_appliance_packager.sh 
 You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
 
-Store administrator username/password for local Malcolm access? (Y/n): y
+Package Kubernetes manifests in addition to docker-compose.yml [y/N]?
 
-Administrator username: analyst
-analyst password:
-analyst password (again):
+Packaged Malcolm to "/home/user/tmp/malcolm_20250310_134542_2425d08b.tar.gz"
 
-Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
-
-(Re)generate self-signed certificates for HTTPS access (Y/n): y 
-
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): y
-
-Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): n
-
-Store username/password for email alert sender account? (y/N): n
-
-(Re)generate internal passwords for NetBox (Y/n): y
-
-Packaged Malcolm to "/home/user/tmp/malcolm_20190513_101117_f0d052c.tar.gz"
-
-Do you need to package images also [y/N]? y
-This might take a few minutes...
-
-Packaged Malcolm images to "/home/user/tmp/malcolm_20190513_101117_f0d052c_images.tar.xz"
-
+Do you need to package container images also [y/N]? n
 
 To install Malcolm:
   1. Run install.py
@@ -120,12 +101,31 @@ To install Malcolm:
 
 To start, stop, restart, etc. Malcolm:
   Use the control scripts in the "scripts/" directory:
-   - start         (start Malcolm)
-   - stop          (stop Malcolm)
-   - restart       (restart Malcolm)
-   - logs          (monitor Malcolm logs)
-   - wipe          (stop Malcolm and clear its database)
-   - auth_setup    (change authentication-related settings)
+   - start       (start Malcolm)
+   - stop        (stop Malcolm)
+   - restart     (restart Malcolm)
+   - logs        (monitor Malcolm logs)
+   - wipe        (stop Malcolm and clear its database)
+   - auth_setup  (change authentication-related settings)
+
+Malcolm services can be accessed at https://<IP or hostname>/
+
+Do you need to package container images also [y/N]? y
+
+Packaged Malcolm images to "/home/user/tmp/malcolm_20250310_134542_2425d08b_images.tar.xz"
+
+To install Malcolm:
+  1. Run install.py
+  2. Follow the prompts
+
+To start, stop, restart, etc. Malcolm:
+  Use the control scripts in the "scripts/" directory:
+   - start       (start Malcolm)
+   - stop        (stop Malcolm)
+   - restart     (restart Malcolm)
+   - logs        (monitor Malcolm logs)
+   - wipe        (stop Malcolm and clear its database)
+   - auth_setup  (change authentication-related settings)
 
 Malcolm services can be accessed at https://<IP or hostname>/
 ```

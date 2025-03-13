@@ -39,12 +39,12 @@ spec:
               name: ssl-env
           - configMapRef:
               name: opensearch-env
-          - secretRef:
-              name: auth-env
           - configMapRef:
               name: upload-common-env
           - configMapRef:
               name: pcap-capture-env
+          - secretRef:
+              name: auth-env
           - configMapRef:
               name: arkime-env
           - configMapRef:

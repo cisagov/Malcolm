@@ -22,7 +22,8 @@ Malcolm leverages the following excellent open source tools, among others.
 * [NetBox](https://netbox.dev/) - a suite for modeling and documenting modern networks
 * [PostgreSQL](https://www.postgresql.org/) - a relational databased used for storing configuration and state for a few other Malcolm components
 * [Redis](https://redis.io/) - an in-memory data store for caching session information for a few Malcolm components
-* [Nginx](https://nginx.org/) - for HTTPS and reverse proxying Malcolm components
+* [Keycloak](https://www.keycloak.org/) - an identity and access management (IAM) tool
+* [OpenResty](https://openresty.org/) - a dynamic web platform based on [Nginx](https://nginx.org/) and [LuaJIT](http://luajit.org/) for HTTPS and reverse proxying Malcolm components
 * [nginx-auth-ldap](https://github.com/kvspb/nginx-auth-ldap) - an LDAP authentication module for nginx
 * [Fluent Bit](https://fluentbit.io/) - for forwarding metrics to Malcolm from [network sensors](live-analysis.md#Hedgehog) (packet capture appliances)
 * [Mark Baggett](https://github.com/MarkBaggett)'s [freq](https://github.com/MarkBaggett/freq) - a tool for calculating entropy of strings

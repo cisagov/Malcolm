@@ -103,6 +103,10 @@ if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
        [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "opensearch-remote" ]]; then
         DISABLED=1
     fi
+    # and a special case for Keycloak too :/
+    if [[ "$SERVICE" == "keycloak" ]] && [[ "${NGINX_AUTH_MODE:-keycloak}" != "keycloak" ]]; then
+        DISABLED=1
+    fi
 fi
 
 # if port and/or format not specified via command line, make some inferences based on service
@@ -120,6 +124,8 @@ if [[ -n "$SERVICE" ]]; then
             PORT=8440
         elif [[ "$SERVICE" == "freq" ]]; then
             PORT=10004
+        elif [[ "$SERVICE" == "keycloak" ]]; then
+            PORT=8080
         elif [[ "$SERVICE" == "logstash" ]]; then
             PORT=9600
         elif [[ "$SERVICE" == "netbox" ]]; then

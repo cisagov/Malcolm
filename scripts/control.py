@@ -137,6 +137,7 @@ UsernameMinLen = 4
 UsernameMaxLen = 32
 PasswordMinLen = 8
 PasswordMaxLen = 128
+TrueOrFalseNoQuote = lambda x: 'true' if x else 'false'
 
 ###################################################################################################
 try:
@@ -158,6 +159,8 @@ def shutdown_handler(signum, frame):
 ###################################################################################################
 def checkEnvFilesAndValues():
     global args
+    global dockerComposeBin
+    global orchMode
     global dotenvImported
     global yamlImported
 
@@ -264,8 +267,50 @@ def checkEnvFilesAndValues():
                                         eprint(f"Removing {keys}, deleting {os.path.basename(envFileName)}")
                                     os.unlink(envFileName)
 
+                # files or directories that need to be relocated, only if:
+                #   - deployment mode is docker compose
+                #   - Malcolm is not running
+                #   - the source exists
+                #   - the destination does not exist
+                if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and ('relocated_files' in envVarActionsYaml):
+                    osEnv = os.environ.copy()
+                    if not args.noTmpDirOverride:
+                        osEnv['TMPDIR'] = MalcolmTmpPath
+                    err, out = run_process(
+                        [
+                            dockerComposeBin,
+                            '--profile',
+                            args.composeProfile,
+                            '-f',
+                            args.composeFile,
+                            'ps',
+                            '--services',
+                            '--status=running',
+                        ],
+                        env=osEnv,
+                        stderr=False,
+                        debug=args.debug,
+                    )
+                    out[:] = [x for x in out if x]
+                    if (err == 0) and (len(out) == 0):
+                        for src, dst in envVarActionsYaml['relocated_files'].items():
+                            srcPath = os.path.join(MalcolmPath, src)
+                            dstPath = os.path.join(MalcolmPath, next(iter(get_iterable(dst))))
+                            if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
+                                if args.debug:
+                                    eprint(
+                                        f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files'
+                                    )
+                            else:
+                                try:
+                                    shutil.move(srcPath, dstPath)
+                                    if args.debug:
+                                        eprint(f'Relocated "{src}" to "{dst}"')
+                                except Exception as e:
+                                    eprint(f'Error relocating "{src}" to "{dst}": {e}')
+
         # creating missing .env file from .env.example file
-        for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
+        for envExampleFile in sorted(glob.glob(os.path.join(examplesConfigDir, '*.env.example'))):
             envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
             if not os.path.isfile(envFile):
                 if args.debug:
@@ -274,7 +319,7 @@ def checkEnvFilesAndValues():
 
         # now, example the .env and .env.example file for individual values, and create any that are
         # in the .example file but missing in the .env file
-        for envFile in glob.glob(os.path.join(args.configDir, '*.env')):
+        for envFile in sorted(glob.glob(os.path.join(args.configDir, '*.env'))):
             envExampleFile = os.path.join(examplesConfigDir, os.path.basename(envFile) + '.example')
             if os.path.isfile(envExampleFile):
                 envValues = dotenvImported.dotenv_values(envFile)
@@ -1386,8 +1431,24 @@ def authSetup():
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else None
 
+    authCommonEnvFile = os.path.join(args.configDir, 'auth-common.env')
+    if args.authMode:
+        nginxAuthMode = str(args.authMode).lower()
+    else:
+        nginxAuthMode = 'unknown'
+        if os.path.isfile(authCommonEnvFile):
+            nginxAuthMode = (
+                dotenvImported.dotenv_values(authCommonEnvFile).get('NGINX_AUTH_MODE', nginxAuthMode).lower()
+            )
+
     # don't make them go through every thing every time, give them a choice instead
-    authModeChoices = (
+    # 0 - key
+    # 1 - description
+    # 2 - preselected choice
+    # 3 - option default (yes/no) for if they're doing "all""
+    # 4 - ? (lol, doesn't seem to be used in this script, probably just there
+    #          as it's used in other scripts where ChooseOne/ChooseMultiple is used)
+    authConfigChoices = (
         (
             'all',
             "Configure all authentication-related settings",
@@ -1396,8 +1457,15 @@ def authSetup():
             [],
         ),
         (
+            'method',
+            f"Select authentication method (currently \"{nginxAuthMode}\")",
+            False,
+            (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
+            [],
+        ),
+        (
             'admin',
-            "Store administrator username/password for local Malcolm access",
+            "Store administrator username/password for basic HTTP authentication",
             False,
             (not args.cmdAuthSetupNonInteractive)
             or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
@@ -1432,6 +1500,22 @@ def authSetup():
             ],
         ),
         (
+            'keycloak',
+            "Configure Keycloak",
+            False,
+            bool(
+                str(nginxAuthMode).startswith('keycloak')
+                or args.authKeycloakRealm
+                or args.authKeycloakRedirectUri
+                or args.authKeycloakUrl
+                or args.authKeycloakClientId
+                or args.authKeycloakClientSecret
+                or args.authKeycloakBootstrapUser
+                or args.authKeycloakBootstrapPassword
+            ),
+            [],
+        ),
+        (
             'remoteos',
             "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
             False,
@@ -1450,6 +1534,13 @@ def authSetup():
             "(Re)generate internal passwords for NetBox",
             False,
             (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
+            [],
+        ),
+        (
+            'keycloakdb',
+            "(Re)generate internal passwords for Keycloak's PostgreSQL database",
+            False,
+            (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
             [],
         ),
         (
@@ -1480,12 +1571,12 @@ def authSetup():
             False,
             [],
         ),
-    )[: 11 if txRxScript else -1]
+    )[: 14 if txRxScript else -1]
 
-    authMode = (
+    authConfigChoice = (
         ChooseOne(
             'Configure Authentication',
-            choices=[x[:-2] for x in authModeChoices],
+            choices=[x[:-2] for x in authConfigChoices],
         )
         if not args.cmdAuthSetupNonInteractive
         else 'all'
@@ -1500,9 +1591,9 @@ def authSetup():
     )
 
     try:
-        for authItem in authModeChoices[1:]:
+        for authItem in authConfigChoices[1:]:
             if (
-                (authMode == 'all')
+                (authConfigChoice == 'all')
                 and YesOrNo(
                     f'{authItem[1]}?',
                     default=authItem[3],
@@ -1512,8 +1603,139 @@ def authSetup():
                         else defaultBehavior
                     ),
                 )
-            ) or ((authMode != 'all') and (authMode == authItem[0])):
-                if authItem[0] == 'admin':
+            ) or ((authConfigChoice != 'all') and (authConfigChoice == authItem[0])):
+
+                if authItem[0] == 'method':
+
+                    authMethodChoices = (
+                        (
+                            'basic',
+                            "Use basic HTTP authentication",
+                            (not nginxAuthMode) or (nginxAuthMode.lower() == 'basic'),
+                        ),
+                        (
+                            'ldap',
+                            "Use Lightweight Directory Access Protocol (LDAP) for authentication",
+                            (nginxAuthMode.lower() == 'ldap'),
+                        ),
+                        (
+                            'keycloak',
+                            "Use embedded Keycloak for authentication",
+                            (nginxAuthMode.lower() == 'keycloak'),
+                        ),
+                        (
+                            'keycloak_remote',
+                            "Use remote Keycloak for authentication",
+                            (nginxAuthMode.lower() == 'keycloak_remote'),
+                        ),
+                        (
+                            'no_authentication',
+                            "Disable authentication",
+                            (nginxAuthMode.lower() == 'no_authentication'),
+                        ),
+                    )
+                    newNginxAuthMode = None if (args.composeProfile == PROFILE_MALCOLM) else 'basic'
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid authentication method')
+                    while (
+                        (not args.cmdAuthSetupNonInteractive)
+                        and (newNginxAuthMode not in list([x[0] for x in authMethodChoices]))
+                        and loopBreaker.increment()
+                    ):
+                        newNginxAuthMode = ChooseOne(
+                            'Select authentication method',
+                            choices=authMethodChoices,
+                        ).lower()
+                    if newNginxAuthMode:
+                        nginxAuthMode = newNginxAuthMode
+
+                    ldapStartTLS = False
+                    if nginxAuthMode == 'ldap':
+                        ldapStartTLS = YesOrNo(
+                            'Use StartTLS (rather than LDAPS) for LDAP connection security?',
+                            default=args.ldapStartTLS,
+                            defaultBehavior=defaultBehavior,
+                        )
+
+                        ldapConfFile = os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))
+                        if (
+                            (not os.path.isfile(ldapConfFile))
+                            or (os.path.getsize(ldapConfFile) == 0)
+                            or YesOrNo(
+                                'nginx_ldap.conf already exists, overwrite with fresh template?',
+                                default=False,
+                                defaultBehavior=defaultBehavior,
+                            )
+                        ):
+                            ldapServerTypeDefault = args.ldapServerType if args.ldapServerType else 'winldap'
+                            if not args.cmdAuthSetupNonInteractive:
+                                allowedLdapModes = ('winldap', 'openldap')
+                                ldapServerType = None
+                                loopBreaker = CountUntilException(
+                                    MaxAskForValueCount, 'Invalid LDAP server compatibility type'
+                                )
+                                while ldapServerType not in allowedLdapModes and loopBreaker.increment():
+                                    ldapServerType = ChooseOne(
+                                        'Select LDAP server compatibility type',
+                                        choices=[(x, '', x == ldapServerTypeDefault) for x in allowedLdapModes],
+                                    )
+                            else:
+                                ldapServerType = ldapServerTypeDefault
+
+                            # stub out default LDAP stuff (they'll have to edit it by hand later)
+                            ldapProto = 'ldap://' if ldapStartTLS else 'ldaps://'
+                            ldapHost = "ds.example.com"
+                            ldapPort = 3268 if ldapStartTLS else 3269
+                            if ldapServerType == "openldap":
+                                ldapUri = 'DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
+                                ldapGroupAttr = "memberUid"
+                                ldapGroupAttrIsDN = "off"
+                            else:
+                                ldapUri = 'DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
+                                ldapGroupAttr = "member"
+                                ldapGroupAttrIsDN = "on"
+                            with open(ldapConfFile, 'w') as f:
+                                f.write('# This is a sample configuration for the ldap_server section of nginx.conf.\n')
+                                f.write(
+                                    '# Yours will vary depending on how your Active Directory/LDAP server is configured.\n'
+                                )
+                                f.write(
+                                    '# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.\n\n'
+                                )
+                                f.write('ldap_server ad_server {\n')
+                                f.write(f'  url "{ldapProto}{ldapHost}:{ldapPort}/{ldapUri}";\n\n')
+                                f.write('  binddn "bind_dn";\n')
+                                f.write('  binddn_passwd "bind_dn_password";\n\n')
+                                f.write(f'  group_attribute {ldapGroupAttr};\n')
+                                f.write(f'  group_attribute_is_dn {ldapGroupAttrIsDN};\n')
+                                f.write('  require group "CN=malcolm,OU=groups,DC=example,DC=com";\n')
+                                f.write('  require valid_user;\n')
+                                f.write('  satisfy all;\n')
+                                f.write('}\n\n')
+                                f.write('auth_ldap_cache_enabled on;\n')
+                                f.write('auth_ldap_cache_expiration_time 10000;\n')
+                                f.write('auth_ldap_cache_size 1000;\n')
+                            os.chmod(ldapConfFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+                    # write env files
+                    UpdateEnvFiles(
+                        [
+                            EnvValue(
+                                True,
+                                authCommonEnvFile,
+                                'NGINX_AUTH_MODE',
+                                nginxAuthMode,
+                            ),
+                            EnvValue(
+                                True,
+                                authCommonEnvFile,
+                                'NGINX_LDAP_TLS_STUNNEL',
+                                TrueOrFalseNoQuote((nginxAuthMode == 'ldap') and ldapStartTLS),
+                            ),
+                        ],
+                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                    )
+
+                elif authItem[0] == 'admin':
                     # prompt username and password
                     usernamePrevious = None
                     password = None
@@ -1617,60 +1839,14 @@ def authSetup():
                                 ):
                                     f.write(line)
 
-                    # configure default LDAP stuff (they'll have to edit it by hand later)
-                    ldapConfFile = os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))
-                    if not os.path.isfile(ldapConfFile):
-                        ldapDefaults = defaultdict(str)
-                        if os.path.isfile(os.path.join(MalcolmPath, '.ldap_config_defaults')):
-                            ldapDefaults = defaultdict(str)
-                            with open(os.path.join(MalcolmPath, '.ldap_config_defaults'), 'r') as f:
-                                for line in f:
-                                    try:
-                                        k, v = line.rstrip().split("=")
-                                        ldapDefaults[k] = v.strip('"').strip("'")
-                                    except Exception:
-                                        pass
-                        ldapProto = ldapDefaults.get("LDAP_PROTO", "ldap://")
-                        ldapHost = ldapDefaults.get("LDAP_HOST", "ds.example.com")
-                        ldapPort = ldapDefaults.get("LDAP_PORT", "3268")
-                        ldapType = ldapDefaults.get("LDAP_SERVER_TYPE", "winldap")
-                        if ldapType == "openldap":
-                            ldapUri = 'DC=example,DC=com?uid?sub?(objectClass=posixAccount)'
-                            ldapGroupAttr = "memberUid"
-                            ldapGroupAttrIsDN = "off"
-                        else:
-                            ldapUri = 'DC=example,DC=com?sAMAccountName?sub?(objectClass=person)'
-                            ldapGroupAttr = "member"
-                            ldapGroupAttrIsDN = "on"
-                        with open(ldapConfFile, 'w') as f:
-                            f.write('# This is a sample configuration for the ldap_server section of nginx.conf.\n')
-                            f.write(
-                                '# Yours will vary depending on how your Active Directory/LDAP server is configured.\n'
-                            )
-                            f.write(
-                                '# See https://github.com/kvspb/nginx-auth-ldap#available-config-parameters for options.\n\n'
-                            )
-                            f.write('ldap_server ad_server {\n')
-                            f.write(f'  url "{ldapProto}{ldapHost}:{ldapPort}/{ldapUri}";\n\n')
-                            f.write('  binddn "bind_dn";\n')
-                            f.write('  binddn_passwd "bind_dn_password";\n\n')
-                            f.write(f'  group_attribute {ldapGroupAttr};\n')
-                            f.write(f'  group_attribute_is_dn {ldapGroupAttrIsDN};\n')
-                            f.write('  require group "CN=malcolm,OU=groups,DC=example,DC=com";\n')
-                            f.write('  require valid_user;\n')
-                            f.write('  satisfy all;\n')
-                            f.write('}\n\n')
-                            f.write('auth_ldap_cache_enabled on;\n')
-                            f.write('auth_ldap_cache_expiration_time 10000;\n')
-                            f.write('auth_ldap_cache_size 1000;\n')
-                        os.chmod(ldapConfFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-
                     # populate htadmin config file
                     with open(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')), 'w') as f:
                         f.write('; HTAdmin config file.\n\n')
                         f.write('[application]\n')
                         f.write('; Change this to customize your title:\n')
-                        f.write('app_title = Malcolm User Management\n\n')
+                        f.write(
+                            f'app_title = {"Malcolm Service Account Management" if nginxAuthMode.startswith("keycloak") else "Malcolm User Management" }\n\n'
+                        )
                         f.write('; htpasswd file\n')
                         f.write('secure_path  = ./auth/htpasswd\n')
                         f.write('; metadata file\n')
@@ -1689,10 +1865,16 @@ def authSetup():
                     # touch the metadata file
                     open(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')), 'a').close()
 
-                    DisplayMessage(
-                        'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
-                        defaultBehavior=defaultBehavior,
-                    )
+                    if nginxAuthMode in ['basic', 'true']:
+                        DisplayMessage(
+                            'Additional local accounts can be created at https://localhost/auth/ when Malcolm is running',
+                            defaultBehavior=defaultBehavior,
+                        )
+                    else:
+                        DisplayMessage(
+                            f'Authentication method is "{nginxAuthMode}", local credentials are only valid for OpenSearch endpoint, if enabled.',
+                            defaultBehavior=defaultBehavior,
+                        )
 
                 # generate HTTPS self-signed certificates
                 elif authItem[0] == 'webcerts':
@@ -1999,7 +2181,153 @@ def authSetup():
                         eprint("Failed to store email alert sender account variables:\n")
                         eprint("\n".join(results))
 
-                elif authItem[0] in ['netbox', 'postgres', 'keycloak']:
+                elif authItem[0] == 'keycloak':
+                    with pushd(args.configDir):
+                        keycloakEnvValues = defaultdict(str)
+
+                        keycloakEnvFile = 'keycloak.env'
+                        if os.path.isfile(keycloakEnvFile):
+                            keycloakEnvValues.update(dotenvImported.dotenv_values(keycloakEnvFile))
+
+                        keyCloakOpts = (
+                            # opt[0] - human readable description
+                            # opt[1] - env. variable name
+                            # opt[2] - can be blank
+                            # opt[3] - is a secret
+                            # opt[4] - default value
+                            (
+                                'Keycloak realm',
+                                'KEYCLOAK_AUTH_REALM',
+                                False,
+                                False,
+                                (
+                                    args.authKeycloakRealm
+                                    if args.authKeycloakRealm
+                                    else keycloakEnvValues.get('KEYCLOAK_AUTH_REALM', 'master')
+                                ),
+                            ),
+                            (
+                                'Keycloak redirect URI',
+                                'KEYCLOAK_AUTH_REDIRECT_URI',
+                                False,
+                                False,
+                                (
+                                    args.authKeycloakRedirectUri
+                                    if args.authKeycloakRedirectUri
+                                    else keycloakEnvValues.get('KEYCLOAK_AUTH_REDIRECT_URI', '/index.html')
+                                ),
+                            ),
+                            (
+                                'Keycloak URL',
+                                'KEYCLOAK_AUTH_URL',
+                                False,
+                                False,
+                                (
+                                    args.authKeycloakUrl
+                                    if args.authKeycloakUrl
+                                    else keycloakEnvValues['KEYCLOAK_AUTH_URL']
+                                ),
+                            ),
+                            (
+                                'Keycloak client ID',
+                                'KEYCLOAK_CLIENT_ID',
+                                True,
+                                False,
+                                (
+                                    args.authKeycloakClientId
+                                    if args.authKeycloakClientId
+                                    else keycloakEnvValues['KEYCLOAK_CLIENT_ID']
+                                ),
+                            ),
+                            (
+                                'Keycloak client secret (blank to retain the previous value)',
+                                'KEYCLOAK_CLIENT_SECRET',
+                                True,
+                                True,
+                                (
+                                    args.authKeycloakClientSecret
+                                    if args.authKeycloakClientSecret
+                                    else keycloakEnvValues['KEYCLOAK_CLIENT_SECRET']
+                                ),
+                            ),
+                            (
+                                'Temporary Keycloak admin bootstrap username',
+                                'KC_BOOTSTRAP_ADMIN_USERNAME',
+                                True,
+                                False,
+                                (
+                                    args.authKeycloakBootstrapUser
+                                    if args.authKeycloakBootstrapUser
+                                    else keycloakEnvValues['KC_BOOTSTRAP_ADMIN_USERNAME']
+                                ),
+                            ),
+                            (
+                                'Temporary Keycloak admin bootstrap password (blank to retain the previous value)',
+                                'KC_BOOTSTRAP_ADMIN_PASSWORD',
+                                True,
+                                True,
+                                (
+                                    args.authKeycloakBootstrapPassword
+                                    if args.authKeycloakBootstrapPassword
+                                    else keycloakEnvValues['KC_BOOTSTRAP_ADMIN_PASSWORD']
+                                ),
+                            ),
+                        )
+                        # see comment on keyCloakOpts above for definitions
+                        changeMade = False
+                        for opt in keyCloakOpts:
+                            if (nginxAuthMode == 'keycloak') or (not opt[1].startswith('KC_')):
+                                loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opt[0]}')
+                                while loopBreaker.increment():
+                                    tmpVal = (
+                                        AskForString(
+                                            opt[0],
+                                            default=opt[4],
+                                            defaultBehavior=defaultBehavior,
+                                        )
+                                        if (opt[3] == False)
+                                        else AskForPassword(
+                                            opt[0],
+                                            default=opt[4],
+                                            defaultBehavior=defaultBehavior,
+                                        )
+                                    )
+
+                                    if (len(tmpVal) == 0) and (opt[3] == True):
+                                        # if this is a password/secret and they
+                                        #   leave it blank, retain the old value
+                                        tmpVal = opt[4]
+
+                                    if (len(tmpVal) > 0) or (opt[2] == True):
+                                        if keycloakEnvValues[opt[1]] != tmpVal:
+                                            changeMade = True
+                                        keycloakEnvValues[opt[1]] = tmpVal
+                                        break
+                                    else:
+                                        eprint(f"{opt[0]} cannot be empty")
+
+                        # update keycloak.env with the new values, if any
+                        if changeMade:
+                            UpdateEnvFiles(
+                                [
+                                    EnvValue(
+                                        True,
+                                        keycloakEnvFile,
+                                        k,
+                                        v,
+                                    )
+                                    for k, v in keycloakEnvValues.items()
+                                ],
+                                stat.S_IRUSR | stat.S_IWUSR,
+                            )
+
+                        if not nginxAuthMode.startswith('keycloak'):
+                            DisplayMessage(
+                                f'Authentication method is "{nginxAuthMode}", Keycloak configuration will have no effect.',
+                                defaultBehavior=defaultBehavior,
+                            )
+
+                elif authItem[0] in ['netbox', 'postgres', 'keycloakdb']:
                     with pushd(args.configDir):
 
                         # Check for the presence of existing passwords prior to setting new NetBox/PostgreSQL passwords.
@@ -2018,7 +2346,7 @@ def authSetup():
                                     'SUPERUSER_API_TOKEN',
                                 ),
                             }
-                        elif authItem[0] == 'keycloak':
+                        elif authItem[0] == 'keycloakdb':
                             preExistingPasswords = {
                                 'postgres.env': ('POSTGRES_KEYCLOAK_PASSWORD',),
                             }
@@ -2078,7 +2406,7 @@ def authSetup():
                                         ''.join(secrets.choice(pwAlphabet) for i in range(40)),
                                     ),
                                 ]
-                            elif authItem[0] == 'keycloak':
+                            elif authItem[0] == 'keycloakdb':
                                 envFiles = [
                                     EnvValue(
                                         True,
@@ -2378,6 +2706,34 @@ def main():
         help="Configure Malcolm authentication (noninteractive using arguments provided)",
     )
     authSetupGroup.add_argument(
+        '--auth-method',
+        dest='authMode',
+        required=False,
+        metavar='<basic|ldap|keycloak|keycloak_remote|no_authentication>',
+        type=str,
+        default='',
+        help='Authentication method (for --auth-noninteractive)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-ldap-mode',
+        dest='ldapServerType',
+        required=False,
+        metavar='<openldap|winldap>',
+        type=str,
+        default=None,
+        help='LDAP server compatibility type (for --auth-noninteractive when --auth-method is ldap)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-ldap-start-tls',
+        dest='ldapStartTLS',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=False,
+        help="Use StartTLS (rather than LDAPS) for LDAP connection security (for --auth-noninteractive when --auth-method is ldap)",
+    )
+    authSetupGroup.add_argument(
         '--auth-admin-username',
         dest='authUserName',
         required=False,
@@ -2457,6 +2813,78 @@ def main():
         const=True,
         default=False,
         help="(Re)generate internal superuser passwords for PostgreSQL",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-keycloak-db-password',
+        dest='authGenKeycloakDbPassword',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate internal passwords for Keycloak's PostgreSQL database",
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-realm',
+        dest='authKeycloakRealm',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Keycloak realm',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-redirect-uri',
+        dest='authKeycloakRedirectUri',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Keycloak redirect URI',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-url',
+        dest='authKeycloakUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Keycloak URL',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-client-id',
+        dest='authKeycloakClientId',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Keycloak client ID',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-client-secret',
+        dest='authKeycloakClientSecret',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Keycloak client secret',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-bootstrap-user',
+        dest='authKeycloakBootstrapUser',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Temporary Keycloak admin bootstrap username',
+    )
+    authSetupGroup.add_argument(
+        '--auth-keycloak-bootstrap-password',
+        dest='authKeycloakBootstrapPassword',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Temporary Keycloak admin bootstrap password',
     )
 
     logsAndStatusGroup = parser.add_argument_group('Logs and Status')

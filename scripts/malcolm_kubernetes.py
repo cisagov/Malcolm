@@ -222,6 +222,7 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_MALCOLM] = [
     'filebeat',
     'freq',
     'htadmin',
+    'keycloak',
     'logstash',
     'netbox',
     'postgres',
