@@ -38,6 +38,8 @@ NGINX_LDAP_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_ldap.conf
 
 # "include" file for KeyCloak authentication
 NGINX_KEYCLOAK_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_keycloak.conf
+# experimental HTTP Basic Auth translation layer handling OAuth2 token exchange transparently
+NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF=${NGINX_CONF_DIR}/nginx_auth_keycloak_basic.conf
 
 # "include" file for fully disabling authentication
 NGINX_NO_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_disabled.conf
@@ -165,7 +167,12 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
 
   # TODO: we can't yet handle proxying client API requests to the opensearch
   #   endpoint with Keycloak so we have to use basic for now
-  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  if [[ "${NGINX_KEYCLOAK_BASIC_AUTH:-false}" == "true" ]]; then
+    # experimental
+    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  else
+    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  fi
 
   # ldap configuration is empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
@@ -184,7 +191,12 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
 
   # TODO: we can't yet handle proxying client API requests to the opensearch
   #   endpoint with Keycloak so we have to use basic for now
-  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  if [[ "${NGINX_KEYCLOAK_BASIC_AUTH:-false}" == "true" ]]; then
+    # experimental
+    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  else
+    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  fi
 
   # ldap configuration is empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
