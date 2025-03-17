@@ -184,6 +184,15 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             -XPUT --location --fail-with-body --output "$CURL_OUT" --silent "$OPENSEARCH_URL_TO_USE/_snapshot/$ISM_SNAPSHOT_REPO" \
             -d "{ \"type\": \"fs\", \"settings\": { \"location\": \"$ISM_SNAPSHOT_REPO\", \"compress\": $ISM_SNAPSHOT_COMPRESSED } }" \
             || ( cat "$CURL_OUT" && echo )
+
+          # for single-cluster opensearch set cluster-wide default replicas to 0
+          echo "Setting number_of_replicas for single-node $DATASTORE_TYPE..."
+          CURL_OUT=$(get_tmp_output_filename)
+          curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+            -XPUT "$OPENSEARCH_URL_TO_USE/_settings" \
+            -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+            -d '{ "index": { "number_of_replicas":"0" } }' || ( cat "$CURL_OUT" && echo )
+
         fi
 
         #############################################################################################################################
@@ -444,7 +453,6 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch Tweaks
-            #   - TODO: only do these if they've NEVER been done before?
 
             # set dark theme (or not)
             echo "Setting $DATASTORE_TYPE dark mode ($DARK_MODE)..."

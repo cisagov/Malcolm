@@ -12,24 +12,29 @@ A fresh installation of Malcolm configures an example [custom webhook destinatio
 When using an email account to send alerts, users must [authenticate each sender account](https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account) before sending an email. The [`auth_setup`](authsetup.md#AuthSetup) script can be used to securely store the email account credentials:
 
 ```
-./scripts/auth_setup 
+$ ./scripts/auth_setup
+1: all - Configure all authentication-related settings
+2: method - Select authentication method (currently "basic")
+3: admin - Store administrator username/password for basic HTTP authentication
+4: webcerts - (Re)generate self-signed certificates for HTTPS access
+5: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
+6: keycloak - Configure Keycloak
+7: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
+8: email - Store username/password for OpenSearch Alerting email sender account
+9: netbox - (Re)generate internal passwords for NetBox
+10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
+11: postgres - (Re)generate internal superuser passwords for PostgreSQL
+12: redis - (Re)generate internal passwords for Redis
+13: arkime - Store password hash secret for Arkime viewer cluster
+14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
+Configure Authentication (all): 7
 
-Store administrator username/password for local Malcolm access? (Y/n): n
-
-(Re)generate self-signed certificates for HTTPS access (Y/n): n
-
-(Re)generate self-signed certificates for a remote log forwarder (Y/n): n
-
-Will Malcolm be using an existing remote primary or secondary OpenSearch instance? (y/N): n
-
-Store username/password for email alert sender account? (y/N): y
+OpenSearch alerting email sender name: example
 
 Email account username: analyst@example.org
-analyst@example.org password: 
-analyst@example.org password (again): 
-Email alert sender account variables stored: opensearch.alerting.destination.email.destination_alpha.password, opensearch.alerting.destination.email.destination_alpha.username
-
-(Re)generate internal passwords for NetBox (Y/n): n
+analyst@example.org password: :
+analyst@example.org password (again): :
+Email alert sender account variables stored: plugins.alerting.destination.email.example.password, plugins.alerting.destination.email.example.username
 ```
 
 This action should only be performed while Malcolm is [stopped](running.md#StopAndRestart): otherwise the credentials will not be stored correctly.

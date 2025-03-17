@@ -16,6 +16,7 @@ ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "www-data"
 ENV PGROUP "www-data"
+ENV PUSER_CHOWN "/var/www"
 # not dropping privileges globally so nginx can bind privileged ports internally.
 # nginx and php-fpm will drop privileges to "www-data" user for worker processes
 ENV PUSER_PRIV_DROP false
@@ -88,7 +89,8 @@ ADD --chmod=755 container-health-scripts/htadmin.sh /usr/local/bin/container_hea
 ADD --chmod=644 docs/images/favicon/favicon.ico /var/www/htadmin/
 ADD --chmod=644 htadmin/supervisord.conf /supervisord.conf
 ADD --chmod=755 htadmin/htadmin.sh /usr/local/bin/
-ADD htadmin/src /var/www/htadmin/
+ADD --chmod=644 htadmin/src/bootstrap.* /var/www/htadmin/
+ADD --chmod=644 htadmin/src/includes/*.php /var/www/htadmin/includes/
 ADD --chmod=644 htadmin/php/php.ini /etc/php/$PHP_VERSION/fpm/php.ini
 ADD --chmod=644 htadmin/nginx/sites-available/default /etc/nginx/sites-available/default
 

@@ -48,6 +48,7 @@ from malcolm_common import (
     DotEnvDynamic,
     DownloadToFile,
     DumpYaml,
+    EnvValue,
     GetPlatformOSRelease,
     HOMEBREW_INSTALL_URLS,
     KubernetesDynamic,
@@ -68,6 +69,7 @@ from malcolm_common import (
     PROFILE_KEY,
     RequestsDynamic,
     ScriptPath,
+    UpdateEnvFiles,
     UserInputDefaultsBehavior,
     UserInterfaceMode,
     YAMLDynamic,
@@ -141,23 +143,22 @@ class ConfigOptions(IntEnum):
     RestartMode = 7
     RequireHTTPS = 8
     DockerNetworking = 9
-    AuthMethod = 10
-    StorageLocations = 11
-    ILMISM = 12
-    StorageManagement = 13
-    AutoArkime = 14
-    AutoSuricata = 15
-    SuricataRuleUpdate = 16
-    AutoZeek = 17
-    ICS = 18
-    Enrichment = 19
-    OpenPorts = 20
-    FileCarving = 21
-    ZeekIntel = 22
-    NetBox = 23
-    Capture = 24
-    DarkMode = 25
-    PostConfig = 26
+    StorageLocations = 10
+    ILMISM = 11
+    StorageManagement = 12
+    AutoArkime = 13
+    AutoSuricata = 14
+    SuricataRuleUpdate = 15
+    AutoZeek = 16
+    ICS = 17
+    Enrichment = 18
+    OpenPorts = 19
+    FileCarving = 20
+    ZeekIntel = 21
+    NetBox = 22
+    Capture = 23
+    DarkMode = 24
+    PostConfig = 25
 
 
 ###################################################################################################
@@ -632,6 +633,8 @@ class Installer(object):
         zeekIntelFeedSince = '7 days ago'
         zeekIntelItemExipration = '-1min'
         zeekIntelOnStartup = True
+        nginxResolverIpv4Off = False
+        nginxResolverIpv6Off = False
 
         prevStep = None
         currentStep = ConfigOptions.Preconfig
@@ -910,6 +913,32 @@ class Installer(object):
                                 default=False,
                                 extraLabel=BACK_LABEL,
                             )
+
+                        nginxResolverChoices = []
+                        allowedResolverChoices = {
+                            'ipv4': [
+                                DatabaseMode.OpenSearchLocal,
+                                'IPv4',
+                                args.nginxResolverIpv4,
+                            ],
+                            'ipv6': [
+                                DatabaseMode.OpenSearchRemote,
+                                'IPv6',
+                                args.nginxResolverIpv6,
+                            ],
+                        }
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Both ')
+                        while (not nginxResolverChoices) and loopBreaker.increment():
+                            nginxResolverChoices = InstallerChooseMultiple(
+                                'Which IP version does the network support? (IPv4, IPv6, or both)',
+                                choices=[
+                                    (x, allowedResolverChoices[x][1], allowedResolverChoices[x][2])
+                                    for x in list(allowedResolverChoices.keys())
+                                ],
+                                extraLabel=BACK_LABEL,
+                            )
+                        nginxResolverIpv4Off = 'ipv4' not in nginxResolverChoices
+                        nginxResolverIpv6Off = 'ipv6' not in nginxResolverChoices
                     else:
                         nginxSSL = True
 
@@ -980,64 +1009,6 @@ class Installer(object):
                         default=args.containerNetworkName,
                         extraLabel=BACK_LABEL,
                     )
-
-                ###################################################################################
-                elif currentStep == ConfigOptions.AuthMethod:
-                    allowedAuthModes = {
-                        'Basic': 'true',
-                        'Lightweight Directory Access Protocol (LDAP)': 'false',
-                        'None': 'no_authentication',
-                    }
-                    authMode = None if (malcolmProfile == PROFILE_MALCOLM) else 'Basic'
-                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid authentication method')
-                    while authMode not in list(allowedAuthModes.keys()) and loopBreaker.increment():
-                        authMode = InstallerChooseOne(
-                            'Select authentication method',
-                            choices=[
-                                (
-                                    x,
-                                    '',
-                                    x
-                                    == (
-                                        'Lightweight Directory Access Protocol (LDAP)' if args.authModeLDAP else 'Basic'
-                                    ),
-                                )
-                                for x in list(allowedAuthModes.keys())
-                            ],
-                            extraLabel=BACK_LABEL,
-                        )
-
-                    ldapStartTLS = False
-                    ldapServerTypeDefault = args.ldapServerType if args.ldapServerType else 'winldap'
-                    ldapServerType = ldapServerTypeDefault
-                    if 'ldap' in authMode.lower():
-                        allowedLdapModes = ('winldap', 'openldap')
-                        ldapServerType = args.ldapServerType if args.ldapServerType else None
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid LDAP server compatibility type')
-                        while ldapServerType not in allowedLdapModes and loopBreaker.increment():
-                            ldapServerType = InstallerChooseOne(
-                                'Select LDAP server compatibility type',
-                                choices=[(x, '', x == ldapServerTypeDefault) for x in allowedLdapModes],
-                                extraLabel=BACK_LABEL,
-                            )
-                        ldapStartTLS = InstallerYesOrNo(
-                            'Use StartTLS (rather than LDAPS) for LDAP connection security?',
-                            default=args.ldapStartTLS,
-                            extraLabel=BACK_LABEL,
-                        )
-                        try:
-                            with open(
-                                os.path.join(os.path.realpath(os.path.join(ScriptPath, "..")), ".ldap_config_defaults"),
-                                "w",
-                            ) as ldapDefaultsFile:
-                                print(f"LDAP_SERVER_TYPE='{ldapServerType}'", file=ldapDefaultsFile)
-                                print(
-                                    f"LDAP_PROTO='{'ldap://' if ldapStartTLS else 'ldaps://'}'",
-                                    file=ldapDefaultsFile,
-                                )
-                                print(f"LDAP_PORT='{3268 if ldapStartTLS else 3269}'", file=ldapDefaultsFile)
-                        except Exception:
-                            pass
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.StorageLocations:
@@ -2087,9 +2058,6 @@ class Installer(object):
                         eprint(f"Creating {envFile} from {envExampleFile}")
                     shutil.copyfile(envExampleFile, envFile)
 
-        # define environment variables to be set in .env files
-        EnvValue = namedtuple("EnvValue", ["provided", "envFile", "key", "value"], rename=False)
-
         EnvValues = [
             # Whether or not Arkime is allowed to delete uploaded/captured PCAP
             EnvValue(
@@ -2181,20 +2149,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'arkime.env'),
                 'INDEX_MANAGEMENT_SEGMENTS',
                 indexManagementOptimizeSessionSegments,
-            ),
-            # authentication method: basic (true), ldap (false) or no_authentication
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'auth-common.env'),
-                'NGINX_BASIC_AUTH',
-                allowedAuthModes.get(authMode, TrueOrFalseNoQuote(True)),
-            ),
-            # StartTLS vs. ldap:// or ldaps://
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'auth-common.env'),
-                'NGINX_LDAP_TLS_STUNNEL',
-                TrueOrFalseNoQuote(('ldap' in authMode.lower()) and ldapStartTLS),
             ),
             # Logstash host and port
             EnvValue(
@@ -2376,19 +2330,25 @@ class Installer(object):
                 'NETBOX_DISABLED',
                 TrueOrFalseNoQuote(not netboxEnabled),
             ),
-            # enable/disable netbox (postgres)
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_POSTGRES_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
-            ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'nginx.env'),
                 'NGINX_SSL',
                 TrueOrFalseNoQuote(nginxSSL),
+            ),
+            # "off" parameters for IPv4/IPv6 for NGINX resolver
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'nginx.env'),
+                'NGINX_RESOLVER_IPV4_OFF',
+                TrueOrFalseNoQuote(nginxResolverIpv4Off),
+            ),
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'nginx.env'),
+                'NGINX_RESOLVER_IPV6_OFF',
+                TrueOrFalseNoQuote(nginxResolverIpv6Off),
             ),
             # OpenSearch primary instance is local vs. remote
             EnvValue(
@@ -2733,35 +2693,7 @@ class Installer(object):
         ]
 
         # now, go through and modify the provided values in the .env files
-        for val in [v for v in EnvValues if v.provided]:
-            try:
-                touch(val.envFile)
-            except Exception:
-                pass
-
-            try:
-                oldDotEnvVersion = False
-                try:
-                    dotenv_imported.set_key(
-                        val.envFile,
-                        val.key,
-                        str(val.value),
-                        quote_mode='never',
-                        encoding='utf-8',
-                    )
-                except TypeError:
-                    oldDotEnvVersion = True
-
-                if oldDotEnvVersion:
-                    dotenv_imported.set_key(
-                        val.envFile,
-                        val.key,
-                        str(val.value),
-                        quote_mode='never',
-                    )
-
-            except Exception as e:
-                eprint(f"Setting value for {val.key} in {val.envFile} module failed ({type(e).__name__}): {e}")
+        UpdateEnvFiles(EnvValues)
 
         # if any arbitrary extra .env settings were specified, handle those last (e.g., foobar.env:VARIABLE_NAME=value)
         if args.extraSettings:
@@ -2792,39 +2724,20 @@ class Installer(object):
                         )
 
                     else:
-                        if self.debug:
-                            eprint(f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)}")
-
-                        try:
-                            touch(extraFile)
-                        except Exception:
-                            pass
-
-                        try:
-                            oldDotEnvVersion = False
-                            try:
-                                dotenv_imported.set_key(
+                        extraValSuccess = UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
                                     extraFile,
                                     extraVar,
                                     extraVal,
-                                    quote_mode='never',
-                                    encoding='utf-8',
-                                )
-                            except TypeError:
-                                oldDotEnvVersion = True
-
-                            if oldDotEnvVersion:
-                                dotenv_imported.set_key(
-                                    extraFile,
-                                    extraVar,
-                                    extraVal,
-                                    quote_mode='never',
-                                )
-
-                        except Exception as e:
-                            eprint(
-                                f"Setting extra value for {extraVar} in {extraFile} module failed ({type(e).__name__}): {e}"
-                            )
+                                ),
+                            ]
+                        )
+                    if self.debug:
+                        eprint(
+                            f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} {'succeeded' if extraValSuccess else 'failed'}"
+                        )
 
         # change ownership of .envs file to match puid/pgid
         if (
@@ -4192,8 +4105,8 @@ def main():
         help='Architecture for container image',
     )
 
-    authencOptionsArgGroup = parser.add_argument_group('Entryption and authentication options')
-    authencOptionsArgGroup.add_argument(
+    netOptionsArgGroup = parser.add_argument_group('Network connectivity options')
+    netOptionsArgGroup.add_argument(
         '--https',
         dest='nginxSSL',
         type=str2bool,
@@ -4203,34 +4116,25 @@ def main():
         default=True,
         help="Require encrypted HTTPS connections",
     )
-    authencOptionsArgGroup.add_argument(
-        '--ldap',
-        dest='authModeLDAP',
+    netOptionsArgGroup.add_argument(
+        '--nginx-resolver-ipv4',
+        dest='nginxResolverIpv4',
+        type=str2bool,
+        metavar="true|false",
+        nargs='?',
+        const=True,
+        default=True,
+        help="Enable IPv4 for nginx resolver directive",
+    )
+    netOptionsArgGroup.add_argument(
+        '--nginx-resolver-ipv6',
+        dest='nginxResolverIpv6',
         type=str2bool,
         metavar="true|false",
         nargs='?',
         const=True,
         default=False,
-        help="Use Lightweight Directory Access Protocol (LDAP)",
-    )
-    authencOptionsArgGroup.add_argument(
-        '--ldap-mode',
-        dest='ldapServerType',
-        required=False,
-        metavar='<openldap|winldap>',
-        type=str,
-        default=None,
-        help='LDAP server compatibility type',
-    )
-    authencOptionsArgGroup.add_argument(
-        '--ldap-start-tls',
-        dest='ldapStartTLS',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Use StartTLS (rather than LDAPS) for LDAP connection security",
+        help="Enable IPv6 for nginx resolver directive",
     )
 
     dockerOptionsArgGroup = parser.add_argument_group('Container options')

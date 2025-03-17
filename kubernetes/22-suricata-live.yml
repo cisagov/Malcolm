@@ -40,11 +40,11 @@ spec:
           - configMapRef:
               name: upload-common-env
           - configMapRef:
+              name: pcap-capture-env
+          - configMapRef:
               name: suricata-env
           - configMapRef:
               name: suricata-live-env
-          - configMapRef:
-              name: pcap-capture-env
         livenessProbe:
           exec:
             command:

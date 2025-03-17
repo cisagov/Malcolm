@@ -26,6 +26,9 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/postgres.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 postgres-scripts/docker-entrypoint-initdb.d/*.sh /docker-entrypoint-initdb.d/
+ADD --chmod=755 postgres-scripts/docker-entrypoint-startdb.d/*.sh /docker-entrypoint-startdb.d/
+ADD --chmod=755 postgres-scripts/*.sh /usr/local/bin/
 
 RUN apk update --no-cache && \
     apk upgrade --no-cache && \
@@ -47,7 +50,8 @@ ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
-            "-s", "netbox-postgres"]
+            "-s", "postgres", \
+            "/usr/bin/docker-entrypoint-startdb.sh"]
 
 CMD ["/usr/bin/docker-entrypoint.sh", "postgres"]
 

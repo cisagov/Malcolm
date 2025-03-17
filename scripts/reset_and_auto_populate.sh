@@ -381,7 +381,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
-      $($GREP -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
+      $($GREP -q -P "NGINX_AUTH_MODE\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
       ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-if [[ "${NGINX_BASIC_AUTH:-true}" == "true" ]]; then
+# htadmin also runs with keycloak selected as the auth mode, as the OpenSearch API endpoint is not (yet) compatible
+if [[ "${NGINX_AUTH_MODE:-basic}" =~ ^(true|basic|keycloak|keycloak_remote)$ ]]; then
 
   if [[ ! -f /var/www/htadmin/config/config.ini ]] && [[ -f /var/www/htadmin/default/config.ini ]]; then
     cp /var/www/htadmin/default/config.ini /var/www/htadmin/config/config.ini
