@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: netbox-postgres
+  name: postgres
   namespace: malcolm
 spec:
   ports:
@@ -10,27 +10,27 @@ spec:
       protocol: TCP
       name: postgresql
   selector:
-    name: netbox-postgres-deployment
+    name: postgres-deployment
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: netbox-postgres-deployment
+  name: postgres-deployment
   namespace: malcolm
 spec:
   selector:
     matchLabels:
-      name: netbox-postgres-deployment
+      name: postgres-deployment
   replicas: 1
   template:
     metadata:
       labels:
-        name: netbox-postgres-deployment
+        name: postgres-deployment
     spec:
       containers:
-      - name: netbox-postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:25.02.0
+      - name: postgres-container
+        image: ghcr.io/idaholab/malcolm/postgresql:25.03.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -46,10 +46,10 @@ spec:
           - configMapRef:
               name: netbox-common-env
           - secretRef:
-              name: netbox-postgres-env
+              name: postgres-env
         env:
           - name: VIRTUAL_HOST
-            value: "netbox-postgres.malcolm.local"
+            value: "postgres.malcolm.local"
         livenessProbe:
           exec:
             command:
@@ -61,13 +61,13 @@ spec:
           failureThreshold: 10
         volumeMounts:
           - mountPath: /var/local/ca-trust/configmap
-            name: netbox-postgres-var-local-catrust-volume
+            name: postgres-var-local-catrust-volume
           - mountPath: /var/lib/postgresql/data
-            name: netbox-postgres-volume
-            subPath: netbox/postgres
+            name: postgres-volume
+            subPath: postgres
       initContainers:
-      - name: netbox-postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
+      - name: postgres-dirinit-container
+        image: ghcr.io/idaholab/malcolm/dirinit:25.03.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -76,14 +76,14 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/config:netbox/postgres"
+            value: "/data/config:postgres"
         volumeMounts:
-          - name: netbox-postgres-volume
+          - name: postgres-volume
             mountPath: "/data/config"
       volumes:
-        - name: netbox-postgres-var-local-catrust-volume
+        - name: postgres-var-local-catrust-volume
           configMap:
             name: var-local-catrust
-        - name: netbox-postgres-volume
+        - name: postgres-volume
           persistentVolumeClaim:
             claimName: config-claim

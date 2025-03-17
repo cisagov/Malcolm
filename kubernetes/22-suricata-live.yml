@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: suricata-live-container
-        image: ghcr.io/idaholab/malcolm/suricata:25.02.0
+        image: ghcr.io/idaholab/malcolm/suricata:25.03.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -40,11 +40,11 @@ spec:
           - configMapRef:
               name: upload-common-env
           - configMapRef:
+              name: pcap-capture-env
+          - configMapRef:
               name: suricata-env
           - configMapRef:
               name: suricata-live-env
-          - configMapRef:
-              name: pcap-capture-env
         livenessProbe:
           exec:
             command:
@@ -65,7 +65,7 @@ spec:
             name: suricata-live-custom-configs-volume
       initContainers:
       - name: suricata-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.02.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.03.0
         imagePullPolicy: Always
         stdin: false
         tty: true

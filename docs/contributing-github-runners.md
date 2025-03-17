@@ -238,4 +238,6 @@ ghcr.io/idaholab/malcolm/freq                   {{ site.malcolm.version }}      
 ghcr.io/romeogdetlevjr/malcolm/freq             main          xxxxxxxxxxxx   18 minutes ago   153MB
 ghcr.io/idaholab/malcolm/api                    {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   169MB
 ghcr.io/romeogdetlevjr/malcolm/api              main          xxxxxxxxxxxx   18 minutes ago   169MB
+ghcr.io/idaholab/malcolm/keycloak               {{ site.malcolm.version }}       xxxxxxxxxxxx   18 minutes ago   533MB
+ghcr.io/romeogdetlevjr/malcolm/keycloak         main          xxxxxxxxxxxx   18 minutes ago   533MB
 ```

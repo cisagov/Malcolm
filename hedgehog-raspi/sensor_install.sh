@@ -60,7 +60,6 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    # TODO: switch back to release when it's actually out, or revert to source build
     ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_${ARCH}.deb"
     curl -fsSL -o /tmp/arkime-deb/arkime.deb "${ARKIME_DEB_URL}"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests

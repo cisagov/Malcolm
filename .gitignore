@@ -24,6 +24,7 @@
 .configured
 config.*/
 /redis
+/postgres
 
 # development
 .envrc

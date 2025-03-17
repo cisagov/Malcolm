@@ -40,7 +40,7 @@ scripts
 zeek-logs
 suricata-logs
 redis
+postgres
 netbox/media
-netbox/postgres
 netbox/custom-plugins
 zeek/custom

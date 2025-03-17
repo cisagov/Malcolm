@@ -219,7 +219,8 @@ trap clean_up EXIT
 
 if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
    (( ${#DOCKER_COMPOSE_BIN[@]} > 0 )) && \
-   which jq >/dev/null 2>&1; then
+   which jq >/dev/null 2>&1 && \
+   which yq >/dev/null 2>&1; then
   mkdir -p "$WORKDIR"
 
   # get paths of things we're working with
@@ -317,10 +318,13 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     ./scripts/netbox-restore $VERBOSE_FLAG -f "$MALCOLM_FILE" --netbox-restore "$NETBOX_BACKUP_FILE" || true
   fi
 
+  PCAP_UPLOAD_DIR="$(yq '.services.upload.volumes[] | select(.target == "/var/www/upload/server/php/chroot/files") | .source' "$MALCOLM_FILE" 2>/dev/null)"
+  ( [[ -z "$PCAP_UPLOAD_DIR" ]] || [[ ! -d "$PCAP_UPLOAD_DIR" ]] ) && PCAP_UPLOAD_DIR=./pcap/upload
+
   if (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) || (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )); then
     # copy the PCAP file(s) to the Malcolm upload directory to be processed
-    (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" ./pcap/upload/
-    (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_NOT_ADJUSTED[@]}" ./pcap/upload/
+    (( ${#PCAP_FILES_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_ADJUSTED[@]}" "$PCAP_UPLOAD_DIR"/
+    (( ${#PCAP_FILES_NOT_ADJUSTED[@]} > 0 )) && cp $VERBOSE_FLAG "${PCAP_FILES_NOT_ADJUSTED[@]}" "$PCAP_UPLOAD_DIR"/
 
     if (( $PCAP_PROCESS_IDLE_SECONDS > 0 )); then
       # wait for processing to finish out (count becomes "idle", no longer increasing)
@@ -338,10 +342,10 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
         fi
 
         # get the total number of session records in the database
-        NEW_LOG_COUNT=$( ( ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
-                           curl -sSL -XGET "http://localhost:5000/mapi/agg/event.provider?from=1970" | \
-                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' | \
-                           awk '{s+=$1} END {print s}' ) 2>/dev/null )
+        NEW_LOG_COUNT=$( ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -u $(id -u) -T api \
+                           curl -sSL -XGET "http://localhost:5000/mapi/agg/event.provider?from=0" 2>/dev/null | \
+                           jq -r '.. | .buckets? // empty | .[] | objects | [.doc_count|tostring] | join ("")' 2>/dev/null | \
+                           awk '{s+=$1} END {print s}' )
         if [[ $NEW_LOG_COUNT =~ $NUMERIC_REGEX ]] ; then
           [[ -n $VERBOSE_FLAG ]] && echo "Waiting for idle state ($NEW_LOG_COUNT logs) ..." >&2
           NEW_LOG_COUNT_TIME=$CURRENT_TIME
@@ -377,7 +381,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
     [[ -n $VERBOSE_FLAG ]] && echo "Ensuring creation of user accounts prior to setting to read-only" >&2
     for USER in \
       $(cat nginx/htpasswd | cut -d: -f1) \
-      $($GREP -q -P "NGINX_BASIC_AUTH\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
+      $($GREP -q -P "NGINX_AUTH_MODE\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
       ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
         --header "http_auth_http_user:$USER" \
@@ -401,6 +405,6 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   [[ -n $VERBOSE_FLAG ]] && echo "Finished" >&2
 else
   echo "must specify docker-compose.yml file with -m and PCAP file(s)" >&2
-  echo "also, pcap_time_shift.py, docker compose and jq must be available"
+  echo "also, pcap_time_shift.py, docker compose, jq and yq must be available"
   exit 1
 fi

@@ -43,14 +43,15 @@ Pulling file-monitor      ... done
 Pulling filebeat          ... done
 Pulling freq              ... done
 Pulling htadmin           ... done
+Pulling keycloak          ... done
 Pulling logstash          ... done
 Pulling netbox            ... done
-Pulling netbox-postgresql ... done
-Pulling redis             ... done
 Pulling nginx-proxy       ... done
 Pulling opensearch        ... done
 Pulling pcap-capture      ... done
 Pulling pcap-monitor      ... done
+Pulling postgresql        ... done
+Pulling redis             ... done
 Pulling suricata          ... done
 Pulling upload            ... done
 Pulling zeek              ... done
@@ -69,6 +70,7 @@ ghcr.io/idaholab/malcolm/file-upload                           {{ site.malcolm.v
 ghcr.io/idaholab/malcolm/filebeat-oss                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   624MB
 ghcr.io/idaholab/malcolm/freq                                  {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   132MB
 ghcr.io/idaholab/malcolm/htadmin                               {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   242MB
+ghcr.io/idaholab/malcolm/keycloak                              {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   533MB
 ghcr.io/idaholab/malcolm/logstash-oss                          {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.35GB
 ghcr.io/idaholab/malcolm/netbox                                {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   1.01GB
 ghcr.io/idaholab/malcolm/nginx-proxy                           {{ site.malcolm.version }}           xxxxxxxxxxxx   3 days ago   121MB

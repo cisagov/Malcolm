@@ -289,7 +289,7 @@ freq-deployment-cfd84fd97-dnngf                | Running | 10.42.1.17 | ReplicaS
 arkime-deployment-56999cdd66-s98pp             | Running | 10.42.1.18 | ReplicaSet | agent2      | 4.15m     | 113.07Mi     | arkime-container:0             | arkime:{{ site.malcolm.version }}            |
 pcap-monitor-deployment-594ff674c4-fsm7m       | Running | 10.42.1.19 | ReplicaSet | agent2      | 1.24m     | 48.44Mi      | pcap-monitor-container:0       | pcap-monitor:{{ site.malcolm.version }}      |
 pcap-capture-deployment-7c8bf6957-jzpzn        | Running | 10.42.1.20 | ReplicaSet | agent2      | 0.02m     | 9.64Mi       | pcap-capture-container:0       | pcap-capture:{{ site.malcolm.version }}      |
-netbox-postgres-deployment-5879b8dffc-kkt56    | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | netbox-postgres-container:0    | postgresql:{{ site.malcolm.version }}        |
+postgres-deployment-5879b8dffc-kkt56           | Running | 10.42.1.21 | ReplicaSet | agent2      | 70.91m    | 33.02Mi      | postgres-container:0           | postgresql:{{ site.malcolm.version }}        |
 htadmin-deployment-6fc46888b9-sq6ln            | Running | 10.42.1.23 | ReplicaSet | agent2      | 0.14m     | 30.53Mi      | htadmin-container:0            | htadmin:{{ site.malcolm.version }}           |
 redis-deployment-5bcd8f6c96-j5xpf              | Running | 10.42.1.24 | ReplicaSet | agent2      | 1.46m     | 7.34Mi       | redis-container:0              | redis:{{ site.malcolm.version }}             |
 nginx-proxy-deployment-69fcc4968d-f68tq        | Running | 10.42.1.22 | ReplicaSet | agent2      | 0.31m     | 22.63Mi      | nginx-proxy-container:0        | nginx-proxy:{{ site.malcolm.version }}       |
@@ -361,10 +361,9 @@ Setting 6 workers for Logstash pipelines. Is this OK? (Y / n): y
 
 Require encrypted HTTPS connections? (Y / n): y
 
-1: Basic
-2: Lightweight Directory Access Protocol (LDAP)
-3: None
-Select authentication method (Basic): 1
+1: ipv4 - IPv4
+2: ipv6 - IPv6
+Which IP version does the network support? (IPv4, IPv6, or both) (ipv4): 1,2
 
 Enable index management policies (ILM/ISM) in Arkime? (y / N): n
 
@@ -453,36 +452,56 @@ Run `./scripts/auth_setup` and answer the questions to [configure authentication
 $ ./scripts/auth_setup -f /path/to/kubeconfig.yaml
 
 1: all - Configure all authentication-related settings
-2: admin - Store administrator username/password for local Malcolm access
-3: webcerts - (Re)generate self-signed certificates for HTTPS access
-4: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
-5: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
-6: email - Store username/password for OpenSearch Alerting email sender account
-7: netbox - (Re)generate internal passwords for NetBox
-8: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
-
+2: method - Select authentication method (currently "basic")
+3: admin - Store administrator username/password for basic HTTP authentication
+4: webcerts - (Re)generate self-signed certificates for HTTPS access
+5: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
+6: keycloak - Configure Keycloak
+7: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
+8: email - Store username/password for OpenSearch Alerting email sender account
+9: netbox - (Re)generate internal passwords for NetBox
+10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
+11: postgres - (Re)generate internal superuser passwords for PostgreSQL
+12: redis - (Re)generate internal passwords for Redis
+13: arkime - Store password hash secret for Arkime viewer cluster
+14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
 Configure Authentication (all): 1
 
-Store administrator username/password for local Malcolm access? (Y / n): y
+Select authentication method (currently "basic")? (Y / n): y
+1: basic - Use basic HTTP authentication
+2: ldap - Use Lightweight Directory Access Protocol (LDAP) for authentication
+3: keycloak - Use embedded Keycloak for authentication
+4: keycloak_remote - Use remote Keycloak for authentication
+5: no_authentication - Disable authentication
+Select authentication method (basic): 1
 
-Administrator username: analyst
-analyst password:
+Store administrator username/password for basic HTTP authentication? (Y / n): y
+
+Administrator username (between 4 and 32 characters; alphanumeric, _, -, and . allowed): analyst
+analyst password  (between 8 and 128 characters):
 analyst password (again):
-
-Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
 
 (Re)generate self-signed certificates for HTTPS access? (Y / n): y
 
 (Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
 
-Store username/password for primary remote OpenSearch/Elasticsearch instance? (y / N): n
+Configure Keycloak? (Y / n): n
 
-Store username/password for email alert sender account? (y / N): n
+Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
+
+Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
 (Re)generate internal passwords for NetBox? (Y / n): y
 
-Transfer self-signed client certificates to a remote log forwarder? (y / N): n
+(Re)generate internal passwords for Keycloak's PostgreSQL database? (Y / n): y
 
+(Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
+
+(Re)generate internal passwords for Redis? (Y / n): y
+
+Store password hash secret for Arkime viewer cluster? (y / N): n
+
+Transfer self-signed client certificates to a remote log forwarder? (y / N): n
 ```
 
 Next, copy `./kubernetes/01-volumes-vagrant-nfs-server.yml.example` to `./kubernetes/01-volumes.yml` (when using the Vagrant provided NFS server) or copy `./kubernetes/01-volumes-nfs.yml.example` to `./kubernetes/01-volumes.yml` and edit that file to define the [required PersistentVolumeClaims](#PVC) there.
@@ -568,7 +587,7 @@ zeek-live-deployment-64b69d4b6f-fcb6n          | Running | 10.42.2.9  | ReplicaS
 dashboards-deployment-69b5465db-kgsqk          | Running | 10.42.2.3  | ReplicaSet | agent2      | 14.98m    | 108.85Mi     | dashboards-container:0         | dashboards:{{ site.malcolm.version }}        |
 arkime-deployment-56999cdd66-xxpw9             | Running | 10.42.2.11 | ReplicaSet | agent2      | 208.95m   | 78.42Mi      | arkime-container:0             | arkime:{{ site.malcolm.version }}            |
 api-deployment-6f4686cf59-xt9md                | Running | 10.42.1.3  | ReplicaSet | agent1      | 0.14m     | 56.88Mi      | api-container:0                | api:{{ site.malcolm.version }}               |
-netbox-postgres-deployment-5879b8dffc-lb4qm    | Running | 10.42.1.6  | ReplicaSet | agent1      | 141.2m    | 48.02Mi      | netbox-postgres-container:0    | postgresql:{{ site.malcolm.version }}        |
+postgres-deployment-5879b8dffc-lb4qm           | Running | 10.42.1.6  | ReplicaSet | agent1      | 141.2m    | 48.02Mi      | postgres-container:0           | postgresql:{{ site.malcolm.version }}        |
 pcap-monitor-deployment-594ff674c4-fwq7g       | Running | 10.42.1.12 | ReplicaSet | agent1      | 3.93m     | 46.44Mi      | pcap-monitor-container:0       | pcap-monitor:{{ site.malcolm.version }}      |
 suricata-offline-deployment-6ccdb89478-j5fgj   | Running | 10.42.1.10 | ReplicaSet | agent1      | 10.42m    | 35.12Mi      | suricata-offline-container:0   | suricata:{{ site.malcolm.version }}          |
 suricata-live-deployment-6494c77759-rpt48      | Running | 10.42.1.8  | ReplicaSet | agent1      | 0.01m     | 9.62Mi       | suricata-live-container:0      | suricata:{{ site.malcolm.version }}          |

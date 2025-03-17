@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - Arkime
-Exec=/usr/bin/firefox https://localhost/
+Exec=/usr/bin/firefox https://localhost/arkime/
 Terminal=false
 X-MultipleArgs=false
 Type=Application

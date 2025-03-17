@@ -130,14 +130,13 @@ Select Malcolm restart behavior (unless-stopped): 4
 
 Require encrypted HTTPS connections? (Y / n): y
 
+1: ipv4 - IPv4
+2: ipv6 - IPv6
+Which IP version does the network support? (IPv4, IPv6, or both) (ipv4): 1,2
+
 Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)? (y / N): n
 
 Specify external container network name (or leave blank for default networking) (): 
-
-1: Basic
-2: Lightweight Directory Access Protocol (LDAP)
-3: None
-Select authentication method (Basic): 1
 
 Store PCAP, log and index files in /home/user/Malcolm? (Y / n): y
 
@@ -221,21 +220,60 @@ The next step is to [set up authentication](authsetup.md#AuthSetup) and generate
 ```
 user@host:~/Malcolm$ ./scripts/auth_setup 
 
-Store administrator username/password for local Malcolm access? (Y / n): y
+1: all - Configure all authentication-related settings
+2: method - Select authentication method (currently "basic")
+3: admin - Store administrator username/password for basic HTTP authentication
+4: webcerts - (Re)generate self-signed certificates for HTTPS access
+5: fwcerts - (Re)generate self-signed certificates for a remote log forwarder
+6: keycloak - Configure Keycloak
+7: remoteos - Configure remote primary or secondary OpenSearch/Elasticsearch instance
+8: email - Store username/password for OpenSearch Alerting email sender account
+9: netbox - (Re)generate internal passwords for NetBox
+10: keycloakdb - (Re)generate internal passwords for Keycloak's PostgreSQL database
+11: postgres - (Re)generate internal superuser passwords for PostgreSQL
+12: redis - (Re)generate internal passwords for Redis
+13: arkime - Store password hash secret for Arkime viewer cluster
+14: txfwcerts - Transfer self-signed client certificates to a remote log forwarder
+Configure Authentication (all): 1
 
-Administrator username: analyst
-analyst password:
-analyst password (again):
+Select authentication method (currently "basic")? (Y / n): y
+1: basic - Use basic HTTP authentication
+2: ldap - Use Lightweight Directory Access Protocol (LDAP) for authentication
+3: keycloak - Use embedded Keycloak for authentication
+4: keycloak_remote - Use remote Keycloak for authentication
+5: no_authentication - Disable authentication
+Select authentication method (basic): 1
+
+Store administrator username/password for basic HTTP authentication? (Y / n): y
+
+Administrator username (between 4 and 32 characters; alphanumeric, _, -, and . allowed) (): analyst
+analyst password  (between 8 and 128 characters): :
+analyst password (again): :
 
 Additional local accounts can be created at https://localhost/auth/ when Malcolm is running
+
+(Re)generate self-signed certificates for HTTPS access? (Y / n): y
+
+(Re)generate self-signed certificates for a remote log forwarder? (Y / n): y
+
+Configure Keycloak? (Y / n): n
 
 Configure remote primary or secondary OpenSearch/Elasticsearch instance? (y / N): n
 
 Store username/password for OpenSearch Alerting email sender account? (y / N): n
 
-(Re)generate internal passwords for NetBox (Y / n): y
+(Re)generate internal passwords for NetBox? (Y / n): y
+
+(Re)generate internal passwords for Keycloak's PostgreSQL database? (Y / n): y
+
+(Re)generate internal superuser passwords for PostgreSQL? (Y / n): y
+
+(Re)generate internal passwords for Redis? (Y / n): y
 
 Store password hash secret for Arkime viewer cluster? (y / N): n
+
+Transfer self-signed client certificates to a remote log forwarder? (y / N): n
+
 ```
 
 Users planning to install and configure sensor devices running [Hedgehog Linux](hedgehog.md) must perform an additional step to allow communication between a Malcolm instance and an installation of Hedgehog Linux. In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected above. The certificate authority, certificate, and key files to be copied to and used by the remote log forwarder are located in Malcolm's `filebeat/certs/` directory; these certificates should be copied to the `/opt/sensor/sensor_ctl/logstash-client-certificates` directory on the Hedgehog Linux sensor.
@@ -250,47 +288,49 @@ user@host:~/Malcolm$ docker compose --profile malcolm pull
  ✔ netbox-redis Skipped - Image is already being pulled by netbox-redis-cache
  ✔ arkime-live Skipped - Image is already being pulled by arkime
  ✔ zeek-live Skipped - Image is already being pulled by zeek
- ✔ opensearch Pulled
- ✔ dashboards-helper Pulled
- ✔ pcap-capture Pulled
- ✔ netbox Pulled
- ✔ filebeat Pulled
- ✔ netbox-redis-cache Pulled
- ✔ upload Pulled
  ✔ api Pulled
- ✔ netbox-postgres Pulled
- ✔ file-monitor Pulled
- ✔ nginx-proxy Pulled
- ✔ htadmin Pulled
- ✔ freq Pulled
- ✔ logstash Pulled
- ✔ dashboards Pulled
- ✔ suricata-live Pulled
- ✔ pcap-monitor Pulled
  ✔ arkime Pulled
+ ✔ dashboards Pulled
+ ✔ dashboards-helper Pulled
+ ✔ file-monitor Pulled
+ ✔ filebeat Pulled
+ ✔ freq Pulled
+ ✔ htadmin Pulled
+ ✔ keycloak Pulled
+ ✔ logstash Pulled
+ ✔ netbox Pulled
+ ✔ netbox-redis-cache Pulled
+ ✔ nginx-proxy Pulled
+ ✔ opensearch Pulled
+ ✔ pcap-capture Pulled
+ ✔ pcap-monitor Pulled
+ ✔ postgres Pulled
+ ✔ suricata-live Pulled
+ ✔ upload Pulled
  ✔ zeek Pulled
 
 user@host:~/Malcolm$ docker images
 REPOSITORY                                                     TAG               IMAGE ID       CREATED      SIZE
-ghcr.io/idaholab/malcolm/nginx-proxy         25.01.0   ee2dac715efc   4 weeks ago   157MB
-ghcr.io/idaholab/malcolm/dashboards          25.01.0   a35265cbde35   4 weeks ago   1.55GB
-ghcr.io/idaholab/malcolm/dashboards-helper   25.01.0   7ca0c53c745f   4 weeks ago   253MB
-ghcr.io/idaholab/malcolm/logstash-oss        25.01.0   ef10cbc5053f   4 weeks ago   1.57GB
-ghcr.io/idaholab/malcolm/arkime              25.01.0   8c6bc6d79e1b   4 weeks ago   835MB
-ghcr.io/idaholab/malcolm/zeek                25.01.0   1ccdbea08109   4 weeks ago   1.35GB
-ghcr.io/idaholab/malcolm/filebeat-oss        25.01.0   6e08f4a8621e   4 weeks ago   433MB
-ghcr.io/idaholab/malcolm/netbox              25.01.0   8dcbc152a9b9   4 weeks ago   1.78GB
-ghcr.io/idaholab/malcolm/suricata            25.01.0   0c40ac0d8005   5 weeks ago   353MB
-ghcr.io/idaholab/malcolm/opensearch          25.01.0   b66dd0922d21   5 weeks ago   1.54GB
-ghcr.io/idaholab/malcolm/pcap-capture        25.01.0   830b7d682693   5 weeks ago   139MB
-ghcr.io/idaholab/malcolm/file-monitor        25.01.0   daef959d2db4   5 weeks ago   723MB
-ghcr.io/idaholab/malcolm/htadmin             25.01.0   098e5a4d1974   5 weeks ago   247MB
-ghcr.io/idaholab/malcolm/postgresql          25.01.0   11fd6170d5d5   5 weeks ago   335MB
-ghcr.io/idaholab/malcolm/api                 25.01.0   ed92d05a5485   5 weeks ago   165MB
-ghcr.io/idaholab/malcolm/redis               25.01.0   f876b484bf9d   5 weeks ago   51.1MB
-ghcr.io/idaholab/malcolm/file-upload         25.01.0   40468de667cf   5 weeks ago   250MB
-ghcr.io/idaholab/malcolm/freq                25.01.0   7a64594a7c6b   5 weeks ago   155MB
-ghcr.io/idaholab/malcolm/pcap-monitor        25.01.0   ff3fa6dec5da   5 weeks ago   178MB
+ghcr.io/idaholab/malcolm/api                 {{ site.malcolm.version }}   ed92d05a5485   5 weeks ago   165MB
+ghcr.io/idaholab/malcolm/arkime              {{ site.malcolm.version }}   8c6bc6d79e1b   4 weeks ago   835MB
+ghcr.io/idaholab/malcolm/dashboards          {{ site.malcolm.version }}   a35265cbde35   4 weeks ago   1.55GB
+ghcr.io/idaholab/malcolm/dashboards-helper   {{ site.malcolm.version }}   7ca0c53c745f   4 weeks ago   253MB
+ghcr.io/idaholab/malcolm/file-monitor        {{ site.malcolm.version }}   daef959d2db4   5 weeks ago   723MB
+ghcr.io/idaholab/malcolm/file-upload         {{ site.malcolm.version }}   40468de667cf   5 weeks ago   250MB
+ghcr.io/idaholab/malcolm/filebeat-oss        {{ site.malcolm.version }}   6e08f4a8621e   4 weeks ago   433MB
+ghcr.io/idaholab/malcolm/freq                {{ site.malcolm.version }}   7a64594a7c6b   5 weeks ago   155MB
+ghcr.io/idaholab/malcolm/htadmin             {{ site.malcolm.version }}   098e5a4d1974   5 weeks ago   247MB
+ghcr.io/idaholab/malcolm/keycloak            {{ site.malcolm.version }}   22696a0e27ea   5 weeks ago   533MB
+ghcr.io/idaholab/malcolm/logstash-oss        {{ site.malcolm.version }}   ef10cbc5053f   4 weeks ago   1.57GB
+ghcr.io/idaholab/malcolm/netbox              {{ site.malcolm.version }}   8dcbc152a9b9   4 weeks ago   1.78GB
+ghcr.io/idaholab/malcolm/nginx-proxy         {{ site.malcolm.version }}   ee2dac715efc   4 weeks ago   157MB
+ghcr.io/idaholab/malcolm/opensearch          {{ site.malcolm.version }}   b66dd0922d21   5 weeks ago   1.54GB
+ghcr.io/idaholab/malcolm/pcap-capture        {{ site.malcolm.version }}   830b7d682693   5 weeks ago   139MB
+ghcr.io/idaholab/malcolm/pcap-monitor        {{ site.malcolm.version }}   ff3fa6dec5da   5 weeks ago   178MB
+ghcr.io/idaholab/malcolm/postgresql          {{ site.malcolm.version }}   11fd6170d5d5   5 weeks ago   335MB
+ghcr.io/idaholab/malcolm/redis               {{ site.malcolm.version }}   f876b484bf9d   5 weeks ago   51.1MB
+ghcr.io/idaholab/malcolm/suricata            {{ site.malcolm.version }}   0c40ac0d8005   5 weeks ago   353MB
+ghcr.io/idaholab/malcolm/zeek                {{ site.malcolm.version }}   1ccdbea08109   4 weeks ago   1.35GB
 ```
 
 Finally, start Malcolm. When Malcolm starts it will stream informational and debug messages to the console until it has completed initializing.
@@ -310,7 +350,7 @@ malcolm-freq-1                 "/usr/local/bin/dock…"   freq                 r
 malcolm-htadmin-1              "/usr/local/bin/dock…"   htadmin              running (starting)   …
 malcolm-logstash-1             "/usr/local/bin/dock…"   logstash             running (starting)   …
 malcolm-netbox-1               "/usr/bin/tini -- /u…"   netbox               running (starting)   …
-malcolm-netbox-postgres-1      "/usr/bin/docker-uid…"   netbox-postgres      running (starting)   …
+malcolm-postgres-1             "/usr/bin/docker-uid…"   postgres             running (starting)   …
 malcolm-redis-1                "/sbin/tini -- /usr/…"   redis                running (starting)   …
 malcolm-redis-cache-1          "/sbin/tini -- /usr/…"   redis-cache          running (starting)   …
 malcolm-nginx-proxy-1          "/usr/local/bin/dock…"   nginx-proxy          running (starting)   …
