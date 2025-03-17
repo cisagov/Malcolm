@@ -8,7 +8,7 @@ NGINX_CONF=${NGINX_CONF_DIR}/nginx.conf
 NGINX_TEMPLATES_DIR=${NGINX_CONF_DIR}/templates
 NGINX_CONFD_DIR=${NGINX_CONF_DIR}/conf.d
 
-# set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth
+# set up for HTTPS/HTTP and NGINX HTTP basic vs. LDAP/LDAPS/LDAP+StartTLS auth vs. keycloak, etc.
 
 # "include" file that indicates the locations of the PEM files
 NGINX_SSL_ON_CONF=${NGINX_CONF_DIR}/nginx_ssl_on_config.conf
@@ -64,6 +64,9 @@ NGINX_RUNTIME_IDARK2DASH_REWRITE_LINK=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite
 NGINX_DASHBOARDS_DASHBOARDS_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_dashboards.conf
 NGINX_KIBANA_DASHBOARDS_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_kibana.conf
 NGINX_RUNTIME_DASHBOARDS_REWRITE_LINK=${NGINX_CONF_DIR}/nginx_dashboards_rewrite_rt.conf
+
+# logging
+NGINX_LOGGING_CONF=${NGINX_CONF_DIR}/nginx_logging.conf
 
 # config file for stunnel if using stunnel to issue LDAP StartTLS function
 STUNNEL_CONF=/etc/stunnel/stunnel.conf
@@ -127,6 +130,9 @@ if [[ -f "${NGINX_CONF}" ]]; then
     fi
   done < "${NGINX_CONF}"
 fi
+
+# set logging level for error.log
+echo "error_log /var/log/nginx/error.log ${NGINX_ERROR_LOG_LEVEL:-error};" > "${NGINX_LOGGING_CONF}"
 
 # NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication
 if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGINX_AUTH_MODE" == "true" ]]; then
