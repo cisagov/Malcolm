@@ -29,9 +29,17 @@ NGINX_AUTH_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_auth_location.conf
 NGINX_KEYCLOAK_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_keycloak_location_rt.conf
 NGINX_KEYCLOAK_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_keycloak_location.conf
 
+# "include" file for embedded keycloak upstream
+NGINX_KEYCLOAK_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_keycloak_upstream_rt.conf
+NGINX_KEYCLOAK_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_keycloak_upstream.conf
+
 # "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_basic.conf
 NGINX_AUTH_BASIC_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_auth_basic_location.conf
+
+# "include" file for htadmin upstream
+NGINX_HTADMIN_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_htadmin_upstream_rt.conf
+NGINX_HTADMIN_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_htadmin_upstream.conf
 
 # "include" file for auth_ldap, prompt, and "auth_ldap_servers" name
 NGINX_LDAP_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_ldap.conf
@@ -49,6 +57,15 @@ NGINX_LDAP_USER_CONF=${NGINX_CONF_DIR}/nginx_ldap.conf
 
 # runtime "include" file for auth method (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, NGINX_KEYCLOAK_AUTH_CONF, or NGINX_NO_AUTH_CONF)
 NGINX_RUNTIME_AUTH_LINK=${NGINX_CONF_DIR}/nginx_auth_rt.conf
+
+# "include" files and links for embedded opensearch, if used
+NGINX_OPENSEARCH_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_opensearch_upstream_rt.conf
+NGINX_OPENSEARCH_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_opensearch_upstream.conf
+NGINX_OPENSEARCH_MAPI_LINK=${NGINX_CONF_DIR}/nginx_opensearch_mapi_rt.conf
+NGINX_OPENSEARCH_MAPI_CONF=${NGINX_CONF_DIR}/nginx_opensearch_mapi.conf
+NGINX_OPENSEARCH_API_LINK=${NGINX_CONF_DIR}/nginx_opensearch_api_rt.conf
+NGINX_OPENSEARCH_API_CONF=${NGINX_CONF_DIR}/nginx_opensearch_api.conf
+NGINX_OPENSEARCH_API_501_CONF=${NGINX_CONF_DIR}/nginx_opensearch_api_501.conf
 
 # runtime "include" file for opensearch endpoint auth method (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, or NGINX_NO_AUTH_CONF)
 NGINX_RUNTIME_AUTH_OPENSEARCH_LINK=${NGINX_CONF_DIR}/nginx_auth_opensearch_rt.conf
@@ -134,6 +151,17 @@ fi
 # set logging level for error.log
 echo "error_log /var/log/nginx/error.log ${NGINX_ERROR_LOG_LEVEL:-error};" > "${NGINX_LOGGING_CONF}"
 
+# set up config links for whether there's an embedded opensearch instance or not
+if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "opensearch-local" ]]; then
+  ln -sf "$NGINX_OPENSEARCH_UPSTREAM_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_OPENSEARCH_MAPI_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
+  ln -sf "$NGINX_OPENSEARCH_API_CONF" "$NGINX_OPENSEARCH_API_LINK"
+else
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
+  ln -sf "$NGINX_OPENSEARCH_API_501_CONF" "$NGINX_OPENSEARCH_API_LINK"
+fi
+
 # NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication
 if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGINX_AUTH_MODE" == "true" ]]; then
   # doing HTTP basic auth
@@ -147,9 +175,11 @@ if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGIN
 
   # /auth location handling for htpasswd
   ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_HTADMIN_UPSTREAM_CONF" "$NGINX_HTADMIN_UPSTREAM_LINK"
 
   # /keycloak location isn't used
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_UPSTREAM_LINK"
 
 elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" == "none" ]] || [[ "$NGINX_AUTH_MODE" == "no" ]]; then
   # completely disabling authentication (not recommended)
@@ -163,7 +193,9 @@ elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" ==
 
   # /auth and /keycloak locations are empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_HTADMIN_UPSTREAM_LINK"
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_UPSTREAM_LINK"
 
 elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
   # Keycloak (remote) authentication
@@ -185,9 +217,11 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
 
   # /auth location handling for htpasswd
   ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_HTADMIN_UPSTREAM_CONF" "$NGINX_HTADMIN_UPSTREAM_LINK"
 
   # /keycloak location isn't used
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_UPSTREAM_LINK"
 
 elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
   # Keycloak (embedded) authentication
@@ -209,9 +243,11 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
 
   # /auth location handling for htpasswd
   ln -sf "$NGINX_AUTH_BASIC_LOCATION_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_HTADMIN_UPSTREAM_CONF" "$NGINX_HTADMIN_UPSTREAM_LINK"
 
   # /keycloak location points to embedded keycloak container
   ln -sf "$NGINX_KEYCLOAK_LOCATION_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+  ln -sf "$NGINX_KEYCLOAK_UPSTREAM_CONF" "$NGINX_KEYCLOAK_UPSTREAM_LINK"
 
 elif [[ "$NGINX_AUTH_MODE" == "ldap" ]] || [[ "$NGINX_AUTH_MODE" == "false" ]]; then
   # ldap authentication
@@ -222,7 +258,9 @@ elif [[ "$NGINX_AUTH_MODE" == "ldap" ]] || [[ "$NGINX_AUTH_MODE" == "false" ]]; 
 
   # /auth and /keycloak locations are empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_AUTH_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_HTADMIN_UPSTREAM_LINK"
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_KEYCLOAK_UPSTREAM_LINK"
 
   # parse URL information out of user ldap configuration
   # example:
