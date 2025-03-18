@@ -142,7 +142,7 @@ The next steps happen in the context of `auth_setup`.
 
 3. Run `./scripts/auth_setup` and select **Configure Keycloak**.
 
-![Configure Keycloak in auth_setup](./images/screenshots/keycloak_03_auth_setup.png)
+![Configure Keycloak in auth_setup](./images/screenshots/auth_setup.png)
 
 4. Specify the name of the Keycloak [realm](https://www.keycloak.org/docs/latest/server_admin/index.html#_configuring-realms) to use.
 
@@ -200,7 +200,7 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 4. Next, running `auth_setup` again, select **Configure Keycloak**.
 
-![Configure Keycloak in auth_setup](./images/screenshots/keycloak_03_auth_setup.png)
+![Configure Keycloak in auth_setup](./images/screenshots/auth_setup.png)
 
 5. Specify the name of the Keycloak [realm](https://www.keycloak.org/docs/latest/server_admin/index.html#_configuring-realms) to use. The default, as defined by Keycloak itself, is [`master`](https://www.keycloak.org/docs/latest/server_admin/index.html#the-master-realm).
 
