@@ -88,6 +88,7 @@ from malcolm_utils import (
     deep_set,
     eprint,
     flatten,
+    get_iterable,
     LoadFileIfJson,
     remove_prefix,
     remove_suffix,
@@ -419,17 +420,16 @@ class Installer(object):
                 and InstallerYesOrNo(f'Pull Malcolm images?', default=False, forceInteraction=False)
             ):
                 for priv in (False, True):
-                    ecode, out = self.run_process(
-                        [
-                            self.dockerComposeCmd,
-                            '-f',
-                            composeFile,
-                            '--profile=malcolm',
-                            'pull',
-                            '--quiet',
-                        ],
-                        privileged=priv,
-                    )
+                    pullCmd = [
+                        self.dockerComposeCmd,
+                        '-f',
+                        composeFile,
+                        '--profile=malcolm',
+                        'pull',
+                    ]
+                    if 'podman-compose' not in next(iter(get_iterable(flatten(pullCmd)))):
+                        pullCmd.append('--quiet')
+                    ecode, out = self.run_process(pullCmd, privileged=priv)
                     if ecode == 0:
                         break
 
