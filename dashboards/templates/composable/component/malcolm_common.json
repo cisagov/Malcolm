@@ -12,6 +12,9 @@
             },
             "device": {
               "properties": {
+                "discovered": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -106,6 +109,9 @@
         },
         "related": {
           "properties": {
+            "discovered": {
+              "type": "keyword"
+            },
             "mac": {
               "type": "keyword"
             },
@@ -154,6 +160,9 @@
             },
             "device": {
               "properties": {
+                "discovered": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },

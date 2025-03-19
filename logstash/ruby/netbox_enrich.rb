@@ -484,6 +484,7 @@ def filter(
                 result: JSON.generate(_updated_result) }) if @debug
         end
         _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
+        _result[:discovered] = true
       end
       _result.delete(:tags)
 
