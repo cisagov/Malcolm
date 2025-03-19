@@ -5159,6 +5159,22 @@
                 }
               }
             },
+            "s7comm_known_devices": {
+              "properties": {
+                "automation_system_name": {
+                  "type": "keyword"
+                },
+                "module_name": {
+                  "type": "keyword"
+                },
+                "plant_name": {
+                  "type": "keyword"
+                },
+                "module_serial": {
+                  "type": "keyword"
+                }
+              }
+            },
             "s7comm_plus": {
               "properties": {
                 "function_code": {
