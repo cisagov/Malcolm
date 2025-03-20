@@ -61,6 +61,7 @@ class NetBoxConnLazy
     @url = url
     @token = token
     @netboxConnDebug = debug
+    @connected = false
   end
 
   def method_missing(method, *args, &block)
@@ -81,7 +82,12 @@ class NetBoxConnLazy
       $method_timings[key] << duration
     end
 
+    @connected ||= !result.nil?
     result
+  end
+
+  def initialized?
+    !@object.nil? && @connected
   end
 
   private
@@ -92,6 +98,7 @@ class NetBoxConnLazy
       conn.request :url_encoded
       conn.response :json, :parser_options => { :symbolize_names => true }
     end
+    @connected = false
   end
 end
 
@@ -168,6 +175,16 @@ def register(
 
   # target field to store looked-up value
   @target = params["target"]
+
+  # for tagging events that go all the way through the filter
+  @add_tag = params["add_tag"]
+  _add_tag_env = params["add_tag_env"]
+  if @add_tag.nil? && !_add_tag_env.nil?
+    @add_tag = ENV[_add_tag_env]
+  end
+  if !@add_tag.nil? && @add_tag.empty?
+    @add_tag = nil
+  end
 
   # verbose - either specified directly or read from ENV via verbose_env
   #   false - store the "name" (fallback to "display") and "id" value(s) as @target.name and @target.id
@@ -425,6 +442,8 @@ def filter(
   end
 
   _result_set = false
+  _discovered_flag = false
+  _netbox_queried = false
 
   # _key might be an array of IP addresses, but we're only going to set the first _result into @target.
   #    this is still useful, though as autopopulation may happen for multiple IPs even if we only
@@ -434,11 +453,18 @@ def filter(
     _newKey.push(_key) unless _key.nil?
     _key = _newKey
   end
+  # _private_ips stores IPAddr representations of IP strings for private IP addresses
+  _private_ips = Array.new
 
   _key.each do |ip_key|
 
-    _result = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id) }.dup
+    _result, _key_ip,  _nb_queried = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id) }.dup
+    _private_ips.push(_key_ip) unless _key_ip.nil? || !_key_ip&.private?
+    _netbox_queried ||= _nb_queried
     if !_result.nil? && !_result.empty?
+      _result[:discovered] = _result[:discovered].any? if _result[:discovered].is_a?(Array)
+      _result.delete(:discovered) unless _result[:discovered]
+      _discovered_flag ||= _result.fetch(:discovered, false)
 
       puts('netbox_enrich.filter(%{lookup_type}: %{lookup_key} @ %{site}) success: %{result}' % {
             lookup_type: @lookup_type,
@@ -473,7 +499,7 @@ def filter(
           # the manufacturer-unknown tag is set, but we appear to have an OUI or MAC address
           #   from the event. we need to update the record in netbox (determine the manufacturer
           #   from this value and remove the tag) and in the result
-          _updated_result = netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id, :previous_result=>_result)
+          _updated_result, _key_ip, _nb_queried = netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id, :previous_result=>_result)
           puts('filter tried to patch %{name} (site %{site}) for "%{tags}" ("%{host}", "%{mac}", "%{oui}"): %{result}' % {
                 name: ip_key,
                 site: _lookup_site_id,
@@ -484,7 +510,6 @@ def filter(
                 result: JSON.generate(_updated_result) }) if @debug
         end
         _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
-        _result[:discovered] = true
       end
       _result.delete(:tags)
 
@@ -505,8 +530,30 @@ def filter(
       event.set("#{@target}", _result)
       _result_set = true
     end
-
   end # _key.each do |ip_key|
+
+  if (@lookup_type == :ip_device) &&
+     (_discovered_flag || (_netbox_queried && !_result_set)) &&
+     !_private_ips.empty? &&
+     !@target.nil? &&
+     !@target.empty?
+  then
+    # if we never set a result and private IPs were looked up, the device should be marked as "uninventoried"
+    event.set("#{@target}", { :uninventoried => true })
+  end
+
+  unless _private_ips.empty? || @add_tag.nil? || @add_tag.empty?
+    _tags = event.get('[tags]')
+    if !_tags.is_a?(Array) then
+      _newTags = Array.new
+      _newTags.push(_tags) unless _tags.nil? || _tags.empty?
+      _tags = _newTags
+    end
+    if !_tags.include? @add_tag
+      _tags.push(@add_tag)
+      event.set("[tags]", _tags)
+    end
+  end
 
   [event]
 end
@@ -1111,6 +1158,7 @@ def autopopulate_devices(
            _device_create_response.has_key?(:id)
         then
            _autopopulate_device = _device_create_response
+           _autopopulate_device[:discovered] = true
         elsif @debug
           puts('autopopulate_devices (VM: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: site_id, result: JSON.generate(_device_create_response) })
         end
@@ -1141,6 +1189,7 @@ def autopopulate_devices(
              _device_create_response.has_key?(:id)
           then
              _autopopulate_device = _device_create_response
+             _autopopulate_device[:discovered] = true
           elsif @debug
             puts('autopopulate_devices (device: %{name}, site: %{site}): _device_create_response: %{result}' % { name: _device_name, site: site_id, result: JSON.generate(_device_create_response) })
           end
@@ -1291,6 +1340,7 @@ def netbox_lookup(
   previous_result: nil
 )
   _lookup_result = nil
+  _nb = nil
 
   _key_ip = IPAddr.new(ip_key) rescue nil
   if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
@@ -1350,6 +1400,7 @@ def netbox_lookup(
             _devices = Array.new unless _devices.is_a?(Array)
             _devices << { :name => _autopopulate_device&.fetch(:name, _autopopulate_device&.fetch(:display, nil)),
                           :id => _autopopulate_device&.fetch(:id, nil),
+                          :discovered => _autopopulate_device&.fetch(:discovered, nil),
                           :url => _autopopulate_device&.fetch(:url, nil),
                           :tags => _autopopulate_device&.fetch(:tags, nil),
                           :site => _site_obj&.fetch(:name, _site_obj&.fetch(:display, nil)),
@@ -1526,7 +1577,7 @@ def netbox_lookup(
   end # IP address is private IP
 
   # yield return value for _lookup_hash getset
-  (!_lookup_result.nil? && !_lookup_result.empty?) ? _lookup_result : nil
+  return (!_lookup_result.nil? && !_lookup_result.empty?) ? _lookup_result : nil, _key_ip, _nb&.initialized? || false
 end
 
 ###############################################################################

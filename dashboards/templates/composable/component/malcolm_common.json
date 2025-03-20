@@ -15,6 +15,9 @@
                 "discovered": {
                   "type": "keyword"
                 },
+                "uninventoried": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -112,6 +115,9 @@
             "discovered": {
               "type": "keyword"
             },
+            "uninventoried": {
+              "type": "keyword"
+            },
             "mac": {
               "type": "keyword"
             },
@@ -161,6 +167,9 @@
             "device": {
               "properties": {
                 "discovered": {
+                  "type": "keyword"
+                },
+                "uninventoried": {
                   "type": "keyword"
                 },
                 "cluster": {
