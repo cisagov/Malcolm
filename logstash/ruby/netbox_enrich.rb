@@ -538,8 +538,12 @@ def filter(
      !@target.nil? &&
      !@target.empty?
   then
-    # if we never set a result and private IPs were looked up, the device should be marked as "uninventoried"
-    event.set("#{@target}", { :uninventoried => true })
+    # no result found, this device should be marked as "uninventoried"
+    _result = _result_set ? event.get("#{@target}") : Hash.new
+    if _result.is_a?(Hash)
+      _result[:uninventoried] = true
+      event.set("#{@target}", _result)
+    end
   end
 
   unless _private_ips.empty? || @add_tag.nil? || @add_tag.empty?
