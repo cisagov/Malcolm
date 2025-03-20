@@ -458,6 +458,8 @@ def filter(
 
   _key.each do |ip_key|
 
+    # TODO: the issue with the "discovered" flag is that getset will return whatever it was when it was cached...
+    #   can we somehow distinguish between the first set and subsequent getsets?
     _result, _key_ip,  _nb_queried = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id) }.dup
     _private_ips.push(_key_ip) unless _key_ip.nil? || !_key_ip&.private?
     _netbox_queried ||= _nb_queried
