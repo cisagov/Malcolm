@@ -193,7 +193,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
                         )
                         if extraTags and isinstance(extraTags, list):
                             fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                        fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
+                        fileInfo[FILE_INFO_DICT_TAGS] = list(dict.fromkeys(fileInfo[FILE_INFO_DICT_TAGS]))
                         logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
                         # if this is an uploaded PCAP (not captured "live"")
@@ -317,7 +317,7 @@ def zeekFileWorker(zeekWorkerArgs):
                         )
                         if extraTags and isinstance(extraTags, list):
                             fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                        fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
+                        fileInfo[FILE_INFO_DICT_TAGS] = list(dict.fromkeys(fileInfo[FILE_INFO_DICT_TAGS]))
                         logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
                         # create a temporary work directory where zeek will be executed to generate the log files
@@ -477,7 +477,7 @@ def suricataFileWorker(suricataWorkerArgs):
                     )
                     if extraTags and isinstance(extraTags, list):
                         fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                    fileInfo[FILE_INFO_DICT_TAGS] = list(set(fileInfo[FILE_INFO_DICT_TAGS]))
+                    fileInfo[FILE_INFO_DICT_TAGS] = list(dict.fromkeys(fileInfo[FILE_INFO_DICT_TAGS]))
                     logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
 
                     # Create unique output directory for this PCAP's suricata output
