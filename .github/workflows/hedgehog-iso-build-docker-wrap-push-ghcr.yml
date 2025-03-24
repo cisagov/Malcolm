@@ -8,6 +8,7 @@ on:
     paths:
       - 'hedgehog-iso/**'
       - 'shared/bin/*'
+      - '!shared/bin/pcap_processor.py'
       - '.trigger_iso_workflow_build'
       - '.github/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
