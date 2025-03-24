@@ -1,6 +1,6 @@
 pytz==2021.3
 Flask==2.3.2
-gunicorn==22.0.0
+gunicorn==23.0.0
 opensearch-py==2.8.0
 requests==2.32.0
 regex==2022.3.2
