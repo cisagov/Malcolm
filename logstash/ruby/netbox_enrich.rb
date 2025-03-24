@@ -50,6 +50,13 @@ $method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
 $method_timings_logging_thread = nil
 $method_timings_logging_thread_running = false
 
+$private_ip_subnets = {
+  IPAddr.new("10.0.0.0/8")      => { network: IPAddr.new("10.0.0.0"), broadcast: IPAddr.new("10.255.255.255") },
+  IPAddr.new("172.16.0.0/12")   => { network: IPAddr.new("172.16.0.0"), broadcast: IPAddr.new("172.31.255.255") },
+  IPAddr.new("192.168.0.0/16")  => { network: IPAddr.new("192.168.0.0"), broadcast: IPAddr.new("192.168.255.255") },
+  IPAddr.new("fc00::/7")        => { network: IPAddr.new("fc00::"), broadcast: IPAddr.new("fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") }
+}.freeze
+
 ##############################################################################################
 class NetBoxConnLazy
   def initialize(
@@ -373,12 +380,6 @@ def register(
                               /\bsr[ol]s?\b/,
                               /\btech(nolog(y|ie|iya)s?)?\b/ ].freeze
 
-  @private_ip_subnets = [
-    IPAddr.new('10.0.0.0/8'),
-    IPAddr.new('172.16.0.0/12'),
-    IPAddr.new('192.168.0.0/16'),
-  ].freeze
-
   @nb_headers = { 'Content-Type': 'application/json' }.freeze
 
   @device_tag_autopopulated = { 'slug': 'malcolm-autopopulated' }.freeze
@@ -410,6 +411,38 @@ def log_method_timings_thread_proc
       puts "#{method}: total #{total_time.round(2)} ms, avg #{avg_time.round(2)} ms over #{times.size} calls"
     end
   end
+end
+
+##############################################################################################
+def getset_with_tracking(cache, key)
+  cache_hit = true
+  result = cache.getset(key) do
+    cache_hit = false
+    yield
+  end
+  { result: result, cache_hit: cache_hit }
+end
+
+##############################################################################################
+def assignable_private_ip?(ip)
+  ipaddr = if ip.is_a?(IPAddr)
+             ip
+           else
+             begin
+               IPAddr.new(ip)
+             rescue
+               nil
+             end
+           end
+  return false if ipaddr.nil?
+
+  $private_ip_subnets.find do |subnet, addresses|
+    if subnet.include?(ipaddr)
+      return ipaddr != addresses[:network] && ipaddr != addresses[:broadcast]
+    end
+  end
+
+  false
 end
 
 ##############################################################################################
@@ -458,15 +491,27 @@ def filter(
 
   _key.each do |ip_key|
 
-    # TODO: the issue with the "discovered" flag is that getset will return whatever it was when it was cached...
-    #   can we somehow distinguish between the first set and subsequent getsets?
-    _result, _key_ip,  _nb_queried = _lookup_hash.getset(ip_key){ netbox_lookup(:event=>event, :ip_key=>ip_key, :site_id=>_lookup_site_id) }.dup
-    _private_ips.push(_key_ip) unless _key_ip.nil? || !_key_ip&.private?
-    _netbox_queried ||= _nb_queried
+    _lookup_tracking_result = getset_with_tracking(_lookup_hash, ip_key) do
+      netbox_lookup(event: event, ip_key: ip_key, site_id: _lookup_site_id)
+    end
+    if _lookup_tracking_result[:result]
+      _result, _key_ip, _nb_queried = _lookup_tracking_result[:result].dup
+    else
+      _result, _key_ip, _nb_queried = nil, nil, false
+    end
+    _private_ips.push(_key_ip) if assignable_private_ip?(_key_ip)
+    _netbox_queried ||= _nb_queried unless _lookup_tracking_result[:cache_hit]
+
     if !_result.nil? && !_result.empty?
-      _result[:discovered] = _result[:discovered].any? if _result[:discovered].is_a?(Array)
-      _result.delete(:discovered) unless _result[:discovered]
-      _discovered_flag ||= _result.fetch(:discovered, false)
+
+      if _lookup_tracking_result[:cache_hit]
+        # it can't have been "discovered" if it was already in the cache
+        _result.delete(:discovered)
+      else
+        _result[:discovered] = _result[:discovered].any? if _result[:discovered].is_a?(Array)
+        _result.delete(:discovered) unless _result[:discovered]
+        _discovered_flag ||= _result.fetch(:discovered, false)
+      end
 
       puts('netbox_enrich.filter(%{lookup_type}: %{lookup_key} @ %{site}) success: %{result}' % {
             lookup_type: @lookup_type,
@@ -1234,10 +1279,8 @@ def autopopulate_prefixes(
   _autopopulate_tags = [ @device_tag_autopopulated ]
 
   _prefix_data = nil
-  # TODO: IPv6?
-  _private_ip_subnet = @private_ip_subnets.find { |subnet| subnet.include?(ip_obj) }
-  if !_private_ip_subnet.nil?
-    _new_prefix_ip = ip_obj.mask([_private_ip_subnet.prefix() + 8, 24].min)
+  if (_private_ip_subnet = $private_ip_subnets.keys().find { |subnet| subnet.include?(ip_obj) })
+    _new_prefix_ip = ip_obj.mask([_private_ip_subnet.prefix + 8, ip_obj.ipv6? ? 64 : 24].min)
     _new_prefix_name = _new_prefix_ip.to_s
     if !_new_prefix_name.to_s.include?('/')
       _new_prefix_name += '/' + _new_prefix_ip.prefix().to_s
@@ -1349,7 +1392,7 @@ def netbox_lookup(
   _nb = nil
 
   _key_ip = IPAddr.new(ip_key) rescue nil
-  if !_key_ip.nil? && _key_ip&.private? && (@autopopulate || (!@target.nil? && !@target.empty?))
+  if assignable_private_ip?(_key_ip) && (@autopopulate || (!@target.nil? && !@target.empty?))
 
     _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
