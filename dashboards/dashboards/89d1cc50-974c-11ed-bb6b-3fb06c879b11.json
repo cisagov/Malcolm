@@ -357,7 +357,7 @@
       "attributes": {
         "description": "",
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:known_hosts AND network.direction:(internal OR outbound) AND (NOT source.device.id:*) AND (NOT (network.type:ipv4 AND source.ip:(\\\"100.64.0.0/10\\\",\\\"127.0.0.0/8\\\",\\\"192.0.0.0/24\\\",\\\"192.0.2.0/24\\\",\\\"192.88.99.0/24\\\",\\\"198.18.0.0/15\\\",\\\"198.51.100.0/24\\\",\\\"203.0.113.0/24\\\",\\\"224.0.0.0/4\\\",\\\"240.0.0.0/4\\\"))) AND (NOT (network.type:ipv6 AND source.ip:(\\\"::1/128\\\",\\\"fe80::/10\\\",\\\"ff00::/8\\\")))\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:known_hosts AND source.device.uninventoried:true\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "title": "Uninventoried Observed Hosts",
         "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
