@@ -1,11 +1,13 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import psutil
-import time
 import json
 import logging
-import os
 import malcolm_utils
+import os
+import psutil
+import subprocess
+import sys
+import time
 from .sysquery import sys_service as sys_s
 from collections import defaultdict
 from flask import render_template, send_from_directory
@@ -64,6 +66,15 @@ def activate_service(script):
 '''
     System Queries
 '''
+
+
+def count_lines_wc(file_path):
+    try:
+        result = subprocess.run(["wc", "-l", file_path], capture_output=True, text=True, check=True)
+        return int(result.stdout.split()[0])
+    except Exception as e:
+        print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
+        return 0
 
 
 @app.route('/update', methods=['GET'])
@@ -132,11 +143,7 @@ def update_stats():
             for filename in files:
                 if filename.endswith('.log'):
                     zeek_file_path = os.path.join(root, filename)
-                    try:
-                        with open(zeek_file_path, 'r') as f:
-                            zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + sum(1 for _ in f)
-                    except Exception as e:
-                        pass
+                    zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + count_lines_wc(zeek_file_path)
 
     if os.path.isdir(suricata_log_path):
         for filename in os.listdir(suricata_log_path):
@@ -151,11 +158,7 @@ def update_stats():
                     pass
 
     if os.path.isfile(most_recent_suricata_log):
-        try:
-            with open(most_recent_suricata_log, 'r') as f:
-                most_recent_suricata_count = sum(1 for _ in f)
-        except Exception as e:
-            pass
+        most_recent_suricata_count = count_lines_wc(most_recent_suricata_log)
 
     if os.path.isdir(pcap_path):
         for filename in os.listdir(pcap_path):
