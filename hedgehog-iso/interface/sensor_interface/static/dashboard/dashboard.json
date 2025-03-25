@@ -216,6 +216,69 @@
           }
         }
       ]
+    },
+    {
+      "title": "Current PCAP File",
+      "width": 1,
+      "row": {
+        "3": 17
+      },
+      "col": {
+        "3": 1
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "text_widget",
+          "settings": {
+            "size": "regular",
+            "value": "(datasources[\"System Dashboard Flask\"][\"pcap\"] / (1000 * 1024)).toFixed(2)",
+            "animate": true,
+            "units": "MB"
+          }
+        }
+      ]
+    },
+    {
+      "title": "Current Zeek Logs",
+      "width": 1,
+      "row": {
+        "3": 17
+      },
+      "col": {
+        "3": 2
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "html",
+          "settings": {
+            "html": "Object.entries(datasources[\"System Dashboard Flask\"][\"zeek\"]).map(([key, value]) => `<div class=\"tw-value\" style=\"font-size: 16px;\"><b>${key}</b>: ${value}</div>`).join('<br>')",
+            "height": 2
+          }
+        }
+      ]
+    },
+    {
+      "title": "Current Suricata Logs",
+      "width": 1,
+      "row": {
+        "3": 19
+      },
+      "col": {
+        "3": 3
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "text_widget",
+          "settings": {
+            "size": "regular",
+            "value": "datasources[\"System Dashboard Flask\"][\"suricata\"]",
+            "animate": true
+          }
+        }
+      ]
     }
   ],
   "datasources": [

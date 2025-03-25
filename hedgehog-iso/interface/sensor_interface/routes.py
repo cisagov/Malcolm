@@ -172,11 +172,12 @@ def update_stats():
     data['zeek'] = {}
     for k in sorted(zeek_log_line_counts.keys(), key=zeek_log_line_counts.get, reverse=True)[:5]:
         data['zeek'][k[:-4]] = zeek_log_line_counts[k]
-    data['pcap'] = (
-        {most_recent_pcap[:-5]: malcolm_utils.sizeof_fmt(most_recent_pcap_size)}
-        if (most_recent_pcap and most_recent_pcap_size)
-        else {}
-    )
+    # data['pcap'] = (
+    #     {most_recent_pcap[:-5]: malcolm_utils.sizeof_fmt(most_recent_pcap_size)}
+    #     if (most_recent_pcap and most_recent_pcap_size)
+    #     else {}
+    # )
+    data['pcap'] = most_recent_pcap_size
     data['suricata'] = most_recent_suricata_count
 
     return json.dumps(data)
