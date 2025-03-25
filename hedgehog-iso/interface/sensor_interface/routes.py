@@ -68,15 +68,6 @@ def activate_service(script):
 '''
 
 
-def count_lines_wc(file_path):
-    try:
-        result = subprocess.run(["wc", "-l", file_path], capture_output=True, text=True, check=True)
-        return int(result.stdout.split()[0])
-    except Exception as e:
-        print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
-        return 0
-
-
 @app.route('/update', methods=['GET'])
 def update_stats():
     req_time = int(time.time())
@@ -139,11 +130,15 @@ def update_stats():
     most_recent_suricata_log, most_recent_suricata_mtime, most_recent_suricata_count = '', 0, 0
 
     if os.path.isdir(zeek_log_path):
-        for root, dirs, files in os.walk(zeek_log_path):
-            for filename in files:
-                if filename.endswith('.log'):
-                    zeek_file_path = os.path.join(root, filename)
-                    zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + count_lines_wc(zeek_file_path)
+        if zeeklogs := [
+            os.path.join(root, filename)
+            for root, _, files in os.walk(zeek_log_path)
+            for filename in files
+            if filename.endswith('.log')
+        ]:
+            for zeek_file_path, zeek_file_count in malcolm_utils.count_lines_wc_batch(zeeklogs):
+                filename = os.path.basename(zeek_file_path)
+                zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + zeek_file_count
 
     if os.path.isdir(suricata_log_path):
         for filename in os.listdir(suricata_log_path):
@@ -158,7 +153,7 @@ def update_stats():
                     pass
 
     if os.path.isfile(most_recent_suricata_log):
-        most_recent_suricata_count = count_lines_wc(most_recent_suricata_log)
+        most_recent_suricata_count = malcolm_utils.count_lines_mmap(most_recent_suricata_log)[1]
 
     if os.path.isdir(pcap_path):
         for filename in os.listdir(pcap_path):
