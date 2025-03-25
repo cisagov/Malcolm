@@ -122,8 +122,7 @@ def update_stats():
     most_recent_pcap, most_recent_pcap_mtime, most_recent_pcap_size = '', 0, 0
 
     zeek_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'spool')
-    zeek_log_mtimes = defaultdict(lambda: 0)
-    zeek_logs_recent_counts = defaultdict(lambda: 0)
+    zeek_log_line_counts = defaultdict(lambda: 0)
 
     suricata_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'suricata')
     most_recent_suricata_log, most_recent_suricata_mtime, most_recent_suricata_count = '', 0, 0
@@ -134,16 +133,10 @@ def update_stats():
                 if filename.endswith('.log'):
                     zeek_file_path = os.path.join(root, filename)
                     try:
-                        zeek_log_mtimes[zeek_file_path] = os.path.getmtime(zeek_file_path)
+                        with open(zeek_file_path, 'r') as f:
+                            zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + sum(1 for _ in f)
                     except Exception as e:
                         pass
-        for filespec in sorted(zeek_log_mtimes, key=lambda f: zeek_log_mtimes[f], reverse=True)[:3]:
-            try:
-                logtype = os.path.basename(filespec)[:-4]
-                with open(filespec, 'r') as f:
-                    zeek_logs_recent_counts[logtype] = zeek_logs_recent_counts[logtype] + sum(1 for _ in f)
-            except Exception as e:
-                pass
 
     if os.path.isdir(suricata_log_path):
         for filename in os.listdir(suricata_log_path):
@@ -178,7 +171,9 @@ def update_stats():
                 except Exception as e:
                     pass
 
-    data['zeek'] = zeek_logs_recent_counts
+    data['zeek'] = {}
+    for k in sorted(zeek_log_line_counts.keys(), key=zeek_log_line_counts.get, reverse=True)[:5]:
+        data['zeek'][k[:-4]] = zeek_log_line_counts[k]
     data['pcap'] = (
         {most_recent_pcap[:-5]: malcolm_utils.sizeof_fmt(most_recent_pcap_size)}
         if (most_recent_pcap and most_recent_pcap_size)
