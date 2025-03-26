@@ -252,6 +252,7 @@ ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/nginx.sh /usr/local/bin/container_health.sh
 ADD nginx/scripts /usr/local/bin/
 ADD --chmod=644 nginx/*.conf /etc/nginx/
+ADD --chmod=644 nginx/lua/*.lua /usr/local/openresty/lualib/
 ADD nginx/templates /etc/nginx/templates/
 ADD --chmod=644 nginx/supervisord.conf /etc/
 ADD --chmod=644 docs/images/favicon/*.png /usr/share/nginx/html/assets/img/
