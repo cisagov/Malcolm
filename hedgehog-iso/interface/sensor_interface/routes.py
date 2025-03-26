@@ -135,6 +135,24 @@ def update_stats():
             for root, _, files in os.walk(zeek_log_path)
             for filename in files
             if filename.endswith('.log')
+            and all(
+                not filename.startswith(prefix)
+                for prefix in [
+                    'analyzer.',
+                    'broker.',
+                    'capture_loss.',
+                    'cluster.',
+                    'config.',
+                    'loaded_scripts.',
+                    'packet_filter.',
+                    'print.',
+                    'prof.',
+                    'reporter.',
+                    'stats.',
+                    'stderr.',
+                    'stdout.',
+                ]
+            )
         ]:
             for zeek_file_path, zeek_file_count in malcolm_utils.count_lines_wc_batch(zeeklogs):
                 filename = os.path.basename(zeek_file_path)

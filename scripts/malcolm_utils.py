@@ -806,8 +806,11 @@ def count_lines_wc(file_path):
 # use memory-mapped files and count "\n" (fastest for many small files as it avoids subprocess overhead)
 def count_lines_mmap(file_path):
     try:
-        with open(file_path, "r") as f:
-            return file_path, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ).read().count(b"\n")
+        if os.path.getsize(file_path):
+            with open(file_path, "r") as f:
+                return file_path, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ).read().count(b"\n")
+        else:
+            return file_path, 0
     except Exception as e:
         print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
         return file_path, 0
