@@ -207,7 +207,16 @@ def checkEnvFilesAndValues():
                     # top level in this hash represents the destination .env file
                     for destEnv, sourceEnvs in envVarActionsYaml['copied_environment_variables'].items():
                         # if the destination .env file already exists, read its current values
+                        # if not, create it from .example if possible first
                         destEnvFileName = os.path.join(args.configDir, destEnv.replace('_', '-') + '.env')
+                        if not os.path.isfile(destEnvFileName):
+                            envExampleFile = os.path.join(
+                                examplesConfigDir, os.path.basename(destEnvFileName) + '.example'
+                            )
+                            if os.path.isfile(envExampleFile):
+                                if args.debug:
+                                    eprint(f"Creating {destEnvFileName} from {os.path.basename(envExampleFile)}")
+                                shutil.copyfile(envExampleFile, destEnvFileName)
                         destVars = (
                             dotenvImported.dotenv_values(destEnvFileName) if os.path.isfile(destEnvFileName) else dict()
                         )
@@ -1521,6 +1530,8 @@ def authSetup():
                 or args.authKeycloakClientSecret
                 or args.authKeycloakBootstrapUser
                 or args.authKeycloakBootstrapPassword
+                or args.authRequireGroup
+                or args.authRequireRole
             ),
             [],
         ),
@@ -2192,140 +2203,180 @@ def authSetup():
 
                 elif authItem[0] == 'keycloak':
                     with pushd(args.configDir):
-                        keycloakEnvValues = defaultdict(str)
-
                         keycloakEnvFile = 'keycloak.env'
+                        authCommonEnvFile = 'auth-common.env'
+                        # changeMade tracks if the user made changes to the vars in an .env file
+                        #   e.g., {'keycloak.env': True, 'auth-common.env': False}
+                        changeMade = defaultdict(lambda: False)
+                        # envValues is a dict (keyed by filename) of dicts of variable name/value pairs
+                        #   e.g., {"keycloak.env": {"foo": "bar"}, "auth-common.env": {"bar": "baz"}}
+                        envValues = defaultdict(lambda: defaultdict(str))
+
                         if os.path.isfile(keycloakEnvFile):
-                            keycloakEnvValues.update(dotenvImported.dotenv_values(keycloakEnvFile))
+                            envValues[keycloakEnvFile].update(dotenvImported.dotenv_values(keycloakEnvFile))
+
+                        if os.path.isfile(authCommonEnvFile):
+                            envValues[authCommonEnvFile].update(dotenvImported.dotenv_values(authCommonEnvFile))
 
                         keyCloakOpts = (
                             # opt[0] - human readable description
-                            # opt[1] - env. variable name
-                            # opt[2] - can be blank
-                            # opt[3] - is a secret
-                            # opt[4] - default value
+                            # opt[1] - env. file
+                            # opt[2] - env. variable name
+                            # opt[3] - can be blank
+                            # opt[4] - is a secret
+                            # opt[5] - default value
                             (
                                 'Keycloak realm',
+                                keycloakEnvFile,
                                 'KEYCLOAK_AUTH_REALM',
                                 False,
                                 False,
                                 (
                                     args.authKeycloakRealm
                                     if args.authKeycloakRealm
-                                    else keycloakEnvValues.get('KEYCLOAK_AUTH_REALM', 'master')
+                                    else envValues[keycloakEnvFile].get('KEYCLOAK_AUTH_REALM', 'master')
                                 ),
                             ),
                             (
                                 'Keycloak redirect URI',
+                                keycloakEnvFile,
                                 'KEYCLOAK_AUTH_REDIRECT_URI',
                                 False,
                                 False,
                                 (
                                     args.authKeycloakRedirectUri
                                     if args.authKeycloakRedirectUri
-                                    else keycloakEnvValues.get('KEYCLOAK_AUTH_REDIRECT_URI', '/index.html')
+                                    else envValues[keycloakEnvFile].get('KEYCLOAK_AUTH_REDIRECT_URI', '/index.html')
                                 ),
                             ),
                             (
                                 'Keycloak URL',
+                                keycloakEnvFile,
                                 'KEYCLOAK_AUTH_URL',
                                 False,
                                 False,
                                 (
                                     args.authKeycloakUrl
                                     if args.authKeycloakUrl
-                                    else keycloakEnvValues['KEYCLOAK_AUTH_URL']
+                                    else envValues[keycloakEnvFile]['KEYCLOAK_AUTH_URL']
                                 ),
                             ),
                             (
                                 'Keycloak client ID',
+                                keycloakEnvFile,
                                 'KEYCLOAK_CLIENT_ID',
                                 True,
                                 False,
                                 (
                                     args.authKeycloakClientId
                                     if args.authKeycloakClientId
-                                    else keycloakEnvValues['KEYCLOAK_CLIENT_ID']
+                                    else envValues[keycloakEnvFile]['KEYCLOAK_CLIENT_ID']
                                 ),
                             ),
                             (
                                 'Keycloak client secret (blank to retain the previous value)',
+                                keycloakEnvFile,
                                 'KEYCLOAK_CLIENT_SECRET',
                                 True,
                                 True,
                                 (
                                     args.authKeycloakClientSecret
                                     if args.authKeycloakClientSecret
-                                    else keycloakEnvValues['KEYCLOAK_CLIENT_SECRET']
+                                    else envValues[keycloakEnvFile]['KEYCLOAK_CLIENT_SECRET']
+                                ),
+                            ),
+                            (
+                                'Required group(s) to which users must belong',
+                                authCommonEnvFile,
+                                'NGINX_REQUIRE_GROUP',
+                                True,
+                                False,
+                                (
+                                    args.authRequireGroup
+                                    if args.authRequireGroup
+                                    else envValues[authCommonEnvFile]['NGINX_REQUIRE_GROUP']
+                                ),
+                            ),
+                            (
+                                'Required role(s) which users must be assigned',
+                                authCommonEnvFile,
+                                'NGINX_REQUIRE_ROLE',
+                                True,
+                                False,
+                                (
+                                    args.authRequireRole
+                                    if args.authRequireRole
+                                    else envValues[authCommonEnvFile]['NGINX_REQUIRE_ROLE']
                                 ),
                             ),
                             (
                                 'Temporary Keycloak admin bootstrap username',
+                                keycloakEnvFile,
                                 'KC_BOOTSTRAP_ADMIN_USERNAME',
                                 True,
                                 False,
                                 (
                                     args.authKeycloakBootstrapUser
                                     if args.authKeycloakBootstrapUser
-                                    else keycloakEnvValues['KC_BOOTSTRAP_ADMIN_USERNAME']
+                                    else envValues[keycloakEnvFile]['KC_BOOTSTRAP_ADMIN_USERNAME']
                                 ),
                             ),
                             (
                                 'Temporary Keycloak admin bootstrap password (blank to retain the previous value)',
+                                keycloakEnvFile,
                                 'KC_BOOTSTRAP_ADMIN_PASSWORD',
                                 True,
                                 True,
                                 (
                                     args.authKeycloakBootstrapPassword
                                     if args.authKeycloakBootstrapPassword
-                                    else keycloakEnvValues['KC_BOOTSTRAP_ADMIN_PASSWORD']
+                                    else envValues[keycloakEnvFile]['KC_BOOTSTRAP_ADMIN_PASSWORD']
                                 ),
                             ),
                         )
                         # see comment on keyCloakOpts above for definitions
-                        changeMade = False
                         for opt in keyCloakOpts:
-                            if (nginxAuthMode == 'keycloak') or (not opt[1].startswith('KC_')):
+                            if (nginxAuthMode == 'keycloak') or (not opt[2].startswith('KC_')):
                                 loopBreaker = CountUntilException(MaxAskForValueCount, f'Invalid {opt[0]}')
                                 while loopBreaker.increment():
                                     tmpVal = (
                                         AskForString(
                                             opt[0],
-                                            default=opt[4],
+                                            default=opt[5],
                                             defaultBehavior=defaultBehavior,
                                         )
-                                        if (opt[3] == False)
+                                        if (opt[4] == False)
                                         else AskForPassword(
                                             opt[0],
-                                            default=opt[4],
+                                            default=opt[5],
                                             defaultBehavior=defaultBehavior,
                                         )
                                     )
 
-                                    if (len(tmpVal) == 0) and (opt[3] == True):
+                                    if (len(tmpVal) == 0) and (opt[4] == True):
                                         # if this is a password/secret and they
                                         #   leave it blank, retain the old value
-                                        tmpVal = opt[4]
+                                        tmpVal = opt[5]
 
-                                    if (len(tmpVal) > 0) or (opt[2] == True):
-                                        if keycloakEnvValues[opt[1]] != tmpVal:
-                                            changeMade = True
-                                        keycloakEnvValues[opt[1]] = tmpVal
+                                    if (len(tmpVal) > 0) or (opt[3] == True):
+                                        if envValues[opt[1]][opt[2]] != tmpVal:
+                                            changeMade[opt[1]] = True
+                                        envValues[opt[1]][opt[2]] = tmpVal
                                         break
                                     else:
                                         eprint(f"{opt[0]} cannot be empty")
 
-                        # update keycloak.env with the new values, if any
-                        if changeMade:
+                        # update .env file(s) with the new values, if any
+                        for filename in [f for f, changed in changeMade.items() if changed]:
                             UpdateEnvFiles(
                                 [
                                     EnvValue(
                                         True,
-                                        keycloakEnvFile,
+                                        filename,
                                         k,
                                         v,
                                     )
-                                    for k, v in keycloakEnvValues.items()
+                                    for k, v in envValues[filename].items()
                                 ],
                                 stat.S_IRUSR | stat.S_IWUSR,
                             )
@@ -2894,6 +2945,24 @@ def main():
         type=str,
         default='',
         help='Temporary Keycloak admin bootstrap password',
+    )
+    authSetupGroup.add_argument(
+        '--auth-require-group',
+        dest='authRequireGroup',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Required group(s) to which users must belong (--auth-method is keycloak|keycloak_remote)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-require-role',
+        dest='authRequireRole',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='Required role(s) which users must be assigned (--auth-method is keycloak|keycloak_remote)',
     )
 
     logsAndStatusGroup = parser.add_argument_group('Logs and Status')
