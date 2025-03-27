@@ -420,18 +420,15 @@ class Installer(object):
                 and InstallerYesOrNo(f'Pull Malcolm images?', default=False, forceInteraction=False)
             ):
                 for priv in (False, True):
-                    pullCmd = [
-                        self.dockerComposeCmd,
-                        '-f',
-                        composeFile,
-                        '--profile=malcolm',
-                        'pull',
-                    ]
-                    if 'podman-compose' not in next(iter(get_iterable(flatten(pullCmd)))):
-                        pullCmd.append('--quiet')
+                    pullCmd = [self.dockerComposeCmd, '-f', composeFile, '--profile=malcolm', 'pull', '--quiet']
                     ecode, out = self.run_process(pullCmd, privileged=priv)
                     if ecode == 0:
                         break
+                    elif any('unrecognized arguments: --quiet' in s for s in out):
+                        pullCmd.remove('--quiet')
+                        ecode, out = self.run_process(pullCmd, privileged=priv)
+                        if ecode == 0:
+                            break
 
                 if ecode == 0:
                     result = True
