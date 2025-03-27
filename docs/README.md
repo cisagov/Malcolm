@@ -39,6 +39,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Keycloak](authsetup.md#AuthKeycloak)
             * [Using a remote Keycloak instance](authsetup.md#AuthKeycloakRemote)
             * [Using the embedded Keycloak instance](authsetup.md#AuthKeycloakEmbedded)
+            * [Requiring user groups and realm roles](authsetup.md#AuthKeycloakGroupsAndRoles)
         + [TLS certificates](authsetup.md#TLSCerts)
         + [Command-line arguments](authsetup.md#CommandLineConfig)
     - [Log Out of Malcolm](authsetup.md#LoggingOut)

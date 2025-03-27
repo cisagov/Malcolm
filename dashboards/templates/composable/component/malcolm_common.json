@@ -12,6 +12,12 @@
             },
             "device": {
               "properties": {
+                "discovered": {
+                  "type": "keyword"
+                },
+                "uninventoried": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },
@@ -106,6 +112,12 @@
         },
         "related": {
           "properties": {
+            "discovered": {
+              "type": "keyword"
+            },
+            "uninventoried": {
+              "type": "keyword"
+            },
             "mac": {
               "type": "keyword"
             },
@@ -154,6 +166,12 @@
             },
             "device": {
               "properties": {
+                "discovered": {
+                  "type": "keyword"
+                },
+                "uninventoried": {
+                  "type": "keyword"
+                },
                 "cluster": {
                   "type": "keyword"
                 },

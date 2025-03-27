@@ -9,7 +9,7 @@
 ###############################################################################
 
 $fluent_bit_version = '3.2'
-$fluent_bit_full_version = '3.2.8'
+$fluent_bit_full_version = '3.2.10'
 
 ###############################################################################
 # select an item from a menu provided in an array

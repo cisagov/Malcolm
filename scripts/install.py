@@ -88,6 +88,7 @@ from malcolm_utils import (
     deep_set,
     eprint,
     flatten,
+    get_iterable,
     LoadFileIfJson,
     remove_prefix,
     remove_suffix,
@@ -419,17 +420,16 @@ class Installer(object):
                 and InstallerYesOrNo(f'Pull Malcolm images?', default=False, forceInteraction=False)
             ):
                 for priv in (False, True):
-                    ecode, out = self.run_process(
-                        [
-                            self.dockerComposeCmd,
-                            '-f',
-                            composeFile,
-                            '--profile=malcolm',
-                            'pull',
-                            '--quiet',
-                        ],
-                        privileged=priv,
-                    )
+                    pullCmd = [
+                        self.dockerComposeCmd,
+                        '-f',
+                        composeFile,
+                        '--profile=malcolm',
+                        'pull',
+                    ]
+                    if 'podman-compose' not in next(iter(get_iterable(flatten(pullCmd)))):
+                        pullCmd.append('--quiet')
+                    ecode, out = self.run_process(pullCmd, privileged=priv)
                     if ecode == 0:
                         break
 
@@ -3543,6 +3543,10 @@ class LinuxInstaller(Installer):
     def tweak_system_files(self):
         # make some system configuration changes with permission
 
+        tweakWithAbandon = InstallerYesOrNo(
+            'Apply recommended system tweaks automatically without asking for confirmation?', default=True
+        )
+
         ConfigLines = namedtuple("ConfigLines", ["distros", "filename", "prefix", "description", "lines"], rename=False)
 
         configLinesToAdd = [
@@ -3673,6 +3677,7 @@ class LinuxInstaller(Installer):
         for config in configLinesToAdd:
             if ((len(config.distros) == 0) or (self.codename in config.distros)) and (
                 os.path.isfile(config.filename)
+                or tweakWithAbandon
                 or InstallerYesOrNo(
                     f'\n{config.description}\n{config.filename} does not exist, create it?', default=True
                 )
@@ -3686,9 +3691,12 @@ class LinuxInstaller(Installer):
                     or (not os.path.isfile(config.filename) and (len(config.prefix) == 0))
                     or (
                         (len(list(filter(lambda x: x.startswith(config.prefix), confFileLines))) == 0)
-                        and InstallerYesOrNo(
-                            f'\n{config.description}\n{config.prefix} appears to be missing from {config.filename}, append it?',
-                            default=True,
+                        and (
+                            tweakWithAbandon
+                            or InstallerYesOrNo(
+                                f'\n{config.description}\n{config.prefix} appears to be missing from {config.filename}, append it?',
+                                default=True,
+                            )
                         )
                     )
                 ):
@@ -3709,9 +3717,12 @@ class LinuxInstaller(Installer):
             (grubFileName := '/etc/default/grub')
             and os.path.isfile(grubFileName)
             and (not [line.rstrip('\n') for line in open(grubFileName) if 'cgroup' in line.lower()])
-            and InstallerYesOrNo(
-                f'\ncgroup parameters appear to be missing from {grubFileName}, set them?',
-                default=True,
+            and (
+                tweakWithAbandon
+                or InstallerYesOrNo(
+                    f'\ncgroup parameters appear to be missing from {grubFileName}, set them?',
+                    default=True,
+                )
             )
         ):
             err, out = self.run_process(

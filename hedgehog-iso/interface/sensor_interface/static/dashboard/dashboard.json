@@ -4,6 +4,7 @@
   "plugins": [],
   "panes": [
     {
+      "title": "System Time",
       "width": 1,
       "row": {
         "3": 1
@@ -18,7 +19,7 @@
           "settings": {
             "size": "regular",
             "value": "datasources[\"Clock\"][\"time_string_value\"]",
-            "animate": true
+            "animate": false
           }
         }
       ]
@@ -216,6 +217,66 @@
           }
         }
       ]
+    },
+    {
+      "title": "Current PCAP File",
+      "width": 1,
+      "row": {
+        "3": 17
+      },
+      "col": {
+        "3": 1
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "html",
+          "settings": {
+            "html": "`<div class=\"tw-value\" style=\"font-size:30px;padding-left:10px\">${formatBytes(datasources[\"System Dashboard Flask\"][\"pcap\"])}</div>`",
+            "height": 1
+          }
+        }
+      ]
+    },
+    {
+      "title": "Current Zeek Logs",
+      "width": 1,
+      "row": {
+        "3": 17
+      },
+      "col": {
+        "3": 2
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "html",
+          "settings": {
+            "html": "Object.entries(datasources[\"System Dashboard Flask\"][\"zeek\"]).map(([key, value]) => `<div class=\"tw-value\" style=\"font-size:16px;padding-left:10px\"><b>${key}</b>: ${typeof value === 'number' ? value.toLocaleString() : value}</div>`).join('<br>')",
+            "height": 2
+          }
+        }
+      ]
+    },
+    {
+      "title": "Current Suricata Logs",
+      "width": 1,
+      "row": {
+        "3": 19
+      },
+      "col": {
+        "3": 3
+      },
+      "col_width": 1,
+      "widgets": [
+        {
+          "type": "html",
+          "settings": {
+            "html": "`<div class=\"tw-value\" style=\"font-size:30px;padding-left:10px\">${typeof datasources[\"System Dashboard Flask\"][\"suricata\"] === 'number' ? datasources[\"System Dashboard Flask\"][\"suricata\"].toLocaleString() : datasources[\"System Dashboard Flask\"][\"suricata\"]}</div>`",
+            "height": 1
+          }
+        }
+      ]
     }
   ],
   "datasources": [
@@ -225,7 +286,7 @@
       "settings": {
         "url": "http://127.0.0.1:5000/update",
         "use_thingproxy": false,
-        "refresh": 1,
+        "refresh": 2,
         "method": "GET"
       }
     },

@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: htadmin-container
-        image: ghcr.io/idaholab/malcolm/htadmin:25.03.0
+        image: ghcr.io/idaholab/malcolm/htadmin:25.03.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -72,7 +72,7 @@ spec:
           failureThreshold: 10
       initContainers:
       - name: htadmin-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
         imagePullPolicy: Always
         stdin: false
         tty: true

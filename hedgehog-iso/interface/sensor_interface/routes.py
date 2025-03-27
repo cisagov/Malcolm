@@ -1,11 +1,15 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import psutil
-import time
 import json
 import logging
+import malcolm_utils
 import os
+import psutil
+import subprocess
+import sys
+import time
 from .sysquery import sys_service as sys_s
+from collections import defaultdict
 from flask import render_template, send_from_directory
 from flask import Flask
 from flask_cors import CORS
@@ -99,7 +103,7 @@ def update_stats():
     data = {
         'cpu': {'percent': cpu_data},
         'ram': {'percent': ram_data[2], 'total': ram_data[0], 'used': ram_data[3]},
-        'disks': [],  # todo: work in progress
+        'disks': [],
         'disk': {'mount': disk_mount, 'total': disk_data[0], 'used': disk_data[1], 'percent': disk_data[3]},
         'disk_io': {
             'read_bytes_sec': (disk_write_data[2] - disk_write_data_start[2]) / period,
@@ -114,6 +118,85 @@ def update_stats():
         data['disks'].append(
             {'mount': disk_data[0], 'total': disk_data[1][0], 'used': disk_data[1][1], 'percent': disk_data[1][3]}
         )
+
+    # get capture stats for Zeek, Suricata, PCAP
+    pcap_path = os.getenv('PCAP_PATH', '')
+    most_recent_pcap, most_recent_pcap_mtime, most_recent_pcap_size = '', 0, 0
+
+    zeek_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'spool')
+    zeek_log_line_counts = defaultdict(lambda: 0)
+
+    suricata_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'suricata')
+    most_recent_suricata_log, most_recent_suricata_mtime, most_recent_suricata_count = '', 0, 0
+
+    if os.path.isdir(zeek_log_path):
+        if zeeklogs := [
+            os.path.join(root, filename)
+            for root, _, files in os.walk(zeek_log_path)
+            for filename in files
+            if filename.endswith('.log')
+            and all(
+                not filename.startswith(prefix)
+                for prefix in [
+                    'analyzer.',
+                    'broker.',
+                    'capture_loss.',
+                    'cluster.',
+                    'config.',
+                    'loaded_scripts.',
+                    'packet_filter.',
+                    'print.',
+                    'prof.',
+                    'reporter.',
+                    'stats.',
+                    'stderr.',
+                    'stdout.',
+                ]
+            )
+        ]:
+            for zeek_file_path, zeek_file_count in malcolm_utils.count_lines_wc_batch(zeeklogs):
+                filename = os.path.basename(zeek_file_path)
+                zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + zeek_file_count
+
+    if os.path.isdir(suricata_log_path):
+        for filename in os.listdir(suricata_log_path):
+            if filename.startswith('eve') and filename.endswith('.json'):
+                suricata_file_path = os.path.join(suricata_log_path, filename)
+                try:
+                    mtime = os.path.getmtime(suricata_file_path)
+                    if mtime > most_recent_suricata_mtime:
+                        most_recent_suricata_log = suricata_file_path
+                        most_recent_suricata_mtime = mtime
+                except Exception as e:
+                    pass
+
+    if os.path.isfile(most_recent_suricata_log):
+        most_recent_suricata_count = malcolm_utils.count_lines_mmap(most_recent_suricata_log)[1]
+
+    if os.path.isdir(pcap_path):
+        for filename in os.listdir(pcap_path):
+            if any(filename.endswith(ext) for ext in ['.pcap', '.pcap.zst', '.pcap.gz']):
+                pcap_file_path = os.path.join(pcap_path, filename)
+                try:
+                    mtime = os.path.getmtime(pcap_file_path)
+                    size = os.path.getsize(pcap_file_path)
+                    if mtime > most_recent_pcap_mtime:
+                        most_recent_pcap = filename
+                        most_recent_pcap_mtime = mtime
+                        most_recent_pcap_size = size
+                except Exception as e:
+                    pass
+
+    data['zeek'] = {}
+    for k in sorted(zeek_log_line_counts.keys(), key=zeek_log_line_counts.get, reverse=True)[:5]:
+        data['zeek'][k[:-4]] = zeek_log_line_counts[k]
+    # data['pcap'] = (
+    #     {most_recent_pcap[:-5]: malcolm_utils.sizeof_fmt(most_recent_pcap_size)}
+    #     if (most_recent_pcap and most_recent_pcap_size)
+    #     else {}
+    # )
+    data['pcap'] = most_recent_pcap_size
+    data['suricata'] = most_recent_suricata_count
 
     return json.dumps(data)
 

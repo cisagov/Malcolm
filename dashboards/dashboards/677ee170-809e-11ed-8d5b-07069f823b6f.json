@@ -502,7 +502,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"network.direction:(internal OR outbound) AND (NOT source.device.id:*) AND (NOT (network.type:ipv4 AND source.ip:(\\\"100.64.0.0/10\\\",\\\"127.0.0.0/8\\\",\\\"192.0.0.0/24\\\",\\\"192.0.2.0/24\\\",\\\"192.88.99.0/24\\\",\\\"198.18.0.0/15\\\",\\\"198.51.100.0/24\\\",\\\"203.0.113.0/24\\\",\\\"224.0.0.0/4\\\",\\\"240.0.0.0/4\\\"))) AND (NOT (network.type:ipv6 AND source.ip:(\\\"::1/128\\\",\\\"fe80::/10\\\",\\\"ff00::/8\\\")))\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"source.device.uninventoried:true\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -532,7 +532,7 @@
         "description": "",
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"network.direction:(internal OR inbound) AND (NOT destination.device.id:*) AND (NOT (network.type:ipv4 AND destination.ip:(\\\"100.64.0.0/10\\\",\\\"127.0.0.0/8\\\",\\\"192.0.0.0/24\\\",\\\"192.0.2.0/24\\\",\\\"192.88.99.0/24\\\",\\\"198.18.0.0/15\\\",\\\"198.51.100.0/24\\\",\\\"203.0.113.0/24\\\",\\\"224.0.0.0/4\\\",\\\"240.0.0.0/4\\\"))) AND (NOT (network.type:ipv6 AND destination.ip:(\\\"::1/128\\\",\\\"fe80::/10\\\",\\\"ff00::/8\\\")))\",\"language\":\"lucene\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"destination.device.uninventoried:true\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0"
       },
@@ -576,7 +576,7 @@
         "sort": [],
         "version": 1,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"(NOT event.provider:arkime) AND ((NOT event.provider:zeek) OR event.dataset:(conn OR notice OR weird OR signatures OR software OR known*)) AND ((network.direction:(internal OR inbound) AND (destination.ip:*) AND (NOT destination.device.id:*)) OR (network.direction:(internal OR outbound) AND (source.ip:*) AND (NOT source.device.id:*)))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"related.uninventoried:true\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         }
       },
       "references": [

@@ -400,6 +400,9 @@ At the end of the installation process, users will be prompted with a few self-e
 
 Following these prompts, the installer will reboot and Hedgehog Linux will boot into [kiosk mode](hedgehog-boot.md#HedgehogKioskMode).
 
+
+![Kiosk mode sensor menu: resource statistics](./images/hedgehog/images/kiosk_mode_sensor_menu.png)
+
 Kiosk mode can be exited by connecting an external USB keyboard and pressing **Alt+F4**, upon which the *sensor* user's desktop is shown.
 
 ### <a name="HedgehogDesktop"></a> Desktop Environment

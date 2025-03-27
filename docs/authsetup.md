@@ -7,6 +7,7 @@
     - [Keycloak](#AuthKeycloak)
         + [Using a remote Keycloak instance](#AuthKeycloakRemote)
         + [Using the embedded Keycloak instance](#AuthKeycloakEmbedded)
+        + [Requiring user groups and realm roles](#AuthKeycloakGroupsAndRoles)
     - [TLS certificates](#TLSCerts)
     - [Command-line arguments](#CommandLineConfig)
 * [Log Out of Malcolm](#LoggingOut)
@@ -132,11 +133,11 @@ These first two steps are performed during [configuration](malcolm-hedgehog-e2e-
 
 1. Prior to starting Malcolm, during configuration, the user is asked **Which IP version does the network support? (IPv4, IPv6, or both)?** This question is used to configure the [resolver directive](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) for Malcolm's nginx reverse proxy. Note that this selection does not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: it is only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides (for example, to resolve the Keycloak URL if Malcolm is configured to be accessible via a host name rather than an IP address). See related settings for nginx in the [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) configuration file.
 
-![nginx IPv4/IPv6 responder configuration](./images/screenshots/keycloak_00_nginx_responder.png)
+![nginx IPv4/IPv6 responder configuration](./images/screenshots/keycloak_nginx_responder.png)
 
 2. A few steps later, the user is prompted to **Select authentication method**. Selecting `keycloak_remote` will use a remote Keycloak instance.
 
-![Select authentication method](./images/screenshots/keycloak_01_auth_method.png)
+![Select authentication method](./images/screenshots/keycloak_auth_method.png)
 
 The next steps happen in the context of `auth_setup`.
 
@@ -146,35 +147,41 @@ The next steps happen in the context of `auth_setup`.
 
 4. Specify the name of the Keycloak [realm](https://www.keycloak.org/docs/latest/server_admin/index.html#_configuring-realms) to use.
 
-![Specify the Keycloak realm](./images/screenshots/keycloak_04_auth_setup_realm.png)
+![Specify the Keycloak realm](./images/screenshots/keycloak_auth_setup_realm.png)
 
 5. Provide the relative path which is the Malcolm URI to which Keycloak will redirect users after a successful authentication. The default is `/index.html`, which will redirect users to the Malcolm landing page.
 
-![Specify the redirect URI](./images/screenshots/keycloak_05_auth_setup_redirect_uri.png)
+![Specify the redirect URI](./images/screenshots/keycloak_auth_setup_redirect_uri.png)
 
 6. Provide the Keycloak URL, or the URL to which Malcolm should direct authentication requests for Keycloak. This should be the URL of the existing keycloak provider.
 
-![Specify the Keycloak URL](./images/screenshots/keycloak_06_auth_setup_remote_url.png)
+![Specify the Keycloak URL](./images/screenshots/keycloak_auth_setup_remote_url.png)
 
 7. Enter the client ID and client secret that should be used by Malcolm to authenticate.
 
-![Client ID in auth_setup](./images/screenshots/keycloak_22_auth_setup_client_name.png)
+![Client ID in auth_setup](./images/screenshots/keycloak_auth_setup_client_name.png)
 
-![Client secret in auth_setup](./images/screenshots/keycloak_23_auth_setup_client_secret.png)
+![Client secret in auth_setup](./images/screenshots/keycloak_auth_setup_client_secret.png)
 
-8. The values for temporary bootstrap username and password may be left blank, as they are irrelevant when using a remote Keycloak instance.
+8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+
+![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
+
+![Required user roles](./images/screenshots/keycloak_auth_setup_role.png)
+
+9. The values for temporary bootstrap username and password may be left blank, as they are irrelevant when using a remote Keycloak instance.
 
 With the remote Keycloak configuration complete, [start Malcolm](running.md#Starting).
 
-9. Run `./scripts/start` and wait a few minutes for Malcolm to start.
+10. Run `./scripts/start` and wait a few minutes for Malcolm to start.
 
-10. Open a web browser and navigate to the hostname or IP address where Malcolm can be reached (e.g., `https://malcolm.example.com`), which should redirect to the **Sign in to your account** Keycloak page provided by the remote Keycloak instance. Enter valid credentials, then click **Sign in**.
+11. Open a web browser and navigate to the hostname or IP address where Malcolm can be reached (e.g., `https://malcolm.example.com`), which should redirect to the **Sign in to your account** Keycloak page provided by the remote Keycloak instance. Enter valid credentials, then click **Sign in**.
 
-![Malcolm authentication via Keycloak](./images/screenshots/keycloak_24_final_login.png)
+![Malcolm authentication via Keycloak](./images/screenshots/keycloak_final_login.png)
 
-11. After successfully signing in, Keycloak redirects back to the Malcolm landing page.
+12. After successfully signing in, Keycloak redirects back to the Malcolm landing page.
 
-![Redirected to the Malcolm landing page](./images/screenshots/keycloak_25_post_remote_login_landing.png)
+![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_remote_login_landing.png)
 
 ### <a name="AuthKeycloakEmbedded"></a>Using the embedded Keycloak instance
 
@@ -186,17 +193,17 @@ These first two steps are performed during [configuration](malcolm-hedgehog-e2e-
 
 1. Prior to starting Malcolm, during configuration, the user is asked **Which IP version does the network support? (IPv4, IPv6, or both)?** This question is used to configure the [resolver directive](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) for Malcolm's nginx reverse proxy. Note that this selection does not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: it is only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides (for example, to resolve the Keycloak URL if Malcolm is configured to be accessible via a host name rather than an IP address). See related settings for nginx in the [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) configuration file.
 
-![nginx IPv4/IPv6 responder configuration](./images/screenshots/keycloak_00_nginx_responder.png)
+![nginx IPv4/IPv6 responder configuration](./images/screenshots/keycloak_nginx_responder.png)
 
 2. A few steps later, the user is prompted to **Select authentication method**. Selecting `keycloak` will use Malcolm's embedded Keycloak instance.
 
-![Select authentication method](./images/screenshots/keycloak_01_auth_method.png)
+![Select authentication method](./images/screenshots/keycloak_auth_method.png)
 
 The next steps happen in the context of `./scripts/auth_setup`.
 
 3. If the internal passwords for Keycloak's PostgreSQL database were not generated during the initial run of `auth_setup`, this should be done now. If this step has already been done, the user will be warned about regenerating passwords over the top of those that already exist; this is only a concern if the PostgreSQL database already contains data.
 
-![Generating Keycloak's internal PostgreSQL database passwords](./images/screenshots/keycloak_02_db_pw_set.png)
+![Generating Keycloak's internal PostgreSQL database passwords](./images/screenshots/keycloak_db_pw_set.png)
 
 4. Next, running `auth_setup` again, select **Configure Keycloak**.
 
@@ -204,94 +211,100 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 5. Specify the name of the Keycloak [realm](https://www.keycloak.org/docs/latest/server_admin/index.html#_configuring-realms) to use. The default, as defined by Keycloak itself, is [`master`](https://www.keycloak.org/docs/latest/server_admin/index.html#the-master-realm).
 
-![Specify the Keycloak realm](./images/screenshots/keycloak_04_auth_setup_realm.png)
+![Specify the Keycloak realm](./images/screenshots/keycloak_auth_setup_realm.png)
 
 6. Provide the relative path which is the Malcolm URI to which Keycloak will redirect users after a successful authentication. The default is `/index.html`, which will redirect users to the Malcolm landing page.
 
-![Specify the redirect URI](./images/screenshots/keycloak_05_auth_setup_redirect_uri.png)
+![Specify the redirect URI](./images/screenshots/keycloak_auth_setup_redirect_uri.png)
 
 7. Provide the Keycloak URL, or the URL to which Malcolm should direct authentication requests for Keycloak. Since this guide is to configure the embedded Keycloak instance, this host portion of the URL should be the hostname or IP address at which Malcolm is available, followed by **/keycloak**.
 
-![Specify the Keycloak URL](./images/screenshots/keycloak_06_auth_setup_emb_url.png)
+![Specify the Keycloak URL](./images/screenshots/keycloak_auth_setup_emb_url.png)
 
 8. When configuring Keycloak for the first time, a Keycloak client ID and secret have not yet been configured, so the next two values should be left blank for now.
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_07_auth_setup_client_id_empty.png)
+![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_id_empty.png)
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_08_auth_setup_client_secret_empty.png)
+![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
 
-8. When Keycloak starts up for the first time and no users exist, it will [bootstrap](https://www.keycloak.org/server/bootstrap-admin-recovery) a temporary admin account with the username and password provided to the next two questions. These values will only be used once, after which it is recommended to delete this temporary account in the Keycloak user management interface.
+9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
 
-![Bootstrap admin username](./images/screenshots/keycloak_09_auth_setup_bootstrap_admin.png)
+![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
-![Bootstrap admin password](./images/screenshots/keycloak_10_auth_setup_bootstrap_admin_pw.png)
+![Required user roles](./images/screenshots/keycloak_auth_setup_role.png)
+
+10. When Keycloak starts up for the first time and no users exist, it will [bootstrap](https://www.keycloak.org/server/bootstrap-admin-recovery) a temporary admin account with the username and password provided to the next two questions. These values will only be used once, after which it is recommended to delete this temporary account in the Keycloak user management interface.
+
+![Bootstrap admin username](./images/screenshots/keycloak_auth_setup_bootstrap_admin.png)
+
+![Bootstrap admin password](./images/screenshots/keycloak_auth_setup_bootstrap_admin_pw.png)
 
 With the initial configuration complete, [start Malcolm](running.md#Starting).
 
-9. Run `./scripts/start` and wait a few minutes for Malcolm to start.
+11. Run `./scripts/start` and wait a few minutes for Malcolm to start.
 
-10. Open a web browser and enter the Keycloak URL specified above (i.e., the hostname or IP address at which Malcolm is available followed by **/keycloak**), then log in with the bootstrap username and password. Navigating to any other Malcolm URI will result in a "client not found" error until the Keycloak configuration is finished.
+12. Open a web browser and enter the Keycloak URL specified above (i.e., the hostname or IP address at which Malcolm is available followed by **/keycloak**), then log in with the bootstrap username and password. Navigating to any other Malcolm URI will result in a "client not found" error until the Keycloak configuration is finished.
 
-![Bootstrap admin login](./images/screenshots/keycloak_11_bootstrap_login.png)
+![Bootstrap admin login](./images/screenshots/keycloak_bootstrap_login.png)
 
-11. Once logged in, Keycloak warns "You are logged in as a temporary admin user. To harden security, create a permanent admin account and delete the temporary one." Navigate to the **Users** page under **Manage** on the navigation sidebar, then click **Add user**.
+13. Once logged in, Keycloak warns "You are logged in as a temporary admin user. To harden security, create a permanent admin account and delete the temporary one." Navigate to the **Users** page under **Manage** on the navigation sidebar, then click **Add user**.
 
-![Add a new Keycloak admin user](./images/screenshots/keycloak_12_add_user.png)
+![Add a new Keycloak admin user](./images/screenshots/keycloak_add_user.png)
 
-12. The **Create user** page requires that a username for the new admin user be provided. Other details such as name and email may also be supplied. Click **Create** after providing these details.
+14. The **Create user** page requires that a username for the new admin user be provided. Other details such as name and email may also be supplied. Click **Create** after providing these details.
 
-![Provide Keycloak admin user details](./images/screenshots/keycloak_13_add_user_details.png)
+![Provide Keycloak admin user details](./images/screenshots/keycloak_add_user_details.png)
 
-13. Once the new user has been created, navigate to the **Credentials** tab in the user details screen for the new user, and click **Set password**. Set a password for the newly created user.
+15. Once the new user has been created, navigate to the **Credentials** tab in the user details screen for the new user, and click **Set password**. Set a password for the newly created user.
 
-![Provide Keycloak admin user details](./images/screenshots/keycloak_14_set_admin_password.png)
+![Provide Keycloak admin user details](./images/screenshots/keycloak_set_admin_password.png)
 
-14. Navigate to the **Role mapping** tab and click the **Assign role** button. Select **Filter by realm roles**, then check the box next to the **admin** role, then click **Assign**, after which the **User role mapping successfully updated** confirmation will appear.
+16. Navigate to the **Role mapping** tab and click the **Assign role** button. Select **Filter by realm roles**, then check the box next to the **admin** role, then click **Assign**, after which the **User role mapping successfully updated** confirmation will appear.
 
-![Assign admin user role](./images/screenshots/keycloak_15_assign_admin_role.png)
+![Assign admin user role](./images/screenshots/keycloak_assign_admin_role.png)
 
-15. In the upper-right hand corner of the page, click on the username for the temporary admin account and select **Sign out**.
+17. In the upper-right hand corner of the page, click on the username for the temporary admin account and select **Sign out**.
 
-16. Sign in again with the username and password for the new admin user created in the previous steps.
+18. Sign in again with the username and password for the new admin user created in the previous steps.
 
-17. Once again, navigate to the **Users** page under **Manage** on the navigation sidebar. Select the temporary bootstrap admin user account and click **Delete user**, then confirm by clicking **Delete**.
+19. Once again, navigate to the **Users** page under **Manage** on the navigation sidebar. Select the temporary bootstrap admin user account and click **Delete user**, then confirm by clicking **Delete**.
 
-![Deleting the temporary bootstrap user](./images/screenshots/keycloak_16_delete_bootstrap_user.png)
+![Deleting the temporary bootstrap user](./images/screenshots/keycloak_delete_bootstrap_user.png)
 
-18. Next, a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) must be created which will be used by Malcolm's nginx reverse proxy to handle user authentication. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
+20. Next, a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) must be created which will be used by Malcolm's nginx reverse proxy to handle user authentication. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
 
-![Creating a new client](./images/screenshots/keycloak_17_clients_page.png)
+![Creating a new client](./images/screenshots/keycloak_clients_page.png)
 
-19. Provide a **Client ID** (e.g., `malcolm` or `myclient`) to identify the new client, then click **Next**.
+21. Provide a **Client ID** (e.g., `malcolm` or `myclient`) to identify the new client, then click **Next**.
 
-![Client ID](./images/screenshots/keycloak_18_create_client_1.png)
+![Client ID](./images/screenshots/keycloak_create_client_1.png)
 
-20. Enable **Client authentication**, then click **Next**.
+22. Enable **Client authentication**, then click **Next**.
 
-![Client authentication](./images/screenshots/keycloak_19_create_client_2.png)
+![Client authentication](./images/screenshots/keycloak_create_client_2.png)
 
-21. Under **Login settings** provide the following values, replacing `malcolm.example.com` with the hostname or IP address of the Malcolm instance. Then click **Save**.
+23. Under **Login settings** provide the following values, replacing `malcolm.example.com` with the hostname or IP address of the Malcolm instance. Then click **Save**.
     * **Root URL**: `https://malcolm.example.com`
     * **Home URL**: `https://malcolm.example.com`
     * **Valid redirect URIs**: `/*`
     * **Valid post logout redirect URIs**: `https://malcolm.example.com/keycloak`
     * **Web origins**: `https://malcolm.example.com`
 
-![Client login settings](./images/screenshots/keycloak_20_create_client_3.png)
+![Client login settings](./images/screenshots/keycloak_create_client_3.png)
 
-22. From the **Client details** page for the new client, click the **Credentials** tab. Copy the **Client Secret** to the clipboard or make note of it so that it can be used in the following step.
+24. From the **Client details** page for the new client, click the **Credentials** tab. Copy the **Client Secret** to the clipboard or make note of it so that it can be used in the following step.
 
-![Client secret](./images/screenshots/keycloak_21_client_secret.png)
+![Client secret](./images/screenshots/keycloak_client_secret.png)
 
-23. Return to a command prompt in the Malcolm installation directory and re-run `./scripts/auth_setup`, then select **Configure Keycloak**.
+25. Return to a command prompt in the Malcolm installation directory and re-run `./scripts/auth_setup`, then select **Configure Keycloak**.
 
-24. Leave the realm, redirect URI, and keycloak URL unchanged. Enter the client ID and client secret when prompted. The values for temporary bootstrap username and password can also be left unchanged, as they are irrelevant and will not be used again.
+26. Leave the realm, redirect URI, and keycloak URL unchanged. Enter the client ID and client secret when prompted. The values for temporary bootstrap username and password can also be left unchanged, as they are irrelevant and will not be used again.
 
-![Client ID in auth_setup](./images/screenshots/keycloak_22_auth_setup_client_name.png)
+![Client ID in auth_setup](./images/screenshots/keycloak_auth_setup_client_name.png)
 
-![Client secret in auth_setup](./images/screenshots/keycloak_23_auth_setup_client_secret.png)
+![Client secret in auth_setup](./images/screenshots/keycloak_auth_setup_client_secret.png)
 
-25. The `nginx-proxy` container needs to be updated with these new values. Restart the `nginx-proxy` container by running `./scripts/restart -s nginx-proxy` (pressing CTRL+C to interrupt the debug log output once the service has restarted), or [restart Malcolm](running.md#StopAndRestart) entirely.
+27. The `nginx-proxy` container needs to be updated with these new values. Restart the `nginx-proxy` container by running `./scripts/restart -s nginx-proxy` (pressing CTRL+C to interrupt the debug log output once the service has restarted), or [restart Malcolm](running.md#StopAndRestart) entirely.
 
 ```
 /scripts/restart -s nginx-proxy
@@ -300,7 +313,7 @@ Stopped Malcolm's ['nginx-proxy'] services
 Removed Malcolm's ['nginx-proxy'] services
 
 NAME                    IMAGE                                          COMMAND                  SERVICE       CREATED        STATUS                                     PORTS
-malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.03.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
+malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.03.1   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
 
 nginx-proxy-1  | root
 nginx-proxy-1  | uid=0(root) gid=0(root) groups=0(root),0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel),11(floppy),20(dialout),26(tape),27(video)
@@ -317,13 +330,65 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 ^C
 ```
 
-26. Open a web browser and navigate to the hostname or IP address where Malcolm can be reached (e.g., `https://malcolm.example.com`), which should redirect to the **Sign in to your account** Keycloak page. Enter the username and password for the user created above, then click **Sign in**.
+28. Open a web browser and navigate to the hostname or IP address where Malcolm can be reached (e.g., `https://malcolm.example.com`), which should redirect to the **Sign in to your account** Keycloak page. Enter the username and password for the user created above, then click **Sign in**.
 
-![Malcolm authentication via Keycloak](./images/screenshots/keycloak_24_final_login.png)
+![Malcolm authentication via Keycloak](./images/screenshots/keycloak_final_login.png)
 
-27. After successfully signing in, Keycloak redirects back to the Malcolm landing page. Additional users can now be added by navigating to Keycloak (by clicking the **👤 Keycloak Authentication** link) and repeating steps 11 and 12 for each new user to be added.
+29. After successfully signing in, Keycloak redirects back to the Malcolm landing page. Additional users can now be added by navigating to Keycloak (by clicking the **👤 Keycloak Authentication** link) and repeating steps 11 and 12 for each new user to be added.
 
-![Redirected to the Malcolm landing page](./images/screenshots/keycloak_25_post_login_landing.png)
+![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_login_landing.png)
+
+### <a name="AuthKeycloakGroupsAndRoles"></a>Requiring user groups and realm roles
+
+Full role-based fine-grained access controls will be implemented in a [future release](https://github.com/cisagov/Malcolm/issues/460) of Malcolm. In the meantime, Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
+
+For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
+
+Groups can be managed in Keycloak by selecting the appropriate realm from the drop down at the top of the navigation panel and selecting **Groups** under **Manage**.
+
+![Groups](./images/screenshots/keycloak_groups.png)
+
+Users can be joined to groups by clicking on a username on the Keycloak **Users** page, selecting the **Groups** tab, then clicking **Join Group**.
+
+![User group membership](./images/screenshots/keycloak_user_groups.png)
+
+Realm roles can be managed in Keycloak by selecting the appropriate realm from the drop down at the top of the navigation panel and selecting **Realm roles** under **Manage**.
+
+![Realm roles](./images/screenshots/keycloak_realm_roles.png)
+
+Users can be assigned realm roles by clicking on a username on the Keycloak **Users** page, selecting the **Role mapping** tab, then clicking **Assign role**. Select **Filter by realm roles**, then check the box next to the desired role(s), then click **Assign**, after which the **User role mapping successfully updated** confirmation will appear.
+
+![User realm role assignment](./images/screenshots/keycloak_user_realm_roles.png)
+
+Keycloak does not include group or realm role information in authentication tokens by default; clients must be configured to include this information in order for users to log in to Malcolm with group and/or role restrictions set. This can be done by navigating to the Keycloak **Clients** page, selecting the desired client, then clicking the **Client scopes** tab. Click on the name of the assigned client scope beginning with the client ID and ending in **-dedicated**, which will also have a description of "Dedicated scope and mappers for this client." Once on this **Clients** > **Client details** > **Dedicated scopes** screen, click the down arrow on the **Add mapper** button and select **By configuration**.
+
+To include group information in the Keycloak token for this client, select **Group Membership** from the **Configure a new mapper** list. The important information to provide for this Group Membership mapper before clicking **Save** is:
+
+* **Mapper type**: Group Membership
+* **Name**: *provide any name for this mapper*
+* **Token Claim Name**: `groups`
+* **Add to ID token**: On
+* **Add to access token**: On
+* **Add to token introspection**: On
+
+![Client group membership mapper](./images/screenshots/keycloak_client_group_membership_mapper.png)
+
+To include user realm role information in the Keycloak token for this client, once again click the down arrow on the **Add mapper** button and select **Byte configuration**. Select **User Realm Role** from the **Configure a new mapper** list. The important information to provide for this User Realm Role mapper before clicking **Save** is:
+
+* **Mapper type**: Group Membership
+* **Name**: *provide any name for this mapper*
+* **Multivalued**: On
+* **Token Claim Name**: `realm_access.roles`
+* **Claim JSON Type**: String
+* **Add to ID token**: On
+* **Add to access token**: On
+* **Add to token introspection**: On
+
+![Client realm role mapper](./images/screenshots/keycloak_client_user_realm_role_mapper.png)
+
+Once the mapper(s) have been created, the list of mappers on the **Clients** > **Client details** > **Dedicated scopes** page will look something like this:
+
+![Client dedicated scopes](./images/screenshots/keycloak_client_dedicated_scopes.png)
 
 ## <a name="TLSCerts"></a>TLS certificates
 
@@ -392,6 +457,10 @@ Authentication Setup:
                         Temporary Keycloak admin bootstrap username
   --auth-keycloak-bootstrap-password <string>
                         Temporary Keycloak admin bootstrap password
+  --auth-require-group <string>
+                        Required group(s) to which users must belong (--auth-method is keycloak|keycloak_remote)
+  --auth-require-role <string>
+                        Required role(s) which users must be assigned (--auth-method is keycloak|keycloak_remote)
 …
 ```
 
