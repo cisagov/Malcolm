@@ -175,7 +175,7 @@ def update_stats():
 
     if os.path.isdir(pcap_path):
         for filename in os.listdir(pcap_path):
-            if filename.endswith('.pcap'):
+            if any(filename.endswith(ext) for ext in ['.pcap', '.pcap.zst', '.pcap.gz']):
                 pcap_file_path = os.path.join(pcap_path, filename)
                 try:
                     mtime = os.path.getmtime(pcap_file_path)
