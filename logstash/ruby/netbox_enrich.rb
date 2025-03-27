@@ -508,7 +508,7 @@ def filter(
         # it can't have been "discovered" if it was already in the cache
         _result.delete(:discovered)
       else
-        _result[:discovered] = _result[:discovered].any? if _result[:discovered].is_a?(Array)
+        _result[:discovered] = _result[:discovered]&.any? if _result[:discovered].is_a?(Array)
         _result.delete(:discovered) unless _result[:discovered]
         _discovered_flag ||= _result.fetch(:discovered, false)
       end
