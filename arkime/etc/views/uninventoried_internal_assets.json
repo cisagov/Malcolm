@@ -1,6 +1,6 @@
 {
   "name": "Uninventoried Internal Assets",
-  "expression": "related.uninventoried:*",
+  "expression": "related.uninventoried == true",
   "roles": ["arkimeUser"],
   "users" : [ ]
 }
