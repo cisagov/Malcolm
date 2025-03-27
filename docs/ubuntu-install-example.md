@@ -57,40 +57,7 @@ Enter user account: user
 
 Add another non-root user to the "docker" group?: n
 
-fs.file-max increases allowed maximum for file handles
-fs.file-max= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-fs.inotify.max_user_watches increases allowed maximum for monitored files
-fs.inotify.max_user_watches= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-fs.inotify.max_queued_events increases queue size for monitored files
-fs.inotify.max_queued_events= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-fs.inotify.max_user_instances increases allowed maximum monitor file watchers
-fs.inotify.max_user_instances= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-vm.max_map_count increases allowed maximum for memory segments
-vm.max_map_count= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-net.core.somaxconn increases allowed maximum for socket connections
-net.core.somaxconn= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages
-vm.swappiness= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing
-vm.dirty_background_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything
-vm.dirty_ratio= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions
-net.ipv4.tcp_retries2= appears to be missing from /etc/sysctl.conf, append it? (Y / n): y
-
-/etc/security/limits.d/limits.conf increases the allowed maximums for file handles and memlocked segments
-/etc/security/limits.d/limits.conf does not exist, create it? (Y / n): y
-
-cgroup parameters appear to be missing from /etc/default/grub, set them? (Y / n): y
+Apply recommended system tweaks automatically without asking for confirmation? y
 ```
 
 If Malcolm is being installed from the downloaded release artifacts, the script will ask whether the user would like to extract the contents of the tarball and to specify the installation directory and Malcolm configuration will continue:

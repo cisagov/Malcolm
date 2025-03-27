@@ -10,6 +10,7 @@ on:
       - 'shared/bin/*'
       - '!shared/bin/capa-build.sh'
       - '!shared/bin/extracted_files_http_server.py'
+      - '!shared/bin/pcap_processor.py'
       - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/zeek*'
       - '!shared/bin/suricata*'

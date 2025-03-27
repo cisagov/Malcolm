@@ -14,6 +14,7 @@ on:
       - '!shared/bin/tx-rx-secure.sh'
       - '!shared/bin/os-disk-config.py'
       - '!shared/bin/extracted_files_http_server.py'
+      - '!shared/bin/pcap_processor.py'
       - '!shared/bin/web-ui-asset-download.sh'
       - '!shared/bin/preseed_late_user_config.sh'
       - '!shared/bin/configure-interfaces.py'
