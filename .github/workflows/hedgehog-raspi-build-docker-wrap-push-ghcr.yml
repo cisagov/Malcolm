@@ -140,4 +140,5 @@ jobs:
           context: ./hedgehog-raspi
           push: true
           provenance: false
+          platforms: ${{ matrix.platform }}
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/hedgehog-raspi:${{ steps.extract_branch.outputs.branch }}${{ steps.arch_tag_suffix.outputs.archtag }}
