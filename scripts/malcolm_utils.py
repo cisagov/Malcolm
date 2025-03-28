@@ -787,7 +787,7 @@ def count_lines_wc_batch(file_paths):
                 if (count := line.split(maxsplit=1)[0]) and (file := line.split(maxsplit=1)[1].strip()) != "total"
             ]
         except Exception as e:
-            print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
+            print(f"Error counting lines of {file_paths}: {e}", file=sys.stderr)
             return [(file_path, 0) for file_path in file_paths]
     else:
         return []
