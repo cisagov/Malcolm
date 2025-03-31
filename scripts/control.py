@@ -279,13 +279,14 @@ def checkEnvFilesAndValues():
                                             if not newlineAdded:
                                                 print('', file=destEnvFileHandle)
                                                 newlineAdded = True
-                                            if isinstance(sourceKey, dict):
-                                                if destVal := {
+                                            if isinstance(sourceKey, dict) and (
+                                                destVal := {
                                                     str(k): str(v) for k, v in sourceKey[sourceVarName].items()
-                                                }.get(str(sourceVars[sourceVarName]), None):
-                                                    print(f"{destKey}={destVal}", file=destEnvFileHandle)
+                                                }.get(str(sourceVars[sourceVarName]), None)
+                                            ):
+                                                print(f"{destKey}={destVal}", file=destEnvFileHandle)
                                             else:
-                                                print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
+                                                print(f"{destKey}={sourceVars[sourceVarName]}", file=destEnvFileHandle)
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:

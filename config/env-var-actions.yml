@@ -44,9 +44,11 @@ copied_environment_variables:
   redis:
     netbox:
       REDIS_HOST:
-        REDIS_HOST
+        REDIS_HOST:
+          "netbox-redis": redis
       REDIS_CACHE_HOST:
-        REDIS_CACHE_HOST
+        REDIS_CACHE_HOST:
+          "netbox-redis-cache": redis-cache
     netbox_secret:
       REDIS_PASSWORD:
         REDIS_PASSWORD
