@@ -236,16 +236,56 @@ def checkEnvFilesAndValues():
                                 with open(destEnvFileName, "a") as destEnvFileHandle:
                                     newlineAdded = False
                                     for destKey, sourceKey in keys.items():
-                                        # if a key exists in the source, but not in the dest, it needs to be written
-                                        if (sourceKey in sourceVars) and (destKey not in destVars):
+                                        sourceVarName = None
+                                        # in the yml, the variable could be defined like this:
+                                        #
+                                        # destfile:
+                                        #   sourcefile:
+                                        #     destvarname:
+                                        #       sourcevarname
+                                        #
+                                        # in which case the value of sourcefile.sourcevarname is added as
+                                        #   destfile.destvarname
+                                        #
+                                        # another option is this:
+                                        #
+                                        # destfile:
+                                        #   sourcefile:
+                                        #     destvarname:
+                                        #       sourcevarname:
+                                        #         "true": disabled
+                                        #         "false": local
+                                        #
+                                        # when this is the case (sourcevarname is a hash), the value of
+                                        #   sourcefile.sourcefilename is looked up in this hash, and
+                                        #   if it exists, that value is added as destfile.destfilename
+                                        if (
+                                            (
+                                                (isinstance(sourceKey, str) and (sourceVarName := sourceKey))
+                                                or (
+                                                    isinstance(sourceKey, dict)
+                                                    and (len(sourceKey) == 1)
+                                                    and (sourceVarName := next(iter(sourceKey)))
+                                                )
+                                            )
+                                            # if a key exists in the source, but not in the dest, it needs to be written
+                                            and (destKey not in destVars)
+                                            and sourceVarName in sourceVars
+                                        ):
                                             if args.debug:
                                                 eprint(
-                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceKey}"
+                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
                                                 )
                                             if not newlineAdded:
                                                 print('', file=destEnvFileHandle)
                                                 newlineAdded = True
-                                            print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
+                                            if isinstance(sourceKey, dict):
+                                                if destVal := {
+                                                    str(k): str(v) for k, v in sourceKey[sourceVarName].items()
+                                                }.get(str(sourceVars[sourceVarName]), None):
+                                                    print(f"{destKey}={destVal}", file=destEnvFileHandle)
+                                            else:
+                                                print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:
@@ -2403,7 +2443,7 @@ def authSetup():
                                 'netbox-secret.env': (
                                     'SECRET_KEY',
                                     'SUPERUSER_PASSWORD',
-                                    'SUPERUSER_API_TOKEN',
+                                    'NETBOX_TOKEN',
                                 ),
                             }
                         elif authItem[0] == 'keycloakdb':
@@ -2462,7 +2502,7 @@ def authSetup():
                                     EnvValue(
                                         True,
                                         'netbox-secret.env',
-                                        'SUPERUSER_API_TOKEN',
+                                        'NETBOX_TOKEN',
                                         ''.join(secrets.choice(pwAlphabet) for i in range(40)),
                                     ),
                                 ]

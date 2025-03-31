@@ -2320,12 +2320,14 @@ class Installer(object):
                 'NETBOX_DEFAULT_SITE',
                 netboxSiteName,
             ),
+            # TODO: mode
             # enable/disable netbox
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
+                'NETBOX_MODE',
+                # TODO: handle the different modes
+                'local' if netboxEnabled else 'disabled',
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(

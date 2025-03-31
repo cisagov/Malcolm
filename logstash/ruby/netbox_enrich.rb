@@ -119,8 +119,7 @@ def register(
   if _enabled_str.nil? && !_enabled_env.nil?
     _enabled_str = ENV[_enabled_env]
   end
-  @netbox_enabled = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_enabled_str.to_s.downcase) &&
-                    (not [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["NETBOX_DISABLED"].to_s.downcase))
+  @netbox_enabled = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_enabled_str.to_s.downcase)
 
   # source field containing lookup value
   @source = params["source"]
@@ -226,9 +225,27 @@ def register(
   @debug_timings = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_timings_str.to_s.downcase)
 
   # connection URL for netbox
-  @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
-  @netbox_url_suffix = "/netbox/api"
-  @netbox_url_base = @netbox_url.delete_suffix(@netbox_url_suffix)
+  _netbox_url_str = params["netbox_url"].to_s
+  _netbox_url_env = params["netbox_url_env"].to_s
+  if _netbox_url_str.empty? && !_netbox_url_env.empty?
+    _netbox_url_str = ENV[_netbox_url_env].to_s
+  end
+  if _netbox_url_str.empty?
+    _netbox_url_str = "http://netbox:8080/netbox/api"
+  end
+  _netbox_url_str = _netbox_url_str.delete_suffix("/")
+  @netbox_url = _netbox_url_str.end_with?('/api') ? _netbox_url_str : "#{_netbox_url_str}/api"
+
+  _netbox_uri_base_str = params["netbox_uri_base"].to_s
+  _netbox_uri_base_env = params["netbox_uri_base_env"].to_s
+  if _netbox_uri_base_str.empty? && !_netbox_uri_base_env.empty?
+    _netbox_uri_base_str = ENV[_netbox_uri_base_env].to_s
+  end
+  if _netbox_uri_base_str.empty? && @netbox_url == "http://netbox:8080/netbox/api"
+    _netbox_uri_base_str = "/netbox/api"
+  end
+  @netbox_uri_suffix = _netbox_uri_base_str.end_with?('/api') ? _netbox_uri_base_str : "#{_netbox_uri_base_str}/api"
+  @netbox_url_base = @netbox_url.delete_suffix(@netbox_uri_suffix)
 
   # connection token (either specified directly or read from ENV via netbox_token_env)
   @netbox_token = params["netbox_token"]
@@ -1424,7 +1441,7 @@ def netbox_lookup(
         # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
         # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
         # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb)
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
           # no results found, autopopulate enabled, private-space IP address...
@@ -1582,7 +1599,7 @@ def netbox_lookup(
 
             # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
             #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-            _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
+            _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb) if _device_written
 
           end # check _patched_device_data, _device_to_vm
 

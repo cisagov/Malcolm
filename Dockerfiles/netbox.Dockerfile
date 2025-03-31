@@ -25,10 +25,6 @@ ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 USER root
 
-ENV SUPERCRONIC_VERSION "0.2.33"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
-ENV SUPERCRONIC_CRONTAB "/etc/crontab"
-
 ENV NETBOX_INITIALIZERS_VERSION "v4.1.0"
 ENV NETBOX_TOPOLOGY_VERSION "4.1.0"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
@@ -42,7 +38,6 @@ ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
 
 ARG NETBOX_DEFAULT_SITE=Malcolm
-ARG NETBOX_CRON=true
 ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
 ARG NETBOX_CUSTOM_PLUGINS_PATH="/opt/netbox-custom-plugins"
 ARG NETBOX_CONFIG_PATH="/etc/netbox/config"
@@ -50,7 +45,6 @@ ARG NETBOX_CONFIG_PATH="/etc/netbox/config"
 ENV NETBOX_PATH /opt/netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH $NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
-ENV NETBOX_CRON $NETBOX_CRON
 ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 ENV NETBOX_CUSTOM_PLUGINS_PATH $NETBOX_CUSTOM_PLUGINS_PATH
 ENV NETBOX_CONFIG_PATH $NETBOX_CONFIG_PATH
@@ -95,9 +89,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       randomcolor && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
-      touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
     apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \

@@ -141,7 +141,7 @@ def main():
         '--url',
         dest='netboxUrl',
         type=str,
-        default='http://localhost:8080/netbox',
+        default=os.getenv('NETBOX_URL', 'http://localhost:8080/netbox'),
         required=False,
         help="NetBox Base URL",
     )
@@ -150,7 +150,7 @@ def main():
         '--token',
         dest='netboxToken',
         type=str,
-        default=os.getenv('SUPERUSER_API_TOKEN', None),
+        default=os.getenv('NETBOX_TOKEN', None),
         required=False,
         help="NetBox API Token",
     )
