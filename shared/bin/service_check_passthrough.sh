@@ -152,7 +152,7 @@ if [[ -n "$DISABLED" ]]; then
 
     if [[ "$FORMAT" == "json" ]]; then
         cat << EOF > index.html
-{ "error": { "code": 422, "message": "The local service $SERVICE has been disabled." } }
+{ "error": { "code": 501, "message": "The local service $SERVICE has been disabled." } }
 EOF
     else
         cat << EOF > index.html
