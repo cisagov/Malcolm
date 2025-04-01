@@ -499,9 +499,9 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     sed -i "s@MALCOLM_AUTH_TITLE_REPLACER@${AUTH_TITLE}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_DESC_REPLACER@${AUTH_DESC}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_URL_REPLACER@${AUTH_LINK}@g" "${HTML}" || true
-    sed -i "s@MALCOLM_NETBOX_URL_REPLACER@${NETBOX_TITLE}@g" "${HTML}" || true
-    sed -i "s@MALCOLM_NETBOX_TITLE_REPLACER@${NETBOX_DESC}@g" "${HTML}" || true
-    sed -i "s@MALCOLM_NETBOX_DESC_REPLACER@${NETBOX_LINK}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_TITLE_REPLACER@${NETBOX_TITLE}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_DESC_REPLACER@${NETBOX_DESC}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_URL_REPLACER@${NETBOX_LINK}@g" "${HTML}" || true
   done
 fi
 
