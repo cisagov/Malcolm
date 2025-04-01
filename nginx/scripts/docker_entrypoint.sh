@@ -478,6 +478,19 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     AUTH_DESC="Manage the <a href=\"/readme/docs/authsetup.html#AuthBasicAccountManagement\">local user accounts</a> maintained by Malcolm"
     AUTH_LINK="/auth/"
   fi
+  if [[ "${NETBOX_MODE:-local}" == "disabled" ]]; then
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="<a href=\"/readme/docs/asset-interaction-analysis.html\">NetBox</a> is disabled"
+    NETBOX_LINK="/readme/docs/asset-interaction-analysis.html"
+  elif [[ "${NETBOX_MODE:-local}" == "remote" ]]; then
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure"
+    NETBOX_LINK="${NETBOX_URL:-#}"
+  else
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure"
+    NETBOX_LINK="/netbox/"
+  fi
   for HTML in "$(dirname "$(realpath "${NGINX_LANDING_INDEX_HTML}")")"/*.html; do
     sed -i "s@MALCOLM_DASHBOARDS_NAME_REPLACER@${MALCOLM_DASHBOARDS_NAME}@g" "${HTML}" || true
     sed -i "s@MALCOLM_DASHBOARDS_URL_REPLACER@${MALCOLM_DASHBOARDS_URL}@g" "${HTML}" || true
@@ -486,6 +499,9 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     sed -i "s@MALCOLM_AUTH_TITLE_REPLACER@${AUTH_TITLE}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_DESC_REPLACER@${AUTH_DESC}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_URL_REPLACER@${AUTH_LINK}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_URL_REPLACER@${NETBOX_TITLE}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_TITLE_REPLACER@${NETBOX_DESC}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_DESC_REPLACER@${NETBOX_LINK}@g" "${HTML}" || true
   done
 fi
 
