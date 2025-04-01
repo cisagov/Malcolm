@@ -999,7 +999,10 @@ def ready():
             print(f"{type(e).__name__}: {str(e)} getting Logstash lumberjack listener status")
 
     try:
-        netboxStatus = requests.get(f'{netboxUrl}/plugins/netbox_healthcheck_plugin/healthcheck/?format=json').json()
+        netboxStatus = requests.get(
+            f'{netboxUrl}/plugins/netbox_healthcheck_plugin/healthcheck/?format=json',
+            verify=False,
+        ).json()
     except Exception as e:
         netboxStatus = {}
         if debugApi:
