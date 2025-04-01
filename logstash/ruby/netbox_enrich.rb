@@ -252,7 +252,7 @@ def register(
   _netbox_token_env = params["netbox_token_env"]
   if @netbox_token.nil? && !_netbox_token_env.nil?
     # could be something like "NETBOX_TOKEN;SUPERUSER_API_TOKEN", take first variable that evaluates
-    @netbox_token = _netbox_token_env.split(/[;,:\s]+/).map { |env| ENV[env] }.find { |val| val && !val.strip.empty? }
+    @netbox_token = _netbox_token_env.split(/[;,:\s]+/).map { |env| ENV[env].to_s }.find { |val| val && !val.strip.empty? }
   end
 
   # hash of hashes, where key = site ID and value = hash of lookup types (from @lookup_type),

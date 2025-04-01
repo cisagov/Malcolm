@@ -150,7 +150,7 @@ def main():
         '--token',
         dest='netboxToken',
         type=str,
-        default=os.getenv('NETBOX_TOKEN', os.getenv('SUPERUSER_API_TOKEN', None)),
+        default=None,
         required=False,
         help="NetBox API Token",
     )
@@ -301,6 +301,9 @@ def main():
     logging.debug("Arguments: {}".format(args))
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
+
+    if (not args.netboxToken) and (not (args.netboxToken := os.getenv('NETBOX_TOKEN', None))):
+        args.netboxToken = os.getenv('SUPERUSER_API_TOKEN', None)
 
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
     manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
