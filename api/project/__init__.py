@@ -572,9 +572,6 @@ def aggfields(fieldnames, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(current_request)
     idx = index_from_args(args)
     s = SearchClass(
@@ -686,9 +683,6 @@ def document():
     results
         array of the documents retrieved (up to 'limit')
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(request)
     s = SearchClass(
         using=databaseClient,
@@ -756,9 +750,6 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(request)
 
     templateName = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
@@ -892,8 +883,6 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
-    global databaseClient
-
     opensearchStats = requests.get(
         opensearchUrl,
         auth=opensearchReqHttpAuth,
@@ -949,8 +938,6 @@ def ready():
     zeek_extracted_file_monitor
         true or false, the ready status of the Zeek extracted file monitoring process
     """
-    global databaseClient
-
     try:
         arkimeResponse = requests.get(
             arkimeStatusUrl,
@@ -1181,10 +1168,6 @@ def ingest_stats():
         for that host, and "latest_ingest_age_seconds" is the age (in seconds) of the most recently
         ingested log
     """
-    global databaseClient
-    global SearchClass
-    global AggregationClass
-
     result = {}
     result['latest_ingest_age_seconds'] = 0
     try:
@@ -1324,8 +1307,6 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    global databaseClient
-
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)
