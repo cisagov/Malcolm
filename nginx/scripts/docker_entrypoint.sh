@@ -484,11 +484,11 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     NETBOX_LINK="/readme/docs/asset-interaction-analysis.html"
   elif [[ "${NETBOX_MODE:-local}" == "remote" ]]; then
     NETBOX_TITLE="NetBox"
-    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure</a>"
     NETBOX_LINK="${NETBOX_URL:-#}"
   else
     NETBOX_TITLE="NetBox"
-    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure</a>"
     NETBOX_LINK="/netbox/"
   fi
   for HTML in "$(dirname "$(realpath "${NGINX_LANDING_INDEX_HTML}")")"/*.html; do
