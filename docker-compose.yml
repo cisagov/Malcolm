@@ -1208,6 +1208,7 @@ services:
     - ./config/ssl.env
     - ./config/upload-common.env
     - ./config/dashboards.env
+    - ./config/netbox-common.env
     - ./config/opensearch.env
     environment:
       VIRTUAL_HOST: 'api.malcolm.local'
@@ -1289,6 +1290,7 @@ services:
     - ./config/opensearch.env
     - ./config/dashboards.env
     - ./config/keycloak.env
+    - ./config/netbox-common.env
     - ./config/auth-common.env
     - ./config/nginx.env
     depends_on:

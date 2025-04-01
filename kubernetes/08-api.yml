@@ -58,6 +58,8 @@ spec:
           - configMapRef:
               name: dashboards-env
           - configMapRef:
+              name: netbox-common-env
+          - configMapRef:
               name: opensearch-env
         env:
           - name: VIRTUAL_HOST
