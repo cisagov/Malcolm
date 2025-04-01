@@ -2444,7 +2444,7 @@ def authSetup():
                                 'netbox-secret.env': (
                                     'SECRET_KEY',
                                     'SUPERUSER_PASSWORD',
-                                    'NETBOX_TOKEN',
+                                    'SUPERUSER_API_TOKEN',
                                 ),
                             }
                         elif authItem[0] == 'keycloakdb':
@@ -2503,7 +2503,7 @@ def authSetup():
                                     EnvValue(
                                         True,
                                         'netbox-secret.env',
-                                        'NETBOX_TOKEN',
+                                        'SUPERUSER_API_TOKEN',
                                         ''.join(secrets.choice(pwAlphabet) for i in range(40)),
                                     ),
                                 ]

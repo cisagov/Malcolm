@@ -150,7 +150,7 @@ def main():
         '--token',
         dest='netboxToken',
         type=str,
-        default=os.getenv('NETBOX_TOKEN', None),
+        default=os.getenv('NETBOX_TOKEN', os.getenv('SUPERUSER_API_TOKEN', None)),
         required=False,
         help="NetBox API Token",
     )
