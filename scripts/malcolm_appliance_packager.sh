@@ -103,6 +103,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX/"
 
   cp $VERBOSE ./config/*.example "$DESTDIR/config/"
+  cp $VERBOSE ./config/*.yml "$DESTDIR/config/"
   cp $VERBOSE ./docker-compose.yml "$DESTDIR/docker-compose.yml"
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"

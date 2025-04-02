@@ -146,6 +146,7 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./install.py configure
   popd >/dev/null 2>&1
   cp ./config/*.example "$MALCOLM_DEST_DIR/config/"
+  cp ./config/*.yml "$MALCOLM_DEST_DIR/config/"
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
