@@ -302,9 +302,7 @@ def main():
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
-    if (not args.netboxToken) and (not (args.netboxToken := os.getenv('NETBOX_TOKEN', None))):
-        args.netboxToken = os.getenv('SUPERUSER_API_TOKEN', None)
-
+    args.netboxToken = args.netboxToken or os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN')
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
     manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
 
