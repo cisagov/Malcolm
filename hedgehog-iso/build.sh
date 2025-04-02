@@ -74,17 +74,23 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s@\(/etc/capture_storage_format\)@\1.crypt@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
   sed -i "s@\(/etc/capture_storage_format\)@\1.none@g" ./config/includes.binary/install/preseed_minimal.cfg
 
-  # create a hook for installing Python packages required by interface
-  if [ -f "$SCRIPT_PATH/interface/requirements.txt" ]; then
-    echo "#!/bin/sh" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    while read LINE; do
-      echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    done <"$SCRIPT_PATH/interface/requirements.txt"
-    echo "" >> ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
-    chmod +x ./config/hooks/normal/0168-pip-sensor-interface-installs.hook.chroot
+  # create hooks for installing Python packages
+  HOOK_COUNTER=168
+  for SUBDIR in interface config; do
+    if [ -f "$SCRIPT_PATH/$SUBDIR/requirements.txt" ]; then
+      echo "#!/bin/sh" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      echo "export LC_ALL=C.UTF-8" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      echo "PYTHONUNBUFFERED=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      while read LINE; do
+        echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      done <"$SCRIPT_PATH/$SUBDIR/requirements.txt"
+      echo "" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+      chmod +x ./config/hooks/normal/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+    fi
+    ((HOOK_COUNTER++))
   fi
 
   # make sure we install the firmwares, etc.

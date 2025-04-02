@@ -50,6 +50,7 @@ ENV NETBOX_CUSTOM_PLUGINS_PATH $NETBOX_CUSTOM_PLUGINS_PATH
 ENV NETBOX_CONFIG_PATH $NETBOX_CONFIG_PATH
 
 ADD netbox/patch/* /tmp/netbox-patches/
+ADD --chmod=644 netbox/requirements.txt /usr/local/src/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     mv /etc/apt/sources.list.d/unit.list /tmp/ && \
@@ -78,15 +79,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rsync \
       supervisor \
       tini && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
-      "git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}" \
-      "git+https://github.com/netbox-community/netbox-topology-views@v${NETBOX_TOPOLOGY_VERSION}" \
-      "git+https://github.com/netbox-community/netbox-healthcheck-plugin@v${NETBOX_HEALTHCHECK_VERSION}" \
-      psycopg2 \
-      pynetbox \
-      python-magic \
-      python-slugify \
-      randomcolor && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
@@ -106,12 +99,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mkdir -p ./repo && \
       curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
       rm -rf ./repo/device-types/WatchGuard && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
-      cryptography \
-      GitPython \
-      Jinja2 \
-      paramiko \
-      pillow && \
     mkdir -p "${NETBOX_PATH}/netbox/netbox" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq '.routes.main[0].action.share = "`/opt/netbox/netbox${uri.substring(7)}`"' | jq '.routes.main[0].match.uri = "/netbox/static/*"' | jq '.routes.status[0].match.uri = "/netbox/status/*"' > /etc/unit/nginx-unit-new.json && \
       mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \

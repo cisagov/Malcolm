@@ -114,10 +114,10 @@ function InstallPythonPackages {
         python3-requests+security
 
     $SUDO_CMD /usr/bin/python3 -m pip install $USERFLAG -U \
-        dateparser \
-        kubernetes \
-        python-dotenv \
-        pythondialog
+        dateparser==1.2.1 \
+        kubernetes==32.0.1 \
+        python-dotenv==1.1.0 \
+        pythondialog==3.5.3
 }
 
 ################################################################################

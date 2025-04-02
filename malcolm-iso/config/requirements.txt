@@ -1,0 +1,4 @@
+debinterface==3.5.0
+kubernetes==32.0.1
+python-dotenv==1.1.0
+ruamel.yaml==0.18.10

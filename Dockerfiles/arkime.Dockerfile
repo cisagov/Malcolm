@@ -92,6 +92,7 @@ ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
+ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
 RUN export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
@@ -149,7 +150,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
       curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
       chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog==6.0.0 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \

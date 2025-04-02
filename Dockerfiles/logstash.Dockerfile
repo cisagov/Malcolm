@@ -42,6 +42,8 @@ ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PI
 
 USER root
 
+ADD --chmod=644 logstash/requirements.txt /usr/local/src/
+
 RUN set -x && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -56,7 +58,7 @@ RUN set -x && \
         python3-requests \
         rsync \
         tini && \
-    pip3 install ipaddress supervisor manuf pyyaml && \
+    pip3 install -r /usr/local/src/requirements.txt && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
     echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
