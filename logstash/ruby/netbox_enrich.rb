@@ -225,26 +225,29 @@ def register(
   @debug_timings = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_timings_str.to_s.downcase)
 
   # connection URL for netbox
+  # url, e.g., "https://netbox.example.org" or "http://netbox:8080"
   _netbox_url_str = params["netbox_url"].to_s
   _netbox_url_env = params["netbox_url_env"].to_s
   if _netbox_url_str.empty? && !_netbox_url_env.empty?
     _netbox_url_str = ENV[_netbox_url_env].to_s
   end
   if _netbox_url_str.empty?
-    _netbox_url_str = "http://netbox:8080/netbox/api"
+    _netbox_url_str = "http://netbox:8080"
   end
   _netbox_url_str = _netbox_url_str.delete_suffix("/")
-  @netbox_url = _netbox_url_str.end_with?('/api') ? _netbox_url_str : "#{_netbox_url_str}/api"
 
+  # URI base path (e.g., "/netbox" or "")
   _netbox_uri_base_str = params["netbox_uri_base"].to_s
   _netbox_uri_base_env = params["netbox_uri_base_env"].to_s
   if _netbox_uri_base_str.empty? && !_netbox_uri_base_env.empty?
     _netbox_uri_base_str = ENV[_netbox_uri_base_env].to_s
   end
-  if _netbox_uri_base_str.empty? && @netbox_url == "http://netbox:8080/netbox/api"
-    _netbox_uri_base_str = "/netbox/api"
+  if _netbox_uri_base_str.empty? && _netbox_url_str == "http://netbox:8080"
+    _netbox_uri_base_str = "netbox"
   end
-  @netbox_uri_suffix = _netbox_uri_base_str.end_with?('/api') ? _netbox_uri_base_str : "#{_netbox_uri_base_str}/api"
+  _netbox_uri_base_str = _netbox_uri_base_str.delete_suffix("/").delete_prefix("/")
+  @netbox_uri_suffix = _netbox_uri_base_str.end_with?('/api') ? "/#{_netbox_uri_base_str}" : "/#{_netbox_uri_base_str}/api"
+  @netbox_url = _netbox_url_str.end_with?(@netbox_uri_suffix) ? _netbox_url_str : "#{_netbox_url_str}#{@netbox_uri_suffix}"
   @netbox_url_base = @netbox_url.delete_suffix(@netbox_uri_suffix)
 
   # connection token (either specified directly or read from ENV via netbox_token_env)
