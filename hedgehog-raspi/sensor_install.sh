@@ -449,7 +449,7 @@ install_hooks() {
         chmod +x ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
       fi
       ((HOOK_COUNTER++))
-    fi
+    done
 
     for file in ${hooks_dir}/*.hook.chroot; do
         /bin/bash "$file"

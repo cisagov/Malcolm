@@ -97,7 +97,7 @@ if [ -d "$WORKDIR" ]; then
       chmod +x ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
     fi
     ((HOOK_COUNTER++))
-  fi
+  done
 
   # make sure we install the firmwares, etc.
   for PKG in firmware-linux \
