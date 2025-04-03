@@ -102,6 +102,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/opensearch.env
+    - ./config/netbox-common.env
     - ./config/dashboards.env
     - ./config/dashboards-helper.env
     environment:

@@ -30,13 +30,11 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHM
     - `destination.device.role` (`/dcim/device-roles/`)
     - [`destination.device.service`](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) (`/ipam/services/`)
     - `destination.device.site` (`/dcim/sites/`)
-    - `destination.device.url` (`/dcim/devices/`)
     - `destination.device.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
     - `destination.segment.id` (`/ipam/prefixes/{id}`)
     - `destination.segment.name` (`/ipam/prefixes/{description}`)
     - `destination.segment.site` (`/dcim/sites/`)
     - `destination.segment.tenant` (`/tenancy/tenants/`)
-    - `destination.segment.url` (`/ipam/prefixes/`)
     - `destination.segment.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)

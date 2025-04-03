@@ -200,7 +200,6 @@ def register(
   #   true - store a hash of arrays *under* @target
   #             e.g., (@target is destination.segment) destination.segment.name => ["foobar"]
   #                                                    destination.segment.id => [123]
-  #                                                    destination.segment.url => ["whatever"]
   #                                                    destination.segment.foo => ["bar"]
   #                                                    etc.
   _verbose_str = params["verbose"]
@@ -690,7 +689,7 @@ def crush(
   elsif thing.is_a?(Hash)
     thing.each_with_object({}) do |(k,v), h|
       v = crush(v)
-      h[k] = v unless [nil, [], {}, "", "Unspecified", "unspecified"].include?(v)
+      h[k] = v unless ([nil, [], {}, "", "Unspecified", "unspecified"].include?(v) || (k == :url))
     end
   else
     thing

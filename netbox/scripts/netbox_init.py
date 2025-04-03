@@ -141,7 +141,7 @@ def main():
         '--url',
         dest='netboxUrl',
         type=str,
-        default=os.getenv('NETBOX_URL', 'http://localhost:8080/netbox'),
+        default=os.getenv('NETBOX_URL') or 'http://netbox:8080/netbox',
         required=False,
         help="NetBox Base URL",
     )
