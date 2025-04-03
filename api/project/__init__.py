@@ -1230,6 +1230,58 @@ def ingest_stats():
 
 
 @app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/netbox-sites",
+    methods=['GET'],
+)
+def netbox_sites():
+    """Query the NetBox API and return its sites
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    sites
+        A dict where the key is the netbox site ID and the value is a dict containing 'name', 'display', and 'slug'.
+        Example:
+            {
+                231: {"name": "Site1", "display": "Site One", "slug": "site1"},
+                232: {"name": "Site2", "display": "Site Two", "slug": "site2"},
+                ...
+            }
+
+    """
+    result = {}
+    try:
+        headers = {"Authorization": f"Token {netboxToken}"} if netboxToken else None
+        url = f'{netboxUrl}/api/dcim/sites/?format=json'
+        while url:
+            try:
+                response = requests.get(url, headers=headers, verify=False)
+                response.raise_for_status()
+            except Exception as e:
+                if debugApi:
+                    print(f"{type(e).__name__}: \"{str(e)}\" getting NetBox sites")
+                break
+            if response and (data := response.json()):
+                result.update(
+                    {
+                        site["id"]: {"name": site.get("name"), "display": site.get("display"), "slug": site.get("slug")}
+                        for site in data.get("results", [])
+                    }
+                )
+                url = data.get("next")
+            else:
+                break
+
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: \"{str(e)}\" getting NetBox sites")
+
+    return jsonify(result)
+
+
+@app.route(
     f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/ping", methods=['GET']
 )
 def ping():
