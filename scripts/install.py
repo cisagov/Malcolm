@@ -1856,12 +1856,43 @@ class Installer(object):
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.NetBox:
-                    # NetBox
-                    netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
-                        'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
-                        default=args.netboxEnabled,
-                        extraLabel=BACK_LABEL,
+                    netboxOptions = (
+                        ('disabled', 'disable NetBox'),
+                        ('local', 'Run and maintain an embedded NetBox instance'),
+                        ('remote', 'Use a remote NetBox instance'),
                     )
+                    loopBreaker = CountUntilException(MaxAskForValueCount)
+                    netboxMode = None
+                    netboxUrl = ''
+                    if malcolmProfile == PROFILE_MALCOLM:
+                        while netboxMode not in [x[0] for x in netboxOptions] and loopBreaker.increment():
+                            netboxMode = InstallerChooseOne(
+                                'Should Malcolm utilize NetBox, an infrastructure resource modeling tool?',
+                                choices=[
+                                    (
+                                        x[0],
+                                        x[1],
+                                        (
+                                            (not args.netboxMode and x[0] == netboxOptions[0])
+                                            or (x[0] == args.netboxMode)
+                                        ),
+                                    )
+                                    for x in netboxOptions
+                                ],
+                                extraLabel=BACK_LABEL,
+                            )
+                    else:
+                        netboxMode = 'disabled'
+                    netboxEnabled = bool(netboxMode and (netboxMode != 'disabled'))
+                    if netboxMode == 'remote':
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox URL')
+                        while (len(netboxUrl) <= 1) and loopBreaker.increment():
+                            netboxUrl = InstallerAskForString(
+                                'Enter NetBox connection URL (e.g., https://netbox.example.org)',
+                                default=args.netboxUrl,
+                                extraLabel=BACK_LABEL,
+                            )
+
                     netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
                         'Should Malcolm enrich network traffic using NetBox?',
                         default=args.netboxLogstashEnrich,
@@ -2320,14 +2351,19 @@ class Installer(object):
                 'NETBOX_DEFAULT_SITE',
                 netboxSiteName,
             ),
-            # TODO: mode
-            # enable/disable netbox
+            # netbox mode
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_MODE',
-                # TODO: handle the different modes
-                'local' if netboxEnabled else 'disabled',
+                netboxMode,
+            ),
+            # netbox mode
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_URL',
+                netboxUrl if (netboxMode == 'remote') else '',
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
@@ -4780,13 +4816,21 @@ def main():
     netboxArgGroup = parser.add_argument_group('NetBox options')
     netboxArgGroup.add_argument(
         '--netbox',
-        dest='netboxEnabled',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Run and maintain an instance of NetBox",
+        dest='netboxMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='disabled',
+        help='NetBox mode (disabled, local, remote)',
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-url',
+        dest='netboxUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='NetBox URL (used only if NetBox mode is \"remote\")',
     )
     netboxArgGroup.add_argument(
         '--netbox-enrich',
