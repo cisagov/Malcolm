@@ -9,6 +9,7 @@ require 'ipaddr'
 require 'json'
 require 'lru_reredux'
 require 'psych'
+require 'uri'
 require 'stringex_lite'
 
 ##############################################################################################
@@ -226,29 +227,22 @@ def register(
 
   # connection URL for netbox
   # url, e.g., "https://netbox.example.org" or "http://netbox:8080"
-  _netbox_url_str = params["netbox_url"].to_s
+  _netbox_url_str = params["netbox_url"].to_s.delete_suffix("/")
   _netbox_url_env = params["netbox_url_env"].to_s
   if _netbox_url_str.empty? && !_netbox_url_env.empty?
-    _netbox_url_str = ENV[_netbox_url_env].to_s
+    _netbox_url_str = ENV[_netbox_url_env].to_s.delete_suffix("/")
   end
   if _netbox_url_str.empty?
-    _netbox_url_str = "http://netbox:8080"
+    _netbox_url_str = "http://netbox:8080/netbox/api"
   end
-  _netbox_url_str = _netbox_url_str.delete_suffix("/")
-
-  # URI base path (e.g., "/netbox" or "")
-  _netbox_uri_base_str = params["netbox_uri_base"].to_s
-  _netbox_uri_base_env = params["netbox_uri_base_env"].to_s
-  if _netbox_uri_base_str.empty? && !_netbox_uri_base_env.empty?
-    _netbox_uri_base_str = ENV[_netbox_uri_base_env].to_s
-  end
-  if _netbox_uri_base_str.empty? && _netbox_url_str == "http://netbox:8080"
-    _netbox_uri_base_str = "netbox"
-  end
-  _netbox_uri_base_str = _netbox_uri_base_str.delete_suffix("/").delete_prefix("/")
-  @netbox_uri_suffix = _netbox_uri_base_str.end_with?('/api') ? "/#{_netbox_uri_base_str}" : "/#{_netbox_uri_base_str}/api"
-  @netbox_url = _netbox_url_str.end_with?(@netbox_uri_suffix) ? _netbox_url_str : "#{_netbox_url_str}#{@netbox_uri_suffix}"
-  @netbox_url_base = @netbox_url.delete_suffix(@netbox_uri_suffix)
+  _netbox_url_obj = URI.parse(_netbox_url_str.end_with?('/api') ? _netbox_url_str : "#{_netbox_url_str}/api")
+  @netbox_url = (_netbox_url_obj.port == _netbox_url_obj.default_port) ?
+                  "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}#{_netbox_url_obj.path}" :
+                  "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}:#{_netbox_url_obj.port}#{_netbox_url_obj.path}"
+  @netbox_url_base = (_netbox_url_obj.port == _netbox_url_obj.default_port) ?
+                       "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}" :
+                       "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}:#{_netbox_url_obj.port}"
+  @netbox_uri_suffix = _netbox_url_obj.path
 
   # connection token (either specified directly or read from ENV via netbox_token_env)
   @netbox_token = params["netbox_token"]

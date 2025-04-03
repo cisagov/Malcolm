@@ -33,6 +33,14 @@ NGINX_KEYCLOAK_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_keycloak_location.conf
 NGINX_KEYCLOAK_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_keycloak_upstream_rt.conf
 NGINX_KEYCLOAK_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_keycloak_upstream.conf
 
+# "include" file for /netbox endpoint location
+NGINX_NETBOX_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_netbox_location_rt.conf
+NGINX_NETBOX_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_netbox_location.conf
+
+# "include" file for embedded netbox upstream
+NGINX_NETBOX_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_netbox_upstream_rt.conf
+NGINX_NETBOX_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_netbox_upstream.conf
+
 # "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_basic.conf
 NGINX_AUTH_BASIC_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_auth_basic_location.conf
@@ -160,6 +168,16 @@ else
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
   ln -sf "$NGINX_OPENSEARCH_API_501_CONF" "$NGINX_OPENSEARCH_API_LINK"
+fi
+
+if [[ "${NETBOX_MODE:-local}" == "local" ]]; then
+  # /netbox location points to embedded netbox container
+  ln -sf "$NGINX_NETBOX_LOCATION_CONF" "$NGINX_NETBOX_LOCATION_LINK"
+  ln -sf "$NGINX_NETBOX_UPSTREAM_CONF" "$NGINX_NETBOX_UPSTREAM_LINK"
+else
+  # /netbox location isn't used
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_NETBOX_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_NETBOX_UPSTREAM_LINK"
 fi
 
 # NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication

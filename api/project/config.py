@@ -30,8 +30,7 @@ class Config(object):
     MALCOLM_API_PREFIX = f"{os.getenv('MALCOLM_API_PREFIX', 'mapi')}"
     MALCOLM_TEMPLATE = f"{os.getenv('MALCOLM_TEMPLATE', 'malcolm_template')}"
     MALCOLM_VERSION = f"{os.getenv('MALCOLM_VERSION', 'unknown')}"
-    NETBOX_URL = f"{os.getenv('NETBOX_URL', 'http://netbox:8080')}"
-    NETBOX_URI_BASE = f"{os.getenv('NETBOX_URI_BASE', '/netbox')}"
+    NETBOX_URL = f"{os.getenv('NETBOX_URL', 'http://netbox:8080/netbox')}"
     NETBOX_TOKEN = f"{os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN', '')}"
     OPENSEARCH_CREDS_CONFIG_FILE = (
         f"{os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc')}"
