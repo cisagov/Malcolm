@@ -17,8 +17,7 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
-from urllib.parse import urlparse
-
+from urllib.parse import urlparse, urljoin
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -195,7 +194,8 @@ logstashHost = app.config["LOGSTASH_HOST"]
 logstashLJPort = app.config["LOGSTASH_LJ_PORT"]
 logstashMapsPort = app.config["LOGSTASH_LJ_PORT"]
 logstashUrl = f'http://{logstashHost}:{logstashApiPort}'
-netboxUrl = app.config["NETBOX_URL"]
+netboxUrl = urljoin(app.config["NETBOX_URL"], app.config["NETBOX_URI_BASE"])
+netboxToken = app.config["NETBOX_TOKEN"]
 opensearchUrl = app.config["OPENSEARCH_URL"]
 pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
 pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
@@ -1000,7 +1000,8 @@ def ready():
 
     try:
         netboxStatus = requests.get(
-            f'{netboxUrl}/plugins/netbox_healthcheck_plugin/healthcheck/?format=json',
+            f'{netboxUrl}/api/status/?format=json',
+            headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
             verify=False,
         ).json()
     except Exception as e:
@@ -1049,11 +1050,7 @@ def ready():
         logstash_lumberjack=logstashLJStatus,
         logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"], "red") != "red")
         and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"], "red") != "red"),
-        netbox=bool(
-            isinstance(netboxStatus, dict)
-            and netboxStatus
-            and all(value == "working" for value in netboxStatus.values())
-        ),
+        netbox=bool(isinstance(netboxStatus, dict) and netboxStatus.get('netbox-version')),
         opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,

@@ -59,6 +59,8 @@ spec:
               name: dashboards-env
           - configMapRef:
               name: netbox-common-env
+          - secretRef:
+              name: netbox-secret-env
           - configMapRef:
               name: opensearch-env
         env:

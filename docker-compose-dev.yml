@@ -1347,6 +1347,7 @@ services:
     - ./config/upload-common.env
     - ./config/dashboards.env
     - ./config/netbox-common.env
+    - ./config/netbox-secret.env
     - ./config/opensearch.env
     environment:
       VIRTUAL_HOST: 'api.malcolm.local'
