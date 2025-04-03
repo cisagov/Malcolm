@@ -31,15 +31,17 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     $ cp ./packer_vars.json.example ./packer_vars.json
     ```
 1. Edit `packer_vars.json` 
-    * set `aws_access_key`, `aws_secret_key`, `vpc_region`, `instance_arch`, and other variables as needed
+    * set `vpc_region`, `instance_arch`, and other variables as needed
 1. Validate the packer configuration
     ```bash
     $ packer validate packer_build.json
     The configuration is valid.
     ```
-1. Launch packer to build the AMI
+1. Launch packer to build the AMI, providing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as environment variables:
     ```bash
-    $ packer build -var-file=packer_vars.json packer_build.json
+    $ AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY \
+        AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY \
+        packer build -var-file=packer_vars.json packer_build.json
 
     amazon-ebs: output will be in this color.
 
