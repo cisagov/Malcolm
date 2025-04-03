@@ -2378,7 +2378,7 @@ class Installer(object):
                 True,
                 os.path.join(args.configDir, 'netbox-secret.env'),
                 'NETBOX_TOKEN',
-                netboxToken if (netboxToken == 'remote') else '',
+                netboxToken if (netboxMode == 'remote') else '',
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
