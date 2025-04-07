@@ -84,6 +84,9 @@ Although the configuration script automates many of the following configuration 
     - `NETBOX_AUTO_CREATE_PREFIX` - if set to `true`, Logstash will automatically create private subnet prefixes in the [NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic
     - `NETBOX_DEFAULT_AUTOCREATE_MANUFACTURER` - if set to `true`, new manufacturer entries will be created in the NetBox database when [matching device manufacturers to OUIs](asset-interaction-analysis.md#NetBoxPopPassiveOUIMatch) (default `true`)
     - `NETBOX_DEFAULT_FUZZY_THRESHOLD` - fuzzy-matching threshold for [matching device manufacturers to OUIs](asset-interaction-analysis.md#NetBoxPopPassiveOUIMatch) (default `0.95`)
+    - The following variables should only be set if `NETBOX_MODE` is set to `remote`, otherwise they should be blank:
+        + `NETBOX_URL` - the URL of the remote NetBox instance (e.g., `https://netbox.example.org` or `https://example.com/netbox`)
+        + `NETBOX_TOKEN` - the [API token](https://netboxlabs.com/docs/netbox/en/stable/integrations/rest-api/#tokens) for the remote NetBox instance (40 hexadecimal characters)
 * **`nginx.env`** - settings specific to Malcolm's nginx reverse proxy
     - `NGINX_LOG_ACCESS_AND_ERRORS` - if set to `true`, all access to Malcolm via its [web interfaces](quickstart.md#UserInterfaceURLs) will be logged to OpenSearch (default `false`)
     - `NGINX_SSL` - if set to `true`, require HTTPS connections to Malcolm's `nginx-proxy` container (default); if set to `false`, use unencrypted HTTP connections (using unsecured HTTP connections is **NOT** recommended unless you are running Malcolm behind another reverse proxy such as Traefik, Caddy, etc.)

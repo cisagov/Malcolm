@@ -283,8 +283,8 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`7 days ago`).
     - **`Intel::item_expiration` timeout for intelligence items (`-1min` to disable)**
         + Specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration).
-* **Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?**
-    - Answer **Y** to enable [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets.
+* **Should Malcolm utilize NetBox, an infrastructure resource modeling tool?**
+    - Specifies whether Malcolm will use [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets; options are `local` (use an embedded instance NetBox maintained by Malcolm), `remote` (use a remote instance of NetBox), or `disabled` (do not use NetBox).
 * **Should Malcolm enrich network traffic using NetBox?**
     - Answer **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs against the NetBox asset inventory.
 * **Should Malcolm automatically populate NetBox inventory based on observed network traffic?**

@@ -547,7 +547,7 @@ function InstallMalcolm {
           --extracted-file-capa \
           --extracted-file-clamav \
           --extracted-file-yara \
-          --netbox \
+          --netbox local \
           --netbox-enrich \
           --netbox-autopopulate \
           --netbox-auto-prefixes \

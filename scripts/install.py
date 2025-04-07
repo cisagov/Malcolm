@@ -1864,7 +1864,6 @@ class Installer(object):
                     loopBreaker = CountUntilException(MaxAskForValueCount)
                     netboxMode = None
                     netboxUrl = ''
-                    netboxToken = ''
                     if malcolmProfile == PROFILE_MALCOLM:
                         while netboxMode not in [x[0] for x in netboxOptions] and loopBreaker.increment():
                             netboxMode = InstallerChooseOne(
@@ -1893,13 +1892,9 @@ class Installer(object):
                                 default=args.netboxUrl,
                                 extraLabel=BACK_LABEL,
                             )
-                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox API token')
-                        while (len(netboxToken) <= 1) and loopBreaker.increment():
-                            netboxToken = InstallerAskForString(
-                                'Enter NetBox API token',
-                                default=args.netboxToken,
-                                extraLabel=BACK_LABEL,
-                            )
+                        InstallerDisplayMessage(
+                            f'You must run auth_setup after {ScriptName} to store NetBox API token.',
+                        )
 
                     netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
                         'Should Malcolm enrich network traffic using NetBox?',
@@ -2372,13 +2367,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_URL',
                 netboxUrl if (netboxMode == 'remote') else '',
-            ),
-            # remote netbox API token
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'netbox-secret.env'),
-                'NETBOX_TOKEN',
-                netboxToken if (netboxMode == 'remote') else '',
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
@@ -4846,15 +4834,6 @@ def main():
         type=str,
         default='',
         help='NetBox URL (used only if NetBox mode is \"remote\")',
-    )
-    netboxArgGroup.add_argument(
-        '--netbox-token',
-        dest='netboxToken',
-        required=False,
-        metavar='<string>',
-        type=str,
-        default='',
-        help='NetBox API token (used only if NetBox mode is \"remote\")',
     )
     netboxArgGroup.add_argument(
         '--netbox-enrich',

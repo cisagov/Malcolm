@@ -65,7 +65,7 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
         --extracted-file-capa \
         --extracted-file-clamav \
         --extracted-file-yara \
-        --netbox \
+        --netbox local \
         --netbox-enrich \
         --netbox-site-name malcolm \
         --runtime docker

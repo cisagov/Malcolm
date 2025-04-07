@@ -429,7 +429,10 @@ Download updated file scanner signatures periodically? (y / N): y
 
 Configure pulling from threat intelligence feeds for Zeek intelligence framework? (y / N): n
 
-Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): y
+1: disabled - disable NetBox
+2: local - Run and maintain an embedded NetBox instance
+3: remote - Use a remote NetBox instance
+Should Malcolm utilize NetBox, an infrastructure resource modeling tool? (disabled): 2
 
 Should Malcolm enrich network traffic using NetBox? (Y / n): y
 

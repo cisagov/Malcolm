@@ -1490,7 +1490,9 @@ def authSetup():
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else None
 
+    netboxCommonEnvFile = os.path.join(args.configDir, 'netbox-common.env')
     authCommonEnvFile = os.path.join(args.configDir, 'auth-common.env')
+
     if args.authMode:
         nginxAuthMode = str(args.authMode).lower()
     else:
@@ -1499,6 +1501,9 @@ def authSetup():
             nginxAuthMode = (
                 dotenvImported.dotenv_values(authCommonEnvFile).get('NGINX_AUTH_MODE', nginxAuthMode).lower()
             )
+    netboxMode = None
+    if os.path.isfile(netboxCommonEnvFile):
+        netboxMode = dotenvImported.dotenv_values(netboxCommonEnvFile).get('NETBOX_MODE', '').lower()
 
     # don't make them go through every thing every time, give them a choice instead
     # 0 - key
@@ -1507,132 +1512,143 @@ def authSetup():
     # 3 - option default (yes/no) for if they're doing "all""
     # 4 - ? (lol, doesn't seem to be used in this script, probably just there
     #          as it's used in other scripts where ChooseOne/ChooseMultiple is used)
-    authConfigChoices = (
-        (
-            'all',
-            "Configure all authentication-related settings",
-            True,
-            True,
-            [],
-        ),
-        (
-            'method',
-            f"Select authentication method (currently \"{nginxAuthMode}\")",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
-            [],
-        ),
-        (
-            'admin',
-            "Store administrator username/password for basic HTTP authentication",
-            False,
-            (not args.cmdAuthSetupNonInteractive)
-            or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
-            [],
-        ),
-        (
-            'webcerts',
-            "(Re)generate self-signed certificates for HTTPS access",
-            False,
-            not args.cmdAuthSetupNonInteractive
-            or (
-                args.authGenWebCerts
-                or not os.path.isfile(
-                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
-                )
+    authConfigChoices = [
+        x
+        for x in [
+            (
+                'all',
+                "Configure all authentication-related settings",
+                True,
+                True,
+                [],
             ),
-            [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
-        ),
-        (
-            'fwcerts',
-            "(Re)generate self-signed certificates for a remote log forwarder",
-            False,
-            not args.cmdAuthSetupNonInteractive
-            or (
-                args.authGenFwCerts
-                or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
-                or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
+            (
+                'method',
+                f"Select authentication method (currently \"{nginxAuthMode}\")",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
+                [],
             ),
-            [
-                os.path.join(logstashPath, 'server.key'),
-                os.path.join(filebeatPath, 'client.key'),
-            ],
-        ),
-        (
-            'keycloak',
-            "Configure Keycloak",
-            False,
-            bool(
-                str(nginxAuthMode).startswith('keycloak')
-                or args.authKeycloakRealm
-                or args.authKeycloakRedirectUri
-                or args.authKeycloakUrl
-                or args.authKeycloakClientId
-                or args.authKeycloakClientSecret
-                or args.authKeycloakBootstrapUser
-                or args.authKeycloakBootstrapPassword
-                or args.authRequireGroup
-                or args.authRequireRole
+            (
+                'admin',
+                "Store administrator username/password for basic HTTP authentication",
+                False,
+                (not args.cmdAuthSetupNonInteractive)
+                or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
+                [],
             ),
-            [],
-        ),
-        (
-            'remoteos',
-            "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
-            False,
-            False,
-            [],
-        ),
-        (
-            'email',
-            "Store username/password for OpenSearch Alerting email sender account",
-            False,
-            False,
-            [],
-        ),
-        (
-            'netbox',
-            "(Re)generate internal passwords for NetBox",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
-            [],
-        ),
-        (
-            'keycloakdb',
-            "(Re)generate internal passwords for Keycloak's PostgreSQL database",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
-            [],
-        ),
-        (
-            'postgres',
-            "(Re)generate internal superuser passwords for PostgreSQL",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
-            [],
-        ),
-        (
-            'redis',
-            "(Re)generate internal passwords for Redis",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
-            [],
-        ),
-        (
-            'arkime',
-            "Store password hash secret for Arkime viewer cluster",
-            False,
-            False,
-            [],
-        ),
-        (
-            'txfwcerts',
-            "Transfer self-signed client certificates to a remote log forwarder",
-            False,
-            False,
-            [],
-        ),
-    )[: 14 if txRxScript else -1]
+            (
+                'webcerts',
+                "(Re)generate self-signed certificates for HTTPS access",
+                False,
+                not args.cmdAuthSetupNonInteractive
+                or (
+                    args.authGenWebCerts
+                    or not os.path.isfile(
+                        os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
+                    )
+                ),
+                [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
+            ),
+            (
+                'fwcerts',
+                "(Re)generate self-signed certificates for a remote log forwarder",
+                False,
+                not args.cmdAuthSetupNonInteractive
+                or (
+                    args.authGenFwCerts
+                    or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
+                    or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
+                ),
+                [
+                    os.path.join(logstashPath, 'server.key'),
+                    os.path.join(filebeatPath, 'client.key'),
+                ],
+            ),
+            (
+                'keycloak',
+                "Configure Keycloak",
+                False,
+                bool(
+                    str(nginxAuthMode).startswith('keycloak')
+                    or args.authKeycloakRealm
+                    or args.authKeycloakRedirectUri
+                    or args.authKeycloakUrl
+                    or args.authKeycloakClientId
+                    or args.authKeycloakClientSecret
+                    or args.authKeycloakBootstrapUser
+                    or args.authKeycloakBootstrapPassword
+                    or args.authRequireGroup
+                    or args.authRequireRole
+                ),
+                [],
+            ),
+            (
+                'remoteos',
+                "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
+                False,
+                False,
+                [],
+            ),
+            (
+                'email',
+                "Store username/password for OpenSearch Alerting email sender account",
+                False,
+                False,
+                [],
+            ),
+            (
+                'netbox',
+                "(Re)generate internal passwords for NetBox",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
+                [],
+            ),
+            (
+                'netbox-remote-token' if (netboxMode == 'remote') else None,
+                "Store API token for remote NetBox instance",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or (bool(args.authNetBoxRemoteToken)),
+                [],
+            ),
+            (
+                'keycloakdb',
+                "(Re)generate internal passwords for Keycloak's PostgreSQL database",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
+                [],
+            ),
+            (
+                'postgres',
+                "(Re)generate internal superuser passwords for PostgreSQL",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
+                [],
+            ),
+            (
+                'redis',
+                "(Re)generate internal passwords for Redis",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
+                [],
+            ),
+            (
+                'arkime',
+                "Store password hash secret for Arkime viewer cluster",
+                False,
+                False,
+                [],
+            ),
+            (
+                'txfwcerts' if txRxScript else None,
+                "Transfer self-signed client certificates to a remote log forwarder",
+                False,
+                False,
+                [],
+            ),
+        ]
+        if x[0]
+    ]
 
     authConfigChoice = (
         ChooseOne(
@@ -2537,6 +2553,39 @@ def authSetup():
                                 defaultBehavior=defaultBehavior,
                             )
 
+                elif (authItem[0] == 'netbox-remote-token') and (netboxMode == 'remote'):
+                    # prompt Token
+                    netboxToken = ''
+
+                    netboxSecretFile = os.path.join(args.configDir, 'netbox-secret.env')
+                    prevNetboxToken = None
+                    if os.path.isfile(netboxSecretFile):
+                        prevNetboxToken = dotenvImported.dotenv_values(netboxSecretFile).get('NETBOX_TOKEN', '')
+
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox API token')
+                    while loopBreaker.increment():
+                        netboxToken = AskForString(
+                            f"Remote NetBox instance API token (40 characters): ",
+                            default=args.authNetBoxRemoteToken or prevNetboxToken,
+                            defaultBehavior=defaultBehavior,
+                        ).lower()
+                        if (len(netboxToken) == 40) and all(c in string.hexdigits for c in netboxToken):
+                            break
+                        eprint("Invalid NetBox API token")
+
+                    with pushd(args.configDir):
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    'netbox-secret.env',
+                                    'NETBOX_TOKEN',
+                                    netboxToken,
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR,
+                        )
+
                 elif authItem[0] == 'redis':
                     with pushd(args.configDir):
                         UpdateEnvFiles(
@@ -2887,6 +2936,15 @@ def main():
         const=True,
         default=False,
         help="(Re)generate self-signed certificates for a remote log forwarder",
+    )
+    authSetupGroup.add_argument(
+        '--auth-netbox-token',
+        dest='authNetBoxRemoteToken',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='API token for remote NetBox instance (for --auth-noninteractive when NETBOX_MODE=remote in netbox-common.env)',
     )
     authSetupGroup.add_argument(
         '--auth-generate-netbox-passwords',
