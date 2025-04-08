@@ -9,6 +9,12 @@ spec:
     - port: 3310
       protocol: TCP
       name: clamav
+    - port: 5987
+      protocol: TCP
+      name: filetopic
+    - port: 5988
+      protocol: TCP
+      name: loggertopic
     - port: 8440
       protocol: TCP
       name: http
@@ -40,6 +46,12 @@ spec:
         ports:
           - name: clamav
             containerPort: 3310
+            protocol: TCP
+          - name: filetopic
+            containerPort: 5987
+            protocol: TCP
+          - name: loggertopic
+            containerPort: 5988
             protocol: TCP
           - name: http
             protocol: TCP
