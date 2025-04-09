@@ -412,6 +412,20 @@ def register(
      $method_timings_logging_thread = Thread.new { log_method_timings_thread_proc }
      $method_timings_logging_thread_running = true
    end
+
+  # make sure required tags exist before starting up
+  _tmp_nb_conn = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
+  [
+    [{ 'name' => 'Autopopulated', 'slug' => 'malcolm-autopopulated', 'color' => 'add8e6' }],
+    [{ 'name' => 'Manufacturer Unknown', 'slug' => 'manufacturer-unknown', 'color' => 'd3d3d3' }],
+    [{ 'name' => 'Hostname Unknown', 'slug' => 'hostname-unknown', 'color' => 'd3d3d3'}]
+  ].each do |item|
+    begin
+      _tmp_response = _tmp_nb_conn.post('extras/tags/', item.to_json, @nb_headers)
+    rescue Faraday::Error => e
+      # Do nothing (ignore errors)
+    end
+  end
 end
 
 ##############################################################################################
