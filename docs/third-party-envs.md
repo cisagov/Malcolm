@@ -170,7 +170,7 @@ Apply recommended system tweaks automatically without asking for confirmation? y
 ```
 
 * `install.py`: Malcolm configuration
-    - Users should answer the remaining (malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
+    - Users should answer the remaining [configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
 
 * Pull Malcolm container images
     - Answer **Yes** when prompted to **Pull Malcolm images?**
