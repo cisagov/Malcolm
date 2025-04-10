@@ -1209,6 +1209,7 @@ services:
     - ./config/ssl.env
     - ./config/upload-common.env
     - ./config/dashboards.env
+    - ./config/arkime.env
     - ./config/netbox-common.env
     - ./config/netbox-secret.env
     - ./config/opensearch.env
@@ -1291,6 +1292,7 @@ services:
     - ./config/ssl.env
     - ./config/opensearch.env
     - ./config/dashboards.env
+    - ./config/arkime.env
     - ./config/keycloak.env
     - ./config/netbox-common.env
     - ./config/auth-common.env

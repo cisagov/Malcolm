@@ -179,9 +179,10 @@ app.config.from_object("project.config.Config")
 
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
+arkimeSsl = malcolm_utils.str2bool(app.config["ARKIME_SSL"])
 arkimeHost = app.config["ARKIME_HOST"]
 arkimePort = app.config["ARKIME_PORT"]
-arkimeStatusUrl = f'https://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
+arkimeStatusUrl = f'http{"s" if arkimeSsl else ""}://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
 dashboardsUrl = app.config["DASHBOARDS_URL"]
 dashboardsHelperHost = app.config["DASHBOARDS_HELPER_HOST"]
 dashboardsMapsPort = app.config["DASHBOARDS_MAPS_PORT"]
