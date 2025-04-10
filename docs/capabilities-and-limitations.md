@@ -89,7 +89,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
     - Hardware
         + Malcolm
             * Minimum system requirements
-                - 16 gigabytes RAM
+                - 24 gigabytes RAM
                 - 8 CPU cores (amd64 and arm64 supported)
                 - As much storage (preferably solid-state or RAID) as necessary to meet data retention requirements
             * Recommended system requirements
