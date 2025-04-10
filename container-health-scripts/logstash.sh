@@ -30,7 +30,7 @@ if [[ $STRICT == 1 ]]; then
     )
     [[ "$JQ_EVAL" == "true" ]] && exit 0 && exit 1
 else
-    curl --fail --silent -XGET http://localhost:9600/_health_report
+    curl --fail --silent --output /dev/null -XGET http://localhost:9600/_health_report
 fi
 
 
