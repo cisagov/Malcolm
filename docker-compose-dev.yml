@@ -291,7 +291,7 @@ services:
       target: /usr/share/logstash/malcolm-ruby
       read_only: true
     healthcheck:
-      test: ["CMD", "/usr/local/bin/container_health.sh"]
+      test: ["CMD", "/usr/local/bin/container_health.sh", "-s"]
       interval: 30s
       timeout: 15s
       retries: 3
