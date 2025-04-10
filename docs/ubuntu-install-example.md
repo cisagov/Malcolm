@@ -8,13 +8,13 @@ The commands in this example should be executed as a non-root user except where 
 
 Malcolm can be installed from a git [working copy of the source code](development.md#Build) or the from [pre-packaged installation files](development.md#Packager) downloaded as artifacts from the [latest Malcolm release]({{ site.github.repository_url }}/releases/latest). The instructions for both methods are mostly the same, so both will shown here while indicating where the processes differ.
 
-To install Malcolm from the latest Malcolm release artifacts, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases/latest) and download the `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_docker_install.zip` file, then navigate to the downloads directory and extract it. If your distribution does not have the `unzip` utility, you may need to install it with `sudo apt install unzip`.
+To install Malcolm from the latest Malcolm release artifacts, browse to the [Malcolm releases page on GitHub]({{ site.github.repository_url }}/releases/latest) and download the `malcolm-{{ site.malcolm.version }}-docker_install.zip` file, then navigate to the downloads directory and extract it. If your distribution does not have the `unzip` utility, you may need to install it with `sudo apt install unzip`.
 ```
 user@host:~$ cd Downloads/
 user@host:~/Downloads$ ls
-malcolm_20250117_115650_d1867453_docker_install.zip
-user@host:~/Downloads$ unzip malcolm_20250117_115650_d1867453_docker_install.zip
-Archive:  malcolm_20250117_115650_d1867453_docker_install.zip
+malcolm-{{ site.malcolm.version }}-docker_install.zip
+user@host:~/Downloads$ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
+Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
   inflating: install.py
   inflating: malcolm_20250117_115650_d1867453.README.txt
   inflating: malcolm_20250117_115650_d1867453.tar.gz
