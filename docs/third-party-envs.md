@@ -28,7 +28,7 @@ This section outlines the process of using the [AWS Command Line Interface (CLI)
 
 These steps are to be run on a Linux, Windows, or macOS system in a command line environment with the [AWS Command Line Interface (AWS CLI)](https://aws.amazon.com/cli/) installed. Users should adjust these steps to their own use cases in terms of naming resources, setting security policies, etc.
 
-1. Create a [key pair for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html)
+* Create a [key pair for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html)
 
 ```bash
 $ aws ec2 create-key-pair \
@@ -37,7 +37,7 @@ $ aws ec2 create-key-pair \
     --output text > malcolm-key.pem
 ```
 
-2. Create a [security group for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)
+* Create a [security group for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)
 
 ```bash
 $ aws ec2 create-security-group \
@@ -45,10 +45,9 @@ $ aws ec2 create-security-group \
     --description "Malcolm SG"
 ```
 
-3. Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
-
-* These rules will allow SSH and HTTPS access from the address(es) specified
-* Replace `YOUR_PUBLIC_IP` with the public IP address(es) (i.e., addresses which will be allowed to connect to the Malcolm instance via SSH and HTTPS) in the following commands
+* Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
+    - These rules will allow SSH and HTTPS access from the address(es) specified
+    - Replace `YOUR_PUBLIC_IP` with the public IP address(es) (i.e., addresses which will be allowed to connect to the Malcolm instance via SSH and HTTPS) in the following commands
 
 ```bash
 $ aws ec2 authorize-security-group-ingress \
@@ -63,12 +62,11 @@ $ aws ec2 authorize-security-group-ingress \
     --cidr YOUR_PUBLIC_IP/32
 ```
 
-4. [Get a list](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) of Ubuntu Minimal [AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
-
-* This example uses Ubuntu as the base operating system for the EC2 instance
-* `099720109477` is the account number for Canonical, the producer of Ubuntu
-* Replace `ARCH` with the desired architecture (`amd64` or `arm64`) in the following command
-* Make note of the most recent AMI ID for the next step
+* [Get a list](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) of Ubuntu Minimal [AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
+    - This example uses Ubuntu as the base operating system for the EC2 instance
+    - `099720109477` is the account number for Canonical, the producer of Ubuntu
+    - Replace `ARCH` with the desired architecture (`amd64` or `arm64`) in the following command
+    - Make note of the most recent AMI ID for the next step
 
 ```bash
 $ aws ec2 describe-images \
@@ -78,16 +76,15 @@ $ aws ec2 describe-images \
     --output text
 ```
 
-5. Launch selected AMI
-
-* Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). Some instance types meeting recommended minimum requirements:
-    * amd64
-        * [c4.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized), [t2.2xlarge, or t3a.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
-    * arm64
-        * [m6gd.2xlarge, m6g.2xlarge, m7g.2xlarge, and t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
-* Replace `INSTANCE_TYPE` with the desired instance type in the following command
-* Replace `AMI_ID` with the AMI ID from the previous step in the following command
-* The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
+* Launch selected AMI
+    - Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). Some instance types meeting recommended minimum requirements:
+        + amd64
+            * [c4.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized), [t2.2xlarge, or t3a.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+        + arm64
+            * [m6gd.2xlarge, m6g.2xlarge, m7g.2xlarge, and t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+    - Replace `INSTANCE_TYPE` with the desired instance type in the following command
+    - Replace `AMI_ID` with the AMI ID from the previous step in the following command
+    - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
 
 ```bash
 $ aws ec2 run-instances \
@@ -100,7 +97,7 @@ $ aws ec2 run-instances \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=Malcolm}]"
 ```
 
-6. Get [instance details](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html) and check its status
+* Get [instance details](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html) and check its status
 
 ```bash
 $ aws ec2 describe-instances \
@@ -112,7 +109,7 @@ $ aws ec2 describe-instances \
 
 The next steps are to be run as the `ubuntu` user inside the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in step 1.
 
-7. Install `curl` and `unzip`
+* Install `curl` and `unzip`
 
 ```bash
 $ sudo apt-get -y update
@@ -122,9 +119,8 @@ $ sudo apt-get -y install curl unzip
 …
 ```
 
-8. [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
-
-* Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example).
+* [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
+    - Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example).
 
 ```bash
 $ curl -OJsSLf https://github.com/cisagov/Malcolm/releases/latest/download/malcolm-{{ site.malcolm.version }}-docker_install.zip
@@ -133,7 +129,7 @@ $ ls -l malcolm*.zip
 -rw-rw-r-- 1 ubuntu ubuntu 191053 Apr 10 14:26 malcolm-{{ site.malcolm.version }}-docker_install.zip
 ```
 
-9. Extract the Malcolm release ZIP file
+* Extract the Malcolm release ZIP file
 
 ```bash
 $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
@@ -146,9 +142,12 @@ Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
   inflating: malcolm_utils.py
 ```
 
-10. Run `install.py`.
-
-* Malcolm's installation and configuration scripts will guide users through the setup process.
+* Run `install.py`.
+    - Malcolm's installation and configuration scripts will guide users through the setup process.
+    - After the first question, the installer will then switch to a dialog-based wizard.
+    - Use the following resources to answer the installation and configuration questions:
+        + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
+        + [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
 
 ```bash
 $ ./install.py
@@ -158,15 +157,8 @@ Select container runtime engine (docker): 1
 …
 ```
 
-* The installer will then switch to a dialog-based wizard.
-* Use the following resources to answer the installation and configuration questions:
-    * [Malcolm documentation](README.md)
-        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
-        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
-
-11. `install.py`: Docker installation and system configuration
-
-* The [installer script](malcolm-config.md#ConfigAndTuning) will install and configure Docker and Docker Compose, and make necessary changes to system configuration.
+* `install.py`: Docker installation and system configuration
+    - The [installer script](malcolm-config.md#ConfigAndTuning) will install and configure Docker and Docker Compose, and make necessary changes to system configuration.
 
 ```bash
 "docker info" failed, attempt to install Docker? (Y / n): y
@@ -177,28 +169,25 @@ Apply recommended system tweaks automatically without asking for confirmation? y
 …
 ```
 
-12. `install.py`: Malcolm configuration
+* `install.py`: Malcolm configuration
+    - Users should answer the remaining (malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
 
-* Users should answer the remaining (malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
+* Pull Malcolm container images
+    - Answer **Yes** when prompted to **Pull Malcolm images?**
+    - Pulling the container images may take several minutes.
 
-13. Pull Malcolm container images
-
-* Answer **Yes** when prompted to **Pull Malcolm images?**
-* Pulling the container images may take several minutes.
-
-14. Reboot the instance
-
-* This allows the changes to system configuration to take effect
-* After a few minutes, reconnect via Session Manager or SSH
+* Reboot the instance
+    - This allows the changes to system configuration to take effect
+    - After a few minutes, reconnect via Session Manager or SSH
 
 ```bash
 $ sudo reboot
 …
 ```
 
-14. Set up authentication
-
-* [Configure authentication](authsetup.md#AuthSetup) using `./scripts/auth_setup` in the Malcolm installation directory.
+* Set up authentication
+    - [Configure authentication](authsetup.md#AuthSetup) using `./scripts/auth_setup` in the Malcolm installation directory.
+    - [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the remaining prompts.
 
 ```bash
 $ cd ~/malcolm
@@ -209,15 +198,12 @@ all        Configure all authentication-related settings
 …
 ```
 
-* [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) from the Malcolm documentation can guide users through the remaining prompts.
-
 #### <a name="AWSEC2Run"></a> Running Malcolm
 
-15. Start Malcolm
-
-* Running `./scripts/start` in the Malcolm installation directory will [start Malcolm](running.md#Starting).
-* Malcolm takes a few minutes to start. During this time users may see text scroll past from the containers' logs that look like error messages. This is normal while Malcolm's services synchronize among themselves.
-* Once Malcolm is running, the start script will output **Started Malcolm** and return to the command prompt.
+* Start Malcolm
+    - Running `./scripts/start` in the Malcolm installation directory will [start Malcolm](running.md#Starting).
+    - Malcolm takes a few minutes to start. During this time users may see text scroll past from the containers' logs that look like error messages. This is normal while Malcolm's services synchronize among themselves.
+    - Once Malcolm is running, the start script will output **Started Malcolm** and return to the command prompt.
 
 ```bash
 $ cd ~/malcolm
@@ -230,13 +216,10 @@ Started Malcolm
 
 Malcolm services can be accessed at https://<IP address>/
 ------------------------------------------------------------------------------
-
-$
 ```
 
-16. Check Malcolm's status
-
-* Running `./scripts/status` in the Malcolm installation directory will display the status of Malcolm's services.
+* Check Malcolm's status
+    - Running `./scripts/status` in the Malcolm installation directory will display the status of Malcolm's services.
 
 ```bash
 $ cd ~/malcolm
@@ -269,11 +252,10 @@ malcolm-zeek-1                ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
 malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.version }}-arm64                "/usr/bin/tini -- /u…"   zeek-live           7 minutes ago   Up 7 minutes (healthy)
 ```
 
-17. Connect to Malcolm's web interface
-
-* Navigate a web browser to the IP address of the instance (from step 6) using HTTPS
-* Log in with the credentials specified when setting up authentication
-* See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
+* Connect to Malcolm's [web interface](quickstart.md#UserInterfaceURLs)
+    - Navigate a web browser to the IP address of the instance (from step 6) using HTTPS
+    - Log in with the credentials specified when setting up authentication
+    - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
 ## <a name="AWSAMI"></a>Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
 
