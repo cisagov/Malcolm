@@ -107,7 +107,7 @@ $ aws ec2 describe-instances \
 
 #### <a name="AWSEC2Install"></a> Malcolm setup
 
-The next steps are to be run as the `ubuntu` user inside the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in step 1.
+The next steps are to be run as the `ubuntu` user inside the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in the first step.
 
 * Install `curl` and `unzip`
 
@@ -253,7 +253,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
 ```
 
 * Connect to Malcolm's [web interface](quickstart.md#UserInterfaceURLs)
-    - Navigate a web browser to the IP address of the instance (from step 6) using HTTPS
+    - Navigate a web browser to the IP address of the instance using HTTPS
     - Log in with the credentials specified when setting up authentication
     - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
