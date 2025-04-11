@@ -27,9 +27,6 @@
     "custom_zeek_diagnostic"
   ],
   "template" :{
-    "aliases": {
-      "MALCOLM_OTHER_INDEX_ALIAS_REPLACER": {}
-    },
     "settings" : {
       "index" : {
         "mapping.total_fields.limit" : "6000",
