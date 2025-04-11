@@ -1234,7 +1234,6 @@ def start():
         # make sure permissions are set correctly for the worker processes
         for authFile in [
             os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
-            os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
             os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
         ]:
             # chmod 644 authFile
@@ -1915,29 +1914,6 @@ def authSetup():
                                     and (not line.startswith(f"{usernamePrevious}:"))
                                 ):
                                     f.write(line)
-
-                    # populate htadmin config file
-                    with open(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')), 'w') as f:
-                        f.write('; HTAdmin config file.\n\n')
-                        f.write('[application]\n')
-                        f.write('; Change this to customize your title:\n')
-                        f.write(
-                            f'app_title = {"Malcolm Service Account Management" if nginxAuthMode.startswith("keycloak") else "Malcolm User Management" }\n\n'
-                        )
-                        f.write('; htpasswd file\n')
-                        f.write('secure_path  = ./auth/htpasswd\n')
-                        f.write('; metadata file\n')
-                        f.write('metadata_path  = ./config/metadata\n\n')
-                        f.write('; administrator user/password (htpasswd -b -c -B ...)\n')
-                        f.write(f'admin_user = {username}\n\n')
-                        f.write('; username field quality checks\n')
-                        f.write(';\n')
-                        f.write(f'min_username_len = {UsernameMinLen}\n')
-                        f.write(f'max_username_len = {UsernameMaxLen}\n\n')
-                        f.write('; Password field quality checks\n')
-                        f.write(';\n')
-                        f.write(f'min_password_len = {PasswordMinLen}\n')
-                        f.write(f'max_password_len = {PasswordMaxLen}\n\n')
 
                     # touch the metadata file
                     touch(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')))

@@ -43,6 +43,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - secretRef:
+              name: auth-env
           - configMapRef:
               name: auth-common-env
         env:
@@ -54,8 +56,6 @@ spec:
           - mountPath: /var/www/htadmin/auth
             name: htadmin-config-volume
             subPath: "auth"
-          - mountPath: /var/www/htadmin/default/configmap
-            name: htadmin-config-default-volume
           - mountPath: /var/www/htadmin/default/secretmap
             name: htadmin-config-default-secret-volume
           - mountPath: /var/www/htadmin/config
@@ -92,9 +92,6 @@ spec:
         - name: htadmin-config-volume
           persistentVolumeClaim:
             claimName: config-claim
-        - name: htadmin-config-default-volume
-          configMap:
-            name: htadmin-config
         - name: htadmin-config-default-secret-volume
           secret:
             secretName: htadmin-config

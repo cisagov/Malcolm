@@ -1049,6 +1049,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/auth.env
     - ./config/auth-common.env
     environment:
       VIRTUAL_HOST: 'htadmin.malcolm.local'
@@ -1059,11 +1060,6 @@ services:
       source: ./nginx/ca-trust
       target: /var/local/ca-trust
       read_only: true
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./htadmin/config.ini
-      target: /var/www/htadmin/config/config.ini
     - type: bind
       bind:
         create_host_path: false

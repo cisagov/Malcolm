@@ -840,7 +840,6 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'postgres.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
