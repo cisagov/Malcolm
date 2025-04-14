@@ -49,8 +49,9 @@ ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 ENV NETBOX_CUSTOM_PLUGINS_PATH $NETBOX_CUSTOM_PLUGINS_PATH
 ENV NETBOX_CONFIG_PATH $NETBOX_CONFIG_PATH
 
-ADD netbox/patch/* /tmp/netbox-patches/
+ADD --chmod=644 netbox/patch/* /tmp/netbox-patches/
 ADD --chmod=644 netbox/requirements.txt /usr/local/src/
+ADD --chmod=644 netbox/config/* /tmp/netbox-config/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     mv /etc/apt/sources.list.d/unit.list /tmp/ && \
@@ -84,12 +85,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
-      apt-get -q -y --purge autoremove && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
+    cp /tmp/netbox-config/* "${NETBOX_CONFIG_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
         curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
@@ -107,14 +105,17 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mv "${NETBOX_PATH}/netbox/netbox/configuration_ascii.py" "${NETBOX_PATH}/netbox/netbox/configuration.py" && \
     sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" "${NETBOX_PATH}/netbox/netbox/settings.py" && \
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' "${NETBOX_PATH}/launch-netbox.sh" && \
-    sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh
+    sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh && \
+    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
+      apt-get -q -y --purge autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/netbox.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 netbox/scripts/* /usr/local/bin/
-ADD --chmod=644 netbox/config/*.py /etc/netbox/config/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/
