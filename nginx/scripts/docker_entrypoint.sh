@@ -144,6 +144,11 @@ if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
     echo "Generating DH parameters" >&2 && \
       ( openssl dhparam -out ${NGINX_CONF_DIR}/dhparam/dhparam.pem 2048 >/dev/null 2>&1 || \
         echo "Failed to generate DH parameters" >&2 )
+    if [[ -f ${NGINX_CONF_DIR}/dhparam/dhparam.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+      chmod 600 ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+    fi
   fi
 
 else
