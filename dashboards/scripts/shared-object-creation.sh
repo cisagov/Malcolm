@@ -9,10 +9,14 @@ DASHB_URL=${DASHBOARDS_URL:-"http://dashboards:5601/dashboards"}
 INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 INDEX_ALIAS=${MALCOLM_NETWORK_INDEX_ALIAS:-}
 INDEX_DEFAULT_PIPELINE=${MALCOLM_NETWORK_INDEX_DEFAULT_PIPELINE:-}
+INDEX_LIFECYCLE_NAME=${MALCOLM_NETWORK_INDEX_LIFECYCLE_NAME:-}
+INDEX_LIFECYCLE_ROLLOVER_ALIAS=${MALCOLM_NETWORK_INDEX_LIFECYCLE_ROLLOVER_ALIAS:-}
 INDEX_TIME_FIELD=${MALCOLM_NETWORK_INDEX_TIME_FIELD:-"firstPacket"}
 OTHER_INDEX_PATTERN=${MALCOLM_OTHER_INDEX_PATTERN:-"malcolm_beats_*"}
 OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-}
 OTHER_INDEX_DEFAULT_PIPELINE=${MALCOLM_OTHER_INDEX_DEFAULT_PIPELINE:-}
+OTHER_INDEX_LIFECYCLE_NAME=${MALCOLM_OTHER_INDEX_LIFECYCLE_NAME:-}
+OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS=${MALCOLM_OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS:-}
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
@@ -76,6 +80,30 @@ function DoReplacersInFile() {
       [[ -n "$OTHER_INDEX_DEFAULT_PIPELINE" ]] && \
       grep -q MALCOLM_OTHER_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
       jq --arg pipeline "$OTHER_INDEX_DEFAULT_PIPELINE" 'if has("template") then .template.settings.index.default_pipeline = $pipeline else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+    [[ "$FILE_TYPE" == "template" ]] && \
+      [[ -n "$INDEX_LIFECYCLE_NAME" ]] && \
+      grep -q MALCOLM_NETWORK_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
+      jq --arg lifecycle "$INDEX_LIFECYCLE_NAME" 'if has("template") then .template.settings.index["lifecycle.name"] = $lifecycle else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+    [[ "$FILE_TYPE" == "template" ]] && \
+      [[ -n "$OTHER_INDEX_LIFECYCLE_NAME" ]] && \
+      grep -q MALCOLM_OTHER_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
+      jq --arg lifecycle "$OTHER_INDEX_LIFECYCLE_NAME" 'if has("template") then .template.settings.index["lifecycle.name"] = $lifecycle else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+    [[ "$FILE_TYPE" == "template" ]] && \
+      [[ -n "$INDEX_LIFECYCLE_ROLLOVER_ALIAS" ]] && \
+      grep -q MALCOLM_NETWORK_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
+      jq --arg rollover "$INDEX_LIFECYCLE_ROLLOVER_ALIAS" 'if has("template") then .template.settings.index["lifecycle.rollover_alias"] = $rollover else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+    [[ "$FILE_TYPE" == "template" ]] && \
+      [[ -n "$OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS" ]] && \
+      grep -q MALCOLM_OTHER_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
+      jq --arg rollover "$OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS" 'if has("template") then .template.settings.index["lifecycle.rollover_alias"] = $rollover else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
 
     [[ "$FILE_TYPE" == "sa_mapping" ]] && \
