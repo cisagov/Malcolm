@@ -138,11 +138,20 @@ if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
   # doing encrypted HTTPS
   ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_LINK"
   SSL_FLAG=" ssl"
+
+  if [[ ! -f ${NGINX_CONF_DIR}/dhparam/dhparam.pem ]]; then
+    mkdir -p ${NGINX_CONF_DIR}/dhparam
+    echo "Generating DH parameters" >&2 && \
+      ( openssl dhparam -out ${NGINX_CONF_DIR}/dhparam/dhparam.pem 2048 >/dev/null 2>&1 || \
+        echo "Failed to generate DH parameters" >&2 )
+  fi
+
 else
   # doing unencrypted HTTP (not recommended)
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_SSL_LINK"
   SSL_FLAG=""
 fi
+
 # generate listen_####.conf files with appropriate SSL flag (since the NGINX
 #   listen directive doesn't allow using variables)
 if [[ -f "${NGINX_CONF}" ]]; then
