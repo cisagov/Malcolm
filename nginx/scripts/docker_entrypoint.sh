@@ -139,6 +139,7 @@ if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
   ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_LINK"
   SSL_FLAG=" ssl"
 
+  # generate dhparam.pem if missing
   if [[ ! -f ${NGINX_CONF_DIR}/dhparam/dhparam.pem ]]; then
     mkdir -p ${NGINX_CONF_DIR}/dhparam
     echo "Generating DH parameters" >&2 && \
@@ -148,6 +149,24 @@ if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
       [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
       [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
       chmod 600 ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+    fi
+  fi
+
+  # generate self-signed TLS certificate if missing
+  if [[ ! -f ${NGINX_CONF_DIR}/certs/cert.pem ]] && [[ ! -f ${NGINX_CONF_DIR}/certs/key.pem ]]; then
+    mkdir -p ${NGINX_CONF_DIR}/certs
+    echo "Generating self-signed certificate" >&2 && \
+      ( openssl req -subj /CN=localhost -x509 -newkey rsa:4096 -nodes -keyout ${NGINX_CONF_DIR}/certs/key.pem -out ${NGINX_CONF_DIR}/certs/cert.pem -days 3650 || \
+        echo "Failed to generate self-signed certificate" >&2 )
+    if [[ -f ${NGINX_CONF_DIR}/certs/cert.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/certs/cert.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/certs/cert.pem
+      chmod 644 ${NGINX_CONF_DIR}/certs/cert.pem
+    fi
+    if [[ -f ${NGINX_CONF_DIR}/certs/key.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/certs/key.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/certs/key.pem
+      chmod 600 ${NGINX_CONF_DIR}/certs/key.pem
     fi
   fi
 
