@@ -82,25 +82,25 @@ function DoReplacersInFile() {
       jq --arg pipeline "$OTHER_INDEX_DEFAULT_PIPELINE" 'if has("template") then .template.settings.index.default_pipeline = $pipeline else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
 
-    [[ "$FILE_TYPE" == "template" ]] && \
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]] && \
       [[ -n "$INDEX_LIFECYCLE_NAME" ]] && \
       grep -q MALCOLM_NETWORK_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
       jq --arg lifecycle "$INDEX_LIFECYCLE_NAME" 'if has("template") then .template.settings.index["lifecycle.name"] = $lifecycle else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
 
-    [[ "$FILE_TYPE" == "template" ]] && \
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]] && \
       [[ -n "$OTHER_INDEX_LIFECYCLE_NAME" ]] && \
       grep -q MALCOLM_OTHER_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
       jq --arg lifecycle "$OTHER_INDEX_LIFECYCLE_NAME" 'if has("template") then .template.settings.index["lifecycle.name"] = $lifecycle else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
 
-    [[ "$FILE_TYPE" == "template" ]] && \
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]] && \
       [[ -n "$INDEX_LIFECYCLE_ROLLOVER_ALIAS" ]] && \
       grep -q MALCOLM_NETWORK_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
       jq --arg rollover "$INDEX_LIFECYCLE_ROLLOVER_ALIAS" 'if has("template") then .template.settings.index["lifecycle.rollover_alias"] = $rollover else . end' \
         "${REPLFILE}" | sponge "${REPLFILE}"
 
-    [[ "$FILE_TYPE" == "template" ]] && \
+    [[ "$DATASTORE_TYPE" == "elasticsearch" ]] && [[ "$FILE_TYPE" == "template" ]] && \
       [[ -n "$OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS" ]] && \
       grep -q MALCOLM_OTHER_INDEX_PATTERN_REPLACER "${REPLFILE}" && \
       jq --arg rollover "$OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS" 'if has("template") then .template.settings.index["lifecycle.rollover_alias"] = $rollover else . end' \
