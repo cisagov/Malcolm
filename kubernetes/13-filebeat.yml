@@ -23,7 +23,7 @@ metadata:
   namespace: malcolm
   labels:
     app: filebeat
-    role: monitor
+    role: ingest
 spec:
   selector:
     matchLabels:
@@ -33,7 +33,7 @@ spec:
     metadata:
       labels:
         app: filebeat
-        role: monitor
+        role: ingest
     spec:
       containers:
       - name: filebeat-container

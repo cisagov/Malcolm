@@ -29,7 +29,7 @@ metadata:
   namespace: malcolm
   labels:
     app: file-monitor
-    role: monitor
+    role: service
 spec:
   selector:
     matchLabels:
@@ -39,7 +39,7 @@ spec:
     metadata:
       labels:
         app: file-monitor
-        role: monitor
+        role: service
     spec:
       containers:
       - name: file-monitor-container

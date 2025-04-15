@@ -20,7 +20,7 @@ metadata:
   namespace: malcolm
   labels:
     app: pcap-monitor
-    role: monitor
+    role: service
 spec:
   selector:
     matchLabels:
@@ -30,7 +30,7 @@ spec:
     metadata:
       labels:
         app: pcap-monitor
-        role: monitor
+        role: service
     spec:
       containers:
       - name: pcap-monitor-container
