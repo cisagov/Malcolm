@@ -138,7 +138,7 @@ fi
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
 # bootstrap keystore file if necessary
-export LOGSTASH_KEYSTORE_PASS=$(LC_ALL=C tr -dc '[:graph:]' </dev/urandom | head -c 16; echo)
+[[ -z "$LOGSTASH_KEYSTORE_PASS" ]] && export LOGSTASH_KEYSTORE_PASS=$(LC_ALL=C tr -dc '[:graph:]' </dev/urandom | head -c 16; echo)
 /usr/local/bin/keystore-bootstrap.sh || true
 
 # logstash may wish to modify logstash.yml based on some environment variables (e.g.,
