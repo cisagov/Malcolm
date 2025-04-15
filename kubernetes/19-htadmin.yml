@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: htadmin-deployment
+    app: htadmin
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: htadmin-deployment
   namespace: malcolm
+  labels:
+    app: htadmin
+    role: auth
 spec:
   selector:
     matchLabels:
-      name: htadmin-deployment
+      app: htadmin
   replicas: 1
   template:
     metadata:
       labels:
-        name: htadmin-deployment
+        app: htadmin
+        role: auth
     spec:
       containers:
       - name: htadmin-container

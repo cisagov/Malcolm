@@ -19,7 +19,7 @@ spec:
       protocol: TCP
       name: opensearch
   selector:
-    name: nginx-proxy-deployment
+    app: nginx-proxy
 
 ---
 apiVersion: apps/v1
@@ -27,15 +27,19 @@ kind: Deployment
 metadata:
   name: nginx-proxy-deployment
   namespace: malcolm
+  labels:
+    app: nginx-proxy
+    role: proxy
 spec:
   selector:
     matchLabels:
-      name: nginx-proxy-deployment
+      app: nginx-proxy
   replicas: 1
   template:
     metadata:
       labels:
-        name: nginx-proxy-deployment
+        app: nginx-proxy
+        role: proxy
     spec:
       containers:
       - name: nginx-proxy-container

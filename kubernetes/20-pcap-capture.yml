@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: pcap-capture-deployment
   namespace: malcolm
+  labels:
+    app: pcap-capture
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: pcap-capture-deployment
+      app: pcap-capture
   replicas: 1
   template:
     metadata:
       labels:
-        name: pcap-capture-deployment
+        app: pcap-capture
+        role: capture
     spec:
       containers:
       - name: pcap-capture-container

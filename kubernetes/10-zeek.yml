@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: zeek-offline-deployment
   namespace: malcolm
+  labels:
+    app: zeek-offline
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: zeek-offline-deployment
+      app: zeek-offline
   replicas: 1
   template:
     metadata:
       labels:
-        name: zeek-offline-deployment
+        app: zeek-offline
+        role: ingest
     spec:
       containers:
       - name: zeek-offline-container

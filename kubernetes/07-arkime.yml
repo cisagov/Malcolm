@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: arkime-deployment
+    app: arkime
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: arkime-deployment
   namespace: malcolm
+  labels:
+    app: arkime
+    role: analysis
 spec:
   selector:
     matchLabels:
-      name: arkime-deployment
+      app: arkime
   replicas: 1
   template:
     metadata:
       labels:
-        name: arkime-deployment
+        app: arkime
+        role: analysis
     spec:
       containers:
       - name: arkime-container

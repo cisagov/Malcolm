@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: api-deployment
+    app: api
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: api-deployment
   namespace: malcolm
+  labels:
+    app: api
+    role: service
 spec:
   selector:
     matchLabels:
-      name: api-deployment
+      app: api
   replicas: 1
   template:
     metadata:
       labels:
-        name: api-deployment
+        app: api
+        role: service
     spec:
       containers:
       - name: api-container

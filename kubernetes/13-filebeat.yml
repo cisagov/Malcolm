@@ -13,7 +13,7 @@ spec:
       protocol: TCP
       name: tcpjson
   selector:
-    name: filebeat-deployment
+    app: filebeat
 
 ---
 apiVersion: apps/v1
@@ -21,15 +21,19 @@ kind: Deployment
 metadata:
   name: filebeat-deployment
   namespace: malcolm
+  labels:
+    app: filebeat
+    role: monitor
 spec:
   selector:
     matchLabels:
-      name: filebeat-deployment
+      app: filebeat
   replicas: 1
   template:
     metadata:
       labels:
-        name: filebeat-deployment
+        app: filebeat
+        role: monitor
     spec:
       containers:
       - name: filebeat-container

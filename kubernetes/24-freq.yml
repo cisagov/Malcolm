@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: freq-deployment
+    app: freq
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: freq-deployment
   namespace: malcolm
+  labels:
+    app: freq
+    role: service
 spec:
   selector:
     matchLabels:
-      name: freq-deployment
+      app: freq
   replicas: 1
   template:
     metadata:
       labels:
-        name: freq-deployment
+        app: freq
+        role: service
     spec:
       containers:
       - name: freq-container

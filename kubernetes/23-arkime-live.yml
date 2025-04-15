@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: arkime-live-deployment
   namespace: malcolm
+  labels:
+    app: arkime-live
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: arkime-live-deployment
+      app: arkime-live
   replicas: 1
   template:
     metadata:
       labels:
-        name: arkime-live-deployment
+        app: arkime-live
+        role: capture
     spec:
       containers:
       - name: arkime-live-container

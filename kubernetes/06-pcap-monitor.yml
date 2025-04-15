@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: zmq
   selector:
-    name: pcap-monitor-deployment
+    app: pcap-monitor
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: pcap-monitor-deployment
   namespace: malcolm
+  labels:
+    app: pcap-monitor
+    role: monitor
 spec:
   selector:
     matchLabels:
-      name: pcap-monitor-deployment
+      app: pcap-monitor
   replicas: 1
   template:
     metadata:
       labels:
-        name: pcap-monitor-deployment
+        app: pcap-monitor
+        role: monitor
     spec:
       containers:
       - name: pcap-monitor-container

@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: zeek-live-deployment
   namespace: malcolm
+  labels:
+    app: zeek-live
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: zeek-live-deployment
+      app: zeek-live
   replicas: 1
   template:
     metadata:
       labels:
-        name: zeek-live-deployment
+        app: zeek-live
+        role: capture
     spec:
       containers:
       - name: zeek-live-container

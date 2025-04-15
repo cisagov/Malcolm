@@ -19,7 +19,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: logstash-deployment
+    app: logstash
 
 ---
 apiVersion: apps/v1
@@ -27,15 +27,19 @@ kind: Deployment
 metadata:
   name: logstash-deployment
   namespace: malcolm
+  labels:
+    app: logstash
+    role: log-processor
 spec:
   selector:
     matchLabels:
-      name: logstash-deployment
+      app: logstash
   replicas: 1
   template:
     metadata:
       labels:
-        name: logstash-deployment
+        app: logstash
+        role: log-processor
     spec:
       # affinity:
       #   podAntiAffinity:

@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: suricata-live-deployment
   namespace: malcolm
+  labels:
+    app: suricata-live
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: suricata-live-deployment
+      app: suricata-live
   replicas: 1
   template:
     metadata:
       labels:
-        name: suricata-live-deployment
+        app: suricata-live
+        role: capture
     spec:
       containers:
       - name: suricata-live-container

@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: opensearch
   selector:
-    name: opensearch-deployment
+    app: opensearch
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: opensearch-deployment
   namespace: malcolm
+  labels:
+    app: opensearch
+    role: log-store
 spec:
   selector:
     matchLabels:
-      name: opensearch-deployment
+      app: opensearch
   replicas: 1
   template:
     metadata:
       labels:
-        name: opensearch-deployment
+        app: opensearch
+        role: log-store
     spec:
       containers:
       - name: opensearch-container

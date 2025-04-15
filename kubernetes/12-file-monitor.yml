@@ -19,7 +19,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: file-monitor-deployment
+    app: file-monitor
 
 ---
 apiVersion: apps/v1
@@ -27,15 +27,19 @@ kind: Deployment
 metadata:
   name: file-monitor-deployment
   namespace: malcolm
+  labels:
+    app: file-monitor
+    role: monitor
 spec:
   selector:
     matchLabels:
-      name: file-monitor-deployment
+      app: file-monitor
   replicas: 1
   template:
     metadata:
       labels:
-        name: file-monitor-deployment
+        app: file-monitor
+        role: monitor
     spec:
       containers:
       - name: file-monitor-container

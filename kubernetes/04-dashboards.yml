@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: dashboards-deployment
+    app: dashboards
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: dashboards-deployment
   namespace: malcolm
+  labels:
+    app: dashboards
+    role: analysis
 spec:
   selector:
     matchLabels:
-      name: dashboards-deployment
+      app: dashboards
   replicas: 1
   template:
     metadata:
       labels:
-        name: dashboards-deployment
+        app: dashboards
+        role: analysis
     spec:
       containers:
       - name: dashboards-container

@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: postgresql
   selector:
-    name: postgres-deployment
+    app: postgres
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: postgres-deployment
   namespace: malcolm
+  labels:
+    app: postgres
+    role: database
 spec:
   selector:
     matchLabels:
-      name: postgres-deployment
+      app: postgres
   replicas: 1
   template:
     metadata:
       labels:
-        name: postgres-deployment
+        app: postgres
+        role: database
     spec:
       containers:
       - name: postgres-container

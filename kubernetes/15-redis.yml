@@ -10,7 +10,7 @@ spec:
       protocol: TCP
       name: redis
   selector:
-    name: redis-deployment
+    app: redis
 
 ---
 apiVersion: apps/v1
@@ -18,15 +18,19 @@ kind: Deployment
 metadata:
   name: redis-deployment
   namespace: malcolm
+  labels:
+    app: redis
+    role: database
 spec:
   selector:
     matchLabels:
-      name: redis-deployment
+      app: redis
   replicas: 1
   template:
     metadata:
       labels:
-        name: redis-deployment
+        app: redis
+        role: database
     spec:
       containers:
       - name: redis-container

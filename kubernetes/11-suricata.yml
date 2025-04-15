@@ -4,15 +4,19 @@ kind: Deployment
 metadata:
   name: suricata-offline-deployment
   namespace: malcolm
+  labels:
+    app: suricata-offline
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: suricata-offline-deployment
+      app: suricata-offline
   replicas: 1
   template:
     metadata:
       labels:
-        name: suricata-offline-deployment
+        app: suricata-offline
+        role: ingest
     spec:
       containers:
       - name: suricata-offline-container

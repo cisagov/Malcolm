@@ -14,7 +14,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: upload-deployment
+    app: upload
 
 ---
 apiVersion: apps/v1
@@ -22,15 +22,19 @@ kind: Deployment
 metadata:
   name: upload-deployment
   namespace: malcolm
+  labels:
+    app: upload
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: upload-deployment
+      app: upload
   replicas: 1
   template:
     metadata:
       labels:
-        name: upload-deployment
+        app: upload
+        role: ingest
     spec:
       containers:
       - name: upload-container

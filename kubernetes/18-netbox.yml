@@ -16,7 +16,7 @@ spec:
       protocol: TCP
       name: supervisord
   selector:
-    name: netbox-deployment
+    app: netbox
 
 ---
 apiVersion: apps/v1
@@ -24,15 +24,19 @@ kind: Deployment
 metadata:
   name: netbox-deployment
   namespace: malcolm
+  labels:
+    app: netbox
+    role: infra
 spec:
   selector:
     matchLabels:
-      name: netbox-deployment
+      app: netbox
   replicas: 1
   template:
     metadata:
       labels:
-        name: netbox-deployment
+        app: netbox
+        role: infra
     spec:
       containers:
       - name: netbox-container
