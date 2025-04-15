@@ -129,6 +129,11 @@ if [[ -d "$PIPELINES_DIR"/zeek ]]; then
   sed -i -E 's/\s\s*(%\{\[zeek_cols\]\[)/\t\1/g' "$PIPELINES_DIR"/zeek/*.conf
 fi
 
+# if SSL is disabled, remove references to it in the input (as cert files might not even exist but logstash will still gripe about it)
+if [[ "${BEATS_SSL:-true}" == "false" ]] && [[ -d "$PIPELINES_DIR"/input ]]; then
+  sed -i -E '/^[[:space:]]*ssl_/d' "$PIPELINES_DIR"/input/*.conf
+fi
+
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
