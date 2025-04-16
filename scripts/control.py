@@ -1349,7 +1349,7 @@ def start():
             exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        if CheckPersistentStorageDefs(
+        if args.skipPerVolChecks or CheckPersistentStorageDefs(
             namespace=args.namespace,
             malcolmPath=MalcolmPath,
             profile=args.composeProfile,
@@ -2797,6 +2797,15 @@ def main():
         type=str,
         default=os.getenv('MALCOLM_NAMESPACE', 'malcolm'),
         help="Kubernetes namespace",
+    )
+    kubernetesGroup.add_argument(
+        '--skip-persistent-volume-checks',
+        dest='skipPerVolChecks',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Skip checks for PersistentVolumes/PersistentVolumeClaims in manifests before starting",
     )
     kubernetesGroup.add_argument(
         '--reclaim-persistent-volume',
