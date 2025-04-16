@@ -1376,7 +1376,10 @@ def start():
         else:
             groupedStorageEntries = {
                 i: [j[0] for j in j]
-                for i, j in groupby(sorted(REQUIRED_VOLUME_OBJECTS.items(), key=lambda x: x[1]), lambda x: x[1])
+                for i, j in groupby(
+                    sorted(REQUIRED_VOLUME_OBJECTS.items(), key=lambda x: tuple(x[1].items())),
+                    lambda x: tuple(x[1].items()),
+                )
             }
             raise Exception(
                 f'Storage objects required by Malcolm are not defined in {os.path.join(MalcolmPath, "kubernetes")}: {groupedStorageEntries}'
