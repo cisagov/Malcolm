@@ -46,10 +46,10 @@ spec:
       #     requiredDuringSchedulingIgnoredDuringExecution:
       #     - labelSelector:
       #         matchExpressions:
-      #         - key: name
+      #         - key: app
       #           operator: In
       #           values:
-      #           - opensearch-deployment
+      #           - opensearch
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container

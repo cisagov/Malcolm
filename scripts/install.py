@@ -5107,14 +5107,15 @@ def main():
             eprint(f"Malcolm images file: {imageFile}")
 
     if not args.configOnly:
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker'):
-            installer.install_docker()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_compose'):
-            installer.install_docker_compose()
-        if hasattr(installer, 'tweak_system_files'):
-            installer.tweak_system_files()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
-            _, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
+        if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+            if hasattr(installer, 'install_docker'):
+                installer.install_docker()
+            if hasattr(installer, 'install_docker_compose'):
+                installer.install_docker_compose()
+            if hasattr(installer, 'tweak_system_files'):
+                installer.tweak_system_files()
+            if hasattr(installer, 'install_malcolm_files'):
+                _, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
     # if .env directory is unspecified, use the default ./config directory
     if args.configDir is None:
