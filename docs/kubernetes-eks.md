@@ -68,7 +68,7 @@ This document assumes good working knowledge of Amazon Web Services (AWS) and Am
 
 1. Create manifest for persistent volumes and volume claims from the EFS file system ID and access point IDs
     * See [**PersistentVolumeClaim Definitions**](kubernetes.md#PVC) under [**Deploying Malcolm with Kubernetes**](kubernetes.md)
-    * [`kubernetes/01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example) is an example manifest to use as a starting point. Copy `01-volumes-aws-efs.yml.example` to `01-volumes.yml` and replace `fs-FILESYSTEMID` with the EFS file system and each `fsap-…` value with the corresponding access point ID from the previous step.
+    * [`kubernetes/01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example) is an example manifest to use as a starting point. Copy `01-volumes-aws-efs.yml.example` to `01-volumes.yml` and replace `${EFS_ID}` with the EFS file system and each `${EFS_ACCESS_POINT_…_ID}` value with the corresponding access point ID from the previous step.
 1. Finish [the configuration](kubernetes.md#Config) then [start](kubernetes.md#Running) Malcolm as described in [**Deploying Malcolm with Kubernetes**](kubernetes.md)
 
 ## <a name="AWSAttribution"></a> Attribution

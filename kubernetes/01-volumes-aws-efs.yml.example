@@ -16,7 +16,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-pcap
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_PCAP_ID}
 
 ---
 apiVersion: v1
@@ -52,7 +52,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-zeek-logs
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_ZEEK_LOGS_ID}
 
 ---
 apiVersion: v1
@@ -88,7 +88,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-suricata-logs
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_SURICATA_LOGS_ID}
 
 ---
 apiVersion: v1
@@ -124,7 +124,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-config
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_CONFIG_ID}
 
 ---
 apiVersion: v1
@@ -160,7 +160,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-runtime-logs
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_RUNTIME_LOGS_ID}
 
 ---
 apiVersion: v1
@@ -196,7 +196,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-opensearch
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_OPENSEARCH_ID}
 
 ---
 apiVersion: v1
@@ -232,7 +232,7 @@ spec:
   storageClassName: efs-sc
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: fs-FILESYSTEMID::fsap-opensearch-backup
+    volumeHandle: ${EFS_ID}::${EFS_ACCESS_POINT_OPENSEARCH_BACKUP_ID}
 
 ---
 apiVersion: v1
