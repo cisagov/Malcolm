@@ -21,6 +21,17 @@ This section outlines the process of using the [AWS Command Line Interface (CLI)
 
 * [aws cli](https://aws.amazon.com/cli/)
     - the AWS Command Line Interface with functioning access to AWS infrastructure
+    ```bash
+    $ curl -sSL \
+        -o /tmp/awscli.zip \
+        "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
+    $ unzip -d /tmp /tmp/awscli.zip
+    …
+    $ sudo /tmp/aws/install
+    You can now run: /usr/local/bin/aws --version
+    $ aws --version
+    aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
+    ```
 
 ### <a name="AWSEC2Procedure"></a> Procedure
 
@@ -109,13 +120,18 @@ $ aws ec2 describe-instances \
 
 The next steps are to be run as the `ubuntu` user inside the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in the first step.
 
-* Install `curl` and `unzip`
+* Install `curl`, `unzip`, and `python3`
 
 ```bash
 $ sudo apt-get -y update
 …
-
-$ sudo apt-get -y install curl unzip
+$ sudo apt-get -y install --no-install-recommends \
+    curl \
+    unzip \
+    python3 \
+    python3-dialog \
+    python3-pip \
+    python3-ruamel.yaml
 …
 ```
 
@@ -144,18 +160,9 @@ Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
 
 * Run `install.py`.
     - Malcolm's installation and configuration scripts will guide users through the setup process.
-    - After the first question, the installer will then switch to a dialog-based wizard.
     - Use the following resources to answer the installation and configuration questions:
         + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
         + [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
-
-```bash
-$ ./install.py
-1: docker
-2: podman
-Select container runtime engine (docker): 1
-…
-```
 
 * `install.py`: Docker installation and system configuration
     - The [installer script](malcolm-config.md#ConfigAndTuning) will install and configure Docker and Docker Compose, and make necessary changes to system configuration.
