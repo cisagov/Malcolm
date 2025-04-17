@@ -7,6 +7,7 @@
             - [Instance creation](#AWSEC2Instance)
             - [Malcolm setup](#AWSEC2Install)
             - [Running Malcolm](#AWSEC2Run)
+    - [Installing Malcolm on Amazon Web Services (AWS) Fargate](#AWSFargate)
     - [Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)](#AWSAMI)
         + [Prerequisites](#AWSAMIPrerequisites)
         + [Procedure](#AWSAMIProcedure)
@@ -264,7 +265,397 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     - Log in with the credentials specified when setting up authentication
     - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
-## <a name="AWSAMI"></a>Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
+## <a name="AWSFargate"></a> Installing Malcolm on Amazon Web Services (AWS) Fargate
+
+### 👷🏼‍♀️ Note: These instructions are a work in progress and are not yet functional. 👷🏻
+
+* Install prerequisites (may vary by platform)
+    * `curl`, `unzip`, and `python3`
+    ```bash
+    $ sudo apt-get -y update
+    …
+    $ sudo apt-get -y install --no-install-recommends \
+        curl \
+        unzip \
+        python3 \
+        python3-dialog \
+        python3-pip \
+        python3-ruamel.yaml \
+        python3-kubernetes
+    …
+    ```
+    * [`eksctl`](https://eksctl.io/)
+    ```bash
+    $ curl -sSL \
+        -o /tmp/eksctl.tar.gz \
+        "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_$(uname -m | sed 's/^x86_64$/amd64/').tar.gz"
+    $ tar -xzf /tmp/eksctl.tar.gz -C /tmp && rm /tmp/eksctl.tar.gz
+    $ sudo mv /tmp/eksctl /usr/local/bin/
+    $ eksctl version
+    0.207.0
+    ```
+    * [`aws` Command Line Interface](https://aws.amazon.com/cli/)
+    ```bash
+    $ curl -sSL \
+        -o /tmp/awscli.zip \
+        "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
+    $ unzip -d /tmp /tmp/awscli.zip
+    …
+    $ sudo /tmp/aws/install
+    You can now run: /usr/local/bin/aws --version
+    $ aws --version
+    aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
+    ```
+    * [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
+    ```bash
+    $ curl -sSL \
+        -o /tmp/kubectl \
+        "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/^x86_64$/amd64/' | sed 's/^aarch64$/arm64/')/kubectl"
+    $ chmod 755 /tmp/kubectl
+    $ sudo mv /tmp/kubectl /usr/local/bin/
+    $ kubectl version
+    Client Version: v1.32.3
+    ```
+
+* Get Malcolm (**TODO: NOT FINAL**)
+    * These are **not** the final instructions for doing this, as in developing these instructions I've gone through and made some modifications to the Malcolm Kubernetes manifests that have not been released yet (e.g., adding `role` labels to the manifests). But for now those as-yet unreleased changes can be gotten from [here](https://github.com/mmguero-dev/malcolm/); however, the `image:` in the manifests needs to be changed from `idaholab` to `mmguero-dev` for the org and from `25.04.0` to `main` for the version, like this:
+    ```bash
+    $ git clone --single-branch --depth 1 https://github.com/mmguero-dev/Malcolm
+    $ sed -i "s@ghcr.io/idaholab@ghcr.io/mmguero-dev@g" ./Malcolm/kubernetes/*.yml
+    $ sed -i "s@25\.04\.0@main@g" ./Malcolm/kubernetes/*.yml
+    ```
+
+* Create cluster for Fargate
+```bash
+$ eksctl create cluster \
+    --name malcolm-cluster \
+    --region us-east-1 \
+    --fargate \
+    --version 1.28 \
+    --vpc-nat-mode HighlyAvailable \
+    --with-oidc \
+    --vpc-cidr 10.0.0.0/16 \
+    --node-private-networking
+```
+
+* Create IAM policy for EFS CSI Driver
+```bash
+$ aws iam create-policy \
+    --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
+    --policy-document '{
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "elasticfilesystem:DescribeAccessPoints",
+            "elasticfilesystem:DescribeFileSystems",
+            "elasticfilesystem:DescribeMountTargets",
+            "ec2:DescribeAvailabilityZones"
+          ],
+          "Resource": "*"
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "elasticfilesystem:CreateAccessPoint"
+          ],
+          "Resource": "*",
+          "Condition": {
+            "StringLike": {
+              "aws:RequestTag/efs.csi.aws.com/cluster": "true"
+            }
+          }
+        },
+        {
+          "Effect": "Allow",
+          "Action": "elasticfilesystem:DeleteAccessPoint",
+          "Resource": "*",
+          "Condition": {
+            "StringEquals": {
+              "aws:ResourceTag/efs.csi.aws.com/cluster": "true"
+            }
+          }
+        }
+      ]
+    }'
+```
+
+* Create service account and attach the policy
+```bash
+$ eksctl create iamserviceaccount \
+    --cluster malcolm-cluster \
+    --namespace kube-system \
+    --name efs-csi-controller-sa \
+    --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonEKS_EFS_CSI_Driver_Policy \
+    --approve \
+    --override-existing-serviceaccounts \
+    --region us-east-1
+```
+
+* Install EFS CSI driver
+```bash
+$ eksctl create addon \
+  --name aws-efs-csi-driver \
+  --cluster malcolm-cluster \
+  --service-account-role-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/efs-csi-controller-sa \
+  --force \
+  --region us-east-1
+```
+
+* Create namespace
+```bash
+$ kubectl create namespace malcolm
+```
+
+* Create Fargate profiles for Malcolm components based on pods' "role" labels
+```bash
+$ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | sort -u); do \
+    eksctl create fargateprofile \
+        --cluster malcolm-cluster \
+        --region us-east-1 \
+        --name malcolm-"$ROLE" \
+        --namespace malcolm \
+        --labels role="$ROLE"; \
+done
+```
+
+* Create EFS file system and get file system ID
+```bash
+$ aws efs create-file-system \
+    --creation-token malcolm-efs \
+    --encrypted \
+    --region us-east-1 \
+    --tags Key=Name,Value=malcolm-efs \
+    --performance-mode generalPurpose \
+    --throughput-mode bursting
+
+$ EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
+    --query 'FileSystems[0].FileSystemId' --output text)
+
+$ echo $EFS_ID
+```
+
+* Create file system [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html)
+```bash
+$ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
+    aws efs create-access-point \
+            --file-system-id $EFS_ID \
+            --client-token $(head -c 1024 /dev/urandom 2>/dev/null | tr -cd 'a-f0-9' | head -c 32) \
+            --root-directory "Path=/malcolm/$AP,CreationInfo={OwnerUid=1000,OwnerGid=1000,Permissions=0770}" \
+            --tags "Key=Name,Value=$AP"; \
+done
+```
+
+* Get VPC ID
+```bash
+$ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
+        --query "cluster.resourcesVpcConfig.vpcId" --output text)
+
+$ echo $VPC_ID
+```
+
+* Create Security Group for EFS and get Security Group ID
+```bash
+$ aws ec2 create-security-group \
+    --group-name malcolm-efs-sg \
+    --description "Security group for Malcolm EFS" \
+    --vpc-id $VPC_ID
+
+$ SG_ID=$(aws ec2 describe-security-groups \
+    --filters "Name=group-name,Values=malcolm-efs-sg" "Name=vpc-id,Values=$VPC_ID" \
+    --query 'SecurityGroups[0].GroupId' --output text)
+
+$ echo $SG_ID
+```
+
+* Add NFS inbound rule to Security Group
+```bash
+$ aws ec2 authorize-security-group-ingress \
+    --group-id $SG_ID \
+    --protocol tcp \
+    --port 2049 \
+    --cidr 10.0.0.0/16
+```
+
+* Get subnet IDs and create EFS mount targets
+```bash
+$ SUBNETS=$(aws ec2 describe-subnets \
+    --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:aws:cloudformation:logical-id,Values=SubnetPrivate*" \
+    --query 'Subnets[*].SubnetId' --output text)
+
+$ echo $SUBNETS
+```
+
+* Create mount targets
+```bash
+$ for subnet in $SUBNETS; do \
+    aws efs create-mount-target \
+        --file-system-id $EFS_ID \
+        --subnet-id $subnet \
+        --security-groups $SG_ID; \
+done
+```
+
+* Create Persistent Volumes (PV) and Persistent Volume Claims (PVC) using static provisioning
+    * Ensure file system ID is **exported** in `$EFS_ID`
+    ```bash
+    $ export EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
+        --query 'FileSystems[0].FileSystemId' --output text)
+
+    $ echo $EFS_ID
+    ```
+    * Ensure the Access Point IDs are **exported** in `$EFS_ACCESS_POINT_CONFIG_ID`, etc.
+    ```bash
+    $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
+        AP_UPPER=$(echo "$AP" | tr 'a-z-' 'A-Z_'); \
+        ACCESS_POINT_ID=$(aws efs describe-access-points \
+                            --file-system-id $EFS_ID \
+                            --query "AccessPoints[?Tags[?Key=='Name' && Value=='$AP']].AccessPointId" \
+                            --output text); \
+
+        [[ -n "$ACCESS_POINT_ID" ]] && export EFS_ACCESS_POINT_${AP_UPPER}_ID=$ACCESS_POINT_ID; \
+    done
+
+    $ env | grep EFS_ACCESS_POINT_
+    ```
+    * Create and verify PVs and PVCs to be used by Malcolm services
+    ```bash
+    $ envsubst < ./Malcolm/kubernetes/01-volumes-aws-efs.yml.example | kubectl apply -f -
+    ```
+    * Verify PVs and PVCs have "Bound" status
+    ```bash
+    $ kubectl get pv -n malcolm
+    NAME                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                             STORAGECLASS   REASON   AGE
+    config-volume              25Gi       RWX            Retain           Bound    malcolm/config-claim              efs-sc                  2m11s
+    opensearch-backup-volume   500Gi      RWO            Retain           Bound    malcolm/opensearch-backup-claim   efs-sc                  2m11s
+    opensearch-volume          500Gi      RWO            Retain           Bound    malcolm/opensearch-claim          efs-sc                  2m11s
+    pcap-volume                500Gi      RWX            Retain           Bound    malcolm/pcap-claim                efs-sc                  2m12s
+    runtime-logs-volume        25Gi       RWX            Retain           Bound    malcolm/runtime-logs-claim        efs-sc                  2m11s
+    suricata-volume            100Gi      RWX            Retain           Bound    malcolm/suricata-claim            efs-sc                  2m12s
+    zeek-volume                250Gi      RWX            Retain           Bound    malcolm/zeek-claim                efs-sc                  2m12s
+
+    $ kubectl get pvc -n malcolm
+    kubectl get pvc -n malcolm
+    NAME                      STATUS   VOLUME                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+    config-claim              Bound    config-volume              25Gi       RWX            efs-sc         2m32s
+    opensearch-backup-claim   Bound    opensearch-backup-volume   500Gi      RWO            efs-sc         2m31s
+    opensearch-claim          Bound    opensearch-volume          500Gi      RWO            efs-sc         2m32s
+    pcap-claim                Bound    pcap-volume                500Gi      RWX            efs-sc         2m33s
+    runtime-logs-claim        Bound    runtime-logs-volume        25Gi       RWX            efs-sc         2m32s
+    suricata-claim            Bound    suricata-volume            100Gi      RWX            efs-sc         2m32s
+    zeek-claim                Bound    zeek-volume                250Gi      RWX            efs-sc         2m33s
+    ```
+
+* Configure Malcolm
+    * `./Malcolm/scripts/install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * Malcolm's configuration scripts will guide users through the setup process.
+    * Use the following resources to answer the installation and configuration questions:
+        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
+        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
+
+* Configure [authentication](authsetup.md#AuthSetup)
+    * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
+
+* Start Malcolm (**TODO: NOT FINAL**)
+```bash
+$ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
+    --skip-persistent-volume-checks \
+    --no-capture-pods \
+    --no-capabilities
+```
+
+* Monitor deployment
+    * Check pods
+    ```bash
+    $ kubectl get pods -n malcolm -w
+    kubectl get pods -n malcolm -w
+    NAME                                            READY   STATUS     RESTARTS   AGE
+    api-deployment-5c8b9c7c5b-dtpkq                 1/1     Running    0          3m6s
+    arkime-deployment-fcbb44c8f-plh8k               1/1     Running    0          3m6s
+    dashboards-deployment-95467ff6f-h2zx5           1/1     Running    0          3m7s
+    dashboards-helper-deployment-7686756dc4-vxw4r   1/1     Running    0          3m5s
+    file-monitor-deployment-7fccbb7c98-8hxrv        1/1     Running    0          3m5s
+    filebeat-deployment-57db54b549-zvfb4            1/1     Running    0          3m4s
+    freq-deployment-6c7688b4c-zhdfw                 1/1     Running    0          3m2s
+    htadmin-deployment-767c78b4bf-sjzmf             1/1     Running    0          3m2s
+    keycloak-deployment-7ff7bb9c8c-trkc6            1/1     Running    0          3m2s
+    logstash-deployment-54ffd8c85-spmh5             1/1     Running    0          3m4s
+    netbox-deployment-7bdbfcbf6c-xc725              1/1     Running    0          3m3s
+    nginx-proxy-deployment-864c896ff6-v8jrs         1/1     Running    0          3m1s
+    opensearch-deployment-654b79f6f9-2tss2          1/1     Running    0          3m7s
+    pcap-monitor-deployment-5f644fb9b-tzk8k         1/1     Running    0          3m6s
+    postgres-deployment-76fb787976-pgwsr            1/1     Running    0          3m3s
+    redis-cache-deployment-6f9b9d65bf-dssjt         1/1     Running    0          3m3s
+    redis-deployment-7b985fb7d7-zz9jb               1/1     Running    0          3m4s
+    suricata-offline-deployment-669c759f88-nt24v    1/1     Running    0          3m5s
+    upload-deployment-76c6c49cb5-9zdtp              1/1     Running    0          3m7s
+    zeek-offline-deployment-c56f7f46f-m62sd         1/1     Running    0          3m5s
+    ```
+    * Check all resources
+    ```bash
+    $ kubectl get all -n malcolm
+    …
+    ```
+    * Watch logs
+    ```bash
+    $ kubectl logs --follow=true -n malcolm --all-containers <pod>
+    ```
+    * Get all events in the namespace for more detailed information and debugging
+    ```bash
+    $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
+    …
+    ```
+
+* Stop Malcolm (**TODO**)
+
+# Current issues
+
+* Look at CPU/RAM resources
+    * These numbers may not be good, I really just took a stab at it... also the user probably wants to tune?
+    * These resource sections are not in the vanilla manifests, how can we somehow maintain them so they're here for fargate but not in the yml files for every other Malcolm K8s installation?
+* Look at storage requests for PVs/PVCs
+    * We could probably scale down a lot? We're used to deploying these on physical servers with TiBs available storage
+* Figuring out EFS mounting issues
+```
+Events:
+  Type     Reason           Age                From               Message
+  ----     ------           ----               ----               -------
+  Warning  LoggingDisabled  67s                fargate-scheduler  Disabled logging because aws-logging configmap was not found. configmap "aws-logging" not found
+  Normal   Scheduled        21s                fargate-scheduler  Successfully assigned malcolm/opensearch-deployment-564d484dcc-f6lmx to fargate-ip-10-0-116-219.ec2.internal
+  Warning  FailedMount      13s (x5 over 21s)  kubelet            MountVolume.SetUp failed for volume "opensearch-volume" : rpc error: code = Internal desc = Could not mount "fs-0bd5b35418afc7fae:/" at "/var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/opensearch-volume/mount": mount failed: exit status 1
+Mounting command: mount
+Mounting arguments: -t efs -o accesspoint=fsap-0ffc3561ba4bcd4c2,tls fs-0bd5b35418afc7fae:/ /var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/opensearch-volume/mount
+Output: Failed to resolve "fs-0bd5b35418afc7fae.efs.us-east-1.amazonaws.com" - check that your file system ID is correct, and ensure that the VPC has an EFS mount target for this file system ID.
+See https://docs.aws.amazon.com/console/efs/mount-dns-name for more detail.
+Attempting to lookup mount target ip address using botocore. Failed to import necessary dependency botocore, please install botocore first.
+  Warning  FailedMount  13s (x5 over 21s)  kubelet  MountVolume.SetUp failed for volume "config-volume" : rpc error: code = Internal desc = Could not mount "fs-0bd5b35418afc7fae:/" at "/var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/config-volume/mount": mount failed: exit status 1
+
+```
+* Various pods won't start:
+    * `Pod not supported on Fargate: invalid SecurityContext fields: Capabilities added: IPC_LOCK, SYS_RESOURCE`
+    * `-live`/`-capture` pods may not make sense on Fargate anyway, so we could remove those?
+    * OpenSearch and Logstash are still affected
+        * commenting out?
+* What about ingress?
+* Malcolm's `./scripts/stop` deletes the namespace, which we don't want to do, so I need to update that or make an option to leave things in place.
+* suggestion when creating efs driver addon?
+```bash
+$ eksctl create addon \
+  --name aws-efs-csi-driver \
+  --cluster malcolm-cluster \
+  --service-account-role-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/efs-csi-controller-sa \
+  --force \
+  --region us-east-1
+2025-04-16 14:51:21 [ℹ]  Kubernetes version "1.28" in use by cluster "malcolm-cluster"
+2025-04-16 14:51:22 [ℹ]  IRSA is set for "aws-efs-csi-driver" addon; will use this to configure IAM permissions
+2025-04-16 14:51:22 [!]  the recommended way to provide IAM permissions for "aws-efs-csi-driver" addon is via pod identity associations; after addon creation is completed, run `eksctl utils migrate-to-pod-identity`
+2025-04-16 14:51:22 [ℹ]  using provided ServiceAccountRoleARN "arn:aws:iam::422382356529:role/efs-csi-controller-sa"
+2025-04-16 14:51:22 [ℹ]  creating addon: aws-efs-csi-driver
+```
+
+## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
 
 This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI for either the x86-64 or arm64 CPU architecture. This section assumes good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
 
