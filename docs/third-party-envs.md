@@ -652,22 +652,193 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 # Current issues
 
 * Figuring out EFS mounting issues
+    * I'm gettting these warnings (using the `zeek-offline` container as an example, but it's not just that)
+    
+    ```
+    k describe pod -n malcolm zeek-offline
+    Name:                 zeek-offline-deployment-7ffc55d489-rtgfz
+    Namespace:            malcolm
+    Priority:             2000001000
+    Priority Class Name:  system-node-critical
+    Service Account:      default
+    Node:                 fargate-ip-10-0-96-58.ec2.internal/10.0.96.58
+    Start Time:           Thu, 17 Apr 2025 14:00:33 -0600
+    Labels:               app=zeek-offline
+                          eks.amazonaws.com/fargate-profile=malcolm-ingest
+                          pod-template-hash=7ffc55d489
+                          role=ingest
+    Annotations:          CapacityProvisioned: 1vCPU 5GB
+                          Logging: LoggingDisabled: LOGGING_CONFIGMAP_NOT_FOUND
+    Status:               Running
+    IP:                   10.0.96.58
+    IPs:
+      IP:           10.0.96.58
+    Controlled By:  ReplicaSet/zeek-offline-deployment-7ffc55d489
+    Init Containers:
+      zeek-offline-dirinit-container:
+        Container ID:   containerd://83ebab0f4b962479c2df6948b5c2cb1e2a133fa6ef1921e5864cb9746f645206
+        Image:          ghcr.io/mmguero-dev/malcolm/dirinit:main
+        Image ID:       ghcr.io/mmguero-dev/malcolm/dirinit@sha256:c044f40d8c50cd18680624c7c8cf550812fc0410de24577aa15a141399d07203
+        Port:           <none>
+        Host Port:      <none>
+        State:          Terminated
+          Reason:       Completed
+          Exit Code:    0
+          Started:      Thu, 17 Apr 2025 14:00:52 -0600
+          Finished:     Thu, 17 Apr 2025 14:00:52 -0600
+        Ready:          True
+        Restart Count:  0
+        Limits:
+          cpu:     500m
+          memory:  256Mi
+        Requests:
+          cpu:     250m
+          memory:  128Mi
+        Environment Variables from:
+          process-env  ConfigMap  Optional: false
+        Environment:
+          PUSER_MKDIR:  /data/config:zeek/intel/Mandiant,zeek/intel/MISP,zeek/intel/STIX;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload
+        Mounts:
+          /data/config from zeek-offline-intel-volume (rw)
+          /data/pcap from zeek-offline-pcap-volume (rw)
+          /data/zeek-logs from zeek-offline-zeek-volume (rw)
+          /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-97z9j (ro)
+    Containers:
+      zeek-offline-container:
+        Container ID:   containerd://874233ff2317fd0f016e405108bc0f1875f095361779538c8344c198c5c108be
+        Image:          ghcr.io/mmguero-dev/malcolm/zeek:main
+        Image ID:       ghcr.io/mmguero-dev/malcolm/zeek@sha256:021208f0a15aefc684fa058745bc36a9fdde13c996071c5f9f7d5c6cbe1dd9b4
+        Port:           <none>
+        Host Port:      <none>
+        State:          Running
+          Started:      Thu, 17 Apr 2025 14:01:22 -0600
+        Ready:          True
+        Restart Count:  0
+        Requests:
+          cpu:     1
+          memory:  4Gi
+        Liveness:  exec [/usr/local/bin/container_health.sh] delay=60s timeout=15s period=30s #success=1 #failure=10
+        Environment Variables from:
+          process-env        ConfigMap  Optional: false
+          ssl-env            ConfigMap  Optional: false
+          upload-common-env  ConfigMap  Optional: false
+          zeek-env           ConfigMap  Optional: false
+          zeek-secret-env    Secret     Optional: false
+          zeek-offline-env   ConfigMap  Optional: false
+        Environment:         <none>
+        Mounts:
+          /opt/zeek/share/zeek/site/custom/configmap from zeek-offline-custom-volume (rw)
+          /opt/zeek/share/zeek/site/intel from zeek-offline-intel-volume (rw,path="zeek/intel")
+          /opt/zeek/share/zeek/site/intel-preseed/configmap from zeek-offline-intel-preseed-volume (rw)
+          /pcap from zeek-offline-pcap-volume (rw)
+          /var/local/ca-trust/configmap from zeek-offline-var-local-catrust-volume (rw)
+          /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-97z9j (ro)
+          /zeek/extract_files from zeek-offline-zeek-volume (rw,path="extract_files")
+          /zeek/upload from zeek-offline-zeek-volume (rw,path="upload")
+    Conditions:
+      Type              Status
+      Initialized       True 
+      Ready             True 
+      ContainersReady   True 
+      PodScheduled      True 
+    Volumes:
+      zeek-offline-var-local-catrust-volume:
+        Type:      ConfigMap (a volume populated by a ConfigMap)
+        Name:      var-local-catrust
+        Optional:  false
+      zeek-offline-pcap-volume:
+        Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+        ClaimName:  pcap-claim
+        ReadOnly:   false
+      zeek-offline-zeek-volume:
+        Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+        ClaimName:  zeek-claim
+        ReadOnly:   false
+      zeek-offline-custom-volume:
+        Type:      ConfigMap (a volume populated by a ConfigMap)
+        Name:      zeek-custom
+        Optional:  false
+      zeek-offline-intel-preseed-volume:
+        Type:      ConfigMap (a volume populated by a ConfigMap)
+        Name:      zeek-intel-preseed
+        Optional:  false
+      zeek-offline-intel-volume:
+        Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+        ClaimName:  config-claim
+        ReadOnly:   false
+      kube-api-access-97z9j:
+        Type:                    Projected (a volume that contains injected data from multiple sources)
+        TokenExpirationSeconds:  3607
+        ConfigMapName:           kube-root-ca.crt
+        ConfigMapOptional:       <nil>
+        DownwardAPI:             true
+    QoS Class:                   Burstable
+    Node-Selectors:              <none>
+    Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+    Events:
+      Type     Reason           Age                From               Message
+      ----     ------           ----               ----               -------
+      Warning  LoggingDisabled  22m                fargate-scheduler  Disabled logging because aws-logging configmap was not found. configmap "aws-logging" not found
+      Normal   Scheduled        22m                fargate-scheduler  Successfully assigned malcolm/zeek-offline-deployment-7ffc55d489-rtgfz to fargate-ip-10-0-96-58.ec2.internal
+      Warning  FailedMount      22m                kubelet            MountVolume.MountDevice failed for volume "config-volume" : kubernetes.io/csi: attacher.MountDevice failed to create newCsiDriverClient: driver name efs.csi.aws.com not found in the list of registered CSI drivers
+      Warning  FailedMount      22m                kubelet            MountVolume.MountDevice failed for volume "pcap-volume" : kubernetes.io/csi: attacher.MountDevice failed to create newCsiDriverClient: driver name efs.csi.aws.com not found in the list of registered CSI drivers
+      Warning  FailedMount      22m                kubelet            MountVolume.MountDevice failed for volume "zeek-volume" : kubernetes.io/csi: attacher.MountDevice failed to create newCsiDriverClient: driver name efs.csi.aws.com not found in the list of registered CSI drivers
+      Warning  FailedMount      22m (x4 over 22m)  kubelet            MountVolume.SetUp failed for volume "config-volume" : rpc error: code = Internal desc = Could not mount "fs-0d66110f5e994381a:/" at "/var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/config-volume/mount": mount failed: exit status 1
+    Mounting command: mount
+    Mounting arguments: -t efs -o accesspoint=fsap-0e37af706726f3234,tls fs-0d66110f5e994381a:/ /var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/config-volume/mount
+    Output: Failed to resolve "fs-0d66110f5e994381a.efs.us-east-1.amazonaws.com" - check that your file system ID is correct, and ensure that the VPC has an EFS mount target for this file system ID.
+    See https://docs.aws.amazon.com/console/efs/mount-dns-name for more detail.
+    Attempting to lookup mount target ip address using botocore. Failed to import necessary dependency botocore, please install botocore first.
+      Warning  FailedMount  22m (x4 over 22m)  kubelet  MountVolume.SetUp failed for volume "zeek-volume" : rpc error: code = Internal desc = Could not mount "fs-0d66110f5e994381a:/" at "/var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/zeek-volume/mount": mount failed: exit status 1
+    Mounting command: mount
+    Mounting arguments: -t efs -o accesspoint=fsap-0ceb805a5f513d3ad,tls fs-0d66110f5e994381a:/ /var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/zeek-volume/mount
+    Output: Failed to resolve "fs-0d66110f5e994381a.efs.us-east-1.amazonaws.com" - check that your file system ID is correct, and ensure that the VPC has an EFS mount target for this file system ID.
+    See https://docs.aws.amazon.com/console/efs/mount-dns-name for more detail.
+    Attempting to lookup mount target ip address using botocore. Failed to import necessary dependency botocore, please install botocore first.
+      Warning  FailedMount  22m (x4 over 22m)  kubelet  MountVolume.SetUp failed for volume "pcap-volume" : rpc error: code = Internal desc = Could not mount "fs-0d66110f5e994381a:/" at "/var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/pcap-volume/mount": mount failed: exit status 1
+    Mounting command: mount
+    Mounting arguments: -t efs -o accesspoint=fsap-05356388be7048aec,tls fs-0d66110f5e994381a:/ /var/lib/kubelet/pods/341b9199-aa1b-4f8e-93c5-ca5f76fd5b9d/volumes/kubernetes.io~csi/pcap-volume/mount
+    Output: Failed to resolve "fs-0d66110f5e994381a.efs.us-east-1.amazonaws.com" - check that your file system ID is correct, and ensure that the VPC has an EFS mount target for this file system ID.
+    See https://docs.aws.amazon.com/console/efs/mount-dns-name for more detail.
+    Attempting to lookup mount target ip address using botocore. Failed to import necessary dependency botocore, please install botocore first.
+      Normal  Pulling  21m  kubelet  Pulling image "ghcr.io/mmguero-dev/malcolm/dirinit:main"
+      Normal  Pulled   21m  kubelet  Successfully pulled image "ghcr.io/mmguero-dev/malcolm/dirinit:main" in 649ms (649ms including waiting)
+      Normal  Created  21m  kubelet  Created container zeek-offline-dirinit-container
+      Normal  Started  21m  kubelet  Started container zeek-offline-dirinit-container
+      Normal  Pulling  21m  kubelet  Pulling image "ghcr.io/mmguero-dev/malcolm/zeek:main"
+      Normal  Pulled   21m  kubelet  Successfully pulled image "ghcr.io/mmguero-dev/malcolm/zeek:main" in 29.435s (29.435s including waiting)
+      Normal  Created  21m  kubelet  Created container zeek-offline-container
+      Normal  Started  21m  kubelet  Started container zeek-offline-container
+    ```
 
-```
-Events:
-  Type     Reason           Age                From               Message
-  ----     ------           ----               ----               -------
-  Warning  LoggingDisabled  67s                fargate-scheduler  Disabled logging because aws-logging configmap was not found. configmap "aws-logging" not found
-  Normal   Scheduled        21s                fargate-scheduler  Successfully assigned malcolm/opensearch-deployment-564d484dcc-f6lmx to fargate-ip-10-0-116-219.ec2.internal
-  Warning  FailedMount      13s (x5 over 21s)  kubelet            MountVolume.SetUp failed for volume "opensearch-volume" : rpc error: code = Internal desc = Could not mount "fs-0bd5b35418afc7fae:/" at "/var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/opensearch-volume/mount": mount failed: exit status 1
-Mounting command: mount
-Mounting arguments: -t efs -o accesspoint=fsap-0ffc3561ba4bcd4c2,tls fs-0bd5b35418afc7fae:/ /var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/opensearch-volume/mount
-Output: Failed to resolve "fs-0bd5b35418afc7fae.efs.us-east-1.amazonaws.com" - check that your file system ID is correct, and ensure that the VPC has an EFS mount target for this file system ID.
-See https://docs.aws.amazon.com/console/efs/mount-dns-name for more detail.
-Attempting to lookup mount target ip address using botocore. Failed to import necessary dependency botocore, please install botocore first.
-  Warning  FailedMount  13s (x5 over 21s)  kubelet  MountVolume.SetUp failed for volume "config-volume" : rpc error: code = Internal desc = Could not mount "fs-0bd5b35418afc7fae:/" at "/var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/config-volume/mount": mount failed: exit status 1
+    * However, things seem to be working?
 
-```
+    ```bash
+    kshell zeek
+    Defaulted container "zeek-offline-container" out of: zeek-offline-container, zeek-offline-dirinit-container (init)
+    root@zeek-offline-deployment-7ffc55d489-rtgfz:/# df|grep 127
+    127.0.0.1:/              9007199254739968        0 9007199254739968   0% /pcap
+    127.0.0.1:/extract_files 9007199254739968        0 9007199254739968   0% /zeek/extract_files
+    127.0.0.1:/upload        9007199254739968        0 9007199254739968   0% /zeek/upload
+    127.0.0.1:/zeek/intel    9007199254739968        0 9007199254739968   0% /opt/zeek/share/zeek/site/intel
+    ```
+
+    * And for the "read-write many" containers, I can see that stuff is actually shared:
+    
+    ```bash
+    $ kshell zeek
+    root@zeek-offline-deployment-7ffc55d489-rtgfz:/# touch /pcap/heythere.txt
+    root@zeek-offline-deployment-7ffc55d489-rtgfz:/# 
+
+    $ kshell arkime
+    root@arkime-deployment-c7f5d47b5-9brc8:/opt/arkime# ls -l /data/pcap/
+    total 12
+    -rw-r--r-- 1 root   root      0 Apr 17 20:24 heythere.txt
+    drwxr-xr-x 2 arkime arkime 6144 Apr 17 20:00 processed
+    drwxrwxr-x 4 arkime arkime 6144 Apr 17 20:00 upload
+    ```
+
 * What about ingress?
 * Malcolm's `./scripts/stop` deletes the namespace, which we don't want to do, so I need to update that or make an option to leave things in place.
 
