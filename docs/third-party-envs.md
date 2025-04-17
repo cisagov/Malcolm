@@ -587,13 +587,16 @@ done
     * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
+* If needed, copy `./Malcolm/config/kubernetes-container-resources.yml.example` to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
+
 * Start Malcolm (**TODO: NOT FINAL**)
 
 ```bash
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
-    --skip-persistent-volume-checks \
+    --inject-resources \
     --no-capture-pods \
-    --no-capabilities
+    --no-capabilities \
+    --skip-persistent-volume-checks
 ```
 
 * Monitor deployment
