@@ -709,7 +709,14 @@ def DeleteNamespace(namespace, deleteRetPerVol=False):
     return results_dict
 
 
-def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dryrun=False):
+def StartMalcolm(
+    namespace,
+    malcolmPath,
+    configPath,
+    profile=PROFILE_MALCOLM,
+    startCapturePods=True,
+    dryrun=False,
+):
     if not namespace:
         namespace = 'malcolm'
 
@@ -855,14 +862,17 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dr
         if not dryrun:
             results_dict['create_from_yaml']['result'] = dict()
         yamlFiles = sorted(
-            list(
-                chain(
-                    *[
-                        glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
-                        for ftype in ['*.yml', '*.yaml']
-                    ]
+            [
+                f
+                for f in chain.from_iterable(
+                    glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
+                    for ftype in ['*.yml', '*.yaml']
                 )
-            )
+                if startCapturePods
+                or not any(
+                    f.endswith(suffix) for suffix in ['-live.yml', '-live.yaml', '-capture.yml', '-capture.yaml']
+                )
+            ]
         )
         for yamlName in yamlFiles:
             # check to make sure the container in this YAML file belongs to this profile
