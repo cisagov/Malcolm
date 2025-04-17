@@ -1360,6 +1360,7 @@ def start():
                 configPath=args.configDir,
                 profile=args.composeProfile,
                 startCapturePods=not args.noCapturePodsStart,
+                noCapabilities=args.noCapabilities,
             )
 
             if dictsearch(startResults, 'error'):
@@ -2819,6 +2820,15 @@ def main():
         const=True,
         default=False,
         help='Do not deploy pods for traffic live capture/analysis (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--no-capabilities',
+        dest='noCapabilities',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Do not specify modifications to container capabilities (only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--reclaim-persistent-volume',
