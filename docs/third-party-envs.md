@@ -552,6 +552,7 @@ done
     ```
 
     * Verify PVs and PVCs have "Bound" status
+    
     ```bash
     $ kubectl get pv -n malcolm
     NAME                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                             STORAGECLASS   REASON   AGE
