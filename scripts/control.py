@@ -1359,6 +1359,7 @@ def start():
                 malcolmPath=MalcolmPath,
                 configPath=args.configDir,
                 profile=args.composeProfile,
+                injectResources=args.injectResources,
                 startCapturePods=not args.noCapturePodsStart,
                 noCapabilities=args.noCapabilities,
             )
@@ -2829,6 +2830,15 @@ def main():
         const=True,
         default=False,
         help='Do not specify modifications to container capabilities (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--inject-resources',
+        dest='injectResources',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--reclaim-persistent-volume',

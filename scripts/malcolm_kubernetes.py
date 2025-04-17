@@ -17,6 +17,7 @@ from pathlib import Path
 from malcolm_common import (
     DotEnvDynamic,
     GetMemMegabytesFromJavaOptsLine,
+    ParseK8sMemoryToMib,
     KubernetesDynamic,
     MalcolmPath,
     NullRepresenter,
@@ -27,6 +28,8 @@ from malcolm_common import (
 )
 from malcolm_utils import (
     deep_get,
+    deep_set,
+    deep_merge_in_place,
     dictsearch,
     get_iterable,
     file_contents,
@@ -714,6 +717,7 @@ def StartMalcolm(
     malcolmPath,
     configPath,
     profile=PROFILE_MALCOLM,
+    injectResources=False,
     startCapturePods=True,
     noCapabilities=False,
     dryrun=False,
@@ -859,6 +863,16 @@ def StartMalcolm(
                         if not results_dict[resultsEntry]['error'][os.path.basename(envFileName)]:
                             results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = str(x)
 
+        containerResources = None
+        if injectResources:
+            resourcesFilePath = os.path.join(configPath, 'kubernetes-container-resources.yml')
+            if os.path.isfile(resourcesFilePath):
+                with open(resourcesFilePath, 'r') as resourcesFileHandle:
+                    if resourcesFileContents := list(
+                        yamlImported.YAML(typ='safe', pure=True).load_all(resourcesFileHandle)
+                    ) and isinstance(resourcesFileContents[0], dict):
+                        containerResources = resourcesFileContents[0]
+
         # apply manifests
         if not dryrun:
             results_dict['create_from_yaml']['result'] = dict()
@@ -935,7 +949,9 @@ def StartMalcolm(
                                     modified = True
 
                                 # for resource requests we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
-                                if containerName in CONTAINER_JAVA_OPTS_VARS:
+                                #   or that have been specified in kubernetes-container-resources.yml when injectResources is True
+                                if (containerName in CONTAINER_JAVA_OPTS_VARS) or (containerName in containerResources):
+
                                     # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
                                     containerEnvs = {}
                                     if (
@@ -949,41 +965,27 @@ def StartMalcolm(
                                         ][containerIdx]['envFrom']:
                                             if ('configMapRef' in env) and ('name' in env['configMapRef']):
                                                 containerEnvs.update(namedEnvs.get(env['configMapRef']['name'], {}))
-                                    # proceed if the environment variable in CONTAINER_JAVA_OPTS_VARS for this container
-                                    #  is defined in this container's runtime environment variables
-                                    if CONTAINER_JAVA_OPTS_VARS[containerName] in containerEnvs:
-                                        # calculate mebibytes for resources request from JAVA_OPTS line and proceed if it's > 0
-                                        if requestMib := GetMemMegabytesFromJavaOptsLine(
+
+                                    # if the memory request from the environment variable exceeds that from the inject YAML, use that instead
+                                    injectedContents = containerResources.get(containerName, {})
+                                    if (
+                                        requestMib := GetMemMegabytesFromJavaOptsLine(
                                             containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
-                                        ):
-                                            if (
-                                                'resources'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources'] = {}
-                                            if (
-                                                'requests'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]['resources']
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources']['requests'] = {}
-                                            if (
-                                                'memory'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]['resources']['requests']
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources']['requests']['memory'] = f'{requestMib}Mi'
-                                            modified = True
+                                        )
+                                    ) > ParseK8sMemoryToMib(injectedContents, ['resources', 'requests', 'memory'], 0):
+                                        deep_set(
+                                            injectedContents, ['resources', 'requests', 'memory'], f"{requestMib}Mi"
+                                        )
+
+                                    # inject the stuff into the container
+                                    if injectedContents:
+                                        deep_merge_in_place(
+                                            injectedContents,
+                                            manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                                containerIdx
+                                            ],
+                                        )
+                                        modified = True
 
                 # if we modified the manifest write out the modified YAML to a temporary file
                 with temporary_filename(suffix='.yml') if modified else nullcontext() as tmpYmlFileName:

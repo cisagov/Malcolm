@@ -75,6 +75,13 @@ spec:
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

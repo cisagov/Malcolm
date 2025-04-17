@@ -203,6 +203,26 @@ def deep_set(d, keys, value, deleteIfNone=False):
 
 
 ###################################################################################################
+# Recursively merges 'source' dict into 'destination' dict. Values from 'source' override those
+#    in 'destination' at the same path.
+def deep_merge(source, destination):
+    for key, value in source.items():
+        if isinstance(value, dict) and isinstance(destination.get(key), dict):
+            destination[key] = deep_merge(value, destination[key])
+        else:
+            destination[key] = value
+    return destination
+
+
+def deep_merge_in_place(source, destination):
+    for key, value in source.items():
+        if isinstance(value, dict) and isinstance(destination.get(key), dict):
+            deep_merge(value, destination[key])
+        else:
+            destination[key] = value
+
+
+###################################################################################################
 # recursive dictionary key search
 def dictsearch(d, target):
     val = filter(
