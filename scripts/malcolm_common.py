@@ -225,7 +225,7 @@ def GetMemMegabytesFromJavaOptsLine(val):
 
 ##################################################################################################
 def ParseK8sMemoryToMib(val):
-    val = val.strip()
+    val = str(val).strip()
     units = {'Ki': 1 / 1024, 'Mi': 1, 'Gi': 1024, 'Ti': 1024 * 1024}
 
     for unit in units:

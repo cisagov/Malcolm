@@ -246,10 +246,9 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'zeek-offline',
 ]
 
-CONTAINER_JAVA_OPTS_VARS = {
-    'opensearch': 'OPENSEARCH_JAVA_OPTS',
-    'logstash': 'LS_JAVA_OPTS',
-}
+CONTAINER_JAVA_OPTS_VARS = defaultdict(lambda: None)
+CONTAINER_JAVA_OPTS_VARS['opensearch'] = 'OPENSEARCH_JAVA_OPTS'
+CONTAINER_JAVA_OPTS_VARS['logstash'] = 'LS_JAVA_OPTS'
 
 
 ###################################################################################################
@@ -863,15 +862,17 @@ def StartMalcolm(
                         if not results_dict[resultsEntry]['error'][os.path.basename(envFileName)]:
                             results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = str(x)
 
-        containerResources = None
+        containerResources = {}
         if injectResources:
             resourcesFilePath = os.path.join(configPath, 'kubernetes-container-resources.yml')
             if os.path.isfile(resourcesFilePath):
                 with open(resourcesFilePath, 'r') as resourcesFileHandle:
                     if resourcesFileContents := list(
                         yamlImported.YAML(typ='safe', pure=True).load_all(resourcesFileHandle)
-                    ) and isinstance(resourcesFileContents[0], dict):
-                        containerResources = resourcesFileContents[0]
+                    ):
+                        containerResources = (
+                            resourcesFileContents[0] if isinstance(resourcesFileContents[0], dict) else {}
+                        )
 
         # apply manifests
         if not dryrun:
@@ -972,12 +973,14 @@ def StartMalcolm(
                                         requestMib := GetMemMegabytesFromJavaOptsLine(
                                             containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
                                         )
-                                    ) > ParseK8sMemoryToMib(injectedContents, ['resources', 'requests', 'memory'], 0):
+                                    ) > ParseK8sMemoryToMib(
+                                        deep_get(injectedContents, ['resources', 'requests', 'memory'], 0)
+                                    ):
                                         deep_set(
                                             injectedContents, ['resources', 'requests', 'memory'], f"{requestMib}Mi"
                                         )
 
-                                    # inject the stuff into the container
+                                    # inject the stuff into the container manifest
                                     if injectedContents:
                                         deep_merge_in_place(
                                             injectedContents,
