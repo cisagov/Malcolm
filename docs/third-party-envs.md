@@ -22,6 +22,7 @@ This section outlines the process of using the [AWS Command Line Interface (CLI)
 
 * [aws cli](https://aws.amazon.com/cli/)
     - the AWS Command Line Interface with functioning access to AWS infrastructure
+
     ```bash
     $ curl -sSL \
         -o /tmp/awscli.zip \
@@ -271,6 +272,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
 
 * Install prerequisites (may vary by platform)
     * `curl`, `unzip`, and `python3`
+
     ```bash
     $ sudo apt-get -y update
     …
@@ -284,7 +286,9 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
         python3-kubernetes
     …
     ```
+
     * [`eksctl`](https://eksctl.io/)
+
     ```bash
     $ curl -sSL \
         -o /tmp/eksctl.tar.gz \
@@ -294,7 +298,9 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     $ eksctl version
     0.207.0
     ```
+
     * [`aws` Command Line Interface](https://aws.amazon.com/cli/)
+
     ```bash
     $ curl -sSL \
         -o /tmp/awscli.zip \
@@ -306,7 +312,9 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     $ aws --version
     aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
     ```
+
     * [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
+
     ```bash
     $ curl -sSL \
         -o /tmp/kubectl \
@@ -319,6 +327,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
 
 * Get Malcolm (**TODO: NOT FINAL**)
     * These are **not** the final instructions for doing this, as in developing these instructions I've gone through and made some modifications to the Malcolm Kubernetes manifests that have not been released yet (e.g., adding `role` labels to the manifests). But for now those as-yet unreleased changes can be gotten from [here](https://github.com/mmguero-dev/malcolm/); however, the `image:` in the manifests needs to be changed from `idaholab` to `mmguero-dev` for the org and from `25.04.0` to `main` for the version, like this:
+
     ```bash
     $ git clone --single-branch --depth 1 https://github.com/mmguero-dev/Malcolm
     $ sed -i "s@ghcr.io/idaholab@ghcr.io/mmguero-dev@g" ./Malcolm/kubernetes/*.yml
@@ -512,13 +521,16 @@ done
 
 * Create Persistent Volumes (PV) and Persistent Volume Claims (PVC) using static provisioning
     * Ensure file system ID is **exported** in `$EFS_ID`
+    
     ```bash
     $ export EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
         --query 'FileSystems[0].FileSystemId' --output text)
 
     $ echo $EFS_ID
     ```
+
     * Ensure the Access Point IDs are **exported** in `$EFS_ACCESS_POINT_CONFIG_ID`, etc.
+    
     ```bash
     $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
         AP_UPPER=$(echo "$AP" | tr 'a-z-' 'A-Z_'); \
@@ -532,10 +544,13 @@ done
 
     $ env | grep EFS_ACCESS_POINT_
     ```
+
     * Create and verify PVs and PVCs to be used by Malcolm services
+
     ```bash
     $ envsubst < ./Malcolm/kubernetes/01-volumes-aws-efs.yml.example | kubectl apply -f -
     ```
+
     * Verify PVs and PVCs have "Bound" status
     ```bash
     $ kubectl get pv -n malcolm
@@ -582,6 +597,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 
 * Monitor deployment
     * Check pods
+
     ```bash
     $ kubectl get pods -n malcolm -w
     kubectl get pods -n malcolm -w
@@ -607,15 +623,20 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     upload-deployment-76c6c49cb5-9zdtp              1/1     Running    0          3m7s
     zeek-offline-deployment-c56f7f46f-m62sd         1/1     Running    0          3m5s
     ```
+
     * Check all resources
+
     ```bash
     $ kubectl get all -n malcolm
     …
     ```
+
     * Watch logs
+
     ```bash
     $ kubectl logs --follow=true -n malcolm --all-containers <pod>
     ```
+
     * Get all events in the namespace for more detailed information and debugging
     ```bash
     $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
@@ -632,6 +653,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 * Look at storage requests for PVs/PVCs
     * We could probably scale down a lot? We're used to deploying these on physical servers with TiBs available storage
 * Figuring out EFS mounting issues
+
 ```
 Events:
   Type     Reason           Age                From               Message
