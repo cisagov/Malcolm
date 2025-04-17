@@ -839,6 +839,41 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     drwxrwxr-x 4 arkime arkime 6144 Apr 17 20:00 upload
     ```
 
+    * Describing the addon (`aws eks describe-addon --cluster-name malcolm-cluster --addon-name aws-efs-csi-driver`)
+
+    ```json
+    {
+        "addon": {
+            "addonName": "aws-efs-csi-driver",
+            "clusterName": "malcolm-cluster",
+            "status": "DEGRADED",
+            "addonVersion": "v2.1.7-eksbuild.1",
+            "health": {
+                "issues": [
+                    {
+                        "code": "InsufficientNumberOfReplicas",
+                        "message": "The add-on is unhealthy because all deployments have all pods unscheduled Pod not supported on Fargate: invalid SecurityContext fields: Privileged"
+                    }
+                ]
+            },
+            "addonArn": "arn:aws:eks:us-east-1:422382356529:addon/malcolm-cluster/aws-efs-csi-driver/7ccb22a7-98d7-bde2-4c76-404a1a4784e2",
+            "createdAt": "2025-04-17T13:52:20.276000-06:00",
+            "modifiedAt": "2025-04-17T13:52:34.383000-06:00",
+            "serviceAccountRoleArn": "arn:aws:iam::422382356529:role/efs-csi-controller-sa",
+            "tags": {}
+        }
+    }
+    ```
+
+    * My hypothesis
+        * The EFS CSI Controller (the "control plane" part of the add-on) is deployed and working — it's a Deployment, and Fargate can run that part.
+        * The EFS CSI Node (which is a DaemonSet) is supposed to run on every node to handle volume mounts the "traditional" CSI way — but with Fargate it's not supported
+        * The reason it still works:
+            * I have configured static EFS mounts via access points and the pod spec directly, so pods themselves are directly mounting the EFS volumes, so we don’t need the EFS CSI node DaemonSet
+            * Fargate won't run it anyway (because it uses privileged: true)
+            * So the add-on status is "degraded" (because it checks the DaemonSet)
+            * But the actual workload is using EFS just fine
+
 * What about ingress?
 * Malcolm's `./scripts/stop` deletes the namespace, which we don't want to do, so I need to update that or make an option to leave things in place.
 
