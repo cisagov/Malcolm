@@ -651,11 +651,6 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 
 # Current issues
 
-* Look at CPU/RAM resources
-    * These numbers may not be good, I really just took a stab at it... also the user probably wants to tune?
-    * These resource sections are not in the vanilla manifests, how can we somehow maintain them so they're here for fargate but not in the yml files for every other Malcolm K8s installation?
-* Look at storage requests for PVs/PVCs
-    * We could probably scale down a lot? We're used to deploying these on physical servers with TiBs available storage
 * Figuring out EFS mounting issues
 
 ```
@@ -673,28 +668,9 @@ Attempting to lookup mount target ip address using botocore. Failed to import ne
   Warning  FailedMount  13s (x5 over 21s)  kubelet  MountVolume.SetUp failed for volume "config-volume" : rpc error: code = Internal desc = Could not mount "fs-0bd5b35418afc7fae:/" at "/var/lib/kubelet/pods/27b67517-69ef-4044-8639-2f271cd20d8f/volumes/kubernetes.io~csi/config-volume/mount": mount failed: exit status 1
 
 ```
-* Various pods won't start:
-    * `Pod not supported on Fargate: invalid SecurityContext fields: Capabilities added: IPC_LOCK, SYS_RESOURCE`
-    * `-live`/`-capture` pods may not make sense on Fargate anyway, so we could remove those?
-    * OpenSearch and Logstash are still affected
-        * commenting out?
 * What about ingress?
 * Malcolm's `./scripts/stop` deletes the namespace, which we don't want to do, so I need to update that or make an option to leave things in place.
-* suggestion when creating efs driver addon?
 
-```bash
-$ eksctl create addon \
-  --name aws-efs-csi-driver \
-  --cluster malcolm-cluster \
-  --service-account-role-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/efs-csi-controller-sa \
-  --force \
-  --region us-east-1
-2025-04-16 14:51:21 [ℹ]  Kubernetes version "1.28" in use by cluster "malcolm-cluster"
-2025-04-16 14:51:22 [ℹ]  IRSA is set for "aws-efs-csi-driver" addon; will use this to configure IAM permissions
-2025-04-16 14:51:22 [!]  the recommended way to provide IAM permissions for "aws-efs-csi-driver" addon is via pod identity associations; after addon creation is completed, run `eksctl utils migrate-to-pod-identity`
-2025-04-16 14:51:22 [ℹ]  using provided ServiceAccountRoleARN "arn:aws:iam::422382356529:role/efs-csi-controller-sa"
-2025-04-16 14:51:22 [ℹ]  creating addon: aws-efs-csi-driver
-```
 
 ## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI) for Use on Amazon Web Services (AWS)
 

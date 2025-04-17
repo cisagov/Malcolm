@@ -8,7 +8,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 500Gi
+    storage: 100Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -31,7 +31,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 500Gi
+      storage: 100Gi
   volumeName: pcap-volume
 
 ---
@@ -44,7 +44,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 250Gi
+    storage: 50Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -67,7 +67,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 250Gi
+      storage: 50Gi
   volumeName: zeek-volume
 
 ---
@@ -80,7 +80,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 100Gi
+    storage: 25Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -103,7 +103,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 100Gi
+      storage: 25Gi
   volumeName: suricata-volume
 
 ---
@@ -116,7 +116,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 25Gi
+    storage: 10Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -139,7 +139,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 25Gi
+      storage: 10Gi
   volumeName: config-volume
 
 ---
@@ -152,7 +152,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 25Gi
+    storage: 10Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteMany
@@ -175,7 +175,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 25Gi
+      storage: 10Gi
   volumeName: runtime-logs-volume
 
 ---
@@ -188,7 +188,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 500Gi
+    storage: 150Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -211,7 +211,7 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 500Gi
+      storage: 150Gi
   volumeName: opensearch-volume
 
 ---
@@ -224,7 +224,7 @@ metadata:
     namespace: malcolm
 spec:
   capacity:
-    storage: 500Gi
+    storage: 150Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -247,5 +247,5 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 500Gi
+      storage: 150Gi
   volumeName: opensearch-backup-volume
