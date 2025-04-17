@@ -326,6 +326,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     ```
 
 * Create cluster for Fargate
+
 ```bash
 $ eksctl create cluster \
     --name malcolm-cluster \
@@ -339,6 +340,7 @@ $ eksctl create cluster \
 ```
 
 * Create IAM policy for EFS CSI Driver
+
 ```bash
 $ aws iam create-policy \
     --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
@@ -382,6 +384,7 @@ $ aws iam create-policy \
 ```
 
 * Create service account and attach the policy
+
 ```bash
 $ eksctl create iamserviceaccount \
     --cluster malcolm-cluster \
@@ -394,6 +397,7 @@ $ eksctl create iamserviceaccount \
 ```
 
 * Install EFS CSI driver
+
 ```bash
 $ eksctl create addon \
   --name aws-efs-csi-driver \
@@ -404,11 +408,13 @@ $ eksctl create addon \
 ```
 
 * Create namespace
+
 ```bash
 $ kubectl create namespace malcolm
 ```
 
 * Create Fargate profiles for Malcolm components based on pods' "role" labels
+
 ```bash
 $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | sort -u); do \
     eksctl create fargateprofile \
@@ -421,6 +427,7 @@ done
 ```
 
 * Create EFS file system and get file system ID
+
 ```bash
 $ aws efs create-file-system \
     --creation-token malcolm-efs \
@@ -437,6 +444,7 @@ $ echo $EFS_ID
 ```
 
 * Create file system [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html)
+
 ```bash
 $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
     aws efs create-access-point \
@@ -448,6 +456,7 @@ done
 ```
 
 * Get VPC ID
+
 ```bash
 $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
         --query "cluster.resourcesVpcConfig.vpcId" --output text)
@@ -456,6 +465,7 @@ $ echo $VPC_ID
 ```
 
 * Create Security Group for EFS and get Security Group ID
+
 ```bash
 $ aws ec2 create-security-group \
     --group-name malcolm-efs-sg \
@@ -470,6 +480,7 @@ $ echo $SG_ID
 ```
 
 * Add NFS inbound rule to Security Group
+
 ```bash
 $ aws ec2 authorize-security-group-ingress \
     --group-id $SG_ID \
@@ -479,6 +490,7 @@ $ aws ec2 authorize-security-group-ingress \
 ```
 
 * Get subnet IDs and create EFS mount targets
+
 ```bash
 $ SUBNETS=$(aws ec2 describe-subnets \
     --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:aws:cloudformation:logical-id,Values=SubnetPrivate*" \
@@ -488,6 +500,7 @@ $ echo $SUBNETS
 ```
 
 * Create mount targets
+
 ```bash
 $ for subnet in $SUBNETS; do \
     aws efs create-mount-target \
@@ -559,6 +572,7 @@ done
     * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
 * Start Malcolm (**TODO: NOT FINAL**)
+
 ```bash
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --skip-persistent-volume-checks \
@@ -641,6 +655,7 @@ Attempting to lookup mount target ip address using botocore. Failed to import ne
 * What about ingress?
 * Malcolm's `./scripts/stop` deletes the namespace, which we don't want to do, so I need to update that or make an option to leave things in place.
 * suggestion when creating efs driver addon?
+
 ```bash
 $ eksctl create addon \
   --name aws-efs-csi-driver \
