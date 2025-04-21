@@ -1359,6 +1359,7 @@ def start():
                 malcolmPath=MalcolmPath,
                 configPath=args.configDir,
                 profile=args.composeProfile,
+                serviceType=args.serviceType,
                 injectResources=args.injectResources,
                 startCapturePods=not args.noCapturePodsStart,
                 noCapabilities=args.noCapabilities,
@@ -2839,6 +2840,15 @@ def main():
         const=True,
         default=False,
         help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--service-type',
+        required=False,
+        dest='serviceType',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_SERVICE_TYPE', ''),
+        help='Type for exposed Kubernetes services (e.g., ClusterIP, LoadBalancer, etc.; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--reclaim-persistent-volume',
