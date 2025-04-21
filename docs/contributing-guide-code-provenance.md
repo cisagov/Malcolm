@@ -26,7 +26,7 @@ Malcolm's source code and release artifacts are made up of the following:
 * Desktop OS environments for [Malcolm](malcolm-hedgehog-e2e-iso-install.md#HedgehogInstallAndConfig)
     - These are ISO-installed environments that are primarily used for bare-metal or virtual machine installations. The Malcolm environment includes the container images mentioned above.
 * The actual "[Malcolm source code](({{ site.github.repository_url }}))", which includes:
-    - [scripts]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/main/scripts/) for installing and configuring Malcolm
+    - [scripts]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/scripts/) for installing and configuring Malcolm
     - "recipes" and contents used for building images
         + [container]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/Dockerfiles/) images
         + [Malcolm]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/malcolm-iso) ISO installer
