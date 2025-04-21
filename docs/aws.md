@@ -1,46 +1,90 @@
 # <a name="AWS"></a>Deploying Malcolm on Amazon Web Services (AWS)
 
 * [Deploying Malcolm on Amazon Web Services (AWS)](#AWS)
-    - [Installing Malcolm in an EC2](#AWSEC2)
-        + [Prerequisites](#AWSEC2Prerequisites)
-        + [Procedure](#AWSEC2Procedure)
-            - [Instance creation](#AWSEC2Instance)
-            - [Malcolm setup](#AWSEC2Install)
-            - [Running Malcolm](#AWSEC2Run)
+    - [Installing prerequisites](#AWSPrereqInstall)
+    - [Installing Malcolm in an EC2 instance](#AWSEC2)
+        + [Instance creation](#AWSEC2Instance)
+        + [Malcolm setup](#AWSEC2Install)
+        + [Running Malcolm](#AWSEC2Run)
     - [Installing Malcolm on Fargate](#AWSFargate)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
-        - [Prerequisites](#Prerequisites)
-        - [Procedure](#Procedure)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
-        + [Prerequisites](#AWSAMIPrerequisites)
-        + [Procedure](#AWSAMIProcedure)
-            * [Using MFA](#AWSAMIMFA)
+        + [Using MFA](#AWSAMIMFA)
     - [Attribution and Disclaimer](#AWSAttribution)
 
-## <a name="AWSEC2"></a>Installing Malcolm in an EC2
+## <a name="AWSPrereqInstall"></a>Installing prerequisites
+
+The sections below make use of various command line tools. Installation may vary from platform to platform; however, this section gives some basic examples of how to install these tools in *nix-based environments. Not every guide in this document requires each of the following commands.
+
+* [aws cli](https://aws.amazon.com/cli/)
+
+```bash
+$ curl -fsSL \
+    -o /tmp/awscli.zip \
+    "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
+$ unzip -d /tmp /tmp/awscli.zip
+…
+$ sudo /tmp/aws/install
+You can now run: /usr/local/bin/aws --version
+$ aws --version
+aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
+```
+
+* [`eksctl`](https://eksctl.io/)
+
+```bash
+$ curl -fsSL \
+    -o /tmp/eksctl.tar.gz \
+    "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_$(uname -m | sed 's/^x86_64$/amd64/').tar.gz"
+$ tar -xzf /tmp/eksctl.tar.gz -C /tmp && rm /tmp/eksctl.tar.gz
+$ sudo mv /tmp/eksctl /usr/local/bin/
+$ eksctl version
+0.207.0
+```
+
+* [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
+
+```bash
+$ curl -fsSL \
+    -o /tmp/kubectl \
+    "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/^x86_64$/amd64/' | sed 's/^aarch64$/arm64/')/kubectl"
+$ chmod 755 /tmp/kubectl
+$ sudo mv /tmp/kubectl /usr/local/bin/
+$ kubectl version
+Client Version: v1.32.3
+```
+
+* [`helm`](https://helm.sh/)
+
+```bash
+$ curl -fsSL \
+    -o /tmp/get_helm.sh \
+    https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+$ chmod 700 /tmp/get_helm.sh
+$ /tmp/get_helm.sh
+$ helm version
+version.BuildInfo{Version:"v3.17.3", GitCommit:"e4da49785aa6e6ee2b86efd5dd9e43400318262b", GitTreeState:"clean", GoVersion:"go1.23.7"}
+```
+
+* [`packer`](https://developer.hashicorp.com/packer)
+
+```bash
+$ PACKER_VERSION="$(curl -fsSL 'https://releases.hashicorp.com/packer/' | grep -Po 'href="/packer/[^"]+"' | sort --version-sort | cut -d'/' -f3 | tail -n 1)"
+$ curl -fsSL \
+    -o /tmp/packer.zip \
+    "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_$(uname -m | sed 's/^x86_64$/amd64/' | sed 's/^aarch64$/arm64/').zip"
+$ unzip -d /tmp /tmp/packer.zip
+$ chmod 755 /tmp/packer
+$ sudo mv /tmp/packer /usr/local/bin/
+$ packer --version
+Packer v1.12.0
+```
+
+## <a name="AWSEC2"></a>Installing Malcolm in an EC2 instance
 
 This section outlines the process of using the [AWS Command Line Interface (CLI)](https://aws.amazon.com/cli/) to instantiate an [EC2](https://aws.amazon.com/ec2/) instance running Malcolm. This section assumes good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
 
-### <a name="AWSEC2Prerequisites"></a> Prerequisites
-
-* [aws cli](https://aws.amazon.com/cli/)
-    - the AWS Command Line Interface with functioning access to AWS infrastructure
-
-    ```bash
-    $ curl -sSL \
-        -o /tmp/awscli.zip \
-        "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
-    $ unzip -d /tmp /tmp/awscli.zip
-    …
-    $ sudo /tmp/aws/install
-    You can now run: /usr/local/bin/aws --version
-    $ aws --version
-    aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
-    ```
-
-### <a name="AWSEC2Procedure"></a> Procedure
-
-#### <a name="AWSEC2Instance"></a> Instance creation
+### <a name="AWSEC2Instance"></a> Instance creation
 
 These steps are to be run on a Linux, Windows, or macOS system in a command line environment with the [AWS Command Line Interface (AWS CLI)](https://aws.amazon.com/cli/) installed. Users should adjust these steps to their own use cases in terms of naming resources, setting security policies, etc.
 
@@ -121,7 +165,7 @@ $ aws ec2 describe-instances \
     --query "Reservations[].Instances[].{ID:InstanceId,IP:PublicIpAddress,State:State.Name}"
 ```
 
-#### <a name="AWSEC2Install"></a> Malcolm setup
+### <a name="AWSEC2Install"></a> Malcolm setup
 
 The next steps are to be run as the `ubuntu` user inside the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in the first step.
 
@@ -210,7 +254,7 @@ all        Configure all authentication-related settings
 …
 ```
 
-#### <a name="AWSEC2Run"></a> Running Malcolm
+### <a name="AWSEC2Run"></a> Running Malcolm
 
 * Start Malcolm
     - Running `./scripts/start` in the Malcolm installation directory will [start Malcolm](running.md#Starting).
@@ -290,44 +334,6 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     …
     ```
 
-    * [`eksctl`](https://eksctl.io/)
-
-    ```bash
-    $ curl -sSL \
-        -o /tmp/eksctl.tar.gz \
-        "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_$(uname -m | sed 's/^x86_64$/amd64/').tar.gz"
-    $ tar -xzf /tmp/eksctl.tar.gz -C /tmp && rm /tmp/eksctl.tar.gz
-    $ sudo mv /tmp/eksctl /usr/local/bin/
-    $ eksctl version
-    0.207.0
-    ```
-
-    * [`aws` Command Line Interface](https://aws.amazon.com/cli/)
-
-    ```bash
-    $ curl -sSL \
-        -o /tmp/awscli.zip \
-        "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip"
-    $ unzip -d /tmp /tmp/awscli.zip
-    …
-    $ sudo /tmp/aws/install
-    You can now run: /usr/local/bin/aws --version
-    $ aws --version
-    aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
-    ```
-
-    * [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
-
-    ```bash
-    $ curl -sSL \
-        -o /tmp/kubectl \
-        "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed 's/^x86_64$/amd64/' | sed 's/^aarch64$/arm64/')/kubectl"
-    $ chmod 755 /tmp/kubectl
-    $ sudo mv /tmp/kubectl /usr/local/bin/
-    $ kubectl version
-    Client Version: v1.32.3
-    ```
-
 * Get Malcolm (**TODO: NOT FINAL**)
     * These are **not** the final instructions for doing this, as in developing these instructions I've gone through and made some modifications to the Malcolm Kubernetes manifests that have not been released yet (e.g., adding `role` labels to the manifests). But for now those as-yet unreleased changes can be gotten from [here](https://github.com/mmguero-dev/malcolm/); however, the `image:` in the manifests needs to be changed from `idaholab` to `mmguero-dev` for the org and from `25.04.0` to `main` for the version, like this:
 
@@ -351,51 +357,15 @@ $ eksctl create cluster \
     --node-private-networking
 ```
 
-* Create IAM policy for EFS CSI Driver
+* Create IAM policy for EFS CSI driver
 
 ```bash
 $ aws iam create-policy \
-    --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
-    --policy-document '{
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "elasticfilesystem:DescribeAccessPoints",
-            "elasticfilesystem:DescribeFileSystems",
-            "elasticfilesystem:DescribeMountTargets",
-            "ec2:DescribeAvailabilityZones"
-          ],
-          "Resource": "*"
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "elasticfilesystem:CreateAccessPoint"
-          ],
-          "Resource": "*",
-          "Condition": {
-            "StringLike": {
-              "aws:RequestTag/efs.csi.aws.com/cluster": "true"
-            }
-          }
-        },
-        {
-          "Effect": "Allow",
-          "Action": "elasticfilesystem:DeleteAccessPoint",
-          "Resource": "*",
-          "Condition": {
-            "StringEquals": {
-              "aws:ResourceTag/efs.csi.aws.com/cluster": "true"
-            }
-          }
-        }
-      ]
-    }'
+  --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
+  --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-driver/refs/heads/master/docs/iam-policy-example.json')"
 ```
 
-* Create service account and attach the policy
+* Create service account for EFS CSI driver
 
 ```bash
 $ eksctl create iamserviceaccount \
@@ -408,15 +378,25 @@ $ eksctl create iamserviceaccount \
     --region us-east-1
 ```
 
-* Install EFS CSI driver
+* Create IAM policy for AWS load balancer
 
 ```bash
-$ eksctl create addon \
-  --name aws-efs-csi-driver \
-  --cluster malcolm-cluster \
-  --service-account-role-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/efs-csi-controller-sa \
-  --force \
-  --region us-east-1
+$ aws iam create-policy \
+  --policy-name AmazonAWS_Load_Balancer_Controller_Policy \
+  --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json')"
+```
+
+* Create service account for AWS load balancer
+
+```bash
+$ eksctl create iamserviceaccount \
+    --cluster malcolm-cluster \
+    --namespace kube-system \
+    --name aws-alb-controller-sa \
+    --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy \
+    --approve \
+    --override-existing-serviceaccounts \
+    --region us-east-1
 ```
 
 * Create namespace
@@ -568,7 +548,6 @@ done
     zeek-volume                250Gi      RWX            Retain           Bound    malcolm/zeek-claim                efs-sc                  2m12s
 
     $ kubectl get pvc -n malcolm
-    kubectl get pvc -n malcolm
     NAME                      STATUS   VOLUME                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
     config-claim              Bound    config-volume              25Gi       RWX            efs-sc         2m32s
     opensearch-backup-claim   Bound    opensearch-backup-volume   500Gi      RWO            efs-sc         2m31s
@@ -579,8 +558,61 @@ done
     zeek-claim                Bound    zeek-volume                250Gi      RWX            efs-sc         2m33s
     ```
 
+* Install AWS Load Balancer Controller via Helm
+
+```bash
+$ helm repo add eks https://aws.github.io/eks-charts
+…
+$ helm repo update
+…
+$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=malcolm-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-alb-controller-sa \
+  --set region=us-east-1 \
+  --set vpcId=$VPC_ID
+```
+
+* Request a certificate and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
+
+```bash
+$ aws acm request-certificate \
+  --domain-name malcolm.example.org \
+  --validation-method DNS \
+  --region us-east-1
+
+$ CERT_ARN=$(aws acm list-certificates \
+    --region us-east-1 \
+    --query "CertificateSummaryList[?DomainName=='malcolm.example.org'].CertificateArn" \
+    --output text)
+```
+
+* Get the DNS validation record from ACM
+
+```bash
+$ VALIDATION_RECORD=$(aws acm describe-certificate \
+  --certificate-arn "$CERT_ARN" \
+  --region us-east-1 \
+  --query "Certificate.DomainValidationOptions[0].ResourceRecord" \
+  --output json)
+
+$ echo $VALIDATION_RECORD
+```
+
+* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
+
+* Periodically check the status of the certificate until it has changed from `PENDING_VALIDATION` to `ISSUED`.
+
+```bash
+$ aws acm describe-certificate \
+  --certificate-arn "$CERT_ARN" \
+  --region us-east-1 \
+  --query "Certificate.Status"
+```
+
 * Configure Malcolm
-    * `./Malcolm/scripts/install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * `./Malcolm/scripts/configure -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * Malcolm's configuration scripts will guide users through the setup process.
     * Use the following resources to answer the installation and configuration questions:
         * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
@@ -590,17 +622,34 @@ done
     * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
-* If needed, copy `./Malcolm/config/kubernetes-container-resources.yml.example` to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
+* Copy `./Malcolm/config/kubernetes-container-resources.yml.example` to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
 
-* Start Malcolm (**TODO: NOT FINAL**)
+* Copy `./Malcolm/kubernetes/99-ingress-aws-alb.yml.example` to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTP(S) requests and the NLB controller for TCP connections to Logstash and Filebeat. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
+    * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
+    * The `alb.ingress.kubernetes.io/certificate-arn` value to be replaced with the certificate ARN for the domain name (`$CERT_ARN` from a previous step).
+
+* Start Malcolm
 
 ```bash
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --inject-resources \
+    --service-type LoadBalancer \
     --no-capture-pods \
     --no-capabilities \
     --skip-persistent-volume-checks
 ```
+
+* Get the ALB hostname for the ALB ingress created from `./Malcolm/kubernetes/99-ingress-aws-alb.yml`
+
+```bash
+$ ALB_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+
+$ echo $ALB_HOSTNAME
+```
+
+* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$ALB_HOSTNAME`. Wait five to ten minutes for DNS to propogate.
+
+* Open a web browser to connect to the Malcolm Fargate cluster (e.g., `https://malcolm.example.org`)
 
 * Monitor deployment
     * Check pods
@@ -652,7 +701,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 
 * Stop Malcolm (**TODO**)
 
-# Current issues
+### Current issues
 
 * Figuring out EFS mounting issues
     * I'm gettting these warnings (using the `zeek-offline` container as an example, but it's not just that)
@@ -889,13 +938,6 @@ This is a work-in-progress document that is still a bit rough around the edges. 
 This section assumes good working knowledge of Amazon Web Services (AWS) and Amazon Elastic Kubernetes Service (EKS). Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
-### <a name="EKSPrerequisites"></a> Prerequisites
-
-* [aws cli](https://aws.amazon.com/cli/) - the AWS Command Line Interface with functioning access to the AWS infrastructure
-* [eksctl](https://eksctl.io/) - the official CLI for Amazon EKS
-
-### <a name="EKSProcedure"></a> Procedure
-
 1. Create a [Virtual Private Cloud (VPC)](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
     * subnets in at least 2 availability zones
     * tag private subnets with `kubernetes.io/role/internal-elb`: `1`
@@ -951,19 +993,6 @@ This section assumes good working knowledge of Amazon Web Services (AWS) and Ama
 ## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI)
 
 This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI for either the x86-64 or arm64 CPU architecture. This section assumes good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
-
-### <a name="AWSAMIPrerequisites"></a> Prerequisites
-
-* [packer](https://www.packer.io/)
-    - the packer command-line tool ([download](https://developer.hashicorp.com/packer/downloads))
-* [aws cli](https://aws.amazon.com/cli/)
-    - the AWS Command Line Interface with functioning access to AWS infrastructure
-* AWS access key ID and secret access key
-    - [AWS security credentials](https://docs.aws.amazon.com/IAM/latest/UserGuide/security-creds.html)
-* ensure the AWS account used for packer has minimal required permissions
-    - [Amazon AMI builder](https://developer.hashicorp.com/packer/plugins/builders/amazon)
-
-### <a name="AWSAMIProcedure"></a> Procedure
 
 The files referenced in this section can be found in [scripts/third-party-environments/aws/ami]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-environments/aws/ami).
 
