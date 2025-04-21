@@ -14,7 +14,7 @@
 
 ## <a name="AWSPrereqInstall"></a>Installing prerequisites
 
-The sections below make use of various command line tools. Installation may vary from platform to platform; however, this section gives some basic examples of how to install these tools in *nix-based environments. Not every guide in this document requires each of the following commands.
+The sections below make use of various command line tools. Installation may vary from platform to platform; however, this section gives some basic examples of how to install these tools in \*nix-based environments. Not every guide in this document requires each of the following commands.
 
 * [`aws`, the AWS Command Line Interface](https://aws.amazon.com/cli/)
 
@@ -607,7 +607,7 @@ $ aws acm describe-certificate \
 
 * Copy `./Malcolm/config/kubernetes-container-resources.yml.example` to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
 
-* Copy `./Malcolm/kubernetes/99-ingress-aws-alb.yml.example` to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTP(S) requests and the NLB controller for TCP connections to Logstash and Filebeat. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
+* Copy `./Malcolm/kubernetes/99-ingress-aws-alb.yml.example` to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
     * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
     * The `alb.ingress.kubernetes.io/certificate-arn` value to be replaced with the certificate ARN for the domain name (`$CERT_ARN` from a previous step).
 
