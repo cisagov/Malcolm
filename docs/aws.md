@@ -16,7 +16,7 @@
 
 The sections below make use of various command line tools. Installation may vary from platform to platform; however, this section gives some basic examples of how to install these tools in *nix-based environments. Not every guide in this document requires each of the following commands.
 
-* [aws cli](https://aws.amazon.com/cli/)
+* [`aws`, the AWS Command Line Interface](https://aws.amazon.com/cli/)
 
 ```bash
 $ curl -fsSL \
@@ -30,7 +30,7 @@ $ aws --version
 aws-cli/2.26.2 Python/3.13.2 Linux/6.1.0-32-amd64 exe/x86_64.ubuntu.24
 ```
 
-* [`eksctl`](https://eksctl.io/)
+* [`eksctl`, the official CLI for Amazon EKS](https://eksctl.io/)
 
 ```bash
 $ curl -fsSL \
@@ -42,7 +42,7 @@ $ eksctl version
 0.207.0
 ```
 
-* [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
+* [`kubectl`, the Kubernetes command line tool](https://kubernetes.io/docs/reference/kubectl/)
 
 ```bash
 $ curl -fsSL \
@@ -54,7 +54,7 @@ $ kubectl version
 Client Version: v1.32.3
 ```
 
-* [`helm`](https://helm.sh/)
+* [`helm`, the package manager for Kubernetes](https://helm.sh/)
 
 ```bash
 $ curl -fsSL \
@@ -66,7 +66,7 @@ $ helm version
 version.BuildInfo{Version:"v3.17.3", GitCommit:"e4da49785aa6e6ee2b86efd5dd9e43400318262b", GitTreeState:"clean", GoVersion:"go1.23.7"}
 ```
 
-* [`packer`](https://developer.hashicorp.com/packer)
+* [`packer`, a tool to build automated machine images](https://developer.hashicorp.com/packer)
 
 ```bash
 $ PACKER_VERSION="$(curl -fsSL 'https://releases.hashicorp.com/packer/' | grep -Po 'href="/packer/[^"]+"' | sort --version-sort | cut -d'/' -f3 | tail -n 1)"
@@ -315,24 +315,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
 
 ## <a name="AWSFargate"></a> Installing Malcolm on [Fargate](https://aws.amazon.com/fargate/)
 
-### 👷🏼‍♀️ Note: These instructions are a work in progress and are not yet functional. 👷🏻
-
-* Install prerequisites (may vary by platform)
-    * `curl`, `unzip`, and `python3`
-
-    ```bash
-    $ sudo apt-get -y update
-    …
-    $ sudo apt-get -y install --no-install-recommends \
-        curl \
-        unzip \
-        python3 \
-        python3-dialog \
-        python3-pip \
-        python3-ruamel.yaml \
-        python3-kubernetes
-    …
-    ```
+### 👷🏼‍♀️ Note: These instructions are a work in progress and may not yet be fully functional. 👷🏻
 
 * Get Malcolm (**TODO: NOT FINAL**)
     * These are **not** the final instructions for doing this, as in developing these instructions I've gone through and made some modifications to the Malcolm Kubernetes manifests that have not been released yet (e.g., adding `role` labels to the manifests). But for now those as-yet unreleased changes can be gotten from [here](https://github.com/mmguero-dev/malcolm/); however, the `image:` in the manifests needs to be changed from `idaholab` to `mmguero-dev` for the org and from `25.04.0` to `main` for the version, like this:
