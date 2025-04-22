@@ -137,7 +137,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Running Malcolm](kubernetes.md#Running)
     - [Deployment Example](kubernetes.md#Example)
     - [Future Enhancements](kubernetes.md#Future)
-    - [Deploying Malcolm on Microsoft Azure Kubernetes Service (AKS)](kubernetes-azure.md#KubernetesAzure)
 * [Deploying Malcolm on Amazon Web Services (AWS)](aws.md#AWS)
     - [Installing prerequisites](aws.md#AWSPrereqInstall)
     - [Installing Malcolm in an EC2 instance](aws.md#AWSEC2)
