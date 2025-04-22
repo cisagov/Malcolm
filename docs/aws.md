@@ -401,6 +401,37 @@ $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | so
 done
 ```
 
+* Get VPC ID
+
+```bash
+$ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
+        --query "cluster.resourcesVpcConfig.vpcId" --output text)
+
+$ echo $VPC_ID
+```
+
+* Create and assign a security group for raw TCP log forwarding: Logstash over 5044/tcp and Filebeat over 5045/tcp (**ONLY** if you want to expose the Malcolm services )
+
+```bash
+$ aws ec2 create-security-group \
+    --group-name malcolm-raw-tcp-sg \
+    --description "Security group for raw TCP services" \
+    --vpc-id $VPC_ID
+
+$ TCP_SG_ID=$(aws ec2 describe-security-groups \
+                --filters Name=group-name,Values=malcolm-raw-tcp-sg \
+                --query 'SecurityGroups[0].GroupId' \
+                --output text)
+
+$ for PORT in 5044 5045; do \
+    aws ec2 authorize-security-group-ingress \
+        --group-id $TCP_SG_ID \
+        --protocol tcp \
+        --port $PORT \
+        --cidr 0.0.0.0/0; \
+done
+```
+
 * Create EFS file system and get file system ID
 
 ```bash
@@ -430,15 +461,6 @@ $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs 
 done
 ```
 
-* Get VPC ID
-
-```bash
-$ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
-        --query "cluster.resourcesVpcConfig.vpcId" --output text)
-
-$ echo $VPC_ID
-```
-
 * Create Security Group for EFS and get Security Group ID
 
 ```bash
@@ -447,18 +469,18 @@ $ aws ec2 create-security-group \
     --description "Security group for Malcolm EFS" \
     --vpc-id $VPC_ID
 
-$ SG_ID=$(aws ec2 describe-security-groups \
+$ EFS_SG_ID=$(aws ec2 describe-security-groups \
     --filters "Name=group-name,Values=malcolm-efs-sg" "Name=vpc-id,Values=$VPC_ID" \
     --query 'SecurityGroups[0].GroupId' --output text)
 
-$ echo $SG_ID
+$ echo $EFS_SG_ID
 ```
 
 * Add NFS inbound rule to Security Group
 
 ```bash
 $ aws ec2 authorize-security-group-ingress \
-    --group-id $SG_ID \
+    --group-id $EFS_SG_ID \
     --protocol tcp \
     --port 2049 \
     --cidr 10.0.0.0/16
@@ -481,7 +503,7 @@ $ for subnet in $SUBNETS; do \
     aws efs create-mount-target \
         --file-system-id $EFS_ID \
         --subnet-id $subnet \
-        --security-groups $SG_ID; \
+        --security-groups $EFS_SG_ID; \
 done
 ```
 
