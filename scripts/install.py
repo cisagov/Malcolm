@@ -2611,6 +2611,13 @@ class Installer(object):
                 'VTOT_API2_KEY',
                 vtotApiKey,
             ),
+            # file scanning via virustotal
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_ENABLE_VTOT',
+                TrueOrFalseNoQuote(len(vtotApiKey) > 1),
+            ),
             # file scanning via yara
             EnvValue(
                 True,
