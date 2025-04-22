@@ -721,6 +721,7 @@ $ echo $FILEBEAT_HOSTNAME
     ```
 
     * Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
+
     ```bash
     $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
     …
