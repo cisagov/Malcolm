@@ -355,7 +355,7 @@ trap finish EXIT
 echo "Running via \"$ZEEK_CTL\" ($ZEEK_PROCS processes) ..." >&2
 "$ZEEK_CTL" deploy
 
-for (( i=1; i <= 10; i++)); do sleep 1; done
+for (( i=1; i <= 30; i++)); do sleep 1; done
 
 # keep track of intel updates in order to reload when they occur
 INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
@@ -372,7 +372,7 @@ while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" 
     INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
   fi
 
-  for (( i=1; i <= 10; i++)); do sleep 1; done
+  for (( i=1; i <= 30; i++)); do sleep 1; done
 done
 
 popd >/dev/null 2>&1
