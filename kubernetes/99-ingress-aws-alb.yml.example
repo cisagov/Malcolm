@@ -74,7 +74,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: logstash
+    app: nginx-proxy
   ports:
     - port: 443
       protocol: TCP

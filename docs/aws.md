@@ -662,15 +662,19 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     done
     ```
 
-* Get the ALB hostname for the ALB ingress created from `./Malcolm/kubernetes/99-ingress-aws-alb.yml`
+* Get the LoadBalancer hostnames for the internet-facing services created from `./Malcolm/kubernetes/99-ingress-aws-alb.yml`. The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands can be ignored if you did not configure allowing incoming TCP connections from remote sensors in the previous step.
 
 ```bash
-$ ALB_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+$ HTTPS_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+$ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+$ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
 
-$ echo $ALB_HOSTNAME
+$ echo $HTTPS_HOSTNAME
+$ echo $LOGSTASH_HOSTNAME
+$ echo $FILEBEAT_HOSTNAME
 ```
 
-* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$ALB_HOSTNAME`. Wait five to ten minutes for DNS to propogate.
+* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors above, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
 
 * Open a web browser to connect to the Malcolm Fargate cluster (e.g., `https://malcolm.example.org`)
 
