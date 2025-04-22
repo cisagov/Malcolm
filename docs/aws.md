@@ -326,7 +326,7 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     $ sed -i "s@25\.04\.0@main@g" ./Malcolm/kubernetes/*.yml
     ```
 
-* Create cluster for Fargate
+* Create [cluster](https://eksctl.io/usage/fargate-support/) for [Fargate](https://aws.amazon.com/fargate/)
 
 ```bash
 $ eksctl create cluster \
@@ -340,7 +340,7 @@ $ eksctl create cluster \
     --node-private-networking
 ```
 
-* Create IAM policy for EFS CSI driver
+* Create [IAM policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) for [EFS CSI driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver)
 
 ```bash
 $ aws iam create-policy \
@@ -348,7 +348,7 @@ $ aws iam create-policy \
   --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-driver/refs/heads/master/docs/iam-policy-example.json')"
 ```
 
-* Create service account for EFS CSI driver
+* Create [service account](https://eksctl.io/usage/iamserviceaccounts/) for EFS CSI driver
 
 ```bash
 $ eksctl create iamserviceaccount \
@@ -361,7 +361,7 @@ $ eksctl create iamserviceaccount \
     --region us-east-1
 ```
 
-* Create IAM policy for AWS load balancer
+* Create IAM policy for [AWS load balancer](https://github.com/kubernetes-sigs/aws-load-balancer-controller)
 
 ```bash
 $ aws iam create-policy \
@@ -388,7 +388,7 @@ $ eksctl create iamserviceaccount \
 $ kubectl create namespace malcolm
 ```
 
-* Create Fargate profiles for Malcolm components based on pods' "role" labels
+* Create [Fargate profiles](https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html) for Malcolm components based on pods' "role" labels
 
 ```bash
 $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | sort -u); do \
@@ -401,7 +401,7 @@ $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | so
 done
 ```
 
-* Create EFS file system and get file system ID
+* Create [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html) and get file system ID
 
 ```bash
 $ aws efs create-file-system \
@@ -430,7 +430,7 @@ $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs 
 done
 ```
 
-* Get VPC ID
+* Get [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) ID
 
 ```bash
 $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
@@ -439,7 +439,7 @@ $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
 $ echo $VPC_ID
 ```
 
-* Create Security Group for EFS and get Security Group ID
+* Create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for EFS and get Security Group ID
 
 ```bash
 $ aws ec2 create-security-group \
@@ -454,7 +454,7 @@ $ EFS_SG_ID=$(aws ec2 describe-security-groups \
 $ echo $EFS_SG_ID
 ```
 
-* Add NFS inbound rule to Security Group
+* Add NFS [inbound rule](https://docs.aws.amazon.com/quicksight/latest/user/vpc-security-groups.html) to Security Group
 
 ```bash
 $ aws ec2 authorize-security-group-ingress \
@@ -474,7 +474,7 @@ $ SUBNETS=$(aws ec2 describe-subnets \
 $ echo $SUBNETS
 ```
 
-* Create mount targets
+* Create [mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html)
 
 ```bash
 $ for subnet in $SUBNETS; do \
@@ -485,7 +485,7 @@ $ for subnet in $SUBNETS; do \
 done
 ```
 
-* Create Persistent Volumes (PV) and Persistent Volume Claims (PVC) using static provisioning
+* Create [Persistent Volumes](https://docs.aws.amazon.com/eks/latest/best-practices/windows-storage.html) (PV) and Persistent Volume Claims (PVC) using static provisioning
     * Ensure file system ID is **exported** in `$EFS_ID`
     
     ```bash
@@ -511,7 +511,7 @@ done
     $ env | grep EFS_ACCESS_POINT_
     ```
 
-    * Create and verify PVs and PVCs to be used by Malcolm services
+    * Create and verify PVs and PVCs to be used by Malcolm services (see [`01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example))
 
     ```bash
     $ envsubst < ./Malcolm/kubernetes/01-volumes-aws-efs.yml.example | kubectl apply -f -
@@ -541,7 +541,7 @@ done
     zeek-claim                Bound    zeek-volume                250Gi      RWX            efs-sc         2m33s
     ```
 
-* Install AWS Load Balancer Controller via Helm
+* Install [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) via Helm
 
 ```bash
 $ helm repo add eks https://aws.github.io/eks-charts
@@ -557,7 +557,7 @@ $ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set vpcId=$VPC_ID
 ```
 
-* Request a certificate and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
+* [Request a certificate](https://docs.aws.amazon.com/cli/latest/reference/acm/request-certificate.html) and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
 
 ```bash
 $ aws acm request-certificate \
@@ -571,7 +571,7 @@ $ CERT_ARN=$(aws acm list-certificates \
     --output text)
 ```
 
-* Get the DNS validation record from ACM
+* Get the DNS [validation record](https://docs.aws.amazon.com/cli/latest/reference/acm/describe-certificate.html) from ACM
 
 ```bash
 $ VALIDATION_RECORD=$(aws acm describe-certificate \
@@ -583,7 +583,7 @@ $ VALIDATION_RECORD=$(aws acm describe-certificate \
 $ echo $VALIDATION_RECORD
 ```
 
-* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
+* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
 
 * Periodically check the status of the certificate until it has changed from `PENDING_VALIDATION` to `ISSUED`.
 
@@ -605,13 +605,13 @@ $ aws acm describe-certificate \
     * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
-* Copy `./Malcolm/config/kubernetes-container-resources.yml.example` to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
+* Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
 
-* Copy `./Malcolm/kubernetes/99-ingress-aws-alb.yml.example` to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
+* Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
     * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
     * The `alb.ingress.kubernetes.io/certificate-arn` value to be replaced with the certificate ARN for the domain name (`$CERT_ARN` from a previous step).
 
-* Start Malcolm (**TODO: NOT FINAL**)
+* [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace.
 
 ```bash
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
@@ -621,7 +621,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --skip-persistent-volume-checks
 ```
 
-* Allow incoming TCP connections from remote sensors (**OPTIONAL**: only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor)
+* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) (**OPTIONAL**: only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor) 
     * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
     
     ```bash
@@ -674,12 +674,12 @@ $ echo $LOGSTASH_HOSTNAME
 $ echo $FILEBEAT_HOSTNAME
 ```
 
-* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a DNS record of type `CNAME` with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors above, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
+* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors above, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
 
-* Open a web browser to connect to the Malcolm Fargate cluster (e.g., `https://malcolm.example.org`)
+* Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm Fargate cluster (e.g., `https://malcolm.example.org`)
 
 * Monitor deployment
-    * Check pods
+    * Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
 
     ```bash
     $ kubectl get pods -n malcolm -w
@@ -707,20 +707,20 @@ $ echo $FILEBEAT_HOSTNAME
     zeek-offline-deployment-c56f7f46f-m62sd         1/1     Running    0          3m5s
     ```
 
-    * Check all resources
+    * [Check](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/) all resources
 
     ```bash
     $ kubectl get all -n malcolm
     …
     ```
 
-    * Watch logs
+    * Watch [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
 
     ```bash
     $ kubectl logs --follow=true -n malcolm --all-containers <pod>
     ```
 
-    * Get all events in the namespace for more detailed information and debugging
+    * Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
     ```bash
     $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
     …
