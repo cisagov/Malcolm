@@ -5,6 +5,7 @@ metadata:
   name: htadmin
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 80
       protocol: TCP

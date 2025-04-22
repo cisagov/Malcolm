@@ -716,7 +716,6 @@ def StartMalcolm(
     malcolmPath,
     configPath,
     profile=PROFILE_MALCOLM,
-    serviceType='',
     injectResources=False,
     startCapturePods=True,
     noCapabilities=False,
@@ -913,7 +912,6 @@ def StartMalcolm(
                 # Some manifests need to have some modifications done to them on-the-fly:
                 #
                 # * Remove "capabilities" under "securityContext" (for something like Fargate that doesn't support them)
-                # * Set service type (e.g., ClusterIP, LoadBalancer, etc.) for services
                 # * Have resource requests created for them on the fly (idaholab/Malcolm#539).
                 #       For now the only ones I'm doing this for are ones that have JAVA_OPTS specified (see CONTAINER_JAVA_OPTS_VARS)
                 #           which we retrieve from the container's environment variables we created earlier as configMapRefs.
@@ -923,11 +921,6 @@ def StartMalcolm(
                 if manYamlFileContents:
                     for docIdx, doc in enumerate(manYamlFileContents):
                         if 'spec' in manYamlFileContents[docIdx]:
-
-                            if serviceType and (manYamlFileContents[docIdx].get('kind', '') == 'Service'):
-                                # set service type (ClusterIP, LoadBalancer, etc.)
-                                manYamlFileContents[docIdx]['spec']['type'] = serviceType
-                                modified = True
 
                             if (
                                 ('template' in manYamlFileContents[docIdx]['spec'])

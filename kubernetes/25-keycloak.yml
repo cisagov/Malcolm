@@ -5,6 +5,7 @@ metadata:
   name: keycloak
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 8080
       protocol: TCP

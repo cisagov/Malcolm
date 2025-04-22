@@ -5,6 +5,7 @@ metadata:
   name: dashboards
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 5601
       protocol: TCP

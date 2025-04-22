@@ -5,6 +5,7 @@ metadata:
   name: file-monitor
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 3310
       protocol: TCP

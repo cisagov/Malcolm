@@ -5,6 +5,7 @@ metadata:
   name: dashboards-helper
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 28991
       protocol: TCP

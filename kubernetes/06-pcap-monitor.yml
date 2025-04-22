@@ -5,6 +5,7 @@ metadata:
   name: pcap-monitor
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 30441
       protocol: TCP

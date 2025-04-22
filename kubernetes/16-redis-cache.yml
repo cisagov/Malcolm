@@ -5,6 +5,7 @@ metadata:
   name: redis-cache
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 6379
       protocol: TCP
