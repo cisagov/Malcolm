@@ -156,7 +156,7 @@ fi
 [[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
 export INTEL_DIR
 mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP "$INTEL_DIR"/Mandiant
-touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true
+[[ ! -f "$INTEL_DIR"/__load__.zeek ]] && ( touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true )
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && \
   [[ "$ZEEK_INTEL_REFRESH_ON_DEPLOY" == "true" ]] && \
@@ -167,7 +167,7 @@ INTEL_UPDATE_TIME_PREV=0
 [[ -n "$ZEEK_CUSTOM_PATH" ]] && CUSTOM_DIR="$ZEEK_CUSTOM_PATH" || CUSTOM_DIR=/opt/sensor/sensor_ctl/zeek/custom
 export CUSTOM_DIR
 mkdir -p "$CUSTOM_DIR"
-touch "$CUSTOM_DIR"/__load__.zeek 2>/dev/null || true
+[[ ! -f "$CUSTOM_DIR"/__load__.zeek ]] && ( touch "$CUSTOM_DIR"/__load__.zeek 2>/dev/null || true )
 
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
