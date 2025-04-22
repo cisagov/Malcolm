@@ -401,37 +401,6 @@ $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | so
 done
 ```
 
-* Get VPC ID
-
-```bash
-$ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
-        --query "cluster.resourcesVpcConfig.vpcId" --output text)
-
-$ echo $VPC_ID
-```
-
-* Create and assign a security group for raw TCP log forwarding: Logstash over 5044/tcp and Filebeat over 5045/tcp (**ONLY** if you want to expose the Malcolm services )
-
-```bash
-$ aws ec2 create-security-group \
-    --group-name malcolm-raw-tcp-sg \
-    --description "Security group for raw TCP services" \
-    --vpc-id $VPC_ID
-
-$ TCP_SG_ID=$(aws ec2 describe-security-groups \
-                --filters Name=group-name,Values=malcolm-raw-tcp-sg \
-                --query 'SecurityGroups[0].GroupId' \
-                --output text)
-
-$ for PORT in 5044 5045; do \
-    aws ec2 authorize-security-group-ingress \
-        --group-id $TCP_SG_ID \
-        --protocol tcp \
-        --port $PORT \
-        --cidr 0.0.0.0/0; \
-done
-```
-
 * Create EFS file system and get file system ID
 
 ```bash
@@ -459,6 +428,15 @@ $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs 
             --root-directory "Path=/malcolm/$AP,CreationInfo={OwnerUid=1000,OwnerGid=1000,Permissions=0770}" \
             --tags "Key=Name,Value=$AP"; \
 done
+```
+
+* Get VPC ID
+
+```bash
+$ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
+        --query "cluster.resourcesVpcConfig.vpcId" --output text)
+
+$ echo $VPC_ID
 ```
 
 * Create Security Group for EFS and get Security Group ID
@@ -643,6 +621,47 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --no-capabilities \
     --skip-persistent-volume-checks
 ```
+
+* Allow incoming TCP connections from remote sensors (**OPTIONAL**: only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor)
+    * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
+    
+    ```bash
+    $ aws ec2 create-security-group \
+        --group-name malcolm-raw-tcp-sg \
+        --description "Security group for raw TCP services" \
+        --vpc-id $VPC_ID
+    
+    $ TCP_SG_ID=$(aws ec2 describe-security-groups \
+                    --filters Name=group-name,Values=malcolm-raw-tcp-sg \
+                    --query 'SecurityGroups[0].GroupId' \
+                    --output text)
+    
+    $ for PORT in 5044 5045; do \
+        aws ec2 authorize-security-group-ingress \
+            --group-id $TCP_SG_ID \
+            --protocol tcp \
+            --port $PORT \
+            --cidr 0.0.0.0/0; \
+    done
+    ```
+
+    * Assign the new security group to the network interfaces 
+
+    ```bash
+    $ for POD in logstash filebeat; do \
+        POD_NAME="$(kubectl get pods -n malcolm --no-headers -o custom-columns=':metadata.name' | grep "$POD" | head -n 1)"; \
+        [[ -n "$POD_NAME" ]] || continue; \
+        POD_IP="$(kubectl get pod -n malcolm "$POD_NAME" -o jsonpath='{.status.podIP}')"; \
+        [[ -n "$POD_IP" ]] || continue; \
+        NIC_ID="$(aws ec2 describe-network-interfaces --filters "Name=addresses.private-ip-address,Values=$POD_IP" --query "NetworkInterfaces[0].NetworkInterfaceId" --output text)"; \
+        [[ -n "$NIC_ID" ]] || continue; \
+        NIC_GROUPS="$(aws ec2 describe-network-interfaces --network-interface-ids "$NIC_ID" --query "NetworkInterfaces[0].Groups[].GroupId" --output text)"; \
+        [[ -n "$NIC_GROUPS" ]] || continue; \
+        aws ec2 modify-network-interface-attribute \
+          --network-interface-id "$NIC_ID" \
+          --groups $TCP_SG_ID $NIC_GROUPS; \
+    done
+    ```
 
 * Get the ALB hostname for the ALB ingress created from `./Malcolm/kubernetes/99-ingress-aws-alb.yml`
 
