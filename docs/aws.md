@@ -2,7 +2,7 @@
 
 * [Deploying Malcolm on Amazon Web Services (AWS)](#AWS)
     - [Installing prerequisites](#AWSPrereqInstall)
-    - [Compute sizing](#AWSComputeSizing)
+    - [Amazon EC2 Instance Types](#AWSInstanceSizing)
     - [Installing Malcolm in an EC2 instance](#AWSEC2)
         + [Instance creation](#AWSEC2Instance)
         + [Malcolm setup](#AWSEC2Install)
@@ -83,7 +83,7 @@ $ packer --version
 Packer v1.12.0
 ```
 
-## <a name="AWSComputeSizing"></a>Compute sizing
+## <a name="AWSInstanceSizing"></a>Amazon EC2 Instance Types
 
 Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). Some AWS EC2 instance types meeting recommended minimum requirements:
 
@@ -154,7 +154,7 @@ $ aws ec2 describe-images \
 
 * Launch selected AMI
     - Replace `INSTANCE_TYPE` with the desired instance type in the following command
-        + See [Compute sizing](#AWSComputeSizing) for suggestions
+        + See [EC2 Instance Types](#AWSInstanceSizing) for suggestions
     - Replace `AMI_ID` with the AMI ID from the previous step in the following command
     - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
 
@@ -523,7 +523,7 @@ $ aws ec2 create-route \
 …
 ```
 
-* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed (see [Compute sizing](#AWSComputeSizing) for suggestions for `instanceType`)
+* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed (see [EC2 Instance Types](#AWSInstanceSizing) for suggestions for `instanceType`)
 
 ```yml
 # cluster.yaml
@@ -791,6 +791,7 @@ $ echo $EFS_SG_ID
             --port 2049 \
             --source-group "$SG"; \
     done
+    …
     ```
 
     * For EKS on Fargate
@@ -1251,7 +1252,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     }
     ```
 
-1. Launch an instance from the new AMI (see [Compute sizing](#AWSComputeSizing) for suggestions for instance type)
+1. Launch an instance from the new AMI (see [EC2 Instance Types](#AWSInstanceSizing) for suggestions for instance type)
 1. SSH into the instance
 1. Run `~/Malcolm/scripts/configure` to configure Malcolm
 1. Run `~/Malcolm/scripts/auth_setup` to set up authentication for Malcolm
