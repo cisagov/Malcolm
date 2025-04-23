@@ -343,7 +343,7 @@ This section covers two deployment options: deploying Malcolm in a standard Kube
 
 ### <a name="AWSEKS"></a>Deploying with EKS
 
-* create VPC and get its ID
+* Create a [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
 
 ```bash
 $ aws ec2 create-vpc \
@@ -360,7 +360,7 @@ $ VPC_ID=$(aws ec2 describe-vpcs \
 $ echo $VPC_ID
 ```
 
-* create public and private subnets in two availability zones and get subnet IDs
+* Create public and private [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) in two [availability zones](https://aws.amazon.com/about-aws/global-infrastructure/regions_az/)
 
 ```bash
 $ aws ec2 create-subnet \
@@ -407,7 +407,7 @@ $ echo $PUBLIC_SUBNET_IDS
 $ echo $PRIVATE_SUBNET_IDS
 ```
 
-* Enable Public IP Auto-Assign for Public Subnets
+* Enable ["Auto-assign public IPv4 address"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#vpc-public-ipv4-addresses) for public subnets
 
 ```bash
 $ for SUBNET in $PUBLIC_SUBNET_IDS; do \
@@ -417,7 +417,7 @@ $ for SUBNET in $PUBLIC_SUBNET_IDS; do \
 done
 ```
 
-* Create and attach internet gateway
+* Create and attach [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
 
 ```bash
 $ aws ec2 create-internet-gateway \
@@ -436,7 +436,7 @@ $ aws ec2 attach-internet-gateway \
       --vpc-id $VPC_ID
 ```
 
-* Create public route table, associate with public subnets, and add to internet gateway
+* Create public [route table](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html), associate with public subnets, and add to internet gateway
 
 ```bash
 $ aws ec2 create-route-table \
@@ -466,7 +466,7 @@ $ aws ec2 create-route \
 …
 ```
 
-* Create the NAT gateway and private route table, then associate with the private subnets
+* Create [NAT gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) and private [route table](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html), then associate with the private subnets
 
 ```bash
 $ aws ec2 allocate-address \
@@ -523,7 +523,7 @@ $ aws ec2 create-route \
 …
 ```
 
-* Create a file called `cluster.yaml` and customize as needed (see [Compute sizing](#AWSComputeSizing) for suggestions for `instanceType`)
+* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed (see [Compute sizing](#AWSComputeSizing) for suggestions for `instanceType`)
 
 ```yml
 # cluster.yaml
@@ -557,7 +557,7 @@ nodeGroups:
     privateNetworking: true
 ```
 
-* Create the cluster using `eksctl`
+* [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
 $ export VPC_ID
@@ -594,7 +594,7 @@ $ envsubst < cluster.yaml | eksctl create cluster -f -
 …
 ```
 
-* Enable OIDC provider
+* Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
 
 ```bash
 $ eksctl utils associate-iam-oidc-provider \
@@ -609,7 +609,7 @@ $ kubectl create namespace malcolm
 …
 ```
 
-* Procede to [Common Steps for EKS Deployments](#AWSEKSCommon)
+* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
 
 ### <a name="AWSFargate"></a> Deploying with EKS on [Fargate](https://aws.amazon.com/fargate/)
 
@@ -655,7 +655,7 @@ $ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
 $ echo $PRIVATE_SUBNET_IDS
 ```
 
-* Procede to [Common Steps for EKS Deployments](#AWSEKSCommon)
+* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
 
 ### <a name="AWSEKSCommon"></a> Common Steps for EKS Deployments
 
@@ -719,7 +719,7 @@ $ helm install efs-csi-driver efs-csi-driver/aws-efs-csi-driver \
 …
 ```
 
-* Create [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html) and get file system ID
+* Create [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html)
 
 ```bash
 $ aws efs create-file-system \
@@ -759,7 +759,7 @@ $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
 $ echo $VPC_ID
 ```
 
-* Create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for EFS and get Security Group ID
+* Create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for EFS
 
 ```bash
 $ aws ec2 create-security-group \
@@ -1144,17 +1144,22 @@ This section outlines the process of using [packer](https://www.packer.io/)'s [A
 The files referenced in this section can be found in [scripts/third-party-environments/aws/ami]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-environments/aws/ami).
 
 1. Copy `packer_vars.json.example` to `packer_vars.json`
+
     ```bash
     $ cp ./packer_vars.json.example ./packer_vars.json
     ```
+
 1. Edit `packer_vars.json`
-    * set `vpc_region`, `instance_arch`, and other variables as needed
+    * Set `vpc_region`, `instance_arch`, and other variables as needed
 1. Validate the packer configuration
+
     ```bash
     $ packer validate packer_build.json
     The configuration is valid.
     ```
+
 1. Launch packer to build the AMI, providing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as environment variables:
+
     ```bash
     $ AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY \
         AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY \
@@ -1188,10 +1193,13 @@ The files referenced in this section can be found in [scripts/third-party-enviro
     --> amazon-ebs: AMIs were created:
     us-east-1: ami-xxxxxxxxxxxxxxxxx
     ```
+
 1. Use `aws` (or the [Amazon EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home)) to verify that the new AMI exists
+
     ```bash
     $ aws ec2 describe-images --owners self --filters "Name=root-device-type,Values=ebs" --filters "Name=name,Values=malcolm-*"
     ```
+
     ```json
     {
         "Images": [
@@ -1242,6 +1250,7 @@ The files referenced in this section can be found in [scripts/third-party-enviro
         ]
     }
     ```
+
 1. Launch an instance from the new AMI (see [Compute sizing](#AWSComputeSizing) for suggestions for instance type)
 1. SSH into the instance
 1. Run `~/Malcolm/scripts/configure` to configure Malcolm
