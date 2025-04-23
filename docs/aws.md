@@ -1269,4 +1269,4 @@ Users with [AWS MFA requirements](https://docs.aws.amazon.com/console/iam/self-m
 
 ## <a name="AWSAttribution"></a> Attribution
 
-Amazon Web Services, AWS, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.
+Amazon Web Services, AWS, Fargate, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.
