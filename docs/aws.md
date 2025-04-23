@@ -1135,8 +1135,12 @@ $ echo $FILEBEAT_HOSTNAME
     …
     ```
 
-* Stop Malcolm (**TODO**)
+* Stop Malcolm, providing the kubeconfig file as the `--file`/`-f` parameter. This will stop the pods and remove the resources running under the `malcolm` namespace.
 
+```bash
+$ ./Malcolm/scripts/stop -f "${KUBECONFIG:-$HOME/.kube/config}"
+…
+```
 
 ## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI)
 

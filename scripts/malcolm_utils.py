@@ -348,6 +348,16 @@ def get_iterable(x):
         return (x,)
 
 
+# remove "empty" items from a collection
+def remove_falsy(obj):
+    if isinstance(obj, dict):
+        return {k: v for k, v in ((k, remove_falsy(v)) for k, v in obj.items()) if v}
+    elif isinstance(obj, list):
+        return [v for v in (remove_falsy(i) for i in obj) if v]
+    else:
+        return obj if obj else None
+
+
 ###################################################################################################
 # will it float?
 def isfloat(value):

@@ -27,12 +27,14 @@ from malcolm_common import (
     YAML_VERSION,
 )
 from malcolm_utils import (
+    eprint,
     deep_get,
     deep_set,
     deep_merge_in_place,
     dictsearch,
     get_iterable,
     file_contents,
+    remove_falsy,
     remove_suffix,
     tablify,
     LoadStrIfJson,
@@ -1039,6 +1041,105 @@ def StartMalcolm(
                                     results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
+
+
+def SafeK8sDelete(
+    kubeImported,
+    func,
+    name,
+    namespace,
+    results_dict,
+    dryrun,
+    **kwargs,
+):
+    try:
+        if not dryrun:
+            func(name, namespace, **kwargs)
+        if isinstance(results_dict, dict) and isinstance(results_dict.get('deleted', None), list):
+            results_dict['deleted'].append(name)
+    except kubeImported.client.rest.ApiException as e:
+        if e.status not in [404, 403, 409]:
+            if not (errVal := LoadStrIfJson(str(e))):
+                errVal = str(e)
+            if errVal and isinstance(results_dict, dict) and isinstance(results_dict.get('error', None), list):
+                results_dict['error'].append(errVal)
+
+
+def StopMalcolm(
+    namespace,
+    dryrun=False,
+):
+    results_dict = dict()
+    results_dict[namespace] = dict()
+    for resourceType in ['secrets', 'configmaps', 'ingresses', 'services', 'deployments']:
+        results_dict[namespace][resourceType] = dict()
+        for msgType in ['deleted', 'error']:
+            results_dict[namespace][resourceType][msgType] = list()
+
+    if kubeImported := KubernetesDynamic():
+        k8s_api = kubeImported.client.CoreV1Api()
+        apps_api = kubeImported.client.AppsV1Api()
+        net_api = kubeImported.client.NetworkingV1Api()
+        delete_opts = kubeImported.client.V1DeleteOptions(propagation_policy='Foreground')
+
+        for resource in apps_api.list_namespaced_deployment(namespace).items:
+            SafeK8sDelete(
+                kubeImported,
+                apps_api.delete_namespaced_deployment,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['deployments'],
+                dryrun=dryrun,
+                body=delete_opts,
+            )
+
+        for resource in k8s_api.list_namespaced_service(namespace).items:
+            if resource.metadata.name == "kubernetes":
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_service,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['services'],
+                dryrun=dryrun,
+            )
+
+        for resource in net_api.list_namespaced_ingress(namespace).items:
+            SafeK8sDelete(
+                kubeImported,
+                net_api.delete_namespaced_ingress,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['ingresses'],
+                dryrun=dryrun,
+            )
+
+        for resource in k8s_api.list_namespaced_config_map(namespace).items:
+            if resource.metadata.name == "kube-root-ca.crt":
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_config_map,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['configmaps'],
+                dryrun=dryrun,
+            )
+
+        for resource in k8s_api.list_namespaced_secret(namespace).items:
+            if "kubernetes.io/service-account-token" in resource.type:
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_secret,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['secrets'],
+                dryrun=dryrun,
+            )
+
+    return remove_falsy(results_dict)
 
 
 def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):

@@ -92,6 +92,7 @@ from malcolm_kubernetes import (
     PrintPodStatus,
     REQUIRED_VOLUME_OBJECTS,
     StartMalcolm,
+    StopMalcolm,
 )
 
 from base64 import b64encode
@@ -1178,26 +1179,21 @@ def stop(wipe=False):
                 eprint("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        deleteResults = DeleteNamespace(
-            namespace=args.namespace,
-            deleteRetPerVol=args.deleteRetPerVol,
-        )
-
-        if dictsearch(deleteResults, 'error'):
-            eprint(
-                f"Deleting {args.namespace} namespace and its underlying resources returned the following error(s):\n"
-            )
-            eprint(deleteResults)
+        stopResults = StopMalcolm(namespace=args.namespace)
+        if dictsearch(stopResults, 'error'):
+            eprint(f"Removing resources in the {args.namespace} namespace returned the following error(s):\n")
+            eprint(stopResults)
             eprint()
-
         else:
-            eprint(f"The {args.namespace} namespace and its underlying resources have been deleted\n")
+            eprint(f"The resources in the {args.namespace} namespace have been removed\n")
             if args.debug:
-                eprint(deleteResults)
+                eprint(stopResults)
                 eprint()
 
         if wipe:
-            eprint(f'Data on PersistentVolume storage cannot be deleted by {ScriptName}: it must be deleted manually\n')
+            eprint(
+                f'PersistentVolumes, PersitentVolumeClaims, and underlying data cannot be deleted by {ScriptName}: they must be deleted manually\n'
+            )
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
