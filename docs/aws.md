@@ -705,7 +705,7 @@ $ eksctl create iamserviceaccount \
 …
 ```
 
-* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm (not explicitly required for Fargate)
+* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm (**not required for Fargate**)
 
 ```bash
 $ helm repo add efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver
@@ -814,6 +814,49 @@ $ for subnet in $PRIVATE_SUBNET_IDS; do \
         --security-groups $EFS_SG_ID; \
 done
 …
+```
+
+* Associate necessary EFS permissions with node role (**not required for Fargate**)
+
+```bash
+$ NODE_ROLE_NAME=$(aws iam list-roles \
+                     --query "Roles[?contains(RoleName, 'eksctl-malcolm-cluster-nodegroup')].RoleName" \
+                     --output text)
+
+$ echo $NODE_ROLE_NAME
+
+$ EFS_ARN="arn:aws:elasticfilesystem:us-east-1:$(aws sts get-caller-identity --query Account --output text):file-system/${EFS_ID}"
+
+$ echo $EFS_ARN
+
+$ aws iam put-role-policy \
+  --role-name $NODE_ROLE_NAME \
+  --policy-name AllowEFSAccess \
+  --policy-document file://<(cat <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "elasticfilesystem:DescribeMountTargets",
+        "elasticfilesystem:DescribeFileSystems",
+        "elasticfilesystem:ClientMount",
+        "elasticfilesystem:ClientWrite"
+      ],
+      "Resource": "$EFS_ARN"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeAvailabilityZones"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+)
 ```
 
 * Create [Persistent Volumes](https://docs.aws.amazon.com/eks/latest/best-practices/windows-storage.html) (PV) and Persistent Volume Claims (PVC) using static provisioning
@@ -944,7 +987,7 @@ $ aws acm describe-certificate \
     * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is required for EKS on Fargate and optional for standard EKS.
+    * This step is **required** for EKS on Fargate and **optional** for standard EKS.
 
 * Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
     * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
@@ -1070,12 +1113,19 @@ $ echo $FILEBEAT_HOSTNAME
     …
     ```
 
-    * Watch [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
+    * Watch pod [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
+        * Using Malcolm's convenience script
 
-    ```bash
-    $ kubectl logs --follow=true -n malcolm --all-containers <pod>
-    …
-    ```
+        ```bash
+        $ ./Malcolm/scripts/logs -f "${KUBECONFIG:-$HOME/.kube/config}"
+        …
+        ```
+
+        * Using `kubectl`
+        ```bash
+        $ kubectl logs --follow=true -n malcolm --all-containers <pod>
+        …
+        ```
 
     * Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
 
