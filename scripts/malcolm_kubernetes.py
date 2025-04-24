@@ -112,12 +112,6 @@ MALCOLM_CONFIGMAPS = {
             'path': os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
         },
     ],
-    'logstash-keystore': [
-        {
-            'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'logstash.keystore')),
-        },
-    ],
     'arkime-lua': [
         {
             'secret': False,
