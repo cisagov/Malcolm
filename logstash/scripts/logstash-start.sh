@@ -137,8 +137,10 @@ fi
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
+# As the keystore is encapsulated in the container, there's nothing actually stored in this keystore.
+# It's included here just to suppress the prompt when creating the keystore.
+[[ -z "$LOGSTASH_KEYSTORE_PASS" ]] && export LOGSTASH_KEYSTORE_PASS=a410a267b1404c949284dee25518a917
 # bootstrap keystore file if necessary
-[[ -z "$LOGSTASH_KEYSTORE_PASS" ]] && export LOGSTASH_KEYSTORE_PASS=$(openssl rand -base64 64 | tr -d /+= | head -c 32)
 /usr/local/bin/keystore-bootstrap.sh || true
 
 # logstash may wish to modify logstash.yml based on some environment variables (e.g.,
