@@ -9,6 +9,7 @@ require 'ipaddr'
 require 'json'
 require 'lru_reredux'
 require 'psych'
+require 'uri'
 require 'stringex_lite'
 
 ##############################################################################################
@@ -119,8 +120,7 @@ def register(
   if _enabled_str.nil? && !_enabled_env.nil?
     _enabled_str = ENV[_enabled_env]
   end
-  @netbox_enabled = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_enabled_str.to_s.downcase) &&
-                    (not [1, true, '1', 'true', 't', 'on', 'enabled'].include?(ENV["NETBOX_DISABLED"].to_s.downcase))
+  @netbox_enabled = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_enabled_str.to_s.downcase)
 
   # source field containing lookup value
   @source = params["source"]
@@ -200,7 +200,6 @@ def register(
   #   true - store a hash of arrays *under* @target
   #             e.g., (@target is destination.segment) destination.segment.name => ["foobar"]
   #                                                    destination.segment.id => [123]
-  #                                                    destination.segment.url => ["whatever"]
   #                                                    destination.segment.foo => ["bar"]
   #                                                    etc.
   _verbose_str = params["verbose"]
@@ -226,15 +225,30 @@ def register(
   @debug_timings = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_debug_timings_str.to_s.downcase)
 
   # connection URL for netbox
-  @netbox_url = params.fetch("netbox_url", "http://netbox:8080/netbox/api").delete_suffix("/")
-  @netbox_url_suffix = "/netbox/api"
-  @netbox_url_base = @netbox_url.delete_suffix(@netbox_url_suffix)
+  # url, e.g., "https://netbox.example.org" or "http://netbox:8080"
+  _netbox_url_str = params["netbox_url"].to_s.delete_suffix("/")
+  _netbox_url_env = params["netbox_url_env"].to_s
+  if _netbox_url_str.empty? && !_netbox_url_env.empty?
+    _netbox_url_str = ENV[_netbox_url_env].to_s.delete_suffix("/")
+  end
+  if _netbox_url_str.empty?
+    _netbox_url_str = "http://netbox:8080/netbox/api"
+  end
+  _netbox_url_obj = URI.parse(_netbox_url_str.end_with?('/api') ? _netbox_url_str : "#{_netbox_url_str}/api")
+  @netbox_url = (_netbox_url_obj.port == _netbox_url_obj.default_port) ?
+                  "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}#{_netbox_url_obj.path}" :
+                  "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}:#{_netbox_url_obj.port}#{_netbox_url_obj.path}"
+  @netbox_url_base = (_netbox_url_obj.port == _netbox_url_obj.default_port) ?
+                       "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}" :
+                       "#{_netbox_url_obj.scheme}://#{_netbox_url_obj.host}:#{_netbox_url_obj.port}"
+  @netbox_uri_suffix = _netbox_url_obj.path
 
   # connection token (either specified directly or read from ENV via netbox_token_env)
   @netbox_token = params["netbox_token"]
   _netbox_token_env = params["netbox_token_env"]
   if @netbox_token.nil? && !_netbox_token_env.nil?
-    @netbox_token = ENV[_netbox_token_env]
+    # could be something like "NETBOX_TOKEN;SUPERUSER_API_TOKEN", take first variable that evaluates
+    @netbox_token = _netbox_token_env.split(/[;,:\s]+/).map { |env| ENV[env].to_s }.find { |val| val && !val.strip.empty? }
   end
 
   # hash of hashes, where key = site ID and value = hash of lookup types (from @lookup_type),
@@ -398,6 +412,20 @@ def register(
      $method_timings_logging_thread = Thread.new { log_method_timings_thread_proc }
      $method_timings_logging_thread_running = true
    end
+
+  # make sure required tags exist before starting up
+  _tmp_nb_conn = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
+  [
+    [{ 'name' => 'Autopopulated', 'slug' => 'malcolm-autopopulated', 'color' => 'add8e6' }],
+    [{ 'name' => 'Manufacturer Unknown', 'slug' => 'manufacturer-unknown', 'color' => 'd3d3d3' }],
+    [{ 'name' => 'Hostname Unknown', 'slug' => 'hostname-unknown', 'color' => 'd3d3d3'}]
+  ].each do |item|
+    begin
+      _tmp_response = _tmp_nb_conn.post('extras/tags/', item.to_json, @nb_headers)
+    rescue Faraday::Error => e
+      # Do nothing (ignore errors)
+    end
+  end
 end
 
 ##############################################################################################
@@ -675,7 +703,7 @@ def crush(
   elsif thing.is_a?(Hash)
     thing.each_with_object({}) do |(k,v), h|
       v = crush(v)
-      h[k] = v unless [nil, [], {}, "", "Unspecified", "unspecified"].include?(v)
+      h[k] = v unless ([nil, [], {}, "", "Unspecified", "unspecified"].include?(v) || (k == :url))
     end
   else
     thing
@@ -1424,7 +1452,7 @@ def netbox_lookup(
         # then, for those IP addresses, search for devices pertaining to the interfaces assigned to each
         # IP address (e.g., ipam.ip_address -> dcim.interface -> dcim.device, or
         # ipam.ip_address -> virtualization.interface -> virtualization.virtual_machine)
-        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb)
+        _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb)
 
         if @autopopulate && (_devices.nil? || _devices.empty?)
           # no results found, autopopulate enabled, private-space IP address...
@@ -1582,7 +1610,7 @@ def netbox_lookup(
 
             # we've made the change to netbox, do a call to lookup_devices to get the formatted/updated data
             #   (yeah, this is a *little* inefficient, but this should really only happen one extra time per device at most)
-            _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_url_suffix, _nb) if _device_written
+            _devices = lookup_devices(ip_key, site_id, _lookup_service_port, @netbox_url_base, @netbox_uri_suffix, _nb) if _device_written
 
           end # check _patched_device_data, _device_to_vm
 

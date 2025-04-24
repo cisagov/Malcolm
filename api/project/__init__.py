@@ -17,8 +17,7 @@ from collections.abc import Iterable
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
-from urllib.parse import urlparse
-
+from urllib.parse import urlparse, urljoin
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -180,9 +179,10 @@ app.config.from_object("project.config.Config")
 
 debugApi = app.config["MALCOLM_API_DEBUG"] == "true"
 
+arkimeSsl = malcolm_utils.str2bool(app.config["ARKIME_SSL"])
 arkimeHost = app.config["ARKIME_HOST"]
 arkimePort = app.config["ARKIME_PORT"]
-arkimeStatusUrl = f'https://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
+arkimeStatusUrl = f'http{"s" if arkimeSsl else ""}://{arkimeHost}:{arkimePort}/_ns_/nstest.html'
 dashboardsUrl = app.config["DASHBOARDS_URL"]
 dashboardsHelperHost = app.config["DASHBOARDS_HELPER_HOST"]
 dashboardsMapsPort = app.config["DASHBOARDS_MAPS_PORT"]
@@ -195,7 +195,8 @@ logstashHost = app.config["LOGSTASH_HOST"]
 logstashLJPort = app.config["LOGSTASH_LJ_PORT"]
 logstashMapsPort = app.config["LOGSTASH_LJ_PORT"]
 logstashUrl = f'http://{logstashHost}:{logstashApiPort}'
-netboxUrl = app.config["NETBOX_URL"]
+netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(app.config["NETBOX_URL"], '/'), '/api')
+netboxToken = app.config["NETBOX_TOKEN"]
 opensearchUrl = app.config["OPENSEARCH_URL"]
 pcapMonitorHost = app.config["PCAP_MONITOR_HOST"]
 pcapTopicPort = app.config["PCAP_TOPIC_PORT"]
@@ -572,9 +573,6 @@ def aggfields(fieldnames, current_request, urls=None):
     fields
         the name of the field(s) on which the aggregation was performed
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(current_request)
     idx = index_from_args(args)
     s = SearchClass(
@@ -590,7 +588,7 @@ def aggfields(fieldnames, current_request, urls=None):
         # Get the field mapping type for this field, and map it to a good default "missing"
         #   (empty bucket) label for the bucket missing= parameter below
         mapping = databaseClient.indices.get_field_mapping(
-            fname,
+            fields=fname,
             index=idx,
         )
         missing_val = (
@@ -686,9 +684,6 @@ def document():
     results
         array of the documents retrieved (up to 'limit')
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(request)
     s = SearchClass(
         using=databaseClient,
@@ -756,9 +751,6 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
-    global databaseClient
-    global SearchClass
-
     args = get_request_arguments(request)
 
     templateName = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
@@ -800,6 +792,7 @@ def fields():
             for fieldname, fieldinfo in malcolm_utils.deep_get(
                 template,
                 ["index_template", "template", "mappings", "properties"],
+                {},
             ).items():
                 if debugApi:
                     fieldinfo['source'] = f'opensearch.{templateName}'
@@ -823,6 +816,7 @@ def fields():
                     for fieldname, fieldinfo in malcolm_utils.deep_get(
                         component,
                         ["component_template", "template", "mappings", "properties"],
+                        {},
                     ).items():
                         if debugApi:
                             fieldinfo['source'] = f'opensearch.{templateName}.{componentName}'
@@ -837,15 +831,19 @@ def fields():
 
     # get fields from OpenSearch dashboards
     try:
-        for field in requests.get(
-            f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
-            params={
-                'pattern': index_from_args(args),
-                'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
-            },
-            auth=opensearchReqHttpAuth,
-            verify=opensearchSslVerify,
-        ).json()['fields']:
+        for field in (
+            requests.get(
+                f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
+                params={
+                    'pattern': index_from_args(args),
+                    'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+                },
+                auth=opensearchReqHttpAuth,
+                verify=opensearchSslVerify,
+            )
+            .json()
+            .get('fields', [])
+        ):
             if fieldname := malcolm_utils.deep_get(field, ['name']):
                 if debugApi:
                     field['source'] = 'dashboards'
@@ -892,8 +890,6 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
-    global databaseClient
-
     opensearchStats = requests.get(
         opensearchUrl,
         auth=opensearchReqHttpAuth,
@@ -949,8 +945,6 @@ def ready():
     zeek_extracted_file_monitor
         true or false, the ready status of the Zeek extracted file monitoring process
     """
-    global databaseClient
-
     try:
         arkimeResponse = requests.get(
             arkimeStatusUrl,
@@ -1012,7 +1006,11 @@ def ready():
             print(f"{type(e).__name__}: {str(e)} getting Logstash lumberjack listener status")
 
     try:
-        netboxStatus = requests.get(f'{netboxUrl}/plugins/netbox_healthcheck_plugin/healthcheck/?format=json').json()
+        netboxStatus = requests.get(
+            f'{netboxUrl}/api/status/?format=json',
+            headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
+            verify=False,
+        ).json()
     except Exception as e:
         netboxStatus = {}
         if debugApi:
@@ -1052,18 +1050,25 @@ def ready():
 
     return jsonify(
         arkime=arkimeStatus,
-        dashboards=(malcolm_utils.deep_get(dashboardsStatus, ["status", "overall", "state"], "red") != "red"),
+        dashboards=(
+            malcolm_utils.deep_get(
+                dashboardsStatus,
+                [
+                    "status",
+                    "overall",
+                    "level" if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote else "state",
+                ],
+                "red",
+            )
+            != "red"
+        ),
         dashboards_maps=dashboardsMapsStatus,
         filebeat_tcp=filebeatTcpJsonStatus,
         freq=freqStatus,
         logstash_lumberjack=logstashLJStatus,
         logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"], "red") != "red")
         and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"], "red") != "red"),
-        netbox=bool(
-            isinstance(netboxStatus, dict)
-            and netboxStatus
-            and all(value == "working" for value in netboxStatus.values())
-        ),
+        netbox=bool(isinstance(netboxStatus, dict) and netboxStatus.get('netbox-version')),
         opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
@@ -1181,10 +1186,6 @@ def ingest_stats():
         for that host, and "latest_ingest_age_seconds" is the age (in seconds) of the most recently
         ingested log
     """
-    global databaseClient
-    global SearchClass
-    global AggregationClass
-
     result = {}
     result['latest_ingest_age_seconds'] = 0
     try:
@@ -1242,6 +1243,58 @@ def ingest_stats():
     except Exception as e:
         if debugApi:
             print(f"{type(e).__name__}: \"{str(e)}\" getting ingest stats")
+
+    return jsonify(result)
+
+
+@app.route(
+    f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/netbox-sites",
+    methods=['GET'],
+)
+def netbox_sites():
+    """Query the NetBox API and return its sites
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    sites
+        A dict where the key is the netbox site ID and the value is a dict containing 'name', 'display', and 'slug'.
+        Example:
+            {
+                231: {"name": "Site1", "display": "Site One", "slug": "site1"},
+                232: {"name": "Site2", "display": "Site Two", "slug": "site2"},
+                ...
+            }
+
+    """
+    result = {}
+    try:
+        headers = {"Authorization": f"Token {netboxToken}"} if netboxToken else None
+        url = f'{netboxUrl}/api/dcim/sites/?format=json'
+        while url:
+            try:
+                response = requests.get(url, headers=headers, verify=False)
+                response.raise_for_status()
+            except Exception as e:
+                if debugApi:
+                    print(f"{type(e).__name__}: \"{str(e)}\" getting NetBox sites")
+                break
+            if response and (data := response.json()):
+                result.update(
+                    {
+                        site["id"]: {"name": site.get("name"), "display": site.get("display"), "slug": site.get("slug")}
+                        for site in data.get("results", [])
+                    }
+                )
+                url = data.get("next")
+            else:
+                break
+
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: \"{str(e)}\" getting NetBox sites")
 
     return jsonify(result)
 
@@ -1324,8 +1377,6 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
-    global databaseClient
-
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)

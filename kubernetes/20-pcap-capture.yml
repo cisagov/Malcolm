@@ -4,19 +4,23 @@ kind: Deployment
 metadata:
   name: pcap-capture-deployment
   namespace: malcolm
+  labels:
+    app: pcap-capture
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: pcap-capture-deployment
+      app: pcap-capture
   replicas: 1
   template:
     metadata:
       labels:
-        name: pcap-capture-deployment
+        app: pcap-capture
+        role: capture
     spec:
       containers:
       - name: pcap-capture-container
-        image: ghcr.io/idaholab/malcolm/pcap-capture:25.03.1
+        image: ghcr.io/idaholab/malcolm/pcap-capture:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -59,10 +63,17 @@ spec:
             subPath: "upload"
       initContainers:
       - name: pcap-capture-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

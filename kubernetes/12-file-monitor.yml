@@ -5,15 +5,22 @@ metadata:
   name: file-monitor
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 3310
       protocol: TCP
       name: clamav
+    - port: 5987
+      protocol: TCP
+      name: filetopic
+    - port: 5988
+      protocol: TCP
+      name: loggertopic
     - port: 8440
       protocol: TCP
       name: http
   selector:
-    name: file-monitor-deployment
+    app: file-monitor
 
 ---
 apiVersion: apps/v1
@@ -21,25 +28,35 @@ kind: Deployment
 metadata:
   name: file-monitor-deployment
   namespace: malcolm
+  labels:
+    app: file-monitor
+    role: service
 spec:
   selector:
     matchLabels:
-      name: file-monitor-deployment
+      app: file-monitor
   replicas: 1
   template:
     metadata:
       labels:
-        name: file-monitor-deployment
+        app: file-monitor
+        role: service
     spec:
       containers:
       - name: file-monitor-container
-        image: ghcr.io/idaholab/malcolm/file-monitor:25.03.1
+        image: ghcr.io/idaholab/malcolm/file-monitor:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
         ports:
           - name: clamav
             containerPort: 3310
+            protocol: TCP
+          - name: filetopic
+            containerPort: 5987
+            protocol: TCP
+          - name: loggertopic
+            containerPort: 5988
             protocol: TCP
           - name: http
             protocol: TCP
@@ -80,16 +97,23 @@ spec:
             name: file-monitor-yara-rules-custom-volume
       initContainers:
       - name: file-monitor-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/zeek-logs:extract_files/preserved,extract_files/quarantine"
+            value: "/data/zeek-logs:logs,extract_files/preserved,extract_files/quarantine"
         volumeMounts:
           - name: file-monitor-zeek-volume
             mountPath: "/data/zeek-logs"

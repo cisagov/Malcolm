@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.1.11
+FROM netboxcommunity/netbox:v4.2.8
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -25,12 +25,8 @@ ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 USER root
 
-ENV SUPERCRONIC_VERSION "0.2.33"
-ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
-ENV SUPERCRONIC_CRONTAB "/etc/crontab"
-
-ENV NETBOX_INITIALIZERS_VERSION "v4.1.0"
-ENV NETBOX_TOPOLOGY_VERSION "4.1.0"
+ENV NETBOX_INITIALIZERS_VERSION "v4.2.0"
+ENV NETBOX_TOPOLOGY_VERSION "4.2.1"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
 ENV YQ_VERSION "4.45.1"
@@ -42,7 +38,6 @@ ENV NETBOX_DEVICETYPE_LIBRARY_URL "https://codeload.github.com/netbox-community/
 ARG NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH="/opt/netbox-devicetype-library-import"
 
 ARG NETBOX_DEFAULT_SITE=Malcolm
-ARG NETBOX_CRON=true
 ARG NETBOX_PRELOAD_PATH="/opt/netbox-preload"
 ARG NETBOX_CUSTOM_PLUGINS_PATH="/opt/netbox-custom-plugins"
 ARG NETBOX_CONFIG_PATH="/etc/netbox/config"
@@ -50,12 +45,13 @@ ARG NETBOX_CONFIG_PATH="/etc/netbox/config"
 ENV NETBOX_PATH /opt/netbox
 ENV NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH $NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH
 ENV NETBOX_DEFAULT_SITE $NETBOX_DEFAULT_SITE
-ENV NETBOX_CRON $NETBOX_CRON
 ENV NETBOX_PRELOAD_PATH $NETBOX_PRELOAD_PATH
 ENV NETBOX_CUSTOM_PLUGINS_PATH $NETBOX_CUSTOM_PLUGINS_PATH
 ENV NETBOX_CONFIG_PATH $NETBOX_CONFIG_PATH
 
-ADD netbox/patch/* /tmp/netbox-patches/
+ADD --chmod=644 netbox/patch/* /tmp/netbox-patches/
+ADD --chmod=644 netbox/requirements.txt /usr/local/src/
+ADD --chmod=644 netbox/config/* /tmp/netbox-config/
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     mv /etc/apt/sources.list.d/unit.list /tmp/ && \
@@ -84,28 +80,16 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rsync \
       supervisor \
       tini && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir \
-      "git+https://github.com/tobiasge/netbox-initializers@${NETBOX_INITIALIZERS_VERSION}" \
-      "git+https://github.com/netbox-community/netbox-topology-views@v${NETBOX_TOPOLOGY_VERSION}" \
-      "git+https://github.com/netbox-community/netbox-healthcheck-plugin@v${NETBOX_HEALTHCHECK_VERSION}" \
-      psycopg2 \
-      pynetbox \
-      python-magic \
-      python-slugify \
-      randomcolor && \
+    curl -fsSL -o /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
+      "${NETBOX_PATH}/venv/bin/python" /tmp/get-pip.py && \
+    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
-    curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
-      chmod +x /usr/local/bin/supercronic && \
-      touch "${SUPERCRONIC_CRONTAB}" && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
         chmod 755 /usr/bin/yq && \
-    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
-      apt-get -q -y --purge autoremove && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     usermod -a -G tty ${PUSER} && \
     mkdir -p /opt/unit "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}" "${NETBOX_PRELOAD_PATH}" && \
+    cp /tmp/netbox-config/* "${NETBOX_CONFIG_PATH}" && \
     chown -R $PUSER:root /etc/netbox /opt/unit "${NETBOX_PATH}" && \
     cd "$(dirname "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" && \
         curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_URL}" | tar xzf - -C ./"$(basename "${NETBOX_DEVICETYPE_LIBRARY_IMPORT_PATH}")" --strip-components 1 && \
@@ -115,12 +99,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mkdir -p ./repo && \
       curl -sSL "${NETBOX_DEVICETYPE_LIBRARY_URL}" | tar xzf - -C ./repo --strip-components 1 && \
       rm -rf ./repo/device-types/WatchGuard && \
-    "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir --upgrade \
-      cryptography \
-      GitPython \
-      Jinja2 \
-      paramiko \
-      pillow && \
     mkdir -p "${NETBOX_PATH}/netbox/netbox" "${NETBOX_CUSTOM_PLUGINS_PATH}/requirements" && \
       jq '. += { "settings": { "http": { "discard_unsafe_fields": false } } }' /etc/unit/nginx-unit.json | jq 'del(.listeners."[::]:8080")' | jq 'del(.listeners."[::]:8081")' | jq '.routes.main[0].action.share = "`/opt/netbox/netbox${uri.substring(7)}`"' | jq '.routes.main[0].match.uri = "/netbox/static/*"' | jq '.routes.status[0].match.uri = "/netbox/status/*"' > /etc/unit/nginx-unit-new.json && \
       mv /etc/unit/nginx-unit-new.json /etc/unit/nginx-unit.json && \
@@ -129,14 +107,17 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mv "${NETBOX_PATH}/netbox/netbox/configuration_ascii.py" "${NETBOX_PATH}/netbox/netbox/configuration.py" && \
     sed -i "s/\('CENSUS_REPORTING_ENABLED',[[:space:]]*\)True/\1False/" "${NETBOX_PATH}/netbox/netbox/settings.py" && \
     sed -i -E 's@^([[:space:]]*\-\-(state|tmp))([[:space:]])@\1dir\3@g' "${NETBOX_PATH}/launch-netbox.sh" && \
-    sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh
+    sed -i '/\/opt\/netbox\/venv\/bin\/activate/a \\n# Install custom plugins \npython3 /usr/local/bin/netbox_install_plugins.py' /opt/netbox/docker-entrypoint.sh && \
+    apt-get -q -y --purge remove patch gcc libpq-dev python3-dev gpg && \
+      apt-get -q -y --purge autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/netbox.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 netbox/scripts/* /usr/local/bin/
-ADD --chmod=644 netbox/config/*.py /etc/netbox/config/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 netbox/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 netbox/preload/*.yml $NETBOX_PRELOAD_PATH/

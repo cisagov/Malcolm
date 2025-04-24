@@ -47,7 +47,7 @@ deb https://XXXXXX:443/debian buster-backports main contrib non-free
 5. Update underlying system packages with `apt-get`
     - `apt-get update && apt-get dist-upgrade`
 
-6. If there were [new system deb packages added]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare]({{ site.github.repository_url }}/commits/main/hedgehog-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `main`; in this example I'm not jumping between Debian releases, just upgrading within a release):
+6. If there were [new system deb packages added]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/hedgehog-iso/config/package-lists) to this release of Hedgehog Linux (you might have to [manually compare]({{ site.github.repository_url }}/commits/{{ site.github.build_revision }}/hedgehog-iso/config/package-lists) on GitHub), install them. If you're not sure, of course, you could just install everything, like this (although you may have to tweak some version numbers or something if the base distribution of your Hedgehog branch is different than `main`; in this example I'm not jumping between Debian releases, just upgrading within a release):
 ```
 $ for LIST in apps desktopmanager net system; do curl -L -J -O {{ site.github.repository_url }}/main/hedgehog-iso/config/package-lists/$LIST.list.chroot; done
 ...

@@ -5,12 +5,13 @@ metadata:
   name: htadmin
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 80
       protocol: TCP
       name: http
   selector:
-    name: htadmin-deployment
+    app: htadmin
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: htadmin-deployment
   namespace: malcolm
+  labels:
+    app: htadmin
+    role: auth
 spec:
   selector:
     matchLabels:
-      name: htadmin-deployment
+      app: htadmin
   replicas: 1
   template:
     metadata:
       labels:
-        name: htadmin-deployment
+        app: htadmin
+        role: auth
     spec:
       containers:
       - name: htadmin-container
-        image: ghcr.io/idaholab/malcolm/htadmin:25.03.1
+        image: ghcr.io/idaholab/malcolm/htadmin:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -43,6 +48,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - secretRef:
+              name: auth-env
           - configMapRef:
               name: auth-common-env
         env:
@@ -54,8 +61,6 @@ spec:
           - mountPath: /var/www/htadmin/auth
             name: htadmin-config-volume
             subPath: "auth"
-          - mountPath: /var/www/htadmin/default/configmap
-            name: htadmin-config-default-volume
           - mountPath: /var/www/htadmin/default/secretmap
             name: htadmin-config-default-secret-volume
           - mountPath: /var/www/htadmin/config
@@ -72,10 +77,17 @@ spec:
           failureThreshold: 10
       initContainers:
       - name: htadmin-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env
@@ -92,9 +104,6 @@ spec:
         - name: htadmin-config-volume
           persistentVolumeClaim:
             claimName: config-claim
-        - name: htadmin-config-default-volume
-          configMap:
-            name: htadmin-config
         - name: htadmin-config-default-secret-volume
           secret:
             secretName: htadmin-config

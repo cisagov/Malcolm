@@ -224,11 +224,11 @@ function InstallEnvPackages {
 
     if python3 -m pip -V >/dev/null 2>&1; then
       python3 -m pip install --user -U \
-        dateparser \
-        kubernetes \
-        mmguero \
-        python-dotenv \
-        pythondialog
+        dateparser==1.2.1 \
+        kubernetes==32.0.1 \
+        python-dotenv==1.1.0 \
+        pythondialog==3.5.3 \
+        mmguero==1.3.4
     fi
   fi
 
@@ -547,7 +547,7 @@ function InstallMalcolm {
           --extracted-file-capa \
           --extracted-file-clamav \
           --extracted-file-yara \
-          --netbox \
+          --netbox local \
           --netbox-enrich \
           --netbox-autopopulate \
           --netbox-auto-prefixes \

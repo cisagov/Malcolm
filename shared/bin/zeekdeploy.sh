@@ -156,7 +156,7 @@ fi
 [[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
 export INTEL_DIR
 mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP "$INTEL_DIR"/Mandiant
-touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true
+[[ ! -f "$INTEL_DIR"/__load__.zeek ]] && ( touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true )
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && \
   [[ "$ZEEK_INTEL_REFRESH_ON_DEPLOY" == "true" ]] && \
@@ -167,7 +167,7 @@ INTEL_UPDATE_TIME_PREV=0
 [[ -n "$ZEEK_CUSTOM_PATH" ]] && CUSTOM_DIR="$ZEEK_CUSTOM_PATH" || CUSTOM_DIR=/opt/sensor/sensor_ctl/zeek/custom
 export CUSTOM_DIR
 mkdir -p "$CUSTOM_DIR"
-touch "$CUSTOM_DIR"/__load__.zeek 2>/dev/null || true
+[[ ! -f "$CUSTOM_DIR"/__load__.zeek ]] && ( touch "$CUSTOM_DIR"/__load__.zeek 2>/dev/null || true )
 
 # configure zeek cfg files
 pushd "$ZEEK_INSTALL_PATH"/etc >/dev/null 2>&1
@@ -355,7 +355,7 @@ trap finish EXIT
 echo "Running via \"$ZEEK_CTL\" ($ZEEK_PROCS processes) ..." >&2
 "$ZEEK_CTL" deploy
 
-for (( i=1; i <= 10; i++)); do sleep 1; done
+for (( i=1; i <= 30; i++)); do sleep 1; done
 
 # keep track of intel updates in order to reload when they occur
 INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
@@ -372,7 +372,7 @@ while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" 
     INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
   fi
 
-  for (( i=1; i <= 10; i++)); do sleep 1; done
+  for (( i=1; i <= 30; i++)); do sleep 1; done
 done
 
 popd >/dev/null 2>&1

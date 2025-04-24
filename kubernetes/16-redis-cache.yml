@@ -5,12 +5,13 @@ metadata:
   name: redis-cache
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 6379
       protocol: TCP
       name: redis
   selector:
-    name: redis-cache-deployment
+    app: redis-cache
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: redis-cache-deployment
   namespace: malcolm
+  labels:
+    app: redis-cache
+    role: database
 spec:
   selector:
     matchLabels:
-      name: redis-cache-deployment
+      app: redis-cache
   replicas: 1
   template:
     metadata:
       labels:
-        name: redis-cache-deployment
+        app: redis-cache
+        role: database
     spec:
       containers:
       - name: redis-cache-container
-        image: ghcr.io/idaholab/malcolm/redis:25.03.1
+        image: ghcr.io/idaholab/malcolm/redis:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true

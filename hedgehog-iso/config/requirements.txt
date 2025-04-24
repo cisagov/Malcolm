@@ -1,0 +1,14 @@
+git+https://github.com/google/mandiant-ti-client
+clamd==1.0.2
+dateparser==1.2.1
+debinterface==3.5.0
+dominate==2.9.1
+humanfriendly==10.0
+pymisp==2.4.170.1
+python-dotenv==1.1.0
+pytz==2025.2
+ruamel.yaml==0.18.10
+stix2==3.0.1
+stream-zip==0.0.83
+taxii2-client==2.3.0
+watchdog==6.0.0

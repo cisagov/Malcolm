@@ -224,6 +224,19 @@ def GetMemMegabytesFromJavaOptsLine(val):
 
 
 ##################################################################################################
+def ParseK8sMemoryToMib(val):
+    val = str(val).strip()
+    units = {'Ki': 1 / 1024, 'Mi': 1, 'Gi': 1024, 'Ti': 1024 * 1024}
+
+    for unit in units:
+        if val.endswith(unit):
+            value = float(val.replace(unit, ''))
+            return int(value * units[unit])
+
+    return 0
+
+
+##################################################################################################
 def GetUidGidFromEnv(configDir=None):
     configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = defaultdict(str)
@@ -840,7 +853,6 @@ def MalcolmAuthFilesExist(configDir=None):
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
         and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'postgres.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))

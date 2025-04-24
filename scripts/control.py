@@ -84,7 +84,6 @@ from malcolm_utils import (
 
 from malcolm_kubernetes import (
     CheckPersistentStorageDefs,
-    DeleteNamespace,
     get_node_hostnames_and_ips,
     GetPodNamesForService,
     PodExec,
@@ -92,6 +91,7 @@ from malcolm_kubernetes import (
     PrintPodStatus,
     REQUIRED_VOLUME_OBJECTS,
     StartMalcolm,
+    StopMalcolm,
 )
 
 from base64 import b64encode
@@ -236,16 +236,57 @@ def checkEnvFilesAndValues():
                                 with open(destEnvFileName, "a") as destEnvFileHandle:
                                     newlineAdded = False
                                     for destKey, sourceKey in keys.items():
-                                        # if a key exists in the source, but not in the dest, it needs to be written
-                                        if (sourceKey in sourceVars) and (destKey not in destVars):
+                                        sourceVarName = None
+                                        # in the yml, the variable could be defined like this:
+                                        #
+                                        # destfile:
+                                        #   sourcefile:
+                                        #     destvarname:
+                                        #       sourcevarname
+                                        #
+                                        # in which case the value of sourcefile.sourcevarname is added as
+                                        #   destfile.destvarname
+                                        #
+                                        # another option is this:
+                                        #
+                                        # destfile:
+                                        #   sourcefile:
+                                        #     destvarname:
+                                        #       sourcevarname:
+                                        #         "true": disabled
+                                        #         "false": local
+                                        #
+                                        # when this is the case (sourcevarname is a hash), the value of
+                                        #   sourcefile.sourcefilename is looked up in this hash, and
+                                        #   if it exists, that value is added as destfile.destfilename
+                                        if (
+                                            (
+                                                (isinstance(sourceKey, str) and (sourceVarName := sourceKey))
+                                                or (
+                                                    isinstance(sourceKey, dict)
+                                                    and (len(sourceKey) == 1)
+                                                    and (sourceVarName := next(iter(sourceKey)))
+                                                )
+                                            )
+                                            # if a key exists in the source, but not in the dest, it needs to be written
+                                            and (destKey not in destVars)
+                                            and sourceVarName in sourceVars
+                                        ):
                                             if args.debug:
                                                 eprint(
-                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceKey}"
+                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
                                                 )
                                             if not newlineAdded:
                                                 print('', file=destEnvFileHandle)
                                                 newlineAdded = True
-                                            print(f"{destKey}={sourceVars[sourceKey]}", file=destEnvFileHandle)
+                                            if isinstance(sourceKey, dict) and (
+                                                destVal := {
+                                                    str(k): str(v) for k, v in sourceKey[sourceVarName].items()
+                                                }.get(str(sourceVars[sourceVarName]), None)
+                                            ):
+                                                print(f"{destKey}={destVal}", file=destEnvFileHandle)
+                                            else:
+                                                print(f"{destKey}={sourceVars[sourceVarName]}", file=destEnvFileHandle)
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:
@@ -1137,26 +1178,25 @@ def stop(wipe=False):
                 eprint("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        deleteResults = DeleteNamespace(
+        stopResults = StopMalcolm(
             namespace=args.namespace,
-            deleteRetPerVol=args.deleteRetPerVol,
+            deleteNamespace=args.deleteNamespace and wipe,
+            deletePVCsAndPVs=wipe,
         )
-
-        if dictsearch(deleteResults, 'error'):
-            eprint(
-                f"Deleting {args.namespace} namespace and its underlying resources returned the following error(s):\n"
-            )
-            eprint(deleteResults)
+        if dictsearch(stopResults, 'error'):
+            eprint(f"Removing resources in the {args.namespace} namespace returned the following error(s):\n")
+            eprint(stopResults)
             eprint()
-
         else:
-            eprint(f"The {args.namespace} namespace and its underlying resources have been deleted\n")
+            eprint(f"The resources in the {args.namespace} namespace have been removed\n")
             if args.debug:
-                eprint(deleteResults)
+                eprint(stopResults)
                 eprint()
 
         if wipe:
-            eprint(f'Data on PersistentVolume storage cannot be deleted by {ScriptName}: it must be deleted manually\n')
+            eprint(
+                f'Underlying storage artifacts on PersistentVolumes cannot be deleted by {ScriptName}: they must be deleted manually\n'
+            )
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
@@ -1193,7 +1233,6 @@ def start():
         # make sure permissions are set correctly for the worker processes
         for authFile in [
             os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
-            os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
             os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
         ]:
             # chmod 644 authFile
@@ -1309,7 +1348,7 @@ def start():
             exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        if CheckPersistentStorageDefs(
+        if args.skipPerVolChecks or CheckPersistentStorageDefs(
             namespace=args.namespace,
             malcolmPath=MalcolmPath,
             profile=args.composeProfile,
@@ -1319,6 +1358,9 @@ def start():
                 malcolmPath=MalcolmPath,
                 configPath=args.configDir,
                 profile=args.composeProfile,
+                injectResources=args.injectResources,
+                startCapturePods=not args.noCapturePodsStart,
+                noCapabilities=args.noCapabilities,
             )
 
             if dictsearch(startResults, 'error'):
@@ -1336,7 +1378,10 @@ def start():
         else:
             groupedStorageEntries = {
                 i: [j[0] for j in j]
-                for i, j in groupby(sorted(REQUIRED_VOLUME_OBJECTS.items(), key=lambda x: x[1]), lambda x: x[1])
+                for i, j in groupby(
+                    sorted(REQUIRED_VOLUME_OBJECTS.items(), key=lambda x: tuple(x[1].items())),
+                    lambda x: tuple(x[1].items()),
+                )
             }
             raise Exception(
                 f'Storage objects required by Malcolm are not defined in {os.path.join(MalcolmPath, "kubernetes")}: {groupedStorageEntries}'
@@ -1449,7 +1494,9 @@ def authSetup():
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else None
 
+    netboxCommonEnvFile = os.path.join(args.configDir, 'netbox-common.env')
     authCommonEnvFile = os.path.join(args.configDir, 'auth-common.env')
+
     if args.authMode:
         nginxAuthMode = str(args.authMode).lower()
     else:
@@ -1458,6 +1505,9 @@ def authSetup():
             nginxAuthMode = (
                 dotenvImported.dotenv_values(authCommonEnvFile).get('NGINX_AUTH_MODE', nginxAuthMode).lower()
             )
+    netboxMode = None
+    if os.path.isfile(netboxCommonEnvFile):
+        netboxMode = dotenvImported.dotenv_values(netboxCommonEnvFile).get('NETBOX_MODE', '').lower()
 
     # don't make them go through every thing every time, give them a choice instead
     # 0 - key
@@ -1466,132 +1516,143 @@ def authSetup():
     # 3 - option default (yes/no) for if they're doing "all""
     # 4 - ? (lol, doesn't seem to be used in this script, probably just there
     #          as it's used in other scripts where ChooseOne/ChooseMultiple is used)
-    authConfigChoices = (
-        (
-            'all',
-            "Configure all authentication-related settings",
-            True,
-            True,
-            [],
-        ),
-        (
-            'method',
-            f"Select authentication method (currently \"{nginxAuthMode}\")",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
-            [],
-        ),
-        (
-            'admin',
-            "Store administrator username/password for basic HTTP authentication",
-            False,
-            (not args.cmdAuthSetupNonInteractive)
-            or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
-            [],
-        ),
-        (
-            'webcerts',
-            "(Re)generate self-signed certificates for HTTPS access",
-            False,
-            not args.cmdAuthSetupNonInteractive
-            or (
-                args.authGenWebCerts
-                or not os.path.isfile(
-                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
-                )
+    authConfigChoices = [
+        x
+        for x in [
+            (
+                'all',
+                "Configure all authentication-related settings",
+                True,
+                True,
+                [],
             ),
-            [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
-        ),
-        (
-            'fwcerts',
-            "(Re)generate self-signed certificates for a remote log forwarder",
-            False,
-            not args.cmdAuthSetupNonInteractive
-            or (
-                args.authGenFwCerts
-                or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
-                or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
+            (
+                'method',
+                f"Select authentication method (currently \"{nginxAuthMode}\")",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
+                [],
             ),
-            [
-                os.path.join(logstashPath, 'server.key'),
-                os.path.join(filebeatPath, 'client.key'),
-            ],
-        ),
-        (
-            'keycloak',
-            "Configure Keycloak",
-            False,
-            bool(
-                str(nginxAuthMode).startswith('keycloak')
-                or args.authKeycloakRealm
-                or args.authKeycloakRedirectUri
-                or args.authKeycloakUrl
-                or args.authKeycloakClientId
-                or args.authKeycloakClientSecret
-                or args.authKeycloakBootstrapUser
-                or args.authKeycloakBootstrapPassword
-                or args.authRequireGroup
-                or args.authRequireRole
+            (
+                'admin',
+                "Store administrator username/password for basic HTTP authentication",
+                False,
+                (not args.cmdAuthSetupNonInteractive)
+                or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
+                [],
             ),
-            [],
-        ),
-        (
-            'remoteos',
-            "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
-            False,
-            False,
-            [],
-        ),
-        (
-            'email',
-            "Store username/password for OpenSearch Alerting email sender account",
-            False,
-            False,
-            [],
-        ),
-        (
-            'netbox',
-            "(Re)generate internal passwords for NetBox",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
-            [],
-        ),
-        (
-            'keycloakdb',
-            "(Re)generate internal passwords for Keycloak's PostgreSQL database",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
-            [],
-        ),
-        (
-            'postgres',
-            "(Re)generate internal superuser passwords for PostgreSQL",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
-            [],
-        ),
-        (
-            'redis',
-            "(Re)generate internal passwords for Redis",
-            False,
-            (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
-            [],
-        ),
-        (
-            'arkime',
-            "Store password hash secret for Arkime viewer cluster",
-            False,
-            False,
-            [],
-        ),
-        (
-            'txfwcerts',
-            "Transfer self-signed client certificates to a remote log forwarder",
-            False,
-            False,
-            [],
-        ),
-    )[: 14 if txRxScript else -1]
+            (
+                'webcerts',
+                "(Re)generate self-signed certificates for HTTPS access",
+                False,
+                not args.cmdAuthSetupNonInteractive
+                or (
+                    args.authGenWebCerts
+                    or not os.path.isfile(
+                        os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
+                    )
+                ),
+                [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
+            ),
+            (
+                'fwcerts',
+                "(Re)generate self-signed certificates for a remote log forwarder",
+                False,
+                not args.cmdAuthSetupNonInteractive
+                or (
+                    args.authGenFwCerts
+                    or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
+                    or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
+                ),
+                [
+                    os.path.join(logstashPath, 'server.key'),
+                    os.path.join(filebeatPath, 'client.key'),
+                ],
+            ),
+            (
+                'keycloak',
+                "Configure Keycloak",
+                False,
+                bool(
+                    str(nginxAuthMode).startswith('keycloak')
+                    or args.authKeycloakRealm
+                    or args.authKeycloakRedirectUri
+                    or args.authKeycloakUrl
+                    or args.authKeycloakClientId
+                    or args.authKeycloakClientSecret
+                    or args.authKeycloakBootstrapUser
+                    or args.authKeycloakBootstrapPassword
+                    or args.authRequireGroup
+                    or args.authRequireRole
+                ),
+                [],
+            ),
+            (
+                'remoteos',
+                "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
+                False,
+                False,
+                [],
+            ),
+            (
+                'email',
+                "Store username/password for OpenSearch Alerting email sender account",
+                False,
+                False,
+                [],
+            ),
+            (
+                'netbox',
+                "(Re)generate internal passwords for NetBox",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
+                [],
+            ),
+            (
+                'netbox-remote-token' if (netboxMode == 'remote') else None,
+                "Store API token for remote NetBox instance",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or (bool(args.authNetBoxRemoteToken)),
+                [],
+            ),
+            (
+                'keycloakdb',
+                "(Re)generate internal passwords for Keycloak's PostgreSQL database",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
+                [],
+            ),
+            (
+                'postgres',
+                "(Re)generate internal superuser passwords for PostgreSQL",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
+                [],
+            ),
+            (
+                'redis',
+                "(Re)generate internal passwords for Redis",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
+                [],
+            ),
+            (
+                'arkime',
+                "Store password hash secret for Arkime viewer cluster",
+                False,
+                False,
+                [],
+            ),
+            (
+                'txfwcerts' if txRxScript else None,
+                "Transfer self-signed client certificates to a remote log forwarder",
+                False,
+                False,
+                [],
+            ),
+        ]
+        if x[0]
+    ]
 
     authConfigChoice = (
         ChooseOne(
@@ -1858,29 +1919,6 @@ def authSetup():
                                     and (not line.startswith(f"{usernamePrevious}:"))
                                 ):
                                     f.write(line)
-
-                    # populate htadmin config file
-                    with open(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')), 'w') as f:
-                        f.write('; HTAdmin config file.\n\n')
-                        f.write('[application]\n')
-                        f.write('; Change this to customize your title:\n')
-                        f.write(
-                            f'app_title = {"Malcolm Service Account Management" if nginxAuthMode.startswith("keycloak") else "Malcolm User Management" }\n\n'
-                        )
-                        f.write('; htpasswd file\n')
-                        f.write('secure_path  = ./auth/htpasswd\n')
-                        f.write('; metadata file\n')
-                        f.write('metadata_path  = ./config/metadata\n\n')
-                        f.write('; administrator user/password (htpasswd -b -c -B ...)\n')
-                        f.write(f'admin_user = {username}\n\n')
-                        f.write('; username field quality checks\n')
-                        f.write(';\n')
-                        f.write(f'min_username_len = {UsernameMinLen}\n')
-                        f.write(f'max_username_len = {UsernameMaxLen}\n\n')
-                        f.write('; Password field quality checks\n')
-                        f.write(';\n')
-                        f.write(f'min_password_len = {PasswordMinLen}\n')
-                        f.write(f'max_password_len = {PasswordMaxLen}\n\n')
 
                     # touch the metadata file
                     touch(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')))
@@ -2496,6 +2534,39 @@ def authSetup():
                                 defaultBehavior=defaultBehavior,
                             )
 
+                elif (authItem[0] == 'netbox-remote-token') and (netboxMode == 'remote'):
+                    # prompt Token
+                    netboxToken = ''
+
+                    netboxSecretFile = os.path.join(args.configDir, 'netbox-secret.env')
+                    prevNetboxToken = None
+                    if os.path.isfile(netboxSecretFile):
+                        prevNetboxToken = dotenvImported.dotenv_values(netboxSecretFile).get('NETBOX_TOKEN', '')
+
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox API token')
+                    while loopBreaker.increment():
+                        netboxToken = AskForString(
+                            f"Remote NetBox instance API token (40 characters): ",
+                            default=args.authNetBoxRemoteToken or prevNetboxToken,
+                            defaultBehavior=defaultBehavior,
+                        ).lower()
+                        if (len(netboxToken) == 40) and all(c in string.hexdigits for c in netboxToken):
+                            break
+                        eprint("Invalid NetBox API token")
+
+                    with pushd(args.configDir):
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    'netbox-secret.env',
+                                    'NETBOX_TOKEN',
+                                    netboxToken,
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR,
+                        )
+
                 elif authItem[0] == 'redis':
                     with pushd(args.configDir):
                         UpdateEnvFiles(
@@ -2733,18 +2804,50 @@ def main():
         help="Kubernetes namespace",
     )
     kubernetesGroup.add_argument(
-        '--reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_true',
-        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "stop" operation with Kubernetes)',
+        '--skip-persistent-volume-checks',
+        dest='skipPerVolChecks',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Skip checks for PersistentVolumes/PersistentVolumeClaims in manifests (only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
-        '--no-reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_false',
-        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "stop" operation with Kubernetes)',
+        '--no-capture-pods',
+        dest='noCapturePodsStart',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Do not deploy pods for traffic live capture/analysis (only for "start" operation with Kubernetes)',
     )
-    kubernetesGroup.set_defaults(deleteRetPerVol=True)
+    kubernetesGroup.add_argument(
+        '--no-capabilities',
+        dest='noCapabilities',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Do not specify modifications to container capabilities (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--inject-resources',
+        dest='injectResources',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--delete-namespace',
+        dest='deleteNamespace',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Delete Kubernetes namespace (only for "wipe" operation with Kubernetes)',
+    )
 
     authSetupGroup = parser.add_argument_group('Authentication Setup')
     authSetupGroup.add_argument(
@@ -2846,6 +2949,15 @@ def main():
         const=True,
         default=False,
         help="(Re)generate self-signed certificates for a remote log forwarder",
+    )
+    authSetupGroup.add_argument(
+        '--auth-netbox-token',
+        dest='authNetBoxRemoteToken',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='API token for remote NetBox instance (for --auth-noninteractive when NETBOX_MODE=remote in netbox-common.env)',
     )
     authSetupGroup.add_argument(
         '--auth-generate-netbox-passwords',

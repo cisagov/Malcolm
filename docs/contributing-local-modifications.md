@@ -430,11 +430,6 @@ services:
       - type: bind
         bind:
           create_host_path: false
-        source: ./htadmin/config.ini
-        target: /var/www/htadmin/config/config.ini
-      - type: bind
-        bind:
-          create_host_path: false
         source: ./htadmin/metadata
         target: /var/www/htadmin/config/metadata
       - type: bind

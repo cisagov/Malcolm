@@ -5,8 +5,6 @@ metadata:
   name: nginx-proxy
   namespace: malcolm
 spec:
-  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
-  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 443
@@ -19,7 +17,7 @@ spec:
       protocol: TCP
       name: opensearch
   selector:
-    name: nginx-proxy-deployment
+    app: nginx-proxy
 
 ---
 apiVersion: apps/v1
@@ -27,19 +25,23 @@ kind: Deployment
 metadata:
   name: nginx-proxy-deployment
   namespace: malcolm
+  labels:
+    app: nginx-proxy
+    role: proxy
 spec:
   selector:
     matchLabels:
-      name: nginx-proxy-deployment
+      app: nginx-proxy
   replicas: 1
   template:
     metadata:
       labels:
-        name: nginx-proxy-deployment
+        app: nginx-proxy
+        role: proxy
     spec:
       containers:
       - name: nginx-proxy-container
-        image: ghcr.io/idaholab/malcolm/nginx-proxy:25.03.1
+        image: ghcr.io/idaholab/malcolm/nginx-proxy:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -61,7 +63,11 @@ spec:
           - configMapRef:
               name: opensearch-env
           - configMapRef:
+              name: arkime-env
+          - configMapRef:
               name: dashboards-env
+          - configMapRef:
+              name: netbox-common-env
           - secretRef:
               name: keycloak-env
           - configMapRef:
@@ -100,10 +106,17 @@ spec:
           subPath: "nginx"
       initContainers:
       - name: nginx-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

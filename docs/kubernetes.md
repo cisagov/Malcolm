@@ -14,8 +14,7 @@
     - [Live Traffic Analysis](#FutureLiveCap)
     - [Horizontal Scaling](#FutureScaleOut)
     - [Helm Chart](#FutureHelmChart)
-* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS)
-* [Deploying Malcolm on Microsoft Azure Kubernetes Service (AKS)](kubernetes-azure.md#KubernetesAzure)
+* [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#KubernetesEKS)
 
 This document assumes good working knowledge of Kubernetes (K8s). The comprehensive [Kubernetes documentation](https://kubernetes.io/docs/home/) is a good place to go for more information about Kubernetes.
 
@@ -26,7 +25,7 @@ This document assumes good working knowledge of Kubernetes (K8s). The comprehens
 There exist a variety of ingress controllers for Kubernetes suitable for different Kubernetes providers and environments. A few sample manifests for ingress controllers can be found in Malcolm's [`kubernetes`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/) directory, prefixed with `99-ingress-…`:
 
 * [`kubernetes/99-ingress-nginx.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml.example) - an example ingress manifest for Malcolm using the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). The Ingress-NGINX controller has been used internally on self-hosted Kubernetes clusters during Malcolm's development and testing.
-* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). Users likely will prefer to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](kubernetes-eks.md#KubernetesEKS).
+* [`kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) - an example ingress manifest for Malcolm using the [AWS Load Balancer (ALB) Controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.5/#aws-load-balancer-controller). Users likely will prefer to use ALB to [deploy Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#KubernetesEKS).
 
 Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` files to `99-ingress.yml` as a starting point to define the ingress or define a custom manifest file and save it as `99-ingress.yml`.
 
@@ -429,7 +428,10 @@ Download updated file scanner signatures periodically? (y / N): y
 
 Configure pulling from threat intelligence feeds for Zeek intelligence framework? (y / N): n
 
-Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool? (y / N): y
+1: disabled - disable NetBox
+2: local - Run and maintain an embedded NetBox instance
+3: remote - Use a remote NetBox instance
+Should Malcolm utilize NetBox, an infrastructure resource modeling tool? (disabled): 2
 
 Should Malcolm enrich network traffic using NetBox? (Y / n): y
 
