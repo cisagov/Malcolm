@@ -109,6 +109,8 @@ spec:
             name: logstash-certs-secret-volume
           - mountPath: /etc/configmap
             name: logstash-maps-volume
+          - name: logstash-keystore-default-secret-volume
+            mountPath: /usr/share/logstash/config/bootstrap/secretmap
           - name: logstash-config-persist-volume
             mountPath: /usr/share/logstash/config/persist
             subPath: "logstash"
@@ -147,6 +149,9 @@ spec:
         - name: logstash-maps-volume
           configMap:
             name: logstash-maps
+        - name: logstash-keystore-default-secret-volume
+          secret:
+            secretName: logstash-keystore
         - name: logstash-config-persist-volume
           persistentVolumeClaim:
             claimName: config-claim
