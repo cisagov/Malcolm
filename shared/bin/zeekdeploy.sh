@@ -344,6 +344,14 @@ popd >/dev/null 2>&1
 
 pushd "$ZEEK_LOG_PATH" >/dev/null 2>&1
 
+function zeek_procs_running {
+  if output=$("$ZEEK_CTL" status 2>/dev/null) && [[ -n "$output" ]]; then
+    echo "$output" | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l
+  else
+    pidof zeek 2>/dev/null | wc -w
+  fi
+}
+
 function finish {
   echo "Stopping via \"$ZEEK_CTL\"" >&2
   "$ZEEK_CTL" stop
@@ -362,7 +370,8 @@ INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '
 INTEL_UPDATE_TIME_PREV="$INTEL_UPDATE_TIME"
 
 # wait until interrupted (or somehow if zeek dies on its own)
-while [ $("$ZEEK_CTL" status | tail -n +2 | grep -P "localhost\s+running\s+\d+" | wc -l) -ge $ZEEK_PROCS ]; do
+while :; do
+  (( $(zeek_procs_running) >= ZEEK_PROCS )) || break
 
   # check to see if intel feeds were updated, and if so, restart
   INTEL_UPDATE_TIME="$(stat -c %Y "$INTEL_DIR"/__load__.zeek 2>/dev/null || echo '0')"
