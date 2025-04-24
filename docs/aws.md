@@ -7,11 +7,12 @@
         + [Instance creation](#AWSEC2Instance)
         + [Malcolm setup](#AWSEC2Install)
         + [Running Malcolm](#AWSEC2Run)
-    - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
+- [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
         + [Deploying with EKS](#AWSEKS)
         + [Deploying with EKS on Fargate](#AWSFargate)
         + [Common Steps for EKS Deployments](#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
+        + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
         + [Using MFA](#AWSAMIMFA)
     - [Attribution and Disclaimer](#AWSAttribution)
 
@@ -1144,123 +1145,169 @@ $ ./Malcolm/scripts/stop -f "${KUBECONFIG:-$HOME/.kube/config}"
 
 ## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI)
 
-This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm AMI for either the x86-64 or arm64 CPU architecture. This section assumes good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
+This section outlines the process of using [packer](https://www.packer.io/)'s [Amazon AMI Builder](https://developer.hashicorp.com/packer/plugins/builders/amazon) to create an [EBS-backed](https://developer.hashicorp.com/packer/plugins/builders/amazon/ebs) Malcolm [AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html) for either the x86-64 or arm64 CPU architecture. This section assumes good working knowledge of [Amazon Web Services (AWS)](https://docs.aws.amazon.com/index.html).
 
 The files referenced in this section can be found in [scripts/third-party-environments/aws/ami]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/third-party-environments/aws/ami).
 
-1. Copy `packer_vars.json.example` to `packer_vars.json`
+* Copy `packer_vars.json.example` to `packer_vars.json`
 
-    ```bash
-    $ cp ./packer_vars.json.example ./packer_vars.json
-    ```
+```bash
+$ cp ./packer_vars.json.example ./packer_vars.json
+```
 
-1. Edit `packer_vars.json`
+* Edit `packer_vars.json`
     * Set `vpc_region`, `instance_arch`, and other variables as needed
-1. Validate the packer configuration
+* Validate the `packer` configuration
 
-    ```bash
-    $ packer validate packer_build.json
-    The configuration is valid.
-    ```
+```bash
+$ packer validate packer_build.json
+The configuration is valid.
+```
 
-1. Launch packer to build the AMI, providing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as environment variables:
+* Launch `packer` to build the AMI, providing `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as environment variables:
 
-    ```bash
-    $ AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY \
-        AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY \
-        packer build -var-file=packer_vars.json packer_build.json
+```bash
+$ AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY \
+    AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY \
+    packer build -var-file=packer_vars.json packer_build.json
 
-    amazon-ebs: output will be in this color.
+amazon-ebs: output will be in this color.
 
-    ==> amazon-ebs: Prevalidating any provided VPC information
-    ==> amazon-ebs: Prevalidating AMI Name: malcolm-v{{ site.malcolm.version }}-x86_64-2024-10-10T15-41-32Z
-        amazon-ebs: Found Image ID: ami-xxxxxxxxxxxxxxxxx
+==> amazon-ebs: Prevalidating any provided VPC information
+==> amazon-ebs: Prevalidating AMI Name: malcolm-v{{ site.malcolm.version }}-x86_64-2024-10-10T15-41-32Z
+    amazon-ebs: Found Image ID: ami-xxxxxxxxxxxxxxxxx
 
-    ...
+...
 
-    ==> amazon-ebs: Waiting for AMI to become ready...
-    ==> amazon-ebs: Skipping Enable AMI deprecation...
-    ==> amazon-ebs: Adding tags to AMI (ami-xxxxxxxxxxxxxxxxx)...
-    ==> amazon-ebs: Tagging snapshot: snap-xxxxxxxxxxxxxxxxx
-    ==> amazon-ebs: Creating AMI tags
-        amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v{{ site.malcolm.version }}"
-        amazon-ebs: Adding tag: "source_ami_name": "al2023-ami-ecs-hvm-2023.0.20241003-kernel-6.1-x86_64"
-    ==> amazon-ebs: Creating snapshot tags
-    ==> amazon-ebs: Terminating the source AWS instance...
-    ==> amazon-ebs: Cleaning up any extra volumes...
-    ==> amazon-ebs: No volumes to clean up, skipping
-    ==> amazon-ebs: Deleting temporary keypair...
-    Build 'amazon-ebs' finished after 19 minutes 57 seconds.
+==> amazon-ebs: Waiting for AMI to become ready...
+==> amazon-ebs: Skipping Enable AMI deprecation...
+==> amazon-ebs: Adding tags to AMI (ami-xxxxxxxxxxxxxxxxx)...
+==> amazon-ebs: Tagging snapshot: snap-xxxxxxxxxxxxxxxxx
+==> amazon-ebs: Creating AMI tags
+    amazon-ebs: Adding tag: "Malcolm": "idaholab/Malcolm/v{{ site.malcolm.version }}"
+    amazon-ebs: Adding tag: "source_ami_name": "al2023-ami-ecs-hvm-2023.0.20241003-kernel-6.1-x86_64"
+==> amazon-ebs: Creating snapshot tags
+==> amazon-ebs: Terminating the source AWS instance...
+==> amazon-ebs: Cleaning up any extra volumes...
+==> amazon-ebs: No volumes to clean up, skipping
+==> amazon-ebs: Deleting temporary keypair...
+Build 'amazon-ebs' finished after 19 minutes 57 seconds.
 
-    ==> Wait completed after 19 minutes 57 seconds
+==> Wait completed after 19 minutes 57 seconds
 
-    ==> Builds finished. The artifacts of successful builds are:
-    --> amazon-ebs: AMIs were created:
-    us-east-1: ami-xxxxxxxxxxxxxxxxx
-    ```
+==> Builds finished. The artifacts of successful builds are:
+--> amazon-ebs: AMIs were created:
+us-east-1: ami-xxxxxxxxxxxxxxxxx
+```
 
-1. Use `aws` (or the [Amazon EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home)) to verify that the new AMI exists
+* Use [`aws`](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) (or the Amazon EC2 console) to verify that the new AMI exists and note the ID of the image to launch if you wish to continue on to the next section.
 
-    ```bash
-    $ aws ec2 describe-images --owners self --filters "Name=root-device-type,Values=ebs" --filters "Name=name,Values=malcolm-*"
-    ```
+```bash
+$ aws ec2 describe-images \
+    --owners self \
+    --filters "Name=root-device-type,Values=ebs" \
+    --filters "Name=name,Values=malcolm-*" \
+    --query "Images[*].[Name,ImageId,CreationDate]" \
+    --output text | sort
 
-    ```json
-    {
-        "Images": [
-            {
-                "Architecture": "x86_64",
-                "CreationDate": "2024-05-30T14:02:21.000Z",
-                "ImageId": "ami-xxxxxxxxxxxxxxxxx",
-                "ImageLocation": "xxxxxxxxxxxx/malcolm-v{{ site.malcolm.version }}-arm64-2024-05-30T13-57-31Z",
-                "ImageType": "machine",
-                "Public": false,
-                "OwnerId": "xxxxxxxxxxxx",
-                "PlatformDetails": "Linux/UNIX",
-                "UsageOperation": "RunInstances",
-                "State": "available",
-                "BlockDeviceMappings": [
-                    {
-                        "DeviceName": "/dev/xvda",
-                        "Ebs": {
-                            "DeleteOnTermination": true,
-                            "SnapshotId": "snap-xxxxxxxxxxxxxxxxx",
-                            "VolumeSize": 30,
-                            "VolumeType": "gp2",
-                            "Encrypted": false
-                        }
-                    }
-                ],
-                "EnaSupport": true,
-                "Hypervisor": "xen",
-                "Name": "malcolm-v{{ site.malcolm.version }}-arm64-2024-05-30T13-57-31Z",
-                "RootDeviceName": "/dev/xvda",
-                "RootDeviceType": "ebs",
-                "SriovNetSupport": "simple",
-                "Tags": [
-                    {
-                        "Key": "Malcolm",
-                        "Value": "idaholab/Malcolm/v{{ site.malcolm.version }}"
-                    },
-                    {
-                        "Key": "source_ami_name",
-                        "Value": "al2023-ami-ecs-hvm-2023.0.20241003-kernel-6.1-x86_64"
-                    }
-                ],
-                "VirtualizationType": "hvm",
-                "BootMode": "uefi",
-                "SourceInstanceId": "i-xxxxxxxxxxxxxxxxx",
-                "DeregistrationProtection": "disabled"
-            }
-        ]
-    }
-    ```
+malcolm-v25.03.1-arm64-2025-03-31T18-28-00Z     ami-0fd4956463b3467ed   2025-03-31T18:33:12.000Z
+malcolm-v25.03.1-x86_64-2025-03-31T18-13-34Z    ami-00824b133eba2a9ca   2025-03-31T18:19:17.000Z
+```
 
-1. Launch an instance from the new AMI (see [EC2 Instance Types](#AWSInstanceSizing) for suggestions for instance type)
-1. SSH into the instance
-1. Run `~/Malcolm/scripts/configure` to configure Malcolm
-1. Run `~/Malcolm/scripts/auth_setup` to set up authentication for Malcolm
-1. Run `~/Malcolm/scripts/start` to start Malcolm
+### <a name="AWSAMILaunch"></a> Launching an EC2 instance from the Malcolm AMI
+
+* Create a [key pair for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html)
+
+```bash
+$ aws ec2 create-key-pair \
+    --key-name malcolm-key \
+    --query "KeyMaterial" \
+    --output text > ./malcolm-key.pem
+
+$ chmod 600 ./malcolm-key.pem
+```
+
+* Create a [security group for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)
+
+```bash
+$ aws ec2 create-security-group \
+    --group-name malcolm-sg \
+    --description "Malcolm SG"
+…
+```
+
+* Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
+    - These rules will allow SSH and HTTPS access from the address(es) specified
+    - Replace `#.#.#.#` with the public IP address(es) (i.e., addresses which will be allowed to connect to the Malcolm instance via SSH and HTTPS) in the following commands
+
+```bash
+$ PUBLIC_IP=#.#.#.#
+
+$ for PORT in 22 443; do \
+    aws ec2 authorize-security-group-ingress \
+        --group-name malcolm-sg \
+        --protocol tcp \
+        --port $PORT \
+        --cidr $PUBLIC_IP/32; \
+done
+…
+```
+
+* Launch selected AMI
+    - Replace `INSTANCE_TYPE` with the desired instance type in the following command
+        + See [EC2 Instance Types](#AWSInstanceSizing) for suggestions
+    - Replace `AMI_ID` with the AMI ID from above in the following command
+    - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
+
+```bash
+$ aws ec2 run-instances \
+    --image-id AMI_ID \
+    --instance-type INSTANCE_TYPE \
+    --key-name malcolm-key \
+    --security-group-ids malcolm-sg \
+    --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":100,\"VolumeType\":\"gp3\"}}]" \
+    --count 1 \
+    --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=Malcolm}]"
+…
+```
+
+* Get [instance details](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html) and check its status
+
+```bash
+$ aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=Malcolm" \
+    --query "Reservations[].Instances[].{ID:InstanceId,IP:PublicIpAddress,State:State.Name}" \
+    --output table
+…
+```
+
+* Connect via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created above.
+
+```bash
+$ INSTANCE_IP=$(aws ec2 describe-instances \
+                  --filters "Name=tag:Name,Values=Malcolm" \
+                  --query "Reservations[].Instances[].PublicIpAddress" \
+                  --output text)
+
+$ ssh -o IdentitiesOnly=yes -i ./malcolm-key.pem ec2-user@$INSTANCE_IP
+```
+
+* Upon connection, Malcolm will automatically prompt the user to complete [configuration](malcolm-config.md#ConfigAndTuning) and set up [authentication](authsetup.md#AuthSetup).
+    - Users should answer the remaining [configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
+    - [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the authentication setup prompts.
+
+* Start Malcolm
+    - Running `~/Malcolm/scripts/start` will [start Malcolm](running.md#Starting).
+    - Malcolm takes a few minutes to start. During this time users may see text scroll past from the containers' logs that look like error messages. This is normal while Malcolm's services synchronize among themselves.
+    - Once Malcolm is running, the start script will output **Started Malcolm** and return to the command prompt.
+
+* Check Malcolm's status
+    - Running `./scripts/status` in the Malcolm installation directory will display the status of Malcolm's services.
+
+* Connect to Malcolm's [web interface](quickstart.md#UserInterfaceURLs)
+    - Navigate a web browser to the IP address of the instance using HTTPS
+    - Log in with the credentials specified when setting up authentication
+    - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
 ### <a name="AWSAMIMFA"></a> Using MFA
 
@@ -1269,7 +1316,7 @@ Users with [AWS MFA requirements](https://docs.aws.amazon.com/console/iam/self-m
 1. Remove the `access_key` and `secret_key` lines from the `builders` section of `packer_build.json` (right below `"type": "amazon-ebs"`)
 1. Run `aws ec2 describe-instances --profile=xxxxxxxx` (replacing `xxxxxxxx` with the credential profile name) to cause `aws` to authenticate (prompting for the MFA code) and cache the credentials
 1. At the bash command line, run: `eval "$(aws configure export-credentials --profile xxxxxxxx --format env)"` to load the current AWS credentials into environment variables in the current session
-1. Run the `packer build` command as described in the previous section
+1. Run the `packer build` command as described above
 
 ## <a name="AWSAttribution"></a> Attribution
 
