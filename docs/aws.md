@@ -195,6 +195,7 @@ $ sudo apt-get -y install --no-install-recommends \
     unzip \
     python3 \
     python3-dialog \
+    python3-dotenv \
     python3-pip \
     python3-ruamel.yaml
 …
@@ -334,6 +335,26 @@ These instructions assume good working knowledge of AWS and EKS. Good documentat
 This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) on [Fargate](https://aws.amazon.com/fargate/).
 
 * The first step in each of these respective procedures is to download Malcolm. 
+    
+    * Install some dependencies (this will vary by OS distribution, adjust as needed)
+
+    ```bash
+    $ sudo apt-get -y update
+    …
+    $ sudo apt-get -y install --no-install-recommends \
+        apache2-utils \
+        curl \
+        openssl \
+        python3 \
+        python3-dialog \
+        python3-dotenv \
+        python3-kubernetes \
+        python3-pip \
+        python3-ruamel.yaml \
+        unzip \
+        xz-utils
+    …
+    ```
 
     * [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
         - Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example), and either download the Malcolm release ZIP file there or use `curl` to do so:
