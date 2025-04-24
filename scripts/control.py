@@ -44,7 +44,7 @@ from malcolm_common import (
     LocalPathForContainerBindMount,
     MainDialog,
     MalcolmAuthFilesExist,
-    MalcolmPath,
+    GetMalcolmPath,
     MalcolmTmpPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
@@ -166,7 +166,7 @@ def checkEnvFilesAndValues():
     global yamlImported
 
     # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
-    if os.path.isdir(examplesConfigDir := os.path.join(MalcolmPath, 'config')):
+    if os.path.isdir(examplesConfigDir := os.path.join(GetMalcolmPath(), 'config')):
 
         # process renames, copies, removes, etc. from env-var-actions.yml
         envVarActionsYaml = None
@@ -386,8 +386,8 @@ def checkEnvFilesAndValues():
             out[:] = [x for x in out if x]
             if (err == 0) and (len(out) == 0):
                 for src, dst in envVarActionsYaml['relocated_files'].items():
-                    srcPath = os.path.join(MalcolmPath, src)
-                    dstPath = os.path.join(MalcolmPath, next(iter(get_iterable(dst))))
+                    srcPath = os.path.join(GetMalcolmPath(), src)
+                    dstPath = os.path.join(GetMalcolmPath(), next(iter(get_iterable(dst))))
                     if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
                         if args.debug:
                             eprint(f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files')
@@ -448,7 +448,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                 service,
                 dockerComposeYaml,
                 composeFileKeystore,
-                MalcolmPath,
+                GetMalcolmPath(),
             )
             if localKeystore:
                 localKeystore = os.path.realpath(localKeystore)
@@ -744,7 +744,7 @@ def netboxBackup(backupFileName=None):
         backupFileParts = os.path.splitext(backupFileName)
         backupMediaFileName = backupFileParts[0] + ".media.tar.gz"
         with tarfile.open(backupMediaFileName, 'w:gz') as t:
-            t.add(os.path.join(os.path.join(MalcolmPath, 'netbox'), 'media'), arcname='.')
+            t.add(os.path.join(os.path.join(GetMalcolmPath(), 'netbox'), 'media'), arcname='.')
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if podsResults := PodExec(
@@ -1141,7 +1141,7 @@ def stop(wipe=False):
                         boundPath.service,
                         dockerComposeYaml,
                         boundPath.target,
-                        MalcolmPath,
+                        GetMalcolmPath(),
                     )
                     if localPath and os.path.isdir(localPath):
                         # delete files
@@ -1210,10 +1210,10 @@ def start():
     global orchMode
 
     if args.service is None:
-        touch(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')))
-        touch(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
-        touch(os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'))
-        touch(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
+        touch(os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')))
+        touch(os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'))
+        touch(os.path.join(GetMalcolmPath(), '.opensearch.secondary.curlrc'))
+        touch(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')))
 
         # make sure the auth files exist. if we are in an interactive shell and we're
         # missing any of the auth files, prompt to create them now
@@ -1227,20 +1227,20 @@ def start():
             )
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
-        if not os.path.isfile(os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore'))):
+        if not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore'))):
             keystore_op('opensearch', True, 'create')
 
         # make sure permissions are set correctly for the worker processes
         for authFile in [
-            os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
-            os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+            os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')),
+            os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')),
         ]:
             # chmod 644 authFile
             os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
         for authFile in [
-            os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
-            os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
-            os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+            os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')),
+            os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'),
+            os.path.join(GetMalcolmPath(), '.opensearch.secondary.curlrc'),
         ]:
             # chmod 600 authFile
             os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
@@ -1250,12 +1250,12 @@ def start():
                 os.chmod(envFile, stat.S_IRUSR | stat.S_IWUSR)
 
         # touch the zeek intel file and zeek custom file
-        touch(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', '__load__.zeek'))))
-        touch(os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('custom', '__load__.zeek'))))
+        touch(os.path.join(GetMalcolmPath(), os.path.join('zeek', os.path.join('intel', '__load__.zeek'))))
+        touch(os.path.join(GetMalcolmPath(), os.path.join('zeek', os.path.join('custom', '__load__.zeek'))))
 
         # clean up any leftover intel update locks
         shutil.rmtree(
-            os.path.join(MalcolmPath, os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True
+            os.path.join(GetMalcolmPath(), os.path.join('zeek', os.path.join('intel', 'lock'))), ignore_errors=True
         )
 
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -1292,7 +1292,7 @@ def start():
                     boundPath.service,
                     dockerComposeYaml,
                     boundPath.target,
-                    MalcolmPath,
+                    GetMalcolmPath(),
                 )
                 if localPath:
                     try:
@@ -1350,12 +1350,12 @@ def start():
     elif orchMode is OrchestrationFramework.KUBERNETES:
         if args.skipPerVolChecks or CheckPersistentStorageDefs(
             namespace=args.namespace,
-            malcolmPath=MalcolmPath,
+            malcolmPath=GetMalcolmPath(),
             profile=args.composeProfile,
         ):
             startResults = StartMalcolm(
                 namespace=args.namespace,
-                malcolmPath=MalcolmPath,
+                malcolmPath=GetMalcolmPath(),
                 configPath=args.configDir,
                 profile=args.composeProfile,
                 injectResources=args.injectResources,
@@ -1384,7 +1384,7 @@ def start():
                 )
             }
             raise Exception(
-                f'Storage objects required by Malcolm are not defined in {os.path.join(MalcolmPath, "kubernetes")}: {groupedStorageEntries}'
+                f'Storage objects required by Malcolm are not defined in {os.path.join(GetMalcolmPath(), "kubernetes")}: {groupedStorageEntries}'
             )
 
     else:
@@ -1480,15 +1480,15 @@ def authSetup():
     global dotenvImported
 
     # for beats/logstash self-signed certificates
-    logstashPath = os.path.join(MalcolmPath, os.path.join('logstash', 'certs'))
-    filebeatPath = os.path.join(MalcolmPath, os.path.join('filebeat', 'certs'))
+    logstashPath = os.path.join(GetMalcolmPath(), os.path.join('logstash', 'certs'))
+    filebeatPath = os.path.join(GetMalcolmPath(), os.path.join('filebeat', 'certs'))
 
     txRxScript = None
     if (pyPlatform != PLATFORM_WINDOWS) and which("croc"):
         txRxScript = 'tx-rx-secure.sh' if which('tx-rx-secure.sh') else None
         if not txRxScript:
             txRxScript = os.path.join(
-                MalcolmPath, os.path.join('shared', os.path.join('bin', os.path.join('tx-rx-secure.sh')))
+                GetMalcolmPath(), os.path.join('shared', os.path.join('bin', os.path.join('tx-rx-secure.sh')))
             )
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/local/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
@@ -1549,10 +1549,10 @@ def authSetup():
                 or (
                     args.authGenWebCerts
                     or not os.path.isfile(
-                        os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))
+                        os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))
                     )
                 ),
-                [os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem')))],
+                [os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))],
             ),
             (
                 'fwcerts',
@@ -1737,7 +1737,7 @@ def authSetup():
                             defaultBehavior=defaultBehavior,
                         )
 
-                        ldapConfFile = os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf'))
+                        ldapConfFile = os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf'))
                         if (
                             (not os.path.isfile(ldapConfFile))
                             or (os.path.getsize(ldapConfFile) == 0)
@@ -1892,7 +1892,7 @@ def authSetup():
                     )
 
                     # create or update the htpasswd file
-                    htpasswdFile = os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd'))
+                    htpasswdFile = os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd'))
                     if not args.cmdAuthSetupNonInteractive:
                         htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
                         if not os.path.isfile(htpasswdFile):
@@ -1921,7 +1921,7 @@ def authSetup():
                                     f.write(line)
 
                     # touch the metadata file
-                    touch(os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')))
+                    touch(os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')))
 
                     if nginxAuthMode in ['basic', 'true']:
                         DisplayMessage(
@@ -1936,7 +1936,7 @@ def authSetup():
 
                 # generate HTTPS self-signed certificates
                 elif authItem[0] == 'webcerts':
-                    with pushd(os.path.join(MalcolmPath, os.path.join('nginx', 'certs'))):
+                    with pushd(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'certs'))):
                         # remove previous files
                         for oldfile in glob.glob("*.pem"):
                             os.remove(oldfile)
@@ -2114,7 +2114,7 @@ def authSetup():
                 # create and populate connection parameters file for remote OpenSearch instance(s)
                 elif authItem[0] == 'remoteos':
                     for instance in ['primary', 'secondary']:
-                        openSearchCredFileName = os.path.join(MalcolmPath, f'.opensearch.{instance}.curlrc')
+                        openSearchCredFileName = os.path.join(GetMalcolmPath(), f'.opensearch.{instance}.curlrc')
                         if YesOrNo(
                             f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
                             default=False,
@@ -2710,7 +2710,7 @@ def main():
         dest='composeFile',
         metavar='<string>',
         type=str,
-        default=os.getenv('MALCOLM_COMPOSE_FILE', os.path.join(MalcolmPath, 'docker-compose.yml')),
+        default=os.getenv('MALCOLM_COMPOSE_FILE', os.path.join(GetMalcolmPath(), 'docker-compose.yml')),
         help='docker-compose or kubeconfig YML file',
     )
     parser.add_argument(
@@ -3159,7 +3159,7 @@ def main():
         eprint(os.path.join(ScriptPath, ScriptName))
         eprint(f"Arguments: {sys.argv[1:]}")
         eprint(f"Arguments: {args}")
-        eprint("Malcolm path:", MalcolmPath)
+        eprint("Malcolm path:", GetMalcolmPath())
     else:
         sys.tracebacklimit = 0
 
@@ -3182,7 +3182,7 @@ def main():
     if not ((orchMode := DetermineYamlFileFormat(args.composeFile)) and (orchMode in OrchestrationFrameworksSupported)):
         raise Exception(f'{args.composeFile} must be a docker-compose or kubeconfig YAML file')
 
-    with pushd(MalcolmPath):
+    with pushd(GetMalcolmPath()):
         # don't run this as root
         if (pyPlatform != PLATFORM_WINDOWS) and (
             (os.getuid() == 0) or (os.geteuid() == 0) or (getpass.getuser() == 'root')
@@ -3194,7 +3194,7 @@ def main():
             if (args.configDir is None) or (not os.path.isdir(args.configDir)):
                 if firstLoop:
                     if args.configDir is None:
-                        args.configDir = os.path.join(MalcolmPath, 'config')
+                        args.configDir = os.path.join(GetMalcolmPath(), 'config')
                     try:
                         os.makedirs(args.configDir)
                     except OSError as exc:
