@@ -11,3 +11,5 @@ pynetbox==7.4.1
 python-magic==0.4.27
 python-slugify==8.0.4
 randomcolor==0.4.4.6
+setuptools==79.0.1
+wheel==0.45.1

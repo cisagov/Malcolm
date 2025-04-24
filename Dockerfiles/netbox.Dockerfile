@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.1.11
+FROM netboxcommunity/netbox:v4.2.8
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -25,8 +25,8 @@ ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 USER root
 
-ENV NETBOX_INITIALIZERS_VERSION "v4.1.0"
-ENV NETBOX_TOPOLOGY_VERSION "4.1.0"
+ENV NETBOX_INITIALIZERS_VERSION "v4.2.0"
+ENV NETBOX_TOPOLOGY_VERSION "4.2.1"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
 ENV YQ_VERSION "4.45.1"
@@ -80,6 +80,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       rsync \
       supervisor \
       tini && \
+    curl -fsSL -o /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
+      "${NETBOX_PATH}/venv/bin/python" /tmp/get-pip.py && \
     "${NETBOX_PATH}/venv/bin/python" -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd "${NETBOX_PATH}" && \
       bash -c 'for i in /tmp/netbox-patches/*; do patch -p 1 -r - --no-backup-if-mismatch < $i || true; done' && \
