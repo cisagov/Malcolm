@@ -84,7 +84,6 @@ from malcolm_utils import (
 
 from malcolm_kubernetes import (
     CheckPersistentStorageDefs,
-    DeleteNamespace,
     get_node_hostnames_and_ips,
     GetPodNamesForService,
     PodExec,
@@ -1179,7 +1178,11 @@ def stop(wipe=False):
                 eprint("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
-        stopResults = StopMalcolm(namespace=args.namespace)
+        stopResults = StopMalcolm(
+            namespace=args.namespace,
+            deleteNamespace=args.deleteNamespace and wipe,
+            deletePVCsAndPVs=wipe,
+        )
         if dictsearch(stopResults, 'error'):
             eprint(f"Removing resources in the {args.namespace} namespace returned the following error(s):\n")
             eprint(stopResults)
@@ -1192,7 +1195,7 @@ def stop(wipe=False):
 
         if wipe:
             eprint(
-                f'PersistentVolumes, PersitentVolumeClaims, and underlying data cannot be deleted by {ScriptName}: they must be deleted manually\n'
+                f'Underlying storage artifacts on PersistentVolumes cannot be deleted by {ScriptName}: they must be deleted manually\n'
             )
 
     else:
@@ -2837,18 +2840,14 @@ def main():
         help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
-        '--reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_true',
-        help='Delete PersistentVolumes with Retain reclaim policy (default; only for "stop" operation with Kubernetes)',
+        '--delete-namespace',
+        dest='deleteNamespace',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Delete Kubernetes namespace (only for "wipe" operation with Kubernetes)',
     )
-    kubernetesGroup.add_argument(
-        '--no-reclaim-persistent-volume',
-        dest='deleteRetPerVol',
-        action='store_false',
-        help='Do not delete PersistentVolumes with Retain reclaim policy (only for "stop" operation with Kubernetes)',
-    )
-    kubernetesGroup.set_defaults(deleteRetPerVol=True)
 
     authSetupGroup = parser.add_argument_group('Authentication Setup')
     authSetupGroup.add_argument(

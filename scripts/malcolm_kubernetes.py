@@ -634,85 +634,6 @@ def PrintPodStatus(namespace=None):
     tablify(statusRows)
 
 
-def DeleteNamespace(namespace, deleteRetPerVol=False):
-    results_dict = defaultdict(dict)
-
-    if namespace:
-        if kubeImported := KubernetesDynamic():
-            k8s_api = kubeImported.client.CoreV1Api()
-
-            manualDeletePersistentVolumes = []
-            if deleteRetPerVol:
-                # If indicated, manually delete PersistentVolumes with "Retain" reclaim policy
-                #   - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#retain
-
-                # get a list of PersistentVolumes to delete after the delete_namespace
-                # 1. from list_namespaced_persistent_volume_claim
-                # 2. from list_persistent_volume with the "namespace=XXXXXXX" label
-                manualDeletePersistentVolumes = [
-                    x.spec.volume_name
-                    for x in k8s_api.list_namespaced_persistent_volume_claim(
-                        watch=False,
-                        namespace=namespace,
-                    ).items
-                ]
-                manualDeletePersistentVolumes.extend(
-                    [
-                        x.metadata.name
-                        for x in k8s_api.list_persistent_volume(
-                            label_selector=f'namespace={namespace}',
-                        ).items
-                        if x.spec.persistent_volume_reclaim_policy == 'Retain'
-                    ]
-                )
-
-                # filter (ensuring we only ended up with "Retain" PersistentVolumes) and dedupe
-                manualDeletePersistentVolumes = list(
-                    chain(
-                        *[
-                            [
-                                x.metadata.name
-                                for x in k8s_api.list_persistent_volume(
-                                    field_selector=f'metadata.name={name}',
-                                ).items
-                                if x.spec.persistent_volume_reclaim_policy == 'Retain'
-                            ]
-                            for name in set(manualDeletePersistentVolumes)
-                        ]
-                    )
-                )
-
-            # delete the namespace, which should delete the resources belonging to it
-            try:
-                results_dict[namespace]['delete_namespace'] = k8s_api.delete_namespace(
-                    namespace,
-                    propagation_policy='Foreground',
-                )
-            except kubeImported.client.rest.ApiException as x:
-                if x.status != 404:
-                    results_dict[namespace]['error'] = LoadStrIfJson(str(x))
-                    if not results_dict[namespace]['error']:
-                        results_dict[namespace]['error'] = str(x)
-
-            # If indicated, manually delete each PersistentVolume with "Retain" reclaim policy identified above
-            if manualDeletePersistentVolumes:
-                results_dict[namespace]['delete_persistent_volume'] = dict()
-                for name in manualDeletePersistentVolumes:
-                    try:
-                        results_dict[namespace]['delete_persistent_volume'][name] = k8s_api.delete_persistent_volume(
-                            name=name
-                        )
-                    except kubeImported.client.rest.ApiException as x:
-                        if x.status != 404:
-                            if 'error' not in results_dict[namespace]['delete_persistent_volume']:
-                                results_dict[namespace]['delete_persistent_volume']['error'] = dict()
-                            results_dict[namespace]['delete_persistent_volume']['error'][name] = LoadStrIfJson(str(x))
-                            if not results_dict[namespace]['delete_persistent_volume']['error'][name]:
-                                results_dict[namespace]['delete_persistent_volume']['error'][name] = str(x)
-
-    return results_dict
-
-
 def StartMalcolm(
     namespace,
     malcolmPath,
@@ -1054,7 +975,10 @@ def SafeK8sDelete(
 ):
     try:
         if not dryrun:
-            func(name, namespace, **kwargs)
+            if namespace:
+                func(name, namespace, **kwargs)
+            else:
+                func(name, **kwargs)
         if isinstance(results_dict, dict) and isinstance(results_dict.get('deleted', None), list):
             results_dict['deleted'].append(name)
     except kubeImported.client.rest.ApiException as e:
@@ -1067,11 +991,22 @@ def SafeK8sDelete(
 
 def StopMalcolm(
     namespace,
+    deleteNamespace=False,
+    deletePVCsAndPVs=False,
     dryrun=False,
 ):
     results_dict = dict()
     results_dict[namespace] = dict()
-    for resourceType in ['secrets', 'configmaps', 'ingresses', 'services', 'deployments']:
+    for resourceType in [
+        'configmaps',
+        'deployments',
+        'ingresses',
+        'namespace',
+        'persistentvolumeclaims',
+        'persistentvolumes',
+        'secrets',
+        'services',
+    ]:
         results_dict[namespace][resourceType] = dict()
         for msgType in ['deleted', 'error']:
             results_dict[namespace][resourceType][msgType] = list()
@@ -1116,7 +1051,7 @@ def StopMalcolm(
             )
 
         for resource in k8s_api.list_namespaced_config_map(namespace).items:
-            if resource.metadata.name == "kube-root-ca.crt":
+            if resource.metadata.name in ["kube-root-ca.crt", "istio-ca-root-cert"]:
                 continue
             SafeK8sDelete(
                 kubeImported,
@@ -1137,6 +1072,38 @@ def StopMalcolm(
                 namespace,
                 results_dict[namespace]['secrets'],
                 dryrun=dryrun,
+            )
+
+        if deletePVCsAndPVs:
+            for resource in k8s_api.list_namespaced_persistent_volume_claim(namespace).items:
+                SafeK8sDelete(
+                    kubeImported,
+                    k8s_api.delete_namespaced_persistent_volume_claim,
+                    resource.metadata.name,
+                    namespace,
+                    results_dict[namespace]['persistentvolumeclaims'],
+                    dryrun=dryrun,
+                )
+            for resource in k8s_api.list_persistent_volume().items:
+                if (claim_ref := resource.spec.claim_ref) and (claim_ref.namespace == namespace):
+                    SafeK8sDelete(
+                        kubeImported,
+                        k8s_api.delete_persistent_volume,
+                        resource.metadata.name,
+                        None,
+                        results_dict[namespace]['persistentvolumes'],
+                        dryrun=dryrun,
+                    )
+
+        if deleteNamespace:
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespace,
+                namespace,
+                None,
+                results_dict[namespace]['namespace'],
+                dryrun=dryrun,
+                body=delete_opts,
             )
 
     return remove_falsy(results_dict)
