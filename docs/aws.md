@@ -1210,8 +1210,8 @@ $ aws ec2 describe-images \
     --query "Images[*].[Name,ImageId,CreationDate]" \
     --output text | sort
 
-malcolm-v25.03.1-arm64-2025-03-31T18-28-00Z     ami-0fd4956463b3467ed   2025-03-31T18:33:12.000Z
-malcolm-v25.03.1-x86_64-2025-03-31T18-13-34Z    ami-00824b133eba2a9ca   2025-03-31T18:19:17.000Z
+malcolm-v25.03.1-arm64-2025-03-31T18-28-00Z     ami-xxxxxxxxxxxxxxxxx   2025-03-31T18:33:12.000Z
+malcolm-v25.03.1-x86_64-2025-03-31T18-13-34Z    ami-xxxxxxxxxxxxxxxxx   2025-03-31T18:19:17.000Z
 ```
 
 ### <a name="AWSAMILaunch"></a> Launching an EC2 instance from the Malcolm AMI
