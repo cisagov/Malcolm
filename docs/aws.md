@@ -7,14 +7,14 @@
         + [Instance creation](#AWSEC2Instance)
         + [Malcolm setup](#AWSEC2Install)
         + [Running Malcolm](#AWSEC2Run)
-- [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
+    - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
         + [Deploying with EKS](#AWSEKS)
         + [Deploying with EKS on Fargate](#AWSFargate)
         + [Common Steps for EKS Deployments](#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
         + [Using MFA](#AWSAMIMFA)
-    - [Attribution and Disclaimer](#AWSAttribution)
+* [Attribution and Disclaimer](#AWSAttribution)
 
 ## <a name="AWSPrereqInstall"></a>Installing prerequisites
 
