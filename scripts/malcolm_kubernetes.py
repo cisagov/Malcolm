@@ -254,6 +254,27 @@ CONTAINER_JAVA_OPTS_VARS['logstash'] = 'LS_JAVA_OPTS'
 
 
 ###################################################################################################
+def update_container_image(containerImage, imageSource=None, imageTag=None):
+    # Split into name and tag
+    name_tag = containerImage.rsplit(':', 1)
+    name = name_tag[0]
+    tag = name_tag[1] if len(name_tag) == 2 else None
+
+    # Split into source and image name
+    source, image = name.rsplit('/', 1)
+
+    # Replace as needed
+    new_source = imageSource.rstrip('/') if imageSource else source
+    new_tag = imageTag if imageTag else tag
+
+    # Build new image string
+    updated_image = f"{new_source}/{image}"
+    if new_tag:
+        updated_image += f":{new_tag}"
+
+    return updated_image
+
+
 def _nanocore_to_millicore(n):
     n = int(n[:-1])
     return str(round(n / 1000000, 2)) + 'm'
@@ -639,6 +660,8 @@ def StartMalcolm(
     malcolmPath,
     configPath,
     profile=PROFILE_MALCOLM,
+    imageSource=None,
+    imageTag=None,
     injectResources=False,
     startCapturePods=True,
     noCapabilities=False,
@@ -844,79 +867,94 @@ def StartMalcolm(
                 if manYamlFileContents:
                     for docIdx, doc in enumerate(manYamlFileContents):
                         if 'spec' in manYamlFileContents[docIdx]:
-
                             if (
                                 ('template' in manYamlFileContents[docIdx]['spec'])
                                 and ('spec' in manYamlFileContents[docIdx]['spec']['template'])
-                                and ('containers' in manYamlFileContents[docIdx]['spec']['template']['spec'])
+                                and (containerType in manYamlFileContents[docIdx]['spec']['template']['spec'])
                             ):
                                 # modify container specs
+                                for containerType in ('containers', 'initContainers'):
 
-                                # loop over each container defined in this document (by index since we're modifying in-place)
-                                for containerIdx, container in enumerate(
-                                    manYamlFileContents[docIdx]['spec']['template']['spec']['containers']
-                                ):
-                                    containerName = remove_suffix(
-                                        manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                            containerIdx
-                                        ].get('name', ''),
-                                        '-container',
-                                    )
-
-                                    # if they've asked to disable the capabilities definition (e.g., for fargate)
-                                    if noCapabilities and (
-                                        'securityContext'
-                                        in manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                            containerIdx
-                                        ]
+                                    # loop over each container defined in this document (by index since we're modifying in-place)
+                                    for containerIdx, container in enumerate(
+                                        manYamlFileContents[docIdx]['spec']['template']['spec'][containerType]
                                     ):
-                                        manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                            containerIdx
-                                        ]['securityContext'].pop('capabilities', None)
-                                        modified = True
+                                        containerName = remove_suffix(
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ].get('name', ''),
+                                            '-container',
+                                        )
+                                        containerImage = manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                            containerType
+                                        ][containerIdx].get('image', '')
+                                        newContainerImage = update_container_image(
+                                            containerImage, imageSource, imageTag
+                                        )
+                                        if newContainerImage != containerImage:
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ]['image'] = newContainerImage
+                                            modified = True
 
-                                    # for resource requests we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
-                                    #   or that have been specified in kubernetes-container-resources.yml when injectResources is True
-                                    if (containerName in CONTAINER_JAVA_OPTS_VARS) or (
-                                        containerName in containerResources
-                                    ):
-
-                                        # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
-                                        containerEnvs = {}
-                                        if (
-                                            'envFrom'
-                                            in manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
+                                        # if they've asked to disable the capabilities definition (e.g., for fargate)
+                                        if noCapabilities and (
+                                            'securityContext'
+                                            in manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
                                                 containerIdx
                                             ]
                                         ):
-                                            for env in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                'containers'
-                                            ][containerIdx]['envFrom']:
-                                                if ('configMapRef' in env) and ('name' in env['configMapRef']):
-                                                    containerEnvs.update(namedEnvs.get(env['configMapRef']['name'], {}))
-
-                                        # if the memory request from the environment variable exceeds that from the inject YAML, use that instead
-                                        injectedContents = containerResources.get(containerName, {})
-                                        if (
-                                            requestMib := GetMemMegabytesFromJavaOptsLine(
-                                                containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
-                                            )
-                                        ) > ParseK8sMemoryToMib(
-                                            deep_get(injectedContents, ['resources', 'requests', 'memory'], 0)
-                                        ):
-                                            deep_set(
-                                                injectedContents, ['resources', 'requests', 'memory'], f"{requestMib}Mi"
-                                            )
-
-                                        # inject the stuff into the container manifest
-                                        if injectedContents:
-                                            deep_merge_in_place(
-                                                injectedContents,
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ],
-                                            )
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ]['securityContext'].pop('capabilities', None)
                                             modified = True
+
+                                        # for resource requests we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
+                                        #   or that have been specified in kubernetes-container-resources.yml when injectResources is True
+                                        if (containerName in CONTAINER_JAVA_OPTS_VARS) or (
+                                            containerName in containerResources
+                                        ):
+
+                                            # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
+                                            containerEnvs = {}
+                                            if (
+                                                'envFrom'
+                                                in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    containerType
+                                                ][containerIdx]
+                                            ):
+                                                for env in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    containerType
+                                                ][containerIdx]['envFrom']:
+                                                    if ('configMapRef' in env) and ('name' in env['configMapRef']):
+                                                        containerEnvs.update(
+                                                            namedEnvs.get(env['configMapRef']['name'], {})
+                                                        )
+
+                                            # if the memory request from the environment variable exceeds that from the inject YAML, use that instead
+                                            injectedContents = containerResources.get(containerName, {})
+                                            if (
+                                                requestMib := GetMemMegabytesFromJavaOptsLine(
+                                                    containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
+                                                )
+                                            ) > ParseK8sMemoryToMib(
+                                                deep_get(injectedContents, ['resources', 'requests', 'memory'], 0)
+                                            ):
+                                                deep_set(
+                                                    injectedContents,
+                                                    ['resources', 'requests', 'memory'],
+                                                    f"{requestMib}Mi",
+                                                )
+
+                                            # inject the stuff into the container manifest
+                                            if injectedContents:
+                                                deep_merge_in_place(
+                                                    injectedContents,
+                                                    manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                        containerType
+                                                    ][containerIdx],
+                                                )
+                                                modified = True
 
                 # if we modified the manifest write out the modified YAML to a temporary file
                 with temporary_filename(suffix='.yml') if modified else nullcontext() as tmpYmlFileName:
