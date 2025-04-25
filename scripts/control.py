@@ -1337,6 +1337,7 @@ def start():
         if args.service is not None:
             cmd.append(['--no-deps', args.service])
 
+        print("\nStarting Malcolm\n")
         err, out = run_process(
             cmd,
             env=osEnv,
@@ -1353,6 +1354,7 @@ def start():
             malcolmPath=GetMalcolmPath(),
             profile=args.composeProfile,
         ):
+            print("\nStarting Malcolm\n")
             startResults = StartMalcolm(
                 namespace=args.namespace,
                 malcolmPath=GetMalcolmPath(),
@@ -3126,6 +3128,16 @@ def main():
         default=None,
         help='docker-compose service(s) (only applies to some operations)',
     )
+    logsAndStatusGroup.add_argument(
+        '-q',
+        '--quiet',
+        dest='quiet',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="Don't show logs as part of start/stop operations",
+    )
 
     netboxGroup = parser.add_argument_group('NetBox Backup and Restore')
     netboxGroup.add_argument(
@@ -3353,7 +3365,7 @@ def main():
             start()
 
         # tail Malcolm logs
-        if args.cmdStart or args.cmdRestart or args.cmdLogs:
+        if ((not args.quiet) and (args.cmdStart or args.cmdRestart)) or args.cmdLogs:
             logs()
 
         # display Malcolm status
