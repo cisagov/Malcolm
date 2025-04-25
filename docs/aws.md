@@ -195,6 +195,7 @@ $ sudo apt-get -y install --no-install-recommends \
     unzip \
     python3 \
     python3-dialog \
+    python3-dotenv \
     python3-pip \
     python3-ruamel.yaml
 …
@@ -333,13 +334,49 @@ These instructions assume good working knowledge of AWS and EKS. Good documentat
 
 This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) on [Fargate](https://aws.amazon.com/fargate/).
 
-* The first step in each of these respective procedures is to download Malcolm. (**TODO: NOT FINAL**)
-    * These are **not** the final instructions for doing this, as in developing these instructions I've gone through and made some modifications to the Malcolm Kubernetes manifests that have not been released yet (e.g., adding `role` labels to the manifests). But for now those as-yet unreleased changes can be gotten from [here](https://github.com/mmguero-dev/malcolm/); however, the `image:` in the manifests needs to be changed from `idaholab` to `mmguero-dev` for the org and from `25.04.0` to `main` for the version, like this:
+* The first step in each of these respective procedures is to download Malcolm. 
+    
+    * Install some dependencies (this will vary by OS distribution, adjust as needed)
 
     ```bash
-    $ git clone --single-branch --depth 1 https://github.com/mmguero-dev/Malcolm
-    $ sed -i "s@ghcr.io/idaholab@ghcr.io/mmguero-dev@g" ./Malcolm/kubernetes/*.yml
-    $ sed -i "s@25\.04\.0@main@g" ./Malcolm/kubernetes/*.yml
+    $ sudo apt-get -y update
+    …
+    $ sudo apt-get -y install --no-install-recommends \
+        apache2-utils \
+        curl \
+        openssl \
+        python3 \
+        python3-dialog \
+        python3-dotenv \
+        python3-kubernetes \
+        python3-pip \
+        python3-ruamel.yaml \
+        unzip \
+        xz-utils
+    …
+    ```
+
+    * [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
+        - Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example), and either download the Malcolm release ZIP file there or use `curl` to do so:
+
+    ```bash
+    $ curl -OJsSLf https://github.com/cisagov/Malcolm/releases/latest/download/malcolm-{{ site.malcolm.version }}-docker_install.zip
+
+    $ ls -l malcolm*.zip
+    -rw-rw-r-- 1 ubuntu ubuntu 191053 Apr 10 14:26 malcolm-{{ site.malcolm.version }}-docker_install.zip
+    ```
+
+    * Extract the Malcolm release ZIP file
+
+    ```bash
+    $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
+    Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
+      inflating: install.py
+      inflating: malcolm_20250401_225238_df27028c.README.txt
+      inflating: malcolm_20250401_225238_df27028c.tar.gz
+      inflating: malcolm_common.py
+      inflating: malcolm_kubernetes.py
+      inflating: malcolm_utils.py
     ```
 
 ### <a name="AWSEKS"></a>Deploying with EKS
@@ -978,7 +1015,7 @@ $ aws acm describe-certificate \
 ```
 
 * Configure Malcolm
-    * `./Malcolm/scripts/configure -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * Malcolm's configuration scripts will guide users through the setup process.
     * Use the following resources to answer the installation and configuration questions:
         * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)

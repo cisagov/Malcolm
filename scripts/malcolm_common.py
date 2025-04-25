@@ -161,6 +161,17 @@ OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | Orche
 
 
 ##################################################################################################
+def GetMalcolmPath():
+    return MalcolmPath
+
+
+def SetMalcolmPath(val):
+    global MalcolmPath
+    MalcolmPath = val
+    return MalcolmPath
+
+
+##################################################################################################
 def GetPlatformOSRelease():
     try:
         return platform.freedesktop_os_release().get('VARIANT_ID', None)
@@ -238,7 +249,7 @@ def ParseK8sMemoryToMib(val):
 
 ##################################################################################################
 def GetUidGidFromEnv(configDir=None):
-    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
+    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(GetMalcolmPath(), 'config')
     uidGidDict = defaultdict(str)
     if dotEnvImported := DotEnvDynamic():
         pyPlatform = platform.system()
@@ -846,18 +857,18 @@ def DotEnvDynamic(debug=False, forceInteraction=False):
 # do the required auth files for Malcolm exist?
 def MalcolmAuthFilesExist(configDir=None):
     configDirToCheck = (
-        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
+        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(GetMalcolmPath(), 'config')
     )
     return (
-        os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
+        os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')))
+        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')))
+        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
+        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem'))))
         and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'postgres.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
         and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
-        and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
+        and os.path.isfile(os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'))
     )
 
 

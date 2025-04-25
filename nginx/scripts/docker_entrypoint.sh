@@ -81,6 +81,9 @@ NGINX_RUNTIME_AUTH_OPENSEARCH_LINK=${NGINX_CONF_DIR}/nginx_auth_opensearch_rt.co
 # runtime "include" file for ldap config (link to either NGINX_BLANK_CONF or (possibly modified) NGINX_LDAP_USER_CONF)
 NGINX_RUNTIME_LDAP_LINK=${NGINX_CONF_DIR}/nginx_ldap_rt.conf
 
+# "include" files and links for embedded opensearch dashboards, if used
+NGINX_DASHBOARDS_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_dashboards_upstream_rt.conf
+NGINX_DASHBOARDS_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_dashboards_upstream.conf
 # "include" files for idark2dash rewrite using opensearch dashboards, kibana, and runtime copy, respectively
 NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_dashboards.conf
 NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_kibana.conf
@@ -195,10 +198,12 @@ echo "error_log /var/log/nginx/error.log ${NGINX_ERROR_LOG_LEVEL:-error};" > "${
 # set up config links for whether there's an embedded opensearch instance or not
 if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "opensearch-local" ]]; then
   ln -sf "$NGINX_OPENSEARCH_UPSTREAM_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_DASHBOARDS_UPSTREAM_CONF" "$NGINX_DASHBOARDS_UPSTREAM_LINK"
   ln -sf "$NGINX_OPENSEARCH_MAPI_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
   ln -sf "$NGINX_OPENSEARCH_API_CONF" "$NGINX_OPENSEARCH_API_LINK"
 else
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_DASHBOARDS_UPSTREAM_LINK"
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
   ln -sf "$NGINX_OPENSEARCH_API_501_CONF" "$NGINX_OPENSEARCH_API_LINK"
 fi

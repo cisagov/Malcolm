@@ -19,7 +19,7 @@ from malcolm_common import (
     GetMemMegabytesFromJavaOptsLine,
     ParseK8sMemoryToMib,
     KubernetesDynamic,
-    MalcolmPath,
+    GetMalcolmPath,
     NullRepresenter,
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
@@ -53,135 +53,135 @@ MALCOLM_CONFIGMAPS = {
     'etc-nginx': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')),
         },
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx.conf')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx.conf')),
         },
     ],
     'var-local-catrust': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'ca-trust')),
         },
     ],
     'etc-nginx-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'certs')),
         },
     ],
     'etc-nginx-certs-pem': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
         },
     ],
     'etc-nginx-auth': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')),
         },
     ],
     'opensearch-curlrc': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+            'path': os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'),
         },
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+            'path': os.path.join(GetMalcolmPath(), '.opensearch.secondary.curlrc'),
         },
     ],
     'opensearch-keystore': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore')),
         },
     ],
     'logstash-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('logstash', 'certs')),
         },
     ],
     'logstash-maps': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('logstash', 'maps')),
         },
     ],
     'arkime-lua': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('arkime', 'lua')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'lua')),
         },
     ],
     'arkime-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('arkime', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'rules')),
         },
     ],
     'yara-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('yara', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('yara', 'rules')),
         },
     ],
     'suricata-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('suricata', 'rules')),
         },
     ],
     'suricata-configs': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'include-configs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('suricata', 'include-configs')),
         },
     ],
     'filebeat-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('filebeat', 'certs')),
         },
     ],
     'netbox-config': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'config')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'config')),
         },
     ],
     'netbox-custom-plugins': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'custom-plugins')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'custom-plugins')),
         },
     ],
     'netbox-preload': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'preload')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'preload')),
         },
     ],
     'htadmin-config': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')),
         },
     ],
     'zeek-custom': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('zeek', 'custom')),
         },
     ],
     'zeek-intel-preseed': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('zeek', 'intel')),
         },
     ],
 }
