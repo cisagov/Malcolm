@@ -367,6 +367,7 @@ To include group information in the Keycloak token for this client, select **Gro
 * **Mapper type**: Group Membership
 * **Name**: *provide any name for this mapper*
 * **Token Claim Name**: `groups`
+* **Full group path**: If set to **On**, users will need to include the full path for the group name(s) in `NGINX_REQUIRE_GROUP` (e.g., `/top/level1/malcolm_group`); if set to **Off**, just specify the group name (e.g., `malcolm_group`)
 * **Add to ID token**: On
 * **Add to access token**: On
 * **Add to token introspection**: On
