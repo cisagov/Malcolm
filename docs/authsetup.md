@@ -375,7 +375,7 @@ To include group information in the Keycloak token for this client, select **Gro
 
 To include user realm role information in the Keycloak token for this client, once again click the down arrow on the **Add mapper** button and select **Byte configuration**. Select **User Realm Role** from the **Configure a new mapper** list. The important information to provide for this User Realm Role mapper before clicking **Save** is:
 
-* **Mapper type**: Group Membership
+* **Mapper type**: User Realm Role
 * **Name**: *provide any name for this mapper*
 * **Multivalued**: On
 * **Token Claim Name**: `realm_access.roles`
