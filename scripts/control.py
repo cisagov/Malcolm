@@ -1360,6 +1360,8 @@ def start():
                 malcolmPath=GetMalcolmPath(),
                 configPath=args.configDir,
                 profile=args.composeProfile,
+                imageSource=args.imageSource,
+                imageTag=args.imageTag,
                 injectResources=args.injectResources,
                 startCapturePods=not args.noCapturePodsStart,
                 noCapabilities=args.noCapabilities,
@@ -2840,6 +2842,24 @@ def main():
         const=True,
         default=False,
         help='Inject container resources from kubernetes-container-resources.yml (only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--image-source',
+        required=False,
+        dest='imageSource',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_IMAGE_SOURCE', None),
+        help='Source for container images (e.g., "ghcr.io/idaholab/malcolm"; only for "start" operation with Kubernetes)',
+    )
+    kubernetesGroup.add_argument(
+        '--image-tag',
+        required=False,
+        dest='imageTag',
+        metavar='<string>',
+        type=str,
+        default=os.getenv('MALCOLM_IMAGE_TAG', None),
+        help='Tag for container images (e.g., "25.04.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',

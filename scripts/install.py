@@ -623,7 +623,6 @@ class Installer(object):
         logstashHost = 'logstash:5044'
         syslogPortDict = defaultdict(lambda: 0)
         sftpOpen = False
-        indexSnapshotCompressed = False
         behindReverseProxy = False
         dockerNetworkExternalName = ""
         zeekIntelParamsProvided = False
@@ -744,12 +743,6 @@ class Installer(object):
                         ) and InstallerYesOrNo(
                             f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                             default=args.opensearchPrimarySslVerify,
-                            extraLabel=BACK_LABEL,
-                        )
-                    else:
-                        indexSnapshotCompressed = InstallerYesOrNo(
-                            f'Compress {opensearchPrimaryLabel} index snapshots?',
-                            default=args.indexSnapshotCompressed,
                             extraLabel=BACK_LABEL,
                         )
 
@@ -1051,7 +1044,6 @@ class Installer(object):
                             indexDirDefault = os.path.join(malcolm_install_path, indexDir)
                     indexDirFull = os.path.realpath(indexDirDefault)
 
-                    indexSnapshotCompressed = False
                     if args.indexSnapshotDir:
                         indexSnapshotDirDefault = args.indexSnapshotDir
                         indexSnapshotDir = indexSnapshotDirDefault
@@ -1205,7 +1197,7 @@ class Installer(object):
                                             )
                                             break
 
-                                # opensearch snapshot repository directory and compression
+                                # opensearch snapshot repository directory
                                 if not InstallerYesOrNo(
                                     'Store OpenSearch index snapshots in {}?'.format(indexSnapshotDirDefault),
                                     default=not bool(args.indexSnapshotDir),
@@ -2202,13 +2194,6 @@ class Installer(object):
                 os.path.join(args.configDir, 'dashboards-helper.env'),
                 'DASHBOARDS_DARKMODE',
                 TrueOrFalseNoQuote(dashboardsDarkMode),
-            ),
-            # OpenSearch index state management snapshot compression
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'dashboards-helper.env'),
-                'ISM_SNAPSHOT_COMPRESSED',
-                TrueOrFalseNoQuote(indexSnapshotCompressed),
             ),
             # delete based on index pattern size
             EnvValue(
@@ -4303,16 +4288,6 @@ def main():
         const=True,
         default=False,
         help="Require SSL certificate validation for communication with primary OpenSearch instance",
-    )
-    opensearchArgGroup.add_argument(
-        '--opensearch-compress-snapshots',
-        dest='indexSnapshotCompressed',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Compress OpenSearch index snapshots",
     )
     opensearchArgGroup.add_argument(
         '--opensearch-secondary',
