@@ -2849,7 +2849,7 @@ def main():
         dest='imageSource',
         metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_IMAGE_SOURCE', None),
         help='Source for container images (e.g., "ghcr.io/idaholab/malcolm"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
@@ -2858,7 +2858,7 @@ def main():
         dest='imageTag',
         metavar='<string>',
         type=str,
-        default=None,
+        default=os.getenv('MALCOLM_IMAGE_TAG', None),
         help='Tag for container images (e.g., "25.04.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
