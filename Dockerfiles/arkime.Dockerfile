@@ -33,7 +33,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_VERSION "5.6.2"
+ENV ARKIME_VERSION "5.6.3"
 ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -49,6 +49,7 @@ ARG ARKIME_TPACKETV3_NUM_THREADS=2
 ARG OPENSEARCH_MAX_SHARDS_PER_NODE=2500
 ARG WISE=on
 ARG VIEWER=on
+ARG ARKIME_SSL=true
 ARG ARKIME_VIEWER_PORT=8005
 #Whether or not Arkime is in charge of deleting old PCAP files to reclaim space
 ARG MANAGE_PCAP_FILES=false
@@ -85,6 +86,7 @@ ENV ARKIME_ROTATED_PCAP $ARKIME_ROTATED_PCAP
 ENV OPENSEARCH_MAX_SHARDS_PER_NODE $OPENSEARCH_MAX_SHARDS_PER_NODE
 ENV WISE $WISE
 ENV VIEWER $VIEWER
+ENV ARKIME_SSL $ARKIME_SSL
 ENV ARKIME_VIEWER_PORT $ARKIME_VIEWER_PORT
 ENV MANAGE_PCAP_FILES $MANAGE_PCAP_FILES
 ENV AUTO_TAG $AUTO_TAG
@@ -92,6 +94,7 @@ ENV PCAP_PIPELINE_VERBOSITY $PCAP_PIPELINE_VERBOSITY
 ENV PCAP_MONITOR_HOST $PCAP_MONITOR_HOST
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 
+ADD --chmod=644 arkime/requirements.txt /usr/local/src/
 
 RUN export DEBARCH=$(dpkg --print-architecture) && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
@@ -149,7 +152,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
       curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
       chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir beautifulsoup4 pyzmq watchdog==6.0.0 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \

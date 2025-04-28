@@ -47,8 +47,9 @@ fi
 
 TMP_WORK_DIR="$(mktemp -d)"
 pushd "${TMP_WORK_DIR}" >/dev/null 2>&1
-"${ZEEK_BIN}" -C -r "${DUMMY_PCAP}" "${ZEEK_POLICY}" "${EXTRA_ARGS[@]}"
+"${ZEEK_BIN}" -C -r "${DUMMY_PCAP}" "${ZEEK_POLICY}" "${EXTRA_ARGS[@]}" >&2
 ZEEK_RETURN_VAL=$?
+[[ -r ./loaded_scripts.log ]] && echo -n "Loaded scripts: " && grep '\.zeek' ./loaded_scripts.log | grep -v '__load__' | wc -l
 popd >/dev/null 2>&1
 rm -rf "${TMP_WORK_DIR}"
 

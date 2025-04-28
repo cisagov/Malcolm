@@ -313,7 +313,7 @@ Stopped Malcolm's ['nginx-proxy'] services
 Removed Malcolm's ['nginx-proxy'] services
 
 NAME                    IMAGE                                          COMMAND                  SERVICE       CREATED        STATUS                                     PORTS
-malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.03.1   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
+malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.04.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
 
 nginx-proxy-1  | root
 nginx-proxy-1  | uid=0(root) gid=0(root) groups=0(root),0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel),11(floppy),20(dialout),26(tape),27(video)
@@ -367,6 +367,7 @@ To include group information in the Keycloak token for this client, select **Gro
 * **Mapper type**: Group Membership
 * **Name**: *provide any name for this mapper*
 * **Token Claim Name**: `groups`
+* **Full group path**: If set to **On**, users will need to include the full path for the group name(s) in `NGINX_REQUIRE_GROUP` (e.g., `/top/level1/malcolm_group`); if set to **Off**, just specify the group name (e.g., `malcolm_group`)
 * **Add to ID token**: On
 * **Add to access token**: On
 * **Add to token introspection**: On
@@ -375,7 +376,7 @@ To include group information in the Keycloak token for this client, select **Gro
 
 To include user realm role information in the Keycloak token for this client, once again click the down arrow on the **Add mapper** button and select **Byte configuration**. Select **User Realm Role** from the **Configure a new mapper** list. The important information to provide for this User Realm Role mapper before clicking **Save** is:
 
-* **Mapper type**: Group Membership
+* **Mapper type**: User Realm Role
 * **Name**: *provide any name for this mapper*
 * **Multivalued**: On
 * **Token Claim Name**: `realm_access.roles`

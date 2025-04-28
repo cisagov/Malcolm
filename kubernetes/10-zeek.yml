@@ -4,19 +4,23 @@ kind: Deployment
 metadata:
   name: zeek-offline-deployment
   namespace: malcolm
+  labels:
+    app: zeek-offline
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: zeek-offline-deployment
+      app: zeek-offline
   replicas: 1
   template:
     metadata:
       labels:
-        name: zeek-offline-deployment
+        app: zeek-offline
+        role: ingest
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:25.03.1
+        image: ghcr.io/idaholab/malcolm/zeek:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -62,10 +66,17 @@ spec:
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

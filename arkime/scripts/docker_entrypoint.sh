@@ -73,6 +73,14 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     # note: when setting the node name, the viewer_service.sh script needs to match
     sed -i "s/MALCOLM_PCAP_NODE_NAME/${NODE_NAME}-upload/g" "${ARKIME_CONFIG_FILE}"
 
+    # certFile/keyFile is cleared based on ARKIME_SSL, or overriden via ARKIME_CERTFILE/ARKIME_KEYFILE
+    [[ "${ARKIME_SSL:-true}" == "false" ]] && \
+      ( sed -r -i "s/(certFile)\s*=\s*.*/\1=/" "${ARKIME_CONFIG_FILE}" ; sed -r -i "s/(keyFile)\s*=\s*.*/\1=/" "${ARKIME_CONFIG_FILE}" )
+    [[ -n "$ARKIME_CERTFILE" ]] && \
+      sed -r -i "s/(certFile)\s*=\s*.*/\1=$ARKIME_CERTFILE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$ARKIME_KEYFILE" ]] && \
+      sed -r -i "s/(keyFile)\s*=\s*.*/\1=$ARKIME_KEYFILE/" "${ARKIME_CONFIG_FILE}"
+
     # performance tuning parameters
     [[ -n "$ARKIME_DB_BULK_SIZE" ]] && \
       sed -r -i "s/(dbBulkSize)\s*=\s*.*/\1=$ARKIME_DB_BULK_SIZE/" "${ARKIME_CONFIG_FILE}"

@@ -43,6 +43,8 @@ ENV PCAP_PIPELINE_POLLING_ASSUME_CLOSED_SEC $PCAP_PIPELINE_POLLING_ASSUME_CLOSED
 ENV PCAP_NODE_NAME $PCAP_NODE_NAME
 ENV ZEEK_PATH $ZEEK_PATH
 
+ADD --chmod=644 pcap-monitor/requirements.txt /usr/local/src/requirements.txt
+
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
@@ -61,14 +63,7 @@ RUN apt-get -q update && \
       vim-tiny && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir \
-      elasticsearch \
-      elasticsearch-dsl \
-      opensearch-py \
-      python-magic \
-      pyzmq \
-      requests \
-      watchdog==6.0.0 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 

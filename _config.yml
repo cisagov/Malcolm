@@ -1,7 +1,7 @@
 repository: cisagov/Malcolm
 title: Malcolm
 malcolm:
-  version: 25.03.1
+  version: 25.04.0
 description: A powerful, easily deployable network traffic analysis tool suite for network security monitoring
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0

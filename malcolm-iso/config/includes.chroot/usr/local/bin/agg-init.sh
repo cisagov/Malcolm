@@ -34,7 +34,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     fi
 
     # make sure read permission is set correctly for the nginx worker processes
-    chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/config.ini "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
+    chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
   fi
 
   # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces

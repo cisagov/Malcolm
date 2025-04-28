@@ -14,7 +14,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: upload-deployment
+    app: upload
 
 ---
 apiVersion: apps/v1
@@ -22,19 +22,23 @@ kind: Deployment
 metadata:
   name: upload-deployment
   namespace: malcolm
+  labels:
+    app: upload
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: upload-deployment
+      app: upload
   replicas: 1
   template:
     metadata:
       labels:
-        name: upload-deployment
+        app: upload
+        role: ingest
     spec:
       containers:
       - name: upload-container
-        image: ghcr.io/idaholab/malcolm/file-upload:25.03.1
+        image: ghcr.io/idaholab/malcolm/file-upload:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -72,10 +76,17 @@ spec:
             subPath: "upload"
       initContainers:
       - name: upload-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

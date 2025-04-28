@@ -27,7 +27,7 @@ RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.bu
     find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme/"@g' "{}" \;
 
 # build NGINX image
-FROM alpine:3.20
+FROM alpine:3.21
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -91,10 +91,10 @@ ADD https://openresty.org/download/openresty-$OPENRESTY_VERSION.tar.gz /openrest
 
 
 # component icons from original sources and stuff for offline landing page
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
-ADD https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
+ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
 ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
 ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/

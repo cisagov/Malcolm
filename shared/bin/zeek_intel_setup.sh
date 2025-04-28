@@ -46,7 +46,7 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
             EXCLUDES+=( --exclude="${MAP_DIR}/" )
         done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
 
-        rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
+        rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" --filter="protect $(basename "${LOCK_DIR}")/" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
         mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant || true
     fi
 

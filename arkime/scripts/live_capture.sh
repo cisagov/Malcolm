@@ -22,8 +22,9 @@ else
   CURL_CONFIG_PARAMS=()
 fi
 
-NODE_NAME=${PCAP_NODE_NAME:-""}
-NODE_HOST=${ARKIME_LIVE_NODE_HOST:-""}
+NODE_NAME=${PCAP_NODE_NAME}
+NODE_HOST=${ARKIME_LIVE_NODE_HOST}
+[[ -z "${NODE_HOST}" ]] && [[ -n "${NODE_NAME}" ]] && NODE_HOST="${NODE_NAME}"
 NODE_ARGS=()
 [[ -n "$NODE_NAME" ]] && NODE_ARGS+=( --node ) && NODE_ARGS+=( "$NODE_NAME" )
 [[ -n "$NODE_HOST" ]] && NODE_ARGS+=( --host ) && NODE_ARGS+=( "$NODE_HOST" )

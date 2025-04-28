@@ -11,7 +11,7 @@
 * [Preloading NetBox inventory](#NetBoxPreload)
 * [Backup and restore](#NetBoxBackup)
 
-Malcolm provides an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." The NetBox web interface is available at at **https://localhost/netbox/** if connecting locally.
+Malcolm can utilize an instance of [NetBox](https://netbox.dev/), an open-source "solution for modeling and documenting modern networks." Users may either use Malcolm's embedded NetBox instance (available at at **https://localhost/netbox/** if connecting locally), or Malcolm may connect to a remote NetBox instance not managed by Malcolm. This choice is made during configuration ([this example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) or the NetBox section of [**Environment variable files**](malcolm-config.md#MalcolmConfigEnvVars) in the documentation).
 
 The design of a potentially deeper integration between Malcolm and Netbox is a [work in progress](https://github.com/idaholab/Malcolm/issues/131).
 
@@ -30,13 +30,11 @@ As Zeek logs and Suricata alerts are parsed and enriched (if the `NETBOX_ENRICHM
     - `destination.device.role` (`/dcim/device-roles/`)
     - [`destination.device.service`](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) (`/ipam/services/`)
     - `destination.device.site` (`/dcim/sites/`)
-    - `destination.device.url` (`/dcim/devices/`)
     - `destination.device.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
     - `destination.segment.id` (`/ipam/prefixes/{id}`)
     - `destination.segment.name` (`/ipam/prefixes/{description}`)
     - `destination.segment.site` (`/dcim/sites/`)
     - `destination.segment.tenant` (`/tenancy/tenants/`)
-    - `destination.segment.url` (`/ipam/prefixes/`)
     - `destination.segment.details` (full JSON object, [only with `NETBOX_ENRICHMENT_VERBOSE: 'true'`](malcolm-config.md#MalcolmConfigEnvVars))
 * `source.…` same as `destination.…`
 * collected as `related` fields (the [same approach](https://www.elastic.co/guide/en/ecs/current/ecs-related.html) used in ECS)
@@ -127,11 +125,11 @@ See [idaholab/Malcolm#134](https://github.com/idaholab/Malcolm/issues/134).
 
 ## <a name="NetBoxPreload"></a>Preloading NetBox inventory
 
-YML files in [`./netbox/preload`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/netbox/preload/) under the Malcolm installation directory will be preloaded upon startup using the third-party [netbox-initializers](https://github.com/tobiasge/netbox-initializers) plugin. Examples illustrating the format of these YML files can be found at its [GitHub repository](https://github.com/tobiasge/netbox-initializers/tree/main/src/netbox_initializers/initializers/yaml).
+If Malcolm is using its own embedded NetBox instance, YML files in [`./netbox/preload`]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/netbox/preload/) under the Malcolm installation directory will be preloaded upon startup using the third-party [netbox-initializers](https://github.com/tobiasge/netbox-initializers) plugin. Examples illustrating the format of these YML files can be found at its [GitHub repository](https://github.com/tobiasge/netbox-initializers/tree/main/src/netbox_initializers/initializers/yaml).
 
 ## <a name="NetBoxBackup"></a>Backup and Restore
 
-The NetBox database may be backed up and restored using `./scripts/netbox-backup` and `./scripts/netbox-restore`, respectively. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
+If Malcolm is using its own embedded NetBox instance, the NetBox database may be backed up and restored using `./scripts/netbox-backup` and `./scripts/netbox-restore`, respectively. While Malcolm is running, run the following command from within the Malcolm installation directory to backup the entire NetBox database:
 
 ```
 $ ./scripts/netbox-backup

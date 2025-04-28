@@ -5,12 +5,13 @@ metadata:
   name: freq
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 10004
       protocol: TCP
       name: http
   selector:
-    name: freq-deployment
+    app: freq
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: freq-deployment
   namespace: malcolm
+  labels:
+    app: freq
+    role: service
 spec:
   selector:
     matchLabels:
-      name: freq-deployment
+      app: freq
   replicas: 1
   template:
     metadata:
       labels:
-        name: freq-deployment
+        app: freq
+        role: service
     spec:
       containers:
       - name: freq-container
-        image: ghcr.io/idaholab/malcolm/freq:25.03.1
+        image: ghcr.io/idaholab/malcolm/freq:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true

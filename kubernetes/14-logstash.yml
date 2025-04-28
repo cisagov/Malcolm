@@ -5,8 +5,6 @@ metadata:
   name: logstash
   namespace: malcolm
 spec:
-  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
-  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 5044
@@ -19,7 +17,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    name: logstash-deployment
+    app: logstash
 
 ---
 apiVersion: apps/v1
@@ -27,29 +25,33 @@ kind: Deployment
 metadata:
   name: logstash-deployment
   namespace: malcolm
+  labels:
+    app: logstash
+    role: log-processor
 spec:
   selector:
     matchLabels:
-      name: logstash-deployment
+      app: logstash
   replicas: 1
   template:
     metadata:
       labels:
-        name: logstash-deployment
+        app: logstash
+        role: log-processor
     spec:
       # affinity:
       #   podAntiAffinity:
       #     requiredDuringSchedulingIgnoredDuringExecution:
       #     - labelSelector:
       #         matchExpressions:
-      #         - key: name
+      #         - key: app
       #           operator: In
       #           values:
-      #           - opensearch-deployment
+      #           - opensearch
       #       topologyKey: "kubernetes.io/hostname"
       containers:
       - name: logstash-container
-        image: ghcr.io/idaholab/malcolm/logstash-oss:25.03.1
+        image: ghcr.io/idaholab/malcolm/logstash-oss:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -107,17 +109,22 @@ spec:
             name: logstash-certs-secret-volume
           - mountPath: /etc/configmap
             name: logstash-maps-volume
-          - name: logstash-keystore-default-secret-volume
-            mountPath: /usr/share/logstash/config/bootstrap/secretmap
           - name: logstash-config-persist-volume
             mountPath: /usr/share/logstash/config/persist
             subPath: "logstash"
       initContainers:
       - name: logstash-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env
@@ -140,9 +147,6 @@ spec:
         - name: logstash-maps-volume
           configMap:
             name: logstash-maps
-        - name: logstash-keystore-default-secret-volume
-          secret:
-            secretName: logstash-keystore
         - name: logstash-config-persist-volume
           persistentVolumeClaim:
             claimName: config-claim

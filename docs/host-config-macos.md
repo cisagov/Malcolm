@@ -49,7 +49,7 @@ Compose is now a Docker plugin. For Docker to find this plugin, symlink it:
 
 Some changes should be made for performance ([this link](http://markshust.com/2018/01/30/performance-tuning-docker-mac) gives a good succinct overview).
 
-* **Resource allocation** - For best results, Mac users should be running recent system with at least 16GB RAM and an SSD. In the system tray, select **Docker** → **Preferences** → **Advanced**. Set the resources available to Docker to at least 4 CPUs and at least 16GB RAM (even more is preferable).
+* **Resource allocation** - For best results, Mac users should be running recent system with at least 32GB RAM and an SSD. In the system tray, select **Docker** → **Preferences** → **Advanced**. Set the resources available to Docker to at least 6 CPUs and at least 24GB RAM (even more is preferable).
 
 * **Volume mount performance** - Users can speed up performance of volume mounts by removing unused paths from **Docker** → **Preferences** → **File Sharing**. For example, if volumes are mounted under the home directory only, users could share /Users but remove other paths.
 

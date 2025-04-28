@@ -33,6 +33,14 @@ NGINX_KEYCLOAK_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_keycloak_location.conf
 NGINX_KEYCLOAK_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_keycloak_upstream_rt.conf
 NGINX_KEYCLOAK_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_keycloak_upstream.conf
 
+# "include" file for /netbox endpoint location
+NGINX_NETBOX_LOCATION_LINK=${NGINX_CONF_DIR}/nginx_netbox_location_rt.conf
+NGINX_NETBOX_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_netbox_location.conf
+
+# "include" file for embedded netbox upstream
+NGINX_NETBOX_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_netbox_upstream_rt.conf
+NGINX_NETBOX_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_netbox_upstream.conf
+
 # "include" file for auth_basic, prompt, and htpasswd location
 NGINX_BASIC_AUTH_CONF=${NGINX_CONF_DIR}/nginx_auth_basic.conf
 NGINX_AUTH_BASIC_LOCATION_CONF=${NGINX_CONF_DIR}/nginx_auth_basic_location.conf
@@ -73,6 +81,9 @@ NGINX_RUNTIME_AUTH_OPENSEARCH_LINK=${NGINX_CONF_DIR}/nginx_auth_opensearch_rt.co
 # runtime "include" file for ldap config (link to either NGINX_BLANK_CONF or (possibly modified) NGINX_LDAP_USER_CONF)
 NGINX_RUNTIME_LDAP_LINK=${NGINX_CONF_DIR}/nginx_ldap_rt.conf
 
+# "include" files and links for embedded opensearch dashboards, if used
+NGINX_DASHBOARDS_UPSTREAM_LINK=${NGINX_CONF_DIR}/nginx_dashboards_upstream_rt.conf
+NGINX_DASHBOARDS_UPSTREAM_CONF=${NGINX_CONF_DIR}/nginx_dashboards_upstream.conf
 # "include" files for idark2dash rewrite using opensearch dashboards, kibana, and runtime copy, respectively
 NGINX_DASHBOARDS_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_dashboards.conf
 NGINX_KIBANA_IDARK2DASH_REWRITE_CONF=${NGINX_CONF_DIR}/nginx_idark2dash_rewrite_kibana.conf
@@ -130,11 +141,44 @@ if [[ -z $NGINX_SSL ]] || [[ "$NGINX_SSL" != "false" ]]; then
   # doing encrypted HTTPS
   ln -sf "$NGINX_SSL_ON_CONF" "$NGINX_SSL_LINK"
   SSL_FLAG=" ssl"
+
+  # generate dhparam.pem if missing
+  if [[ ! -f ${NGINX_CONF_DIR}/dhparam/dhparam.pem ]]; then
+    mkdir -p ${NGINX_CONF_DIR}/dhparam
+    echo "Generating DH parameters" >&2 && \
+      ( openssl dhparam -out ${NGINX_CONF_DIR}/dhparam/dhparam.pem 2048 >/dev/null 2>&1 || \
+        echo "Failed to generate DH parameters" >&2 )
+    if [[ -f ${NGINX_CONF_DIR}/dhparam/dhparam.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+      chmod 600 ${NGINX_CONF_DIR}/dhparam/dhparam.pem
+    fi
+  fi
+
+  # generate self-signed TLS certificate if missing
+  if [[ ! -f ${NGINX_CONF_DIR}/certs/cert.pem ]] && [[ ! -f ${NGINX_CONF_DIR}/certs/key.pem ]]; then
+    mkdir -p ${NGINX_CONF_DIR}/certs
+    echo "Generating self-signed certificate" >&2 && \
+      ( openssl req -subj /CN=localhost -x509 -newkey rsa:4096 -nodes -keyout ${NGINX_CONF_DIR}/certs/key.pem -out ${NGINX_CONF_DIR}/certs/cert.pem -days 3650 || \
+        echo "Failed to generate self-signed certificate" >&2 )
+    if [[ -f ${NGINX_CONF_DIR}/certs/cert.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/certs/cert.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/certs/cert.pem
+      chmod 644 ${NGINX_CONF_DIR}/certs/cert.pem
+    fi
+    if [[ -f ${NGINX_CONF_DIR}/certs/key.pem ]]; then
+      [[ -n ${PUID} ]] && chown -f ${PUID} ${NGINX_CONF_DIR}/certs/key.pem
+      [[ -n ${PGID} ]] && chown -f :${PGID} ${NGINX_CONF_DIR}/certs/key.pem
+      chmod 600 ${NGINX_CONF_DIR}/certs/key.pem
+    fi
+  fi
+
 else
   # doing unencrypted HTTP (not recommended)
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_SSL_LINK"
   SSL_FLAG=""
 fi
+
 # generate listen_####.conf files with appropriate SSL flag (since the NGINX
 #   listen directive doesn't allow using variables)
 if [[ -f "${NGINX_CONF}" ]]; then
@@ -154,12 +198,24 @@ echo "error_log /var/log/nginx/error.log ${NGINX_ERROR_LOG_LEVEL:-error};" > "${
 # set up config links for whether there's an embedded opensearch instance or not
 if [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" == "opensearch-local" ]]; then
   ln -sf "$NGINX_OPENSEARCH_UPSTREAM_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_DASHBOARDS_UPSTREAM_CONF" "$NGINX_DASHBOARDS_UPSTREAM_LINK"
   ln -sf "$NGINX_OPENSEARCH_MAPI_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
   ln -sf "$NGINX_OPENSEARCH_API_CONF" "$NGINX_OPENSEARCH_API_LINK"
 else
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_UPSTREAM_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_DASHBOARDS_UPSTREAM_LINK"
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_OPENSEARCH_MAPI_LINK"
   ln -sf "$NGINX_OPENSEARCH_API_501_CONF" "$NGINX_OPENSEARCH_API_LINK"
+fi
+
+if [[ "${NETBOX_MODE:-local}" == "local" ]]; then
+  # /netbox location points to embedded netbox container
+  ln -sf "$NGINX_NETBOX_LOCATION_CONF" "$NGINX_NETBOX_LOCATION_LINK"
+  ln -sf "$NGINX_NETBOX_UPSTREAM_CONF" "$NGINX_NETBOX_UPSTREAM_LINK"
+else
+  # /netbox location isn't used
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_NETBOX_LOCATION_LINK"
+  ln -sf "$NGINX_BLANK_CONF" "$NGINX_NETBOX_UPSTREAM_LINK"
 fi
 
 # NGINX_AUTH_MODE basic|ldap|keycloak|keycloak_remote|no_authentication
@@ -478,6 +534,19 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     AUTH_DESC="Manage the <a href=\"/readme/docs/authsetup.html#AuthBasicAccountManagement\">local user accounts</a> maintained by Malcolm"
     AUTH_LINK="/auth/"
   fi
+  if [[ "${NETBOX_MODE:-local}" == "disabled" ]]; then
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="<a href=\"/readme/docs/asset-interaction-analysis.html\">NetBox</a> is disabled"
+    NETBOX_LINK="/readme/docs/asset-interaction-analysis.html"
+  elif [[ "${NETBOX_MODE:-local}" == "remote" ]]; then
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure</a>"
+    NETBOX_LINK="${NETBOX_URL:-#}"
+  else
+    NETBOX_TITLE="NetBox"
+    NETBOX_DESC="Model and document your <a href=\"/readme/docs/asset-interaction-analysis.html\">network infrastructure</a>"
+    NETBOX_LINK="/netbox/"
+  fi
   for HTML in "$(dirname "$(realpath "${NGINX_LANDING_INDEX_HTML}")")"/*.html; do
     sed -i "s@MALCOLM_DASHBOARDS_NAME_REPLACER@${MALCOLM_DASHBOARDS_NAME}@g" "${HTML}" || true
     sed -i "s@MALCOLM_DASHBOARDS_URL_REPLACER@${MALCOLM_DASHBOARDS_URL}@g" "${HTML}" || true
@@ -486,6 +555,9 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
     sed -i "s@MALCOLM_AUTH_TITLE_REPLACER@${AUTH_TITLE}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_DESC_REPLACER@${AUTH_DESC}@g" "${HTML}" || true
     sed -i "s@MALCOLM_AUTH_URL_REPLACER@${AUTH_LINK}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_TITLE_REPLACER@${NETBOX_TITLE}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_DESC_REPLACER@${NETBOX_DESC}@g" "${HTML}" || true
+    sed -i "s@MALCOLM_NETBOX_URL_REPLACER@${NETBOX_LINK}@g" "${HTML}" || true
   done
 fi
 

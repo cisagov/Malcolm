@@ -203,6 +203,26 @@ def deep_set(d, keys, value, deleteIfNone=False):
 
 
 ###################################################################################################
+# Recursively merges 'source' dict into 'destination' dict. Values from 'source' override those
+#    in 'destination' at the same path.
+def deep_merge(source, destination):
+    for key, value in source.items():
+        if isinstance(value, dict) and isinstance(destination.get(key), dict):
+            destination[key] = deep_merge(value, destination[key])
+        else:
+            destination[key] = value
+    return destination
+
+
+def deep_merge_in_place(source, destination):
+    for key, value in source.items():
+        if isinstance(value, dict) and isinstance(destination.get(key), dict):
+            deep_merge(value, destination[key])
+        else:
+            destination[key] = value
+
+
+###################################################################################################
 # recursive dictionary key search
 def dictsearch(d, target):
     val = filter(
@@ -326,6 +346,16 @@ def get_iterable(x):
         return x
     else:
         return (x,)
+
+
+# remove "empty" items from a collection
+def remove_falsy(obj):
+    if isinstance(obj, dict):
+        return {k: v for k, v in ((k, remove_falsy(v)) for k, v in obj.items()) if v}
+    elif isinstance(obj, list):
+        return [v for v in (remove_falsy(i) for i in obj) if v]
+    else:
+        return obj if obj else None
 
 
 ###################################################################################################

@@ -5,12 +5,13 @@ metadata:
   name: postgres
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 5432
       protocol: TCP
       name: postgresql
   selector:
-    name: postgres-deployment
+    app: postgres
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: postgres-deployment
   namespace: malcolm
+  labels:
+    app: postgres
+    role: database
 spec:
   selector:
     matchLabels:
-      name: postgres-deployment
+      app: postgres
   replicas: 1
   template:
     metadata:
       labels:
-        name: postgres-deployment
+        app: postgres
+        role: database
     spec:
       containers:
       - name: postgres-container
-        image: ghcr.io/idaholab/malcolm/postgresql:25.03.1
+        image: ghcr.io/idaholab/malcolm/postgresql:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -67,10 +72,17 @@ spec:
             subPath: postgres
       initContainers:
       - name: postgres-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

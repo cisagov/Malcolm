@@ -5,12 +5,13 @@ metadata:
   name: pcap-monitor
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 30441
       protocol: TCP
       name: zmq
   selector:
-    name: pcap-monitor-deployment
+    app: pcap-monitor
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: pcap-monitor-deployment
   namespace: malcolm
+  labels:
+    app: pcap-monitor
+    role: service
 spec:
   selector:
     matchLabels:
-      name: pcap-monitor-deployment
+      app: pcap-monitor
   replicas: 1
   template:
     metadata:
       labels:
-        name: pcap-monitor-deployment
+        app: pcap-monitor
+        role: service
     spec:
       containers:
       - name: pcap-monitor-container
-        image: ghcr.io/idaholab/malcolm/pcap-monitor:25.03.1
+        image: ghcr.io/idaholab/malcolm/pcap-monitor:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -67,10 +72,17 @@ spec:
             name: pcap-monitor-zeek-volume
       initContainers:
       - name: pcap-monitor-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

@@ -141,7 +141,7 @@ def main():
         '--url',
         dest='netboxUrl',
         type=str,
-        default='http://localhost:8080/netbox',
+        default=os.getenv('NETBOX_URL') or 'http://netbox:8080/netbox',
         required=False,
         help="NetBox Base URL",
     )
@@ -150,7 +150,7 @@ def main():
         '--token',
         dest='netboxToken',
         type=str,
-        default=os.getenv('SUPERUSER_API_TOKEN', None),
+        default=None,
         required=False,
         help="NetBox API Token",
     )
@@ -302,6 +302,7 @@ def main():
     if args.verbose > logging.DEBUG:
         sys.tracebacklimit = 0
 
+    args.netboxToken = args.netboxToken or os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN')
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
     manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')
 

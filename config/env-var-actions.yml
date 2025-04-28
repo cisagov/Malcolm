@@ -12,6 +12,12 @@ copied_environment_variables:
     auth_common:
       NGINX_AUTH_MODE:
         NGINX_BASIC_AUTH
+  netbox_common:
+    netbox_common:
+      NETBOX_MODE:
+        NETBOX_DISABLED:
+          "true": disabled
+          "false": local
   postgres:
     netbox:
       DB_HOST:
@@ -34,9 +40,11 @@ copied_environment_variables:
   redis:
     netbox:
       REDIS_HOST:
-        REDIS_HOST
+        REDIS_HOST:
+          "netbox-redis": redis
       REDIS_CACHE_HOST:
-        REDIS_CACHE_HOST
+        REDIS_CACHE_HOST:
+          "netbox-redis-cache": redis-cache
     netbox_secret:
       REDIS_PASSWORD:
         REDIS_PASSWORD
@@ -53,6 +61,8 @@ removed_environment_variables:
   netbox_common:
     - NETBOX_REDIS_DISABLED
     - NETBOX_POSTGRES_DISABLED
+    - NETBOX_CRON
+    - NETBOX_DISABLED
   netbox_secret:
     - DB_PASSWORD
     - DB_USER

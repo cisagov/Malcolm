@@ -129,9 +129,17 @@ if [[ -d "$PIPELINES_DIR"/zeek ]]; then
   sed -i -E 's/\s\s*(%\{\[zeek_cols\]\[)/\t\1/g' "$PIPELINES_DIR"/zeek/*.conf
 fi
 
+# if SSL is disabled, remove references to it in the input (as cert files might not even exist but logstash will still gripe about it)
+if [[ "${BEATS_SSL:-true}" == "false" ]] && [[ -d "$PIPELINES_DIR"/input ]]; then
+  sed -i -E '/^[[:space:]]*ssl_/d' "$PIPELINES_DIR"/input/*.conf
+fi
+
 # import trusted CA certificates if necessary
 /usr/local/bin/jdk-cacerts-auto-import.sh || true
 
+# As the keystore is encapsulated in the container, there's nothing actually stored in this keystore.
+# It's included here just to suppress the prompt when creating the keystore.
+[[ -z "$LOGSTASH_KEYSTORE_PASS" ]] && export LOGSTASH_KEYSTORE_PASS=a410a267b1404c949284dee25518a917
 # bootstrap keystore file if necessary
 /usr/local/bin/keystore-bootstrap.sh || true
 

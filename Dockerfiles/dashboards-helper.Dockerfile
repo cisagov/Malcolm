@@ -57,6 +57,7 @@ ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
 ADD dashboards/scripts /usr/local/bin
 ADD --chmod=644 dashboards/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 dashboards/requirements.txt /usr/local/src/
 ADD dashboards/templates /opt/templates
 ADD --chmod=755 container-health-scripts/dashboards-helper.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -79,7 +80,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-pip \
       rsync \
       tini && \
-    pip3 install --break-system-packages supervisor humanfriendly requests && \
+    pip3 install --break-system-packages -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     groupadd --gid ${DEFAULT_GID} ${PUSER} && \

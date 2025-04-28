@@ -1,0 +1,2 @@
+six==1.17.0
+supervisor==4.2.5

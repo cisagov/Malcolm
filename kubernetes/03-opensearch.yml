@@ -5,12 +5,13 @@ metadata:
   name: opensearch
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 9200
       protocol: TCP
       name: opensearch
   selector:
-    name: opensearch-deployment
+    app: opensearch
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: opensearch-deployment
   namespace: malcolm
+  labels:
+    app: opensearch
+    role: log-store
 spec:
   selector:
     matchLabels:
-      name: opensearch-deployment
+      app: opensearch
   replicas: 1
   template:
     metadata:
       labels:
-        name: opensearch-deployment
+        app: opensearch
+        role: log-store
     spec:
       containers:
       - name: opensearch-container
-        image: ghcr.io/idaholab/malcolm/opensearch:25.03.1
+        image: ghcr.io/idaholab/malcolm/opensearch:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -71,10 +76,17 @@ spec:
             subPath: "opensearch"
       initContainers:
       - name: opensearch-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

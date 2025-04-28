@@ -5,12 +5,13 @@ metadata:
   name: dashboards
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 5601
       protocol: TCP
       name: http
   selector:
-    name: dashboards-deployment
+    app: dashboards
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: dashboards-deployment
   namespace: malcolm
+  labels:
+    app: dashboards
+    role: analysis
 spec:
   selector:
     matchLabels:
-      name: dashboards-deployment
+      app: dashboards
   replicas: 1
   template:
     metadata:
       labels:
-        name: dashboards-deployment
+        app: dashboards
+        role: analysis
     spec:
       containers:
       - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:25.03.1
+        image: ghcr.io/idaholab/malcolm/dashboards:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
