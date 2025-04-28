@@ -65,7 +65,7 @@ rm -Rf zeek* spicy*
 ###
 
 # get Arkime JA4+ plugin
-ARKIME_VERSION="5.6.2"
+ARKIME_VERSION="5.6.3"
 curl "${GITHUB_API_CURL_ARGS[@]}" \
      -o "/opt/arkime/plugins/ja4plus.${ARCH}.so" \
      "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.${ARCH}.so"

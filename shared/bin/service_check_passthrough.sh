@@ -94,7 +94,7 @@ if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
          [[ "${!LOCAL_VARNAME}" == "n" ]] ); then
         DISABLED=1
     fi
-    # kinda hacky but check a special case for OpenSearch and Dashboards
+    # kinda hacky special cases
     if [[ "$SERVICE" == "opensearch" ]] && [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "opensearch-local" ]]; then
         DISABLED=1
     fi
@@ -103,8 +103,10 @@ if [[ -z "$DISABLED" ]] && [[ -n "$SERVICE" ]]; then
        [[ "${OPENSEARCH_PRIMARY:-opensearch-local}" != "opensearch-remote" ]]; then
         DISABLED=1
     fi
-    # and a special case for Keycloak too :/
     if [[ "$SERVICE" == "keycloak" ]] && [[ "${NGINX_AUTH_MODE:-keycloak}" != "keycloak" ]]; then
+        DISABLED=1
+    fi
+    if [[ "$SERVICE" == "netbox" ]] && [[ "${NETBOX_MODE:-local}" != "local" ]]; then
         DISABLED=1
     fi
 fi
@@ -150,7 +152,7 @@ if [[ -n "$DISABLED" ]]; then
 
     if [[ "$FORMAT" == "json" ]]; then
         cat << EOF > index.html
-{ "error": { "code": 422, "message": "The local service $SERVICE has been disabled." } }
+{ "error": { "code": 501, "message": "The local service $SERVICE has been disabled." } }
 EOF
     else
         cat << EOF > index.html

@@ -77,7 +77,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
     - Automatic [alerting](alerting.md#Alerting) and [reporting](reporting.md#Reporting) capabilities are available.
     - Limitation: Malcolm does not yet have a well-defined plan for [automated upgrades](malcolm-upgrade.md#UpgradePlan): it's a pretty manual process, especially for the [Hedgehog Linux sensors](hedgehog-upgrade.md#HedgehogUpgradePlan).
 * Cloud deployment capabilities
-    - Malcolm can be cloud-deployed with [Kubernetes](kubernetes.md#Kubernetes) either on-prem, on [Amazon AWS with Elastic Kubernetes Service](kubernetes-eks.md#KubernetesEKS), or ostensibly on any other Kubernetes-based platform. A US military partner is deploying Malcolm in this manner.
+    - Malcolm can be cloud-deployed with [Kubernetes](kubernetes.md#Kubernetes) either on-prem, on [Amazon AWS with Elastic Kubernetes Service](aws.md#KubernetesEKS), or ostensibly on any other Kubernetes-based platform.
     - As Hedgehog Linux is a dedicated OS for traffic capture, it is not used directly capture in cloud deployments. Instead, for cloud deployments, traffic can be collected in a few ways:
         + Capture in physical network environments can be done normally with Hedgehog Linux and forwarded to a Malcolm instance in the cloud.
         + Malcolm can run in "standalone" mode to do capture of a virtual or physical [interface available](live-analysis.md#LocalPCAP) to nodes the Kubernetes cluster, or run in the capture-only [Hedgehog run profile](live-analysis.md#Profiles).
@@ -89,7 +89,7 @@ In short, Malcolm provides an easily deployable traffic analysis tool suite for 
     - Hardware
         + Malcolm
             * Minimum system requirements
-                - 16 gigabytes RAM
+                - 24 gigabytes RAM
                 - 8 CPU cores (amd64 and arm64 supported)
                 - As much storage (preferably solid-state or RAID) as necessary to meet data retention requirements
             * Recommended system requirements

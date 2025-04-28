@@ -29,9 +29,6 @@
     "custom_malcolm_common"
   ],
   "template" :{
-    "aliases": {
-      "MALCOLM_NETWORK_INDEX_ALIAS_REPLACER": {}
-    },
     "settings" : {
       "index" : {
         "mapping.total_fields.limit" : "6000",

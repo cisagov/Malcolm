@@ -117,15 +117,9 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
   cp $VERBOSE ./netbox/preload/*.yml "$DESTDIR/netbox/preload/"
 
-  unset CONFIRMATION
-  echo ""
-  read -p "Package Kubernetes manifests in addition to docker-compose.yml [y/N]? " CONFIRMATION
-  CONFIRMATION=${CONFIRMATION:-N}
-  if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
-    mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
-    cp $VERBOSE ./kubernetes/*.* "$DESTDIR/kubernetes/"
-    grep -v '^#' ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$DESTDIR/kubernetes/XXX"
-  fi
+  mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
+  cp $VERBOSE ./kubernetes/*.* "$DESTDIR/kubernetes/"
+  grep -v '^#' ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$DESTDIR/kubernetes/XXX"
 
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc

@@ -1,0 +1,7 @@
+entrypoint2==1.1
+ordered-set==4.1.0
+patool==4.0.0
+python-magic==0.4.27
+pyunpack==0.3
+supervisor==4.2.5
+watchdog==6.0.0

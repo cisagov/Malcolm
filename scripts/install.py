@@ -54,7 +54,8 @@ from malcolm_common import (
     KubernetesDynamic,
     LoadYaml,
     MalcolmCfgRunOnceFile,
-    MalcolmPath,
+    GetMalcolmPath,
+    SetMalcolmPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
     PLATFORM_LINUX,
@@ -473,7 +474,7 @@ class Installer(object):
 
             # extract runtime files
             if installPath and os.path.isdir(installPath):
-                MalcolmPath = installPath
+                SetMalcolmPath(installPath)
                 if self.debug:
                     eprint(f"Created {installPath} for Malcolm runtime files")
 
@@ -622,7 +623,6 @@ class Installer(object):
         logstashHost = 'logstash:5044'
         syslogPortDict = defaultdict(lambda: 0)
         sftpOpen = False
-        indexSnapshotCompressed = False
         behindReverseProxy = False
         dockerNetworkExternalName = ""
         zeekIntelParamsProvided = False
@@ -743,12 +743,6 @@ class Installer(object):
                         ) and InstallerYesOrNo(
                             f'Require SSL certificate validation for communication with {opensearchPrimaryLabel} instance?',
                             default=args.opensearchPrimarySslVerify,
-                            extraLabel=BACK_LABEL,
-                        )
-                    else:
-                        indexSnapshotCompressed = InstallerYesOrNo(
-                            f'Compress {opensearchPrimaryLabel} index snapshots?',
-                            default=args.indexSnapshotCompressed,
                             extraLabel=BACK_LABEL,
                         )
 
@@ -1050,7 +1044,6 @@ class Installer(object):
                             indexDirDefault = os.path.join(malcolm_install_path, indexDir)
                     indexDirFull = os.path.realpath(indexDirDefault)
 
-                    indexSnapshotCompressed = False
                     if args.indexSnapshotDir:
                         indexSnapshotDirDefault = args.indexSnapshotDir
                         indexSnapshotDir = indexSnapshotDirDefault
@@ -1204,7 +1197,7 @@ class Installer(object):
                                             )
                                             break
 
-                                # opensearch snapshot repository directory and compression
+                                # opensearch snapshot repository directory
                                 if not InstallerYesOrNo(
                                     'Store OpenSearch index snapshots in {}?'.format(indexSnapshotDirDefault),
                                     default=not bool(args.indexSnapshotDir),
@@ -1856,12 +1849,46 @@ class Installer(object):
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.NetBox:
-                    # NetBox
-                    netboxEnabled = (malcolmProfile == PROFILE_MALCOLM) and InstallerYesOrNo(
-                        'Should Malcolm run and maintain an instance of NetBox, an infrastructure resource modeling tool?',
-                        default=args.netboxEnabled,
-                        extraLabel=BACK_LABEL,
+                    netboxOptions = (
+                        ('disabled', 'disable NetBox'),
+                        ('local', 'Run and maintain an embedded NetBox instance'),
+                        ('remote', 'Use a remote NetBox instance'),
                     )
+                    loopBreaker = CountUntilException(MaxAskForValueCount)
+                    netboxMode = None
+                    netboxUrl = ''
+                    if malcolmProfile == PROFILE_MALCOLM:
+                        while netboxMode not in [x[0] for x in netboxOptions] and loopBreaker.increment():
+                            netboxMode = InstallerChooseOne(
+                                'Should Malcolm utilize NetBox, an infrastructure resource modeling tool?',
+                                choices=[
+                                    (
+                                        x[0],
+                                        x[1],
+                                        (
+                                            (not args.netboxMode and x[0] == netboxOptions[0])
+                                            or (x[0] == args.netboxMode)
+                                        ),
+                                    )
+                                    for x in netboxOptions
+                                ],
+                                extraLabel=BACK_LABEL,
+                            )
+                    else:
+                        netboxMode = 'disabled'
+                    netboxEnabled = bool(netboxMode and (netboxMode != 'disabled'))
+                    if netboxMode == 'remote':
+                        loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox URL')
+                        while (len(netboxUrl) <= 1) and loopBreaker.increment():
+                            netboxUrl = InstallerAskForString(
+                                'Enter NetBox connection URL (e.g., https://netbox.example.org)',
+                                default=args.netboxUrl,
+                                extraLabel=BACK_LABEL,
+                            )
+                        InstallerDisplayMessage(
+                            f'You must run auth_setup after {ScriptName} to store NetBox API token.',
+                        )
+
                     netboxLogstashEnrich = netboxEnabled and InstallerYesOrNo(
                         'Should Malcolm enrich network traffic using NetBox?',
                         default=args.netboxLogstashEnrich,
@@ -2168,13 +2195,6 @@ class Installer(object):
                 'DASHBOARDS_DARKMODE',
                 TrueOrFalseNoQuote(dashboardsDarkMode),
             ),
-            # OpenSearch index state management snapshot compression
-            EnvValue(
-                True,
-                os.path.join(args.configDir, 'dashboards-helper.env'),
-                'ISM_SNAPSHOT_COMPRESSED',
-                TrueOrFalseNoQuote(indexSnapshotCompressed),
-            ),
             # delete based on index pattern size
             EnvValue(
                 True,
@@ -2320,12 +2340,19 @@ class Installer(object):
                 'NETBOX_DEFAULT_SITE',
                 netboxSiteName,
             ),
-            # enable/disable netbox
+            # netbox mode
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'netbox-common.env'),
-                'NETBOX_DISABLED',
-                TrueOrFalseNoQuote(not netboxEnabled),
+                'NETBOX_MODE',
+                netboxMode,
+            ),
+            # remote netbox URL
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_URL',
+                netboxUrl if (netboxMode == 'remote') else '',
             ),
             # HTTPS (nginxSSL=True) vs unencrypted HTTP (nginxSSL=False)
             EnvValue(
@@ -2569,6 +2596,13 @@ class Installer(object):
                 os.path.join(args.configDir, 'zeek-secret.env'),
                 'VTOT_API2_KEY',
                 vtotApiKey,
+            ),
+            # file scanning via virustotal
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'zeek.env'),
+                'EXTRACTED_FILE_ENABLE_VTOT',
+                TrueOrFalseNoQuote(len(vtotApiKey) > 1),
             ),
             # file scanning via yara
             EnvValue(
@@ -3163,7 +3197,11 @@ class LinuxInstaller(Installer):
         else:
             self.sudoCmd = ["sudo", "-n"]
             err, out = self.run_process(['whoami'], privileged=True)
-            if ((err != 0) or (len(out) == 0) or (out[0] != 'root')) and (not self.configOnly):
+            if (
+                ((err != 0) or (len(out) == 0) or (out[0] != 'root'))
+                and (not self.configOnly)
+                and (self.orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            ):
                 raise Exception(f'{ScriptName} must be run as root, or {self.sudoCmd} must be available')
 
         # determine command to use to query if a package is installed
@@ -4252,16 +4290,6 @@ def main():
         help="Require SSL certificate validation for communication with primary OpenSearch instance",
     )
     opensearchArgGroup.add_argument(
-        '--opensearch-compress-snapshots',
-        dest='indexSnapshotCompressed',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Compress OpenSearch index snapshots",
-    )
-    opensearchArgGroup.add_argument(
         '--opensearch-secondary',
         dest='opensearchSecondaryMode',
         required=False,
@@ -4778,13 +4806,21 @@ def main():
     netboxArgGroup = parser.add_argument_group('NetBox options')
     netboxArgGroup.add_argument(
         '--netbox',
-        dest='netboxEnabled',
-        type=str2bool,
-        metavar="true|false",
-        nargs='?',
-        const=True,
-        default=False,
-        help="Run and maintain an instance of NetBox",
+        dest='netboxMode',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='disabled',
+        help='NetBox mode (disabled, local, remote)',
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-url',
+        dest='netboxUrl',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='NetBox URL (used only if NetBox mode is \"remote\")',
     )
     netboxArgGroup.add_argument(
         '--netbox-enrich',
@@ -5058,18 +5094,19 @@ def main():
             eprint(f"Malcolm images file: {imageFile}")
 
     if not args.configOnly:
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker'):
-            installer.install_docker()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_docker_compose'):
-            installer.install_docker_compose()
-        if hasattr(installer, 'tweak_system_files'):
-            installer.tweak_system_files()
-        if (orchMode is OrchestrationFramework.DOCKER_COMPOSE) and hasattr(installer, 'install_malcolm_files'):
+        if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
+            if hasattr(installer, 'install_docker'):
+                installer.install_docker()
+            if hasattr(installer, 'install_docker_compose'):
+                installer.install_docker_compose()
+            if hasattr(installer, 'tweak_system_files'):
+                installer.tweak_system_files()
+        if hasattr(installer, 'install_malcolm_files'):
             _, installPath = installer.install_malcolm_files(malcolmFile, args.configDir is None)
 
     # if .env directory is unspecified, use the default ./config directory
     if args.configDir is None:
-        args.configDir = os.path.join(MalcolmPath, 'config')
+        args.configDir = os.path.join(GetMalcolmPath(), 'config')
     try:
         os.makedirs(args.configDir)
     except OSError as exc:
@@ -5091,7 +5128,7 @@ def main():
                 f'{ScriptName} requires the official Python client library for kubernetes for {orchMode} mode'
             )
 
-    if (
+    if ((not installPath) or (not os.path.isdir(installPath))) and (
         args.configOnly
         or (args.configFile and os.path.isfile(args.configFile))
         or (args.configDir and os.path.isdir(args.configDir))

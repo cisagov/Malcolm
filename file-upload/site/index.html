@@ -220,41 +220,35 @@
                 // Clear any existing options
                 netBoxSiteDropdown.innerHTML = '';
 
-                // Create and append options from the API result data
-                if (data.results && data.results.length > 0) {
+                // Create and append "skip enrichment" item (netbox site id 0 == "skip")
+                const skipOption = document.createElement('option');
+                skipOption.value = 0;
+                skipOption.textContent = "No NetBox Enrichment";
+                netBoxSiteDropdown.appendChild(skipOption);
 
-                    // Create and append "skip enrichment" item (netbox site id 0 == "skip")
-                    const option = document.createElement('option');
-                    option.value = 0;
-                    option.textContent = "No NetBox Enrichment";
-                    netBoxSiteDropdown.appendChild(option);
+                // Convert object keys to an array of site entries
+                const siteEntries = Object.entries(data).map(([id, site]) => ({
+                    id: parseInt(id, 10),
+                    text: site.display || site.name || site.slug || `Site ${id}`
+                }));
 
-                    // Find the index of the item with the lowest id
-                    let lowestId = data.results[0].id;
-                    let lowestIdIndex = 0;
-                    data.results.forEach((item, index) => {
-                        if (item.id < lowestId) {
-                            lowestId = item.id;
-                            lowestIdIndex = index;
-                        }
-                    });
+                if (siteEntries.length > 0) {
+                    // Find the entry with the lowest ID
+                    const lowestId = Math.min(...siteEntries.map(site => site.id));
 
-                    // Create and append options from the data
-                    data.results.forEach((item, index) => {
+                    // Create and append options
+                    siteEntries.forEach(site => {
                         const option = document.createElement('option');
-                        option.value = item.id;
-                        option.textContent = item.display;
-                        // Automatically select the option with the lowest id
-                        if (index === lowestIdIndex) {
+                        option.value = site.id;
+                        option.textContent = site.text;
+                        if (site.id === lowestId) {
                             option.selected = true;
                         }
                         netBoxSiteDropdown.appendChild(option);
                     });
 
-
                     // Make the dropdown visible
                     netBoxSiteDropdown.style.display = 'block';
-
                 } else {
                     // Hide the dropdown if no results
                     netBoxSiteDropdown.style.display = 'none';
@@ -263,7 +257,7 @@
 
             function fetchNetBoxSites() {
                 // Fetch data from the NetBox dcim/sites REST API
-                fetch('/netbox/api/dcim/sites/?format=json')
+                fetch('/mapi/netbox-sites')
                     .then(response => response.json())
                     .then(data => {
                         populatenetBoxSiteDropdown(data);

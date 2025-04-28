@@ -5,15 +5,13 @@ metadata:
   name: filebeat
   namespace: malcolm
 spec:
-  # use "type: ClusterIP" if using Ingress-NGINX as illustrated in 99-ingress-nginx.yml.example
-  # use "type: LoadBalancer" if using AWS Load Balancer as illustrated in 99-ingress-alb.yml.example
   type: ClusterIP
   ports:
     - port: 5045
       protocol: TCP
       name: tcpjson
   selector:
-    name: filebeat-deployment
+    app: filebeat
 
 ---
 apiVersion: apps/v1
@@ -21,19 +19,23 @@ kind: Deployment
 metadata:
   name: filebeat-deployment
   namespace: malcolm
+  labels:
+    app: filebeat
+    role: ingest
 spec:
   selector:
     matchLabels:
-      name: filebeat-deployment
+      app: filebeat
   replicas: 1
   template:
     metadata:
       labels:
-        name: filebeat-deployment
+        app: filebeat
+        role: ingest
     spec:
       containers:
       - name: filebeat-container
-        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.03.1
+        image: ghcr.io/idaholab/malcolm/filebeat-oss:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -81,10 +83,17 @@ spec:
             subPath: "nginx"
       initContainers:
       - name: filebeat-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

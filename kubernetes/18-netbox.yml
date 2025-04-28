@@ -5,6 +5,7 @@ metadata:
   name: netbox
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 8080
       protocol: TCP
@@ -16,7 +17,7 @@ spec:
       protocol: TCP
       name: supervisord
   selector:
-    name: netbox-deployment
+    app: netbox
 
 ---
 apiVersion: apps/v1
@@ -24,19 +25,23 @@ kind: Deployment
 metadata:
   name: netbox-deployment
   namespace: malcolm
+  labels:
+    app: netbox
+    role: service
 spec:
   selector:
     matchLabels:
-      name: netbox-deployment
+      app: netbox
   replicas: 1
   template:
     metadata:
       labels:
-        name: netbox-deployment
+        app: netbox
+        role: service
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:25.03.1
+        image: ghcr.io/idaholab/malcolm/netbox:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -91,10 +96,17 @@ spec:
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

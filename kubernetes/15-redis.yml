@@ -5,12 +5,13 @@ metadata:
   name: redis
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 6379
       protocol: TCP
       name: redis
   selector:
-    name: redis-deployment
+    app: redis
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: redis-deployment
   namespace: malcolm
+  labels:
+    app: redis
+    role: database
 spec:
   selector:
     matchLabels:
-      name: redis-deployment
+      app: redis
   replicas: 1
   template:
     metadata:
       labels:
-        name: redis-deployment
+        app: redis
+        role: database
     spec:
       containers:
       - name: redis-container
-        image: ghcr.io/idaholab/malcolm/redis:25.03.1
+        image: ghcr.io/idaholab/malcolm/redis:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -76,10 +81,17 @@ spec:
             subPath: redis
       initContainers:
       - name: redis-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

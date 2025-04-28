@@ -42,6 +42,8 @@ ENV LOGSTASH_OPENSEARCH_OUTPUT_PIPELINE_ADDRESSES $LOGSTASH_OPENSEARCH_OUTPUT_PI
 
 USER root
 
+ADD --chmod=644 logstash/requirements.txt /usr/local/src/
+
 RUN set -x && \
     apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
@@ -56,7 +58,7 @@ RUN set -x && \
         python3-requests \
         rsync \
         tini && \
-    pip3 install ipaddress supervisor manuf pyyaml && \
+    pip3 install -r /usr/local/src/requirements.txt && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
     echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
@@ -111,10 +113,10 @@ RUN bash -c "chmod --silent 755 /usr/local/bin/*.sh /usr/local/bin/*.py || true"
     python3 /usr/local/bin/manuf-oui-parse.py -o /etc/vendor_macs.yaml && \
     echo "Complete."
 
-# As the keystore is encapsulated in logstash, this isn't really necessary. It's included
-# here just to suppress the prompt when creating the keystore. If you're concerned about it
-# you could change or remove this from the Dockerfile, and/or override it with your
-# own envrionment variable at runtime.
+# As the keystore is encapsulated in the container, there's nothing actually stored in this keystore.
+# It's included here just to suppress the prompt when creating the keystore.
+# If you're concerned about it you could change or remove this from the Dockerfile,
+# and/or override it with your own envrionment variable at runtime.
 ENV LOGSTASH_KEYSTORE_PASS "a410a267b1404c949284dee25518a917"
 
 # see PUSER_CHOWN comment above

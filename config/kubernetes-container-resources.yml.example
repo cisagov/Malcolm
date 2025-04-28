@@ -1,0 +1,120 @@
+api:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "512Mi"
+arkime:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+arkime-live:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+dashboards:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+dashboards-helper:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "512Mi"
+file-monitor:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+filebeat:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+freq:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "512Mi"
+htadmin:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "512Mi"
+keycloak:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+logstash:
+    resources:
+      requests:
+        cpu: "4"
+        memory: "4Gi"
+netbox:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+nginx-proxy:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "1Gi"
+opensearch:
+    resources:
+      requests:
+        cpu: "4"
+        memory: "24Gi"
+pcap-capture:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "2Gi"
+pcap-monitor:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "1Gi"
+postgres:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "3Gi"
+redis-cache:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "1Gi"
+redis:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "1Gi"
+suricata-live:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+suricata-offline:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+upload:
+    resources:
+      requests:
+        cpu: "0.5"
+        memory: "1Gi"
+zeek-live:
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+zeek-offline:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"

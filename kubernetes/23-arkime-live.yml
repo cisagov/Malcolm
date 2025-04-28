@@ -4,19 +4,23 @@ kind: Deployment
 metadata:
   name: arkime-live-deployment
   namespace: malcolm
+  labels:
+    app: arkime-live
+    role: capture
 spec:
   selector:
     matchLabels:
-      name: arkime-live-deployment
+      app: arkime-live
   replicas: 1
   template:
     metadata:
       labels:
-        name: arkime-live-deployment
+        app: arkime-live
+        role: capture
     spec:
       containers:
       - name: arkime-live-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.03.1
+        image: ghcr.io/idaholab/malcolm/arkime:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -73,10 +77,17 @@ spec:
             name: arkime-live-pcap-volume
       initContainers:
       - name: arkime-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.03.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: "128Mi"
+          limits:
+            cpu: "0.5"
+            memory: "256Mi"
         envFrom:
           - configMapRef:
               name: process-env

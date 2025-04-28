@@ -17,8 +17,9 @@ from pathlib import Path
 from malcolm_common import (
     DotEnvDynamic,
     GetMemMegabytesFromJavaOptsLine,
+    ParseK8sMemoryToMib,
     KubernetesDynamic,
-    MalcolmPath,
+    GetMalcolmPath,
     NullRepresenter,
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
@@ -26,10 +27,14 @@ from malcolm_common import (
     YAML_VERSION,
 )
 from malcolm_utils import (
+    eprint,
     deep_get,
+    deep_set,
+    deep_merge_in_place,
     dictsearch,
     get_iterable,
     file_contents,
+    remove_falsy,
     remove_suffix,
     tablify,
     LoadStrIfJson,
@@ -48,145 +53,135 @@ MALCOLM_CONFIGMAPS = {
     'etc-nginx': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')),
         },
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'nginx.conf')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx.conf')),
         },
     ],
     'var-local-catrust': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'ca-trust')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'ca-trust')),
         },
     ],
     'etc-nginx-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'certs')),
         },
     ],
     'etc-nginx-certs-pem': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join(os.path.join('nginx', 'certs'), 'dhparam.pem')),
         },
     ],
     'etc-nginx-auth': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')),
         },
     ],
     'opensearch-curlrc': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, '.opensearch.primary.curlrc'),
+            'path': os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'),
         },
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, '.opensearch.secondary.curlrc'),
+            'path': os.path.join(GetMalcolmPath(), '.opensearch.secondary.curlrc'),
         },
     ],
     'opensearch-keystore': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('opensearch', 'opensearch.keystore')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore')),
         },
     ],
     'logstash-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('logstash', 'certs')),
         },
     ],
     'logstash-maps': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'maps')),
-        },
-    ],
-    'logstash-keystore': [
-        {
-            'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('logstash', 'logstash.keystore')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('logstash', 'maps')),
         },
     ],
     'arkime-lua': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('arkime', 'lua')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'lua')),
         },
     ],
     'arkime-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('arkime', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('arkime', 'rules')),
         },
     ],
     'yara-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('yara', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('yara', 'rules')),
         },
     ],
     'suricata-rules': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'rules')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('suricata', 'rules')),
         },
     ],
     'suricata-configs': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('suricata', 'include-configs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('suricata', 'include-configs')),
         },
     ],
     'filebeat-certs': [
         {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('filebeat', 'certs')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('filebeat', 'certs')),
         },
     ],
     'netbox-config': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'config')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'config')),
         },
     ],
     'netbox-custom-plugins': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'custom-plugins')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'custom-plugins')),
         },
     ],
     'netbox-preload': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('netbox', 'preload')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('netbox', 'preload')),
         },
     ],
     'htadmin-config': [
         {
-            'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')),
-        },
-        {
             'secret': True,
-            'path': os.path.join(MalcolmPath, os.path.join('htadmin', 'metadata')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')),
         },
     ],
     'zeek-custom': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'custom')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('zeek', 'custom')),
         },
     ],
     'zeek-intel-preseed': [
         {
             'secret': False,
-            'path': os.path.join(MalcolmPath, os.path.join('zeek', 'intel')),
+            'path': os.path.join(GetMalcolmPath(), os.path.join('zeek', 'intel')),
         },
     ],
 }
@@ -253,13 +248,63 @@ MALCOLM_PROFILES_CONTAINERS[PROFILE_HEDGEHOG] = [
     'zeek-offline',
 ]
 
-CONTAINER_JAVA_OPTS_VARS = {
-    'opensearch': 'OPENSEARCH_JAVA_OPTS',
-    'logstash': 'LS_JAVA_OPTS',
-}
+CONTAINER_JAVA_OPTS_VARS = defaultdict(lambda: None)
+CONTAINER_JAVA_OPTS_VARS['opensearch'] = 'OPENSEARCH_JAVA_OPTS'
+CONTAINER_JAVA_OPTS_VARS['logstash'] = 'LS_JAVA_OPTS'
 
 
 ###################################################################################################
+def replace_namespace(obj, namespace):
+    def _replace(obj):
+        changed = False
+        if isinstance(obj, dict):
+            new_dict = {}
+            for k, v in obj.items():
+                if k == "namespace" and v == "malcolm":
+                    new_dict[k] = namespace
+                    changed = True
+                else:
+                    new_v, did_change = _replace(v)
+                    new_dict[k] = new_v
+                    changed = changed or did_change
+            return new_dict, changed
+        elif isinstance(obj, list):
+            new_list = []
+            for item in obj:
+                new_item, did_change = _replace(item)
+                new_list.append(new_item)
+                changed = changed or did_change
+            return new_list, changed
+        else:
+            return obj, False
+
+    if namespace and (namespace != 'malcolm'):
+        return _replace(obj)
+    else:
+        return obj, False
+
+
+def update_container_image(containerImage, imageSource=None, imageTag=None):
+    # Split into name and tag
+    name_tag = containerImage.rsplit(':', 1)
+    name = name_tag[0]
+    tag = name_tag[1] if len(name_tag) == 2 else None
+
+    # Split into source and image name
+    source, image = name.rsplit('/', 1)
+
+    # Replace as needed
+    new_source = imageSource.rstrip('/') if imageSource else source
+    new_tag = imageTag if imageTag else tag
+
+    # Build new image string
+    updated_image = f"{new_source}/{image}"
+    if new_tag:
+        updated_image += f":{new_tag}"
+
+    return updated_image
+
+
 def _nanocore_to_millicore(n):
     n = int(n[:-1])
     return str(round(n / 1000000, 2)) + 'm'
@@ -640,86 +685,18 @@ def PrintPodStatus(namespace=None):
     tablify(statusRows)
 
 
-def DeleteNamespace(namespace, deleteRetPerVol=False):
-    results_dict = defaultdict(dict)
-
-    if namespace:
-        if kubeImported := KubernetesDynamic():
-            k8s_api = kubeImported.client.CoreV1Api()
-
-            manualDeletePersistentVolumes = []
-            if deleteRetPerVol:
-                # If indicated, manually delete PersistentVolumes with "Retain" reclaim policy
-                #   - https://kubernetes.io/docs/concepts/storage/persistent-volumes/#retain
-
-                # get a list of PersistentVolumes to delete after the delete_namespace
-                # 1. from list_namespaced_persistent_volume_claim
-                # 2. from list_persistent_volume with the "namespace=XXXXXXX" label
-                manualDeletePersistentVolumes = [
-                    x.spec.volume_name
-                    for x in k8s_api.list_namespaced_persistent_volume_claim(
-                        watch=False,
-                        namespace=namespace,
-                    ).items
-                ]
-                manualDeletePersistentVolumes.extend(
-                    [
-                        x.metadata.name
-                        for x in k8s_api.list_persistent_volume(
-                            label_selector=f'namespace={namespace}',
-                        ).items
-                        if x.spec.persistent_volume_reclaim_policy == 'Retain'
-                    ]
-                )
-
-                # filter (ensuring we only ended up with "Retain" PersistentVolumes) and dedupe
-                manualDeletePersistentVolumes = list(
-                    chain(
-                        *[
-                            [
-                                x.metadata.name
-                                for x in k8s_api.list_persistent_volume(
-                                    field_selector=f'metadata.name={name}',
-                                ).items
-                                if x.spec.persistent_volume_reclaim_policy == 'Retain'
-                            ]
-                            for name in set(manualDeletePersistentVolumes)
-                        ]
-                    )
-                )
-
-            # delete the namespace, which should delete the resources belonging to it
-            try:
-                results_dict[namespace]['delete_namespace'] = k8s_api.delete_namespace(
-                    namespace,
-                    propagation_policy='Foreground',
-                )
-            except kubeImported.client.rest.ApiException as x:
-                if x.status != 404:
-                    results_dict[namespace]['error'] = LoadStrIfJson(str(x))
-                    if not results_dict[namespace]['error']:
-                        results_dict[namespace]['error'] = str(x)
-
-            # If indicated, manually delete each PersistentVolume with "Retain" reclaim policy identified above
-            if manualDeletePersistentVolumes:
-                results_dict[namespace]['delete_persistent_volume'] = dict()
-                for name in manualDeletePersistentVolumes:
-                    try:
-                        results_dict[namespace]['delete_persistent_volume'][name] = k8s_api.delete_persistent_volume(
-                            name=name
-                        )
-                    except kubeImported.client.rest.ApiException as x:
-                        if x.status != 404:
-                            if 'error' not in results_dict[namespace]['delete_persistent_volume']:
-                                results_dict[namespace]['delete_persistent_volume']['error'] = dict()
-                            results_dict[namespace]['delete_persistent_volume']['error'][name] = LoadStrIfJson(str(x))
-                            if not results_dict[namespace]['delete_persistent_volume']['error'][name]:
-                                results_dict[namespace]['delete_persistent_volume']['error'][name] = str(x)
-
-    return results_dict
-
-
-def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dryrun=False):
+def StartMalcolm(
+    namespace,
+    malcolmPath,
+    configPath,
+    profile=PROFILE_MALCOLM,
+    imageSource=None,
+    imageTag=None,
+    injectResources=False,
+    startCapturePods=True,
+    noCapabilities=False,
+    dryrun=False,
+):
     if not namespace:
         namespace = 'malcolm'
 
@@ -861,18 +838,33 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dr
                         if not results_dict[resultsEntry]['error'][os.path.basename(envFileName)]:
                             results_dict[resultsEntry]['error'][os.path.basename(envFileName)] = str(x)
 
+        containerResources = {}
+        if injectResources:
+            resourcesFilePath = os.path.join(configPath, 'kubernetes-container-resources.yml')
+            if os.path.isfile(resourcesFilePath):
+                with open(resourcesFilePath, 'r') as resourcesFileHandle:
+                    if resourcesFileContents := list(
+                        yamlImported.YAML(typ='safe', pure=True).load_all(resourcesFileHandle)
+                    ):
+                        containerResources = (
+                            resourcesFileContents[0] if isinstance(resourcesFileContents[0], dict) else {}
+                        )
+
         # apply manifests
         if not dryrun:
             results_dict['create_from_yaml']['result'] = dict()
         yamlFiles = sorted(
-            list(
-                chain(
-                    *[
-                        glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
-                        for ftype in ['*.yml', '*.yaml']
-                    ]
+            [
+                f
+                for f in chain.from_iterable(
+                    glob.iglob(os.path.join(os.path.join(malcolmPath, 'kubernetes'), ftype), recursive=False)
+                    for ftype in ['*.yml', '*.yaml']
                 )
-            )
+                if startCapturePods
+                or not any(
+                    f.endswith(suffix) for suffix in ['-live.yml', '-live.yaml', '-capture.yml', '-capture.yaml']
+                )
+            ]
         )
         for yamlName in yamlFiles:
             # check to make sure the container in this YAML file belongs to this profile
@@ -893,80 +885,120 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dr
             # apply the manifests in this YAML file, otherwise skip it
             if containerBelongsInProfile:
 
-                # Some containers need to have resource requests created for them on the fly (idaholab/Malcolm#539).
-                # For now the only ones I'm doing this for are ones that have JAVA_OPTS specified (see CONTAINER_JAVA_OPTS_VARS)
-                #   which we retrieve from the container's environment variables we created earlier as configMapRefs.
+                # Some manifests need to have some modifications done to them on-the-fly:
+                #
+                # * Replace namespace if a custom one was passed in
+                # * Remove "capabilities" under "securityContext" (for something like Fargate that doesn't support them)
+                # * Massage image names (source and tag) if requested
+                # * Have resource requests created for them on the fly (idaholab/Malcolm#539).
+                #       For now the only ones I'm doing this for are ones that have JAVA_OPTS specified (see CONTAINER_JAVA_OPTS_VARS)
+                #           which we retrieve from the container's environment variables we created earlier as configMapRefs.
+                #       TODO: optionally expand this to other containers as well
+                #
                 modified = False
                 if manYamlFileContents:
                     for docIdx, doc in enumerate(manYamlFileContents):
+
+                        # recursively change the namespace document-wide if a different one was specified
+                        namespaceChangedDoc, namespaceChanged = replace_namespace(
+                            manYamlFileContents[docIdx],
+                            namespace,
+                        )
+                        if namespaceChangedDoc and namespaceChanged:
+                            manYamlFileContents[docIdx] = namespaceChangedDoc
+                            modified = True
+
+                        # modify container specs
                         if (
                             ('spec' in manYamlFileContents[docIdx])
                             and ('template' in manYamlFileContents[docIdx]['spec'])
                             and ('spec' in manYamlFileContents[docIdx]['spec']['template'])
-                            and ('containers' in manYamlFileContents[docIdx]['spec']['template']['spec'])
                         ):
-                            # loop over each container defined in this document (by index since we're modifying in-place)
-                            for containerIdx, container in enumerate(
-                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers']
-                            ):
-                                # we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
-                                containerName = remove_suffix(
-                                    manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                        containerIdx
-                                    ].get('name', ''),
-                                    '-container',
-                                )
-                                if containerName in CONTAINER_JAVA_OPTS_VARS:
-                                    # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
-                                    containerEnvs = {}
-                                    if (
-                                        'envFrom'
-                                        in manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                            containerIdx
-                                        ]
+                            for containerType in ('containers', 'initContainers'):
+                                if containerType in manYamlFileContents[docIdx]['spec']['template']['spec']:
+
+                                    # loop over each container defined in this document (by index since we're modifying in-place)
+                                    for containerIdx, container in enumerate(
+                                        manYamlFileContents[docIdx]['spec']['template']['spec'][containerType]
                                     ):
-                                        for env in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                            'containers'
-                                        ][containerIdx]['envFrom']:
-                                            if ('configMapRef' in env) and ('name' in env['configMapRef']):
-                                                containerEnvs.update(namedEnvs.get(env['configMapRef']['name'], {}))
-                                    # proceed if the environment variable in CONTAINER_JAVA_OPTS_VARS for this container
-                                    #  is defined in this container's runtime environment variables
-                                    if CONTAINER_JAVA_OPTS_VARS[containerName] in containerEnvs:
-                                        # calculate mebibytes for resources request from JAVA_OPTS line and proceed if it's > 0
-                                        if requestMib := GetMemMegabytesFromJavaOptsLine(
-                                            containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
-                                        ):
-                                            if (
-                                                'resources'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources'] = {}
-                                            if (
-                                                'requests'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]['resources']
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources']['requests'] = {}
-                                            if (
-                                                'memory'
-                                                not in manYamlFileContents[docIdx]['spec']['template']['spec'][
-                                                    'containers'
-                                                ][containerIdx]['resources']['requests']
-                                            ):
-                                                manYamlFileContents[docIdx]['spec']['template']['spec']['containers'][
-                                                    containerIdx
-                                                ]['resources']['requests']['memory'] = f'{requestMib}Mi'
+                                        containerName = remove_suffix(
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ].get('name', ''),
+                                            '-container',
+                                        )
+                                        containerImage = manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                            containerType
+                                        ][containerIdx].get('image', '')
+                                        newContainerImage = update_container_image(
+                                            containerImage, imageSource, imageTag
+                                        )
+                                        if newContainerImage != containerImage:
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ]['image'] = newContainerImage
                                             modified = True
 
-                # if we added a resource request, write out the modified YAML to a temporary file
+                                        # if they've asked to disable the capabilities definition (e.g., for fargate)
+                                        if noCapabilities and (
+                                            'securityContext'
+                                            in manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ]
+                                        ):
+                                            manYamlFileContents[docIdx]['spec']['template']['spec'][containerType][
+                                                containerIdx
+                                            ]['securityContext'].pop('capabilities', None)
+                                            modified = True
+
+                                        # for resource requests we're only concerned about containters we've defined by name in CONTAINER_JAVA_OPTS_VARS
+                                        #   or that have been specified in kubernetes-container-resources.yml when injectResources is True
+                                        if (containerName in CONTAINER_JAVA_OPTS_VARS) or (
+                                            containerName in containerResources
+                                        ):
+
+                                            # load up a list of environment variable sets (configMapRefs) defined in the container's envFrom
+                                            containerEnvs = {}
+                                            if (
+                                                'envFrom'
+                                                in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    containerType
+                                                ][containerIdx]
+                                            ):
+                                                for env in manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                    containerType
+                                                ][containerIdx]['envFrom']:
+                                                    if ('configMapRef' in env) and ('name' in env['configMapRef']):
+                                                        containerEnvs.update(
+                                                            namedEnvs.get(env['configMapRef']['name'], {})
+                                                        )
+
+                                            # if the memory request from the environment variable exceeds that from the inject YAML, use that instead
+                                            injectedContents = containerResources.get(containerName, {})
+                                            if (
+                                                requestMib := GetMemMegabytesFromJavaOptsLine(
+                                                    containerEnvs.get(CONTAINER_JAVA_OPTS_VARS[containerName], '')
+                                                )
+                                            ) > ParseK8sMemoryToMib(
+                                                deep_get(injectedContents, ['resources', 'requests', 'memory'], 0)
+                                            ):
+                                                deep_set(
+                                                    injectedContents,
+                                                    ['resources', 'requests', 'memory'],
+                                                    f"{requestMib}Mi",
+                                                )
+
+                                            # inject the stuff into the container manifest
+                                            if injectedContents:
+                                                deep_merge_in_place(
+                                                    injectedContents,
+                                                    manYamlFileContents[docIdx]['spec']['template']['spec'][
+                                                        containerType
+                                                    ][containerIdx],
+                                                )
+                                                modified = True
+
+                # if we modified the manifest write out the modified YAML to a temporary file
                 with temporary_filename(suffix='.yml') if modified else nullcontext() as tmpYmlFileName:
                     if modified:
                         with open(tmpYmlFileName, 'w') as tmpYmlFile:
@@ -1010,6 +1042,151 @@ def StartMalcolm(namespace, malcolmPath, configPath, profile=PROFILE_MALCOLM, dr
                                     results_dict['create_from_yaml']['error'][os.path.basename(yamlName)] = str(fe)
 
     return results_dict
+
+
+def SafeK8sDelete(
+    kubeImported,
+    func,
+    name,
+    namespace,
+    results_dict,
+    dryrun,
+    **kwargs,
+):
+    try:
+        if not dryrun:
+            if namespace:
+                func(name, namespace, **kwargs)
+            else:
+                func(name, **kwargs)
+        if isinstance(results_dict, dict) and isinstance(results_dict.get('deleted', None), list):
+            results_dict['deleted'].append(name)
+    except kubeImported.client.rest.ApiException as e:
+        if e.status not in [404, 403, 409]:
+            if not (errVal := LoadStrIfJson(str(e))):
+                errVal = str(e)
+            if errVal and isinstance(results_dict, dict) and isinstance(results_dict.get('error', None), list):
+                results_dict['error'].append(errVal)
+
+
+def StopMalcolm(
+    namespace,
+    deleteNamespace=False,
+    deletePVCsAndPVs=False,
+    dryrun=False,
+):
+    results_dict = dict()
+    results_dict[namespace] = dict()
+    for resourceType in [
+        'configmaps',
+        'deployments',
+        'ingresses',
+        'namespace',
+        'persistentvolumeclaims',
+        'persistentvolumes',
+        'secrets',
+        'services',
+    ]:
+        results_dict[namespace][resourceType] = dict()
+        for msgType in ['deleted', 'error']:
+            results_dict[namespace][resourceType][msgType] = list()
+
+    if kubeImported := KubernetesDynamic():
+        k8s_api = kubeImported.client.CoreV1Api()
+        apps_api = kubeImported.client.AppsV1Api()
+        net_api = kubeImported.client.NetworkingV1Api()
+        delete_opts = kubeImported.client.V1DeleteOptions(propagation_policy='Foreground')
+
+        for resource in apps_api.list_namespaced_deployment(namespace).items:
+            SafeK8sDelete(
+                kubeImported,
+                apps_api.delete_namespaced_deployment,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['deployments'],
+                dryrun=dryrun,
+                body=delete_opts,
+            )
+
+        for resource in k8s_api.list_namespaced_service(namespace).items:
+            if resource.metadata.name == "kubernetes":
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_service,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['services'],
+                dryrun=dryrun,
+            )
+
+        for resource in net_api.list_namespaced_ingress(namespace).items:
+            SafeK8sDelete(
+                kubeImported,
+                net_api.delete_namespaced_ingress,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['ingresses'],
+                dryrun=dryrun,
+            )
+
+        for resource in k8s_api.list_namespaced_config_map(namespace).items:
+            if resource.metadata.name in ["kube-root-ca.crt", "istio-ca-root-cert"]:
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_config_map,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['configmaps'],
+                dryrun=dryrun,
+            )
+
+        for resource in k8s_api.list_namespaced_secret(namespace).items:
+            if "kubernetes.io/service-account-token" in resource.type:
+                continue
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespaced_secret,
+                resource.metadata.name,
+                namespace,
+                results_dict[namespace]['secrets'],
+                dryrun=dryrun,
+            )
+
+        if deletePVCsAndPVs:
+            for resource in k8s_api.list_namespaced_persistent_volume_claim(namespace).items:
+                SafeK8sDelete(
+                    kubeImported,
+                    k8s_api.delete_namespaced_persistent_volume_claim,
+                    resource.metadata.name,
+                    namespace,
+                    results_dict[namespace]['persistentvolumeclaims'],
+                    dryrun=dryrun,
+                )
+            for resource in k8s_api.list_persistent_volume().items:
+                if (claim_ref := resource.spec.claim_ref) and (claim_ref.namespace == namespace):
+                    SafeK8sDelete(
+                        kubeImported,
+                        k8s_api.delete_persistent_volume,
+                        resource.metadata.name,
+                        None,
+                        results_dict[namespace]['persistentvolumes'],
+                        dryrun=dryrun,
+                    )
+
+        if deleteNamespace:
+            SafeK8sDelete(
+                kubeImported,
+                k8s_api.delete_namespace,
+                namespace,
+                None,
+                results_dict[namespace]['namespace'],
+                dryrun=dryrun,
+                body=delete_opts,
+            )
+
+    return remove_falsy(results_dict)
 
 
 def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):

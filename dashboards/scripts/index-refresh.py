@@ -12,6 +12,7 @@ import urllib3
 
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
+from urllib.parse import urlparse
 
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
@@ -21,6 +22,7 @@ OS_GET_INDEX_TEMPLATE_URI = '_index_template'
 OS_GET_COMPONENT_TEMPLATE_URI = '_component_template'
 GET_SHARDS_URL = '_cat/shards?h=index,state'
 SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
+NETBOX_URL_DEFAULT = 'http://netbox:8080/netbox'
 
 ###################################################################################################
 debug = False
@@ -72,6 +74,15 @@ def main():
         type=str,
         default=os.getenv('OPENSEARCH_URL', None),
         help='OpenSearch URL',
+    )
+    parser.add_argument(
+        '-b',
+        '--netbox-url',
+        dest='netboxUrl',
+        metavar='<protocol://host:port>',
+        type=str,
+        default=os.getenv('NETBOX_URL') or NETBOX_URL_DEFAULT,
+        help='NetBox URL',
     )
     parser.add_argument(
         '-c',
@@ -155,6 +166,10 @@ def main():
     opensearchCreds = (
         malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
     )
+
+    args.netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(args.netboxUrl, '/'), '/api')
+    if netboxEmbedded := (args.netboxUrl == NETBOX_URL_DEFAULT):
+        args.netboxUrl = '/netbox'
 
     if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
         xsrfHeader = "kbn-xsrf"
@@ -348,45 +363,50 @@ def main():
                 fieldFormatInfo['params'] = {}
 
                 if field['name'].endswith('.segment.id'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/ipam/prefixes/{{value}}'
+                    fieldFormatInfo['params']['urlTemplate'] = f'{args.netboxUrl}/ipam/prefixes/{{{{value}}}}'
 
                 elif field['name'].endswith('.segment.name') or (field['name'] == 'network.name'):
                     fieldFormatInfo['params'][
                         'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=ipam.prefix&lookup=iexact'
 
                 elif field['name'].endswith('.segment.tenant'):
                     fieldFormatInfo['params'][
                         'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=tenancy.tenant&lookup=iexact'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=tenancy.tenant&lookup=iexact'
 
                 elif field['name'].endswith('.device.id') or (field['name'] == 'related.device_id'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/dcim/devices/{{value}}'
+                    fieldFormatInfo['params']['urlTemplate'] = f'{args.netboxUrl}/dcim/devices/{{{{value}}}}'
 
                 elif field['name'].endswith('.device.name') or (field['name'] == 'related.device_name'):
                     fieldFormatInfo['params'][
                         'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
 
                 elif field['name'].endswith('.device.cluster'):
                     fieldFormatInfo['params'][
                         'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=virtualization.cluster&lookup=iexact'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=virtualization.cluster&lookup=iexact'
 
                 elif field['name'].endswith('.device.device_type') or (field['name'] == 'related.device_type'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicetype'
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.devicetype'
 
                 elif field['name'].endswith('.device.manufacturer') or (field['name'] == 'related.manufacturer'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.manufacturer'
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.manufacturer'
 
                 elif field['name'].endswith('.device.role') or (field['name'] == 'related.role'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=dcim.devicerole'
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.devicerole'
 
                 elif field['name'].endswith('.device.service') or (field['name'] == 'related.service'):
-                    fieldFormatInfo['params']['urlTemplate'] = '/netbox/search/?q={{value}}&obj_types=ipam.service'
-
-                elif field['name'].endswith('.device.url') or field['name'].endswith('.segment.url'):
-                    fieldFormatInfo['params']['urlTemplate'] = '{{value}}'
+                    fieldFormatInfo['params'][
+                        'urlTemplate'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=ipam.service'
 
                 elif (
                     field['name'].endswith('.device.site')
@@ -395,7 +415,7 @@ def main():
                 ):
                     fieldFormatInfo['params'][
                         'urlTemplate'
-                    ] = '/netbox/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'
+                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.site&lookup=iexact'
 
                 elif field['name'] == 'zeek.files.extracted_uri':
                     fieldFormatInfo['params']['urlTemplate'] = '/{{value}}'

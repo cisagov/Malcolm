@@ -13,8 +13,9 @@ class Config(object):
     ARKIME_NETWORK_INDEX_PATTERN = f"{os.getenv('ARKIME_NETWORK_INDEX_PATTERN', 'arkime_sessions3-*')}"
     ARKIME_NETWORK_INDEX_TIME_FIELD = f"{os.getenv('ARKIME_NETWORK_INDEX_TIME_FIELD', 'firstPacket')}"
 
+    ARKIME_SSL = f"{os.getenv('ARKIME_SSL', 'true')}"
     ARKIME_HOST = f"{os.getenv('ARKIME_HOST', 'arkime')}"
-    ARKIME_PORT = int(f"{os.getenv('ARKIME_PORT', '8005')}".split(':')[-1])
+    ARKIME_PORT = int(f"{os.getenv('ARKIME_VIEWER_PORT', os.getenv('ARKIME_PORT', '8005'))}".split(':')[-1])
     BUILD_DATE = f"{os.getenv('BUILD_DATE', 'unknown')}"
     DASHBOARDS_URL = f"{os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards')}"
     DASHBOARDS_HELPER_HOST = f"{os.getenv('DASHBOARDS_HELPER_HOST', 'dashboards-helper')}"
@@ -30,7 +31,8 @@ class Config(object):
     MALCOLM_API_PREFIX = f"{os.getenv('MALCOLM_API_PREFIX', 'mapi')}"
     MALCOLM_TEMPLATE = f"{os.getenv('MALCOLM_TEMPLATE', 'malcolm_template')}"
     MALCOLM_VERSION = f"{os.getenv('MALCOLM_VERSION', 'unknown')}"
-    NETBOX_URL = f"{os.getenv('NETBOX_URL', 'http://netbox:8080/netbox')}"
+    NETBOX_URL = os.getenv('NETBOX_URL') or 'http://netbox:8080/netbox'
+    NETBOX_TOKEN = f"{os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN', '')}"
     OPENSEARCH_CREDS_CONFIG_FILE = (
         f"{os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc')}"
     )

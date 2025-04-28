@@ -30,6 +30,8 @@ ENV FREQ_LOOKUP   $FREQ_LOOKUP
 
 ENV FREQ_URL "https://codeload.github.com/markbaggett/freq/tar.gz/master"
 
+ADD --chmod=644 freq-server/requirements.txt /usr/local/src/
+
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
@@ -42,7 +44,7 @@ RUN apt-get -q update && \
       python3-pip \
       rsync \
       tini && \
-    pip3 install --break-system-packages --no-compile --no-cache-dir supervisor six && \
+    pip3 install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     cd /opt && \
     mkdir -p ./freq_server && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \

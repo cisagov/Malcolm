@@ -5,12 +5,13 @@ metadata:
   name: keycloak
   namespace: malcolm
 spec:
+  type: ClusterIP
   ports:
     - port: 8080
       protocol: TCP
       name: http
   selector:
-    name: keycloak-deployment
+    app: keycloak
 
 ---
 apiVersion: apps/v1
@@ -18,19 +19,23 @@ kind: Deployment
 metadata:
   name: keycloak-deployment
   namespace: malcolm
+  labels:
+    app: keycloak
+    role: auth
 spec:
   selector:
     matchLabels:
-      name: keycloak-deployment
+      app: keycloak
   replicas: 1
   template:
     metadata:
       labels:
-        name: keycloak-deployment
+        app: keycloak
+        role: auth
     spec:
       containers:
       - name: keycloak-container
-        image: ghcr.io/idaholab/malcolm/keycloak:25.03.1
+        image: ghcr.io/idaholab/malcolm/keycloak:25.04.0
         imagePullPolicy: Always
         stdin: false
         tty: true
