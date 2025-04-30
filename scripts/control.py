@@ -1644,7 +1644,7 @@ def authSetup():
                 'arkime',
                 "Store password hash secret for Arkime viewer cluster",
                 False,
-                False,
+                (not args.cmdAuthSetupNonInteractive) or bool(args.authArkimePassword),
                 [],
             ),
             (
@@ -2593,7 +2593,7 @@ def authSetup():
                     arkimePasswordConfirm = None
 
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid password hash secret')
-                    while loopBreaker.increment():
+                    while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
                         arkimePassword = AskForPassword(
                             f"Arkime password hash secret: ",
                             default='',
