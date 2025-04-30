@@ -7,7 +7,7 @@ CERT_FILE="${ARKIME_DIR}"/etc/viewer.crt
 KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
-# WISE=${WISE:-"false"}
+# WISE=${WISE:-"off"}
 # WISE_URL=${ARKIME_WISE_SERVICE_URL:-"https://user@passwordarkime:8081"}
 
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}

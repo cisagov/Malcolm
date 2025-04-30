@@ -3,6 +3,7 @@
 # arkime
 /arkime/etc/GeoLite2-*
 /arkime/etc/oui.txt*
+/arkime/etc/wise.ini
 /arkime/etc/ipv4-address-space.csv*
 /README.css
 

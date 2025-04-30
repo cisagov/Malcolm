@@ -374,6 +374,19 @@ def checkEnvFilesAndValues():
                         )
                         for missingVar in missingVars:
                             print(f"{missingVar}={exampleValues[missingVar]}", file=envFileHandle)
+###################################################################################################
+# The Arkime wise service stores all information in  .ini file.
+# This function creates the .ini file if it does not exist. 
+# This files is based off of th wise.ini.example file.
+#
+def checkWiseFile():
+    arkimePath = "./arkime/etc"
+    wiseFile = os.path.join(arkimePath, 'wise.ini')
+    wiseExampleFile = os.path.join(arkimePath, 'wise.ini.example')
+    if not os.path.isfile(wiseFile):
+        if args.debug:
+            eprint(f"Creating {wiseFile} from {os.path.basename(wiseExampleFile)}")
+        shutil.copyfile(wiseExampleFile, wiseFile)
 
         # files or directories that need to be relocated, only if:
         #   - deployment mode is docker compose
@@ -3476,6 +3489,7 @@ def main():
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat
         checkEnvFilesAndValues()
+        checkWiseFile()
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:

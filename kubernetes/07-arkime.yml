@@ -85,6 +85,9 @@ spec:
             name: arkime-rules-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
+          - mountPath: /opt/arkime/etc/wise.ini
+            name: wise-file-volume
+            subPath: wise.ini  
       initContainers:
       - name: arkime-dirinit-container
         image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
