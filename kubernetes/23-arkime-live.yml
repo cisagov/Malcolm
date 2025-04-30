@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: arkime-live-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.04.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -77,7 +77,7 @@ spec:
             name: arkime-live-pcap-volume
       initContainers:
       - name: arkime-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true

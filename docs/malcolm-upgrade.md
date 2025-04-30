@@ -54,7 +54,7 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
         for FILE in *.env; do \
             cmp -s ../config/"$FILE.example" "$FILE" || \
             unbuffer difft --display side-by-side-show-both \
-                           --tab-width 4 --strip-cr \
+                           --tab-width 4 --strip-cr on \
                            --syntax-highlight on --ignore-comments \
                            ../config/"$FILE.example" "$FILE"; \
         done | bat --color=always
