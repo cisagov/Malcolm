@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: upload-container
-        image: ghcr.io/idaholab/malcolm/file-upload:25.04.0
+        image: ghcr.io/idaholab/malcolm/file-upload:25.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -76,7 +76,7 @@ spec:
             subPath: "upload"
       initContainers:
       - name: upload-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.04.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.04.1
         imagePullPolicy: Always
         stdin: false
         tty: true
