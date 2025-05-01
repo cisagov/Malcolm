@@ -5346,7 +5346,7 @@
                   "type": "long"
                 },
                 "history_timestamps": {
-                  "type": "keyword"
+                  "type": "date"
                 },
                 "history_values": {
                   "type": "keyword"
@@ -5386,7 +5386,14 @@
                   "type": "keyword"
                 },
                 "data": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 128,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
                 },
                 "data_length": {
                   "type": "long"
@@ -5487,9 +5494,6 @@
                 },
                 "start_parameter_num": {
                   "type": "long"
-                },
-                "parameter_data": {
-                  "type": "keyword"
                 }
               }
             },
@@ -5530,9 +5534,6 @@
                 },
                 "num_data_bytes": {
                   "type": "long"
-                },
-                "opcode_data": {
-                  "type": "keyword"
                 }
               }
             },
