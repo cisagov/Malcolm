@@ -5222,12 +5222,6 @@
                 "open_options": {
                   "type": "keyword"
                 },
-                "path": {
-                  "type": "keyword"
-                },
-                "filename": {
-                  "type": "keyword"
-                },
                 "file_descriptor": {
                   "type": "long"
                 },
@@ -5245,9 +5239,6 @@
                 },
                 "total_num_files": {
                   "type": "long"
-                },
-                "file_names": {
-                  "type": "keyword"
                 }
               }
             },
