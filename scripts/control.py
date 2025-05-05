@@ -3336,9 +3336,11 @@ def main():
                 runProfileSrc = f'exception ({e})'
         elif args.debug:
             runProfileSrc = 'specified'
-        if not args.composeProfile:
+        if (not args.composeProfile) or (
+            (args.composeProfile not in (PROFILE_MALCOLM, PROFILE_HEDGEHOG)) and str2bool(args.composeProfile)
+        ):
             args.composeProfile = PROFILE_MALCOLM
-            runProfileSrc = 'default'
+            runProfileSrc = runProfileSrc or 'default'
         if args.debug:
             eprint(f"Run profile ({runProfileSrc}): {args.composeProfile}")
 
