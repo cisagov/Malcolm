@@ -368,3 +368,9 @@ TIME_ZONE = environ.get('TIME_ZONE', 'UTC')
 
 # If true disables miscellaneous functionality which depends on access to the Internet.
 ISOLATED_DEPLOYMENT = _environ_get_and_map('ISOLATED_DEPLOYMENT', 'False', _AS_BOOL)
+
+# If true allows administrators to view user tokens
+ALLOW_TOKEN_RETRIEVAL = _environ_get_and_map('ALLOW_TOKEN_RETRIEVAL', 'False', _AS_BOOL)
+
+# if true hide local login form (e.g., if SSO is in use)
+LOGIN_FORM_HIDDEN = _environ_get_and_map('LOGIN_FORM_HIDDEN', 'True', _AS_BOOL)

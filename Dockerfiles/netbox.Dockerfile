@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.2.8
+FROM netboxcommunity/netbox:v4.3.0
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
