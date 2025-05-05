@@ -195,3 +195,51 @@ start:
 build *SERVICES:
   #!/usr/bin/env bash
   ./scripts/build.sh {{SERVICES}}
+
+[positional-arguments]
+upload *args='':
+  #!/usr/bin/env bash
+
+  PCAPS=()
+  TAGS=()
+  NETBOX_SITE_ID=0
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --tag)
+        TAGS+=("$2")
+        shift 2
+        ;;
+      --site)
+        NETBOX_SITE_ID="$2"
+        shift 2
+        ;;
+      --) # explicit end of options
+        shift
+        break
+        ;;
+      -*)
+        echo "Unknown option: $1"
+        exit 1
+        ;;
+      *)  # Start of PCAP list
+        break
+        ;;
+      esac
+  done
+
+  # remaining arguments are PCAP files
+  PCAPS+=("$@")
+
+  if [[ -n "$MALCOLM_URL" ]]; then
+    TAG_STRING=$(IFS=','; echo "${TAGS[*]}")
+    for PCAP in "${PCAPS[@]}"; do
+      if [[ -f "${PCAP}" ]]; then
+        curl -sSL -XPOST -u "${AUTH_ADMIN_USERNAME}:${AUTH_ADMIN_PASSWORD}" \
+          -F "filepond=@${PCAP}" \
+          -F "tags=${TAG_STRING}" \
+          -F "site-dropdown=${NETBOX_SITE_ID}" \
+          "${MALCOLM_URL}/upload/server/php/submit.php"
+      fi
+    done
+  fi
