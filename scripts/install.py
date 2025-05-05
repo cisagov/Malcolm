@@ -624,6 +624,7 @@ class Installer(object):
         syslogPortDict = defaultdict(lambda: 0)
         sftpOpen = False
         behindReverseProxy = False
+        traefikLabels = False
         dockerNetworkExternalName = ""
         zeekIntelParamsProvided = False
         zeekIntelCronExpression = '0 0 * * *'
@@ -2961,7 +2962,7 @@ class Installer(object):
                         if 'nginx-proxy' in data['services']:
 
                             # set bind IPs and ports based on whether it should be externally exposed or not
-                            if malcolmProfile == PROFILE_HEDGEHOG:
+                            if (malcolmProfile == PROFILE_HEDGEHOG) or (behindReverseProxy and traefikLabels):
                                 data['services']['nginx-proxy'].pop('ports', None)
                             else:
                                 data['services']['nginx-proxy']['ports'] = [
