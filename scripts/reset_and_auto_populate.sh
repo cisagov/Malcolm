@@ -272,19 +272,11 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
   # wipe and/or restart the database as requested
   if [[ "$WIPE" == "true" ]]; then
     ./scripts/wipe $VERBOSE_FLAG -f "$MALCOLM_FILE" || true
-    ./scripts/start --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
-    START_PID=$!
+    ./scripts/start --quiet -f "$MALCOLM_FILE"
   elif [[ "$RESTART" == "true" ]]; then
-    ./scripts/restart --logs $VERBOSE_FLAG -f "$MALCOLM_FILE" >/dev/null 2>&1 &
-    START_PID=$!
-  else
-    START_PID=
+    ./scripts/restart --quiet -f "$MALCOLM_FILE"
   fi
-  if [[ -n "$START_PID" ]]; then
-    sleep 30
-    kill $START_PID
-    sleep 10
-  fi
+  sleep 45
 
   if [[ "$NGINX_DISABLE" == "true" ]]; then
     ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" pause nginx-proxy
