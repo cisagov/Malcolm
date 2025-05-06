@@ -307,7 +307,7 @@ function InstallMalcolm {
         for ENVEXAMPLE in ./config/*.example; do ENVFILE="${ENVEXAMPLE%.*}"; cp "$ENVEXAMPLE" "$ENVFILE"; done
         sed -i "s@\(/malcolm/.*\):\(.*\)@\1:\2${IMAGE_ARCH_SUFFIX}@g" docker-compose.yml
         echo "Pulling Docker images..." >&2
-        docker-compose --profile malcolm pull >/dev/null 2>&1
+        grep 'image:' docker-compose.yml | awk '{print $2}' | xargs -r -l docker pull
         rm -f ./config/*.env
         docker images
         popd >/dev/null 2>&1
