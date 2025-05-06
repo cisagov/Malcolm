@@ -152,7 +152,8 @@ auth-setup:
     --auth-keycloak-url "$AUTH_KEYCLOAK_URL" \
     --auth-keycloak-client-id "$AUTH_KEYCLOAK_CLIENT_ID" \
     --auth-require-group "$AUTH_REQUIRE_GROUP" \
-    --auth-require-role "$AUTH_REQUIRE_ROLE"
+    --auth-require-role "$AUTH_REQUIRE_ROLE" \
+    --auth-netbox-token "$NETBOX_TOKEN"
 
 logs *SERVICES:
   #!/usr/bin/env bash
