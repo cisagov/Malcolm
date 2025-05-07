@@ -9,6 +9,7 @@
         + [Running Malcolm](#AWSEC2Run)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
         + [Deploying with EKS](#AWSEKS)
+        + [Deploying with EKS Auto Mode](#AWSEKSAuto)
         + [Deploying with EKS on Fargate](#AWSFargate)
         + [Common Steps for EKS Deployments](#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
@@ -404,7 +405,7 @@ nodeGroups:
 * [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
-$ envsubst < cluster.yaml | eksctl create cluster -f -
+$ eksctl create cluster -f cluster.yaml
 …
 ```
 
@@ -413,6 +414,57 @@ $ envsubst < cluster.yaml | eksctl create cluster -f -
 ```bash
 $ eksctl utils associate-iam-oidc-provider \
     --region=us-east-1 --cluster=malcolm-cluster --approve
+…
+```
+
+* Create namespace
+
+```bash
+$ kubectl create namespace malcolm
+…
+```
+
+* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
+
+### <a name="AWSEKSAuto"></a> Deploying with [EKS Auto Mode](https://aws.amazon.com/eks/auto-mode/)
+
+* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed
+
+```yml
+# cluster.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: malcolm-cluster
+  region: us-east-1
+
+addonsConfig:
+  disableDefaultAddons: true
+
+autoModeConfig:
+  enabled: true
+```
+
+* [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
+
+```bash
+$ eksctl create cluster -f cluster.yaml
+…
+```
+
+* Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
+
+```bash
+$ eksctl utils associate-iam-oidc-provider \
+    --region=us-east-1 --cluster=malcolm-cluster --approve
+…
+```
+
+* Deploy [metrics-server](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html):
+
+```bash
+$ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 …
 ```
 
@@ -641,7 +693,7 @@ done
 …
 ```
 
-* Associate necessary EFS permissions with node role (**not required for Fargate**)
+* Associate necessary EFS permissions with node role (**not required for EKS Auto Mode or Fargate**)
 
 ```bash
 $ NODE_ROLE_NAME=$(aws iam list-roles \
@@ -801,7 +853,7 @@ $ aws acm describe-certificate \
 ```
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is **required** for EKS on Fargate and **optional** for standard EKS.
+    * This step is **required** for EKS Auto Mode and Fargate and **optional** for standard EKS
 
 * Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
     * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
