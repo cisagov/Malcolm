@@ -381,186 +381,6 @@ This section covers two deployment options: deploying Malcolm in a standard Kube
 
 ### <a name="AWSEKS"></a>Deploying with EKS
 
-* Create a [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
-
-```bash
-$ aws ec2 create-vpc \
-  --cidr-block 10.0.0.0/16 \
-  --region us-east-1 \
-  --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=malcolm-vpc}]'
-…
-
-$ VPC_ID=$(aws ec2 describe-vpcs \
-              --filters "Name=tag:Name,Values=malcolm-vpc" \
-              --query "Vpcs[0].VpcId" \
-              --output text)
-
-$ echo $VPC_ID
-```
-
-* Create public and private [subnets](https://docs.aws.amazon.com/vpc/latest/userguide/configure-subnets.html) in two [availability zones](https://aws.amazon.com/about-aws/global-infrastructure/regions_az/)
-
-```bash
-$ aws ec2 create-subnet \
-    --vpc-id $VPC_ID \
-    --cidr-block 10.0.1.0/24 \
-    --availability-zone us-east-1a \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=public-subnet-1},{Key=kubernetes.io/role/elb,Value=1}]'
-…
-
-$ aws ec2 create-subnet \
-    --vpc-id $VPC_ID \
-    --cidr-block 10.0.2.0/24 \
-    --availability-zone us-east-1b \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=public-subnet-2},{Key=kubernetes.io/role/elb,Value=1}]'
-…
-
-$ aws ec2 create-subnet \
-    --vpc-id $VPC_ID \
-    --cidr-block 10.0.3.0/24 \
-    --availability-zone us-east-1a \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=private-subnet-1},{Key=kubernetes.io/role/internal-elb,Value=1}]'
-…
-
-$ aws ec2 create-subnet \
-    --vpc-id $VPC_ID \
-    --cidr-block 10.0.4.0/24 \
-    --availability-zone us-east-1b \
-    --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=private-subnet-2},{Key=kubernetes.io/role/internal-elb,Value=1}]'
-…
-
-$ PUBLIC_SUBNET_IDS=$(aws ec2 describe-subnets \
-                          --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/elb,Values=1" \
-                          --query "Subnets[*].SubnetId" \
-                          --output text)
-
-$ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
-                          --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/internal-elb,Values=1" \
-                          --query "Subnets[*].SubnetId" \
-                          --output text)
-
-$ echo $PUBLIC_SUBNET_IDS
-$ echo $PRIVATE_SUBNET_IDS
-```
-
-* Enable ["Auto-assign public IPv4 address"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#vpc-public-ipv4-addresses) for public subnets
-
-```bash
-$ for SUBNET in $PUBLIC_SUBNET_IDS; do \
-    aws ec2 modify-subnet-attribute \
-      --subnet-id $SUBNET \
-      --map-public-ip-on-launch; \
-done
-```
-
-* Create and attach [internet gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
-
-```bash
-$ aws ec2 create-internet-gateway \
-    --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=malcolm-igw}]'
-…
-
-$ IGW_ID=$(aws ec2 describe-internet-gateways \
-              --filters "Name=tag:Name,Values=malcolm-igw" \
-              --query "InternetGateways[0].InternetGatewayId" \
-              --output text)
-
-$ echo $IGW_ID
-
-$ aws ec2 attach-internet-gateway \
-      --internet-gateway-id $IGW_ID \
-      --vpc-id $VPC_ID
-```
-
-* Create public [route table](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html), associate with public subnets, and add to internet gateway
-
-```bash
-$ aws ec2 create-route-table \
-    --vpc-id $VPC_ID \
-    --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=malcolm-public-rt}]' \
-    --output text
-…
-
-$ PUBLIC_RT_ID=$(aws ec2 describe-route-tables \
-    --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:Name,Values=malcolm-public-rt" \
-    --query 'RouteTables[0].RouteTableId' \
-    --output text)
-
-$ echo $PUBLIC_RT_ID
-
-$ for SUBNET in $PUBLIC_SUBNET_IDS; do \
-  aws ec2 associate-route-table \
-    --subnet-id $SUBNET \
-    --route-table-id $PUBLIC_RT_ID; \
-done
-…
-
-$ aws ec2 create-route \
-  --route-table-id $PUBLIC_RT_ID \
-  --destination-cidr-block 0.0.0.0/0 \
-  --gateway-id $IGW_ID
-…
-```
-
-* Create [NAT gateway](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html) and private [route table](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html), then associate with the private subnets
-
-```bash
-$ aws ec2 allocate-address \
-    --domain vpc \
-    --output text
-…
-
-$ EIP_ALLOC_ID=$(aws ec2 describe-addresses \
-    --filters "Name=domain,Values=vpc" \
-    --query 'Addresses[0].AllocationId' \
-    --output text)
-
-$ echo $EIP_ALLOC_ID
-
-$ aws ec2 create-nat-gateway \
-    --subnet-id $(echo $PUBLIC_SUBNET_IDS | awk '{print $1}') \
-    --allocation-id $EIP_ALLOC_ID \
-    --output text
-…
-
-$ NAT_GW_ID=$(aws ec2 describe-nat-gateways \
-    --filter "Name=subnet-id,Values=$(echo $PUBLIC_SUBNET_IDS | awk '{print $1}')" \
-    --query 'NatGateways[0].NatGatewayId' \
-    --output text)
-
-$ echo $NAT_GW_ID
-
-$ aws ec2 wait nat-gateway-available --nat-gateway-ids $NAT_GW_ID
-
-$ aws ec2 create-route-table \
-    --vpc-id $VPC_ID \
-    --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=malcolm-private-rt}]' \
-    --output text
-…
-
-$ PRIVATE_RT_ID=$(aws ec2 describe-route-tables \
-    --filter "Name=vpc-id,Values=$VPC_ID" \
-    --query 'RouteTables[?Tags[?Key==`Name` && Value==`malcolm-private-rt`]].RouteTableId' \
-    --output text)
-
-$ echo $PRIVATE_RT_ID
-
-$ for SUBNET in $PRIVATE_SUBNET_IDS; do \
-    aws ec2 associate-route-table \
-    --subnet-id $SUBNET \
-    --route-table-id $PRIVATE_RT_ID; \
-done
-…
-
-$ aws ec2 create-route \
-    --route-table-id $PRIVATE_RT_ID \
-    --destination-cidr-block 0.0.0.0/0 \
-    --nat-gateway-id $NAT_GW_ID
-…
-```
-
 * Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed (see [EC2 Instance Types](#AWSInstanceSizing) for suggestions for `instanceType`)
 
 ```yml
@@ -571,20 +391,6 @@ kind: ClusterConfig
 metadata:
   name: malcolm-cluster
   region: us-east-1
-
-vpc:
-  id: $VPC_ID
-  subnets:
-    public:
-      us-east-1a:
-        id: $PUBLIC_SUBNET_ID_A
-      us-east-1b:
-        id: $PUBLIC_SUBNET_ID_B
-    private:
-      us-east-1a:
-        id: $PRIVATE_SUBNET_ID_A
-      us-east-1b:
-        id: $PRIVATE_SUBNET_ID_B
 
 nodeGroups:
   - name: private-nodes
@@ -598,36 +404,6 @@ nodeGroups:
 * [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
-$ export VPC_ID
-
-$ export PUBLIC_SUBNET_ID_A=$(aws ec2 describe-subnets \
-                                --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/elb,Values=1" \
-                                   "Name=availability-zone,Values=us-east-1a" \
-                                --query "Subnets[*].SubnetId" \
-                                --output text)
-
-$ export PUBLIC_SUBNET_ID_B=$(aws ec2 describe-subnets \
-                                --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/elb,Values=1" \
-                                   "Name=availability-zone,Values=us-east-1b" \
-                                --query "Subnets[*].SubnetId" \
-                                --output text)
-
-$ export PRIVATE_SUBNET_ID_A=$(aws ec2 describe-subnets \
-                                --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/internal-elb,Values=1" \
-                                   "Name=availability-zone,Values=us-east-1a" \
-                                --query "Subnets[*].SubnetId" \
-                                --output text)
-
-$ export PRIVATE_SUBNET_ID_B=$(aws ec2 describe-subnets \
-                                --filters "Name=vpc-id,Values=$VPC_ID" \
-                                   "Name=tag:kubernetes.io/role/internal-elb,Values=1" \
-                                   "Name=availability-zone,Values=us-east-1b" \
-                                --query "Subnets[*].SubnetId" \
-                                --output text)
-
 $ envsubst < cluster.yaml | eksctl create cluster -f -
 …
 ```
@@ -683,19 +459,19 @@ $ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | so
 done
 ```
 
-* Get subnet IDs
-
-```bash
-$ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
-    --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:aws:cloudformation:logical-id,Values=SubnetPrivate*" \
-    --query 'Subnets[*].SubnetId' --output text)
-
-$ echo $PRIVATE_SUBNET_IDS
-```
-
 * Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
 
 ### <a name="AWSEKSCommon"></a> Common Steps for EKS Deployments
+
+* Configure Malcolm
+    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * Malcolm's configuration scripts will guide users through the setup process.
+    * Use the following resources to answer the installation and configuration questions:
+        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
+        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
+    * Configure [authentication](authsetup.md#AuthSetup)
+        * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
+        * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
 * Create [IAM policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) for [EFS CSI driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver)
 
@@ -842,6 +618,16 @@ $ echo $EFS_SG_ID
         --cidr 10.0.0.0/16
     …
     ```
+
+* Get subnet IDs
+
+```bash
+$ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
+    --filters "Name=vpc-id,Values=$VPC_ID" "Name=tag:aws:cloudformation:logical-id,Values=SubnetPrivate*" \
+    --query 'Subnets[*].SubnetId' --output text)
+
+$ echo $PRIVATE_SUBNET_IDS
+```
 
 * Create [EFS mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for subnets
 
@@ -1013,17 +799,6 @@ $ aws acm describe-certificate \
   --query "Certificate.Status"
 …
 ```
-
-* Configure Malcolm
-    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
-    * Malcolm's configuration scripts will guide users through the setup process.
-    * Use the following resources to answer the installation and configuration questions:
-        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
-        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
-
-* Configure [authentication](authsetup.md#AuthSetup)
-    * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
-    * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
     * This step is **required** for EKS on Fargate and **optional** for standard EKS.
