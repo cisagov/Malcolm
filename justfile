@@ -7,6 +7,7 @@ _base_config +CAPTURE_FLAGS:
     --configure-file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
     --malcolm-profile "$MALCOLM_PROFILE" \
     --node-name "$NODE_NAME" \
     --dark-mode "$DARK_MODE" \
@@ -139,6 +140,7 @@ auth-setup:
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
     --profile "$MALCOLM_PROFILE" \
     --auth-method "$AUTH_METHOD" \
     --auth-admin-username "$AUTH_ADMIN_USERNAME" \
@@ -164,6 +166,7 @@ logs *SERVICES:
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
     --profile "$MALCOLM_PROFILE" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
     -s {{SERVICES}}
 
 wipe:
@@ -173,7 +176,9 @@ wipe:
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
-    --profile "$MALCOLM_PROFILE"
+    --profile "$MALCOLM_PROFILE" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
+    --delete-namespace "$MALCOLM_K8S_DELETE_NAMESPACE"
 
 stop:
   #!/usr/bin/env bash
@@ -182,17 +187,42 @@ stop:
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
-    --profile "$MALCOLM_PROFILE"
+    --profile "$MALCOLM_PROFILE" \
+    --namespace "$MALCOLM_K8S_NAMESPACE"
 
 start:
   #!/usr/bin/env bash
   ./scripts/start \
+    --quiet \
     --verbose "$VERBOSE" \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
     --profile "$MALCOLM_PROFILE" \
-    --quiet
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
+    --image-source "$MALCOLM_K8S_IMAGE_SOURCE" \
+    --image-tag "$MALCOLM_K8S_IMAGE_TAG" \
+    --inject-resources "$MALCOLM_K8S_INJECT_RESOURCES" \
+    --no-capabilities "$MALCOLM_K8S_NO_CAPABILITIES" \
+    --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
+    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
+
+restart:
+  #!/usr/bin/env bash
+  ./scripts/restart \
+    --quiet \
+    --verbose "$VERBOSE" \
+    --file "$MALCOLM_COMPOSE_FILE" \
+    --environment-dir "$MALCOLM_CONFIG_DIR" \
+    --runtime "$MALCOLM_CONTAINER_RUNTIME" \
+    --profile "$MALCOLM_PROFILE" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
+    --image-source "$MALCOLM_K8S_IMAGE_SOURCE" \
+    --image-tag "$MALCOLM_K8S_IMAGE_TAG" \
+    --inject-resources "$MALCOLM_K8S_INJECT_RESOURCES" \
+    --no-capabilities "$MALCOLM_K8S_NO_CAPABILITIES" \
+    --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
+    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
 
 build *SERVICES:
   #!/usr/bin/env bash
