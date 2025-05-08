@@ -563,7 +563,7 @@ $ aws iam create-policy \
 $ eksctl create iamserviceaccount \
     --cluster malcolm-cluster \
     --namespace kube-system \
-    --name aws-alb-controller-sa \
+    --name aws-load-balancer-controller \
     --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy \
     --approve \
     --override-existing-serviceaccounts \
@@ -805,7 +805,7 @@ $ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
   --set clusterName=malcolm-cluster \
   --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-alb-controller-sa \
+  --set serviceAccount.name=aws-load-balancer-controller \
   --set region=us-east-1 \
   --set vpcId=$VPC_ID
 …
@@ -881,7 +881,8 @@ $ aws acm describe-certificate \
     …
     ```
 
-* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) (**OPTIONAL**: only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor)
+* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)
+    * **OPTIONAL**: This is only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor.
     * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
 
     ```bash
