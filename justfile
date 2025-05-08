@@ -151,6 +151,7 @@ auth-setup:
     --auth-keycloak-redirect-uri "$AUTH_KEYCLOAK_REDIRECT_URI" \
     --auth-keycloak-url "$AUTH_KEYCLOAK_URL" \
     --auth-keycloak-client-id "$AUTH_KEYCLOAK_CLIENT_ID" \
+    --auth-keycloak-client-secret "$AUTH_KEYCLOAK_CLIENT_SECRET" \
     --auth-require-group "$AUTH_REQUIRE_GROUP" \
     --auth-require-role "$AUTH_REQUIRE_ROLE" \
     --auth-netbox-token "$NETBOX_TOKEN"
