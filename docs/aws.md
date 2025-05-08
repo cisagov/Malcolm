@@ -855,10 +855,6 @@ $ aws acm describe-certificate \
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
     * This step is **required** for EKS Auto Mode and Fargate and **optional** for standard EKS.
 
-* Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
-    * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
-    * The `alb.ingress.kubernetes.io/certificate-arn` value to be replaced with the certificate ARN for the domain name (`$CERT_ARN` from a previous step).
-
 * [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace.
     * For standard EKS
         * The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above
@@ -881,7 +877,17 @@ $ aws acm describe-certificate \
     …
     ```
 
+* Create and verify the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
+
+    ```bash
+    $ export CERT_ARN
+    $ export MALCOLM_HOST=malcolm.example.org
+    $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example | kubectl apply -f -
+    …
+    ```
+
 * Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)
+    * This step is **not required** for EKS Auto Mode.
     * **OPTIONAL**: This is only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor.
     * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
 
@@ -914,13 +920,13 @@ $ aws acm describe-certificate \
     ```bash
     $ for POD in logstash filebeat; do \
         POD_NAME="$(kubectl get pods -n malcolm --no-headers -o custom-columns=':metadata.name' | grep "$POD" | head -n 1)"; \
-        [[ -n "$POD_NAME" ]] || continue; \
+        ( [[ -n "$POD_NAME" ]] && [[ "$POD_NAME" != "None" ]] ) || continue; \
         POD_IP="$(kubectl get pod -n malcolm "$POD_NAME" -o jsonpath='{.status.podIP}')"; \
-        [[ -n "$POD_IP" ]] || continue; \
+        ( [[ -n "$POD_IP" ]] && [[ "$POD_IP" != "None" ]] ) || continue; \
         NIC_ID="$(aws ec2 describe-network-interfaces --filters "Name=addresses.private-ip-address,Values=$POD_IP" --query "NetworkInterfaces[0].NetworkInterfaceId" --output text)"; \
-        [[ -n "$NIC_ID" ]] || continue; \
+        ( [[ -n "$NIC_ID" ]] && [[ "$NIC_ID" != "None" ]] ) || continue; \
         NIC_GROUPS="$(aws ec2 describe-network-interfaces --network-interface-ids "$NIC_ID" --query "NetworkInterfaces[0].Groups[].GroupId" --output text)"; \
-        [[ -n "$NIC_GROUPS" ]] || continue; \
+        ( [[ -n "$NIC_GROUPS" ]] && [[ "$NIC_GROUPS" != "None" ]] ) || continue; \
         aws ec2 modify-network-interface-attribute \
           --network-interface-id "$NIC_ID" \
           --groups $TCP_SG_ID $NIC_GROUPS; \
