@@ -642,7 +642,7 @@ $ echo $EFS_SG_ID
 ```
 
 * Add NFS [inbound rule](https://docs.aws.amazon.com/quicksight/latest/user/vpc-security-groups.html) to Security Group
-    * For standard EKS
+    * For standard EKS and EKS Auto Mode
 
     ```bash
     $ for SG in $(kubectl get nodes \
@@ -877,7 +877,7 @@ $ aws acm describe-certificate \
     …
     ```
 
-* Create and verify the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
+* Create the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
     ```bash
     $ export CERT_ARN
