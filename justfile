@@ -168,6 +168,17 @@ logs *SERVICES:
     --namespace "$MALCOLM_K8S_NAMESPACE" \
     -s {{SERVICES}}
 
+status *SERVICES:
+  #!/usr/bin/env bash
+  ./scripts/status \
+    --verbose "$VERBOSE" \
+    --file "$MALCOLM_COMPOSE_FILE" \
+    --environment-dir "$MALCOLM_CONFIG_DIR" \
+    --runtime "$MALCOLM_CONTAINER_RUNTIME" \
+    --profile "$MALCOLM_PROFILE" \
+    --namespace "$MALCOLM_K8S_NAMESPACE" \
+    -s {{SERVICES}}
+
 wipe:
   #!/usr/bin/env bash
   ./scripts/wipe \
