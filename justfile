@@ -7,7 +7,6 @@ _base_config +CAPTURE_FLAGS:
     --configure-file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
-    --namespace "$MALCOLM_K8S_NAMESPACE" \
     --malcolm-profile "$MALCOLM_PROFILE" \
     --node-name "$NODE_NAME" \
     --dark-mode "$DARK_MODE" \

@@ -853,7 +853,7 @@ $ aws acm describe-certificate \
 ```
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is **required** for EKS Auto Mode and Fargate and **optional** for standard EKS
+    * This step is **required** for EKS Auto Mode and Fargate and **optional** for standard EKS.
 
 * Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
     * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
