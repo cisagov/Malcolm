@@ -77,7 +77,7 @@ spec:
           exec:
             command:
             - /usr/local/bin/container_health.sh
-          initialDelaySeconds: 300
+          initialDelaySeconds: 600
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
