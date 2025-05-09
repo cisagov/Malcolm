@@ -11,6 +11,10 @@ opensearch.hosts: ["${OPENSEARCH_URL}"]
 opensearch.username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
 opensearch.password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
 opensearch.ssl.verificationMode: "_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_"
+opensearch.requestHeadersAllowlist: ["securitytenant","Authorization","X-Forwarded-For","X-Remote-Auth","X-Forwarded-Roles"]
+opensearch_security.auth.type: "proxy"
+opensearch_security.proxycache.user_header: "X-Remote-Auth"
+opensearch_security.proxycache.roles_header: "X-Forwarded-Roles"
 opensearch.requestTimeout: 180000
 data_source.enabled: false
 

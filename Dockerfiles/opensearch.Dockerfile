@@ -32,6 +32,9 @@ ENV TERM xterm
 ENV TINI_VERSION v0.19.0
 ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
+ENV YQ_VERSION "4.45.3"
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
 ARG DISABLE_PERFORMANCE_ANALYZER_AGENT_CLI=true
 ENV DISABLE_INSTALL_DEMO_CONFIG $DISABLE_INSTALL_DEMO_CONFIG
@@ -40,17 +43,20 @@ ENV OPENSEARCH_JAVA_HOME=/usr/share/opensearch/jdk
 
 USER root
 
-# Remove the opensearch-security plugin - Malcolm manages authentication and encryption via NGINX reverse proxy
 # Remove the performance-analyzer plugin - Reduce resources in docker image
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
   yum upgrade -y && \
-  yum install -y openssl util-linux procps jq rsync findutils && \
-  yum remove -y vim-* && \
-  /usr/share/opensearch/bin/opensearch-plugin remove opensearch-security --purge && \
+    yum install -y openssl util-linux procps jq rsync findutils && \
+    yum remove -y vim-* && \
+  curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
+      chmod 755 /usr/local/bin/yq && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
   echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true\nhttp.cors.enabled: true\nhttp.compression: false\nhttp.cors.allow-origin: "*"\nhttp.cors.allow-methods: OPTIONS, HEAD, GET, POST, PUT, DELETE\nhttp.cors.allow-headers: "kbn-version, Origin, X-Requested-With, Content-Type, Accept, Engaged-Auth-Token Authorization"' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
+  /usr/local/bin/yq eval \
+    '.config.dynamic.http.xff.enabled = true | .config.dynamic.http.xff.internalProxies = ".*" | .config.dynamic.http.xff.remoteIpHeader = "X-Forwarded-For" | .config.dynamic.authc.proxy_auth_domain.description = "Authenticate via Malcolm" | .config.dynamic.authc.proxy_auth_domain.http_enabled = true | .config.dynamic.authc.proxy_auth_domain.transport_enabled = true | .config.dynamic.authc.proxy_auth_domain.order = 0 | .config.dynamic.authc.proxy_auth_domain.http_authenticator.type = "proxy" | .config.dynamic.authc.proxy_auth_domain.http_authenticator.challenge = false | .config.dynamic.authc.proxy_auth_domain.http_authenticator.config.user_header = "X-Remote-Auth" | .config.dynamic.authc.proxy_auth_domain.http_authenticator.config.roles_header = "X-Forwarded-Roles" | .config.dynamic.authc.proxy_auth_domain.authentication_backend.type = "noop"' \
+    -i /usr/share/opensearch/config/opensearch-security/config.yml && \
   mkdir -p /var/local/ca-trust \
            /opt/opensearch/backup \
            /usr/share/opensearch/config/bootstrap \
