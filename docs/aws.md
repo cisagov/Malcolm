@@ -86,12 +86,12 @@ Packer v1.12.0
 
 ## <a name="AWSInstanceSizing"></a>Amazon EC2 Instance Types
 
-Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). Some AWS EC2 instance types meeting recommended minimum requirements:
+Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). A few AWS EC2 instance types meeting recommended minimum requirements include:
 
 * amd64
-    - [c4.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized), [t2.2xlarge, or t3a.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+    - [c5.9xlarge or c5.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized) (compute optimized); [m6a.4xlarge or t3.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose) (general purpose)
 * arm64
-    - [m6gd.2xlarge, m6g.2xlarge, m7g.2xlarge, and t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+    - [c6g.8xlarge or c6g.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized) (compute optimized); [m6g.4xlarge or t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose) (general purpose)
 
 ## <a name="AWSEC2"></a>Installing Malcolm in an EC2 instance
 
@@ -394,7 +394,7 @@ metadata:
 
 nodeGroups:
   - name: private-nodes
-    instanceType: t2.2xlarge
+    instanceType: t3.2xlarge
     desiredCapacity: 2
     minSize: 1
     maxSize: 3
