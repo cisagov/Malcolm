@@ -218,9 +218,12 @@ else
   sed -r -i '/InterfacePrefix[[:space:]]*=[[:space:]]*af_packet/d'  ./zeekctl.cfg
 fi
 
-
 if [[ -n "$ZEEK_METRICS_PORT" ]]; then
-  echo "MetricsPort = $ZEEK_METRICS_PORT" >> ./zeekctl.cfg
+  if grep --quiet ^MetricsPort ./zeekctl.cfg; then
+    sed -r -i "s/(MetricsPort)\s*=\s*.*/\1 = $ZEEK_METRICS_PORT/" ./zeekctl.cfg
+  else
+    echo "MetricsPort = $ZEEK_METRICS_PORT" >> ./zeekctl.cfg
+  fi
 fi
 
 # completely rewrite node.cfg for one worker per interface
