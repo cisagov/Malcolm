@@ -10,7 +10,6 @@
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
         + [Deploying with EKS](#AWSEKS)
         + [Deploying with EKS Auto Mode](#AWSEKSAuto)
-        + [Deploying with EKS on Fargate](#AWSFargate)
         + [Common Steps for EKS Deployments](#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
@@ -333,7 +332,7 @@ This section outlines the process of setting up a cluster on [Amazon Elastic Kub
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
-This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) on [Fargate](https://aws.amazon.com/fargate/).
+This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
 
 * The first step in each of these respective procedures is to download Malcolm. 
     
@@ -477,42 +476,6 @@ $ kubectl create namespace malcolm
 
 * Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
 
-### <a name="AWSFargate"></a> Deploying with EKS on [Fargate](https://aws.amazon.com/fargate/)
-
-* Create [cluster](https://eksctl.io/usage/fargate-support/) for [Fargate](https://aws.amazon.com/fargate/)
-
-```bash
-$ eksctl create cluster \
-    --name malcolm-cluster \
-    --region us-east-1 \
-    --fargate \
-    --vpc-nat-mode HighlyAvailable \
-    --with-oidc \
-    --vpc-cidr 10.0.0.0/16 \
-    --node-private-networking
-```
-
-* Create namespace
-
-```bash
-$ kubectl create namespace malcolm
-```
-
-* Create [Fargate profiles](https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html) for Malcolm components based on pods' "role" labels
-
-```bash
-$ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | sort -u); do \
-    eksctl create fargateprofile \
-        --cluster malcolm-cluster \
-        --region us-east-1 \
-        --name malcolm-"$ROLE" \
-        --namespace malcolm \
-        --labels role="$ROLE"; \
-done
-```
-
-* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
-
 ### <a name="AWSEKSCommon"></a> Common Steps for EKS Deployments
 
 * Configure Malcolm
@@ -571,7 +534,7 @@ $ eksctl create iamserviceaccount \
 …
 ```
 
-* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm (**not required for Fargate**)
+* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm
 
 ```bash
 $ helm repo add efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver
@@ -642,34 +605,22 @@ $ echo $EFS_SG_ID
 ```
 
 * Add NFS [inbound rule](https://docs.aws.amazon.com/quicksight/latest/user/vpc-security-groups.html) to Security Group
-    * For standard EKS and EKS Auto Mode
 
-    ```bash
-    $ for SG in $(kubectl get nodes \
-                    -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}' | \
-                    xargs -I{} aws ec2 describe-instances \
-                                 --filters "Name=private-ip-address,Values={}" \
-                                 --query "Reservations[*].Instances[*].NetworkInterfaces[*].Groups[*].GroupId" \
-                                 --output text | tr '\t' '\n' | sort -u); do \
-        aws ec2 authorize-security-group-ingress \
-            --group-id "$EFS_SG_ID" \
-            --protocol tcp \
-            --port 2049 \
-            --source-group "$SG"; \
-    done
-    …
-    ```
-
-    * For EKS on Fargate
-
-    ```bash
-    $ aws ec2 authorize-security-group-ingress \
-        --group-id $EFS_SG_ID \
+```bash
+$ for SG in $(kubectl get nodes \
+                -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}' | \
+                xargs -I{} aws ec2 describe-instances \
+                             --filters "Name=private-ip-address,Values={}" \
+                             --query "Reservations[*].Instances[*].NetworkInterfaces[*].Groups[*].GroupId" \
+                             --output text | tr '\t' '\n' | sort -u); do \
+    aws ec2 authorize-security-group-ingress \
+        --group-id "$EFS_SG_ID" \
         --protocol tcp \
         --port 2049 \
-        --cidr 10.0.0.0/16
-    …
-    ```
+        --source-group "$SG"; \
+done
+…
+```
 
 * Get subnet IDs
 
@@ -693,7 +644,7 @@ done
 …
 ```
 
-* Associate necessary EFS permissions with node role (**not required for EKS Auto Mode or Fargate**)
+* Associate necessary EFS permissions with node role (**not required for EKS Auto Mode**)
 
 ```bash
 $ NODE_ROLE_NAME=$(aws iam list-roles \
@@ -853,29 +804,16 @@ $ aws acm describe-certificate \
 ```
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is **required** for EKS Auto Mode and Fargate and **optional** for standard EKS.
+    * This step is **required** for EKS Auto Mode and **optional** for standard EKS.
 
-* [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace.
-    * For standard EKS
-        * The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above
+* [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace. The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above.
 
-    ```bash
-    $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
-        --inject-resources \
-        --skip-persistent-volume-checks
-    …
-    ```
-
-    * For EKS on Fargate
-
-    ```bash
-    $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
-        --inject-resources \
-        --no-capture-pods \
-        --no-capabilities \
-        --skip-persistent-volume-checks
-    …
-    ```
+```bash
+$ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
+    --inject-resources \
+    --skip-persistent-volume-checks
+…
+```
 
 * Create the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
@@ -1191,4 +1129,4 @@ Users with [AWS MFA requirements](https://docs.aws.amazon.com/console/iam/self-m
 
 ## <a name="AWSAttribution"></a> Attribution
 
-Amazon Web Services, AWS, Fargate, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.
+Amazon Web Services, AWS, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.
