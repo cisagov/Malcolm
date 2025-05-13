@@ -147,7 +147,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](aws.md#KubernetesEKS)
         + [Deploying with EKS](aws.md#AWSEKS)
         + [Deploying with EKS Auto Mode](aws.md#AWSEKSAuto)
-        + [Deploying with EKS on Fargate](aws.md#AWSFargate)
         + [Common Steps for EKS Deployments](aws.md#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](aws.md#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](aws.md#AWSAMILaunch)

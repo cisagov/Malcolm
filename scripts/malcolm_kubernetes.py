@@ -48,6 +48,7 @@ MALCOLM_IMAGE_PREFIX = 'ghcr.io/idaholab/malcolm/'
 
 MALCOLM_DOTFILE_SECRET_KEY = 'K8S_SECRET'
 MALCOLM_CONFIGMAP_DIR_REPLACER = '_MALDIR_'
+MALCOLM_DEFAULT_NAMESPACE = 'malcolm'
 
 MALCOLM_CONFIGMAPS = {
     'etc-nginx': [
@@ -260,7 +261,7 @@ def replace_namespace(obj, namespace):
         if isinstance(obj, dict):
             new_dict = {}
             for k, v in obj.items():
-                if k == "namespace" and v == "malcolm":
+                if k == "namespace" and v == MALCOLM_DEFAULT_NAMESPACE:
                     new_dict[k] = namespace
                     changed = True
                 else:
@@ -278,7 +279,7 @@ def replace_namespace(obj, namespace):
         else:
             return obj, False
 
-    if namespace and (namespace != 'malcolm'):
+    if namespace and (namespace != MALCOLM_DEFAULT_NAMESPACE):
         return _replace(obj)
     else:
         return obj, False
@@ -698,7 +699,7 @@ def StartMalcolm(
     dryrun=False,
 ):
     if not namespace:
-        namespace = 'malcolm'
+        namespace = MALCOLM_DEFAULT_NAMESPACE
 
     results_dict = defaultdict(dict)
 
@@ -1189,7 +1190,11 @@ def StopMalcolm(
     return remove_falsy(results_dict)
 
 
-def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):
+def CheckPersistentStorageDefs(
+    namespace,
+    malcolmPath,
+    profile=PROFILE_MALCOLM,
+):
     foundObjects = {k: False for (k, v) in REQUIRED_VOLUME_OBJECTS[profile].items()}
 
     if yamlImported := YAMLDynamic():
@@ -1211,7 +1216,7 @@ def CheckPersistentStorageDefs(namespace, malcolmPath, profile=PROFILE_MALCOLM):
             for doc in allYamlContents:
                 if (
                     (doc.get('kind', None) == kind)
-                    and (deep_get(doc, ['metadata', 'namespace']) == namespace)
+                    and (deep_get(doc, ['metadata', 'namespace']) in (namespace, MALCOLM_DEFAULT_NAMESPACE))
                     and (deep_get(doc, ['metadata', 'name']) == name)
                 ):
                     foundObjects[name] = True
