@@ -32,11 +32,13 @@ cryptsetup-run
 curl
 debsums
 dialog
+direnv
 dmidecode
 dosfstools
 ebtables
 efibootmgr
 eject
+expect
 fatresize
 file
 findutils

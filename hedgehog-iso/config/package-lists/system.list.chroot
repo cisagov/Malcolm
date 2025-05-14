@@ -30,11 +30,13 @@ cryptsetup-initramfs
 cryptsetup-run
 debsums
 dialog
+direnv
 dmidecode
 dosfstools
 ebtables
 efibootmgr
 eject
+expect
 fatresize
 file
 findutils
