@@ -28,3 +28,8 @@ alias dutop='du -csh ./* 2>/dev/null | sort -rh'
 alias mountcol='mount | column -t'
 alias dmesg='dmesg -wHx'
 alias x='xargs -r -l'
+alias rg="rg --no-ignore --hidden --smart-case"
+alias rgfile="cut -d: -f1 | sort -u"
+alias fd="fdfind --no-ignore --hidden --ignore-case"
+alias ct='\cat'
+alias cat='batcat --paging=never --style=plain,header --tabs 0'

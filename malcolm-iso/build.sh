@@ -150,6 +150,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX/"
   cp ./docker-compose.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
+  cp ./justfile "$MALCOLM_DEST_DIR/justfile"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1

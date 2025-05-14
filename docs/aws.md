@@ -9,7 +9,7 @@
         + [Running Malcolm](#AWSEC2Run)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
         + [Deploying with EKS](#AWSEKS)
-        + [Deploying with EKS on Fargate](#AWSFargate)
+        + [Deploying with EKS Auto Mode](#AWSEKSAuto)
         + [Common Steps for EKS Deployments](#AWSEKSCommon)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
@@ -86,12 +86,12 @@ Packer v1.12.0
 
 ## <a name="AWSInstanceSizing"></a>Amazon EC2 Instance Types
 
-Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). Some AWS EC2 instance types meeting recommended minimum requirements:
+Malcolm is a resource-intensive tool: instance types should meet Malcolm's [minimum system requirements](system-requirements.md#SystemRequirements). A few AWS EC2 instance types meeting recommended minimum requirements include:
 
 * amd64
-    - [c4.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized), [t2.2xlarge, or t3a.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+    - [c5.9xlarge or c5.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized) (compute optimized); [m6a.4xlarge or t3.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose) (general purpose)
 * arm64
-    - [m6gd.2xlarge, m6g.2xlarge, m7g.2xlarge, and t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose)
+    - [c6g.8xlarge or c6g.4xlarge](https://aws.amazon.com/ec2/instance-types/#Compute_Optimized) (compute optimized); [m6g.4xlarge or t4g.2xlarge](https://aws.amazon.com/ec2/instance-types/#General_Purpose) (general purpose)
 
 ## <a name="AWSEC2"></a>Installing Malcolm in an EC2 instance
 
@@ -332,10 +332,10 @@ This section outlines the process of setting up a cluster on [Amazon Elastic Kub
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
-This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS](https://docs.aws.amazon.com/eks/latest/userguide/fargate.html) on [Fargate](https://aws.amazon.com/fargate/).
+This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
 
-* The first step in each of these respective procedures is to download Malcolm. 
-    
+* The first step in each of these respective procedures is to download Malcolm.
+
     * Install some dependencies (this will vary by OS distribution, adjust as needed)
 
     ```bash
@@ -394,7 +394,7 @@ metadata:
 
 nodeGroups:
   - name: private-nodes
-    instanceType: t2.2xlarge
+    instanceType: t3.2xlarge
     desiredCapacity: 2
     minSize: 1
     maxSize: 3
@@ -404,7 +404,7 @@ nodeGroups:
 * [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
-$ envsubst < cluster.yaml | eksctl create cluster -f -
+$ eksctl create cluster -f cluster.yaml
 …
 ```
 
@@ -425,38 +425,53 @@ $ kubectl create namespace malcolm
 
 * Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
 
-### <a name="AWSFargate"></a> Deploying with EKS on [Fargate](https://aws.amazon.com/fargate/)
+### <a name="AWSEKSAuto"></a> Deploying with [EKS Auto Mode](https://aws.amazon.com/eks/auto-mode/)
 
-* Create [cluster](https://eksctl.io/usage/fargate-support/) for [Fargate](https://aws.amazon.com/fargate/)
+* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed
+
+```yml
+# cluster.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: malcolm-cluster
+  region: us-east-1
+
+addonsConfig:
+  disableDefaultAddons: true
+
+autoModeConfig:
+  enabled: true
+```
+
+* [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
-$ eksctl create cluster \
-    --name malcolm-cluster \
-    --region us-east-1 \
-    --fargate \
-    --vpc-nat-mode HighlyAvailable \
-    --with-oidc \
-    --vpc-cidr 10.0.0.0/16 \
-    --node-private-networking
+$ eksctl create cluster -f cluster.yaml
+…
+```
+
+* Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
+
+```bash
+$ eksctl utils associate-iam-oidc-provider \
+    --region=us-east-1 --cluster=malcolm-cluster --approve
+…
+```
+
+* Deploy [metrics-server](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html):
+
+```bash
+$ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+…
 ```
 
 * Create namespace
 
 ```bash
 $ kubectl create namespace malcolm
-```
-
-* Create [Fargate profiles](https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html) for Malcolm components based on pods' "role" labels
-
-```bash
-$ for ROLE in $(grep -h role: ./Malcolm/kubernetes/*.yml | awk '{print $2}' | sort -u); do \
-    eksctl create fargateprofile \
-        --cluster malcolm-cluster \
-        --region us-east-1 \
-        --name malcolm-"$ROLE" \
-        --namespace malcolm \
-        --labels role="$ROLE"; \
-done
+…
 ```
 
 * Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
@@ -511,7 +526,7 @@ $ aws iam create-policy \
 $ eksctl create iamserviceaccount \
     --cluster malcolm-cluster \
     --namespace kube-system \
-    --name aws-alb-controller-sa \
+    --name aws-load-balancer-controller \
     --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy \
     --approve \
     --override-existing-serviceaccounts \
@@ -519,7 +534,7 @@ $ eksctl create iamserviceaccount \
 …
 ```
 
-* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm (**not required for Fargate**)
+* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm
 
 ```bash
 $ helm repo add efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver
@@ -590,34 +605,22 @@ $ echo $EFS_SG_ID
 ```
 
 * Add NFS [inbound rule](https://docs.aws.amazon.com/quicksight/latest/user/vpc-security-groups.html) to Security Group
-    * For standard EKS
 
-    ```bash
-    $ for SG in $(kubectl get nodes \
-                    -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}' | \
-                    xargs -I{} aws ec2 describe-instances \
-                                 --filters "Name=private-ip-address,Values={}" \
-                                 --query "Reservations[*].Instances[*].NetworkInterfaces[*].Groups[*].GroupId" \
-                                 --output text | tr '\t' '\n' | sort -u); do \
-        aws ec2 authorize-security-group-ingress \
-            --group-id "$EFS_SG_ID" \
-            --protocol tcp \
-            --port 2049 \
-            --source-group "$SG"; \
-    done
-    …
-    ```
-
-    * For EKS on Fargate
-
-    ```bash
-    $ aws ec2 authorize-security-group-ingress \
-        --group-id $EFS_SG_ID \
+```bash
+$ for SG in $(kubectl get nodes \
+                -o jsonpath='{range .items[*]}{.status.addresses[?(@.type=="InternalIP")].address}{"\n"}{end}' | \
+                xargs -I{} aws ec2 describe-instances \
+                             --filters "Name=private-ip-address,Values={}" \
+                             --query "Reservations[*].Instances[*].NetworkInterfaces[*].Groups[*].GroupId" \
+                             --output text | tr '\t' '\n' | sort -u); do \
+    aws ec2 authorize-security-group-ingress \
+        --group-id "$EFS_SG_ID" \
         --protocol tcp \
         --port 2049 \
-        --cidr 10.0.0.0/16
-    …
-    ```
+        --source-group "$SG"; \
+done
+…
+```
 
 * Get subnet IDs
 
@@ -641,7 +644,7 @@ done
 …
 ```
 
-* Associate necessary EFS permissions with node role (**not required for Fargate**)
+* Associate necessary EFS permissions with node role (**not required for EKS Auto Mode**)
 
 ```bash
 $ NODE_ROLE_NAME=$(aws iam list-roles \
@@ -753,7 +756,7 @@ $ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
   --set clusterName=malcolm-cluster \
   --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-alb-controller-sa \
+  --set serviceAccount.name=aws-load-balancer-controller \
   --set region=us-east-1 \
   --set vpcId=$VPC_ID
 …
@@ -801,35 +804,29 @@ $ aws acm describe-certificate \
 ```
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is **required** for EKS on Fargate and **optional** for standard EKS.
+    * This step is **required** for EKS Auto Mode and **optional** for standard EKS.
 
-* Copy [`./Malcolm/kubernetes/99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example) to `./Malcolm/kubernetes/99-ingress-aws-alb.yml` and edit as needed. This file is an example ingress manifest for Malcolm using the ALB controller for HTTPS. The ingress configuration will vary depending on the situation, but the values likely to need changing include:
-    * The `host: "malcolm.example.org"` references to be replaced with the domain name to be associated with the cluster's Malcolm instance.
-    * The `alb.ingress.kubernetes.io/certificate-arn` value to be replaced with the certificate ARN for the domain name (`$CERT_ARN` from a previous step).
+* [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace. The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above.
 
-* [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace.
-    * For standard EKS
-        * The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above
+```bash
+$ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
+    --inject-resources \
+    --skip-persistent-volume-checks
+…
+```
+
+* Create the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
     ```bash
-    $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
-        --inject-resources \
-        --skip-persistent-volume-checks
+    $ export CERT_ARN
+    $ export MALCOLM_HOST=malcolm.example.org
+    $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example | kubectl apply -f -
     …
     ```
 
-    * For EKS on Fargate
-
-    ```bash
-    $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
-        --inject-resources \
-        --no-capture-pods \
-        --no-capabilities \
-        --skip-persistent-volume-checks
-    …
-    ```
-
-* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/) (**OPTIONAL**: only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor)
+* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)
+    * This step is **not required** for EKS Auto Mode.
+    * **OPTIONAL**: This is only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor.
     * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
 
     ```bash
@@ -861,13 +858,13 @@ $ aws acm describe-certificate \
     ```bash
     $ for POD in logstash filebeat; do \
         POD_NAME="$(kubectl get pods -n malcolm --no-headers -o custom-columns=':metadata.name' | grep "$POD" | head -n 1)"; \
-        [[ -n "$POD_NAME" ]] || continue; \
+        ( [[ -n "$POD_NAME" ]] && [[ "$POD_NAME" != "None" ]] ) || continue; \
         POD_IP="$(kubectl get pod -n malcolm "$POD_NAME" -o jsonpath='{.status.podIP}')"; \
-        [[ -n "$POD_IP" ]] || continue; \
+        ( [[ -n "$POD_IP" ]] && [[ "$POD_IP" != "None" ]] ) || continue; \
         NIC_ID="$(aws ec2 describe-network-interfaces --filters "Name=addresses.private-ip-address,Values=$POD_IP" --query "NetworkInterfaces[0].NetworkInterfaceId" --output text)"; \
-        [[ -n "$NIC_ID" ]] || continue; \
+        ( [[ -n "$NIC_ID" ]] && [[ "$NIC_ID" != "None" ]] ) || continue; \
         NIC_GROUPS="$(aws ec2 describe-network-interfaces --network-interface-ids "$NIC_ID" --query "NetworkInterfaces[0].Groups[].GroupId" --output text)"; \
-        [[ -n "$NIC_GROUPS" ]] || continue; \
+        ( [[ -n "$NIC_GROUPS" ]] && [[ "$NIC_GROUPS" != "None" ]] ) || continue; \
         aws ec2 modify-network-interface-attribute \
           --network-interface-id "$NIC_ID" \
           --groups $TCP_SG_ID $NIC_GROUPS; \
@@ -1132,4 +1129,4 @@ Users with [AWS MFA requirements](https://docs.aws.amazon.com/console/iam/self-m
 
 ## <a name="AWSAttribution"></a> Attribution
 
-Amazon Web Services, AWS, Fargate, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.
+Amazon Web Services, AWS, the Powered by AWS logo, Amazon Elastic Kubernetes Service (EKS), and Amazon Machine Image (AMI) are trademarks of Amazon.com, Inc. or its affiliates. The information about providers and services contained in this document is for instructional purposes and does not constitute endorsement or recommendation.

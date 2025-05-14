@@ -61,6 +61,7 @@ SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
 SURICATA_LOG_PATH = os.path.join(SURICATA_LOG_DIR, 'suricata.log')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
 SURICATA_AUTOSURICATA_TAG = 'AUTOSURICATA'
+SURICATA_FAILURES_FORCE_RECONNECT = 5
 
 ZEEK_PATH = "/opt/zeek/bin/zeek-offline"
 ZEEK_EXTRACTOR_MODE_INTERESTING = 'interesting'
@@ -428,87 +429,105 @@ def suricataFileWorker(suricataWorkerArgs):
 
     logger.info(f"{scriptName}[{workerId}]:\tstarted")
 
-    # create a single socket client for this worker
-    try:
-        suricata = SuricataSocketClient(
-            socket_path=socketPath,
-            logger=logger,
-            debug=debug,
-            output_dir=uploadDir,
-        )
-    except Exception as e:
-        logger.error(f"Failed to create Suricata socket client: {e}")
-        suricata = None
+    suricata = None
+    processFailures = 0
 
     # loop forever, or until we're told to shut down
-    while suricata and (not shuttingDown):
-        try:
-            # pull an item from the queue of files that need to be processed
-            fileInfo = newFileQueue.popleft()
-        except IndexError:
-            time.sleep(1)
-            continue
+    while not shuttingDown:
+        if suricata:
+            try:
+                # pull an item from the queue of files that need to be processed
+                fileInfo = newFileQueue.popleft()
+            except IndexError:
+                time.sleep(1)
+                continue
 
-        if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-            # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
-            # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
-            # as Suricata now does its own network capture in Malcolm standalone mode.
-            if (
-                autoSuricata
-                or ((FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS])
-            ) and (
-                forceSuricata
-                or (
-                    not any(
-                        os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
-                        for prefix in ('mnetsniff', 'mtcpdump')
+            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+                # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
+                # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
+                # as Suricata now does its own network capture in Malcolm standalone mode.
+                if (
+                    autoSuricata
+                    or (
+                        (FILE_INFO_DICT_TAGS in fileInfo) and SURICATA_AUTOSURICATA_TAG in fileInfo[FILE_INFO_DICT_TAGS]
                     )
-                )
-            ):
-                if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
-
-                if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
-                    # finalize tags list
-                    fileInfo[FILE_INFO_DICT_TAGS] = (
-                        [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x not in TAGS_NOSHOW)]
-                        if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
-                        else list()
-                    )
-                    if extraTags and isinstance(extraTags, list):
-                        fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
-                    fileInfo[FILE_INFO_DICT_TAGS] = list(dict.fromkeys(fileInfo[FILE_INFO_DICT_TAGS]))
-                    logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
-
-                    # Create unique output directory for this PCAP's suricata output
-                    processTimeUsec = int(round(time.time() * 1000000))
-                    output_dir = os.path.join(
-                        uploadDir, f"suricata-{processTimeUsec}-{workerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])})"
-                    )
-
-                    try:
-                        logger.info(
-                            f"{scriptName}[{workerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
+                ) and (
+                    forceSuricata
+                    or (
+                        not any(
+                            os.path.basename(fileInfo[FILE_INFO_DICT_NAME]).startswith(prefix)
+                            for prefix in ('mnetsniff', 'mtcpdump')
                         )
-                        if suricata.process_pcap(
-                            pcap_file=fileInfo[FILE_INFO_DICT_NAME],
-                            output_dir=output_dir,
-                        ):
-                            # suricata over socket mode doesn't let us know when a PCAP file is done processing,
-                            #   so all we do here is submit it and then we'll let filebeat tail the results
-                            #   as long as it needs to
+                    )
+                ):
+                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
+                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                    if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
+                        # finalize tags list
+                        fileInfo[FILE_INFO_DICT_TAGS] = (
+                            [x for x in fileInfo[FILE_INFO_DICT_TAGS] if (x not in TAGS_NOSHOW)]
+                            if ((FILE_INFO_DICT_TAGS in fileInfo) and autoTag)
+                            else list()
+                        )
+                        if extraTags and isinstance(extraTags, list):
+                            fileInfo[FILE_INFO_DICT_TAGS].extend(extraTags)
+                        fileInfo[FILE_INFO_DICT_TAGS] = list(dict.fromkeys(fileInfo[FILE_INFO_DICT_TAGS]))
+                        logger.info(f"{scriptName}[{workerId}]:\t🔎\t{fileInfo}")
+
+                        # Create unique output directory for this PCAP's suricata output
+                        processTimeUsec = int(round(time.time() * 1000000))
+                        output_dir = os.path.join(
+                            uploadDir,
+                            f"suricata-{processTimeUsec}-{workerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])})",
+                        )
+
+                        try:
                             logger.info(
-                                f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                f"{scriptName}[{workerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
                             )
+                            if suricata.process_pcap(
+                                pcap_file=fileInfo[FILE_INFO_DICT_NAME],
+                                output_dir=output_dir,
+                            ):
+                                # suricata over socket mode doesn't let us know when a PCAP file is done processing,
+                                #   so all we do here is submit it and then we'll let filebeat tail the results
+                                #   as long as it needs to
+                                logger.info(
+                                    f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                )
+                                processFailures = 0
 
-                        else:
+                            else:
+                                logger.error(
+                                    f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                )
+                                processFailures = processFailures + 1
+                        except Exception as e:
                             logger.error(
-                                f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                f"{scriptName}[{workerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}"
                             )
-                    except Exception as e:
-                        logger.error(
-                            f"{scriptName}[{workerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}"
-                        )
+                            processFailures = processFailures + 1
+
+                        if processFailures > SURICATA_FAILURES_FORCE_RECONNECT:
+                            # force a reconnect the next time we come around the loop
+                            suricata = None
+                            processFailures = 0
+
+        else:
+            # create a single socket client for this worker
+            try:
+                suricata = SuricataSocketClient(
+                    socket_path=socketPath,
+                    logger=logger,
+                    debug=debug,
+                    output_dir=uploadDir,
+                )
+            except Exception as e:
+                logger.error(f"Failed to create Suricata socket client, will retry: {e}")
+                suricata = None
+            if not suricata:
+                time.sleep(5)
 
     logger.info(f"{scriptName}[{workerId}]:\tfinished")
 

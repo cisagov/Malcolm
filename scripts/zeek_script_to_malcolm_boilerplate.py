@@ -157,6 +157,17 @@ def IsLoggedFieldNode(Node):
     return False
 
 
+def NestProperties(FlatProps):
+    nested = {}
+    for dotted_key, value in FlatProps.items():
+        parts = dotted_key.split(".")
+        current = nested
+        for part in parts[:-1]:
+            current = current.setdefault(part, {}).setdefault("properties", {})
+        current[parts[-1]] = value
+    return nested
+
+
 ###################################################################################################
 # main
 def main():
@@ -552,18 +563,16 @@ def main():
             )
 
     # output boilerplate OpenSearch index template fields for use in Malcolm
-    mappings = {"template": {"mappings": {"properties": {}}}}
+    flatFields = {}
     with open(args.indexOutFile, "w") as f:
         for record in [r for r in records if len(r["fields"]) > 0]:
             # default to the record's log path, fall back to the slugified record name
             rName = record['path'] if ('path' in record) and record['path'] else record['name']
             for field in [f for f in record['fields'] if f['name'] not in ZEEK_COMMON_FIELDS]:
-                mappings["template"]["mappings"]["properties"][f"zeek.{rName}.{field['name']}"] = {
-                    "type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]
-                }
+                flatFields[f"zeek.{rName}.{field['name']}"] = {"type": ZEEK_TO_INDEX_TEMPLATE_TYPES[field['type']]}
         f.write(
             json.dumps(
-                mappings,
+                {"template": {"mappings": {"properties": NestProperties(flatFields)}}},
                 indent=2,
             )
         )

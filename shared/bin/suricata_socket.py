@@ -9,6 +9,9 @@ import malcolm_utils
 from typing import Optional, Dict, Any, Union
 
 
+SuricataMaxRetriesDefault = 30
+
+
 class SuricataSocketClient:
     """Client for communicating with Suricata's unix socket interface"""
 
@@ -17,7 +20,7 @@ class SuricataSocketClient:
         socket_path: str = '/var/run/suricata/suricata-command.socket',
         logger: Optional[logging.Logger] = None,
         debug: bool = False,
-        max_retries: int = 30,
+        max_retries: int = SuricataMaxRetriesDefault,
         retry_delay: int = 1,
         process_pcap_wait_delay: int = 1,
         output_dir: str = '/var/log/suricata',

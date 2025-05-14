@@ -13,6 +13,7 @@ auditd
 autopoint
 bash
 bash-completion
+bat
 bc
 bridge-utils
 btrfs-progs
@@ -30,12 +31,15 @@ cryptsetup-initramfs
 cryptsetup-run
 debsums
 dialog
+direnv
 dmidecode
 dosfstools
 ebtables
 efibootmgr
 eject
+expect
 fatresize
+fd-find
 file
 findutils
 flex
@@ -144,6 +148,7 @@ pv
 pwgen
 rar
 rename
+ripgrep
 rtkit
 samba-libs
 sed

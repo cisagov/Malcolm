@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:25.04.1
+        image: ghcr.io/idaholab/malcolm/netbox:25.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -77,7 +77,7 @@ spec:
           exec:
             command:
             - /usr/local/bin/container_health.sh
-          initialDelaySeconds: 300
+          initialDelaySeconds: 600
           periodSeconds: 60
           timeoutSeconds: 15
           successThreshold: 1
@@ -96,7 +96,7 @@ spec:
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.04.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true

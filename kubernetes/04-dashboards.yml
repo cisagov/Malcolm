@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: dashboards-container
-        image: ghcr.io/idaholab/malcolm/dashboards:25.04.1
+        image: ghcr.io/idaholab/malcolm/dashboards:25.05.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -57,7 +57,7 @@ spec:
           exec:
             command:
             - /usr/local/bin/container_health.sh
-          initialDelaySeconds: 210
+          initialDelaySeconds: 600
           periodSeconds: 30
           timeoutSeconds: 15
           successThreshold: 1

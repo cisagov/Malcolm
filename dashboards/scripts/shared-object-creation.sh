@@ -257,8 +257,11 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
             -XPUT "$OPENSEARCH_URL_TO_USE/_settings" \
             -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-            -d '{ "index": { "number_of_replicas":"0" } }' || ( cat "$CURL_OUT" && echo )
-
+            -d '{ "index": { "number_of_replicas":0 } }' || ( cat "$CURL_OUT" && echo )
+          curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+            -XPUT "$OPENSEARCH_URL_TO_USE/_cluster/settings" \
+            -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+            -d '{ "persistent": { "cluster.default_number_of_replicas":0 } }' || ( cat "$CURL_OUT" && echo )
         fi
 
         #############################################################################################################################
