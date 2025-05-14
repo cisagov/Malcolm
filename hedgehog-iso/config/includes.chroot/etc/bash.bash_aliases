@@ -12,13 +12,21 @@ alias chmod='chmod --preserve-root'
 alias chown='chown --preserve-root'
 
 #convenience
+alias eza="eza --binary --color auto --group-directories-first --hyperlink --icons auto --mounts --no-permissions --octal-permissions --time-style long-iso"
+alias e="eza --all --long"
+alias ea="eza --all"
+alias el="eza --long"
+alias eld="eza --all --long --only-dirs --sort name"
+alias esize="eza --long --sort size"
+alias et="eza --long --sort modified"
+alias etree="eza --tree"
+alias la=ea
+alias l=e
+alias ll=el
+alias lt=et
+alias lsize=esize
+alias lld=eld
 alias ls="ls --block-size=\"'1\" --color=auto --group-directories-first"
-alias la='ls -A'
-alias l='ls -oah'
-alias ll='ls -l --si --color=auto --group-directories-first'
-alias lt='ls -ltr'
-alias lld='ls -lUd */'
-alias lsize='ls -lSrh'
 alias df='df -Th'
 alias ln='ln -s'
 alias ..='cd ..'
