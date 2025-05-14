@@ -13,6 +13,7 @@ audispd-plugins
 auditd
 bash
 bash-completion
+bat
 bc
 bridge-utils
 btrfs-progs
@@ -32,12 +33,15 @@ cryptsetup-run
 curl
 debsums
 dialog
+direnv
 dmidecode
 dosfstools
 ebtables
 efibootmgr
 eject
+expect
 fatresize
+fd-find
 file
 findutils
 fluent-bit
@@ -128,6 +132,7 @@ pv
 pwgen
 rar
 rename
+ripgrep
 rtkit
 samba-libs
 sed

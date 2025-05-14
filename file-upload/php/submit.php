@@ -46,13 +46,21 @@ function move_file_prefixed($file, $path, $prefix) {
     return rename($file['tmp_name'], $path . DIRECTORY_SEPARATOR . sanitize_tagged_filename($prefix . $file['name']));
 }
 
-
 function handle_file_post($files) {
 
-    foreach($files as $file) {
-        FilePond\move_file($file, UPLOAD_DIR);
+    $new_name_prefix = '';
+    if (isset($_POST["tags"]) && (strlen($_POST["tags"]) > 0)) {
+        $new_name_prefix = $_POST["tags"] . ",USERTAG,";
     }
-
+    if (isset($_POST["site-dropdown"]) && (strlen($_POST["site-dropdown"]) > 0) && ((is_int($_POST["site-dropdown"])) || (ctype_digit($_POST["site-dropdown"])))) {
+        if (strlen($new_name_prefix) > 0) {
+            $new_name_prefix = $new_name_prefix . ',';
+        }
+        $new_name_prefix = $new_name_prefix . 'NBSITEID' . $_POST["site-dropdown"] . ",";
+    }
+    foreach ($files as $file) {
+        move_file_prefixed($file, UPLOAD_DIR, $new_name_prefix);
+    }
 }
 
 function handle_base64_encoded_file_post($files) {

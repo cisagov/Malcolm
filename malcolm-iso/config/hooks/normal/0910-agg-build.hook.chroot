@@ -109,6 +109,19 @@ chmod 755 ./croc
 chown root:root ./croc
 ###
 
+# just
+JUST_RELEASE_URL="https://api.github.com/repos/casey/just/releases/latest"
+mkdir -p /tmp/just
+cd /tmp
+just_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$JUST_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+just_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$just_assets_url" | jq ".[] | select(.browser_download_url | contains(\"x86_64-unknown-linux-musl.tar.gz\")) | .browser_download_url" | tr -d '"')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "${just_tar_url}" | tar xzf - -C ./just
+mv ./just/just /usr/local/bin/just
+chmod 755 /usr/local/bin/just
+chown root:root /usr/local/bin/just
+rm -rf /tmp/just
+###
+
 # stern
 RELEASE_URL="https://api.github.com/repos/stern/stern/releases/latest"
 RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$"

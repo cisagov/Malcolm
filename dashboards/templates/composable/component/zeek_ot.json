@@ -5128,6 +5128,488 @@
                 }
               }
             },
+            "roc_plus_configurable_opcode": {
+              "properties": {
+                "table_number": {
+                  "type": "long"
+                },
+                "starting_table_location": {
+                  "type": "long"
+                },
+                "num_table_locations": {
+                  "type": "long"
+                },
+                "table_version_number": {
+                  "type": "long"
+                }
+              }
+            },
+            "roc_plus_data_request": {
+              "properties": {
+                "io_data_req": {
+                  "type": "keyword"
+                },
+                "io_data": {
+                  "type": "keyword"
+                },
+                "historical_points": {
+                  "type": "keyword"
+                },
+                "periodic_index": {
+                  "type": "long"
+                },
+                "tag": {
+                  "type": "keyword"
+                },
+                "num_alarms": {
+                  "type": "long"
+                },
+                "starting_alarm_log_idx": {
+                  "type": "long"
+                },
+                "current_alarm_log_idx": {
+                  "type": "long"
+                },
+                "alarm_data": {
+                  "type": "keyword"
+                },
+                "num_events_req": {
+                  "type": "long"
+                },
+                "starting_event_log_idx": {
+                  "type": "long"
+                },
+                "num_events_sent": {
+                  "type": "long"
+                },
+                "current_event_log_idx": {
+                  "type": "long"
+                },
+                "event_data": {
+                  "type": "keyword"
+                },
+                "day_requested": {
+                  "type": "long"
+                },
+                "month_requested": {
+                  "type": "long"
+                },
+                "starting_periodic_idx": {
+                  "type": "long"
+                },
+                "num_periodic_entries": {
+                  "type": "long"
+                },
+                "daily_index": {
+                  "type": "long"
+                },
+                "num_daily_entries": {
+                  "type": "long"
+                },
+                "history_point": {
+                  "type": "long"
+                },
+                "periodic_values": {
+                  "type": "keyword"
+                },
+                "daily_values": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_file_transfer": {
+              "properties": {
+                "open_options": {
+                  "type": "keyword"
+                },
+                "file_descriptor": {
+                  "type": "long"
+                },
+                "offset": {
+                  "type": "long"
+                },
+                "file_size": {
+                  "type": "long"
+                },
+                "num_bytes": {
+                  "type": "long"
+                },
+                "additional_files": {
+                  "type": "long"
+                },
+                "total_num_files": {
+                  "type": "long"
+                }
+              }
+            },
+            "roc_plus_historical_min_max_vals": {
+              "properties": {
+                "historical_point_number": {
+                  "type": "long"
+                },
+                "historical_archival_method": {
+                  "type": "long"
+                },
+                "parameter_number": {
+                  "type": "long"
+                },
+                "current_value": {
+                  "type": "long"
+                },
+                "minimum_value_since_contract": {
+                  "type": "long"
+                },
+                "maximum_value_since_contract": {
+                  "type": "long"
+                },
+                "time_of_min_value_occurrence": {
+                  "type": "date"
+                },
+                "time_of_max_value_occurrence": {
+                  "type": "date"
+                },
+                "minimum_value_yesterday": {
+                  "type": "long"
+                },
+                "maximum_value_yesterday": {
+                  "type": "long"
+                },
+                "time_of_yesterday_min_value": {
+                  "type": "date"
+                },
+                "time_of_yesterday_max_value": {
+                  "type": "date"
+                },
+                "value_during_last_completed_period": {
+                  "type": "long"
+                }
+              }
+            },
+            "roc_plus_history_information": {
+              "properties": {
+                "history_segment": {
+                  "type": "long"
+                },
+                "history_segment_index": {
+                  "type": "long"
+                },
+                "current_index": {
+                  "type": "long"
+                },
+                "type_of_history": {
+                  "type": "keyword"
+                },
+                "num_time_periods": {
+                  "type": "long"
+                },
+                "request_timestamps": {
+                  "type": "long"
+                },
+                "requested_history_points": {
+                  "type": "keyword"
+                },
+                "num_configured_points": {
+                  "type": "long"
+                },
+                "configured_points": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_history_point_data": {
+              "properties": {
+                "point_number": {
+                  "type": "long"
+                },
+                "num_values_requested": {
+                  "type": "long"
+                },
+                "num_values_sent": {
+                  "type": "long"
+                },
+                "starting_history_point": {
+                  "type": "long"
+                },
+                "num_history_points": {
+                  "type": "long"
+                },
+                "num_data_elements_sent": {
+                  "type": "long"
+                },
+                "history_timestamps": {
+                  "type": "date"
+                },
+                "history_values": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus": {
+              "properties": {
+                "link_id": {
+                  "type": "keyword"
+                },
+                "num_points": {
+                  "type": "long"
+                },
+                "packet_type": {
+                  "type": "keyword"
+                },
+                "point_type": {
+                  "type": "keyword"
+                },
+                "point_logic_number": {
+                  "type": "long"
+                },
+                "destination_unit": {
+                  "type": "long"
+                },
+                "destination_group": {
+                  "type": "long"
+                },
+                "source_unit": {
+                  "type": "long"
+                },
+                "source_group": {
+                  "type": "long"
+                },
+                "opcode": {
+                  "type": "keyword"
+                },
+                "data": {
+                  "type": "keyword",
+                  "ignore_above": 128,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
+                },
+                "data_length": {
+                  "type": "long"
+                },
+                "lsb_crc": {
+                  "type": "long"
+                },
+                "msb_crc": {
+                  "type": "long"
+                },
+                "command": {
+                  "type": "keyword"
+                },
+                "error_code": {
+                  "type": "keyword"
+                },
+                "error_offset": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_login": {
+              "properties": {
+                "operator_id": {
+                  "type": "keyword"
+                },
+                "access_level": {
+                  "type": "long"
+                },
+                "logout_string": {
+                  "type": "keyword"
+                },
+                "session_key_string": {
+                  "type": "keyword"
+                },
+                "wrapped_session_key": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_peer_to_peer_network_messages": {
+              "properties": {
+                "network_id": {
+                  "type": "long"
+                },
+                "commissioned_index_one_based": {
+                  "type": "long"
+                },
+                "embedded_roc_opcode": {
+                  "type": "long"
+                },
+                "embedded_request_length": {
+                  "type": "long"
+                },
+                "embedded_request_data": {
+                  "type": "keyword"
+                },
+                "embedded_response_length": {
+                  "type": "long"
+                },
+                "embedded_request_data_response": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_realtime_clock": {
+              "properties": {
+                "current_second": {
+                  "type": "long"
+                },
+                "current_minute": {
+                  "type": "long"
+                },
+                "current_hour": {
+                  "type": "long"
+                },
+                "current_day": {
+                  "type": "long"
+                },
+                "current_month": {
+                  "type": "long"
+                },
+                "current_year": {
+                  "type": "long"
+                },
+                "current_day_of_week": {
+                  "type": "keyword"
+                },
+                "timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "roc_plus_single_point_parameters": {
+              "properties": {
+                "num_parameters": {
+                  "type": "long"
+                },
+                "start_parameter_num": {
+                  "type": "long"
+                }
+              }
+            },
+            "roc_plus_store_and_forward": {
+              "properties": {
+                "host_address": {
+                  "type": "long"
+                },
+                "host_group": {
+                  "type": "long"
+                },
+                "dest1_address": {
+                  "type": "long"
+                },
+                "dest1_group": {
+                  "type": "long"
+                },
+                "dest2_address": {
+                  "type": "long"
+                },
+                "dest2_group": {
+                  "type": "long"
+                },
+                "dest3_address": {
+                  "type": "long"
+                },
+                "dest3_group": {
+                  "type": "long"
+                },
+                "dest4_address": {
+                  "type": "long"
+                },
+                "dest4_group": {
+                  "type": "long"
+                },
+                "desired_opcode": {
+                  "type": "long"
+                },
+                "num_data_bytes": {
+                  "type": "long"
+                }
+              }
+            },
+            "roc_plus_sys_cfg": {
+              "properties": {
+                "system_mode": {
+                  "type": "keyword"
+                },
+                "port_number": {
+                  "type": "long"
+                },
+                "security_access_mode": {
+                  "type": "long"
+                },
+                "logical_compatability_status": {
+                  "type": "keyword"
+                },
+                "opcode_revision": {
+                  "type": "keyword"
+                },
+                "subtype": {
+                  "type": "keyword"
+                },
+                "type_of_roc": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_time_period_history_points": {
+              "properties": {
+                "timestamp_for_index": {
+                  "type": "date"
+                },
+                "history_point_values": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_transaction_history": {
+              "properties": {
+                "segment": {
+                  "type": "long"
+                },
+                "transaction_offset": {
+                  "type": "long"
+                },
+                "transaction_number": {
+                  "type": "long"
+                },
+                "data_offset": {
+                  "type": "long"
+                },
+                "num_transactions": {
+                  "type": "long"
+                },
+                "more_data": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "keyword"
+                },
+                "payload_size": {
+                  "type": "long"
+                },
+                "transaction_num": {
+                  "type": "keyword"
+                },
+                "date_created": {
+                  "type": "keyword"
+                },
+                "msg_data_size": {
+                  "type": "long"
+                },
+                "data_type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "roc_plus_user_defined_info": {
+              "properties": {
+                "start_point": {
+                  "type": "long"
+                }
+              }
+            },
             "s7comm": {
               "properties": {
                 "error_class": {
