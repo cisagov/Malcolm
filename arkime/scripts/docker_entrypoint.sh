@@ -257,7 +257,7 @@ fi
 if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
   sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
-  if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
+  if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]] && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/etc/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi

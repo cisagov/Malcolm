@@ -463,6 +463,12 @@ services:
         create_host_path: false
       source: ./pcap
       target: /data/pcap
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./arkime/etc/wise.ini
+      target: /opt/arkime/etc/wise.ini
+      read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 90s
