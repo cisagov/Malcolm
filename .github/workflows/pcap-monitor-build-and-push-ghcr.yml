@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - roles
     paths:
       - 'pcap-monitor/**'
       - 'Dockerfiles/pcap-monitor.Dockerfile'

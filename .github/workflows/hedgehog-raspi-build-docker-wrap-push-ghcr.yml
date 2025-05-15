@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - roles
     paths:
       - 'hedgehog-iso/**'
       - 'hedgehog-raspi/**'

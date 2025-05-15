@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - roles
     paths:
       - 'pcap-capture/**'
       - 'Dockerfiles/pcap-capture.Dockerfile'

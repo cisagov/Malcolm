@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - roles
     paths:
       - 'Dockerfiles/postgresql.Dockerfile'
       - 'shared/bin/*'
