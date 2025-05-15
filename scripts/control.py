@@ -2859,7 +2859,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.04.1"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.05.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3336,9 +3336,11 @@ def main():
                 runProfileSrc = f'exception ({e})'
         elif args.debug:
             runProfileSrc = 'specified'
-        if not args.composeProfile:
+        if (not args.composeProfile) or (
+            (args.composeProfile not in (PROFILE_MALCOLM, PROFILE_HEDGEHOG)) and str2bool(args.composeProfile)
+        ):
             args.composeProfile = PROFILE_MALCOLM
-            runProfileSrc = 'default'
+            runProfileSrc = runProfileSrc or 'default'
         if args.debug:
             eprint(f"Run profile ({runProfileSrc}): {args.composeProfile}")
 

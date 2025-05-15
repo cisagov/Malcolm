@@ -1013,7 +1013,10 @@ def lookup_prefixes(
   _query = { :contains => ip_str,
              :offset => 0,
              :limit => @page_size }
-  _query[:site_id] = site_id if (site_id.is_a?(Integer) && (site_id > 0))
+  if (site_id.is_a?(Integer) && (site_id > 0))
+    _query[:scope_type] = "dcim.site"
+    _query[:scope_id] = site_id
+  end
   begin
     while true do
       if (_prefixes_response = nb.get('ipam/prefixes/', _query).body) &&
@@ -1316,7 +1319,8 @@ def autopopulate_prefixes(
     _prefix_post = { :prefix => _new_prefix_name,
                      :description => _new_prefix_name,
                      :tags => _autopopulate_tags,
-                     :site => site_id,
+                     :scope_type => "dcim.site",
+                     :scope_id => site_id,
                      :status => autopopulate_default_status }
     begin
       _new_prefix_create_response = nb.post('ipam/prefixes/', _prefix_post.to_json, @nb_headers).body
@@ -1326,7 +1330,7 @@ def autopopulate_prefixes(
       then
           _prefix_data = { :name => _new_prefix_name,
                            :id => _new_prefix_create_response.fetch(:id, nil),
-                           :site => ((_site = _new_prefix_create_response.fetch(:site, nil)) && _site&.has_key?(:name)) ? _site[:name] : _site&.fetch(:display, nil),
+                           :site => (((_new_prefix_create_response.fetch(:scope_type, nil) == "dcim.site") && (_scope = _new_prefix_create_response.fetch(:scope, nil))) && _scope&.has_key?(:name)) ? _scope[:name] : _scope&.fetch(:display, nil),
                            :tenant => ((_tenant = _new_prefix_create_response.fetch(:tenant, nil)) && _tenant&.has_key?(:name)) ? _tenant[:name] : _tenant&.fetch(:display, nil),
                            :url => _new_prefix_create_response.fetch(:url, nil),
                            :tags => _new_prefix_create_response.fetch(:tags, nil),

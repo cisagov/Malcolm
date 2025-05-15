@@ -47,6 +47,7 @@ global disable_ics_opcua_binary = (getenv("ZEEK_DISABLE_ICS_OPCUA_BINARY") == tr
 global disable_ics_modbus = (getenv("ZEEK_DISABLE_ICS_MODBUS") == true_regex) ? T : F;
 global disable_ics_profinet = (getenv("ZEEK_DISABLE_ICS_PROFINET") == true_regex) ? T : F;
 global disable_ics_profinet_io_cm = (getenv("ZEEK_DISABLE_ICS_PROFINET_IO_CM") == true_regex) ? T : F;
+global disable_ics_roc_plus = (getenv("ZEEK_DISABLE_ICS_ROC_PLUS") == true_regex) ? T : F;
 global disable_ics_s7comm = (getenv("ZEEK_DISABLE_ICS_S7COMM") == true_regex) ? T : F;
 global disable_ics_synchrophasor = (getenv("ZEEK_DISABLE_ICS_SYNCHROPHASOR") == true_regex) ? T : F;
 
@@ -200,6 +201,10 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_profinet_io_cm) {
     Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_SPICY_PROFINET_IO_CM);
+  }
+  if (disable_ics_all || disable_ics_roc_plus) {
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_ROC_PLUS_TCP);
+    Spicy::disable_protocol_analyzer(Analyzer::ANALYZER_ROC_PLUS_UDP);
   }
   if (disable_ics_all || disable_ics_s7comm) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_S7COMM_TCP);

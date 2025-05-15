@@ -36,7 +36,7 @@ ADD https://github.com/lguillaud/osd_transform_vis/releases/download/$OSD_TRANSF
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     yum upgrade -y && \
-    yum install -y curl-minimal psmisc findutils util-linux jq openssl rsync python3 zip unzip && \
+    yum install -y curl-minimal psmisc findutils util-linux jq openssl rsync procps-ng python3 zip unzip && \
     yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
     # Malcolm manages authentication and encryption via NGINX reverse proxy

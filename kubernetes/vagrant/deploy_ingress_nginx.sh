@@ -24,7 +24,7 @@ AWS_EXPOSE_ANNOTATIONS=(
     "{\"service.beta.kubernetes.io/aws-load-balancer-nlb-target-type\":\"instance\"}"
     "{\"service.beta.kubernetes.io/aws-load-balancer-scheme\":\"internet-facing\"}"
 )
-INGRESS_NGINX_CONTROLLER_VERSION=1.11.1
+INGRESS_NGINX_CONTROLLER_VERSION=1.12.2
 KUBECONFIG=
 WORKDIR=
 DRY_RUN=none
@@ -135,7 +135,7 @@ pushd "${WORKDIR}" >/dev/null 2>&1
 INGRESS_NGINX_DEPLOY_FILE_ORIG=ingress-nginx-orig.yaml
 INGRESS_NGINX_DEPLOY_FILE_NEW=ingress-nginx-new.yaml
 
-curl -fsSL -o "${INGRESS_NGINX_DEPLOY_FILE_ORIG}" "https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v${INGRESS_NGINX_CONTROLLER_VERSION}/deploy/static/provider/${INGRESS_NGINX_PROVIDER}/deploy.yaml"
+curl -fsSL -o "${INGRESS_NGINX_DEPLOY_FILE_ORIG}" "https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/tags/controller-v${INGRESS_NGINX_CONTROLLER_VERSION}/deploy/static/provider/${INGRESS_NGINX_PROVIDER}/deploy.yaml"
 yq --split-exp '"deploy_" + $index' --no-doc "${INGRESS_NGINX_DEPLOY_FILE_ORIG}"
 
 readarray -d '' DEPLOY_FILES_SPLIT < <(printf '%s\0' deploy_*.yml | sort -zV)
