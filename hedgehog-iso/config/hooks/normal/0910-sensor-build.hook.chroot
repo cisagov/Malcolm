@@ -267,6 +267,15 @@ chown root:root /usr/local/bin/eza
 rm -rf /tmp/eza
 ###
 
+# terminal font
+mkdir -p /usr/share/fonts/truetype/hack
+cd /usr/share/fonts/truetype/hack
+curl -sSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz | tar xfJ -
+chmod 755 /usr/share/fonts/truetype/hack
+chmod 644 /usr/share/fonts/truetype/hack/*
+fc-cache -f -v
+###
+
 # update clamav signatures
 freshclam --stdout --quiet --no-warnings
 
