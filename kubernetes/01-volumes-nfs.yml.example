@@ -3,7 +3,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: pcap-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -46,7 +45,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: zeek-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -89,7 +87,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: suricata-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -132,7 +129,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: config-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -175,7 +171,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: runtime-logs-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -218,7 +213,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: opensearch-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:
@@ -261,7 +255,6 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: opensearch-backup-volume
-  namespace: malcolm
   labels:
     namespace: malcolm
 spec:

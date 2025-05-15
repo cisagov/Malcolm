@@ -109,6 +109,41 @@ chmod 755 ./croc
 chown root:root ./croc
 ###
 
+# just
+JUST_RELEASE_URL="https://api.github.com/repos/casey/just/releases/latest"
+mkdir -p /tmp/just
+cd /tmp
+just_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$JUST_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+just_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$just_assets_url" | jq ".[] | select(.browser_download_url | contains(\"x86_64-unknown-linux-musl.tar.gz\")) | .browser_download_url" | tr -d '"')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "${just_tar_url}" | tar xzf - -C ./just
+mv ./just/just /usr/local/bin/just
+chmod 755 /usr/local/bin/just
+chown root:root /usr/local/bin/just
+rm -rf /tmp/just
+###
+
+# eza
+EZA_RELEASE_URL="https://api.github.com/repos/eza-community/eza/releases/latest"
+mkdir -p /tmp/eza
+cd /tmp
+eza_assets_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$EZA_RELEASE_URL" | jq '.assets_url' | tr -d '"')"
+eza_tar_url="$(curl "${GITHUB_API_CURL_ARGS[@]}" "$eza_assets_url" | jq ".[] | select(.browser_download_url | contains(\"x86_64-unknown-linux-gnu.tar.gz\")) | .browser_download_url" | tr -d '"')"
+curl "${GITHUB_API_CURL_ARGS[@]}" "${eza_tar_url}" | tar xzf - -C ./eza
+mv ./eza/eza /usr/local/bin/eza
+chmod 755 /usr/local/bin/eza
+chown root:root /usr/local/bin/eza
+rm -rf /tmp/eza
+###
+
+# terminal font
+mkdir -p /usr/share/fonts/truetype/hack
+cd /usr/share/fonts/truetype/hack
+curl -sSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz | tar xfJ -
+chmod 755 /usr/share/fonts/truetype/hack
+chmod 644 /usr/share/fonts/truetype/hack/*
+fc-cache -f -v
+###
+
 # stern
 RELEASE_URL="https://api.github.com/repos/stern/stern/releases/latest"
 RELEASE_FILE_REGEX="_linux_amd64\\\.tar\\\.gz$"

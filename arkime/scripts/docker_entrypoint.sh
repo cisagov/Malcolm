@@ -17,7 +17,9 @@ ARKIME_FREESPACEG=${ARKIME_FREESPACEG:-"10%"}
 ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-"daily"}
 ARKIME_QUERY_ALL_INDICES=${ARKIME_QUERY_ALL_INDICES:-"false"}
 ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}
+ARKIME_NETWORK_INDEX_PATTERN=${ARKIME_NETWORK_INDEX_PATTERN:-arkime_sessions3-*}
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-}
+
 ARKIME_DEBUG_LEVEL=${ARKIME_DEBUG_LEVEL:-0}
 CAPTURE_INTERFACE=${PCAP_IFACE:-}
 LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
@@ -67,7 +69,10 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     sed -i "s/^\(rotateIndex=\).*/\1"${ARKIME_ROTATE_INDEX}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(queryAllIndices=\).*/\1"${ARKIME_QUERY_ALL_INDICES}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(spiDataMaxIndices=\).*/\1"${ARKIME_SPI_DATA_MAX_INDICES}"/" "${ARKIME_CONFIG_FILE}"
-    sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "${MALCOLM_NETWORK_INDEX_PATTERN}" ]] && \
+      [[ "${MALCOLM_NETWORK_INDEX_PATTERN}" != "${ARKIME_NETWORK_INDEX_PATTERN}" ]] && \
+      sed -i "s/^\(queryExtraIndices=\).*/\1"${MALCOLM_NETWORK_INDEX_PATTERN}"/" "${ARKIME_CONFIG_FILE}" || \
+      sed -i "s/^\(queryExtraIndices=\).*/\1/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(debug=\).*/\1"${ARKIME_DEBUG_LEVEL}"/" "${ARKIME_CONFIG_FILE}"
     sed -i "s/^\(viewPort=\).*/\1"${VIEWER_PORT}"/" "${ARKIME_CONFIG_FILE}"
     # note: when setting the node name, the viewer_service.sh script needs to match
