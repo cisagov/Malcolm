@@ -85,7 +85,7 @@ MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPEL
 # (I already wrote python code to do this, so sue me)
 OPENSSL_USER=
 OPENSSL_PASSWORD=
-if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
     OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"

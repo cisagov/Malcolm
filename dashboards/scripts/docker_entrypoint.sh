@@ -14,7 +14,7 @@ if [[ -f "$ORIG_YML" ]]; then
     # get the new username/password from the curl file (I already wrote python code to do this, so sue me)
     OPENSSL_USER=
     OPENSSL_PASSWORD=
-    if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+    if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
         pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
         NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
         OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
@@ -31,13 +31,11 @@ if [[ -f "$ORIG_YML" ]]; then
         sed -i "s/_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_/$OPENSSL_PASSWORD/g" "$FINAL_YML" || \
         sed -i '/_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_/d' "$FINAL_YML"
 
-    [[ "$OPENSEARCH_SSL_CERTIFICATE_VERIFICATION" == "true" ]] && \
+    ( [[ "$OPENSEARCH_SSL_CERTIFICATE_VERIFICATION" == "true" ]] && [[ "$OPENSEARCH_PRIMARY" != "opensearch-local" ]] ) && \
         SSL_VERIFICATION_MODE=certificate || \
         SSL_VERIFICATION_MODE=none
 
-    ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && \
-        sed -i "s/_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_/$SSL_VERIFICATION_MODE/g" "$FINAL_YML" || \
-        sed -i '/_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_/d' "$FINAL_YML"
+    sed -i "s/_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_/$SSL_VERIFICATION_MODE/g" "$FINAL_YML"
 
     chmod 600 "$FINAL_YML"
 fi

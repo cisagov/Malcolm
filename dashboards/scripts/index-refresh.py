@@ -163,9 +163,7 @@ def main():
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
     )
-    opensearchCreds = (
-        malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
-    )
+    opensearchCreds = malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile)
 
     args.netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(args.netboxUrl, '/'), '/api')
     if netboxEmbedded := (args.netboxUrl == NETBOX_URL_DEFAULT):

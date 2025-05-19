@@ -22,7 +22,8 @@ OUTPUT_PATH=
 SUBJECT=
 DN_SERVER=
 DN_CLIENT=
-while getopts 'vno:s:d:c:' OPTION; do
+SKIP_DHPARAM_GEN=0
+while getopts 'vnpo:s:d:c:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -31,6 +32,10 @@ while getopts 'vno:s:d:c:' OPTION; do
 
     n)
       INTERACTIVE_SHELL=no
+      ;;
+
+    p)
+      SKIP_DHPARAM_GEN=1
       ;;
 
     o)
@@ -327,8 +332,10 @@ EOF
   # -----------------------------------------------
 
   # dhparam ------------------------------
-  echo "Generating dhparam..."
-  openssl dhparam -out dhparam.pem 2048
+  if [[ "${SKIP_DHPARAM_GEN}" != 1 ]]; then
+    echo "Generating dhparam..."
+    openssl dhparam -out dhparam.pem 2048
+  fi
   # -----------------------------------------------
 
   if [[ ! -d "$OUTPUT_PATH" ]] && [[ ! -e "$OUTPUT_PATH" ]]; then

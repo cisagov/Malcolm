@@ -209,11 +209,7 @@ opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) o
     opensearchUrl == 'https://opensearch:9200'
 )
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
-opensearchCreds = (
-    malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
-    if (not opensearchLocal)
-    else defaultdict(lambda: None)
-)
+opensearchCreds = malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
 
 DatabaseInitArgs = {}
 if urlparse(opensearchUrl).scheme == 'https':

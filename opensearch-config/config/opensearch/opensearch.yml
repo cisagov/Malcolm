@@ -10,8 +10,6 @@ plugins.security.ssl.http.enabled: true
 plugins.security.ssl.http.pemcert_filepath: /usr/share/opensearch/config/certs/server.crt
 plugins.security.ssl.http.pemkey_filepath: /usr/share/opensearch/config/certs/server.key
 plugins.security.ssl.http.pemtrustedcas_filepath: /usr/share/opensearch/config/certs/ca.crt
-plugins.security.ssl.http.enforce_hostname_verification: false
-plugins.security.ssl.http.resolve_hostname: false
 plugins.security.ssl.transport.enabled: true
 plugins.security.ssl.transport.pemcert_filepath: /usr/share/opensearch/config/certs/server.crt
 plugins.security.ssl.transport.pemkey_filepath: /usr/share/opensearch/config/certs/server.key

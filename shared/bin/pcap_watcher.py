@@ -448,7 +448,7 @@ def main():
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
     )
-    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
+    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile)
 
     if not args.opensearchUrl:
         if opensearchIsLocal:

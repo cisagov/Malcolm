@@ -35,7 +35,7 @@ EOF
 fi
 
 [[ -x /usr/local/bin/self_signed_key_gen.sh ]] && \
-  /usr/local/bin/self_signed_key_gen.sh -n \
+  /usr/local/bin/self_signed_key_gen.sh -n -p \
     -o "${OPENSEARCH_SECURITY_CERTS_DIR}" \
     -s '/CN=opensearch/OU=ca/O=Malcolm/ST=ID/C=US' \
     -d '/CN=opensearch-node/OU=node/O=Malcolm/ST=ID/C=US' \

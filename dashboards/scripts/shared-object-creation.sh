@@ -192,17 +192,17 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
     if [[ "$LOOP" == "primary" ]]; then
       OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"https://opensearch:9200"}
       OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-      if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
-        OPENSEARCH_LOCAL=false
+      if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
         CURL_CONFIG_PARAMS=(
           --config
           "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE"
           )
       else
-        OPENSEARCH_LOCAL=true
         CURL_CONFIG_PARAMS=()
-
       fi
+      ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && \
+        OPENSEARCH_LOCAL=false || \
+        OPENSEARCH_LOCAL=true
       DATASTORE_TYPE="$(echo "$OPENSEARCH_PRIMARY" | cut -d- -f1)"
 
     elif [[ "$LOOP" == "secondary" ]] && ( [[ "$OPENSEARCH_SECONDARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]] ) && [[ -n "${OPENSEARCH_SECONDARY_URL:-""}" ]]; then

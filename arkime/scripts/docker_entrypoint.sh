@@ -30,34 +30,33 @@ MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"https://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
-if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
-    # need to build the opensearch URL (including username/password) by combining
-    # OPENSEARCH_URL and parameters from OPENSEARCH_CREDS_CONFIG_FILE
 
-    # get the new username/password from the curl file (I already wrote python code to do this, so sue me)
-    pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
-    NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
-    NEW_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
-    NEW_PASSWORD="$(urlencodeall "$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)")"
-    popd >/dev/null 2>&1
+# need to build the opensearch URL (including username/password) by combining
+# OPENSEARCH_URL and parameters from OPENSEARCH_CREDS_CONFIG_FILE
 
-    # extract the other stuff from OPENSEARCH_URL_FINAL
-    # extract the protocol
-    PROTOCOL=$(echo "$OPENSEARCH_URL_FINAL" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
-    # Remove the PROTOCOL
-    URL_NO_PROTOCOL=$(echo "${OPENSEARCH_URL_FINAL/$PROTOCOL/}")
-    # Use tr: Make the PROTOCOL lower-case for easy string compare
-    PROTOCOL=$(echo "$PROTOCOL" | tr '[:upper:]' '[:lower:]')
+# get the new username/password from the curl file (I already wrote python code to do this, so sue me)
+pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
+NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
+NEW_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
+NEW_PASSWORD="$(urlencodeall "$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)")"
+popd >/dev/null 2>&1
 
-    # Extract the old user and password (if any)
-    USERPASS=$(echo "$URL_NO_PROTOCOL" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
+# extract the other stuff from OPENSEARCH_URL_FINAL
+# extract the protocol
+PROTOCOL=$(echo "$OPENSEARCH_URL_FINAL" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
+# Remove the PROTOCOL
+URL_NO_PROTOCOL=$(echo "${OPENSEARCH_URL_FINAL/$PROTOCOL/}")
+# Use tr: Make the PROTOCOL lower-case for easy string compare
+PROTOCOL=$(echo "$PROTOCOL" | tr '[:upper:]' '[:lower:]')
 
-    # Extract the host
-    HOSTPORT=$(echo "${URL_NO_PROTOCOL/$USERPASS@/}" | cut -d"/" -f1)
+# Extract the old user and password (if any)
+USERPASS=$(echo "$URL_NO_PROTOCOL" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
 
-    # smoosh them all together for the new URL
-    OPENSEARCH_URL_FINAL="${PROTOCOL}${NEW_USER}:${NEW_PASSWORD}@${HOSTPORT}"
-fi
+# Extract the host
+HOSTPORT=$(echo "${URL_NO_PROTOCOL/$USERPASS@/}" | cut -d"/" -f1)
+
+# smoosh them all together for the new URL
+OPENSEARCH_URL_FINAL="${PROTOCOL}${NEW_USER}:${NEW_PASSWORD}@${HOSTPORT}"
 
 # iff config.ini does not exist but config.orig.ini does, use it as a basis and modify based on env. vars
 if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.ini ]]; then
