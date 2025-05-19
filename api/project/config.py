@@ -38,7 +38,7 @@ class Config(object):
     )
     OPENSEARCH_PRIMARY = f"{os.getenv('OPENSEARCH_PRIMARY', 'opensearch-local')}"
     OPENSEARCH_SSL_CERTIFICATE_VERIFICATION = f"{os.getenv('OPENSEARCH_SSL_CERTIFICATE_VERIFICATION', 'false')}"
-    OPENSEARCH_URL = f"{os.getenv('OPENSEARCH_URL', 'http://opensearch:9200')}"
+    OPENSEARCH_URL = f"{os.getenv('OPENSEARCH_URL', 'https://opensearch:9200')}"
     PCAP_MONITOR_HOST = f"{os.getenv('PCAP_MONITOR_HOST', 'pcap-monitor')}"
     PCAP_TOPIC_PORT = int(f"{os.getenv('PCAP_TOPIC_PORT', '30441')}")
     RESULT_SET_LIMIT = int(f"{os.getenv('RESULT_SET_LIMIT', '500')}")

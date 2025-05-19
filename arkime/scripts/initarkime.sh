@@ -3,7 +3,7 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
-OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
+OPENSEARCH_URL=${OPENSEARCH_URL:-"https://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_SSL_CERTIFICATE_VERIFICATION=${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION:-"false"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}

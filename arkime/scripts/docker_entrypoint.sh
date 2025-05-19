@@ -27,7 +27,7 @@ VIEWER_PORT=${ARKIME_VIEWER_PORT:-8005}
 NODE_NAME=${PCAP_NODE_NAME:-malcolm}
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
-OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"http://opensearch:9200"}
+OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"https://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 OPENSEARCH_CREDS_CONFIG_FILE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
 if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then

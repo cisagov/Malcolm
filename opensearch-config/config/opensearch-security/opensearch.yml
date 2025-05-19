@@ -1,10 +1,10 @@
 plugins.security.nodes_dn:
-  - "CN=*.example.com, OU=SSL, O=Test, L=Test, C=DE"
+  - "CN=opensearch-node, OU=node, O=Malcolm, ST=ID, C=US"
 
 plugins.security.nodes_dn_dynamic_config_enabled: false
 
 plugins.security.authcz.admin_dn:
-  - "CN=kirk,OU=client,O=client,l=tEst, C=De"
+  - "CN=opensearch-admin, OU=admin, O=Malcolm, ST=ID, C=US"
 
 plugins.security.roles_mapping_resolution: MAPPING_ONLY
 

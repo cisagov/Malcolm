@@ -612,7 +612,7 @@ class Installer(object):
             raise Exception(f'"{args.opensearchSecondaryMode}" is not valid for --opensearch-secondary')
 
         opensearchPrimaryMode = DatabaseMode.OpenSearchLocal
-        opensearchPrimaryUrl = 'http://opensearch:9200'
+        opensearchPrimaryUrl = 'https://opensearch:9200'
         opensearchPrimarySslVerify = False
         opensearchPrimaryLabel = 'local OpenSearch'
         opensearchSecondaryMode = DatabaseMode.DatabaseUnset

@@ -190,7 +190,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
   for LOOP in primary secondary; do
 
     if [[ "$LOOP" == "primary" ]]; then
-      OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"http://opensearch:9200"}
+      OPENSEARCH_URL_TO_USE=${OPENSEARCH_URL:-"https://opensearch:9200"}
       OPENSEARCH_CREDS_CONFIG_FILE_TO_USE=${OPENSEARCH_CREDS_CONFIG_FILE:-"/var/local/curlrc/.opensearch.primary.curlrc"}
       if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE_TO_USE" ]]; then
         OPENSEARCH_LOCAL=false

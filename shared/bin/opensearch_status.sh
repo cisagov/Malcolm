@@ -42,7 +42,7 @@ while getopts 'vwt:l:' OPTION; do
 done
 shift "$(($OPTIND -1))"
 
-OPENSEARCH_URL=${OPENSEARCH_URL:-"http://opensearch:9200"}
+OPENSEARCH_URL=${OPENSEARCH_URL:-"https://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
 MALCOLM_NETWORK_INDEX_PATTERN=${MALCOLM_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}
 ARKIME_NETWORK_INDEX_PATTERN=${ARKIME_NETWORK_INDEX_PATTERN:-"arkime_sessions3-*"}

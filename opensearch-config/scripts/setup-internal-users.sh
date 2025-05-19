@@ -35,4 +35,17 @@ EOF
 fi
 
 [[ -x /usr/local/bin/self_signed_key_gen.sh ]] && \
-  /usr/local/bin/self_signed_key_gen.sh -n -o "${OPENSEARCH_SECURITY_CERTS_DIR}" >/dev/null 2>&1
+  /usr/local/bin/self_signed_key_gen.sh -n \
+    -o "${OPENSEARCH_SECURITY_CERTS_DIR}" \
+    -s '/CN=opensearch/OU=ca/O=Malcolm/ST=ID/C=US' \
+    -d '/CN=opensearch-node/OU=node/O=Malcolm/ST=ID/C=US' \
+    -c '/CN=opensearch-admin/OU=admin/O=Malcolm/ST=ID/C=US' >/dev/null 2>&1
+
+# /usr/share/opensearch/plugins/opensearch-security/tools/securityadmin.sh \
+#   -cd /usr/share/opensearch/config/opensearch-security \
+#   -icl \
+#   -nhnv \
+#   -cacert /usr/share/opensearch/config/certs/ca.crt \
+#   -cert /usr/share/opensearch/config/certs/client.crt \
+#   -key /usr/share/opensearch/config/certs/client.key \
+#   -h opensearch

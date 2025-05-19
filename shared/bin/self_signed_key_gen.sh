@@ -19,7 +19,10 @@ else
 fi
 
 OUTPUT_PATH=
-while getopts 'vno:' OPTION; do
+SUBJECT=
+DN_SERVER=
+DN_CLIENT=
+while getopts 'vno:s:d:c:' OPTION; do
   case "$OPTION" in
     v)
       VERBOSE_FLAG="-v"
@@ -34,8 +37,20 @@ while getopts 'vno:' OPTION; do
       OUTPUT_PATH="$OPTARG"
       ;;
 
+    s)
+      SUBJECT="$OPTARG"
+      ;;
+
+    d)
+      DN_SERVER="$OPTARG"
+      ;;
+
+    c)
+      DN_CLIENT="$OPTARG"
+      ;;
+
     ?)
-      echo "script usage: $(basename $0) [-v (verbose)] [-n (non-interactive)]" >&2
+      echo "script usage: $(basename $0) [-v (verbose)] [-n (non-interactive)] [-o <output-path>] [-s <subject>] [-d <server distinguished name>] [-c <client distinguished name>]" >&2
       exit 1
       ;;
   esac
@@ -95,13 +110,15 @@ if [ -d "$WORKDIR" ]; then
   # ca -------------------------------
   echo "Generating CA certificate and key..."
 
-  SUBJECT_DEFAULT="/C=US/ST=$(randomStateAbbr)/O=ACME/OU=R&D"
-  [[ $INTERACTIVE_SHELL == "yes" ]] && SUBJECT="" || SUBJECT=$SUBJECT_DEFAULT
-  while [[ -z $SUBJECT ]]; do
-    echo ""
-    read -p "CA subject [$SUBJECT_DEFAULT]? " SUBJECT
-    SUBJECT=${SUBJECT:-$SUBJECT_DEFAULT}
-  done
+  if [[ -z "${SUBJECT}" ]]; then
+    SUBJECT_DEFAULT="/C=US/ST=$(randomStateAbbr)/O=ACME/OU=R&D"
+    [[ $INTERACTIVE_SHELL == "yes" ]] && SUBJECT="" || SUBJECT=$SUBJECT_DEFAULT
+    while [[ -z $SUBJECT ]]; do
+      echo ""
+      read -p "CA subject [$SUBJECT_DEFAULT]? " SUBJECT
+      SUBJECT=${SUBJECT:-$SUBJECT_DEFAULT}
+    done
+  fi
   openssl genrsa -out ca.key 2048
   openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -subj "$SUBJECT" -out ca.crt
 
@@ -142,6 +159,33 @@ emailAddress_max     = 40
 keyUsage = keyEncipherment, dataEncipherment
 extendedKeyUsage = serverAuth
 EOF
+
+  elif [[ -n "${DN_SERVER}" ]]; then
+    declare -A DN_MAP
+    IFS='/' read -ra DN_PARTS <<< "${DN_SERVER#/}"  # remove leading slash and split
+    for PART in "${DN_PARTS[@]}"; do
+        key="${PART%%=*}"
+        value="${PART#*=}"
+        DN_MAP[$key]="$value"
+    done
+    cat <<EOF > "server.conf"
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = $INTERACTIVE_SHELL
+
+[req_distinguished_name]
+countryName = ${DN_MAP[C]:-US}
+stateOrProvinceName = ${DN_MAP[ST]:-$(randomStateFull)}
+0.organizationName = ${DN_MAP[O]:-ACME}
+organizationalUnitName = ${DN_MAP[OU]:-R&D}
+commonName = ${DN_MAP[CN]:-malcolm}
+
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+EOF
+
   else
     cat <<EOF > "server.conf"
 [req]
@@ -154,6 +198,7 @@ countryName                 = US
 stateOrProvinceName         = $(randomStateFull)
 0.organizationName          = ACME
 organizationalUnitName      = R&D
+commonName                  = malcolm
 
 [v3_req]
 keyUsage = keyEncipherment, dataEncipherment
@@ -214,6 +259,41 @@ extendedKeyUsage = serverAuth, clientAuth
 keyUsage = keyEncipherment, dataEncipherment
 extendedKeyUsage = serverAuth, clientAuth
 EOF
+
+  elif [[ -n "${DN_CLIENT}" ]]; then
+    declare -A DN_MAP
+    IFS='/' read -ra DN_PARTS <<< "${DN_CLIENT#/}"  # remove leading slash and split
+    for PART in "${DN_PARTS[@]}"; do
+        key="${PART%%=*}"
+        value="${PART#*=}"
+        DN_MAP[$key]="$value"
+    done
+    cat <<EOF > "client.conf"
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+prompt = $INTERACTIVE_SHELL
+
+[req_distinguished_name]
+countryName = ${DN_MAP[C]:-US}
+stateOrProvinceName = ${DN_MAP[ST]:-$(randomStateFull)}
+0.organizationName = ${DN_MAP[O]:-ACME}
+organizationalUnitName = ${DN_MAP[OU]:-R&D}
+commonName = ${DN_MAP[CN]:-malcolm}
+
+[usr_cert]
+basicConstraints = CA:FALSE
+nsCertType = client, server
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
+
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+EOF
+
   else
     cat <<EOF > "client.conf"
 [req]

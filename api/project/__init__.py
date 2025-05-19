@@ -206,7 +206,7 @@ zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
 zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
 
 opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
-    opensearchUrl == 'http://opensearch:9200'
+    opensearchUrl == 'https://opensearch:9200'
 )
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = (
