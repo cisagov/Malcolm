@@ -1,0 +1,7 @@
+---
+_meta:
+  type: "allowlist"
+  config_version: 2
+
+config:
+  enabled: false

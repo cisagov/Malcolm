@@ -1,0 +1,13 @@
+plugins.security.nodes_dn:
+  - "CN=*.example.com, OU=SSL, O=Test, L=Test, C=DE"
+
+plugins.security.nodes_dn_dynamic_config_enabled: false
+
+plugins.security.authcz.admin_dn:
+  - "CN=kirk,OU=client,O=client,l=tEst, C=De"
+
+plugins.security.roles_mapping_resolution: MAPPING_ONLY
+
+plugins.security.audit.enable_rest: false
+plugins.security.audit.enable_transport: false
+plugins.security.audit.type: internal_opensearch

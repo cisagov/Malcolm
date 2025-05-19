@@ -1,0 +1,29 @@
+---
+_meta:
+  type: "rolesmapping"
+  config_version: 2
+
+all_access:
+  reserved: false
+  backend_roles:
+  - "admin"
+
+logstash:
+  reserved: false
+  backend_roles:
+  - "logstash"
+
+kibana_user:
+  reserved: false
+  backend_roles:
+  - "kibanauser"
+
+readall:
+  reserved: false
+  backend_roles:
+  - "readall"
+
+kibana_server:
+  reserved: true
+  users:
+  - "kibanaserver"

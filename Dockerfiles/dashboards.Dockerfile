@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:2.19.1
+FROM opensearchproject/opensearch-dashboards:2.19.2
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'

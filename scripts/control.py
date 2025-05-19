@@ -1500,26 +1500,30 @@ def authSetup():
 
     netboxCommonEnvFile = os.path.join(args.configDir, 'netbox-common.env')
     authCommonEnvFile = os.path.join(args.configDir, 'auth-common.env')
+    openSearchEnvFile = os.path.join(args.configDir, 'opensearch.env')
 
     if args.authMode:
         nginxAuthMode = str(args.authMode).lower()
     else:
         nginxAuthMode = 'unknown'
         if os.path.isfile(authCommonEnvFile):
-            nginxAuthMode = (
-                dotenvImported.dotenv_values(authCommonEnvFile).get('NGINX_AUTH_MODE', nginxAuthMode).lower()
-            )
-    netboxMode = None
+            nginxAuthMode = str(
+                dotenvImported.dotenv_values(authCommonEnvFile).get('NGINX_AUTH_MODE', nginxAuthMode)
+            ).lower()
+    netboxMode = ''
     if os.path.isfile(netboxCommonEnvFile):
-        netboxMode = dotenvImported.dotenv_values(netboxCommonEnvFile).get('NETBOX_MODE', '').lower()
+        netboxMode = str(dotenvImported.dotenv_values(netboxCommonEnvFile).get('NETBOX_MODE', '')).lower()
+    osPrimaryMode = ''
+    osSecondaryMode = ''
+    if os.path.isfile(openSearchEnvFile):
+        osPrimaryMode = str(dotenvImported.dotenv_values(openSearchEnvFile).get('OPENSEARCH_PRIMARY', '')).lower()
+        osSecondaryMode = str(dotenvImported.dotenv_values(openSearchEnvFile).get('OPENSEARCH_SECONDARY', '')).lower()
 
     # don't make them go through every thing every time, give them a choice instead
     # 0 - key
     # 1 - description
     # 2 - preselected choice
     # 3 - option default (yes/no) for if they're doing "all""
-    # 4 - ? (lol, doesn't seem to be used in this script, probably just there
-    #          as it's used in other scripts where ChooseOne/ChooseMultiple is used)
     authConfigChoices = [
         x
         for x in [
@@ -1528,14 +1532,12 @@ def authSetup():
                 "Configure all authentication-related settings",
                 True,
                 True,
-                [],
             ),
             (
                 'method',
                 f"Select authentication method (currently \"{nginxAuthMode}\")",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
-                [],
             ),
             (
                 'admin',
@@ -1543,7 +1545,6 @@ def authSetup():
                 False,
                 (not args.cmdAuthSetupNonInteractive)
                 or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
-                [],
             ),
             (
                 'webcerts',
@@ -1556,7 +1557,6 @@ def authSetup():
                         os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))
                     )
                 ),
-                [os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))],
             ),
             (
                 'fwcerts',
@@ -1568,17 +1568,13 @@ def authSetup():
                     or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
                     or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
                 ),
-                [
-                    os.path.join(logstashPath, 'server.key'),
-                    os.path.join(filebeatPath, 'client.key'),
-                ],
             ),
             (
-                'keycloak',
+                'keycloak' if nginxAuthMode.startswith('keycloak') else None,
                 "Configure Keycloak",
                 False,
                 bool(
-                    str(nginxAuthMode).startswith('keycloak')
+                    nginxAuthMode.startswith('keycloak')
                     or args.authKeycloakRealm
                     or args.authKeycloakRedirectUri
                     or args.authKeycloakUrl
@@ -1589,70 +1585,66 @@ def authSetup():
                     or args.authRequireGroup
                     or args.authRequireRole
                 ),
-                [],
             ),
             (
-                'remoteos',
+                'remoteos' if any('-remote' in x for x in [osPrimaryMode, osSecondaryMode]) else None,
                 "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
                 False,
                 False,
-                [],
+            ),
+            (
+                'localos' if osPrimaryMode == 'opensearch-local' else None,
+                "(Re)generate internal passwords for local primary OpenSearch instance",
+                False,
+                (not args.cmdAuthSetupNonInteractive) or args.authGenOpensearchCreds,
             ),
             (
                 'email',
                 "Store username/password for OpenSearch Alerting email sender account",
                 False,
                 False,
-                [],
             ),
             (
-                'netbox',
+                'netbox' if (netboxMode == 'local') else None,
                 "(Re)generate internal passwords for NetBox",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
-                [],
             ),
             (
                 'netbox-remote-token' if (netboxMode == 'remote') else None,
                 "Store API token for remote NetBox instance",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or (bool(args.authNetBoxRemoteToken)),
-                [],
             ),
             (
-                'keycloakdb',
+                'keycloakdb' if nginxAuthMode == 'keycloak' else None,
                 "(Re)generate internal passwords for Keycloak's PostgreSQL database",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
-                [],
             ),
             (
                 'postgres',
                 "(Re)generate internal superuser passwords for PostgreSQL",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
-                [],
             ),
             (
                 'redis',
                 "(Re)generate internal passwords for Redis",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
-                [],
             ),
             (
                 'arkime',
                 "Store password hash secret for Arkime viewer cluster",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or bool(args.authArkimePassword),
-                [],
             ),
             (
                 'txfwcerts' if txRxScript else None,
                 "Transfer self-signed client certificates to a remote log forwarder",
                 False,
                 False,
-                [],
             ),
         ]
         if x[0]
@@ -1661,7 +1653,7 @@ def authSetup():
     authConfigChoice = (
         ChooseOne(
             'Configure Authentication',
-            choices=[x[:-2] for x in authConfigChoices],
+            choices=[x[:-1] for x in authConfigChoices],
         )
         if not args.cmdAuthSetupNonInteractive
         else 'all'
@@ -2192,6 +2184,19 @@ def authSetup():
                                 pass
                         touch(openSearchCredFileName)
                         os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
+
+                # OpenSearch internal service account credentials
+                elif authItem[0] == 'localos':
+                    esUsername = 'malcolm_internal'
+                    esPassword = str(
+                        ''.join(secrets.choice(string.ascii_letters + string.digits + '_') for i in range(36)),
+                    )
+                    openSearchCredFileName = os.path.join(GetMalcolmPath(), f'.opensearch.primary.curlrc')
+                    with open(openSearchCredFileName, 'w') as f:
+                        f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')
+                        f.write('insecure\n')
+                    touch(openSearchCredFileName)
+                    os.chmod(openSearchCredFileName, stat.S_IRUSR | stat.S_IWUSR)
 
                 # OpenSearch authenticate sender account credentials
                 # https://opensearch.org/docs/latest/monitoring-plugins/alerting/monitors/#authenticate-sender-account
@@ -3007,6 +3012,15 @@ def main():
         const=True,
         default=False,
         help="(Re)generate internal superuser passwords for PostgreSQL",
+    )
+    authSetupGroup.add_argument(
+        '--auth-generate-opensearch-internal-creds',
+        dest='authGenOpensearchCreds',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help="(Re)generate internal credentials for embedded OpenSearch instance",
     )
     authSetupGroup.add_argument(
         '--auth-generate-keycloak-db-password',

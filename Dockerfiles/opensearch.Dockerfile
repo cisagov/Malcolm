@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:2.19.1
+FROM opensearchproject/opensearch:2.19.2
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -51,23 +51,20 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
   curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
       chmod 755 /usr/local/bin/yq && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
-  echo -e 'cluster.name: "docker-cluster"\nnetwork.host: 0.0.0.0\nbootstrap.memory_lock: true\nhttp.cors.enabled: true\nhttp.compression: false\nhttp.cors.allow-origin: "*"\nhttp.cors.allow-methods: OPTIONS, HEAD, GET, POST, PUT, DELETE\nhttp.cors.allow-headers: "kbn-version, Origin, X-Requested-With, Content-Type, Accept, Engaged-Auth-Token Authorization"' > /usr/share/opensearch/config/opensearch.yml && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
-  /usr/local/bin/yq eval \
-    '.config.dynamic.http.xff.enabled = true | .config.dynamic.http.xff.internalProxies = ".*" | .config.dynamic.http.xff.remoteIpHeader = "X-Forwarded-For" | .config.dynamic.authc.proxy_auth_domain.description = "Authenticate via Malcolm" | .config.dynamic.authc.proxy_auth_domain.http_enabled = true | .config.dynamic.authc.proxy_auth_domain.transport_enabled = true | .config.dynamic.authc.proxy_auth_domain.order = 0 | .config.dynamic.authc.proxy_auth_domain.http_authenticator.type = "proxy" | .config.dynamic.authc.proxy_auth_domain.http_authenticator.challenge = false | .config.dynamic.authc.proxy_auth_domain.http_authenticator.config.user_header = "X-Remote-Auth" | .config.dynamic.authc.proxy_auth_domain.http_authenticator.config.roles_header = "X-Forwarded-Roles" | .config.dynamic.authc.proxy_auth_domain.authentication_backend.type = "noop"' \
-    -i /usr/share/opensearch/config/opensearch-security/config.yml && \
   mkdir -p /var/local/ca-trust \
            /opt/opensearch/backup \
            /usr/share/opensearch/config/bootstrap \
+           /usr/share/opensearch/config/certs \
+           /usr/share/opensearch/config/opensearch-security \
            /usr/share/opensearch/config/persist && \
-  chown -R $PUSER:$PGROUP /usr/share/opensearch/config/opensearch.yml \
+  chown -R $PUSER:$PGROUP /usr/share/opensearch/config \
                           /var/local/ca-trust \
-                          /opt/opensearch/backup \
-                          /usr/share/opensearch/config/bootstrap \
-                          /usr/share/opensearch/config/persist && \
+                          /opt/opensearch/backup && \
   curl -sSLf -o /usr/bin/tini "${TINI_URL}-${BINARCH}" && \
     chmod +x /usr/bin/tini && \
+  sed -i 's/^\([[:space:]]*\)echo "Disabling execution of install_demo_configuration.*/\1\/usr\/local\/bin\/setup-internal-users.sh || true/' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/jdk-cacerts-auto-import.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh && \
   sed -i '/^[[:space:]]*runOpensearch.*/i /usr/local/bin/keystore-bootstrap.sh || true' /usr/share/opensearch/opensearch-docker-entrypoint.sh
 
@@ -75,8 +72,13 @@ COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/jdk-cacerts-auto-import.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/keystore-bootstrap.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/opensearch.sh /usr/local/bin/container_health.sh
+ADD --chmod=755 opensearch-config/scripts/*.* /usr/local/bin/
+ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/opensearch.yml
+ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/opensearch.yml
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 
 ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"
@@ -88,7 +90,7 @@ ENV MAX_LOCKED_MEMORY "unlimited"
 ENV path.repo "/opt/opensearch/backup"
 
 # see PUSER_CHOWN comment above
-VOLUME ["/var/local/ca-trust"]
+VOLUME ["/var/local/ca-trust", "/usr/share/opensearch/config/certs"]
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
@@ -96,7 +98,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "opensearch"]
 
-CMD ["/usr/share/opensearch/opensearch-docker-entrypoint.sh"]
+CMD ["sleep", "infinity"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
