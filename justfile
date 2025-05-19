@@ -143,6 +143,7 @@ auth-setup:
     --namespace "$MALCOLM_K8S_NAMESPACE" \
     --profile "$MALCOLM_PROFILE" \
     --auth-method "$AUTH_METHOD" \
+    --auth-generate-opensearch-internal-creds "$AUTH_GENERATE_OPENSEARCH_CREDS" \
     --auth-admin-username "$AUTH_ADMIN_USERNAME" \
     --auth-admin-password-openssl "$(echo -n "$AUTH_ADMIN_PASSWORD" | openssl passwd -1 --stdin)" \
     --auth-admin-password-htpasswd "$(echo -n "$AUTH_ADMIN_PASSWORD" | htpasswd -i -n -B username | cut -d: -f2 | head -n 1)" \

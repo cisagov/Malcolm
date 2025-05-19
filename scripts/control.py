@@ -1524,6 +1524,7 @@ def authSetup():
     # 1 - description
     # 2 - preselected choice
     # 3 - option default (yes/no) for if they're doing "all""
+    # 4 - perform automatically if the listed files don't exist (auto first-time generation)
     authConfigChoices = [
         x
         for x in [
@@ -1532,12 +1533,14 @@ def authSetup():
                 "Configure all authentication-related settings",
                 True,
                 True,
+                [],
             ),
             (
                 'method',
                 f"Select authentication method (currently \"{nginxAuthMode}\")",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
+                [],
             ),
             (
                 'admin',
@@ -1545,6 +1548,7 @@ def authSetup():
                 False,
                 (not args.cmdAuthSetupNonInteractive)
                 or (bool(args.authUserName) and bool(args.authPasswordOpenssl) and bool(args.authPasswordHtpasswd)),
+                [],
             ),
             (
                 'webcerts',
@@ -1557,6 +1561,7 @@ def authSetup():
                         os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))
                     )
                 ),
+                [os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))],
             ),
             (
                 'fwcerts',
@@ -1568,6 +1573,10 @@ def authSetup():
                     or not os.path.isfile(os.path.join(logstashPath, 'server.key'))
                     or not os.path.isfile(os.path.join(filebeatPath, 'client.key'))
                 ),
+                [
+                    os.path.join(logstashPath, 'server.key'),
+                    os.path.join(filebeatPath, 'client.key'),
+                ],
             ),
             (
                 'keycloak' if nginxAuthMode.startswith('keycloak') else None,
@@ -1585,66 +1594,77 @@ def authSetup():
                     or args.authRequireGroup
                     or args.authRequireRole
                 ),
+                [],
             ),
             (
                 'remoteos' if any('-remote' in x for x in [osPrimaryMode, osSecondaryMode]) else None,
                 "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
                 False,
                 False,
+                [],
             ),
             (
                 'localos' if osPrimaryMode == 'opensearch-local' else None,
                 "(Re)generate internal passwords for local primary OpenSearch instance",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenOpensearchCreds,
+                [os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')],
             ),
             (
                 'email',
                 "Store username/password for OpenSearch Alerting email sender account",
                 False,
                 False,
+                [],
             ),
             (
                 'netbox' if (netboxMode == 'local') else None,
                 "(Re)generate internal passwords for NetBox",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
+                [],
             ),
             (
                 'netbox-remote-token' if (netboxMode == 'remote') else None,
                 "Store API token for remote NetBox instance",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or (bool(args.authNetBoxRemoteToken)),
+                [],
             ),
             (
                 'keycloakdb' if nginxAuthMode == 'keycloak' else None,
                 "(Re)generate internal passwords for Keycloak's PostgreSQL database",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
+                [],
             ),
             (
                 'postgres',
                 "(Re)generate internal superuser passwords for PostgreSQL",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
+                [],
             ),
             (
                 'redis',
                 "(Re)generate internal passwords for Redis",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenRedisPassword,
+                [],
             ),
             (
                 'arkime',
                 "Store password hash secret for Arkime viewer cluster",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or bool(args.authArkimePassword),
+                [],
             ),
             (
                 'txfwcerts' if txRxScript else None,
                 "Transfer self-signed client certificates to a remote log forwarder",
                 False,
                 False,
+                [],
             ),
         ]
         if x[0]
