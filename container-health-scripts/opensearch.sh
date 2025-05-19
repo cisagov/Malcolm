@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-curl --silent --output /dev/null --fail "http://localhost:9200"
+curl --insecure --silent --output /dev/null --fail "https://localhost:9200"
