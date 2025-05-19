@@ -21,7 +21,7 @@ config:
           type: basic
           challenge: true
         authentication_backend:
-          type: intern
+          type: internal
       proxy_auth_domain:
         description: "Authenticate via Malcolm"
         http_enabled: true

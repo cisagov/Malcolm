@@ -4,22 +4,22 @@ _meta:
   config_version: 2
 
 all_access:
-  reserved: false
+  reserved: true
   backend_roles:
   - "admin"
 
 logstash:
-  reserved: false
+  reserved: true
   backend_roles:
   - "logstash"
 
 kibana_user:
-  reserved: false
+  reserved: true
   backend_roles:
   - "kibanauser"
 
 readall:
-  reserved: false
+  reserved: true
   backend_roles:
   - "readall"
 

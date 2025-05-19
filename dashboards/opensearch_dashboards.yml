@@ -1,5 +1,4 @@
 ---
----
 # Default OpenSearch Dashboards configuration
 
 server:
@@ -26,7 +25,8 @@ opensearch:
 
 opensearch_security:
   auth:
-    type: "proxy"
+    type: ["basicauth","proxy"]
+    multiple_auth_enabled: true
   proxycache:
     user_header: "X-Remote-Auth"
     roles_header: "X-Forwarded-Roles"
