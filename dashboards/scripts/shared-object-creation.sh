@@ -254,6 +254,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           # for single-cluster opensearch set cluster-wide default replicas to 0
           echo "Setting number_of_replicas for single-node $DATASTORE_TYPE..."
           CURL_OUT=$(get_tmp_output_filename)
+          # TODO: this is failing even for an "all_access" user
           curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
             -XPUT "$OPENSEARCH_URL_TO_USE/_settings" \
             -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
