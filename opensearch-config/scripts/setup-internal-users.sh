@@ -39,13 +39,9 @@ fi
     -o "${OPENSEARCH_SECURITY_CERTS_DIR}" \
     -s '/CN=opensearch/OU=ca/O=Malcolm/ST=ID/C=US' \
     -d '/CN=opensearch-node/OU=node/O=Malcolm/ST=ID/C=US' \
-    -c '/CN=opensearch-admin/OU=admin/O=Malcolm/ST=ID/C=US' >/dev/null 2>&1
+    -c '/CN=opensearch-admin/OU=admin/O=Malcolm/ST=ID/C=US' >/dev/null 2>&1 && \
+    mv "${OPENSEARCH_SECURITY_CERTS_DIR}"/{client,admin}.crt && \
+    mv "${OPENSEARCH_SECURITY_CERTS_DIR}"/{client,admin}.key
 
-# /usr/share/opensearch/plugins/opensearch-security/tools/securityadmin.sh \
-#   -cd /usr/share/opensearch/config/opensearch-security \
-#   -icl \
-#   -nhnv \
-#   -cacert /usr/share/opensearch/config/certs/ca.crt \
-#   -cert /usr/share/opensearch/config/certs/client.crt \
-#   -key /usr/share/opensearch/config/certs/client.key \
-#   -h opensearch
+[[ -x /usr/local/bin/setup-security-admin.sh ]] && \
+  nohup /usr/local/bin/setup-security-admin.sh >/dev/null 2>&1 </dev/null &
