@@ -39,8 +39,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     yum install -y curl-minimal psmisc findutils util-linux jq openssl rsync procps-ng python3 zip unzip && \
     yum remove -y vim-* && \
     usermod -a -G tty ${PUSER} && \
-    # Malcolm manages authentication and encryption via NGINX reverse proxy
-    /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
         unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         sed -i "s/2\.18\.0/2\.19\.2/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \

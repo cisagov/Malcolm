@@ -999,10 +999,12 @@ LOG_IGNORE_REGEX = re.compile(
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
+  | Failure\s+no\s+such\s+index\s+\[\.opendistro_security\]
   | Falling\s+back\s+to\s+single\s+shard\s+assignment
   | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
+  | opensearch.*has\s+insecure\s+file\s+permissions
   | i:\s+pcap:\s+read\s+\d+\s+file
   | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
@@ -1033,6 +1035,7 @@ LOG_IGNORE_REGEX = re.compile(
   | use_field_mapping
   | Using\s+geoip\s+database
   | Warning:\s+app-layer-
+  | you\s+may\s+need\s+to\s+run\s+securityadmin
 )
 """,
     re.VERBOSE | re.IGNORECASE,
