@@ -43,8 +43,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin remove securityDashboards --allow-root && \
     cd /tmp && \
         unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        sed -i "s/2\.18\.0/2\.19\.1/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        sed -i "s/2\.18\.0/2\.19\.1/g" opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/2\.18\.0/2\.19\.2/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/2\.18\.0/2\.19\.2/g" opensearch-dashboards/transformVis/package.json && \
         zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
