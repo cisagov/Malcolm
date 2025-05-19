@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-/usr/local/bin/opensearch_status.sh 2>&1 && \
-    echo "${OPENSEARCH_PRIMARY:-opensearch-local} is running, setting security plugin configuration..." >&2
+echo "Waiting for OpenSearch to be reponsive..."
+
+until timeout 1 bash -c "</dev/tcp/localhost/9200" 2>/dev/null; do
+    sleep 1
+done
 
 /usr/share/opensearch/plugins/opensearch-security/tools/securityadmin.sh \
   -cd /usr/share/opensearch/config/opensearch-security \
