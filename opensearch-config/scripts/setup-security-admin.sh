@@ -6,6 +6,8 @@ until timeout 1 bash -c "</dev/tcp/localhost/9200" 2>/dev/null; do
     sleep 1
 done
 
+sleep 5
+
 /usr/share/opensearch/plugins/opensearch-security/tools/securityadmin.sh \
   -cd /usr/share/opensearch/config/opensearch-security \
   -icl \

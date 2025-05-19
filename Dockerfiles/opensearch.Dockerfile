@@ -77,8 +77,8 @@ ADD --chmod=755 shared/bin/self_signed_key_gen.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
 ADD --chmod=755 container-health-scripts/opensearch.sh /usr/local/bin/container_health.sh
 ADD --chmod=755 opensearch-config/scripts/*.* /usr/local/bin/
-ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/opensearch.yml
-ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/opensearch.yml
+ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/
+ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 
 ENV bootstrap.memory_lock "true"
