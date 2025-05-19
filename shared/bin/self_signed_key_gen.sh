@@ -161,8 +161,8 @@ emailAddress         = Email Address
 emailAddress_max     = 40
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
 EOF
 
   elif [[ -n "${DN_SERVER}" ]]; then
@@ -187,8 +187,8 @@ organizationalUnitName = ${DN_MAP[OU]:-R&D}
 commonName = ${DN_MAP[CN]:-malcolm}
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
 EOF
 
   else
@@ -206,8 +206,8 @@ organizationalUnitName      = R&D
 commonName                  = malcolm
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
-extendedKeyUsage = serverAuth
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
+extendedKeyUsage = serverAuth, clientAuth
 EOF
   fi
 
@@ -257,11 +257,11 @@ basicConstraints = CA:FALSE
 nsCertType = client, server
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement, nonRepudiation
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 EOF
 
@@ -291,11 +291,11 @@ basicConstraints = CA:FALSE
 nsCertType = client, server
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement, nonRepudiation
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 EOF
 
@@ -317,11 +317,11 @@ basicConstraints = CA:FALSE
 nsCertType = client, server
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer:always
-keyUsage = critical, digitalSignature, keyEncipherment, keyAgreement, nonRepudiation
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+keyUsage = critical, digitalSignature, keyEncipherment, dataEncipherment, keyAgreement, nonRepudiation
 extendedKeyUsage = serverAuth, clientAuth
 EOF
   fi
