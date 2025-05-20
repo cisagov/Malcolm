@@ -8,13 +8,123 @@ all_access:
   backend_roles:
   - "$ROLE_ADMIN"
 
+security_manager:
+  reserved: true
+  backend_roles:
+  - "$ROLE_ADMIN"
+
+# Dashboards read-only roles
+
 dashboards_read_access:
   reserved: true
   backend_roles:
   - "$ROLE_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
 
 dashboards_read_write_access:
   reserved: true
   backend_roles:
   - "$ROLE_DASHBOARDS_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+alerting_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+anomaly_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+asynchronous_search_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+index_management_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+ml_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+notifications_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+reports_instances_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+security_analytics_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+snapshot_management_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+# Dashboards read/write roles
+
+alerting_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+anomaly_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+asynchronous_search_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+index_management_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+ml_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+notifications_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+point_in_time_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+security_analytics_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+snapshot_management_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
