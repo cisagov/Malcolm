@@ -1673,7 +1673,7 @@ def authSetup():
     authConfigChoice = (
         ChooseOne(
             'Configure Authentication',
-            choices=[x[:-1] for x in authConfigChoices],
+            choices=[x[:-2] for x in authConfigChoices],
         )
         if not args.cmdAuthSetupNonInteractive
         else 'all'
