@@ -1500,6 +1500,7 @@ def authSetup():
 
     netboxCommonEnvFile = os.path.join(args.configDir, 'netbox-common.env')
     authCommonEnvFile = os.path.join(args.configDir, 'auth-common.env')
+    nginxEnvFile = os.path.join(args.configDir, 'nginx.env')
     openSearchEnvFile = os.path.join(args.configDir, 'opensearch.env')
 
     if args.authMode:
@@ -1824,7 +1825,7 @@ def authSetup():
                             ),
                             EnvValue(
                                 True,
-                                authCommonEnvFile,
+                                nginxEnvFile,
                                 'NGINX_LDAP_TLS_STUNNEL',
                                 TrueOrFalseNoQuote((nginxAuthMode == 'ldap') and ldapStartTLS),
                             ),

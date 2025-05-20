@@ -18,6 +18,16 @@ copied_environment_variables:
         NETBOX_DISABLED:
           "true": disabled
           "false": local
+  nginx:
+    auth_common:
+      NGINX_LDAP_TLS_STUNNEL:
+        NGINX_LDAP_TLS_STUNNEL
+      NGINX_LDAP_TLS_STUNNEL_CHECK_HOST:
+        NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+      NGINX_LDAP_TLS_STUNNEL_CHECK_IP:
+        NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+      NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL:
+        NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
   postgres:
     netbox:
       DB_HOST:
@@ -54,6 +64,10 @@ removed_environment_variables:
   #   - key2
   auth_common:
     - NGINX_BASIC_AUTH
+    - NGINX_LDAP_TLS_STUNNEL
+    - NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+    - NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+    - NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
   lookup_common:
     - CONNECTION_SECONDS_SEVERITY_THRESHOLD
   netbox_redis:
