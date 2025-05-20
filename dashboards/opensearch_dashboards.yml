@@ -30,6 +30,13 @@ opensearch_security:
   proxycache:
     user_header: "X-Remote-Auth"
     roles_header: "X-Forwarded-Roles"
+  multitenancy:
+    enabled: false
+    enable_filter: false
+    tenants:
+      enable_global: true
+      enable_private: false
+      preferred: ["Global"]
 
 data_source:
   enabled: false

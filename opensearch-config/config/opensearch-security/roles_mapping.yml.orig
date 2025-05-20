@@ -8,14 +8,10 @@ all_access:
   backend_roles:
   - "$ROLE_ADMIN"
 
-readall:
-  reserved: true
-  backend_roles:
-  - "$ROLE_READ_ACCESS"
-
 dashboards_read_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ACCESS"
 
 dashboards_read_write_access:

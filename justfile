@@ -219,7 +219,7 @@ start:
     --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
     --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
 
-restart:
+restart *SERVICES:
   #!/usr/bin/env bash
   ./scripts/restart \
     --quiet \
@@ -234,7 +234,8 @@ restart:
     --inject-resources "$MALCOLM_K8S_INJECT_RESOURCES" \
     --no-capabilities "$MALCOLM_K8S_NO_CAPABILITIES" \
     --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
-    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
+    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS" \
+    -s {{SERVICES}}
 
 build *SERVICES:
   #!/usr/bin/env bash

@@ -8,6 +8,7 @@ dashboards_read_access:
   cluster_permissions:
     - cluster_composite_ops_ro
     - cluster:monitor/*
+    - cluster:admin/opensearch/ql/datasources/read
   index_permissions:
     - index_patterns:
         - "*"
@@ -19,15 +20,16 @@ dashboards_read_access:
         - indices:admin/aliases/get
   tenant_permissions:
     - tenant_patterns:
-        - "global"
+        - "global*"
       allowed_actions:
         - kibana_all_read
 
-dashboards_read_write:
-  reserved: false
+dashboards_read_write_access:
+  reserved: true
   cluster_permissions:
     - cluster_composite_ops_ro
     - cluster:monitor/*
+    - cluster:admin/opensearch/ql/datasources/read
   index_permissions:
     - index_patterns:
         - "*"
@@ -39,7 +41,7 @@ dashboards_read_write:
         - indices:admin/aliases/get
   tenant_permissions:
     - tenant_patterns:
-        - "global"
+        - "global*"
       allowed_actions:
         - kibana_all_read
         - kibana_all_write
