@@ -43,5 +43,5 @@ fi
     mv "${OPENSEARCH_SECURITY_CERTS_DIR}"/{client,admin}.crt && \
     mv "${OPENSEARCH_SECURITY_CERTS_DIR}"/{client,admin}.key
 
-[[ -x /usr/local/bin/setup-security-admin.sh ]] && \
-  nohup /usr/local/bin/setup-security-admin.sh >/dev/null 2>&1 </dev/null &
+[[ -x /usr/local/bin/setup-post-start.sh ]] && \
+  nohup /usr/local/bin/setup-post-start.sh >/dev/null 2>&1 </dev/null &
