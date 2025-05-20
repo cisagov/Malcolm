@@ -6,24 +6,19 @@ _meta:
 all_access:
   reserved: true
   backend_roles:
-  - "admin"
-
-logstash:
-  reserved: true
-  backend_roles:
-  - "logstash"
-
-kibana_user:
-  reserved: true
-  backend_roles:
-  - "kibanauser"
+  - "$ROLE_ADMIN"
 
 readall:
   reserved: true
   backend_roles:
-  - "readall"
+  - "$ROLE_READ_ACCESS"
 
-kibana_server:
+dashboards_read_access:
   reserved: true
-  users:
-  - "kibanaserver"
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_ACCESS"
+
+dashboards_read_write_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_DASHBOARDS_READ_WRITE_ACCESS"
