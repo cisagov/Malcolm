@@ -14,7 +14,6 @@ dashboards_read_access:
         - "*"
       allowed_actions:
         - read
-        - search
         - indices:admin/get
         - indices:admin/mappings/get
         - indices:admin/aliases/get
@@ -35,7 +34,6 @@ dashboards_read_write_access:
         - "*"
       allowed_actions:
         - read
-        - search
         - indices:admin/get
         - indices:admin/mappings/get
         - indices:admin/aliases/get
