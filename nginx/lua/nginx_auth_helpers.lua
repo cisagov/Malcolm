@@ -145,7 +145,16 @@ end
 function _M.check_rbac(token_data)
     -- URI -> ENV VARS mapping
     local path_role_envs = {
-        ["/upload"] = { "ROLE_ADMIN", "ROLE_READ_WRITE_ACCESS", "ROLE_UPLOAD" },
+        ["^/upload"] = {
+            "ROLE_ADMIN",
+            "ROLE_READ_WRITE_ACCESS",
+            "ROLE_UPLOAD" },
+        ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
+            "ROLE_ADMIN",
+            "ROLE_READ_ACCESS",
+            "ROLE_READ_WRITE_ACCESS",
+            "ROLE_EXTRACTED_FILES"
+        },
     }
     local uri = ngx.var.request_uri
     local username = token_data.preferred_username or ""
@@ -153,8 +162,9 @@ function _M.check_rbac(token_data)
 
     -- Match prefix and collect allowed roles for this route
     local function get_allowed_roles_for_path(uri_path)
-        for path_prefix, env_vars in pairs(path_role_envs) do
-            if uri_path:sub(1, #path_prefix) == path_prefix then
+        for pattern, env_vars in pairs(path_role_envs) do
+            local from, to, err = ngx.re.find(uri_path, pattern, "jo")
+            if from then
                 local allowed = {}
                 for _, var_name in ipairs(env_vars) do
                     local role = os.getenv(var_name)
