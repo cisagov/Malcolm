@@ -13,6 +13,11 @@ security_manager:
   backend_roles:
   - "$ROLE_ADMIN"
 
+security_rest_api_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_ADMIN"
+
 # Dashboards read-only roles
 
 dashboards_read_access:
