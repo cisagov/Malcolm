@@ -192,8 +192,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
       usermod -a -G tty ${PUSER} && \
-    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
-    find /var/log/clamav "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
+    chown -R ${PUSER}:${PGROUP} /var/log/clamav "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" && \
+    find /var/log/clamav "${EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR}" "${CLAMAV_RULES_DIR}" "${YARA_RULES_DIR}" "${YARA_RULES_SRC_DIR}" -type d -exec chmod 750 "{}" \; && \
     sed -i 's/^Foreground .*$/Foreground true/g' /etc/clamav/clamd.conf && \
       sed -i "s/^User .*$/User ${PUSER}/g" /etc/clamav/clamd.conf && \
       sed -i "s|^LocalSocket .*$|LocalSocket $CLAMD_SOCKET_FILE|g" /etc/clamav/clamd.conf && \
