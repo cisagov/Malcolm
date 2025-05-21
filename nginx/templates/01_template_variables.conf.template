@@ -26,3 +26,7 @@ map $ARKIME_SSL ${DOLLAR}arkime_protocol {
   default https;
   "false" http;
 }
+
+map ${DOLLAR}host ${DOLLAR}admin_role {
+  default "$ROLE_ADMIN";
+}
