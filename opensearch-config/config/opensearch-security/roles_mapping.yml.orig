@@ -22,6 +22,12 @@ dashboards_read_access:
   - "$ROLE_DASHBOARDS_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
 
+dashboards_all_apps_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
 alerting_read_access:
   reserved: true
   backend_roles:

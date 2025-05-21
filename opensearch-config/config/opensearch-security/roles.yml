@@ -19,7 +19,46 @@ dashboards_read_access:
         - indices:admin/aliases/get
   tenant_permissions:
     - tenant_patterns:
-        - "global*"
+        - "global_tenant"
+      allowed_actions:
+        - kibana_all_read
+
+dashboards_all_apps_read_access:
+  reserved: true
+  cluster_permissions:
+    - cluster:admin/opendistro/alerting/destination/email_account/search
+    - cluster:admin/opendistro/alerting/destination/email_group/search
+    - cluster:admin/opendistro/ism/managedindex/explain
+    - cluster:admin/opendistro/ism/policy/search
+    - cluster:admin/opendistro/reports/definition/list
+    - cluster:admin/opendistro/rollup/search
+    - cluster:admin/opendistro/transform/get_transforms
+    - cluster:admin/opensearch/controlcenter/lron/get
+    - cluster:admin/opensearch/insights/top_queries
+    - cluster:admin/opensearch/observability/get
+    - cluster:admin/opensearch/ppl
+    - cluster:admin/opensearch/ql/datasources/read
+    - cluster:admin/opensearch/securityanalytics/correlation/rule/search
+    - cluster:admin/search/pipeline/get
+    - cluster:monitor/*
+    - cluster_composite_ops_ro
+  index_permissions:
+    - index_patterns:
+        - "*"
+      allowed_actions:
+        - read
+        - indices:admin/aliases/get
+        - indices:admin/data_stream/get
+        - indices:admin/get
+        - indices:admin/index_template/get
+        - indices:admin/mappings/get
+        - indices:admin/template/get
+        - indices:monitor/data_stream/stats
+        - indices:monitor/settings/get
+        - indices:monitor/stats
+  tenant_permissions:
+    - tenant_patterns:
+        - "global_tenant"
       allowed_actions:
         - kibana_all_read
 
@@ -39,7 +78,7 @@ dashboards_read_write_access:
         - indices:admin/aliases/get
   tenant_permissions:
     - tenant_patterns:
-        - "global*"
+        - "global_tenant"
       allowed_actions:
         - kibana_all_read
         - kibana_all_write
