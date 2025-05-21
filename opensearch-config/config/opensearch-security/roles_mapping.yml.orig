@@ -46,7 +46,31 @@ asynchronous_search_read_access:
   - "$ROLE_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
 
+flow_framework_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
 index_management_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+ip2geo_datasource_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+knn_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+ltr_read_access:
   reserved: true
   backend_roles:
   - "$ROLE_READ_ACCESS"
@@ -58,13 +82,31 @@ ml_read_access:
   - "$ROLE_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
 
+notebooks_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
 notifications_read_access:
   reserved: true
   backend_roles:
   - "$ROLE_READ_ACCESS"
   - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
 
+observability_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
 reports_instances_read_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"
+
+reports_read_access:
   reserved: true
   backend_roles:
   - "$ROLE_READ_ACCESS"
@@ -87,50 +129,114 @@ snapshot_management_read_access:
 dashboards_read_write_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 alerting_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 anomaly_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 asynchronous_search_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+flow_framework_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 index_management_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+ip2geo_datasource_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+knn_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+ltr_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 ml_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+notebooks_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 notifications_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+observability_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 point_in_time_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+ppl_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+query_insights_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
+  - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+
+reports_full_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 security_analytics_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
 
 snapshot_management_full_access:
   reserved: true
   backend_roles:
+  - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
