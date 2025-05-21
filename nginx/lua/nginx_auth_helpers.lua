@@ -114,7 +114,7 @@ function _M.check_groups_and_roles(token_data)
         end
         for _, required_group in ipairs(required_groups) do
             if not user_groups[required_group] then
-                ngx.log(ngx.ERR, "User " .. username .. " does not belong to required group: " .. required_group)
+                ngx.log(ngx.WARN, "User " .. username .. " does not belong to required group: " .. required_group)
                 ngx.status = 403
                 return ngx.HTTP_FORBIDDEN, username, groups, roles
             end
@@ -132,7 +132,7 @@ function _M.check_groups_and_roles(token_data)
         end
         for _, required_role in ipairs(required_roles) do
             if not user_roles[required_role] then
-                ngx.log(ngx.ERR, "User " .. username .. " does not have required role: " .. required_role)
+                ngx.log(ngx.WARN, "User " .. username .. " does not have required role: " .. required_role)
                 ngx.status = 403
                 return ngx.HTTP_FORBIDDEN, username, groups, roles
             end
@@ -140,6 +140,56 @@ function _M.check_groups_and_roles(token_data)
     end
 
     return ngx.HTTP_OK, username, groups, roles
+end
+
+function _M.check_rbac(token_data)
+    -- URI -> ENV VARS mapping
+    local path_role_envs = {
+        ["/upload"] = { "ROLE_ADMIN", "ROLE_READ_WRITE_ACCESS", "ROLE_UPLOAD" },
+    }
+    local uri = ngx.var.request_uri
+    local username = token_data.preferred_username or ""
+    local roles = (token_data.realm_access and token_data.realm_access.roles) or {}
+
+    -- Match prefix and collect allowed roles for this route
+    local function get_allowed_roles_for_path(uri_path)
+        for path_prefix, env_vars in pairs(path_role_envs) do
+            if uri_path:sub(1, #path_prefix) == path_prefix then
+                local allowed = {}
+                for _, var_name in ipairs(env_vars) do
+                    local role = os.getenv(var_name)
+                    if role and role ~= "" then
+                        allowed[role] = true
+                    end
+                end
+                return allowed
+            end
+        end
+        return nil
+    end
+
+    local allowed_roles = get_allowed_roles_for_path(uri)
+
+    if not allowed_roles then
+        ngx.log(ngx.INFO, "No role restrictions, access granted")
+        return ngx.HTTP_OK
+    end
+
+    if next(allowed_roles) == nil then
+        ngx.log(ngx.INFO, "No environment roles, access granted")
+        return ngx.HTTP_OK
+    end
+
+    -- Check for role match
+    for _, user_role in ipairs(roles) do
+        if allowed_roles[user_role] then
+            ngx.log(ngx.INFO, "User " .. username .. " with " .. user_role .. ", access granted")
+            return ngx.HTTP_OK
+        end
+    end
+
+    ngx.log(ngx.WARN, "User " .. username .. " does not have required role")
+    return ngx.HTTP_FORBIDDEN
 end
 
 return _M
