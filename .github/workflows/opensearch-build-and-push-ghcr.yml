@@ -8,6 +8,7 @@ on:
       - roles
     paths:
       - 'Dockerfiles/opensearch.Dockerfile'
+      - 'opensearch-config/**'
       - 'shared/bin/*'
       - '!shared/bin/capa-build.sh'
       - '!shared/bin/common-init.sh'
