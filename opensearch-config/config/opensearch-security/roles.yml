@@ -68,6 +68,7 @@ dashboards_read_write_access:
     - cluster_composite_ops_ro
     - cluster:monitor/*
     - cluster:admin/opensearch/ql/datasources/read
+    - indices:data/write/bulk*
   index_permissions:
     - index_patterns:
         - "*"
@@ -76,6 +77,18 @@ dashboards_read_write_access:
         - indices:admin/get
         - indices:admin/mappings/get
         - indices:admin/aliases/get
+    - index_patterns:
+        - ".kibana*"
+        - ".opensearch_dashboards"
+      allowed_actions:
+        - read
+        - write
+        - delete
+        - index
+        - create_index
+        - indices:admin/mapping/put
+        - indices:data/write/index*
+        - indices:data/write/update*
   tenant_permissions:
     - tenant_patterns:
         - "global_tenant"
