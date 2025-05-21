@@ -1005,7 +1005,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/auth-common.env
     - ./config/auth.env
     environment:
       VIRTUAL_HOST: 'upload.malcolm.local'
