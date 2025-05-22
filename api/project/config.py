@@ -48,6 +48,7 @@ class Config(object):
     ZEEK_EXTRACTED_FILE_MONITOR_HOST = f"{os.getenv('ZEEK_EXTRACTED_FILE_MONITOR_HOST', 'file-monitor')}"
     ZEEK_EXTRACTED_FILE_TOPIC_PORT = int(f"{os.getenv('ZEEK_EXTRACTED_FILE_TOPIC_PORT', '5987')}")
 
+    ROLE_BASED_ACCESS = os.getenv('ROLE_BASED_ACCESS', 'false')
     ROLE_ADMIN = os.getenv('ROLE_ADMIN', '')
     ROLE_READ_ACCESS = os.getenv('ROLE_READ_ACCESS', '')
     ROLE_READ_WRITE_ACCESS = os.getenv('ROLE_READ_WRITE_ACCESS', '')

@@ -371,14 +371,19 @@ def translate_roles(req):
 
 
 def check_roles(req):
-    caller_name = malcolm_utils.get_function_name(depth=1)
-    result = translate_roles(req)[caller_name]
-    if debugApi and (caller_name != "ping"):
-        client_roles = [
-            role for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(',')) if role
-        ]
-        print(f"Role(s) satisfied for \"{caller_name}\" with {client_roles}: {result}")
-    return result
+    if malcolm_utils.str2bool(app.config["ROLE_BASED_ACCESS"]):
+        caller_name = malcolm_utils.get_function_name(depth=1)
+        result = translate_roles(req)[caller_name]
+        if debugApi and (caller_name != "ping"):
+            client_roles = [
+                role
+                for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(','))
+                if role
+            ]
+            print(f"Role(s) satisfied for \"{caller_name}\" with {client_roles}: {result}")
+        return result
+    else:
+        return True
 
 
 def gettimes(args):

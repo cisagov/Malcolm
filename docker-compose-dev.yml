@@ -841,6 +841,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/auth-common.env
     - ./config/dashboards.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
