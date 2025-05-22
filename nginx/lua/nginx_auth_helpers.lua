@@ -12,11 +12,19 @@ function _M.set_headers(username, token, groups, roles)
     if token ~= nil and token ~= '' then
         ngx.req.set_header("Authorization", "Bearer " .. token)
     end
-    if roles ~= nil and next(roles) ~= nil then
-        ngx.req.set_header("X-Forwarded-Roles", table.concat(roles, ","))
-    end
     if groups ~= nil and next(groups) ~= nil then
         ngx.req.set_header("X-Forwarded-Groups", table.concat(groups, ","))
+    end
+    local rbac_enabled_env = os.getenv("ROLE_BASED_ACCESS_ENABLED")
+    if rbac_enabled_env and rbac_enabled_env:lower():match("^(1|true|yes|on)$") then
+        if roles and next(roles) then
+            ngx.req.set_header("X-Forwarded-Roles", table.concat(roles, ","))
+        else
+            ngx.req.clear_header("X-Forwarded-Roles")
+        end
+    else
+        local role_admin_env = os.getenv("ROLE_ADMIN")
+        ngx.req.set_header("X-Forwarded-Roles", (role_admin_env and role_admin_env ~= "") and role_admin_env or "admin")
     end
 end
 
@@ -145,9 +153,19 @@ end
 -- check_rbac is a top-level check for URI access based on roles, but it is not the final line of
 --   defense. Individual applications should do additional checking of X-Forwarded-Roles internally.
 function _M.check_rbac(token_data)
+
+    -- RBAC toggle
+    local rbac_enabled_env = os.getenv("ROLE_BASED_ACCESS_ENABLED")
+    local rbac_enabled = rbac_enabled_env and rbac_enabled_env:lower():match("^(1|true|yes|on)$")
+    if not rbac_enabled then
+        ngx.log(ngx.DEBUG, "RBAC disabled by ROLE_BASED_ACCESS_ENABLED")
+        return ngx.HTTP_OK
+    end
+
     -- URI -> ENV VARS mapping
     local path_role_envs = {
         ["^/(arkime|iddash2ark)"] = {
+            "ROLE_ADMIN",
             "ROLE_ARKIME_ADMIN",
             "ROLE_ARKIME_USER",
             "ROLE_ARKIME_WISE_ADMIN",
@@ -155,6 +173,7 @@ function _M.check_rbac(token_data)
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS" },
         ["^/((mapi/)?dashboards|idark2dash)"] = {
+            "ROLE_ADMIN",
             "ROLE_DASHBOARDS_READ_ACCESS",
             "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",
             "ROLE_DASHBOARDS_READ_WRITE_ACCESS",
@@ -162,18 +181,22 @@ function _M.check_rbac(token_data)
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS" },
         ["^/mapi"] = {
+            "ROLE_ADMIN",
             "ROLE_API_ACCESS",
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS" },
         ["^/netbox"] = {
+            "ROLE_ADMIN",
             "ROLE_NETBOX_READ_ACCESS",
             "ROLE_NETBOX_READ_WRITE_ACCESS",
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS" },
         ["^/(server/php|upload)"] = {
+            "ROLE_ADMIN",
             "ROLE_READ_WRITE_ACCESS",
             "ROLE_UPLOAD" },
         ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
+            "ROLE_ADMIN",
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS",
             "ROLE_EXTRACTED_FILES"
