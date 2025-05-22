@@ -63,6 +63,8 @@ spec:
           - configMapRef:
               name: upload-common-env
           - configMapRef:
+              name: auth-common-env
+          - configMapRef:
               name: dashboards-env
           - configMapRef:
               name: netbox-common-env

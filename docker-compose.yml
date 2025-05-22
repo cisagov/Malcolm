@@ -1205,6 +1205,7 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/upload-common.env
+    - ./config/auth-common.env
     - ./config/dashboards.env
     - ./config/arkime.env
     - ./config/netbox-common.env

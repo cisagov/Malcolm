@@ -265,6 +265,122 @@ def get_request_arguments(req):
     return arguments
 
 
+def translate_roles(req):
+    roles_map = defaultdict(lambda: True)
+    try:
+        client_roles = [
+            role for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(',')) if role
+        ]
+        roles_map['event'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['aggregate'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['dashboard_export'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['document'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['fields'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['indices'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS"],
+                app.config["ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"],
+            )
+        )
+        roles_map['ingest_stats'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+            )
+        )
+        roles_map['ready'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+            )
+        )
+        roles_map['netbox_sites'] = any(
+            role in client_roles
+            for role in (
+                app.config["ROLE_ADMIN"],
+                app.config["ROLE_READ_ACCESS"],
+                app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_NETBOX_READ_ACCESS"],
+                app.config["ROLE_NETBOX_READ_WRITE_ACCESS"],
+            )
+        )
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: {str(e)} translating roles")
+
+    return roles_map
+
+
+def check_roles(req):
+    caller_name = malcolm_utils.get_function_name(depth=1)
+    result = translate_roles(req)[caller_name]
+    if debugApi and (caller_name != "ping"):
+        client_roles = [
+            role for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(',')) if role
+        ]
+        print(f"Role(s) satisfied for \"{caller_name}\" with {client_roles}: {result}")
+    return result
+
+
 def gettimes(args):
     """Parses 'from' and 'to' times out of the provided dictionary, returning
     two datetime objects
@@ -652,6 +768,9 @@ def aggregate(fieldname):
     range
         start_time (seconds since EPOCH) and end_time (seconds since EPOCH) of query
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     start_time, end_time = gettimes(get_request_arguments(request))
     fields = fieldname.split(",")
     return aggfields(
@@ -680,6 +799,9 @@ def document():
     results
         array of the documents retrieved (up to 'limit')
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     args = get_request_arguments(request)
     s = SearchClass(
         using=databaseClient,
@@ -716,6 +838,9 @@ def indices():
         and malcolm_network_index_pattern, malcolm_other_index_pattern, and arkime_network_index_pattern contain
         their respective index pattern names
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     result = {}
     result["indices"] = requests.get(
         f'{opensearchUrl}/_cat/indices?format=json',
@@ -747,6 +872,9 @@ def fields():
     fields
         A dict of dicts where key is the field name and value may contain 'description' and 'type'
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     args = get_request_arguments(request)
 
     templateName = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
@@ -886,6 +1014,9 @@ def version():
     opensearch_health
         a JSON structure containing OpenSearch cluster health
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     opensearchStats = requests.get(
         opensearchUrl,
         auth=opensearchReqHttpAuth,
@@ -941,6 +1072,9 @@ def ready():
     zeek_extracted_file_monitor
         true or false, the ready status of the Zeek extracted file monitoring process
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     try:
         arkimeResponse = requests.get(
             arkimeStatusUrl,
@@ -1095,6 +1229,8 @@ def dashboard_export(dashid):
     content
         The JSON of the exported dashboard
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
 
     args = get_request_arguments(request)
     try:
@@ -1182,6 +1318,9 @@ def ingest_stats():
         for that host, and "latest_ingest_age_seconds" is the age (in seconds) of the most recently
         ingested log
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     result = {}
     result['latest_ingest_age_seconds'] = 0
     try:
@@ -1265,6 +1404,9 @@ def netbox_sites():
             }
 
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     result = {}
     try:
         headers = {"Authorization": f"Token {netboxToken}"} if netboxToken else None
@@ -1309,6 +1451,9 @@ def ping():
     pong
         a string containing 'pong'
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     return jsonify(ping="pong")
 
 
@@ -1373,6 +1518,9 @@ def event():
     status
         the JSON-formatted OpenSearch response from indexing/updating the alert record
     """
+    if not check_roles(request):
+        raise PermissionError("Not authorized to perform this action")
+
     alert = {}
     idxResponse = {}
     data = get_request_arguments(request)
@@ -1496,7 +1644,7 @@ def basic_error(e):
         The type of exception and its string representation (e.g., "KeyError: 'protocols'")
     """
     errorStr = f"{type(e).__name__}: {str(e)}"
-    if debugApi:
+    if debugApi and (not isinstance(e, PermissionError)):
         print(errorStr)
         print(traceback.format_exc())
     return jsonify(error=errorStr)
