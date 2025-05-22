@@ -181,11 +181,6 @@ function _M.check_rbac(token_data)
             "ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS",
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS" },
-        ["^/mapi"] = {
-            "ROLE_ADMIN",
-            "ROLE_API_ACCESS",
-            "ROLE_READ_ACCESS",
-            "ROLE_READ_WRITE_ACCESS" },
         ["^/netbox"] = {
             "ROLE_ADMIN",
             "ROLE_NETBOX_READ_ACCESS",
