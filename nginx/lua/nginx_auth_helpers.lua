@@ -147,8 +147,6 @@ end
 function _M.check_rbac(token_data)
     -- URI -> ENV VARS mapping
     local path_role_envs = {
-        ["^/(auth|htadmin|admin_login)"] = {
-            "ROLE_ADMIN" },
         ["^/(arkime|iddash2ark)"] = {
             "ROLE_ARKIME_ADMIN",
             "ROLE_ARKIME_USER",
