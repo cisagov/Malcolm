@@ -142,15 +142,40 @@ function _M.check_groups_and_roles(token_data)
     return ngx.HTTP_OK, username, groups, roles
 end
 
+-- check_rbac is a top-level check for URI access based on roles, but it is not the final line of
+--   defense. Individual applications should do additional checking of X-Forwarded-Roles internally.
 function _M.check_rbac(token_data)
     -- URI -> ENV VARS mapping
     local path_role_envs = {
-        ["^/upload"] = {
-            "ROLE_ADMIN",
+        ["^/(auth|htadmin|admin_login)"] = {
+            "ROLE_ADMIN" },
+        ["^/(arkime|iddash2ark)"] = {
+            "ROLE_ARKIME_ADMIN",
+            "ROLE_ARKIME_USER",
+            "ROLE_ARKIME_WISE_ADMIN",
+            "ROLE_ARKIME_WISE_USER",
+            "ROLE_READ_ACCESS",
+            "ROLE_READ_WRITE_ACCESS" },
+        ["^/((mapi/)?dashboards|idark2dash)"] = {
+            "ROLE_DASHBOARDS_READ_ACCESS",
+            "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",
+            "ROLE_DASHBOARDS_READ_WRITE_ACCESS",
+            "ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS",
+            "ROLE_READ_ACCESS",
+            "ROLE_READ_WRITE_ACCESS" },
+        ["^/mapi"] = {
+            "ROLE_API_ACCESS",
+            "ROLE_READ_ACCESS",
+            "ROLE_READ_WRITE_ACCESS" },
+        ["^/netbox"] = {
+            "ROLE_NETBOX_READ_ACCESS",
+            "ROLE_NETBOX_READ_WRITE_ACCESS",
+            "ROLE_READ_ACCESS",
+            "ROLE_READ_WRITE_ACCESS" },
+        ["^/(server/php|upload)"] = {
             "ROLE_READ_WRITE_ACCESS",
             "ROLE_UPLOAD" },
         ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
-            "ROLE_ADMIN",
             "ROLE_READ_ACCESS",
             "ROLE_READ_WRITE_ACCESS",
             "ROLE_EXTRACTED_FILES"
