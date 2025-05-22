@@ -1032,6 +1032,11 @@ def version():
 
     return jsonify(
         version=app.config["MALCOLM_VERSION"],
+        forwarded_headers={
+            k: v
+            for k, v in request.headers.items()
+            if k.lower().startswith('x-forwarded') or k.lower().startswith('x-remote')
+        },
         built=app.config["BUILD_DATE"],
         sha=app.config["VCS_REVISION"],
         mode=malcolm_utils.DatabaseModeEnumToStr(databaseMode),
