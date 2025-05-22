@@ -15,8 +15,9 @@ function _M.set_headers(username, token, groups, roles)
     if groups ~= nil and next(groups) ~= nil then
         ngx.req.set_header("X-Forwarded-Groups", table.concat(groups, ","))
     end
-    local rbac_enabled_env = os.getenv("ROLE_BASED_ACCESS_ENABLED")
-    if rbac_enabled_env and rbac_enabled_env:lower():match("^(1|true|yes|on)$") then
+    local rbac_enabled_env_match, err = ngx.re.match(os.getenv("ROLE_BASED_ACCESS") or "",
+                                                     "^(1|true|yes|on)$", "ijo")
+    if rbac_enabled_env_match ~= nil then
         if roles and next(roles) then
             ngx.req.set_header("X-Forwarded-Roles", table.concat(roles, ","))
         else
@@ -155,10 +156,10 @@ end
 function _M.check_rbac(token_data)
 
     -- RBAC toggle
-    local rbac_enabled_env = os.getenv("ROLE_BASED_ACCESS_ENABLED")
-    local rbac_enabled = rbac_enabled_env and rbac_enabled_env:lower():match("^(1|true|yes|on)$")
-    if not rbac_enabled then
-        ngx.log(ngx.DEBUG, "RBAC disabled by ROLE_BASED_ACCESS_ENABLED")
+    local rbac_enabled_env_match, err = ngx.re.match(os.getenv("ROLE_BASED_ACCESS") or "",
+                                                     "^(1|true|yes|on)$", "ijo")
+    if rbac_enabled_env_match == nil then
+        ngx.log(ngx.DEBUG, "RBAC disabled by ROLE_BASED_ACCESS")
         return ngx.HTTP_OK
     end
 
