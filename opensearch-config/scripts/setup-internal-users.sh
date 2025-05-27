@@ -56,4 +56,4 @@ fi
 
 # background setup processes to run after opensearch starts
 [[ -x /usr/local/bin/setup-post-start.sh ]] && \
-  nohup /usr/local/bin/setup-post-start.sh >/dev/null 2>&1 </dev/null &
+  ( setsid bash -c '/usr/local/bin/setup-post-start.sh >/dev/null 2>&1 </dev/null &' ) >/dev/null 2>&1 </dev/null

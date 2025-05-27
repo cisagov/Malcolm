@@ -27,4 +27,7 @@ if [[ "${NGINX_AUTH_MODE:-keycloak}" == "keycloak" ]]; then
   echo "PostgreSQL is up and ready at ${KC_DB_URL}!"
 fi
 
+[[ -x /usr/local/bin/realm-setup.sh ]] && \
+  ( setsid bash -c '/usr/local/bin/realm-setup.sh >/dev/null 2>&1 </dev/null &' ) >/dev/null 2>&1 </dev/null
+
 exec "$@"
