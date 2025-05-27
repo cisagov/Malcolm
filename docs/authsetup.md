@@ -221,11 +221,11 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 ![Specify the Keycloak URL](./images/screenshots/keycloak_auth_setup_emb_url.png)
 
-8. When configuring Keycloak for the first time, a Keycloak client ID and secret have not yet been configured, so the next two values should be left blank for now.
+8. When configuring Keycloak for the first time, a Keycloak client has not yet been created, and its secret has not yet been generated. Specify the [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) ID to be automatically created when Keycloak first starts up. Leave the secret blank for now.
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_id_empty.png)
+![Client ID in auth_setup](./images/screenshots/keycloak_auth_setup_client_name.png)
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
+![An empty value for Keycloak client secret](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
 
 9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
 
@@ -271,7 +271,9 @@ With the initial configuration complete, [start Malcolm](running.md#Starting).
 
 ![Deleting the temporary bootstrap user](./images/screenshots/keycloak_delete_bootstrap_user.png)
 
-20. Next, a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) must be created which will be used by Malcolm's nginx reverse proxy to handle user authentication. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
+During startup, Malcolm's embedded Keycloak instance will automatically create and configure a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) using the value in `KEYCLOAK_CLIENT_ID` as its name, which will be used by Malcolm's nginx reverse proxy to handle user authentication. To create additional clients (optional), follow steps 20 through 23. Otherwise, continue with step 24.
+
+20. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
 
 ![Creating a new client](./images/screenshots/keycloak_clients_page.png)
 
