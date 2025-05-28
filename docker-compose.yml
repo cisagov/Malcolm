@@ -388,7 +388,7 @@ services:
       bind:
         create_host_path: false
       source: ./arkime/etc/wise.ini
-      target: /opt/arkime/etc/wise.ini
+      target: /opt/arkime/wiseini/wise.ini
     - type: bind
       bind:
         create_host_path: false
@@ -467,7 +467,7 @@ services:
       bind:
         create_host_path: false
       source: ./arkime/etc/wise.ini
-      target: /opt/arkime/etc/wise.ini
+      target: /opt/arkime/wiseini/wise.ini
       read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
