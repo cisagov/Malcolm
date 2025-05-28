@@ -29,7 +29,8 @@ ROLE_BASED_ACCESS=${ROLE_BASED_ACCESS:-false}
 ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI-"false"}
 ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG-"false"}
 ARKIME_WISE_CONFIG_PIN_CODE=${ARKIME_WISE_CONFIG_PIN_CODE-"WISE2019"}
-ARKIME_WISE_CONFIG_FILE="${ARKIME_DIR}"/etc/wise.ini
+ARKIME_WISE_EXAMPLE_FILE="${ARKIME_DIR}"/etc/wise.ini.example
+ARKIME_WISE_CONFIG_FILE="${ARKIME_DIR}"/wiseini/wise.ini
 ARKIME_WISE_SERVICE_SCRIPT=/usr/local/bin/wise_service.sh
 
 
@@ -254,12 +255,17 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     [[ -n ${PUID} ]] && chown -f ${PUID} "${ARKIME_CONFIG_FILE}" || true
     [[ -n ${PGID} ]] && chown -f :${PGID} "${ARKIME_CONFIG_FILE}" || true
 fi 
+
+if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]; then
+    cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
+fi
+
 if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
   sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
   if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]] && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
-    sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/etc/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
+    sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseetc/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
 fi
 
