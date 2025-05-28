@@ -183,7 +183,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
         - This question asks for the number of segments to use for optimization.
     - **How many replicas should Arkime maintain for older session indices?**
         - This defines how many additional copies of older session indices Arkime should store.
-    - **How many weeks of history should Arkime keep?",**
+    - **How many weeks of history should Arkime keep?**
         - This defines the retention period (in weeks) for `arkime-history` indices.
 * **Should Malcolm delete the oldest database indices and capture artifacts based on available storage?**
     - Choose **Y** to proceed to the following related questions about [managing the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
@@ -254,7 +254,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
         + Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
     - **Expose web interface for downloading preserved files?**
-        + Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://<Malcolm host or IP address>/extracted-files/**. Beware that Zeek-extracted files may contain malware.
+        + Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://﹤Malcolm host or IP address﹥/extracted-files/**. Beware that Zeek-extracted files may contain malware.
     - **ZIP downloaded preserved files?**
         + Answering **Y** will cause that Zeek-extracted files downloaded as described under the previous question will be archived using the ZIP file format.
     - **Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)** and **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
@@ -345,7 +345,7 @@ As this is the first time setting up authentication, ensure the **all** option i
 Users will be prompted to do the following:
 
 * **Select authentication method**
-    - Choose **basic**, to use [TLS-encrypted HTTP basic](#AuthBasicAccountManagement) authentication (default); **ldap** [Lightweight Directory Access Protocol (LDAP)](#AuthLDAP) authentication; **keycloak** to use [authentication managed by Malcolm's embedded Keycloak](#AuthKeycloakEmbedded) instance;  **keycloak_remote** to use [authentication managed by a remote Keycloak](#AuthKeycloakRemote) instance; or, **no_authentication** to disable authentication (not recommended)
+    - Choose **basic**, to use [TLS-encrypted HTTP basic](authsetup.md#AuthBasicAccountManagement) authentication (default); **ldap** [Lightweight Directory Access Protocol (LDAP)](authsetup.md#AuthLDAP) authentication; **keycloak** to use [authentication managed by Malcolm's embedded Keycloak](authsetup.md#AuthKeycloakEmbedded) instance;  **keycloak_remote** to use [authentication managed by a remote Keycloak](authsetup.md#AuthKeycloakRemote) instance; or, **no_authentication** to disable authentication (not recommended)
 * **Select LDAP server compatibility type**
     - This question allows users to specify Microsoft Active Directory compatibility (**winldap**) or generic LDAP compatibility (**openldap**, for OpenLDAP, glauth, etc.) when using [LDAP authentication](authsetup.md#AuthLDAP)
 * **Use StartTLS (rather than LDAPS) for LDAP connection security?**
