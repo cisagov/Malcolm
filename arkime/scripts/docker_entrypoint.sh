@@ -256,8 +256,16 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     [[ -n ${PGID} ]] && chown -f :${PGID} "${ARKIME_CONFIG_FILE}" || true
 fi 
 
+
+# An example wise.ini file is baked into the container image by the Dockerfile as $ARKIME_DIR/etc/wise.ini.example
+# After the container is booted we copy wise.ini.example from $ARMIKE_DIR/etc/ to $ARKIME_DIR/wiseini/
+# if $ARKIME_DIR/wiseini/wise.ini does not already exist.
+# $ARKIME_DIR/wiseini/wise.ini will either be a R/W mounted file, when run under Docker Compose or
+# $ARKIME_DIR/wiseini/ will be a persistent volume when run under Kubernetes.
+# This allows changes to persist when the wise application edits its own ini file at runtime.
 if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]; then
     cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
+    chown -fR "$PUSER":"$PUSER" "${ARKIME_DIR}"/wiseini
 fi
 
 if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then

@@ -85,9 +85,9 @@ spec:
             name: arkime-rules-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
-          - mountPath: /opt/arkime/etc/wise.ini
-            name: wise-file-volume
-            subPath: wise.ini  
+          - mountPath: "/opt/arkime/wiseini"
+            name: arkime-config-volume
+            subPath: "arkime/wiseini"  
       initContainers:
       - name: arkime-dirinit-container
         image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
@@ -106,10 +106,12 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:processed"
+            value: "/data/config:arkime/wiseini;/data/pcap:processed"
         volumeMounts:
           - name: arkime-pcap-volume
             mountPath: "/data/pcap"
+          - name: arkime-config-volume
+            mountPath: "/data/config"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:
@@ -126,3 +128,6 @@ spec:
         - name: arkime-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: arkime-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim

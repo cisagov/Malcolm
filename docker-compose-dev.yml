@@ -434,6 +434,11 @@ services:
     - type: bind
       bind:
         create_host_path: false
+      source: ./arkime/etc/wise.ini
+      target: /opt/arkime/wiseini/wise.ini
+    - type: bind
+      bind:
+        create_host_path: false
       source: ./arkime/etc/config.ini
       target: /opt/arkime/etc/config.orig.ini
       read_only: true

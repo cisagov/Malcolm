@@ -4,6 +4,7 @@
 /arkime/etc/GeoLite2-*
 /arkime/etc/oui.txt*
 /arkime/etc/wise.ini
+/arkime/wiseini
 /arkime/etc/ipv4-address-space.csv*
 /README.css
 
@@ -34,6 +35,7 @@ config.*/
 .direnv
 .vagrant
 .fuse_*
+.venv
 malcolm_*images.tar.gz
 malcolm_*images.tar.xz
 malcolm_netbox_backup_*.gz

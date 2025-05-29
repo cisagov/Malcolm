@@ -468,7 +468,6 @@ services:
         create_host_path: false
       source: ./arkime/etc/wise.ini
       target: /opt/arkime/wiseini/wise.ini
-      read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 90s
