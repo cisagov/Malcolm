@@ -179,8 +179,8 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       sed -r -i "s|(luaFiles)\s*=\s*.*|\1=$LUA_FILES|" "${ARKIME_CONFIG_FILE}"
     fi
 
-    # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
     if [[ "$MALCOLM_PROFILE" == "hedgehog" ]] || [[ "$LIVE_CAPTURE" == "true" ]]; then
+      # comment-out features that are unused in hedgehog run profile mode and in live-capture mode
         sed -i "s/^\(userNameHeader=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(userAuthIps=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(userAutoCreateTmpl=\)/# \1/" "${ARKIME_CONFIG_FILE}"
@@ -188,6 +188,9 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+    else
+    # comment-out features that are unused in malcolm non-live mode
+      sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
     fi
 
     # enable ja4+ plugin if it's present
@@ -263,15 +266,15 @@ fi
 # $ARKIME_DIR/wiseini/wise.ini will either be a R/W mounted file, when run under Docker Compose or
 # $ARKIME_DIR/wiseini/ will be a persistent volume when run under Kubernetes.
 # This allows changes to persist when the wise application edits its own ini file at runtime.
-if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]; then
+if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]  && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
     chown -fR "$PUSER":"$PUSER" "${ARKIME_DIR}"/wiseini
 fi
 
-if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
+if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]] && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
-  if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]] && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
+  if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseetc/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
