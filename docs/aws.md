@@ -405,7 +405,6 @@ nodeGroups:
 
 ```bash
 $ eksctl create cluster -f cluster.yaml
-
 ```
 
 * Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
@@ -449,7 +448,6 @@ autoModeConfig:
 
 ```bash
 $ eksctl create cluster -f cluster.yaml
-
 ```
 
 * Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
@@ -472,7 +470,6 @@ $ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/la
 
 ```bash
 $ kubectl create namespace malcolm
-
 ```
 
 * Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
@@ -618,7 +615,6 @@ $ for SG in $(kubectl get nodes \
         --port 2049 \
         --source-group "$SG"; \
 done
-
 ```
 
 * Get subnet IDs
@@ -810,7 +806,6 @@ $ aws acm describe-certificate \
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --inject-resources \
     --skip-persistent-volume-checks
-
 ```
 
 * Create the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
@@ -819,7 +814,6 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     $ export CERT_ARN
     $ export MALCOLM_HOST=malcolm.example.org
     $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example | kubectl apply -f -
-
     ```
 
 * Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)
