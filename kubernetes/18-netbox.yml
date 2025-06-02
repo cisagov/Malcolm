@@ -61,6 +61,8 @@ spec:
           - configMapRef:
               name: ssl-env
           - configMapRef:
+              name: auth-common-env
+          - configMapRef:
               name: netbox-common-env
           - configMapRef:
               name: netbox-env

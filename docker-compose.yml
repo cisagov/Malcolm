@@ -1012,6 +1012,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/auth-common.env
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
