@@ -991,6 +991,7 @@ LOG_IGNORE_REGEX = re.compile(
   | \d+\s+changes\s+in\s+\d+\s+seconds\.\s+Saving
   | Cleaning\s+registries\s+for\s+queue:
   | Connecting\s+to\s+backoff
+  | Could\s+not\s+assign\s+group.+to\s+remotely-authenticated\s+user.+Group\s+not\s+found
   | curl.+localhost.+GET\s+/api/status\s+200
   | DB\s+saved\s+on\s+disk
   | DEPRECATION

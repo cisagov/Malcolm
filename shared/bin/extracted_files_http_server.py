@@ -84,17 +84,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
             if role
         ]
         rolesSatisfied = (not args.rbacEnabled) or any(
-            role in client_roles
-            for role in [
-                x
-                for x in (
-                    os.getenv('ROLE_ADMIN', ''),
-                    os.getenv('ROLE_READ_ACCESS', ''),
-                    os.getenv('ROLE_READ_WRITE_ACCESS', ''),
-                    os.getenv('ROLE_EXTRACTED_FILES', ''),
-                )
-                if x
-            ]
+            role in client_roles for role in [x for x in (os.getenv('ROLE_EXTRACTED_FILES', ''),) if x]
         )
         if rolesSatisfied:
 

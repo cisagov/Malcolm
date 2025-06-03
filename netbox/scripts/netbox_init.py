@@ -536,14 +536,17 @@ def main():
                 time.sleep(5)
 
         # GROUPS #####################################################################################################
-        DEFAULT_GROUP_NAMES = (args.adminGroupName, args.readOnlyGroupName, args.readWriteGroupName)
-
+        defaultGroupNames = (
+            args.adminGroupName,
+            args.readOnlyGroupName,
+            args.readWriteGroupName,
+        )
         try:
             groupsPreExisting = {x.name: x for x in nb.users.groups.all()}
             logging.debug(f"groups (before): { {k:v.id for k, v in groupsPreExisting.items()} }")
 
             # create groups that don't already exist
-            for groupName in [x for x in DEFAULT_GROUP_NAMES if x and (x not in groupsPreExisting)]:
+            for groupName in [x for x in defaultGroupNames if x and (x not in groupsPreExisting)]:
                 try:
                     nb.users.groups.create({'name': groupName})
                 except pynetbox.RequestError as nbe:
@@ -554,96 +557,102 @@ def main():
         except Exception as e:
             logging.error(f"{type(e).__name__} processing groups: {e}")
 
-        # PERMISSIONS ##################################################################################################
-        # TODO: this is not done yet!!!
-        DEFAULT_PERMISSIONS = {}
-        # DEFAULT_PERMISSIONS = {
-        #     f'{args.staffGroupName}_permission': {
-        #         'name': f'{args.staffGroupName}_permission',
-        #         'enabled': True,
-        #         'groups': [args.staffGroupName],
-        #         'actions': [
-        #             'view',
-        #             'add',
-        #             'change',
-        #             'delete',
-        #         ],
-        #         'constraints': {},
-        #         'include_objects': ['*'],
-        #         'exclude_objects': [],
-        #     },
-        #     f'{args.defaultGroupName}_permission': {
-        #         'name': f'{args.defaultGroupName}_permission',
-        #         'enabled': True,
-        #         'groups': [args.defaultGroupName],
-        #         'actions': [
-        #             'view',
-        #             'add',
-        #             'change',
-        #             'delete',
-        #         ],
-        #         'constraints': {},
-        #         'include_objects': ['*'],
-        #         'exclude_objects': [
-        #             'account.usertoken',
-        #             'auth.group',
-        #             'auth.permission',
-        #             'contenttypes.contenttype',
-        #             'core.autosyncrecord',
-        #             'core.configrevision',
-        #             'core.datafile',
-        #             'core.datasource',
-        #             'core.job',
-        #             'core.managedfile',
-        #             'core.objectchange',
-        #             'core.objecttype',
-        #             'db.testmodel',
-        #             'django_rq.queue',
-        #             'social_django.association',
-        #             'social_django.code',
-        #             'social_django.nonce',
-        #             'social_django.partial',
-        #             'social_django.usersocialauth',
-        #             'users.group',
-        #             'users.objectpermission',
-        #             'users.token',
-        #             'users.user',
-        #             'users.userconfig',
-        #         ],
-        #     },
-        #     f'{args.defaultGroupName}_user_config_permission': {
-        #         'name': f'{args.defaultGroupName}_user_config_permission',
-        #         'enabled': True,
-        #         'groups': [args.defaultGroupName],
-        #         'actions': [
-        #             'view',
-        #             'change',
-        #         ],
-        #         'constraints': {
-        #             "user": "$user",
-        #         },
-        #         'include_objects': [
-        #             'users.userconfig',
-        #         ],
-        #         'exclude_objects': [],
-        #     },
-        #     f'{args.defaultGroupName}_token_manage_permission': {
-        #         'name': f'{args.defaultGroupName}_token_manage_permission',
-        #         'enabled': True,
-        #         'groups': [args.defaultGroupName],
-        #         'actions': [
-        #             'add',
-        #             'view',
-        #             'change',
-        #             'delete',
-        #         ],
-        #         'constraints': {
-        #             "user": "$user",
-        #         },
-        #         'include_objects': ['users.token'],
-        #         'exclude_objects': [],
-        #     },
-        # }
+        # PERMISSIONS for default groups ###############################################################################
+        defaultGroupPermissions = {
+            f'{args.adminGroupName}_permission': {
+                'name': f'{args.adminGroupName}_permission',
+                'enabled': True,
+                'groups': [args.adminGroupName],
+                'actions': [
+                    'view',
+                    'add',
+                    'change',
+                    'delete',
+                ],
+                'constraints': {},
+                'include_objects': ['*'],
+                'exclude_objects': [],
+            },
+        }
+
+        groupsDefaultPermissions = {
+            args.readWriteGroupName: [
+                'view',
+                'add',
+                'change',
+                'delete',
+            ],
+            args.readOnlyGroupName: [
+                'view',
+            ],
+        }
+        for groupName, groupActions in groupsDefaultPermissions.items():
+            defaultGroupPermissions[f'{groupName}_permission'] = {
+                'name': f'{groupName}_permission',
+                'enabled': True,
+                'groups': [groupName],
+                'actions': groupActions,
+                'constraints': {},
+                'include_objects': ['*'],
+                'exclude_objects': [
+                    'account.usertoken',
+                    'auth.group',
+                    'auth.permission',
+                    'contenttypes.contenttype',
+                    'core.autosyncrecord',
+                    'core.configrevision',
+                    'core.datafile',
+                    'core.datasource',
+                    'core.job',
+                    'core.managedfile',
+                    'core.objectchange',
+                    'core.objecttype',
+                    'db.testmodel',
+                    'django_rq.queue',
+                    'social_django.association',
+                    'social_django.code',
+                    'social_django.nonce',
+                    'social_django.partial',
+                    'social_django.usersocialauth',
+                    'users.group',
+                    'users.objectpermission',
+                    'users.token',
+                    'users.user',
+                    'users.userconfig',
+                ],
+            }
+            defaultGroupPermissions[f'{groupName}_user_config_permission'] = {
+                'name': f'{groupName}_user_config_permission',
+                'enabled': True,
+                'groups': [groupName],
+                'actions': [
+                    'view',
+                    'change',
+                ],
+                'constraints': {
+                    "user": "$user",
+                },
+                'include_objects': [
+                    'users.userconfig',
+                ],
+                'exclude_objects': [],
+            }
+            defaultGroupPermissions[f'{groupName}_token_manage_permission'] = {
+                'name': f'{groupName}_token_manage_permission',
+                'enabled': True,
+                'groups': [groupName],
+                'actions': [
+                    'add',
+                    'view',
+                    'change',
+                    'delete',
+                ],
+                'constraints': {
+                    "user": "$user",
+                },
+                'include_objects': ['users.token'],
+                'exclude_objects': [],
+            }
 
         try:
             # get all content types (for creating new permissions)
@@ -655,7 +664,7 @@ def main():
             # create permissions that don't already exist
             for permName, permConfig in {
                 k: v
-                for (k, v) in DEFAULT_PERMISSIONS.items()
+                for (k, v) in defaultGroupPermissions.items()
                 if v.get('name', None) and v['name'] not in permsPreExisting
             }.items():
                 permConfig['groups'] = [groups[x].id for x in permConfig['groups']]
