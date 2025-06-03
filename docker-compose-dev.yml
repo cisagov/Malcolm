@@ -11,7 +11,6 @@ services:
     #   start but not actually run OpenSearch. It's included in both profiles to
     #   satisfy some other containers' depends_on.
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -85,7 +84,6 @@ services:
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards-helper:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -140,7 +138,6 @@ services:
       dockerfile: Dockerfiles/dashboards.Dockerfile
     image: ghcr.io/idaholab/malcolm/dashboards:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -187,7 +184,6 @@ services:
       dockerfile: Dockerfiles/logstash.Dockerfile
     image: ghcr.io/idaholab/malcolm/logstash-oss:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -221,8 +217,6 @@ services:
     - ./config/logstash.env
     depends_on:
     - opensearch
-    ports:
-    - 127.0.0.1:5044:5044
     volumes:
     - type: bind
       bind:
@@ -302,7 +296,6 @@ services:
       dockerfile: Dockerfiles/filebeat.Dockerfile
     image: ghcr.io/idaholab/malcolm/filebeat-oss:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -323,8 +316,6 @@ services:
     - ./config/nginx.env
     - ./config/beats-common.env
     - ./config/filebeat.env
-    ports:
-    - 127.0.0.1:5045:5045
     volumes:
     - nginx-log-path:/nginx:ro
     - type: bind
@@ -379,7 +370,6 @@ services:
       dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -465,7 +455,6 @@ services:
       dockerfile: Dockerfiles/arkime.Dockerfile
     image: ghcr.io/idaholab/malcolm/arkime:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -556,7 +545,6 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -629,7 +617,6 @@ services:
       dockerfile: Dockerfiles/zeek.Dockerfile
     image: ghcr.io/idaholab/malcolm/zeek:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -700,7 +687,6 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -760,7 +746,6 @@ services:
       dockerfile: Dockerfiles/suricata.Dockerfile
     image: ghcr.io/idaholab/malcolm/suricata:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -824,7 +809,6 @@ services:
       dockerfile: Dockerfiles/file-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-monitor:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -880,7 +864,6 @@ services:
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-capture:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -933,7 +916,6 @@ services:
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
     image: ghcr.io/idaholab/malcolm/pcap-monitor:25.05.0
     profiles: ["malcolm", "hedgehog"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -988,7 +970,6 @@ services:
       dockerfile: Dockerfiles/file-upload.Dockerfile
     image: ghcr.io/idaholab/malcolm/file-upload:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1007,8 +988,6 @@ services:
     - ./config/auth.env
     environment:
       VIRTUAL_HOST: 'upload.malcolm.local'
-    ports:
-    - 127.0.0.1:8022:22
     volumes:
     - type: bind
       bind:
@@ -1030,7 +1009,6 @@ services:
   htadmin:
     image: ghcr.io/idaholab/malcolm/htadmin:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1079,7 +1057,6 @@ services:
   freq:
     image: ghcr.io/idaholab/malcolm/freq:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1117,7 +1094,6 @@ services:
   netbox:
     image: ghcr.io/idaholab/malcolm/netbox:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1186,7 +1162,6 @@ services:
   postgres:
     image: ghcr.io/idaholab/malcolm/postgresql:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1230,7 +1205,6 @@ services:
   redis:
     image: ghcr.io/idaholab/malcolm/redis:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1278,7 +1252,6 @@ services:
   redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1321,7 +1294,6 @@ services:
   api:
     image: ghcr.io/idaholab/malcolm/api:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1414,7 +1386,6 @@ services:
       dockerfile: Dockerfiles/nginx.Dockerfile
     image: ghcr.io/idaholab/malcolm/nginx-proxy:25.05.0
     profiles: ["malcolm"]
-    userns_mode: keep-id
     logging:
       driver: local
       options:
@@ -1447,8 +1418,7 @@ services:
     - netbox
     - upload
     ports:
-    - 0.0.0.0:443:443
-    - 127.0.0.1:9200:9200
+    - 127.0.0.1:80:443/tcp
     volumes:
     - nginx-log-path:/var/log/nginx
     - type: bind

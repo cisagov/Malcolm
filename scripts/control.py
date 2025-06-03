@@ -2675,6 +2675,81 @@ def authSetup():
         if MainDialog and (not args.cmdAuthSetupNonInteractive):
             ClearScreen()
 
+def wipe_indices(dates=None):
+    #Wipe Opensearch indices.
+    #If dates are provided then only wipe those indices.
+    #Otherwise wipe all indices.
+
+    global args
+    global dockerComposeBin
+    global orchMode
+
+    if orchMode is not OrchestrationFramework.DOCKER_COMPOSE:
+        raise Exception("Index wiping is only supported with Docker Compose mode.")
+    
+    #Check if Malcolm is running
+    osEnv = os.environ.copy()
+    if not args.noTmpDirOverride:
+        osEnv['TMPDIR'] = MalcolmTmpPath
+    err, out = run_process(
+        [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q'],
+        env=osEnv,
+        stderr=False,
+        debug=args.debug,
+    )
+    out[:] = [x for x in out if x]
+    if (err != 0) or (len(out) == 0):
+        eprint("Malcolm is not running, cannot wipe indices.")
+        exit(1)
+    
+    #Build curl command to delete indices
+    #Get credentials from .opensearch.curlrc
+    curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc') 
+    creds = ParseCurlFile(curlrc_path)
+    user = creds.get('user', '')
+    insecure = 'insecure' in creds
+
+    #Get list of indices
+    curl_cmd = [
+        dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch',
+        'curl', '-s', '-u', user
+    ]
+    if insecure:
+        curl_cmd.append('-k')
+    curl_cmd.append('https://localhost:9200/_cat/indices?h=index')    
+    err, indices = run_process(curl_cmd, env=osEnv, debug=args.debug)
+    if err != 0:
+        eprint("Failed to get indices from OpenSearch.")
+        exit(1)
+    indices = [i.strip() for i in indices if i.strip()]
+    if dates:
+        #Select indices that match the provided dates
+        date_patterns = [str(d) for d in dates]
+        indices = [i for i in indices if any(date in i for d in date_patterns)]
+    if not indices:
+        eprint("No indices found to wipe.")
+        return
+    print("Deleting indices:")
+    for index in indices:
+        print(f" - {index}")
+    
+    for index in indices:
+        del_cmd = [
+            dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', 'opensearch',
+            'curl', '-s', '-u', user, 'XDELETE', f'https://localhost:9200/{index}',
+        ]
+        if insecure:
+            del_cmd.insert(-1, '-k')
+        err, out = run_process(del_cmd, env=osEnv, debug=args.debug)
+        if err == 0:
+            print(f"Successfully deleted index: {index}")
+        else:
+            print(f"Failed to delete index: {index}")
+
+
+
+
+
 
 ###################################################################################################
 # main
@@ -2757,6 +2832,25 @@ def main():
         default=str2bool(os.getenv('MALCOLM_NO_TMPDIR_OVERRIDE', default='False')),
         help="Don't override TMPDIR for compose commands",
     )
+    parser.add_argument(
+        '--wipe-indices',
+        dest = 'cmdWipeIndices',
+        type = str2bool,
+        nargs = '?',
+        const = True,
+        default = False,
+        help = 'Wipe OpenSearch indices. If dates are provided, only wipe those indices.',
+    )
+    parser.add_argument(
+        '--wipe-index-dates',
+        dest = 'wipeIndexDates',
+        metavar='<date>',
+        type=str,
+        nargs='*',
+        default=None,
+        help='Dates of indices to wipe. If not provided, all indices will be wiped.',
+    )
+
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -3373,6 +3467,11 @@ def main():
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat
         checkEnvFilesAndValues()
+
+        # wipe opensearch indices only and exit
+        if getattr(args, 'cmdWipeIndices', False):
+            wipe_indices(dates=args.wipeIndexDates)
+            return
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:
