@@ -157,7 +157,8 @@ auth-setup:
     --auth-keycloak-client-secret "$AUTH_KEYCLOAK_CLIENT_SECRET" \
     --auth-require-group "$AUTH_REQUIRE_GROUP" \
     --auth-require-role "$AUTH_REQUIRE_ROLE" \
-    --auth-netbox-token "$NETBOX_TOKEN"
+    --auth-netbox-token "$NETBOX_TOKEN" \
+    --auth-role-based-access-control "$ROLE_BASED_ACCESS"
 
 logs *SERVICES:
   #!/usr/bin/env bash

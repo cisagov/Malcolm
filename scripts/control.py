@@ -1598,6 +1598,13 @@ def authSetup():
                 [],
             ),
             (
+                'rbac' if nginxAuthMode.startswith('keycloak') else None,
+                "Configure Role-Based Access Control",
+                False,
+                bool(nginxAuthMode.startswith('keycloak') or args.authRbacEnabled),
+                [],
+            ),
+            (
                 'remoteos' if any('-remote' in x for x in [osPrimaryMode, osSecondaryMode]) else None,
                 "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
                 False,
@@ -1815,23 +1822,24 @@ def authSetup():
                             os.chmod(ldapConfFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
                     # write env files
-                    UpdateEnvFiles(
-                        [
-                            EnvValue(
-                                True,
-                                authCommonEnvFile,
-                                'NGINX_AUTH_MODE',
-                                nginxAuthMode,
-                            ),
-                            EnvValue(
-                                True,
-                                nginxEnvFile,
-                                'NGINX_LDAP_TLS_STUNNEL',
-                                TrueOrFalseNoQuote((nginxAuthMode == 'ldap') and ldapStartTLS),
-                            ),
-                        ],
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
-                    )
+                    with pushd(args.configDir):
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    authCommonEnvFile,
+                                    'NGINX_AUTH_MODE',
+                                    nginxAuthMode,
+                                ),
+                                EnvValue(
+                                    True,
+                                    nginxEnvFile,
+                                    'NGINX_LDAP_TLS_STUNNEL',
+                                    TrueOrFalseNoQuote((nginxAuthMode == 'ldap') and ldapStartTLS),
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                        )
 
                 elif authItem[0] == 'admin':
                     # prompt username and password
@@ -2454,6 +2462,35 @@ def authSetup():
                                 f'Authentication method is "{nginxAuthMode}", Keycloak configuration will have no effect.',
                                 defaultBehavior=defaultBehavior,
                             )
+
+                elif authItem[0] == 'rbac':
+                    authRbacEnabled = YesOrNo(
+                        'Enable role-based access control?',
+                        default=args.authRbacEnabled,
+                        defaultBehavior=defaultBehavior,
+                    )
+                    with pushd(args.configDir):
+                        UpdateEnvFiles(
+                            [
+                                EnvValue(
+                                    True,
+                                    authCommonEnvFile,
+                                    'ROLE_BASED_ACCESS',
+                                    str(authRbacEnabled).lower(),
+                                ),
+                            ],
+                            stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                        )
+
+                    DisplayMessage(
+                        f'See Keycloak or {os.path.basename(authCommonEnvFile)} for realm roles.',
+                        defaultBehavior=defaultBehavior,
+                    )
+                    if not nginxAuthMode.startswith('keycloak'):
+                        DisplayMessage(
+                            f'Authentication method is "{nginxAuthMode}", RBAC settings will have no effect.',
+                            defaultBehavior=defaultBehavior,
+                        )
 
                 elif authItem[0] in ['netbox', 'postgres', 'keycloakdb']:
                     with pushd(args.configDir):
@@ -3132,6 +3169,15 @@ def main():
         type=str,
         default='',
         help='Required role(s) which users must be assigned (--auth-method is keycloak|keycloak_remote)',
+    )
+    authSetupGroup.add_argument(
+        '--auth-role-based-access-control',
+        dest='authRbacEnabled',
+        type=str2bool,
+        nargs='?',
+        const=True,
+        default=False,
+        help='Enable Role-Based Access Control (--auth-method is keycloak|keycloak_remote)',
     )
 
     logsAndStatusGroup = parser.add_argument_group('Logs and Status')
