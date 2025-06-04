@@ -7,7 +7,10 @@
     - [Keycloak](#AuthKeycloak)
         + [Using a remote Keycloak instance](#AuthKeycloakRemote)
         + [Using the embedded Keycloak instance](#AuthKeycloakEmbedded)
-        + [Requiring user groups and realm roles](#AuthKeycloakGroupsAndRoles)
+        + [Groups and roles](#AuthKeycloakGroupsRoles)
+            * [Role-based access control](#AuthKeycloakRBAC)
+            * [System-wide required user groups and realm roles](#AuthKeycloakReqGroupsRoles)
+            * [Configuring Keycloak to pass groups and roles to Malcolm](#AuthKeycloakGroupsAndRolesConfig)
     - [TLS certificates](#TLSCerts)
     - [Command-line arguments](#CommandLineConfig)
 * [Log Out of Malcolm](#LoggingOut)
@@ -163,7 +166,7 @@ The next steps happen in the context of `auth_setup`.
 
 ![Client secret in auth_setup](./images/screenshots/keycloak_auth_setup_client_secret.png)
 
-8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -227,7 +230,7 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 ![An empty value for Keycloak client secret](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
 
-9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -340,11 +343,9 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 
 ![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_login_landing.png)
 
-### <a name="AuthKeycloakGroupsAndRoles"></a>Requiring user groups and realm roles
+### <a name="AuthKeycloakGroupsRoles"></a>System-wide required user groups and realm roles
 
-Full role-based fine-grained access controls will be implemented in a [future release](https://github.com/cisagov/Malcolm/issues/460) of Malcolm. In the meantime, Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
-
-For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
+Malcolm can use Keycloak's realm roles to implement [role-based access controls](#AuthKeycloakRBAC). It can also use realm roles or user groups as the basis for [system-wide authentication requirements](#AuthKeycloakReqGroupsRoles).
 
 Groups can be managed in Keycloak by selecting the appropriate realm from the drop down at the top of the navigation panel and selecting **Groups** under **Manage**.
 
@@ -362,7 +363,17 @@ Users can be assigned realm roles by clicking on a username on the Keycloak **Us
 
 ![User realm role assignment](./images/screenshots/keycloak_user_realm_roles.png)
 
-Keycloak does not include group or realm role information in authentication tokens by default; clients must be configured to include this information in order for users to log in to Malcolm with group and/or role restrictions set. This can be done by navigating to the Keycloak **Clients** page, selecting the desired client, then clicking the **Client scopes** tab. Click on the name of the assigned client scope beginning with the client ID and ending in **-dedicated**, which will also have a description of "Dedicated scope and mappers for this client." Once on this **Clients** > **Client details** > **Dedicated scopes** screen, click the down arrow on the **Add mapper** button and select **By configuration**.
+For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
+
+#### <a name="AuthKeycloakRBAC"></a>Role-based access control
+
+#### <a name="AuthKeycloakReqGroupsRoles"></a>System-wide required user groups and realm roles
+
+As a simpler alternative to [role-based access control](#AuthRBAC), Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
+
+#### <a name="AuthKeycloakGroupsAndRolesConfig"></a>Configuring Keycloak to pass groups and roles to Malcolm
+
+When using Malcolm's [embedded Keycloak](#AuthKeycloakEmbedded) instance, the default client is automatically created and configured. For [remote Keycloak instances](#AuthKeycloakRemote) or manually-created clients, Keycloak does not include group or realm role information in authentication tokens by default; clients must be configured to include this information in order for users to log in to Malcolm with group and/or role restrictions set. This can be done by navigating to the Keycloak **Clients** page, selecting the desired client, then clicking the **Client scopes** tab. Click on the name of the assigned client scope beginning with the client ID and ending in **-dedicated**, which will also have a description of "Dedicated scope and mappers for this client." Once on this **Clients** > **Client details** > **Dedicated scopes** screen, click the down arrow on the **Add mapper** button and select **By configuration**.
 
 To include group information in the Keycloak token for this client, select **Group Membership** from the **Configure a new mapper** list. The important information to provide for this Group Membership mapper before clicking **Save** is:
 
