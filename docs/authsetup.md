@@ -166,7 +166,7 @@ The next steps happen in the context of `auth_setup`.
 
 ![Client secret in auth_setup](./images/screenshots/keycloak_auth_setup_client_secret.png)
 
-8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakReqGroupsRoles) below for more information. These restrictions are separate from [role-based access controls](#AuthKeycloakRBAC).
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -230,7 +230,7 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 ![An empty value for Keycloak client secret](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
 
-9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakReqGroupsRoles) below for more information. These restrictions are separate from [role-based access controls](#AuthKeycloakRBAC).
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -366,6 +366,46 @@ Users can be assigned realm roles by clicking on a username on the Keycloak **Us
 For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
 
 #### <a name="AuthKeycloakRBAC"></a>Role-based access control
+
+Role-based access control is only available when the authentication method is `keycloak` or `keycloak_remote`. With other authentication methods such as [HTTP basic](#AuthBasicAccountManagement) or [LDAP](#AuthLDAP), or when role-based access control is disabled, all Malcolm users effectively have administrator privileges.
+
+Having chosen `keycloak` or `keycloak_remote` in `auth_setup`, select **Configure Role-Based Access Control**.
+
+![Configure RBAC](./images/screenshots/keycloak_auth_setup_rbac.png)
+
+Select **Yes** when prompted to **Enable role-based access control**.
+
+![Enable RBAC](./images/screenshots/keycloak_enable_rbac.png)
+
+The `auth_setup` dialog instructs the user to **See Keycloak or [`auth-common.env`](malcolm-config.md#MalcolmConfigEnvVars) for realm roles.**
+
+`auth-common.env` contains the [environment variables]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/auth-common.env.example) that define the names of Malcolm's "back-end" roles which are in turn mapped to roles used internally by Malcolm's several components (e.g., NetBox, OpenSearch, etc.). When using Malcolm's [embedded Keycloak](#AuthKeycloakEmbedded) instance realm roles with these names are automatically created when Keycloak starts up. When using a [remote Keycloak instance](#AuthKeycloakRemote) the user must create these realm roles manually.
+
+These environment variables are divided into two sections:
+
+* General access roles
+    * `ROLE_ADMIN` - Unrestricted administrator access
+    * `ROLE_READ_ACCESS` - Read-only access across all Malcolm components
+    * `ROLE_READ_WRITE_ACCESS` - Read/write access across all Malcolm components, excluding some administrator functions
+* Fine-grained roles
+    * `ROLE_ARKIME_ADMIN` - Maps to Arkime's [built-in](https://arkime.com/roles) `arkimeAdmin` role
+    * `ROLE_ARKIME_READ_ACCESS` - Maps to a [custom Arkime role](https://arkime.com/settings#user-role-mappings) with read-only Viewer access
+    * `ROLE_ARKIME_READ_WRITE_ACCESS` - Maps to a custom Arkime role with read/write Viewer access
+    * `ROLE_ARKIME_PCAP_ACCESS` - Maps to a custom Arkime role with access to viewing/exporting PCAP payloads in Viewer
+    * `ROLE_ARKIME_HUNT_ACCESS` - Maps to a custom Arkime role with access to [Hunt](arkime.md#ArkimeHunt) (packet search) in Viewer
+    * `ROLE_ARKIME_WISE_READ_ACCESS` - Maps to Arkime's built-in `wiseUser` role
+    * `ROLE_ARKIME_WISE_READ_WRITE_ACCESS` - Maps to Arkime's built-in `wiseAdmin` role
+    * `ROLE_DASHBOARDS_READ_ACCESS` - Read-only access to [OpenSearch Dashboards](dashboards.md#Dashboards) visualizations, but not all Dashboards apps
+    * `ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS` - Read-only access to all OpenSearch Dashboards visualizations and apps
+    * `ROLE_DASHBOARDS_READ_WRITE_ACCESS` - Read/write access to OpenSearch Dashboards visualizations, but not all Dashboards apps
+    * `ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS` - Read/write access to OpenSearch Dashboards visualizations and apps
+    * `ROLE_EXTRACTED_FILES` - Access to [extracted file downloads](file-scanning.md#ZeekFileExtractionUI)
+    * `ROLE_NETBOX_READ_ACCESS` - Read-only access to [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis)
+    * `ROLE_NETBOX_READ_WRITE_ACCESS` - Read/write access to NetBox
+    * `ROLE_UPLOAD` - Access to [upload artifact interface](upload.md#Upload)
+    * `ROLE_CAPTURE_SERVICE` - Internal-use role for service account used by Arkime capture on remote [network sensor](live-analysis.md#Hedgehog)
+
+Note that the general access roles are supersets of combinations of the fine-grained roles: e.g., the role named by the `ROLE_READ_ACCESS` variable includes read-only access to Dashboards, Arkime, and NetBox.
 
 #### <a name="AuthKeycloakReqGroupsRoles"></a>System-wide required user groups and realm roles
 

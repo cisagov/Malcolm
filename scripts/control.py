@@ -2482,15 +2482,16 @@ def authSetup():
                             stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
                         )
 
-                    DisplayMessage(
-                        f'See Keycloak or {os.path.basename(authCommonEnvFile)} for realm roles.',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    if not nginxAuthMode.startswith('keycloak'):
+                    if authRbacEnabled:
                         DisplayMessage(
-                            f'Authentication method is "{nginxAuthMode}", RBAC settings will have no effect.',
+                            f'See Keycloak or {os.path.basename(authCommonEnvFile)} for realm roles.',
                             defaultBehavior=defaultBehavior,
                         )
+                        if not nginxAuthMode.startswith('keycloak'):
+                            DisplayMessage(
+                                f'Authentication method is "{nginxAuthMode}", RBAC settings will have no effect.',
+                                defaultBehavior=defaultBehavior,
+                            )
 
                 elif authItem[0] in ['netbox', 'postgres', 'keycloakdb']:
                     with pushd(args.configDir):
