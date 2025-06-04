@@ -407,6 +407,8 @@ These environment variables are divided into two sections:
 
 Note that the general access roles are supersets of combinations of the fine-grained roles: e.g., the role named by the `ROLE_READ_ACCESS` variable includes read-only access to Dashboards, Arkime, and NetBox.
 
+With role-based access control enabled, realm roles must exist that correspond to the names defined by these `ROLE_…` environment variables, and users must be [assigned those realm roles](#AuthKeycloakGroupsRoles) in order to use the Malcolm features to which they correspond. Users attempting to access features for which they are authorized will be presented with a ["forbidden"](https://en.wikipedia.org/wiki/HTTP_403) error message.
+
 #### <a name="AuthKeycloakReqGroupsRoles"></a>System-wide required user groups and realm roles
 
 As a simpler alternative to [role-based access control](#AuthRBAC), Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
