@@ -93,7 +93,14 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
       ROLE_NAME=${ROLE_FILE##*/}
       ROLE_NAME=${ROLE_NAME#arkime_}
       ROLE_NAME=${ROLE_NAME%.json}
-      $ARKIME_DIR/bin/arkime_add_user.sh "role:${ROLE_NAME}" "${ROLE_NAME}" "ignored" --createOnly --roles "" $DB_SSL_FLAG >/dev/null 2>&1
+      PERM_ARGS=()
+      [[ "$(jq -r '(.doc?.disablePcapDownload) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --disablePcapDownload )
+      [[ "$(jq -r '(.doc?.hideFiles) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideFiles )
+      [[ "$(jq -r '(.doc?.hidePcap) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hidePcap )
+      [[ "$(jq -r '(.doc?.hideStats) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideStats )
+      [[ "$(jq -r '(.doc?.packetSearch) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --packetSearch )
+      [[ "$(jq -r '(.doc?.removeEnabled) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --removeEnabled )
+      $ARKIME_DIR/bin/arkime_add_user.sh "role:${ROLE_NAME}" "${ROLE_NAME}" "ignored" --createOnly --roles "" "${PERM_ARGS[@]}" $DB_SSL_FLAG >/dev/null 2>&1
     done
 
     echo "Setting defaults..."

@@ -1,12 +1,10 @@
 {
   "doc": {
-    "createEnabled": false,
     "disablePcapDownload": false,
-    "enabled": true,
+    "hideFiles": false,
     "hidePcap": false,
+    "hideStats": false,
     "packetSearch": false,
-    "removeEnabled": false,
-    "roleAssigners": [],
-    "roles": []
+    "removeEnabled": false
   }
 }
