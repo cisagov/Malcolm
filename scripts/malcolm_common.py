@@ -855,20 +855,31 @@ def DotEnvDynamic(debug=False, forceInteraction=False):
 
 ###################################################################################################
 # do the required auth files for Malcolm exist?
+def AuthFileCheck(fileName, allowEmpty=False):
+    try:
+        return os.path.isfile(fileName) and (allowEmpty or (os.path.getsize(fileName) > 0))
+    except Exception as e:
+        return False
+
+
 def MalcolmAuthFilesExist(configDir=None):
     configDirToCheck = (
         configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(GetMalcolmPath(), 'config')
     )
     return (
-        os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')))
-        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')))
-        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
-        and os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem'))))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'postgres.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
-        and os.path.isfile(os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'))
+        AuthFileCheck(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')))
+        and AuthFileCheck(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
+        and AuthFileCheck(
+            os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+        )
+        and AuthFileCheck(
+            os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
+        )
+        and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
+        and AuthFileCheck(os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'))
     )
 
 
