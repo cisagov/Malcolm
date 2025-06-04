@@ -66,8 +66,8 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
     echo "Creating default user..."
 
-  	# this password isn't going to be used by Arkime, nginx will do the auth instead
-  	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG
+  	# this username/password isn't going to be used by Arkime, nginx will do the auth instead
+  	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG >/dev/null 2>&1
 
     echo "Initializing fields..."
 
@@ -85,6 +85,15 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
       jq ". += {\"user\": \"${MALCOLM_USERNAME}\"}" < "${VIEW_FILE}" >"${TEMP_JSON}"
       curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_views/_doc/${RANDOM_ID}" -d "@${TEMP_JSON}"
       rm -f "${TEMP_JSON}"
+    done
+
+    echo "Creating user-defined roles..."
+
+    for ROLE_FILE in "$ARKIME_DIR"/etc/roles/*.json; do
+      ROLE_NAME=${ROLE_FILE##*/}
+      ROLE_NAME=${ROLE_NAME#arkime_}
+      ROLE_NAME=${ROLE_NAME%.json}
+      $ARKIME_DIR/bin/arkime_add_user.sh "role:${ROLE_NAME}" "${ROLE_NAME}" "ignored" --createOnly --roles "" $DB_SSL_FLAG >/dev/null 2>&1
     done
 
     echo "Setting defaults..."

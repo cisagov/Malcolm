@@ -1,16 +1,16 @@
 {
   "doc": {
     "enabled": true,
-    "createEnabled": true,
+    "createEnabled": false,
     "webEnabled": true,
     "headerAuthEnabled": true,
     "emailSearch": true,
-    "removeEnabled": true,
-    "packetSearch": true,
+    "removeEnabled": false,
+    "packetSearch": false,
     "hideStats": false,
     "hideFiles": false,
-    "hidePcap": false,
-    "disablePcapDownload": false,
+    "hidePcap": true,
+    "disablePcapDownload": true,
     "settings": {
       "timezone": "local",
       "detailFormat": "last",

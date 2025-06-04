@@ -4,7 +4,7 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
-# Monitor a directory for PCAP files for processing (by publishing their filenames to a ZMQ socket)
+# Monitor a directory for PCAP files for processing (by moving them from upload/ to processed/)
 #
 # Run the script with --help for options
 ###################################################################################################

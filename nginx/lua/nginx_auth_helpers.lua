@@ -7,9 +7,12 @@ local path_role_envs = {
     ["^/(arkime|iddash2ark)"] = {
         "ROLE_ADMIN",
         "ROLE_ARKIME_ADMIN",
-        "ROLE_ARKIME_USER",
-        "ROLE_ARKIME_WISE_ADMIN",
-        "ROLE_ARKIME_WISE_USER",
+        "ROLE_ARKIME_HUNT_ACCESS",
+        "ROLE_ARKIME_PCAP_ACCESS",
+        "ROLE_ARKIME_READ_ACCESS",
+        "ROLE_ARKIME_READ_WRITE_ACCESS",
+        "ROLE_ARKIME_WISE_READ_ACCESS",
+        "ROLE_ARKIME_WISE_READ_WRITE_ACCESS",
         "ROLE_READ_ACCESS",
         "ROLE_READ_WRITE_ACCESS" },
     ["^/((mapi/)?dashboards|idark2dash)"] = {
@@ -43,7 +46,18 @@ local path_role_envs = {
 --   define all the roles, but this is a convenient way to avoid duplication.
 local uri_role_mappings = {
     ["^/(arkime|iddash2ark)"] = {
-        { from = "ROLE_ADMIN", to = "ROLE_ARKIME_ADMIN" }
+        { from = "ROLE_ADMIN", to = "ROLE_ARKIME_ADMIN",
+                                    "ROLE_ARKIME_READ_WRITE_ACCESS",
+                                    "ROLE_ARKIME_PCAP_ACCESS",
+                                    "ROLE_ARKIME_HUNT_ACCESS",
+                                    "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" },
+        { from = "ROLE_READ_ACCESS", to = { "ROLE_ARKIME_READ_ACCESS",
+                                            "ROLE_ARKIME_PCAP_ACCESS",
+                                            "ROLE_ARKIME_WISE_READ_ACCESS" } },
+        { from = "ROLE_READ_WRITE_ACCESS", to = { "ROLE_ARKIME_READ_WRITE_ACCESS",
+                                                  "ROLE_ARKIME_PCAP_ACCESS",
+                                                  "ROLE_ARKIME_HUNT_ACCESS",
+                                                  "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" } }
     },
     ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
         { from = "ROLE_ADMIN", to = "ROLE_EXTRACTED_FILES" },
@@ -79,11 +93,23 @@ function _M.init()
     for pattern, mappings in pairs(uri_role_mappings) do
         for _, map in ipairs(mappings) do
             local from_role = get_env(map.from)
-            local to_role = get_env(map.to)
-            if from_role and to_role then
+            local to_roles = map.to
+            if from_role and to_roles then
                 role_expansion_map[pattern] = role_expansion_map[pattern] or {}
                 role_expansion_map[pattern][from_role] = role_expansion_map[pattern][from_role] or {}
-                table.insert(role_expansion_map[pattern][from_role], to_role)
+                if type(to_roles) == "table" then
+                    for _, to_role_env in ipairs(to_roles) do
+                        local to_role = get_env(to_role_env)
+                        if to_role then
+                            table.insert(role_expansion_map[pattern][from_role], to_role)
+                        end
+                    end
+                else
+                    local to_role = get_env(to_roles)
+                    if to_role then
+                        table.insert(role_expansion_map[pattern][from_role], to_role)
+                    end
+                end
             end
         end
     end

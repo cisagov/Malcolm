@@ -398,6 +398,7 @@ services:
     - ./config/ssl.env
     - ./config/opensearch.env
     - ./config/upload-common.env
+    - ./config/auth-common.env
     - ./config/auth.env
     - ./config/arkime.env
     - ./config/arkime-offline.env

@@ -52,6 +52,8 @@ spec:
               name: opensearch-env
           - configMapRef:
               name: upload-common-env
+          - configMapRef:
+              name: auth-common-env
           - secretRef:
               name: auth-env
           - configMapRef:
