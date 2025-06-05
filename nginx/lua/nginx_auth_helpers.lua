@@ -2,9 +2,71 @@ local _M = {}
 
 local cjson = require("cjson.safe")
 
--- URI -> ENV VARS mapping for RBAC
+-- URI -> ENV VARS mapping for RBAC (ordered, specific to general)
 local path_role_envs = {
-    ["^/(arkime|iddash2ark)"] = {
+    -- Special cases (if you add deeper patterns, put them up here)
+
+    -- Arkime PCAP view/export
+    { pattern = "^/arkime/(api/)?sessions?/.+/packets(?:$|[/?])", roles = {
+        "ROLE_ADMIN",
+        "ROLE_ARKIME_ADMIN",
+        "ROLE_ARKIME_PCAP_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+    { pattern = "^/arkime/(api/)?sessions?[./]pcap", roles = {
+        "ROLE_ADMIN",
+        "ROLE_ARKIME_ADMIN",
+        "ROLE_ARKIME_PCAP_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- Arkime Hunt
+    { pattern = "^/arkime/(api/)?hunts?", roles = {
+        "ROLE_ADMIN",
+        "ROLE_ARKIME_ADMIN",
+        "ROLE_ARKIME_HUNT_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- Upload endpoints
+    { pattern = "^/(server/php|upload)", roles = {
+        "ROLE_ADMIN",
+        "ROLE_READ_WRITE_ACCESS",
+        "ROLE_UPLOAD"
+    }},
+
+    -- NetBox
+    { pattern = "^/netbox", roles = {
+        "ROLE_ADMIN",
+        "ROLE_NETBOX_READ_ACCESS",
+        "ROLE_NETBOX_READ_WRITE_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- Extracted files
+    { pattern = "^/(dashboards/app/)?(hh-)?extracted-files", roles = {
+        "ROLE_ADMIN",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS",
+        "ROLE_EXTRACTED_FILES"
+    }},
+
+    -- Dashboards & related paths
+    { pattern = "^/((mapi/)?dashboards|idark2dash)", roles = {
+        "ROLE_ADMIN",
+        "ROLE_DASHBOARDS_READ_ACCESS",
+        "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",
+        "ROLE_DASHBOARDS_READ_WRITE_ACCESS",
+        "ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS",
+        "ROLE_READ_ACCESS",
+        "ROLE_READ_WRITE_ACCESS"
+    }},
+
+    -- Arkime & related paths
+    { pattern = "^/(arkime|iddash2ark)", roles = {
         "ROLE_ADMIN",
         "ROLE_ARKIME_ADMIN",
         "ROLE_ARKIME_HUNT_ACCESS",
@@ -14,31 +76,8 @@ local path_role_envs = {
         "ROLE_ARKIME_WISE_READ_ACCESS",
         "ROLE_ARKIME_WISE_READ_WRITE_ACCESS",
         "ROLE_READ_ACCESS",
-        "ROLE_READ_WRITE_ACCESS" },
-    ["^/((mapi/)?dashboards|idark2dash)"] = {
-        "ROLE_ADMIN",
-        "ROLE_DASHBOARDS_READ_ACCESS",
-        "ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS",
-        "ROLE_DASHBOARDS_READ_WRITE_ACCESS",
-        "ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS",
-        "ROLE_READ_ACCESS",
-        "ROLE_READ_WRITE_ACCESS" },
-    ["^/netbox"] = {
-        "ROLE_ADMIN",
-        "ROLE_NETBOX_READ_ACCESS",
-        "ROLE_NETBOX_READ_WRITE_ACCESS",
-        "ROLE_READ_ACCESS",
-        "ROLE_READ_WRITE_ACCESS" },
-    ["^/(server/php|upload)"] = {
-        "ROLE_ADMIN",
-        "ROLE_READ_WRITE_ACCESS",
-        "ROLE_UPLOAD" },
-    ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
-        "ROLE_ADMIN",
-        "ROLE_READ_ACCESS",
-        "ROLE_READ_WRITE_ACCESS",
-        "ROLE_EXTRACTED_FILES"
-    }
+        "ROLE_READ_WRITE_ACCESS"
+    }}
 }
 
 -- Define URI pattern → role mappings (i.e., helps us turn "read_access" into "netbox_read_access")
@@ -302,17 +341,19 @@ function _M.check_rbac(token_data)
     end
 
     -- URI -> ENV VARS mapping
-    local uri = ngx.var.request_uri
+    local uri = ngx.var.uri
     local username = token_data.preferred_username or ""
     local roles = (token_data.realm_access and token_data.realm_access.roles) or {}
 
-    -- Match prefix and collect allowed roles for this route
+    -- Match prefix and collect allowed roles for this route.
+    -- path_role_envs is ordered from more-to-less specific, so
+    -- this will return the first matching rule.
     local function get_allowed_roles_for_path(uri_path)
-        for pattern, env_vars in pairs(path_role_envs) do
-            local from, to, err = ngx.re.find(uri_path, pattern, "jo")
+        for _, entry in ipairs(path_role_envs) do
+            local from, to, err = ngx.re.find(uri_path, entry.pattern, "jo")
             if from then
                 local allowed = {}
-                for _, var_name in ipairs(env_vars) do
+                for _, var_name in ipairs(entry.roles) do
                     local role = _M.get_environment_variable(var_name)
                     if role then
                         allowed[role] = true
