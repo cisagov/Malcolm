@@ -57,6 +57,7 @@ for URL_SUFFIX in ${URL_SUFFIXES[@]}; do
   mkdir -p "$OUTPUT_DIR_REL"
   pushd "$OUTPUT_DIR_REL" >/dev/null 2>&1
   for URL_PREFIX in ${URL_PREFIXES[@]}; do
+    echo "Downloading \"${URL_PREFIX%/}/${URL_SUFFIX}\"..." >&2
     curl -fsSL -O -J "${URL_PREFIX%/}/${URL_SUFFIX}" && break
   done
   popd >/dev/null 2>&1
