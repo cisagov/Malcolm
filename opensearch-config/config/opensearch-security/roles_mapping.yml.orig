@@ -18,6 +18,11 @@ security_rest_api_full_access:
   backend_roles:
   - "$ROLE_ADMIN"
 
+capture_service_access:
+  reserved: true
+  backend_roles:
+  - "$ROLE_CAPTURE_SERVICE"
+
 # Dashboards read-only roles
 
 dashboards_read_access:
@@ -137,8 +142,6 @@ dashboards_read_write_access:
   - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
-  # TODO: this isn't right, just experimenting
-  - "$ROLE_CAPTURE_SERVICE"
 
 alerting_full_access:
   reserved: true

@@ -96,6 +96,29 @@ dashboards_read_write_access:
         - kibana_all_read
         - kibana_all_write
 
+capture_service_access:
+  reserved: true
+  cluster_permissions:
+    - cluster_composite_ops_ro
+    - cluster:monitor/*
+    - indices:admin/index_template/get
+    - indices:admin/template/get
+    - indices:data/write/bulk*
+  index_permissions:
+    - index_patterns:
+        - "arkime_*"
+      allowed_actions:
+        - create_index
+        - read
+        - index
+        - indices:admin/aliases/get
+        - indices:admin/mapping/put
+        - indices:admin/mappings/get
+        - indices:data/write/bulk*
+        - indices:data/write/index*
+        - indices:data/write/update*
+        - indices_monitor
+
 security_rest_api_full_access:
   reserved: true
   cluster_permissions:
