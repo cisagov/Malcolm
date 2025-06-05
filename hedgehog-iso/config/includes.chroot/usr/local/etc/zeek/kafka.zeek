@@ -1,5 +1,3 @@
-global true_regex: pattern = /^\s*(?i:t(rue)?|y(es)?|on|1)\s*$/;
-
 global zeek_kafka_enabled = (getenv("ZEEK_KAFKA_ENABLED") == true_regex) ? T : F;
 global zeek_kafka_brokers = getenv("ZEEK_KAFKA_BROKERS");
 global zeek_kafka_topic = getenv("ZEEK_KAFKA_TOPIC");
