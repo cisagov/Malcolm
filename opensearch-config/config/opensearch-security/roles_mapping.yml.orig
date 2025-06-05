@@ -137,6 +137,8 @@ dashboards_read_write_access:
   - "$ROLE_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ACCESS"
   - "$ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS"
+  # TODO: this isn't right, just experimenting
+  - "$ROLE_CAPTURE_SERVICE"
 
 alerting_full_access:
   reserved: true

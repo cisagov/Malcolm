@@ -30,3 +30,7 @@ map $ARKIME_SSL ${DOLLAR}arkime_protocol {
 map ${DOLLAR}host ${DOLLAR}admin_role {
   default "$ROLE_ADMIN";
 }
+
+map ${DOLLAR}host ${DOLLAR}capture_service_role {
+  default "$ROLE_CAPTURE_SERVICE";
+}
