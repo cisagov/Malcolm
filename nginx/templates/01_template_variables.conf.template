@@ -31,6 +31,7 @@ map ${DOLLAR}host ${DOLLAR}admin_role {
   default "$ROLE_ADMIN";
 }
 
-map ${DOLLAR}host ${DOLLAR}capture_service_role {
+map $ROLE_BASED_ACCESS ${DOLLAR}capture_service_role {
   default "$ROLE_CAPTURE_SERVICE";
+  "false" "$ROLE_ADMIN";
 }

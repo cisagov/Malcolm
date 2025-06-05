@@ -72,16 +72,20 @@ local uri_role_mappings = {
 local role_expansion_map = {}
 
 -- Helper to safely get non-empty env vars
-local function get_env(name)
+function _M.get_environment_variable(name)
     local val = os.getenv(name)
     return (val and val ~= "") and val or nil
 end
 
 local role_based_access_enabled = false
 
+function _M.is_role_based_access_enabled()
+    return role_based_access_enabled
+end
+
 function _M.init()
     -- Determine if role base access is enabled vi environment variable
-    local rbac_enabled_env_match, err = ngx.re.match(get_env("ROLE_BASED_ACCESS"), "^(1|true|yes|on)$", "ijo")
+    local rbac_enabled_env_match, err = ngx.re.match(_M.get_environment_variable("ROLE_BASED_ACCESS"), "^(1|true|yes|on)$", "ijo")
     if rbac_enabled_env_match ~= nil then
         role_based_access_enabled = true
     else
@@ -92,20 +96,20 @@ function _M.init()
     -- Build the role expansion map dynamically from environment variables
     for pattern, mappings in pairs(uri_role_mappings) do
         for _, map in ipairs(mappings) do
-            local from_role = get_env(map.from)
+            local from_role = _M.get_environment_variable(map.from)
             local to_roles = map.to
             if from_role and to_roles then
                 role_expansion_map[pattern] = role_expansion_map[pattern] or {}
                 role_expansion_map[pattern][from_role] = role_expansion_map[pattern][from_role] or {}
                 if type(to_roles) == "table" then
                     for _, to_role_env in ipairs(to_roles) do
-                        local to_role = get_env(to_role_env)
+                        local to_role = _M.get_environment_variable(to_role_env)
                         if to_role then
                             table.insert(role_expansion_map[pattern][from_role], to_role)
                         end
                     end
                 else
-                    local to_role = get_env(to_roles)
+                    local to_role = _M.get_environment_variable(to_roles)
                     if to_role then
                         table.insert(role_expansion_map[pattern][from_role], to_role)
                     end
@@ -161,8 +165,8 @@ function _M.set_headers(username, token, groups, roles)
             ngx.req.clear_header("X-Forwarded-Roles")
         end
     else
-        local role_admin_env = get_env("ROLE_ADMIN")
-        ngx.req.set_header("X-Forwarded-Roles", (role_admin_env and role_admin_env ~= "") and role_admin_env or "admin")
+        local role_admin_env = _M.get_environment_variable("ROLE_ADMIN")
+        ngx.req.set_header("X-Forwarded-Roles", role_admin_env or "admin")
     end
 end
 
@@ -248,8 +252,8 @@ function _M.check_groups_and_roles(token_data)
         ngx.log(ngx.INFO, "User " .. username .. " has roles " .. cjson.encode(roles))
     end
 
-    local required_groups_str = get_env("NGINX_REQUIRE_GROUP")
-    if required_groups_str and required_groups_str ~= "" then
+    local required_groups_str = _M.get_environment_variable("NGINX_REQUIRE_GROUP")
+    if required_groups_str then
         local required_groups = {}
         for group in required_groups_str:gmatch("[^,]+") do
             table.insert(required_groups, group)
@@ -266,8 +270,8 @@ function _M.check_groups_and_roles(token_data)
             end
         end
     end
-    local required_roles_str = get_env("NGINX_REQUIRE_ROLE")
-    if required_roles_str and required_roles_str ~= "" then
+    local required_roles_str = _M.get_environment_variable("NGINX_REQUIRE_ROLE")
+    if required_roles_str then
         local required_roles = {}
         for role in required_roles_str:gmatch("[^,]+") do
             table.insert(required_roles, role)
@@ -309,8 +313,8 @@ function _M.check_rbac(token_data)
             if from then
                 local allowed = {}
                 for _, var_name in ipairs(env_vars) do
-                    local role = get_env(var_name)
-                    if role and role ~= "" then
+                    local role = _M.get_environment_variable(var_name)
+                    if role then
                         allowed[role] = true
                     end
                 end
