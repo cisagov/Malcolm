@@ -343,7 +343,7 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 
 ![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_login_landing.png)
 
-### <a name="AuthKeycloakGroupsRoles"></a>System-wide required user groups and realm roles
+### <a name="AuthKeycloakGroupsRoles"></a>Groups and roles
 
 Malcolm can use Keycloak's realm roles to implement [role-based access controls](#AuthKeycloakRBAC). It can also use realm roles or user groups as the basis for [system-wide authentication requirements](#AuthKeycloakReqGroupsRoles).
 
@@ -479,6 +479,12 @@ Authentication Setup:
                         Configure Malcolm authentication
   --auth-noninteractive [CMDAUTHSETUPNONINTERACTIVE]
                         Configure Malcolm authentication (noninteractive using arguments provided)
+  --auth-method <basic|ldap|keycloak|keycloak_remote|no_authentication>
+                        Authentication method (for --auth-noninteractive)
+  --auth-ldap-mode <openldap|winldap>
+                        LDAP server compatibility type (for --auth-noninteractive when --auth-method is ldap)
+  --auth-ldap-start-tls [true|false]
+                        Use StartTLS (rather than LDAPS) for LDAP connection security (for --auth-noninteractive when --auth-method is ldap)
   --auth-admin-username <string>
                         Administrator username (for --auth-noninteractive)
   --auth-admin-password-openssl <string>
@@ -491,12 +497,16 @@ Authentication Setup:
                         (Re)generate self-signed certificates for HTTPS access (for --auth-noninteractive)
   --auth-generate-fwcerts [AUTHGENFWCERTS]
                         (Re)generate self-signed certificates for a remote log forwarder
+  --auth-netbox-token <string>
+                        API token for remote NetBox instance (for --auth-noninteractive when NETBOX_MODE=remote in netbox-common.env)
   --auth-generate-netbox-passwords [AUTHGENNETBOXPASSWORDS]
                         (Re)generate internal passwords for NetBox
   --auth-generate-redis-password [AUTHGENREDISPASSWORD]
                         (Re)generate internal passwords for Redis
   --auth-generate-postgres-password [AUTHGENPOSTGRESPASSWORD]
                         (Re)generate internal superuser passwords for PostgreSQL
+  --auth-generate-opensearch-internal-creds [AUTHGENOPENSEARCHCREDS]
+                        (Re)generate internal credentials for embedded OpenSearch instance
   --auth-generate-keycloak-db-password [AUTHGENKEYCLOAKDBPASSWORD]
                         (Re)generate internal passwords for Keycloak's PostgreSQL database
   --auth-keycloak-realm <string>
@@ -517,6 +527,8 @@ Authentication Setup:
                         Required group(s) to which users must belong (--auth-method is keycloak|keycloak_remote)
   --auth-require-role <string>
                         Required role(s) which users must be assigned (--auth-method is keycloak|keycloak_remote)
+  --auth-role-based-access-control [AUTHRBACENABLED]
+                        Enable Role-Based Access Control (--auth-method is keycloak|keycloak_remote)
 …
 ```
 
