@@ -6,7 +6,7 @@ unset VERBOSE
 command -v dpkg >/dev/null 2>&1 && ARCH="$(dpkg --print-architecture)" || ARCH=amd64
 DISTRO=Debian_12
 OUTPUT_DIR=/tmp
-ZEEK_VERSION=7.2.0-0
+ZEEK_VERSION=7.2.1-0
 PRESERVE_HIERARCHY=false
 ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=${ZEEK_DEB_ALTERNATE_DOWNLOAD_URL:-}
 ZEEK_DEB_ALTERNATE_DOWNLOAD_URL_FILE=${ZEEK_DEB_ALTERNATE_DOWNLOAD_URL_FILE:-}
@@ -57,6 +57,7 @@ for URL_SUFFIX in ${URL_SUFFIXES[@]}; do
   mkdir -p "$OUTPUT_DIR_REL"
   pushd "$OUTPUT_DIR_REL" >/dev/null 2>&1
   for URL_PREFIX in ${URL_PREFIXES[@]}; do
+    echo "Downloading \"${URL_PREFIX%/}/${URL_SUFFIX}\"..." >&2
     curl -fsSL -O -J "${URL_PREFIX%/}/${URL_SUFFIX}" && break
   done
   popd >/dev/null 2>&1
