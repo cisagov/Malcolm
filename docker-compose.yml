@@ -1274,7 +1274,7 @@ services:
     - netbox
     - upload
     ports:
-    - 127.0.0.1:80:443/tcp
+    - 0.0.0.0:443:443/tcp
     volumes:
     - nginx-log-path:/var/log/nginx
     - type: bind

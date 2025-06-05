@@ -26,6 +26,7 @@ import string
 import tarfile
 import tempfile
 import time
+import base64
 
 from malcolm_common import (
     AskForPassword,
@@ -2676,9 +2677,9 @@ def authSetup():
             ClearScreen()
 
 def wipe_indices(dates=None):
-    #Wipe Opensearch indices.
-    #If dates are provided then only wipe those indices.
-    #Otherwise wipe all indices.
+    # Wipe Opensearch indices.
+    # If dates are provided then only wipe those indices.
+    # Otherwise wipe all indices.
 
     global args
     global dockerComposeBin
@@ -2687,7 +2688,7 @@ def wipe_indices(dates=None):
     if orchMode is not OrchestrationFramework.DOCKER_COMPOSE:
         raise Exception("Index wiping is only supported with Docker Compose mode.")
     
-    #Check if Malcolm is running
+    # Check if Malcolm is running
     osEnv = os.environ.copy()
     if not args.noTmpDirOverride:
         osEnv['TMPDIR'] = MalcolmTmpPath
@@ -2702,41 +2703,65 @@ def wipe_indices(dates=None):
         eprint("Malcolm is not running, cannot wipe indices.")
         exit(1)
     
-    #Build curl command to delete indices
-    #Get credentials from .opensearch.curlrc
-    curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc') 
-    creds = ParseCurlFile(curlrc_path)
-    user = creds.get('user', '')
-    insecure = 'insecure' in creds
+    # Determine credentials based off of remote or local OpenSearch
+    curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')
+    use_curlrc = False
+    if os.path.isfile(curlrc_path):
+        creds = ParseCurlFile(curlrc_path)
+        user = creds.get('user', '')
+        if user:
+            insecure = 'insecure' in creds
+            use_curlrc = True
+            print(f"Using OpenSearch credentials from curlrc: user={user}, insecure={insecure}")
+    if not use_curlrc:
+        # Use local credentials from auth.env
+        auth_env_path = os.path.join(args.configDir, 'auth.env')
+        if not os.path.isfile(auth_env_path):
+            eprint(f"Authentication file not found: {auth_env_path}")
+            exit(1)
+        envs = dotenvImported.dotenv_values(auth_env_path)
+        username = envs.get('MALCOLM_USERNAME', 'admin')
+        password_base = envs.get('MALCOLM_PASSWORD', '')
+        try:
+            password = base64.b64decode(password_base).decode('utf-8')
+        except Exception:
+            passsword = 'admin'
+        user = f"{username}:{password}"
+        insecure = True
+        print(f"Using OpenSearch credentials from auth.env: user={user}, insecure={insecure}")
 
-    #Get list of indices
+
+    # Get list of indices
     curl_cmd = [
         dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch',
         'curl', '-s', '-u', user
     ]
     if insecure:
         curl_cmd.append('-k')
-    curl_cmd.append('https://localhost:9200/_cat/indices?h=index')    
+    curl_cmd.append('http://localhost:9200/_cat/indices?h=index')    
     err, indices = run_process(curl_cmd, env=osEnv, debug=args.debug)
     if err != 0:
         eprint("Failed to get indices from OpenSearch.")
         exit(1)
     indices = [i.strip() for i in indices if i.strip()]
+
+    # Select indices that match the optional provided dates 
     if dates:
-        #Select indices that match the provided dates
         date_patterns = [str(d) for d in dates]
         indices = [i for i in indices if any(date in i for d in date_patterns)]
+
     if not indices:
         eprint("No indices found to wipe.")
         return
     print("Deleting indices:")
     for index in indices:
         print(f" - {index}")
-    
+
+    # Delete indices    
     for index in indices:
         del_cmd = [
             dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', 'opensearch',
-            'curl', '-s', '-u', user, 'XDELETE', f'https://localhost:9200/{index}',
+            'curl', '-s', '-u', user, '-XDELETE', f'http://localhost:9200/{index}',
         ]
         if insecure:
             del_cmd.insert(-1, '-k')
