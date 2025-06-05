@@ -30,7 +30,6 @@ groupmod --non-unique --gid ${PGID:-${DEFAULT_GID}} ${PGROUP}
 #   inside of other CONFIG_MAP_DIR directories. More than one CONFIG_MAP_DIR can be specified
 #   in this variable, separated by ';' (for example, "CONFIG_MAP_DIR=configmap;secretmap").
 #
-# TODO: else with cpio, tar, cp?
 
 CONFIG_MAP_FIND_PRUNE_ARGS=()
 if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
@@ -60,7 +59,7 @@ if [[ -n ${CONFIG_MAP_DIR} ]] && command -v rsync >/dev/null 2>&1; then
           true
       done # loop over flattened filenames
 
-        # TODO - regarding ownership and permissions:
+        # regarding ownership and permissions:
         #
         # I *think* what we want to do here is change the ownership of
         #   these configmap-copied files to be owned by the user specified by PUID

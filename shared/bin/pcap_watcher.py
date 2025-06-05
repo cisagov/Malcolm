@@ -176,10 +176,6 @@ class EventWatcher:
         self.topic_socket = self.context.socket(zmq.PUB)
         self.topic_socket.bind(f"tcp://*:{PCAP_TOPIC_PORT}")
 
-        # todo: do I want to set this? probably not since this guy's whole job is to send
-        # and if he can't then what's the point? just block
-        # self.topic_socket.SNDTIMEO = 5000
-
         self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
     ###################################################################################################

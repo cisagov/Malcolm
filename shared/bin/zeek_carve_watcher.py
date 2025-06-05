@@ -68,10 +68,6 @@ class EventWatcher:
         self.ventilator_socket = self.context.socket(zmq.PUB)
         self.ventilator_socket.bind(f"tcp://*:{VENTILATOR_PORT}")
 
-        # todo: do I want to set this? probably not since this guy's whole job is to send
-        # and if he can't then what's the point? just block
-        # self.ventilator_socket.SNDTIMEO = 5000
-
         self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
     ###################################################################################################

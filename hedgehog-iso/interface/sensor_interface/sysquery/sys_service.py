@@ -9,8 +9,6 @@ path = os.path.join(os.path.sep.join(__file__.split(os.path.sep)[:-3]), "sensor_
 
 
 def service(command):
-    # TODO implement better error handling
-
     command, arguement = command.split(" ")
 
     command_line = os.path.join(path, command)

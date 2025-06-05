@@ -37,7 +37,6 @@ event file_sniff(f: fa_file, meta: fa_metadata) {
 
     local uid: string = "unknown";
     if (f?$conns)
-      # todo this is a little hacky, figure out how to do this better
       for (cid in f$conns) {
         uid = f$conns[cid]$uid;
         break;

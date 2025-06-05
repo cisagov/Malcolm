@@ -310,7 +310,6 @@ ln -s -f /opt/arkime/bin/npx /usr/local/bin
 # as such, we're going to reset zeek to a "clean" state after each reboot. the config files will get
 # regenerated when we are about to deploy zeek itself.
 # so, now make a complete backup of /opt/zeek as it's going to have its ownership changed during runtime
-# TODO: check this with .deb install
 rsync -a "${ZEEK_DIR}"/ "${ZEEK_DIR}".orig
 
 # enable sensor init scripts
