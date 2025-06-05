@@ -108,9 +108,8 @@ capture_service_access:
     - index_patterns:
         - "arkime_*"
       allowed_actions:
-        - create_index
         - read
-        - index
+        - create_index
         - indices:admin/aliases/get
         - indices:admin/mapping/put
         - indices:admin/mappings/get

@@ -1007,6 +1007,7 @@ LOG_IGNORE_REGEX = re.compile(
   | DB\s+saved\s+on\s+disk
   | DEPRECATION
   | descheduling\s+job\s*id
+  | DON'T\s+DO\s+IT.*bad\s+idea
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
