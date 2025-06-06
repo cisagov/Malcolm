@@ -1142,7 +1142,7 @@ def ready():
 
     try:
         netboxStatus = requests.get(
-            f'{netboxUrl}/api/status/?format=json',
+            f'{netboxUrl}/api/?format=json',
             headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
             verify=False,
         ).json()
@@ -1203,7 +1203,7 @@ def ready():
         logstash_lumberjack=logstashLJStatus,
         logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"], "red") != "red")
         and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"], "red") != "red"),
-        netbox=bool(isinstance(netboxStatus, dict) and netboxStatus.get('netbox-version')),
+        netbox=bool(isinstance(netboxStatus, dict) and netboxStatus.get('core')),
         opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
         pcap_monitor=pcapMonitorStatus,
         zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
