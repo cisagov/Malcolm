@@ -21,6 +21,18 @@ local path_role_envs = {
         "ROLE_READ_ACCESS",
         "ROLE_READ_WRITE_ACCESS"
     }},
+    { pattern = "^/arkime/(api/)?sessions?/(add|remove)tags", roles = {
+        "ROLE_ADMIN",
+        "ROLE_ARKIME_ADMIN",
+        "ROLE_READ_WRITE_ACCESS",
+        "ROLE_ARKIME_READ_WRITE_ACCESS"
+    }},
+    { pattern = "^/arkime/(api/)?(delete|upload)", roles = {
+        "ROLE_ADMIN",
+        "ROLE_ARKIME_ADMIN",
+        "ROLE_READ_WRITE_ACCESS",
+        "ROLE_ARKIME_READ_WRITE_ACCESS"
+    }},
 
     -- Arkime Hunt
     { pattern = "^/arkime/(api/)?hunts?", roles = {
