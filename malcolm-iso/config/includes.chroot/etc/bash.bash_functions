@@ -537,6 +537,9 @@ function malcolmmonitor () {
   if [[ -d "$HOME"/Malcolm ]]; then
     mkdir -p "$HOME"/Malcolm/.tmp
     export TMPDIR="$HOME"/Malcolm/.tmp
+    pushd ~/Malcolm >/dev/null 2>&1
+    EXTRACTED_FILES_DIR="$(grep -P 'source:.*extract_files' docker-compose.yml | head -n 1 | awk '{print $2}')"
+    popd >/dev/null 2>&1
     MAX_WIDTH=$(tput cols)
     MAX_HEIGHT=$(tput lines)
     /usr/bin/tmux new-session \; \
@@ -551,30 +554,30 @@ function malcolmmonitor () {
       split-window -v \; \
       split-window -v \; \
       select-pane -t 1 \; \
-      send-keys 'pushd ~/Malcolm >/dev/null 2>&1; ~/Malcolm/scripts/logs; popd >/dev/null 2>&1' C-m \; \
+      send-keys 'pushd ~/Malcolm >/dev/null 2>&1; ./scripts/logs; popd >/dev/null 2>&1' C-m \; \
       select-pane -t 2 \; \
       send-keys "docker stats --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}'" C-m \; \
       select-pane -t 3 \; \
-      send-keys 'while true; do clear; df -h ~/Malcolm/ | tail -n +2; sleep 60; done' C-m \; \
+      send-keys 'while true; do clear; df -h ~/Malcolm/ /malcolm/* 2>/dev/null | tail -n +2; sleep 60; done' C-m \; \
       select-pane -t 4 \; \
       send-keys 'top' C-m \; \
       split-window -v \; \
       select-pane -t 5 \; \
       send-keys 'while true; do clear; free -m | grep ^Mem: | cut -d" " -f2- | sed "s/[[:space:]]\+/,/g" | sed "s/^,//" ; sleep 60; done' C-m \; \
       select-pane -t 6 \; \
-      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker compose exec -u $(id -u) api curl -sSL 'http://localhost:5000/mapi/agg/event.dataset?from=1970' 2>/dev/null | python3 -m json.tool | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' | head -n $(( (MAX_HEIGHT / 2) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker compose exec -u $(id -u) api curl -sSL -H 'X-Forwarded-Roles: read_access' 'http://localhost:5000/mapi/agg/event.dataset?from=1970' 2>/dev/null | jq | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' | head -n $(( (MAX_HEIGHT / 2) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
       select-pane -t 7 \; \
-      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker compose exec -u $(id -u) api curl -sSL 'http://localhost:5000/mapi/agg?from=1970' 2>/dev/null | python3 -m json.tool | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; docker compose exec -u $(id -u) api curl -sSL -H 'X-Forwarded-Roles: read_access' 'http://localhost:5000/mapi/agg?from=1970' 2>/dev/null | jq | grep -P '\b(doc_count|key)\b' | tr -d '\", ' | cut -d: -f2 | paste - - -d'\t\t' ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
       split-window -v \; \
       select-pane -t 8 \; \
-      send-keys "while true; do clear; find ~/Malcolm/zeek-logs/extract_files -type f | sed 's@.*/\(.*\)/.*@\1@' | sort | uniq -c | sort -nr; sleep 60; done" C-m \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; find "$EXTRACTED_FILES_DIR" -type f | sed 's@.*/\(.*\)/.*@\1@' | sort | uniq -c | sort -nr; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
       select-pane -t 9 \; \
-      send-keys "while true; do clear; find ~/Malcolm/zeek-logs/extract_files -type f | sed 's@.*/@@' | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -n $(( (MAX_HEIGHT / 3) - 1 )) ; sleep 60; done" C-m \; \
+      send-keys "while true; do clear; pushd ~/Malcolm >/dev/null 2>&1; find "$EXTRACTED_FILES_DIR" -type f | sed 's@.*/@@' | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -n $(( (MAX_HEIGHT / 3) - 1 )) ; popd >/dev/null 2>&1; sleep 60; done" C-m \; \
       select-pane -t 9 \; \
       resize-pane -R $(( ($MAX_WIDTH / 2) - 30 )) \; \
       select-pane -t 1 \; \
       resize-pane -D 999 \; \
-      resize-pane -U 24 \; \
+      resize-pane -U 26 \; \
       select-pane -t 3 \; \
       resize-pane -D 999 \; \
       resize-pane -U 1 \; \
