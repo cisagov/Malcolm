@@ -39,6 +39,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Keycloak](authsetup.md#AuthKeycloak)
             * [Using a remote Keycloak instance](authsetup.md#AuthKeycloakRemote)
             * [Using the embedded Keycloak instance](authsetup.md#AuthKeycloakEmbedded)
+            * [Known Limitation with Hedgehog Linux](authsetup.md#AuthKeycloakHedgehog)
             * [Groups and roles](authsetup.md#AuthKeycloakGroupsRoles)
                 - [Role-based access control](authsetup.md#AuthKeycloakRBAC)
                 - [System-wide required user groups and realm roles](authsetup.md#AuthKeycloakReqGroupsRoles)

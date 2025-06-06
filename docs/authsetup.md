@@ -7,6 +7,7 @@
     - [Keycloak](#AuthKeycloak)
         + [Using a remote Keycloak instance](#AuthKeycloakRemote)
         + [Using the embedded Keycloak instance](#AuthKeycloakEmbedded)
+        + [Known Limitation with Hedgehog Linux](#AuthKeycloakHedgehog)
         + [Groups and roles](#AuthKeycloakGroupsRoles)
             * [Role-based access control](#AuthKeycloakRBAC)
             * [System-wide required user groups and realm roles](#AuthKeycloakReqGroupsRoles)
@@ -117,16 +118,6 @@ For encrypted connections (whether using **StartTLS** or **LDAPS**), Malcolm wil
 Malcolm can utilize Keycloak, an identity and access management (IAM) tool, to provide a more robust authentication and authorization experience, including single sign-on (SSO) functionality.
 
 The guides in this section cover configuring Malcolm to use Keycloak for authentication, but do not go into the details of the many capabilities Keycloak provides, including [identity providers](https://www.keycloak.org/docs/latest/server_admin/index.html#_identity_broker), [SSO protocols](https://www.keycloak.org/docs/latest/server_admin/index.html#sso-protocols), [federate one or more LDAP or Kerberos servers](https://www.keycloak.org/docs/latest/server_admin/index.html#_user-storage-federation), and more. Refer to the Keycloak [Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/index.html) for information on these and other topics.
-
-### Known Limitation with Hedgehog Linux
-
-Due to incompatibilities between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm's nginx reverse proxy, and Keycloak, if Malcolm is using a [local OpenSearch](#OpenSearchInstance) instance exposed to external hosts, that endpoint (typically port 9200/tcp) must be authenticated using [HTTP basic](#AuthBasicAccountManagement) authentication even when Keycloak is selected as Malcolm's main authentication method.
-
-When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, the credentials entered should be those described above in the section on [**local account management**](#AuthBasicAccountManagement), not Keycloak credentials. In this configuration, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page as described above. These credentials are **only** valid for Malcolm's local OpenSearch API endpoint.
-
-This limitation does not apply when Malcolm is configured to use a remote OpenSearch or Elasticsearch instance.
-
-The Malcolm development team is exploring solutions to this issue.
 
 ### <a name="AuthKeycloakRemote"></a>Using a remote Keycloak instance
 
@@ -342,6 +333,19 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 29. After successfully signing in, Keycloak redirects back to the Malcolm landing page. Additional users can now be added by navigating to Keycloak (by clicking the **👤 Keycloak Authentication** link) and repeating steps 11 and 12 for each new user to be added.
 
 ![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_login_landing.png)
+
+### <a name="AuthKeycloakHedgehog"></a>Known Limitation with Hedgehog Linux
+
+Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts.
+
+If Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for that endpoint — even when Keycloak is selected as Malcolm’s primary authentication method.
+
+When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, use the local Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
+
+* The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
+* These basic credentials apply *only* to Malcolm’s OpenSearch API endpoint.
+
+This limitation does not apply if Malcolm is connected to a remote OpenSearch or Elasticsearch [instance](opensearch-instances.md#OpenSearchInstance).
 
 ### <a name="AuthKeycloakGroupsRoles"></a>Groups and roles
 
