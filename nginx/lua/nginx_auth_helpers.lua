@@ -180,7 +180,7 @@ function _M.set_headers(username, token, groups, roles)
                 role_set[role] = true
             end
             -- Apply role expansion logic based on current request URI
-            local request_uri = ngx.var.uri or ""
+            local request_uri = ngx.var.request_uri:match("^[^?]+") or ""
             for pattern, expansion in pairs(role_expansion_map) do
                 local m, err = ngx.re.match(request_uri, pattern)
                 if m then
@@ -341,7 +341,7 @@ function _M.check_rbac(token_data)
     end
 
     -- URI -> ENV VARS mapping
-    local uri = ngx.var.uri
+    local uri = ngx.var.request_uri:match("^[^?]+") or ""
     local username = token_data.preferred_username or ""
     local roles = (token_data.realm_access and token_data.realm_access.roles) or {}
 
