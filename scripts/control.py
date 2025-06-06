@@ -233,60 +233,81 @@ def checkEnvFilesAndValues():
                             if os.path.isfile(sourceEnvFileName):
                                 sourceVars = dotenvImported.dotenv_values(sourceEnvFileName)
                                 # open the destination file for writing new values
-                                with open(destEnvFileName, "a") as destEnvFileHandle:
-                                    newlineAdded = False
-                                    for destKey, sourceKey in keys.items():
-                                        sourceVarName = None
-                                        # in the yml, the variable could be defined like this:
-                                        #
-                                        # destfile:
-                                        #   sourcefile:
-                                        #     destvarname:
-                                        #       sourcevarname
-                                        #
-                                        # in which case the value of sourcefile.sourcevarname is added as
-                                        #   destfile.destvarname
-                                        #
-                                        # another option is this:
-                                        #
-                                        # destfile:
-                                        #   sourcefile:
-                                        #     destvarname:
-                                        #       sourcevarname:
-                                        #         "true": disabled
-                                        #         "false": local
-                                        #
-                                        # when this is the case (sourcevarname is a hash), the value of
-                                        #   sourcefile.sourcefilename is looked up in this hash, and
-                                        #   if it exists, that value is added as destfile.destfilename
-                                        if (
-                                            (
-                                                (isinstance(sourceKey, str) and (sourceVarName := sourceKey))
-                                                or (
-                                                    isinstance(sourceKey, dict)
-                                                    and (len(sourceKey) == 1)
-                                                    and (sourceVarName := next(iter(sourceKey)))
+                                destEnvValues = []
+                                for destKey, sourceKey in keys.items():
+                                    sourceVarName = None
+                                    # in the yml, the variable could be defined like this:
+                                    #
+                                    # destfile:
+                                    #   sourcefile:
+                                    #     destvarname:
+                                    #       sourcevarname
+                                    #
+                                    # in which case the value of sourcefile.sourcevarname is added as
+                                    #   destfile.destvarname
+                                    #
+                                    # another option is this:
+                                    #
+                                    # destfile:
+                                    #   sourcefile:
+                                    #     destvarname:
+                                    #       sourcevarname:
+                                    #         "true": disabled
+                                    #         "false": local
+                                    #
+                                    # when this is the case (sourcevarname is a hash), the value of
+                                    #   sourcefile.sourcefilename is looked up in this hash, and
+                                    #   if it exists, that value is added as destfile.destfilename
+                                    if (
+                                        (
+                                            (isinstance(sourceKey, str) and (sourceVarName := sourceKey))
+                                            or (
+                                                isinstance(sourceKey, dict)
+                                                and (len(sourceKey) == 1)
+                                                and (sourceVarName := next(iter(sourceKey)))
+                                            )
+                                        )
+                                        # if a key exists in the source, but is either not in the dest, or IS in the
+                                        # dest but it has value map, it needs to be written
+                                        and ((destKey not in destVars) or isinstance(sourceKey, dict))
+                                        and sourceVarName in sourceVars
+                                    ):
+                                        if isinstance(sourceKey, str):
+                                            if args.debug:
+                                                eprint(
+                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
+                                                )
+                                            destEnvValues.append(
+                                                EnvValue(
+                                                    True,
+                                                    destEnvFileName,
+                                                    destKey,
+                                                    sourceVars[sourceVarName],
                                                 )
                                             )
-                                            # if a key exists in the source, but not in the dest, it needs to be written
-                                            and (destKey not in destVars)
-                                            and sourceVarName in sourceVars
+
+                                        elif isinstance(sourceKey, dict) and (
+                                            destVal := {
+                                                str(k): str(v) for k, v in sourceKey[sourceVarName].items()
+                                            }.get(str(sourceVars[sourceVarName]), None)
                                         ):
                                             if args.debug:
                                                 eprint(
                                                     f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
                                                 )
-                                            if not newlineAdded:
-                                                print('', file=destEnvFileHandle)
-                                                newlineAdded = True
-                                            if isinstance(sourceKey, dict) and (
-                                                destVal := {
-                                                    str(k): str(v) for k, v in sourceKey[sourceVarName].items()
-                                                }.get(str(sourceVars[sourceVarName]), None)
-                                            ):
-                                                print(f"{destKey}={destVal}", file=destEnvFileHandle)
-                                            else:
-                                                print(f"{destKey}={sourceVars[sourceVarName]}", file=destEnvFileHandle)
+                                            destEnvValues.append(
+                                                EnvValue(
+                                                    True,
+                                                    destEnvFileName,
+                                                    destKey,
+                                                    destVal,
+                                                )
+                                            )
+                                if destEnvValues:
+                                    UpdateEnvFiles(
+                                        destEnvValues,
+                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH,
+                                    )
 
                 # removed_environment_variables contains values that used to be in an environment variable file, but no longer belong there
                 if 'removed_environment_variables' in envVarActionsYaml:

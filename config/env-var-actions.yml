@@ -49,6 +49,11 @@ copied_environment_variables:
         NGINX_LDAP_TLS_STUNNEL_CHECK_IP
       NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL:
         NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
+  opensearch:
+    opensearch:
+      OPENSEARCH_URL:
+        OPENSEARCH_URL:
+          "http://opensearch:9200": "https://opensearch:9200"
   postgres:
     netbox:
       DB_HOST:
