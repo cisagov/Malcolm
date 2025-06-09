@@ -58,6 +58,7 @@ $private_ip_subnets = {
   IPAddr.new("fc00::/7")        => { network: IPAddr.new("fc00::"), broadcast: IPAddr.new("fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") }
 }.freeze
 
+
 ##############################################################################################
 class NetBoxConnLazy
   def initialize(
@@ -108,6 +109,95 @@ class NetBoxConnLazy
     end
     @connected = false
   end
+end
+
+##############################################################################################
+def assignable_private_ip?(ip)
+  ipaddr = if ip.is_a?(IPAddr)
+             ip
+           else
+             begin
+               IPAddr.new(ip)
+             rescue
+               nil
+             end
+           end
+  return false if ipaddr.nil?
+
+  $private_ip_subnets.find do |subnet, addresses|
+    if subnet.include?(ipaddr)
+      return ipaddr != addresses[:network] && ipaddr != addresses[:broadcast]
+    end
+  end
+
+  false
+end
+
+##############################################################################################
+def cidr_is_private?(cidr)
+  $private_ip_subnets.any? { |subnet, _| subnet.include?(cidr) }
+end
+
+##############################################################################################
+def parse_autopopulate_config(raw_config)
+  return { allow_all_private: true, entries: [] } if raw_config.nil? || raw_config.strip.empty?
+
+  entries = []
+
+  raw_config.split(',').each do |raw_entry|
+    entry = raw_entry.strip
+    next if entry.empty?
+
+    is_exclusion = entry.start_with?('!')
+    cidr_str = is_exclusion ? entry[1..] : entry
+
+    begin
+      cidr = IPAddr.new(cidr_str)
+    rescue IPAddr::InvalidAddressError
+      puts "parse_autopopulate_config invalid CIDR: #{cidr_str}"
+      next
+    end
+
+    unless cidr_is_private?(cidr.to_range.first)
+      puts "parse_autopopulate_config skipping non-private CIDR: #{cidr_str}"
+      next
+    end
+
+    entries << { cidr: cidr, allow: !is_exclusion }
+  end
+
+  { allow_all_private: false, entries: entries }
+end
+
+##############################################################################################
+def autopopulate_allowed?(ip_input, config)
+  ip = if ip_input.is_a?(IPAddr)
+         ip_input
+       else
+         begin
+           IPAddr.new(ip_input)
+         rescue IPAddr::InvalidAddressError
+           return false
+         end
+       end
+  return false unless assignable_private_ip?(ip)
+
+  return true if config.nil? || config[:allow_all_private]
+
+  # If no positive entries, but negatives exist, allow all except those excluded
+  if config[:entries].none? { |e| e[:allow] } && !config[:entries].empty?
+    return !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
+  end
+
+  # Iterate entries in order; last matching rule wins
+  allow = nil
+  config[:entries].each do |entry|
+    if entry[:cidr].include?(ip)
+      allow = entry[:allow]
+    end
+  end
+
+  allow.nil? ? false : allow
 end
 
 ##############################################################################################
@@ -359,6 +449,16 @@ def register(
   end
   @autopopulate_create_prefix = [1, true, '1', 'true', 't', 'on', 'enabled'].include?(_autopopulate_create_prefix_str.to_s.downcase)
 
+  _autopopulate_subnets = params["autopopulate_subnets"]
+  _autopopulate_subnets_env = params["autopopulate_subnets_env"]
+  if _autopopulate_subnets.nil? && !_autopopulate_subnets_env.nil?
+    _autopopulate_subnets = ENV[_autopopulate_subnets_env]
+  end
+  if !_autopopulate_subnets.nil? && _autopopulate_subnets.empty?
+    _autopopulate_subnets = nil
+  end
+  @autopopulate_subnets_config = parse_autopopulate_config(_autopopulate_subnets)
+
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = get_register_ttl_cache(:manuf_hash, params.fetch("manuf_cache_size", 4096), @cache_ttl, true)
 
@@ -449,28 +549,6 @@ def getset_with_tracking(cache, key)
     yield
   end
   { result: result, cache_hit: cache_hit }
-end
-
-##############################################################################################
-def assignable_private_ip?(ip)
-  ipaddr = if ip.is_a?(IPAddr)
-             ip
-           else
-             begin
-               IPAddr.new(ip)
-             rescue
-               nil
-             end
-           end
-  return false if ipaddr.nil?
-
-  $private_ip_subnets.find do |subnet, addresses|
-    if subnet.include?(ipaddr)
-      return ipaddr != addresses[:network] && ipaddr != addresses[:broadcast]
-    end
-  end
-
-  false
 end
 
 ##############################################################################################
@@ -1424,7 +1502,8 @@ def netbox_lookup(
   _nb = nil
 
   _key_ip = IPAddr.new(ip_key) rescue nil
-  if assignable_private_ip?(_key_ip) && (@autopopulate || (!@target.nil? && !@target.empty?))
+
+  if autopopulate_allowed?(_key_ip, @autopopulate_subnets_config) && (@autopopulate || (!@target.nil? && !@target.empty?))
 
     _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
