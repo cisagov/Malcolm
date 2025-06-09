@@ -206,7 +206,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       sed -i 's/;\{2,\}/;/g' "${ARKIME_CONFIG_FILE}"
       # remove trailing semicolon from plugins= line if it exists
       sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "${ARKIME_CONFIG_FILE}"
-    fi
+    fi 
 
     # build mappings from Malcolm roles to Arkime roles for config.ini
     #   - https://arkime.com/settings#user-role-mappings
@@ -268,15 +268,18 @@ fi
 # This allows changes to persist when the wise application edits its own ini file at runtime.
 if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]  && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
-    chown -fR "$PUSER":"$PUSER" "${ARKIME_DIR}"/wiseini
 fi
 
-if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]] && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
-  sed -i "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
-  sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
+if [[  -d "${ARKIME_DIR}/wiseini" ]]; then
+  chown -fR "$PUSER":"$PUSER" "${ARKIME_DIR}/wiseini"
+fi
+
+if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
+  sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
+  sed "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
   if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
-    sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseetc/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
+    sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
 fi
 
