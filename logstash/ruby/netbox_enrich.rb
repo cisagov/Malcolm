@@ -16,15 +16,18 @@ require 'stringex_lite'
 # Despite the warning against globla variables, we are using them here in order to make sure that
 #   we don't have duplicate caches for things cross different clones of the filter,
 #   which is what happens if you just use @instance_variables. However, we should
-#   be safe because 1) we are using Concurrent::Hash to maintain these per-type caches, and
+#   be safe because 1) we are using Concurrent::Map to maintain these per-type caches, and
 #   2) because the caches themselves are threadsafe. Note that this will share these values
 #   across filters and pipelines, though, as far as I understand it.
 # See "Avoiding Concurrency Issues"
 #   https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html#plugins-filters-ruby-concurrency
 # Note that these calls are intended to be used during the "register" method.
 
-$global_caches_hash = Concurrent::Hash.new
-$global_ttl_caches_hash = Concurrent::Hash.new
+$global_caches_hash = Concurrent::Map.new
+$global_ttl_caches_hash = Concurrent::Map.new
+
+$global_autopopulate_subnets_config_site_hash = Concurrent::Map.new
+$global_autopopulate_subnets_config_site_hash_populated = Concurrent::AtomicFixnum.new(0)
 
 def get_register_cache(
   cache_type,
@@ -47,7 +50,7 @@ end
 # These global variables are used for generating performance profiling stats for
 #   NetBox API calls and are not used by default
 $method_timings_logging_thread_started = Concurrent::AtomicFixnum.new(0)
-$method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
+$method_timings = Concurrent::Map.new
 $method_timings_logging_thread = nil
 $method_timings_logging_thread_running = false
 
@@ -88,7 +91,7 @@ class NetBoxConnLazy
 
     if $method_timings_logging_thread_running
       duration = (Time.now - start_time) * 1000
-      $method_timings[key] << duration
+      $method_timings.compute_if_absent(key) { Concurrent::Array.new } << duration
     end
 
     @connected ||= !result.nil?
@@ -170,10 +173,15 @@ def parse_autopopulate_config(raw_config)
 end
 
 ##############################################################################################
-def parse_autopopulate_configs_for_sites(raw_config)
-  return { '*' => { allow_all_private: true, entries: [] } } if raw_config.nil? || raw_config.strip.empty?
+def parse_autopopulate_configs_for_sites(raw_config, config_site_hash)
+  site_configs = (config_site_hash.respond_to?(:[]) &&
+                  config_site_hash.respond_to?(:[]=) &&
+                  config_site_hash.respond_to?(:each_pair)) ? config_site_hash : Hash.new
 
-  site_configs = {}
+  if raw_config.nil? || raw_config.strip.empty?
+    site_configs['*'] = { allow_all_private: true, entries: [] }
+    return site_configs
+  end
 
   raw_config.split(';').each do |site_entry|
     site_entry = site_entry.strip
@@ -450,7 +458,14 @@ def register(
   if !_autopopulate_subnets.nil? && _autopopulate_subnets.empty?
     _autopopulate_subnets = nil
   end
-  @autopopulate_subnets_config_site_hash = parse_autopopulate_configs_for_sites(_autopopulate_subnets)
+
+  if !_autopopulate_subnets.nil? &&
+     ($global_autopopulate_subnets_config_site_hash_populated.value == 0) &&
+     $global_autopopulate_subnets_config_site_hash_populated.compare_and_set(0, 1)
+  then
+    _config_site_hash = parse_autopopulate_configs_for_sites(_autopopulate_subnets, $global_autopopulate_subnets_config_site_hash)
+    puts "IP autopopulation filter: #{JSON.generate(Hash[_config_site_hash.each_pair.to_a])}" if @debug
+  end
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = get_register_ttl_cache(:manuf_hash, params.fetch("manuf_cache_size", 4096), @cache_ttl, true)
@@ -501,7 +516,6 @@ def register(
   @virtual_machine_device_type_name = "Virtual Machine".freeze
 
   if @debug_timings && ($method_timings_logging_thread_started.value == 0) && $method_timings_logging_thread_started.compare_and_set(0, 1)
-     $method_timings = Concurrent::Hash.new { |h, k| h[k] = Concurrent::Array.new }
      $method_timings_logging_thread = Thread.new { log_method_timings_thread_proc }
      $method_timings_logging_thread_running = true
    end
@@ -588,7 +602,7 @@ end
 
 def autopopulate_allowed_debug?(ip_input, site_id, config_site_hash)
   result = autopopulate_allowed?(ip_input, site_id, config_site_hash)
-  puts "autopopulate_allowed: (#{site_id.to_s}, #{ip_input.to_s}, #{JSON.generate(config_site_hash)}): #{result})"
+  puts "autopopulate_allowed: (#{site_id.to_s}, #{ip_input.to_s}: #{result})"
   return result
 end
 
@@ -1544,7 +1558,7 @@ def netbox_lookup(
 
   _key_ip = IPAddr.new(ip_key) rescue nil
 
-  if (@autopopulate || (!@target.nil? && !@target.empty?)) && autopopulate_allowed_debug?(_key_ip, site_id, @autopopulate_subnets_config_site_hash)
+  if (@autopopulate || (!@target.nil? && !@target.empty?)) && autopopulate_allowed?(_key_ip, site_id, $global_autopopulate_subnets_config_site_hash)
 
     _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
