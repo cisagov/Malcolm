@@ -437,6 +437,8 @@ Should Malcolm enrich network traffic using NetBox? (Y / n): y
 
 Should Malcolm automatically populate NetBox inventory based on observed network traffic? (y / N): n
 
+Specify NetBox IP autopopulation filter:
+
 Specify default NetBox site name: Malcolm
 
 Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic? (y / N): n

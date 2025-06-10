@@ -73,6 +73,7 @@ from malcolm_common import (
     UpdateEnvFiles,
     UserInputDefaultsBehavior,
     UserInterfaceMode,
+    ValidNetBoxSubnetFilter,
     YAMLDynamic,
     YesOrNo,
 )
@@ -1900,6 +1901,21 @@ class Installer(object):
                         default=args.netboxAutoPopulate,
                         extraLabel=BACK_LABEL,
                     )
+                    loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox IP autopopulation filter')
+                    while loopBreaker.increment():
+                        netboxAutoPopulateSubnets = ''.join(
+                            (
+                                InstallerAskForString(
+                                    'Specify NetBox IP autopopulation filter',
+                                    default=args.netboxAutopopFilter,
+                                    extraLabel=BACK_LABEL,
+                                )
+                                if (netboxEnabled and netboxAutoPopulate)
+                                else ''
+                            ).split()
+                        )
+                        if ValidNetBoxSubnetFilter(netboxAutoPopulateSubnets):
+                            break
                     netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
                         'Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?',
                         default=args.netboxLogstashAutoSubnets,
@@ -2333,6 +2349,13 @@ class Installer(object):
                 os.path.join(args.configDir, 'netbox-common.env'),
                 'NETBOX_AUTO_POPULATE',
                 TrueOrFalseNoQuote(netboxAutoPopulate),
+            ),
+            # NetBox IP autopopulation filter
+            EnvValue(
+                True,
+                os.path.join(args.configDir, 'netbox-common.env'),
+                'NETBOX_AUTO_POPULATE_SUBNETS',
+                netboxAutoPopulateSubnets,
             ),
             # NetBox default site name
             EnvValue(
@@ -4842,6 +4865,15 @@ def main():
         const=True,
         default=False,
         help="Automatically populate NetBox inventory based on observed network traffic",
+    )
+    netboxArgGroup.add_argument(
+        '--netbox-autopopulate-filter',
+        dest='netboxAutopopFilter',
+        required=False,
+        metavar='<string>',
+        type=str,
+        default='',
+        help='NetBox IP autopopulation filter',
     )
     netboxArgGroup.add_argument(
         '--netbox-auto-prefixes',

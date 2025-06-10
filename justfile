@@ -83,6 +83,7 @@ _base_config +CAPTURE_FLAGS:
     --netbox-autopopulate "$NETBOX_AUTOPOPULATE" \
     --netbox-auto-prefixes "$NETBOX_AUTO_PREFIXES" \
     --netbox-site-name "$NETBOX_SITE_NAME" \
+    --netbox-autopopulate-filter "$NETBOX_AUTO_POPULATE_SUBNETS" \
     --extra \
       "nginx.env:NGINX_LOG_ACCESS_AND_ERRORS=$NGINX_LOG_ACCESS_AND_ERRORS" \
       "arkime.env:ARKIME_ROTATE_INDEX=$ARKIME_ROTATE_INDEX" \

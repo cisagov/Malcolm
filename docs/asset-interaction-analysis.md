@@ -121,15 +121,15 @@ This variable is especially useful for excluding dynamic address ranges such as 
 
 #### Examples
 
-* `192.168.100.0/24`  
+* `192.168.100.0/24`
     * Only allow addresses in `192.168.100.0/24`
-* `!172.16.0.0/12`  
+* `!172.16.0.0/12`
     * Allow all private IPs *except* `172.16.0.0/12`
-* `!10.0.0.0/8,10.0.10.0/24`  
+* `!10.0.0.0/8,10.0.10.0/24`
     * Exclude `10.0.0.0/8` generally, but *allow* `10.0.10.0/24` as an override
-* `10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32`  
+* `10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32`
     * Allow all of `10.0.0.0/8` *except* `10.0.10.0/16`, *but still allow* `10.0.10.5`
-* `!fc00::/7,fd12:3456:789a:1::/64`  
+* `!fc00::/7,fd12:3456:789a:1::/64`
     * Exclude all [ULA](https://en.wikipedia.org/wiki/Unique_local_address) IPv6 ranges, *except* a specific subnet
 
 ### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs

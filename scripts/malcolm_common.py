@@ -5,6 +5,7 @@
 
 import getpass
 import importlib
+import ipaddress
 import json
 import os
 import math
@@ -770,6 +771,28 @@ def posInt(value):
         raise ValueError("{} is an invalid positive int value".format(value))
 
     return ivalue
+
+
+###################################################################################################
+def ValidNetBoxSubnetFilter(value):
+    if not value.strip():
+        return True
+
+    entries = [e.strip() for e in value.split(',')]
+    cidr_pattern = re.compile(r'^!?([0-9a-fA-F:.]+/\d+)$')
+
+    for entry in entries:
+        match = cidr_pattern.match(entry)
+        if not match:
+            return False
+
+        cidr = match.group(1)
+        try:
+            ipaddress.ip_network(cidr, strict=False)
+        except ValueError:
+            return False
+
+    return True
 
 
 ###################################################################################################
