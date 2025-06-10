@@ -588,7 +588,7 @@ end
 
 def autopopulate_allowed_debug?(ip_input, site_id, config_site_hash)
   result = autopopulate_allowed?(ip_input, site_id, config_site_hash)
-  puts "autopopulate_allowed: (#{site_id.to_s}, #{ip_input.to_s}, #{JSON.generate(config_site_hash)}): #{result})" if @debug
+  puts "autopopulate_allowed: (#{site_id.to_s}, #{ip_input.to_s}, #{JSON.generate(config_site_hash)}): #{result})"
   return result
 end
 
@@ -1544,7 +1544,7 @@ def netbox_lookup(
 
   _key_ip = IPAddr.new(ip_key) rescue nil
 
-  if autopopulate_allowed?(_key_ip, site_id, @autopopulate_subnets_config_site_hash) && (@autopopulate || (!@target.nil? && !@target.empty?))
+  if (@autopopulate || (!@target.nil? && !@target.empty?)) && autopopulate_allowed_debug?(_key_ip, site_id, @autopopulate_subnets_config_site_hash)
 
     _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
