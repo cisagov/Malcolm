@@ -778,19 +778,31 @@ def ValidNetBoxSubnetFilter(value):
     if not value.strip():
         return True
 
-    entries = [e.strip() for e in value.split(',')]
+    site_entries = [entry.strip() for entry in value.split(';') if entry.strip()]
     cidr_pattern = re.compile(r'^!?([0-9a-fA-F:.]+/\d+)$')
 
-    for entry in entries:
-        match = cidr_pattern.match(entry)
-        if not match:
+    for entry in site_entries:
+        if ':' in entry:
+            site_key, cidr_list = entry.split(':', 1)
+            site_key = site_key.strip()
+        else:
+            site_key = '*'
+            cidr_list = entry
+
+        if not site_key:  # site name can be '*', any string, or omitted (becomes '*')
             return False
 
-        cidr = match.group(1)
-        try:
-            ipaddress.ip_network(cidr, strict=False)
-        except ValueError:
-            return False
+        cidr_entries = [cidr.strip() for cidr in cidr_list.split(',') if cidr.strip()]
+        for cidr_entry in cidr_entries:
+            match = cidr_pattern.match(cidr_entry)
+            if not match:
+                return False
+
+            cidr = match.group(1)
+            try:
+                ipaddress.ip_network(cidr, strict=False)
+            except ValueError:
+                return False
 
     return True
 
