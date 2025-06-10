@@ -1,3 +1,5 @@
+# code editor files
+.vscode/
 # arkime
 /arkime/etc/GeoLite2-*
 /arkime/etc/oui.txt*
