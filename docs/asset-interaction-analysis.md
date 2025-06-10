@@ -119,6 +119,12 @@ When [passive device autopopulation](#NetBoxPopPassive) is enabled, devices with
 
 This variable is especially useful for excluding dynamic address ranges such as those used by DHCP, which should generally not trigger autopopulation in NetBox. Since these addresses can change frequently and aren't tied to specific devices, including them could result in inaccurate or noisy inventory data. By fine-tuning which private subnets are included or excluded, users can ensure that only meaningful, typically static assignments are autopopulated.
 
+#### Multiple NetBox Sites
+
+Users may wish to apply different CIDR subnet filters for autopopulation within different NetBox sites. To support this, the `NETBOX_AUTO_POPULATE_SUBNETS` environment variable can accept multiple site-specific entries, each specifying a NetBox site name or numeric site ID, followed by a colon (`:`), and a comma-separated list of subnet rules (just like the single-site case described above). Multiple site entries should be separated by semicolons (`;`).
+
+If no matching site-specific rule is found, the default rule — defined using an asterisk (`*`) as the site key, or by omitting the site name or ID — will be used as a fallback if present. If no fallback is defined, then all private IPs are autopopulated by default.
+
 #### Examples
 
 * `192.168.100.0/24`
@@ -131,6 +137,8 @@ This variable is especially useful for excluding dynamic address ranges such as 
     * Allow all of `10.0.0.0/8` *except* `10.0.10.0/16`, *but still allow* `10.0.10.5`
 * `!fc00::/7,fd12:3456:789a:1::/64`
     * Exclude all [ULA](https://en.wikipedia.org/wiki/Unique_local_address) IPv6 ranges, *except* a specific subnet
+* `site1:10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32;site2:!172.16.0.0/12;site3:!fc00::/7,fd12:3456:789a:1::/64;!192.168.0.0/16`
+    * Specify different autopopulation rules for different NetBox sites
 
 ### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs
 

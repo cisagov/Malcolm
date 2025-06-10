@@ -170,40 +170,27 @@ def parse_autopopulate_config(raw_config)
 end
 
 ##############################################################################################
-def autopopulate_allowed?(ip_input, config)
-  ip = if ip_input.is_a?(IPAddr)
-         ip_input
-       else
-         begin
-           IPAddr.new(ip_input)
-         rescue IPAddr::InvalidAddressError
-           return false
-         end
-       end
-  return false unless assignable_private_ip?(ip)
+def parse_autopopulate_configs_for_sites(raw_config)
+  return { '*' => { allow_all_private: true, entries: [] } } if raw_config.nil? || raw_config.strip.empty?
 
-  return true if config.nil? || config[:allow_all_private]
+  site_configs = {}
 
-  # If no positive entries, but negatives exist, allow all except those excluded
-  if config[:entries].none? { |e| e[:allow] } && !config[:entries].empty?
-    return !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
-  end
+  raw_config.split(';').each do |site_entry|
+    site_entry = site_entry.strip
+    next if site_entry.empty?
 
-  # Iterate entries in order; last matching rule wins
-  allow = nil
-  config[:entries].each do |entry|
-    if entry[:cidr].include?(ip)
-      allow = entry[:allow]
+    if site_entry.include?(':')
+      site_id, cidr_list = site_entry.split(':', 2)
+      site_id = site_id.strip
+    else
+      site_id = '*'
+      cidr_list = site_entry
     end
+
+    site_configs[site_id] = parse_autopopulate_config(cidr_list)
   end
 
-  allow.nil? ? false : allow
-end
-
-def autopopulate_allowed_debug?(ip_input, config)
-  result = autopopulate_allowed?(ip_input, config)
-  puts "autopopulate_allowed: (#{ip_input.to_s}, #{JSON.generate(config)}): #{result})" if @debug
-  return result
+  site_configs
 end
 
 ##############################################################################################
@@ -463,7 +450,7 @@ def register(
   if !_autopopulate_subnets.nil? && _autopopulate_subnets.empty?
     _autopopulate_subnets = nil
   end
-  @autopopulate_subnets_config = parse_autopopulate_config(_autopopulate_subnets)
+  @autopopulate_subnets_config_site_hash = parse_autopopulate_configs_for_sites(_autopopulate_subnets)
 
   # case-insensitive hash of OUIs (https://standards-oui.ieee.org/) to Manufacturers (https://demo.netbox.dev/static/docs/core-functionality/device-types/)
   @manuf_hash = get_register_ttl_cache(:manuf_hash, params.fetch("manuf_cache_size", 4096), @cache_ttl, true)
@@ -555,6 +542,54 @@ def getset_with_tracking(cache, key)
     yield
   end
   { result: result, cache_hit: cache_hit }
+end
+
+##############################################################################################
+def autopopulate_allowed?(ip_input, site_id, config_site_hash)
+  ip = if ip_input.is_a?(IPAddr)
+         ip_input
+       else
+         begin
+           IPAddr.new(ip_input)
+         rescue IPAddr::InvalidAddressError
+           return false
+         end
+       end
+
+  return false unless assignable_private_ip?(ip)
+
+  # Determine applicable config: site-specific first, fallback to '*', else allow
+  config = config_site_hash[site_id]
+  if config.nil? && (site_id.is_a?(Integer) || site_id.to_s.match?(/\A[+-]?\d+\z/)) && (site_id.to_i > 0)
+    # the site is being looked up by ID, not name, but there's no matching site ID in the config_site_hash,
+    #   so we need to try to map to the name and see if there's a config for that instead
+    site_obj = lookup_or_create_site(site_id.to_s, '', nil)
+    if site_obj.is_a?(Hash) && (site_name = site_obj&.fetch(:name, site_obj&.fetch(:display, nil)))
+      config = config_site_hash[site_name]
+    end
+  end
+  config = config_site_hash['*'] if config.nil?
+
+  return true if config.nil? || config[:allow_all_private]
+
+  # If no positive entries, but negatives exist, allow all except those excluded
+  if config[:entries].none? { |e| e[:allow] } && !config[:entries].empty?
+    return !config[:entries].any? { |entry| entry[:cidr].include?(ip) }
+  end
+
+  # Iterate entries in order; last matching rule wins
+  allow = nil
+  config[:entries].each do |entry|
+    allow = entry[:allow] if entry[:cidr].include?(ip)
+  end
+
+  allow.nil? ? false : allow
+end
+
+def autopopulate_allowed_debug?(ip_input, site_id, config_site_hash)
+  result = autopopulate_allowed?(ip_input, site_id, config_site_hash)
+  puts "autopopulate_allowed: (#{site_id.to_s}, #{ip_input.to_s}, #{JSON.generate(config_site_hash)}): #{result})" if @debug
+  return result
 end
 
 ##############################################################################################
@@ -1509,7 +1544,7 @@ def netbox_lookup(
 
   _key_ip = IPAddr.new(ip_key) rescue nil
 
-  if autopopulate_allowed?(_key_ip, @autopopulate_subnets_config) && (@autopopulate || (!@target.nil? && !@target.empty?))
+  if autopopulate_allowed?(_key_ip, site_id, @autopopulate_subnets_config_site_hash) && (@autopopulate || (!@target.nil? && !@target.empty?))
 
     _nb = NetBoxConnLazy.new(@netbox_url, @netbox_token, @debug_verbose)
 
