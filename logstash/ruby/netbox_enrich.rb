@@ -200,6 +200,12 @@ def autopopulate_allowed?(ip_input, config)
   allow.nil? ? false : allow
 end
 
+def autopopulate_allowed_debug?(ip_input, config)
+  result = autopopulate_allowed?(ip_input, config)
+  puts "autopopulate_allowed: (#{ip_input.to_s}, #{JSON.generate(config)}): #{result})" if @debug
+  return result
+end
+
 ##############################################################################################
 def register(
   params

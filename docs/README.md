@@ -123,6 +123,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + Populating the NetBox inventory
             * [Manually](asset-interaction-analysis.md#NetBoxPopManual)
             * [Via passively-gathered network traffic metadata](asset-interaction-analysis.md#NetBoxPopPassive)
+                - [Subnets considered for autopopulation](asset-interaction-analysis.md#NetBoxAutoPopSubnets)
                 - [Matching device manufacturers to OUIs](asset-interaction-analysis.md#NetBoxPopPassiveOUIMatch)
             * [Via active discovery](asset-interaction-analysis.md#NetBoxPopActive)
         + [Compare NetBox inventory with database of known vulnerabilities](asset-interaction-analysis.md#NetBoxVuln)
