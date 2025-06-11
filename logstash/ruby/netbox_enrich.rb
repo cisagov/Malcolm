@@ -643,7 +643,7 @@ def filter(
     else
       _result, _key_ip, _nb_queried = nil, nil, false
     end
-    _private_ips.push(_key_ip) if _key_ip.private?
+    _private_ips.push(_key_ip) if _key_ip&.private?
     _netbox_queried ||= _nb_queried unless _lookup_tracking_result[:cache_hit]
 
     if !_result.nil? && !_result.empty?
