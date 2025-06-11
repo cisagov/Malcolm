@@ -202,8 +202,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     RBAC_FILE="$(mktemp)"
     CONFIG_RBAC_FILE="$(mktemp)"
     echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
-    # TODO: Once Arkime v5.6.5 is out remove this "false &&" cause their stuff will be fixed
-    if false && [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
+    if [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
       echo "arkimeUser=true" >> "${RBAC_FILE}"
       [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
         echo "arkimeAdmin=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
