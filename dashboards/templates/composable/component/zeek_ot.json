@@ -3489,6 +3489,9 @@
                 "sec_channel_id": {
                   "type": "long"
                 },
+                "sec_token_id": {
+                  "type": "long"
+                },
                 "sec_policy_uri": {
                   "type": "keyword"
                 },

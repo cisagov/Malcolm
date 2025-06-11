@@ -2099,6 +2099,7 @@ class MalcolmSource extends WISESource {
       "zeek.opcua_binary.res_hdr_service_diag_encoding",
       "zeek.opcua_binary.res_hdr_timestamp",
       "zeek.opcua_binary.sec_channel_id",
+      "zeek.opcua_binary.sec_token_id",
       "zeek.opcua_binary.sec_policy_uri",
       "zeek.opcua_binary.sec_policy_uri_len",
       "zeek.opcua_binary.seq_number",
