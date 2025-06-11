@@ -54,12 +54,12 @@ $method_timings = Concurrent::Map.new
 $method_timings_logging_thread = nil
 $method_timings_logging_thread_running = false
 
-$private_ip_subnets = {
-  IPAddr.new("10.0.0.0/8")      => { network: IPAddr.new("10.0.0.0"), broadcast: IPAddr.new("10.255.255.255") },
-  IPAddr.new("172.16.0.0/12")   => { network: IPAddr.new("172.16.0.0"), broadcast: IPAddr.new("172.31.255.255") },
-  IPAddr.new("192.168.0.0/16")  => { network: IPAddr.new("192.168.0.0"), broadcast: IPAddr.new("192.168.255.255") },
-  IPAddr.new("fc00::/7")        => { network: IPAddr.new("fc00::"), broadcast: IPAddr.new("fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff") }
-}.freeze
+$private_ip_subnets = [
+  IPAddr.new("10.0.0.0/8"),
+  IPAddr.new("172.16.0.0/12"),
+  IPAddr.new("192.168.0.0/16"),
+  IPAddr.new("fc00::/7")
+].freeze
 
 
 ##############################################################################################
@@ -114,32 +114,6 @@ class NetBoxConnLazy
   end
 end
 
-##############################################################################################
-def assignable_private_ip?(ip)
-  ipaddr = if ip.is_a?(IPAddr)
-             ip
-           else
-             begin
-               IPAddr.new(ip)
-             rescue
-               nil
-             end
-           end
-  return false if ipaddr.nil?
-
-  $private_ip_subnets.find do |subnet, addresses|
-    if subnet.include?(ipaddr)
-      return ipaddr != addresses[:network] && ipaddr != addresses[:broadcast]
-    end
-  end
-
-  false
-end
-
-##############################################################################################
-def cidr_is_private?(cidr)
-  $private_ip_subnets.any? { |subnet, _| subnet.include?(cidr) }
-end
 
 ##############################################################################################
 def parse_autopopulate_config(raw_config)
@@ -161,12 +135,18 @@ def parse_autopopulate_config(raw_config)
       next
     end
 
-    unless cidr_is_private?(cidr.to_range.first)
+    range = cidr.to_range
+    unless range.first.private?
       puts "parse_autopopulate_config skipping non-private CIDR: #{cidr_str}"
       next
     end
 
-    entries << { cidr: cidr, allow: !is_exclusion }
+    entries << {
+      cidr: cidr,
+      allow: !is_exclusion,
+      network: range.first,
+      broadcast: range.to_a.last
+    }
   end
 
   { allow_all_private: false, entries: entries }
@@ -570,7 +550,7 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
          end
        end
 
-  return false unless assignable_private_ip?(ip)
+  return false unless ip.private?
 
   # Determine applicable config: site-specific first, fallback to '*', else allow
   config = config_site_hash[site_id]
@@ -594,7 +574,10 @@ def autopopulate_allowed?(ip_input, site_id, config_site_hash)
   # Iterate entries in order; last matching rule wins
   allow = nil
   config[:entries].each do |entry|
-    allow = entry[:allow] if entry[:cidr].include?(ip)
+    if entry[:cidr].include?(ip)
+      next if ip.ipv4? && (ip == entry[:network] || ip == entry[:broadcast])  # Skip unassignable
+      allow = entry[:allow]
+    end
   end
 
   allow.nil? ? false : allow
@@ -660,7 +643,7 @@ def filter(
     else
       _result, _key_ip, _nb_queried = nil, nil, false
     end
-    _private_ips.push(_key_ip) if assignable_private_ip?(_key_ip)
+    _private_ips.push(_key_ip) if _key_ip.private?
     _netbox_queried ||= _nb_queried unless _lookup_tracking_result[:cache_hit]
 
     if !_result.nil? && !_result.empty?
@@ -1443,7 +1426,7 @@ def autopopulate_prefixes(
   _autopopulate_tags = [ @device_tag_autopopulated ]
 
   _prefix_data = nil
-  if (_private_ip_subnet = $private_ip_subnets.keys().find { |subnet| subnet.include?(ip_obj) })
+  if (_private_ip_subnet = $private_ip_subnets.find { |subnet| subnet.include?(ip_obj) })
     _new_prefix_ip = ip_obj.mask([_private_ip_subnet.prefix + 8, ip_obj.ipv6? ? 64 : 24].min)
     _new_prefix_name = _new_prefix_ip.to_s
     if !_new_prefix_name.to_s.include?('/')
