@@ -71,7 +71,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 )); then
     echo "Initializing $OPENSEARCH_PRIMARY database (${DB_INIT_ARGS[*]})"
 
-  	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt "${DB_INIT_ARGS[@]}"
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt "${DB_INIT_ARGS[@]}"
 
     if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
       [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
