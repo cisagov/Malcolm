@@ -54,6 +54,9 @@ copied_environment_variables:
       OPENSEARCH_URL:
         OPENSEARCH_URL:
           "http://opensearch:9200": "https://opensearch:9200"
+    arkime:
+      CLUSTER_MAX_SHARDS_PER_NODE:
+        OPENSEARCH_MAX_SHARDS_PER_NODE
   postgres:
     netbox:
       DB_HOST:
@@ -88,6 +91,8 @@ removed_environment_variables:
   # env_file:
   #   - key1
   #   - key2
+  arkime:
+    - OPENSEARCH_MAX_SHARDS_PER_NODE
   auth_common:
     - NGINX_BASIC_AUTH
     - NGINX_LDAP_TLS_STUNNEL
