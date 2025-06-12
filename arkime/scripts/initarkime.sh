@@ -66,10 +66,10 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   [[ -n "${ARKIME_INIT_REPLICAS}" ]] && DB_INIT_ARGS+=( --replicas ) && DB_INIT_ARGS+=( "${ARKIME_INIT_REPLICAS}" )
   [[ -n "${ARKIME_INIT_REFRESH_SEC}" ]] && DB_INIT_ARGS+=( --refresh ) && DB_INIT_ARGS+=( "${ARKIME_INIT_REFRESH_SEC}" )
   [[ -n "${ARKIME_INIT_SHARDS_PER_NODE}" ]] && DB_INIT_ARGS+=( --shardsPerNode ) && DB_INIT_ARGS+=( "${ARKIME_INIT_SHARDS_PER_NODE}" )
+  INDEX_MANAGEMENT_FLAG=
 
   # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
   if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 )); then
-
     echo "Initializing $OPENSEARCH_PRIMARY database (${DB_INIT_ARGS[*]})"
 
   	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt "${DB_INIT_ARGS[@]}"
@@ -118,21 +118,20 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPOST "${OPENSEARCH_URL}/arkime_users/_update/$MALCOLM_USERNAME" -d "@$ARKIME_DIR/etc/user_settings.json"
 
     echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
-
   else
     echo "$OPENSEARCH_PRIMARY database previously initialized! (${DB_INIT_ARGS[*]})"
     echo
 
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded "${DB_INIT_ARGS[@]}"
     echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
-
+    INDEX_MANAGEMENT_FLAG='--ifneeded'
   fi # if/else OpenSearch database initialized
 
   if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
     [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
     [[ "${OPENSEARCH_PRIMARY}" == "elasticsearch-remote" ]] && LIFECYCLE_POLCY=ilm || LIFECYCLE_POLCY=ism
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" ${LIFECYCLE_POLCY} "${INDEX_MANAGEMENT_OPTIMIZATION_PERIOD}" "${INDEX_MANAGEMENT_RETENTION_TIME}" ${HOT_WARM_FLAG} --segments "${INDEX_MANAGEMENT_SEGMENTS}" --replicas "${INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS}" --history "${INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS}"
-    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --${LIFECYCLE_POLCY}
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --${LIFECYCLE_POLCY} $INDEX_MANAGEMENT_FLAG
     echo "${LIFECYCLE_POLCY} created"
   fi 
 
