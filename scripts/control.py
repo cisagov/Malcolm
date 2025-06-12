@@ -27,6 +27,10 @@ import tarfile
 import tempfile
 import time
 import base64
+import glob
+import shutil
+import json
+from datetime import datetime
 
 from malcolm_common import (
     AskForPassword,
@@ -2712,7 +2716,7 @@ def wipe_indices(dates=None):
         if user:
             insecure = 'insecure' in creds
             use_curlrc = True
-            print(f"Using OpenSearch credentials from curlrc: user={user}, insecure={insecure}")
+            print(f"Using OpenSearch credentials from curlrc: insecure={insecure}")
     if not use_curlrc:
         # Use local credentials from auth.env
         auth_env_path = os.path.join(args.configDir, 'auth.env')
@@ -2728,7 +2732,7 @@ def wipe_indices(dates=None):
             passsword = 'admin'
         user = f"{username}:{password}"
         insecure = True
-        print(f"Using OpenSearch credentials from auth.env: user={user}, insecure={insecure}")
+        print(f"Using OpenSearch credentials from auth.env: insecure={insecure}")
 
 
     # Get list of indices
@@ -2748,8 +2752,29 @@ def wipe_indices(dates=None):
     # Select indices that match the optional provided dates 
     if dates:
         date_patterns = [str(d) for d in dates]
-        indices = [i for i in indices if any(date in i for d in date_patterns)]
-
+        indices_with_dates = []
+        for index in indices:
+            settings_cmd = [
+                dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch',
+                'curl', '-s', '-u', user, f'http://localhost:9200/{index}/_settings'
+            ]
+            if insecure:
+                settings_cmd.insert(-1, '-k')
+            err, out = run_process(settings_cmd, env=osEnv, debug=args.debug)
+            if err == 0 and out:
+                try:
+                    settings = json.loads(''.join(out))
+                    creation_date = settings[index]['settings']['index'].get('creation_date')
+                    if creation_date:
+                        dt = datetime.fromtimestamp(int(creation_date) / 1000)
+                        dt_str = dt.strftime('%Y.%m.%d')
+                        print(f"{index}: ceartion_date={dt_str}, filter={date_patterns} ")
+                        if dt_str in date_patterns:
+                            indices_with_dates.append(index)
+                except Exception:
+                    pass
+        indices = indices_with_dates
+                
     if not indices:
         eprint("No indices found to wipe.")
         return
@@ -2770,6 +2795,28 @@ def wipe_indices(dates=None):
             print(f"Successfully deleted index: {index}")
         else:
             print(f"Failed to delete index: {index}")
+
+def reindex_pcaps():
+    # Move all PCAPs from ./pcap/processed to ./pcap/upload
+
+    processed_dir = os.path.join(GetMalcolmPath(), 'pcap', 'processed')
+    upload_dir = os.path.join(GetMalcolmPath(), 'pcap', 'upload')
+    if not os.path.isdir(processed_dir):
+        print(f"Processed PCAP directory not found: {processed_dir}")
+        return
+    if not os.path.isdir(upload_dir):
+        print(f"Upload PCAP directory not found: {upload_dir}")
+        return
+    pcaps = glob.glob(os.path.join(processed_dir, '*.pcap'))
+    if not pcaps:
+        print("No PCAPs found in processed directory.")
+        return
+    for pcap in pcaps:
+        dest = os.path.join(upload_dir, os.path.basename(pcap))
+        shutil.move(pcap, dest)
+        os.utime(dest, None)
+        print(f'Moved and touched: {pcap} -> {dest}')
+    print('Reindexing complete')
 
 
 
@@ -2864,7 +2911,7 @@ def main():
         nargs = '?',
         const = True,
         default = False,
-        help = 'Wipe OpenSearch indices. If dates are provided, only wipe those indices.',
+        help = 'Wipe all OpenSearch indices.',
     )
     parser.add_argument(
         '--wipe-index-dates',
@@ -2873,9 +2920,16 @@ def main():
         type=str,
         nargs='*',
         default=None,
-        help='Dates of indices to wipe. If not provided, all indices will be wiped.',
+        help='Date of indices to wipe (format: YYYY.MM.DD, e.g., 2025.01.01). ',
     )
 
+    parser.add_argument(
+        '--reindex',
+        dest='cmdReindex',
+        action='store_true',
+        default=False,
+        help='Move all PCAPs from ./pcap/processed to ./pcap/upload and touch them'
+    )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
     operationsGroup.add_argument(
@@ -3494,8 +3548,13 @@ def main():
         checkEnvFilesAndValues()
 
         # wipe opensearch indices only and exit
-        if getattr(args, 'cmdWipeIndices', False):
+        if getattr(args, 'cmdWipeIndices', False) or (args.wipeIndexDates and len(args.wipeIndexDates)):
             wipe_indices(dates=args.wipeIndexDates)
+            return
+        
+        # reindex PCAPs
+        if getattr(args, 'cmdReindex', False):
+            reindex_pcaps()
             return
 
         # stop Malcolm (and wipe data if requestsed)

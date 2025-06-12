@@ -3,6 +3,6 @@
 #empty_field	(empty)
 #unset_field	-
 #path	signature
-#open	2025-06-05-13-49-31
+#open	2025-06-05-19-11-58
 #fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	note	signature_id	event_message	sub_message	signature_count	host_count
 #types	time	string	addr	port	addr	port	enum	string	string	string	count	count
