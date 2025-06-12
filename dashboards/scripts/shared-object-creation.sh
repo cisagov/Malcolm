@@ -70,7 +70,11 @@ function DoReplacersInFile() {
       fi
       (( SHARDS > CLUSTER_NODE_COUNT )) && SHARDS=$CLUSTER_NODE_COUNT
 
-      REPLICAS="${ARKIME_INIT_REPLICAS:-0}"
+      if [[ -n "${ARKIME_INIT_REPLICAS}" ]]; then
+        REPLICAS="${ARKIME_INIT_REPLICAS}"
+      else
+        (( CLUSTER_NODE_COUNT > 1 )) && REPLICAS=1 || REPLICAS=0
+      fi
 
       SHARDS_PER_NODE=$(echo "($SHARDS * ($REPLICAS + 1) + $CLUSTER_NODE_COUNT - 1) / $CLUSTER_NODE_COUNT" | bc)
       if [[ -n "${ARKIME_INIT_SHARDS_PER_NODE}" ]] && ( [[ "${ARKIME_INIT_SHARDS_PER_NODE}" == "null" ]] || (( ARKIME_INIT_SHARDS_PER_NODE > SHARDS_PER_NODE )) ); then
