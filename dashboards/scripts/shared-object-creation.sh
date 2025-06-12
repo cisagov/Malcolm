@@ -55,8 +55,41 @@ function DoReplacersInFile() {
   # This function takes a file and performs those and other replacements.
   REPLFILE="$1"
   DATASTORE_TYPE="$2"
-  FILE_TYPE="$3"
+  CLUSTER_NODE_COUNT="$3"
+  FILE_TYPE="$4"
   if [[ -n "$REPLFILE" ]] && [[ -f "$REPLFILE" ]]; then
+
+    if [[ "$FILE_TYPE" == "template" ]] && \
+        grep -Pq "\b(MALCOLM_NETWORK_INDEX_PATTERN_REPLACER|MALCOLM_OTHER_INDEX_PATTERN_REPLACER)\b" "${REPLFILE}"; \
+    then
+      if [[ -n "${ARKIME_INIT_SHARDS}" ]]; then
+        SHARDS="${ARKIME_INIT_SHARDS}"
+      else
+        SHARDS="${CLUSTER_NODE_COUNT}"
+        (( SHARDS > 24 )) && SHARDS=24
+      fi
+      (( SHARDS > CLUSTER_NODE_COUNT )) && SHARDS=$CLUSTER_NODE_COUNT
+
+      REPLICAS="${ARKIME_INIT_REPLICAS:-0}"
+
+      SHARDS_PER_NODE=$(echo "($SHARDS * ($REPLICAS + 1) + $CLUSTER_NODE_COUNT - 1) / $CLUSTER_NODE_COUNT" | bc)
+      if [[ -n "${ARKIME_INIT_SHARDS_PER_NODE}" ]] && ( [[ "${ARKIME_INIT_SHARDS_PER_NODE}" == "null" ]] || (( ARKIME_INIT_SHARDS_PER_NODE > SHARDS_PER_NODE )) ); then
+        SHARDS_PER_NODE="${ARKIME_INIT_SHARDS_PER_NODE}"
+      fi
+
+      jq --argjson shards "$SHARDS" 'if has("template") then .template.settings.index.number_of_shards = $shards else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+      jq --argjson replicas "$REPLICAS" 'if has("template") then .template.settings.index.number_of_replicas = $replicas else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+      jq --arg spn "$SHARDS_PER_NODE" 'if has("template") then .template.settings.index.routing.allocation.total_shards_per_node = $spn else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+
+      REFRESH_WITH_UNITS="${ARKIME_INIT_REFRESH_SEC:-60}s" && \
+      jq --arg refresh "$REFRESH_WITH_UNITS" 'if has("template") then .template.settings.index.refresh_interval = $refresh else . end' \
+        "${REPLFILE}" | sponge "${REPLFILE}"
+    fi
 
     [[ "$FILE_TYPE" == "template" ]] && \
       [[ -n "$INDEX_ALIAS" ]] && \
@@ -134,10 +167,11 @@ function DoReplacersInFile() {
 function DoReplacersForDir() {
   REPLDIR="$1"
   DATASTORE_TYPE="$2"
-  FILE_TYPE="$3"
+  CLUSTER_NODE_COUNT="$3"
+  FILE_TYPE="$4"
   if [[ -n "$REPLDIR" ]] && [[ -d "$REPLDIR" ]]; then
     while IFS= read -r fname; do
-        DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$FILE_TYPE"
+        DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$CLUSTER_NODE_COUNT" "$FILE_TYPE"
     done < <( find "$REPLDIR"/ -type f 2>/dev/null )
   fi
 }
@@ -252,6 +286,11 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             || ( cat "$CURL_OUT" && echo )
         fi
 
+        NODE_COUNT="$(curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent -XGET -H "Content-Type: application/json" "$OPENSEARCH_URL_TO_USE/_nodes" 2>/dev/null | jq --raw-output '.nodes | length' 2>/dev/null | head -n 1)"
+        [[ -z "${NODE_COUNT}" ]] && NODE_COUNT=1
+        (( NODE_COUNT < 1 )) && NODE_COUNT=1
+        echo "$DATASTORE_TYPE ($LOOP) node count: ${NODE_COUNT}"
+
         #############################################################################################################################
         # Templates
         #   - a sha256 sum of the combined templates is calculated and the templates are imported if the previously stored hash
@@ -260,7 +299,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         TEMPLATES_IMPORTED=false
         TEMPLATES_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t templates-XXXXXX)"
         rsync -a "$MALCOLM_TEMPLATES_DIR"/ "$TEMPLATES_IMPORT_DIR"/
-        DoReplacersForDir "$TEMPLATES_IMPORT_DIR" "$DATASTORE_TYPE" template
+        DoReplacersForDir "$TEMPLATES_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" template
         MALCOLM_TEMPLATE_FILE_ORIG_TMP="$(echo "$MALCOLM_TEMPLATE_FILE_ORIG" | sed "s@$MALCOLM_TEMPLATES_DIR@$TEMPLATES_IMPORT_DIR@")"
 
         # calculate combined SHA sum of all templates to save as _meta.hash to determine if
@@ -432,7 +471,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
           DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t dashboards-XXXXXX)"
           rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
+          DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -472,7 +511,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           # manually add load our dashboards in /opt/dashboards/beats as well.
           BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t beats-XXXXXX)"
           rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" dashboard
+          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
           for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
 
             # get info about the dashboard to be imported
@@ -580,7 +619,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             # Create anomaly detectors here
             ANOMALY_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t anomaly-XXXXXX)"
             rsync -a /opt/anomaly_detectors/ "$ANOMALY_IMPORT_DIR"/
-            DoReplacersForDir "$ANOMALY_IMPORT_DIR" "$DATASTORE_TYPE" anomaly_detector
+            DoReplacersForDir "$ANOMALY_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" anomaly_detector
             for i in "${ANOMALY_IMPORT_DIR}"/*.json; do
               # identify the name of the anomaly detector, and, if it already exists, its
               #   ID and previous update time, as well as the update time of the file to import
@@ -656,7 +695,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             SA_MAPPINGS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t sa-mappings-XXXXXX)"
             rsync -a /opt/security_analytics_mappings/ "$SA_MAPPINGS_IMPORT_DIR"/
-            DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" sa_mapping
+            DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" sa_mapping
             for i in "${SA_MAPPINGS_IMPORT_DIR}"/*.json; do
               set +e
               RULE_TOPIC="$(jq -r '.rule_topic' 2>/dev/null < "$i")"
@@ -693,7 +732,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             # monitors
             ALERTING_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t alerting-XXXXXX)"
             rsync -a /opt/alerting/monitors/ "$ALERTING_IMPORT_DIR"/
-            DoReplacersForDir "$ALERTING_IMPORT_DIR" "$DATASTORE_TYPE" monitor
+            DoReplacersForDir "$ALERTING_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" monitor
             for i in "${ALERTING_IMPORT_DIR}"/*.json; do
               CURL_OUT=$(get_tmp_output_filename)
               curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \

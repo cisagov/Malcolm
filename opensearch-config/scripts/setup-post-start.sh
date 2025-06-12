@@ -37,4 +37,12 @@ curl --cert /usr/share/opensearch/config/certs/admin.crt \
      -XPUT "$OPENSEARCH_URL/_cluster/settings" \
      -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
      -d '{ "persistent": { "cluster.default_number_of_replicas":0 } }' || ( cat "$CURL_OUT" && echo )
+[[ -n "${CLUSTER_MAX_SHARDS_PER_NODE}" ]] && \
+     curl --cert /usr/share/opensearch/config/certs/admin.crt \
+          --key /usr/share/opensearch/config/certs/admin.key \
+          --insecure --location --fail-with-body --silent --output "$CURL_OUT" \
+          -XPUT "$OPENSEARCH_URL/_cluster/settings" \
+          -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+          -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$CLUSTER_MAX_SHARDS_PER_NODE\" } }" || ( cat "$CURL_OUT" && echo )
+
 rm -f "${CURL_OUT}"

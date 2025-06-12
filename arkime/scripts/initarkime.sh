@@ -42,7 +42,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
   echo "Giving ${OPENSEARCH_PRIMARY} time to start..."
   if /usr/local/bin/opensearch_status.sh 2>&1; then
-    NODE_COUNT="$(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_nodes" 2>/dev/null | jq '.nodes | length' 2>/dev/null | head -n 1)"
+    NODE_COUNT="$(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_nodes" 2>/dev/null | jq --raw-output '.nodes | length' 2>/dev/null | head -n 1)"
     echo "${OPENSEARCH_PRIMARY} is running! (nodes: ${NODE_COUNT})"
   fi
   [[ -z "${NODE_COUNT}" ]] && NODE_COUNT=1
@@ -135,14 +135,6 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --${LIFECYCLE_POLCY}
     echo "${LIFECYCLE_POLCY} created"
   fi 
-
-  # increase OpenSearch max shards per node from default if desired
-  # TODO: should this be in shared-object-creation.sh instead?
-  if [[ -n "${CLUSTER_MAX_SHARDS_PER_NODE}" ]]; then
-    # see https://github.com/elastic/elasticsearch/issues/40803
-    echo "Setting ${OPENSEARCH_PRIMARY} cluster.max_shards_per_node: ${CLUSTER_MAX_SHARDS_PER_NODE}"
-    curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$CLUSTER_MAX_SHARDS_PER_NODE\" } }"
-  fi
 
   # before running viewer, call _refresh to make sure everything is available for search first
   curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
