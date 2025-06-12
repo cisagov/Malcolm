@@ -105,6 +105,8 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
       sed -r -i "s/(tpacketv3NumThreads)\s*=\s*.*/\1=$ARKIME_TPACKETV3_NUM_THREADS/" "${ARKIME_CONFIG_FILE}"
     [[ -n "$ARKIME_TPACKETV3_BLOCK_SIZE" ]] && \
       sed -r -i "s/(tpacketv3BlockSize)\s*=\s*.*/\1=$ARKIME_TPACKETV3_BLOCK_SIZE/" "${ARKIME_CONFIG_FILE}"
+    [[ -n "$PCAP_PROCESSED_DIRECTORY" ]] && \
+      sed -r -i "s|(pcapDir)\s*=\s*.*|\1=$PCAP_PROCESSED_DIRECTORY|" "${ARKIME_CONFIG_FILE}"
 
     # capture interface(s)
     if [[ -n "$CAPTURE_INTERFACE" ]] && [[ "$LIVE_CAPTURE" == "true" ]] ; then

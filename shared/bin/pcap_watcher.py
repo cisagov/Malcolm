@@ -96,7 +96,7 @@ class EventWatcher:
         self.openSearchClient = None
 
         # if we're going to be querying OpenSearch for past PCAP file status, connect now
-        if args.opensearchUrl is not None and args.opensearchUrl != "":
+        if args.opensearchUrl:
             connected = False
             healthy = False
 
@@ -421,7 +421,13 @@ def main():
     )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
-        '-d', '--directory', dest='baseDir', help='Directory to monitor', metavar='<directory>', type=str, required=True
+        '-d',
+        '--directory',
+        dest='baseDir',
+        help='Directory to monitor',
+        metavar='<directory>',
+        type=str,
+        required=True,
     )
 
     try:
