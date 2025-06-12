@@ -40,29 +40,39 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   # download and/or update geo updates
   $ARKIME_DIR/bin/arkime_update_geo.sh
 
-  echo "Giving $OPENSEARCH_PRIMARY time to start..."
-  /usr/local/bin/opensearch_status.sh 2>&1 && echo "$OPENSEARCH_PRIMARY is running!"
+  echo "Giving ${OPENSEARCH_PRIMARY} time to start..."
+  if /usr/local/bin/opensearch_status.sh 2>&1; then
+    NODE_COUNT="$(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_nodes" 2>/dev/null | jq --raw-output '.nodes | length' 2>/dev/null | head -n 1)"
+    echo "${OPENSEARCH_PRIMARY} is running! (nodes: ${NODE_COUNT})"
+  fi
+  [[ -z "${NODE_COUNT}" ]] && NODE_COUNT=1
 
   # start and wait patiently for WISE
   if [[ "$WISE" = "on" ]] ; then
     touch /var/run/arkime/runwise
     echo "Giving WISE time to start..."
     sleep 5
-    until curl -fsS --output /dev/null "http://127.0.0.1:8081/fields?ver=1"
-    do
-        echo "Waiting for WISE to start"
-        sleep 1
-    done
+    until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
     echo "WISE is running!"
     echo
   fi
 
+  DB_INIT_ARGS=()
+  if [[ -n "${ARKIME_INIT_SHARDS}" ]]; then
+    # cannot set "shards" greater than the number of nodes
+    (( ARKIME_INIT_SHARDS > NODE_COUNT )) && ARKIME_INIT_SHARDS=$NODE_COUNT
+    DB_INIT_ARGS+=( --shards ) && DB_INIT_ARGS+=( "${ARKIME_INIT_SHARDS}" )
+  fi
+  [[ -n "${ARKIME_INIT_REPLICAS}" ]] && DB_INIT_ARGS+=( --replicas ) && DB_INIT_ARGS+=( "${ARKIME_INIT_REPLICAS}" )
+  [[ -n "${ARKIME_INIT_REFRESH_SEC}" ]] && DB_INIT_ARGS+=( --refresh ) && DB_INIT_ARGS+=( "${ARKIME_INIT_REFRESH_SEC}" )
+  [[ -n "${ARKIME_INIT_SHARDS_PER_NODE}" ]] && DB_INIT_ARGS+=( --shardsPerNode ) && DB_INIT_ARGS+=( "${ARKIME_INIT_SHARDS_PER_NODE}" )
+
   # initialize the contents of the OpenSearch database if it has never been initialized (ie., the users_v# table hasn't been created)
   if (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: application/json' "${OPENSEARCH_URL}/_cat/indices/arkime_users_v*" | wc -l) < 1 )); then
 
-    echo "Initializing $OPENSEARCH_PRIMARY database..."
+    echo "Initializing $OPENSEARCH_PRIMARY database (${DB_INIT_ARGS[*]})"
 
-  	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt
+  	$ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt "${DB_INIT_ARGS[@]}"
 
     echo "Creating default user..."
 
@@ -110,10 +120,10 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
 
   else
-    echo "$OPENSEARCH_PRIMARY database previously initialized!"
+    echo "$OPENSEARCH_PRIMARY database previously initialized! (${DB_INIT_ARGS[*]})"
     echo
 
-    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded
+    $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded "${DB_INIT_ARGS[@]}"
     echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
 
   fi # if/else OpenSearch database initialized
@@ -125,12 +135,6 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded --${LIFECYCLE_POLCY}
     echo "${LIFECYCLE_POLCY} created"
   fi 
-
-  # increase OpenSearch max shards per node from default if desired
-  if [[ -n $OPENSEARCH_MAX_SHARDS_PER_NODE ]]; then
-    # see https://github.com/elastic/elasticsearch/issues/40803
-    curl "${CURL_CONFIG_PARAMS[@]}" -sS --output /dev/null -H'Content-Type: application/json' -XPUT "${OPENSEARCH_URL}/_cluster/settings" -d "{ \"persistent\": { \"cluster.max_shards_per_node\": \"$OPENSEARCH_MAX_SHARDS_PER_NODE\" } }"
-  fi
 
   # before running viewer, call _refresh to make sure everything is available for search first
   curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
