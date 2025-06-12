@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-supervisorctl status pcap-publisher watch-upload >/dev/null 2>&1
+supervisorctl status pcap-publisher >/dev/null 2>&1

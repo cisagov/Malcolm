@@ -96,7 +96,7 @@ class EventWatcher:
         self.openSearchClient = None
 
         # if we're going to be querying OpenSearch for past PCAP file status, connect now
-        if args.opensearchUrl is not None:
+        if args.opensearchUrl is not None and args.opensearchUrl != "":
             connected = False
             healthy = False
 
@@ -302,7 +302,7 @@ def main():
         dest='opensearchUrl',
         metavar='<STR>',
         type=str,
-        default=os.getenv('OPENSEARCH_URL', None),
+        default=os.getenv('OPENSEARCH_URL', ''),
         help='OpenSearch/Elasticsearch connection string for querying Arkime files index to ignore duplicates',
     )
     parser.add_argument(
