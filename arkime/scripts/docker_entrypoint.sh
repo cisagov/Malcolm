@@ -34,6 +34,7 @@ ARKIME_WISE_CONFIG_FILE="${ARKIME_DIR}"/wiseini/wise.ini
 ARKIME_WISE_SERVICE_SCRIPT=/usr/local/bin/wise_service.sh
 
 
+
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"https://opensearch:9200"}
 OPENSEARCH_PRIMARY=${OPENSEARCH_PRIMARY:-"opensearch-local"}
@@ -188,9 +189,6 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
-    else
-    # comment-out features that are unused in malcolm non-live mode
-      sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
     fi
 
     # enable ja4+ plugin if it's present
@@ -266,6 +264,7 @@ fi
 # $ARKIME_DIR/wiseini/wise.ini will either be a R/W mounted file, when run under Docker Compose or
 # $ARKIME_DIR/wiseini/ will be a persistent volume when run under Kubernetes.
 # This allows changes to persist when the wise application edits its own ini file at runtime.
+
 if [[ ! -f "${ARKIME_WISE_CONFIG_FILE}" ]] && [[ -r "${ARKIME_WISE_EXAMPLE_FILE}" ]]  && [[ "$LIVE_CAPTURE" == "false" ]] && [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     cp "${ARKIME_WISE_EXAMPLE_FILE}" "${ARKIME_WISE_CONFIG_FILE}"
 fi
@@ -275,12 +274,18 @@ if [[  -d "${ARKIME_DIR}/wiseini" ]]; then
 fi
 
 if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
-  sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
-  sed "s|^\(wiseHost=\).*|\1""0.0.0.0""|" "${ARKIME_WISE_CONFIG_FILE}"
+  sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
+  sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" ./wise.tmp
   if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
-    sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}"
+    sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|"  ./wise.tmp
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
+  truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
+  cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
+fi
+if [[ ${WISE} != "on" ]]; then
+  # comment-out WISE URL if unnecessary
+  sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
 fi
 
 unset OPENSEARCH_URL_FINAL
