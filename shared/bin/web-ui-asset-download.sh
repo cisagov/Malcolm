@@ -24,6 +24,11 @@ ASSETS=(
     "https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf|"
     "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d|bootstrap-icons.woff2"
     "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d|bootstrap-icons.woff"
+    "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot|"
+    "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2|"
+    "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff|"
+    "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf|"
+    "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular|"
 )
 
 mkdir -p "$OUTPUT_DIR"

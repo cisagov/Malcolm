@@ -73,6 +73,7 @@ shift "$(($OPTIND -1))"
 [[ "$(uname -s)" = 'Darwin' ]] && REALPATH=grealpath || REALPATH=realpath
 [[ "$(uname -s)" = 'Darwin' ]] && DIRNAME=gdirname || DIRNAME=dirname
 [[ "$(uname -s)" = 'Darwin' ]] && GREP=ggrep || GREP=grep
+[[ "$(uname -s)" = 'Darwin' ]] && AWK=gawk || AWK=awk
 [[ "$(uname -s)" = 'Darwin' ]] && SED=gsed || SED=sed
 [[ "$(uname -s)" = 'Darwin' ]] && FIND=gfind || FIND=find
 if ! (command -v "$REALPATH" && command -v "$DIRNAME" && command -v "$GREP" && command -v "$SED" && command -v "$FIND") > /dev/null; then
@@ -148,6 +149,23 @@ $DOCKER_BIN run --rm -v "$(pwd)":/site "${TOKEN_ARGS[@]}" --entrypoint="docker-e
 
 # clean up some files no longer needed
 $FIND ./_site/ -type f -name "*.md" -delete
+
+# grab some stuff for airgapped use
+curl -sSL -o ./_site/assets/css/font-awesome-css.min.css https://use.fontawesome.com/releases/v4.7.0/css/font-awesome-css.min.css
+curl -sSL https://use.fontawesome.com/285a5794ed.js | $AWK '
+/window\.FontAwesomeCdnConfig *= *{/ {
+  in_obj = 1
+  depth = gsub(/{/, "{") - gsub(/}/, "}")
+  next
+}
+in_obj {
+  depth += gsub(/{/, "{") - gsub(/}/, "}")
+  if (depth <= 0) in_obj = 0
+  next
+}
+{ print }
+' > ./_site/assets/js/fontawesome_285a5794ed.js
+chmod 644 ./_site/assets/js/*.* ./_site/assets/css/*.*
 
 # TODO: can we get this to run mapping UID so it doesn't have to be sudo'd?
 $SUDO_CMD chown -R $(id -u):$(id -g) ./_site/
