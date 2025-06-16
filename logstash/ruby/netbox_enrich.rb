@@ -625,11 +625,8 @@ def filter(
   # _key might be an array of IP addresses, but we're only going to set the first _result into @target.
   #    this is still useful, though as autopopulation may happen for multiple IPs even if we only
   #    store the result of the first one found
-  if !_key.is_a?(Array) then
-    _newKey = Array.new
-    _newKey.push(_key) unless _key.nil?
-    _key = _newKey
-  end
+  _key = [_key].compact unless _key.is_a?(Array)
+
   # _private_ips stores IPAddr representations of IP strings for private IP addresses
   _private_ips = Array.new
 
@@ -739,11 +736,7 @@ def filter(
 
   unless _private_ips.empty? || @add_tag.nil? || @add_tag.empty?
     _tags = event.get('[tags]')
-    if !_tags.is_a?(Array) then
-      _newTags = Array.new
-      _newTags.push(_tags) unless _tags.nil? || _tags.empty?
-      _tags = _newTags
-    end
+    _tags = [_tags].reject { |t| t.nil? || t.empty? } unless _tags.is_a?(Array)
     if !_tags.include? @add_tag
       _tags.push(@add_tag)
       event.set("[tags]", _tags)

@@ -5,11 +5,7 @@ end
 def register(params)
   @field = params["field"]
   _prune = params["prune"]
-  if !_prune.is_a?(Array) then
-    _newPrune = Array.new
-    _newPrune.push(_prune) unless _prune.nil?
-    _prune = _newPrune
-  end
+  _prune = [_prune] unless _prune.is_a?(Array)
   @prune = _prune
   _map = params["translate"]
   if _map.is_a?(Hash) then
@@ -22,11 +18,7 @@ end
 def filter(event)
   _vals = event.get("#{@field}")
   if !_vals.nil? then
-    if !_vals.is_a?(Array) then
-      _newVals = Array.new
-      _newVals.push(_vals)
-      _vals = _newVals
-    end
+    _vals = [_vals] unless _vals.is_a?(Array)
     #                            v dedupe
     #                            |    v prune unwanted values       v translate values when applicable
     #                            |    |                             |                           v keep if not in translate hash
