@@ -123,10 +123,15 @@ If a [YAML](https://yaml.org/) file named `mandiant.yaml` is found in `./zeek/in
 These other parameters can also optionally be provided:
 
 ```yaml
-  minimum_mscore: 60
-  exclude_osint: False
   bearer_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   api_base_url: https://api.intelligence.mandiant.com
+  minimum_mscore: 60
+  exclude_osint: False
+  include_campaigns: False
+  include_category: True
+  include_misp: True
+  include_reports: False
+  include_threat_rating: False
 ```
 
 Malcolm uses the [google/mandiant-ti-client](https://github.com/google/mandiant-ti-client) Python library to access Mandiant threat intelligence feeds.

@@ -1702,7 +1702,7 @@ class MalcolmSource extends WISESource {
       "zeek.intel.seen_where",
       "zeek.intel.threat_score",
       "zeek.intel.verdict",
-      "zeek.intel.verdict_source"
+      "zeek.intel.verdict_source",
       "zeek.ipsec.certificates",
       "zeek.ipsec.doi",
       "zeek.ipsec.exchange_type",
