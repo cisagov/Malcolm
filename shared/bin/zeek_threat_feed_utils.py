@@ -68,7 +68,7 @@ ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 # TODO: STILL NEED TO MAP THESE:
-#   - ZEEK_INTEL_META_CATEGORY (partial)
+#   - ZEEK_INTEL_META_CATEGORY
 #   - ZEEK_INTEL_META_THREAT_SCORE
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
@@ -273,7 +273,6 @@ def map_mandiant_indicator_to_zeek(
 
         if tags:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
-            zeekItem[ZEEK_INTEL_META_CATEGORY] = zeekItem[ZEEK_INTEL_CIF_TAGS]
 
         # The MD5Indicator class can actually have multiple types of hashes,
         #   and we want to create a zeek intel item for each. I'm accessing

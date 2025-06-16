@@ -548,9 +548,6 @@
                 "seen_where": {
                   "type": "keyword"
                 },
-                "desc" : {
-                  "type": "keyword"
-                },
                 "confidence" : {
                   "type": "float"
                 },
@@ -561,12 +558,6 @@
                   "type": "keyword"
                 },
                 "verdict_source" : {
-                  "type": "keyword"
-                },
-                "firstseen" : {
-                  "type": "keyword"
-                },
-                "lastseen" : {
                   "type": "keyword"
                 },
                 "associated" : {
