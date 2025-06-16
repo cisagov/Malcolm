@@ -84,6 +84,15 @@ def main():
         help='Add fields for policy/integration/collective-intel/main.zeek',
     )
     parser.add_argument(
+        '--extended',
+        dest='extended',
+        type=malcolm_utils.str2bool,
+        nargs='?',
+        const=True,
+        default=True,
+        help='Add fields for corelight/ExtendIntel',
+    )
+    parser.add_argument(
         '--ssl-verify',
         dest='sslVerify',
         type=malcolm_utils.str2bool,
@@ -161,7 +170,7 @@ def main():
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
         zeekPrinter = zeek_threat_feed_utils.FeedParserZeekPrinter(
-            args.notice, args.cif, since=since, file=outfile, logger=logging
+            args.extended, args.notice, args.cif, since=since, file=outfile, logger=logging
         )
 
         # if --input-file is specified, process first and append to  --input
