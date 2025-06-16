@@ -551,9 +551,6 @@
                 "desc" : {
                   "type": "keyword"
                 },
-                "url" : {
-                  "type": "keyword"
-                },
                 "confidence" : {
                   "type": "float"
                 },

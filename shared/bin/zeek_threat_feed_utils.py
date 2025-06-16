@@ -270,8 +270,6 @@ def map_mandiant_indicator_to_zeek(
                     tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
                     if newId := hashish.get('id', None):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
-                    if ZEEK_INTEL_META_URL in tmpItem:
-                        sources.append(tmpItem[ZEEK_INTEL_META_URL])
                     if sources:
                         tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
                     results.append(tmpItem)
@@ -281,8 +279,6 @@ def map_mandiant_indicator_to_zeek(
         elif hasattr(indicator, 'value') and (val := indicator.value):
             # handle other types besides the file hash
             zeekItem[ZEEK_INTEL_INDICATOR] = val
-            if ZEEK_INTEL_META_URL in zeekItem:
-                sources.append(zeekItem[ZEEK_INTEL_META_URL])
             if sources:
                 zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
             results.append(zeekItem)
