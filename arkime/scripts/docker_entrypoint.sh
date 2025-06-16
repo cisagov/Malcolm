@@ -124,7 +124,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
 
       # convert pcap rotation size units (MB to GB) and stick in config file
       if [[ -n $PCAP_ROTATE_MEGABYTES ]]; then
-        PCAP_ROTATE_GIGABYTES=$(echo "($PCAP_ROTATE_MEGABYTES + 1024 - 1)/1024" | bc)
+        PCAP_ROTATE_GIGABYTES=$(awk "BEGIN { printf \"%.4f\", $PCAP_ROTATE_MEGABYTES/1024 }")
         sed -r -i "s/(maxFileSizeG)\s*=\s*.*/\1=$PCAP_ROTATE_GIGABYTES/" "${ARKIME_CONFIG_FILE}"
       fi
 
