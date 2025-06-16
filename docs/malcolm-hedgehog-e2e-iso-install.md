@@ -549,6 +549,8 @@ Users will be asked to enter authentication credentials for the sensor's connect
 
 Users will be asked to provide a "password hash secret" for the Arkime viewer cluster. This value corresponds to the `passwordSecret` value in Arkime's [config.ini file](https://arkime.com/settings). Arkime uses this value to secure communication (specifically, the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface) between Arkime viewers in instances of Malcolm and Hedgehog Linux. In other words, this value needs to be the same for the Malcolm instance and all of the instances of Hedgehog Linux forwarding Arkime sessions to that Malcolm instance. The corresponding value is set when [setting up authentication](#MalcolmAuthSetup) during the Malcolm configuration.
 
+Users will be asked if Arkime capture should enrich data using a WISE service. If a user is leveraging the WISE service, they will be prompted to enter the URL of the Arkime instance hosting WISE. By default, Hedgehog will use the OpenSearch credentials configured earlier to authenticate to the WISE service. 
+
 Arkime supports [compression](https://arkime.com/settings#writer-simple) for the PCAP files it creates. Select `none` (at the cost of requiring more storage for PCAP files saved on the sensor) or `zstd` (at the cost of higher CPU load when writing and reading PCAP files). If [`zstd`](https://en.wikipedia.org/wiki/Zstd?lang=en) is chosen, users will also be prompted for the compression level (something like `3` is probably a good choice).
 
 ![PCAP compression](./images/hedgehog/images/pcap_compression.png)

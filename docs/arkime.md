@@ -12,6 +12,8 @@
     - [Hunt](#ArkimeHunt)
     - [Statistics](#ArkimeStats)
     - [Settings](#ArkimeSettings)
+    - [WISE](#ArkimeWise)
+
 
 ## <a name="ArkimeZeek"></a>Zeek log integration
 
@@ -183,3 +185,13 @@ See Arkime's usage documentation for more information on [settings](https://loca
 ![Arkime general settings](./images/screenshots/arkime_general_settings.png)
 
 ![Arkime custom view management](./images/screenshots/arkime_view_settings.png)
+
+## <a name="ArkimeWISE"></a>Settings
+
+Arkime's WISE plugin leverages data feeds to enhance Arkime's logs. WISE is the successor to depricated tagger plugin. 
+
+See Arkime's documentation for additional information on leveraging the [WISE plugin](https://arkime.com/wise).
+
+For more information on configuring WISE within Malcolm, see the [Arkime environment variables](malcolm-config.md#MalcolmConfigEnvVars).
+
+To leverage WISE when using a Hedgehog Linux, the sensor needs to be configured to request data from the WISE service. This can be setup during sensor configuration. See [Hedgehog Arkime Capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) for more information.
