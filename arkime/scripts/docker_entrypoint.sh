@@ -273,15 +273,21 @@ if [[  -d "${ARKIME_DIR}/wiseini" ]]; then
   chown -fR "$PUSER":"$PUSER" "${ARKIME_DIR}/wiseini"
 fi
 
-if [[ ${ARKIME_EXPOSE_WISE_GUI}  == "true" ]]; then
+if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
   sed "s|^\(elasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
   sed -i "s|^\(wiseHost=\).*|\1""0.0.0.0""|" ./wise.tmp
-  if [[ ${ARKIME_ALLOW_WISE_GUI_CONFIG}  == "true" ]]; then
+  if [[ "${ARKIME_ALLOW_WISE_GUI_CONFIG}"  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|"  ./wise.tmp
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
   truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
   cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
+  rm ./wise.tmp
+else
+  sed "s|^\(wiseHost=\).*|\1""127.0.0.1""|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
+  truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
+  cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
+  rm ./wise.tmp
 fi
 if [[ ${WISE} != "on" ]]; then
   # comment-out WISE URL if unnecessary
