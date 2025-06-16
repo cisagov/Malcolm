@@ -59,7 +59,7 @@ if [[ -n "${EXTRA_TAGS}" ]]; then
 fi
 
 if [[ ${WISE} == "on" ]]; then
-    sed -i "s|^\(wiseURL=\).*|\1""${WISE_URL}""|" "${ARKIME_WISE_CONFIG_FILE}"
+    sed -i "s|^\(wiseURL=\).*|\1""${ARKIME_WISE_SERVICE_URL}""|" "${ARKIME_WISE_CONFIG_FILE}"
 fi
 # we haven't dropUser/dropGroup'ed yet, so make sure the regular user owns the files we just touched
 [[ -n ${PUID} ]] && [[ -n ${PGID} ]] && chown -f -R ${PUID}:${PGID} "${ARKIME_DIR}"/etc/ || true
