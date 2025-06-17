@@ -104,21 +104,24 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
       rm -f "${TEMP_JSON}"
     done
 
-    echo "Creating user-defined roles..."
-
-    for ROLE_FILE in "$ARKIME_DIR"/etc/roles/*.json; do
-      ROLE_NAME=${ROLE_FILE##*/}
-      ROLE_NAME=${ROLE_NAME#arkime_}
-      ROLE_NAME=${ROLE_NAME%.json}
-      PERM_ARGS=()
-      [[ "$(jq -r '(.doc?.disablePcapDownload) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --disablePcapDownload )
-      [[ "$(jq -r '(.doc?.hideFiles) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideFiles )
-      [[ "$(jq -r '(.doc?.hidePcap) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hidePcap )
-      [[ "$(jq -r '(.doc?.hideStats) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideStats )
-      [[ "$(jq -r '(.doc?.packetSearch) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --packetSearch )
-      [[ "$(jq -r '(.doc?.removeEnabled) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --removeEnabled )
-      $ARKIME_DIR/bin/arkime_add_user.sh "role:${ROLE_NAME}" "${ROLE_NAME}" "ignored" --createOnly --roles "" "${PERM_ARGS[@]}" $DB_SSL_FLAG >/dev/null 2>&1
-    done
+    # TODO: until Arkime v6.0.0 is out, as per Andy Wick and I's discussion in slack, at the moment not all of the Arkime permissions can be set on roles,
+    #   so creating these doesn't really do us any good. For now, then, Arkime roles are going to be handled purely based on URI path in the NGINX stuff
+    #   (nginx/lua/nginx_auth_helpers.lua). Once all of these permissions are settable at the role level in Arkime, we can uncomment this and revisit it.
+    # -SG 2025.06.17
+    # echo "Creating user-defined roles..."
+    # for ROLE_FILE in "$ARKIME_DIR"/etc/roles/*.json; do
+    #   ROLE_NAME=${ROLE_FILE##*/}
+    #   ROLE_NAME=${ROLE_NAME#arkime_}
+    #   ROLE_NAME=${ROLE_NAME%.json}
+    #   PERM_ARGS=()
+    #   [[ "$(jq -r '(.doc?.disablePcapDownload) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --disablePcapDownload )
+    #   [[ "$(jq -r '(.doc?.hideFiles) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideFiles )
+    #   [[ "$(jq -r '(.doc?.hidePcap) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hidePcap )
+    #   [[ "$(jq -r '(.doc?.hideStats) // true' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --hideStats )
+    #   [[ "$(jq -r '(.doc?.packetSearch) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --packetSearch )
+    #   [[ "$(jq -r '(.doc?.removeEnabled) // false' < "${ROLE_FILE}")" == "true" ]] && PERM_ARGS+=( --removeEnabled )
+    #   $ARKIME_DIR/bin/arkime_add_user.sh "role:${ROLE_NAME}" "${ROLE_NAME}" "ignored" --createOnly --roles "" "${PERM_ARGS[@]}" $DB_SSL_FLAG >/dev/null 2>&1
+    # done
 
     echo "Setting defaults..."
 
