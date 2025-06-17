@@ -93,6 +93,11 @@ removed_environment_variables:
   #   - key2
   arkime:
     - OPENSEARCH_MAX_SHARDS_PER_NODE
+  arkime_live:
+    - VIEWER
+  arkime_offline:
+    - VIEWER
+    - WISE
   auth_common:
     - NGINX_BASIC_AUTH
     - NGINX_LDAP_TLS_STUNNEL

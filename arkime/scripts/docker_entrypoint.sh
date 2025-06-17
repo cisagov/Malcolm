@@ -289,10 +289,6 @@ else
   cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
   rm ./wise.tmp
 fi
-if [[ ${WISE} != "on" ]]; then
-  # comment-out WISE URL if unnecessary
-  sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
-fi
 
 unset OPENSEARCH_URL_FINAL
 
