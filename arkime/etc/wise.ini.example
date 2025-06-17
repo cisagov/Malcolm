@@ -5,6 +5,7 @@
 
 [wiseService]
 port=8081
+wiseHost=0.0.0.0
 excludeDomains=*.bl.barracudabrts.com;*.zen.spamhaus.org;*.in-addr.arpa;*.avts.mcafee.com;*.avqs.mcafee.com;*.bl.barracuda.com;*.lbl8.mailshell.net;*.dnsbl.sorbs.net;*.s.sophosxl.net;*.metric.gstatic.com;*.ip6.arpa
 authMode=header
 usersElasticsearch=http://opensearch:9200
@@ -13,8 +14,7 @@ authMode=header
 userAuthIps=::,0.0.0.0/0
 userNameHeader=http_auth_http_user
 webBasePath=/wiseService
-wiseHost=127.0.0.1
 
 
 [malcolm]
-key=enabled
+key=enabled 
