@@ -2706,22 +2706,37 @@ def wipe_indices(dates=None):
     if (err != 0) or (len(out) == 0):
         eprint("Malcolm is not running, cannot wipe indices.")
         exit(1)
+
+    # Get OpenSearch credentials based off of local or remote instance
+    opensearch_env_path = os.path.join(args.configDir, 'opensearch.env')
+    opensearch_url = 'http://localhost:9200'
+    if os.path.isfile(opensearch_env_path):
+        opensearch_envs = dotenvImported.dotenv_values(opensearch_env_path)
+        opensearch_url = opensearch_envs.get('OPENSEARCH_URL', opensearch_url)
     
     # Determine credentials based off of remote or local OpenSearch
     curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')
     use_curlrc = False
+    user = ''
+    insecure = False
     if os.path.isfile(curlrc_path):
         creds = ParseCurlFile(curlrc_path)
-        user = creds.get('user', '')
-        if user:
-            insecure = 'insecure' in creds
-            use_curlrc = True
-            print(f"Using OpenSearch credentials from curlrc: insecure={insecure}")
+        print(f"DEBUG: creds from curlrc: {creds}")
+        username = creds.get('user', '').strip('"\'' )
+        password = creds.get('password', '').strip('"\'' )
+        if password:
+            user = f"{username}:{password}"
+        else:
+            # If user is already in username:password format 
+            user = username
+        insecure = 'insecure' in creds
+        use_curlrc = True
+        print(f"Using OpenSearch credentials from curlrc: insecure={insecure}, url={opensearch_url}")
     if not use_curlrc:
         # Use local credentials from auth.env
         auth_env_path = os.path.join(args.configDir, 'auth.env')
         if not os.path.isfile(auth_env_path):
-            eprint(f"Authentication file not found: {auth_env_path}")
+            eprint(f"Authentication file not found: {auth_env_path}")   
             exit(1)
         envs = dotenvImported.dotenv_values(auth_env_path)
         username = envs.get('MALCOLM_USERNAME', 'admin')
@@ -2734,16 +2749,27 @@ def wipe_indices(dates=None):
         insecure = True
         print(f"Using OpenSearch credentials from auth.env: insecure={insecure}")
 
+    # Helper to run curl in right context
+    def run_curl(cmd_curl, extra_args=None, method=None):
+        base = ['curl', '-s', '-u', user]
+        if insecure:
+            base.append('-k')
+        if method:
+            base.append(f'-X{method}')
+        if extra_args:
+            base+= extra_args
+        base.append(cmd_curl)
+        if use_curlrc:
+            cmd = base
+        else:
+            cmd = [
+                dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch'
+            ] + base
+        err, out = run_process(cmd, env=osEnv, debug=args.debug)
+        return err,out
 
     # Get list of indices
-    curl_cmd = [
-        dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch',
-        'curl', '-s', '-u', user
-    ]
-    if insecure:
-        curl_cmd.append('-k')
-    curl_cmd.append('http://localhost:9200/_cat/indices?h=index')    
-    err, indices = run_process(curl_cmd, env=osEnv, debug=args.debug)
+    err, indices = run_curl(f'{opensearch_url}/_cat/indices?h=index')
     if err != 0:
         eprint("Failed to get indices from OpenSearch.")
         exit(1)
@@ -2754,13 +2780,7 @@ def wipe_indices(dates=None):
         date_patterns = [str(d) for d in dates]
         indices_with_dates = []
         for index in indices:
-            settings_cmd = [
-                dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch',
-                'curl', '-s', '-u', user, f'http://localhost:9200/{index}/_settings'
-            ]
-            if insecure:
-                settings_cmd.insert(-1, '-k')
-            err, out = run_process(settings_cmd, env=osEnv, debug=args.debug)
+            err, out = run_curl(f'{opensearch_url}/{index}/_settings')
             if err == 0 and out:
                 try:
                     settings = json.loads(''.join(out))
@@ -2784,13 +2804,7 @@ def wipe_indices(dates=None):
 
     # Delete indices    
     for index in indices:
-        del_cmd = [
-            dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', 'opensearch',
-            'curl', '-s', '-u', user, '-XDELETE', f'http://localhost:9200/{index}',
-        ]
-        if insecure:
-            del_cmd.insert(-1, '-k')
-        err, out = run_process(del_cmd, env=osEnv, debug=args.debug)
+        err, out = run_curl(f'{opensearch_url}/{index}', method='DELETE')
         if err == 0:
             print(f"Successfully deleted index: {index}")
         else:
