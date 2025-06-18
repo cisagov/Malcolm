@@ -7,17 +7,56 @@ copied_environment_variables:
   # destination_env_file:
   #   source_env_file:
   #     destination_key:
-  #       source_key
+  #       source_key:
+  #         "source_value": destination_value
   auth_common:
     auth_common:
       NGINX_AUTH_MODE:
         NGINX_BASIC_AUTH
+  netbox:
+    netbox:
+      REMOTE_AUTH_GROUP_HEADER:
+        REMOTE_AUTH_GROUP_HEADER:
+          "HTTP_X_REMOTE_AUTH_GROUP": HTTP_X_FORWARDED_ROLES
+      REMOTE_AUTH_AUTO_CREATE_GROUPS:
+        REMOTE_AUTH_AUTO_CREATE_GROUPS:
+          "True": False
+      REMOTE_AUTH_GROUP_SYNC_ENABLED:
+        REMOTE_AUTH_GROUP_SYNC_ENABLED:
+          "False": True
+      REMOTE_AUTH_DEFAULT_GROUPS:
+        REMOTE_AUTH_DEFAULT_GROUPS:
+          "standard": netbox_read_access
+      REMOTE_AUTH_STAFF_GROUPS:
+        REMOTE_AUTH_STAFF_GROUPS:
+          "administrator": admin
+      REMOTE_AUTH_SUPERUSER_GROUPS:
+        REMOTE_AUTH_SUPERUSER_GROUPS:
+          "administrator": admin
   netbox_common:
     netbox_common:
       NETBOX_MODE:
         NETBOX_DISABLED:
           "true": disabled
           "false": local
+  nginx:
+    auth_common:
+      NGINX_LDAP_TLS_STUNNEL:
+        NGINX_LDAP_TLS_STUNNEL
+      NGINX_LDAP_TLS_STUNNEL_CHECK_HOST:
+        NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+      NGINX_LDAP_TLS_STUNNEL_CHECK_IP:
+        NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+      NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL:
+        NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
+  opensearch:
+    opensearch:
+      OPENSEARCH_URL:
+        OPENSEARCH_URL:
+          "http://opensearch:9200": "https://opensearch:9200"
+    arkime:
+      CLUSTER_MAX_SHARDS_PER_NODE:
+        OPENSEARCH_MAX_SHARDS_PER_NODE
   postgres:
     netbox:
       DB_HOST:
@@ -52,8 +91,14 @@ removed_environment_variables:
   # env_file:
   #   - key1
   #   - key2
+  arkime:
+    - OPENSEARCH_MAX_SHARDS_PER_NODE
   auth_common:
     - NGINX_BASIC_AUTH
+    - NGINX_LDAP_TLS_STUNNEL
+    - NGINX_LDAP_TLS_STUNNEL_CHECK_HOST
+    - NGINX_LDAP_TLS_STUNNEL_CHECK_IP
+    - NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
   lookup_common:
     - CONNECTION_SECONDS_SEVERITY_THRESHOLD
   netbox_redis:
@@ -73,6 +118,8 @@ removed_environment_variables:
     - DB_NAME
     - REDIS_CACHE_HOST
     - REDIS_HOST
+    - REMOTE_AUTH_STAFF_USERS
+    - REMOTE_AUTH_SUPERUSERS
   netbox_redis_cache:
     - REDIS_HOST
     - REDIS_CACHE_HOST

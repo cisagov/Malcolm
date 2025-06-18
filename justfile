@@ -83,6 +83,7 @@ _base_config +CAPTURE_FLAGS:
     --netbox-autopopulate "$NETBOX_AUTOPOPULATE" \
     --netbox-auto-prefixes "$NETBOX_AUTO_PREFIXES" \
     --netbox-site-name "$NETBOX_SITE_NAME" \
+    --netbox-autopopulate-filter "$NETBOX_AUTO_POPULATE_SUBNETS" \
     --extra \
       "nginx.env:NGINX_LOG_ACCESS_AND_ERRORS=$NGINX_LOG_ACCESS_AND_ERRORS" \
       "arkime.env:ARKIME_ROTATE_INDEX=$ARKIME_ROTATE_INDEX" \
@@ -143,6 +144,7 @@ auth-setup:
     --namespace "$MALCOLM_K8S_NAMESPACE" \
     --profile "$MALCOLM_PROFILE" \
     --auth-method "$AUTH_METHOD" \
+    --auth-generate-opensearch-internal-creds "$AUTH_GENERATE_OPENSEARCH_CREDS" \
     --auth-admin-username "$AUTH_ADMIN_USERNAME" \
     --auth-admin-password-openssl "$(echo -n "$AUTH_ADMIN_PASSWORD" | openssl passwd -1 --stdin)" \
     --auth-admin-password-htpasswd "$(echo -n "$AUTH_ADMIN_PASSWORD" | htpasswd -i -n -B username | cut -d: -f2 | head -n 1)" \
@@ -156,7 +158,8 @@ auth-setup:
     --auth-keycloak-client-secret "$AUTH_KEYCLOAK_CLIENT_SECRET" \
     --auth-require-group "$AUTH_REQUIRE_GROUP" \
     --auth-require-role "$AUTH_REQUIRE_ROLE" \
-    --auth-netbox-token "$NETBOX_TOKEN"
+    --auth-netbox-token "$NETBOX_TOKEN" \
+    --auth-role-based-access-control "$ROLE_BASED_ACCESS"
 
 logs *SERVICES:
   #!/usr/bin/env bash
@@ -218,7 +221,7 @@ start:
     --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
     --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
 
-restart:
+restart *SERVICES:
   #!/usr/bin/env bash
   ./scripts/restart \
     --quiet \
@@ -233,7 +236,8 @@ restart:
     --inject-resources "$MALCOLM_K8S_INJECT_RESOURCES" \
     --no-capabilities "$MALCOLM_K8S_NO_CAPABILITIES" \
     --no-capture-pods "$MALCOLM_K8S_NO_CAPTURE_PODS" \
-    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS"
+    --skip-persistent-volume-checks "$MALCOLM_K8S_SKIP_PERSISTENT_VOLUME_CHECKS" \
+    -s {{SERVICES}}
 
 build *SERVICES:
   #!/usr/bin/env bash

@@ -45,11 +45,7 @@ def filter(event)
     return [event]
   end
 
-  if !_vals.is_a?(Array) then
-    _newVals = Array.new
-    _newVals.push(_vals)
-    _vals = _newVals
-  end
+  _vals = [_vals] unless _vals.is_a?(Array)
 
   _scores_v1 = Array.new
   _scores_v2 = Array.new

@@ -49,6 +49,16 @@ ZEEK_INTEL_INDICATOR_TYPE = 'indicator_type'
 ZEEK_INTEL_META_SOURCE = 'meta.source'
 ZEEK_INTEL_META_DESC = 'meta.desc'
 ZEEK_INTEL_META_URL = 'meta.url'
+ZEEK_INTEL_META_CONFIDENCE = 'meta.confidence'
+ZEEK_INTEL_META_THREAT_SCORE = 'meta.threat_score'
+ZEEK_INTEL_META_VERDICT = 'meta.verdict'
+ZEEK_INTEL_META_VERDICT_SOURCE = 'meta.verdict_source'
+ZEEK_INTEL_META_FIRSTSEEN = 'meta.firstseen'
+ZEEK_INTEL_META_LASTSEEN = 'meta.lastseen'
+ZEEK_INTEL_META_ASSOCIATED = 'meta.associated'
+ZEEK_INTEL_META_CATEGORY = 'meta.category'
+ZEEK_INTEL_META_CAMPAIGNS = 'meta.campaigns'
+ZEEK_INTEL_META_REPORTS = 'meta.reports'
 ZEEK_INTEL_META_DO_NOTICE = 'meta.do_notice'
 ZEEK_INTEL_CIF_TAGS = 'meta.cif_tags'
 ZEEK_INTEL_CIF_CONFIDENCE = 'meta.cif_confidence'
@@ -56,6 +66,16 @@ ZEEK_INTEL_CIF_SOURCE = 'meta.cif_source'
 ZEEK_INTEL_CIF_DESCRIPTION = 'meta.cif_description'
 ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
+
+# TODO: STILL NEED TO MAP THESE:
+#   - ZEEK_INTEL_META_CATEGORY
+#   - ZEEK_INTEL_META_THREAT_SCORE
+#   - ZEEK_INTEL_META_VERDICT
+#   - ZEEK_INTEL_META_VERDICT_SOURCE
+#   - ZEEK_INTEL_META_ASSOCIATED
+#   - ZEEK_INTEL_META_CATEGORY
+#   - ZEEK_INTEL_META_CAMPAIGNS
+#   - ZEEK_INTEL_META_REPORTS
 
 ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
 
@@ -227,11 +247,14 @@ def map_mandiant_indicator_to_zeek(
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
         if hasattr(indicator, 'mscore'):
+            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
         if hasattr(indicator, 'first_seen'):
-            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         if hasattr(indicator, 'last_seen'):
-            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
+            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         if hasattr(indicator, 'sources'):
             sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
             if categories := list(
@@ -270,8 +293,6 @@ def map_mandiant_indicator_to_zeek(
                     tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
                     if newId := hashish.get('id', None):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
-                    if ZEEK_INTEL_META_URL in tmpItem:
-                        sources.append(tmpItem[ZEEK_INTEL_META_URL])
                     if sources:
                         tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
                     results.append(tmpItem)
@@ -281,8 +302,6 @@ def map_mandiant_indicator_to_zeek(
         elif hasattr(indicator, 'value') and (val := indicator.value):
             # handle other types besides the file hash
             zeekItem[ZEEK_INTEL_INDICATOR] = val
-            if ZEEK_INTEL_META_URL in zeekItem:
-                sources.append(zeekItem[ZEEK_INTEL_META_URL])
             if sources:
                 zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
             results.append(zeekItem)
@@ -471,8 +490,10 @@ def map_stix_indicator_to_zeek(
             # some of these are from CFM, what the heck...
             # if 'description' in indicator:
             #   "description": "severity level: Low\n\nCONFIDENCE: High",
-        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(mktime(indicator.created.timetuple()))
-        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(indicator.modified.timetuple()))
+        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.created.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
+        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.modified.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         tags = []
         tags.extend([x for x in indicator.get('labels', []) if x])
         tags.extend([x for x in indicator.get('indicator_types', []) if x])
@@ -550,14 +571,17 @@ def map_misp_attribute_to_zeek(
             zeekItem[ZEEK_INTEL_META_URL] = url
         zeekItem[ZEEK_INTEL_INDICATOR] = attribute_value
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
-        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = str(mktime(attribute.timestamp.timetuple()))
-        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = str(mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
+        zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(attribute.timestamp.timetuple()))
+        zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
         if tags is not None and len(tags) > 0:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in [attribute.category] + tags])
         else:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
         if confidence is not None:
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
+            zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
 
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
@@ -575,7 +599,7 @@ class FeedParserZeekPrinter(object):
     outFile = None
     since = None
 
-    def __init__(self, notice: bool, cif: bool, since=None, file=None, logger=None):
+    def __init__(self, extended: bool, notice: bool, cif: bool, since=None, file=None, logger=None):
         self.lock = Lock()
         self.logger = logger
         self.outFile = file
@@ -587,6 +611,21 @@ class FeedParserZeekPrinter(object):
             ZEEK_INTEL_META_DESC,
             ZEEK_INTEL_META_URL,
         ]
+        if extended:
+            self.fields.extend(
+                [
+                    ZEEK_INTEL_META_CONFIDENCE,
+                    ZEEK_INTEL_META_THREAT_SCORE,
+                    ZEEK_INTEL_META_VERDICT,
+                    ZEEK_INTEL_META_VERDICT_SOURCE,
+                    ZEEK_INTEL_META_FIRSTSEEN,
+                    ZEEK_INTEL_META_LASTSEEN,
+                    ZEEK_INTEL_META_ASSOCIATED,
+                    ZEEK_INTEL_META_CATEGORY,
+                    ZEEK_INTEL_META_CAMPAIGNS,
+                    ZEEK_INTEL_META_REPORTS,
+                ]
+            )
         if notice:
             self.fields.extend(
                 [

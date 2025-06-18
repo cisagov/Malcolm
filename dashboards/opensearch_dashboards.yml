@@ -1,40 +1,69 @@
 ---
-# Default OpenSearch dashboards configuration from github.
+# Default OpenSearch Dashboards configuration
 
-server.name: "dashboards"
-server.host: "0.0.0.0"
-server.basePath: "/dashboards"
-server.rewriteBasePath: true
-server.maxPayloadBytes: 8388608
-server.cors: true
-opensearch.hosts: ["${OPENSEARCH_URL}"]
-opensearch.username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
-opensearch.password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
-opensearch.ssl.verificationMode: "_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_"
-opensearch.requestTimeout: 180000
-data_source.enabled: false
+server:
+  name: "dashboards"
+  host: "0.0.0.0"
+  basePath: "/dashboards"
+  rewriteBasePath: true
+  maxPayloadBytes: 8388608
+  cors: true
 
-opensearchDashboards.branding:
-  applicationTitle: "Malcolm Dashboards"
-  useExpandedHeader: false
-  logo:
-   defaultUrl: "/assets/img/Malcolm_outline_banner_dark.png"
-   darkModeUrl: "/assets/img/Malcolm_outline_banner_dark.png"
-  mark:
-   defaultUrl: "/assets/img/icon.png"
-   darkModeUrl: "/assets/img/icon_dark.png"
-  loadingLogo:
-   defaultUrl: "/assets/img/icon.png"
-   darkModeUrl: "/assets/img/icon_dark.png"
-  faviconUrl: "/assets/img/favicon32.png"
+opensearch:
+  hosts: ["${OPENSEARCH_URL}"]
+  username: "_MALCOLM_DASHBOARDS_OPENSEARCH_USER_"
+  password: "_MALCOLM_DASHBOARDS_OPENSEARCH_PASSWORD_"
+  ssl:
+    verificationMode: "_MALCOLM_DASHBOARDS_OPENSEARCH_SSL_VERIFICATION_MODE_"
+  requestHeadersAllowlist:
+    - "securitytenant"
+    - "Authorization"
+    - "X-Forwarded-For"
+    - "X-Remote-Auth"
+    - "X-Forwarded-Roles"
+  requestTimeout: 180000
 
-map.regionmap:
-  includeOpenSearchMapsService: false
-  layers:
-     - name: "World (offline)"
-       url: "/world.geojson"
-       attribution: "https://exploratory.io/maps"
-       fields:
+opensearch_security:
+  auth:
+    type: ["basicauth","proxy"]
+    multiple_auth_enabled: true
+  proxycache:
+    user_header: "X-Remote-Auth"
+    roles_header: "X-Forwarded-Roles"
+  multitenancy:
+    enabled: false
+    enable_filter: false
+    tenants:
+      enable_global: true
+      enable_private: false
+      preferred: ["Global"]
+
+data_source:
+  enabled: false
+
+opensearchDashboards:
+  branding:
+    applicationTitle: "Malcolm Dashboards"
+    useExpandedHeader: false
+    logo:
+      defaultUrl: "/assets/img/Malcolm_outline_banner_dark.png"
+      darkModeUrl: "/assets/img/Malcolm_outline_banner_dark.png"
+    mark:
+      defaultUrl: "/assets/img/icon.png"
+      darkModeUrl: "/assets/img/icon_dark.png"
+    loadingLogo:
+      defaultUrl: "/assets/img/icon.png"
+      darkModeUrl: "/assets/img/icon_dark.png"
+    faviconUrl: "/assets/img/favicon32.png"
+
+map:
+  regionmap:
+    includeOpenSearchMapsService: false
+    layers:
+      - name: "World (offline)"
+        url: "/world.geojson"
+        attribution: "https://exploratory.io/maps"
+        fields:
           - name: "ISO_A2"
             description: "Country Code"
           - name: "WB_A2"
@@ -42,10 +71,10 @@ map.regionmap:
           - name: "NAME"
             description: "Country Name"
 
-# to enable third-party visualization libraries (see https://github.com/lguillaud/osd_transform_vis#server-side)
-csp.strict: false
-csp.warnLegacyBrowsers: false
-csp.rules:
-  - "script-src 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com/ https://d3js.org/ https://cdn.jsdelivr.net/ https://cdnjs.cloudflare.com/ https://cdn.datatables.net/ 'self'"
-  - "worker-src blob: *"
-  - "child-src data: * blob: *"
+csp:
+  strict: false
+  warnLegacyBrowsers: false
+  rules:
+    - "script-src 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com/ https://d3js.org/ https://cdn.jsdelivr.net/ https://cdnjs.cloudflare.com/ https://cdn.datatables.net/ 'self'"
+    - "worker-src blob: *"
+    - "child-src data: * blob: *"

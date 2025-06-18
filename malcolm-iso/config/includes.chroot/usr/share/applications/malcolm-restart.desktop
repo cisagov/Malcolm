@@ -4,6 +4,6 @@ Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/script
 Comment=Restart Malcolm
 Terminal=false
 Type=Application
-Icon=redo.png
+Icon=xfsm-reboot
 Categories=Network;
 StartupNotify=true

@@ -6,6 +6,7 @@
 import contextlib
 import enum
 import hashlib
+import inspect
 import ipaddress
 import json
 import mmap
@@ -125,6 +126,22 @@ def base64_decode_if_prefixed(s: str):
         return b64decode(s[7:]).decode('utf-8')
     else:
         return s
+
+
+###################################################################################################
+# return the name of the calling function as a string
+def get_function_name(depth=0):
+    try:
+        frame = inspect.currentframe()
+        for _ in range(depth + 1):
+            if frame is None:
+                return None
+            frame = frame.f_back
+        return frame.f_code.co_name if frame else None
+    except Exception:
+        return None
+    finally:
+        del frame
 
 
 ###################################################################################################

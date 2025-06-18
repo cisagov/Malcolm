@@ -5,6 +5,7 @@
 * Populating the NetBox inventory
     - [Manually](#NetBoxPopManual)
     - [Via passively-gathered network traffic metadata](#NetBoxPopPassive)
+        + [Subnets considered for autopopulation](#NetBoxAutoPopSubnets)
         + [Matching device manufacturers to OUIs](#NetBoxPopPassiveOUIMatch)
     - [Via active discovery](#NetBoxPopActive)
 * [Compare NetBox inventory with database of known vulnerabilities](#NetBoxVuln)
@@ -103,6 +104,41 @@ Since device autocreation is based on IP address, information about network segm
 Although network devices can be automatically created using this method, [services](https://demo.netbox.dev/static/docs/core-functionality/services/#service-templates) should inventoried manually. The **Uninventoried Observed Services** visualization in the [**Zeek Known Summary** dashboard](dashboards.md#DashboardsVisualizations) can help users review network services to be created in NetBox.
 
 See [idaholab/Malcolm#135](https://github.com/idaholab/Malcolm/issues/135) for more information on this feature.
+
+### <a name="NetBoxAutoPopSubnets"></a> Subnets considered for autopopulation
+
+When [passive device autopopulation](#NetBoxPopPassive) is enabled, devices with addresses in private IP space will be autopopulated by default. You can control this behavior using the `NETBOX_AUTO_POPULATE_SUBNETS` [environment variable in `./config/netbox-common.env`](malcolm-config.md#MalcolmConfigEnvVars). This variable accepts a comma-separated list of private CIDR subnets, with the following logic:
+
+* If left blank, *all private* IPv4 and IPv6 address ranges (as defined in [RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918) and [RFC 4193](https://datatracker.ietf.org/doc/html/rfc4193)) will be autopopulated.
+* Use an exclamation point (`!`) before a CIDR to explicitly *exclude* that subnet.
+* If only exclusions are listed, all private IPs are allowed *except* those excluded.
+* If both inclusions and exclusions are listed:
+    * Only addresses matching the allowed subnets will be considered.
+    * Among those, any matching excluded subnets will be rejected.
+* Network base and broadcast addresses (e.g., `.0` and `.255`) are not considered assignable and will be ignored.
+
+This variable is especially useful for excluding dynamic address ranges such as those used by DHCP, which should generally not trigger autopopulation in NetBox. Since these addresses can change frequently and aren't tied to specific devices, including them could result in inaccurate or noisy inventory data. By fine-tuning which private subnets are included or excluded, users can ensure that only meaningful, typically static assignments are autopopulated.
+
+#### Multiple NetBox Sites
+
+Users may wish to apply different CIDR subnet filters for autopopulation within different NetBox sites. To support this, the `NETBOX_AUTO_POPULATE_SUBNETS` environment variable can accept multiple site-specific entries, each specifying a NetBox site name or numeric site ID, followed by a colon (`:`), and a comma-separated list of subnet rules (just like the single-site case described above). Multiple site entries should be separated by semicolons (`;`).
+
+If no matching site-specific rule is found, the default rule — defined using an asterisk (`*`) as the site key, or by omitting the site name or ID — will be used as a fallback if present. If no fallback is defined, then all private IPs are autopopulated by default.
+
+#### Examples
+
+* `192.168.100.0/24`
+    * Only allow addresses in `192.168.100.0/24`
+* `!172.16.0.0/12`
+    * Allow all private IPs *except* `172.16.0.0/12`
+* `!10.0.0.0/8,10.0.10.0/24`
+    * Exclude `10.0.0.0/8` generally, but *allow* `10.0.10.0/24` as an override
+* `10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32`
+    * Allow all of `10.0.0.0/8` *except* `10.0.10.0/16`, *but still allow* `10.0.10.5`
+* `!fc00::/7,fd12:3456:789a:1::/64`
+    * Exclude all [ULA](https://en.wikipedia.org/wiki/Unique_local_address) IPv6 ranges, *except* a specific subnet
+* `site1:10.0.0.0/8,!10.0.10.0/16,10.0.10.5/32;site2:!172.16.0.0/12;site3:!fc00::/7,fd12:3456:789a:1::/64;!192.168.0.0/16`
+    * Specify different autopopulation rules for different NetBox sites
 
 ### <a name="NetBoxPopPassiveOUIMatch"></a> Matching device manufacturers to OUIs
 

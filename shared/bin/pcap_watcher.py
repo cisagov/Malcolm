@@ -96,7 +96,7 @@ class EventWatcher:
         self.openSearchClient = None
 
         # if we're going to be querying OpenSearch for past PCAP file status, connect now
-        if args.opensearchUrl is not None:
+        if args.opensearchUrl:
             connected = False
             healthy = False
 
@@ -175,10 +175,6 @@ class EventWatcher:
         self.logger.info(f"{scriptName}:\tbinding publisher port {PCAP_TOPIC_PORT}")
         self.topic_socket = self.context.socket(zmq.PUB)
         self.topic_socket.bind(f"tcp://*:{PCAP_TOPIC_PORT}")
-
-        # todo: do I want to set this? probably not since this guy's whole job is to send
-        # and if he can't then what's the point? just block
-        # self.topic_socket.SNDTIMEO = 5000
 
         self.logger.info(f"{scriptName}:\tEventWatcher initialized")
 
@@ -306,7 +302,7 @@ def main():
         dest='opensearchUrl',
         metavar='<STR>',
         type=str,
-        default=os.getenv('OPENSEARCH_URL', None),
+        default=os.getenv('OPENSEARCH_URL', ''),
         help='OpenSearch/Elasticsearch connection string for querying Arkime files index to ignore duplicates',
     )
     parser.add_argument(
@@ -425,7 +421,13 @@ def main():
     )
     requiredNamed = parser.add_argument_group('required arguments')
     requiredNamed.add_argument(
-        '-d', '--directory', dest='baseDir', help='Directory to monitor', metavar='<directory>', type=str, required=True
+        '-d',
+        '--directory',
+        dest='baseDir',
+        help='Directory to monitor',
+        metavar='<directory>',
+        type=str,
+        required=True,
     )
 
     try:
@@ -446,13 +448,13 @@ def main():
         sys.tracebacklimit = 0
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
-        args.opensearchUrl == 'http://opensearch:9200'
+        args.opensearchUrl == 'https://opensearch:9200'
     )
-    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile) if (not opensearchIsLocal) else defaultdict(lambda: None)
+    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile)
 
     if not args.opensearchUrl:
         if opensearchIsLocal:
-            args.opensearchUrl = 'http://opensearch:9200'
+            args.opensearchUrl = 'https://opensearch:9200'
         elif 'url' in opensearchCreds:
             args.opensearchUrl = opensearchCreds['url']
 

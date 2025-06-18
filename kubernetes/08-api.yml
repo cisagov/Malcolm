@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: ghcr.io/idaholab/malcolm/api:25.05.0
+        image: ghcr.io/idaholab/malcolm/api:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -62,6 +62,8 @@ spec:
               name: arkime-env
           - configMapRef:
               name: upload-common-env
+          - configMapRef:
+              name: auth-common-env
           - configMapRef:
               name: dashboards-env
           - configMapRef:

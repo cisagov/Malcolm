@@ -4,7 +4,7 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 ###################################################################################################
-# Monitor a directory for PCAP files for processing (by publishing their filenames to a ZMQ socket)
+# Monitor a directory for PCAP files for processing (by moving them from upload/ to processed/)
 #
 # Run the script with --help for options
 ###################################################################################################
@@ -160,7 +160,9 @@ def main():
         help='Source directory to monitor',
         metavar='<directory>',
         type=str,
-        default=os.path.join(remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), 'upload'),
+        default=os.path.join(
+            remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), os.getenv('PCAP_PATH_UPLOAD_SUBDIR', 'upload')
+        ),
         required=False,
     )
     parser.add_argument(
@@ -170,7 +172,9 @@ def main():
         help='Destination directory',
         metavar='<directory>',
         type=str,
-        default=os.path.join(remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), 'processed'),
+        default=os.path.join(
+            remove_suffix(os.getenv('PCAP_PATH', '/pcap'), '/'), os.getenv('PCAP_PATH_PROCESSED_SUBDIR', 'processed')
+        ),
         required=False,
     )
     parser.add_argument(
@@ -180,7 +184,9 @@ def main():
         help='Zeek upload directory',
         metavar='<directory>',
         type=str,
-        default=os.path.join(remove_suffix(os.getenv('ZEEK_PATH', '/zeek'), '/'), 'upload'),
+        default=os.path.join(
+            remove_suffix(os.getenv('ZEEK_PATH', '/zeek'), '/'), os.getenv('ZEEK_PATH_UPLOAD_SUBDIR', 'upload')
+        ),
         required=False,
     )
     parser.add_argument(

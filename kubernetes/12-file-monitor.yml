@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: file-monitor-container
-        image: ghcr.io/idaholab/malcolm/file-monitor:25.05.0
+        image: ghcr.io/idaholab/malcolm/file-monitor:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -66,6 +66,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: auth-common-env
           - configMapRef:
               name: dashboards-env
           - configMapRef:
@@ -97,7 +99,7 @@ spec:
             name: file-monitor-yara-rules-custom-volume
       initContainers:
       - name: file-monitor-live-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.05.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Name=Malcolm - User Management
-Exec=/usr/bin/firefox https://localhost/auth/
+Exec=/usr/local/bin/malcolm-auth-config-browser-launch.sh
 Terminal=false
 X-MultipleArgs=false
 Type=Application

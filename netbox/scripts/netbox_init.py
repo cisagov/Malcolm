@@ -165,20 +165,28 @@ def main():
         help="Site(s) to create",
     )
     parser.add_argument(
-        '--default-group',
-        dest='defaultGroupName',
+        '--read-only-group',
+        dest='readOnlyGroupName',
         type=str,
-        default=os.getenv('REMOTE_AUTH_DEFAULT_GROUPS', 'standard'),
+        default=os.getenv('ROLE_NETBOX_READ_ACCESS', 'netbox_read_access'),
         required=False,
-        help="Name of default group for automatic NetBox user creation",
+        help="Name of read-only group for automatic NetBox user creation",
     )
     parser.add_argument(
-        '--staff-group',
-        dest='staffGroupName',
+        '--read-write-group',
+        dest='readWriteGroupName',
         type=str,
-        default=os.getenv('REMOTE_AUTH_STAFF_GROUPS', 'administrator'),
+        default=os.getenv('ROLE_NETBOX_READ_WRITE_ACCESS', 'netbox_read_write_access'),
         required=False,
-        help="Name of staff group for automatic NetBox user creation",
+        help="Name of read/write group for automatic NetBox user creation",
+    )
+    parser.add_argument(
+        '--admin-group',
+        dest='adminGroupName',
+        type=str,
+        default=os.getenv('ROLE_ADMIN', 'admin'),
+        required=False,
+        help="Name of administrator group for automatic NetBox user creation",
     )
     parser.add_argument(
         '-m',
@@ -528,17 +536,17 @@ def main():
                 time.sleep(5)
 
         # GROUPS #####################################################################################################
-        DEFAULT_GROUP_NAMES = (
-            args.staffGroupName,
-            args.defaultGroupName,
+        defaultGroupNames = (
+            args.adminGroupName,
+            args.readOnlyGroupName,
+            args.readWriteGroupName,
         )
-
         try:
             groupsPreExisting = {x.name: x for x in nb.users.groups.all()}
             logging.debug(f"groups (before): { {k:v.id for k, v in groupsPreExisting.items()} }")
 
             # create groups that don't already exist
-            for groupName in [x for x in DEFAULT_GROUP_NAMES if x not in groupsPreExisting]:
+            for groupName in [x for x in defaultGroupNames if x and (x not in groupsPreExisting)]:
                 try:
                     nb.users.groups.create({'name': groupName})
                 except pynetbox.RequestError as nbe:
@@ -549,12 +557,12 @@ def main():
         except Exception as e:
             logging.error(f"{type(e).__name__} processing groups: {e}")
 
-        # PERMISSIONS ##################################################################################################
-        DEFAULT_PERMISSIONS = {
-            f'{args.staffGroupName}_permission': {
-                'name': f'{args.staffGroupName}_permission',
+        # PERMISSIONS for default groups ###############################################################################
+        defaultGroupPermissions = {
+            f'{args.adminGroupName}_permission': {
+                'name': f'{args.adminGroupName}_permission',
                 'enabled': True,
-                'groups': [args.staffGroupName],
+                'groups': [args.adminGroupName],
                 'actions': [
                     'view',
                     'add',
@@ -565,16 +573,25 @@ def main():
                 'include_objects': ['*'],
                 'exclude_objects': [],
             },
-            f'{args.defaultGroupName}_permission': {
-                'name': f'{args.defaultGroupName}_permission',
+        }
+
+        groupsDefaultPermissions = {
+            args.readWriteGroupName: [
+                'view',
+                'add',
+                'change',
+                'delete',
+            ],
+            args.readOnlyGroupName: [
+                'view',
+            ],
+        }
+        for groupName, groupActions in groupsDefaultPermissions.items():
+            defaultGroupPermissions[f'{groupName}_permission'] = {
+                'name': f'{groupName}_permission',
                 'enabled': True,
-                'groups': [args.defaultGroupName],
-                'actions': [
-                    'view',
-                    'add',
-                    'change',
-                    'delete',
-                ],
+                'groups': [groupName],
+                'actions': groupActions,
                 'constraints': {},
                 'include_objects': ['*'],
                 'exclude_objects': [
@@ -603,11 +620,11 @@ def main():
                     'users.user',
                     'users.userconfig',
                 ],
-            },
-            f'{args.defaultGroupName}_user_config_permission': {
-                'name': f'{args.defaultGroupName}_user_config_permission',
+            }
+            defaultGroupPermissions[f'{groupName}_user_config_permission'] = {
+                'name': f'{groupName}_user_config_permission',
                 'enabled': True,
-                'groups': [args.defaultGroupName],
+                'groups': [groupName],
                 'actions': [
                     'view',
                     'change',
@@ -619,11 +636,11 @@ def main():
                     'users.userconfig',
                 ],
                 'exclude_objects': [],
-            },
-            f'{args.defaultGroupName}_token_manage_permission': {
-                'name': f'{args.defaultGroupName}_token_manage_permission',
+            }
+            defaultGroupPermissions[f'{groupName}_token_manage_permission'] = {
+                'name': f'{groupName}_token_manage_permission',
                 'enabled': True,
-                'groups': [args.defaultGroupName],
+                'groups': [groupName],
                 'actions': [
                     'add',
                     'view',
@@ -635,8 +652,7 @@ def main():
                 },
                 'include_objects': ['users.token'],
                 'exclude_objects': [],
-            },
-        }
+            }
 
         try:
             # get all content types (for creating new permissions)
@@ -648,7 +664,7 @@ def main():
             # create permissions that don't already exist
             for permName, permConfig in {
                 k: v
-                for (k, v) in DEFAULT_PERMISSIONS.items()
+                for (k, v) in defaultGroupPermissions.items()
                 if v.get('name', None) and v['name'] not in permsPreExisting
             }.items():
                 permConfig['groups'] = [groups[x].id for x in permConfig['groups']]

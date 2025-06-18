@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
       - name: netbox-container
-        image: ghcr.io/idaholab/malcolm/netbox:25.05.0
+        image: ghcr.io/idaholab/malcolm/netbox:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -60,6 +60,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: auth-common-env
           - configMapRef:
               name: netbox-common-env
           - configMapRef:
@@ -96,7 +98,7 @@ spec:
             subPath: netbox/media
       initContainers:
       - name: netbox-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.05.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true

@@ -894,7 +894,6 @@ def StartMalcolm(
                 # * Have resource requests created for them on the fly (idaholab/Malcolm#539).
                 #       For now the only ones I'm doing this for are ones that have JAVA_OPTS specified (see CONTAINER_JAVA_OPTS_VARS)
                 #           which we retrieve from the container's environment variables we created earlier as configMapRefs.
-                #       TODO: optionally expand this to other containers as well
                 #
                 modified = False
                 if manYamlFileContents:

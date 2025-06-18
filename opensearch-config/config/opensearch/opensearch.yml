@@ -1,0 +1,37 @@
+cluster.name: "docker-cluster"
+network.host: 0.0.0.0
+bootstrap.memory_lock: true
+http:
+  cors:
+    enabled: true
+    allow-origin: "*"
+    allow-methods: OPTIONS, HEAD, GET, POST, PUT, DELETE
+    allow-headers: "kbn-version, Origin, X-Requested-With, Content-Type, Accept, Engaged-Auth-Token Authorization"
+  compression: false
+plugins:
+  security:
+    ssl:
+      http:
+        enabled: true
+        pemcert_filepath: /usr/share/opensearch/config/certs/server.crt
+        pemkey_filepath: /usr/share/opensearch/config/certs/server.key
+        pemtrustedcas_filepath: /usr/share/opensearch/config/certs/ca.crt
+      transport:
+        enabled: true
+        pemcert_filepath: /usr/share/opensearch/config/certs/server.crt
+        pemkey_filepath: /usr/share/opensearch/config/certs/server.key
+        pemtrustedcas_filepath: /usr/share/opensearch/config/certs/ca.crt
+        enforce_hostname_verification: false
+        resolve_hostname: false
+    nodes_dn:
+      - "CN=opensearch-node,OU=node,O=Malcolm,ST=ID,C=US"
+    nodes_dn_dynamic_config_enabled: false
+    authcz:
+      admin_dn:
+        - "CN=opensearch-admin,OU=admin,O=Malcolm,ST=ID,C=US"
+    roles_mapping_resolution: MAPPING_ONLY
+    audit:
+      type: internal_opensearch
+      config:
+        enable_rest: false
+        enable_transport: false

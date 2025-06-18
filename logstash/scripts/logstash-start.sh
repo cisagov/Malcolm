@@ -83,23 +83,23 @@ MALCOLM_OPENSEARCH_OUTPUT_PIPELINES=$(printf '"%s"\n' "${OPENSEARCH_OUTPUT_PIPEL
 
 # get the username/password for opensearch from the curlrf file(s) for both primary and secondary outputs
 # (I already wrote python code to do this, so sue me)
-OPENSSL_USER=
-OPENSSL_PASSWORD=
-if ( [[ "$OPENSEARCH_PRIMARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_PRIMARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
+OPENSEARCH_USER=
+OPENSEARCH_PASSWORD=
+if [[ -r "$OPENSEARCH_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
-    OPENSSL_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
-    OPENSSL_PASSWORD="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)"
+    OPENSEARCH_USER="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f1)"
+    OPENSEARCH_PASSWORD="$(echo "$NEW_USER_PASSWORD" | cut -d'|' -f2-)"
     popd >/dev/null 2>&1
 fi
 
-OPENSSL_SECONDARY_USER=
-OPENSSL_SECONDARY_PASSWORD=
+OPENSEARCH_SECONDARY_USER=
+OPENSEARCH_SECONDARY_PASSWORD=
 if ( [[ "$OPENSEARCH_SECONDARY" == "opensearch-remote" ]] || [[ "$OPENSEARCH_SECONDARY" == "elasticsearch-remote" ]] ) && [[ -r "$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE" ]]; then
     pushd "$(dirname $(realpath -e "${BASH_SOURCE[0]}"))" >/dev/null 2>&1
     NEW_SECONDARY_USER_PASSWORD="$(python3 -c "import malcolm_utils; result=malcolm_utils.ParseCurlFile('$OPENSEARCH_SECONDARY_CREDS_CONFIG_FILE'); print(result['user']+'|'+result['password']);")"
-    OPENSSL_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
-    OPENSSL_SECONDARY_PASSWORD="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f2-)"
+    OPENSEARCH_SECONDARY_USER="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f1)"
+    OPENSEARCH_SECONDARY_PASSWORD="$(echo "$NEW_SECONDARY_USER_PASSWORD" | cut -d'|' -f2-)"
     popd >/dev/null 2>&1
 fi
 
@@ -113,12 +113,12 @@ find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_OPENSEARCH
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_PARSE_PIPELINE_ADDRESSES_/${MALCOLM_PARSE_PIPELINE_ADDRESSES}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SSL_VERIFICATION_/${OPENSEARCH_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
-find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_USER_/${OPENSSL_USER}/g" "{}" \; 2>/dev/null
-find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_PASSWORD_/${OPENSSL_PASSWORD}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_USER_/${OPENSEARCH_USER}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_PASSWORD_/${OPENSEARCH_PASSWORD}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_SSL_VERIFICATION_/${OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION}/g" "{}" \; 2>/dev/null
-find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_USER_/${OPENSSL_SECONDARY_USER}/g" "{}" \; 2>/dev/null
-find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_PASSWORD_/${OPENSSL_SECONDARY_PASSWORD}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_USER_/${OPENSEARCH_SECONDARY_USER}/g" "{}" \; 2>/dev/null
+find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_OPENSEARCH_SECONDARY_PASSWORD_/${OPENSEARCH_SECONDARY_PASSWORD}/g" "{}" \; 2>/dev/null
 
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_PRIMARY_DATASTORE_TYPE_/${OPENSEARCH_PRIMARY_TYPE}/g" "{}" \; 2>/dev/null
 find "$PIPELINES_DIR" -type f -name "*.conf" -exec sed -i "s/_MALCOLM_LOGSTASH_SECONDARY_DATASTORE_TYPE_/${OPENSEARCH_SECONDARY_TYPE}/g" "{}" \; 2>/dev/null

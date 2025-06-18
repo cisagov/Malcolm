@@ -12,6 +12,8 @@ ADD --chmod=644 README.md _config.yml Gemfile /site/
 ADD _includes/ /site/_includes/
 ADD _layouts/ /site/_layouts/
 ADD docs/ /site/docs/
+ADD --chmod=644 https://use.fontawesome.com/285a5794ed.js /site/_js/fontawesome_285a5794ed.js
+ADD --chmod=644 https://use.fontawesome.com/releases/v4.7.0/css/font-awesome-css.min.css /site/_css/font-awesome-css.min.css
 
 WORKDIR /site
 
@@ -19,15 +21,33 @@ WORKDIR /site
 RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.build_revision[[:space:]]*}}/$VCS_REVISION/g" "{}" \; && \
     ( [ -n "${GITHUB_TOKEN}" ] && export JEKYLL_GITHUB_TOKEN="${GITHUB_TOKEN}" || true ) && \
     sed -i "s/^\(show_downloads:\).*/\1 false/" /site/_config.yml && \
+    sed -i "s/^\(offline_mode:\).*/\1 true/" /site/_config.yml && \
     sed -i -e "/^mastodon:/,+2d" /site/_config.yml && \
     sed -i -e "/^reddit:/,+2d" /site/_config.yml && \
     docker-entrypoint.sh bundle exec jekyll build && \
+    sh -c 'awk '\'' \
+        /window\.FontAwesomeCdnConfig *= *{/ { \
+          in_obj = 1; \
+          depth = gsub(/{/, "{") - gsub(/}/, "}"); \
+          next; \
+        } \
+        in_obj { \
+          depth += gsub(/{/, "{") - gsub(/}/, "}"); \
+          if (depth <= 0) in_obj = 0; \
+          next; \
+        } \
+        { print } \
+      '\'' /site/_js/fontawesome_285a5794ed.js > /site/_js/fontawesome_clean.js && \
+      mv /site/_js/fontawesome_clean.js /site/_js/fontawesome_285a5794ed.js' && \
+    mv -v /site/_js/* /site/_site/assets/js/ && \
+    mv -v /site/_css/* /site/_site/assets/css/ && \
+    rmdir /site/_js /site/_css && \
     find /site/_site -type f -name "*.md" -delete && \
     find /site/_site -type f -name "*.html" -exec sed -i "s@/\(docs\|assets\)@/readme/\1@g" "{}" \; && \
     find /site/_site -type f -name "*.html" -exec sed -i 's@\(href=\)"/"@\1"/readme/"@g' "{}" \;
 
 # build NGINX image
-FROM alpine:3.21
+FROM alpine:3.22
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -105,6 +125,11 @@ ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf /usr/share/nginx
 ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf /usr/share/nginx/html/css/
 ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff2
 ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff
+ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot' /usr/share/nginx/html/css/
+ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2' /usr/share/nginx/html/css/
+ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff' /usr/share/nginx/html/css/
+ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf' /usr/share/nginx/html/css/
+ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular' /usr/share/nginx/html/css/fontawesome-webfont.svg
 
 
 RUN set -x ; \

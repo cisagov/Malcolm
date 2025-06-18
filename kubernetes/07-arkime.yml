@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.05.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -52,6 +52,8 @@ spec:
               name: opensearch-env
           - configMapRef:
               name: upload-common-env
+          - configMapRef:
+              name: auth-common-env
           - secretRef:
               name: auth-env
           - configMapRef:
@@ -85,7 +87,7 @@ spec:
             name: arkime-pcap-volume
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.05.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
         imagePullPolicy: Always
         stdin: false
         tty: true

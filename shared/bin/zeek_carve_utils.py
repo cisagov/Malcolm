@@ -764,7 +764,6 @@ class YaraScan(FileScanProvider):
             result[FILE_SCAN_RESULT_HITS] = len(hits)
             if len(hits) > 0:
                 cnt = Counter(hits)
-                # short message is most common signature name (todo: they won't have duplicate names, so I guess this is just going to take the first...)
                 result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
                 # long description is list of the signature names and the engines which generated them
                 result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{YARA_ENGINE_ID}>" for x in hits])
@@ -953,7 +952,6 @@ class CapaScan(FileScanProvider):
             if len(hits) > 0:
                 hits = list(set(hits))
                 cnt = Counter(hits)
-                # short message is most common signature name (todo: they won't have duplicate names, so I guess this is just going to take the first...)
                 result[FILE_SCAN_RESULT_MESSAGE] = cnt.most_common(1)[0][0]
                 # long description is list of the signature names and the engines which generated them
                 result[FILE_SCAN_RESULT_DESCRIPTION] = ";".join([f"{x}<{CAPA_ENGINE_ID}>" for x in hits])

@@ -7,10 +7,32 @@
 
 {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+    {% if site.offline_mode %}
+    <link rel="stylesheet" href="{{ "/assets/css/font-awesome-css.min.css" | relative_url }}">
+    <script src="{{ "/assets/js/fontawesome_285a5794ed.js" | relative_url }}"></script>
+    <style>
+    /*!
+     *  Font Awesome v4.7.0 by @davegandy - http://fontawesome.io - @fontawesome
+     *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
+     */
+    @font-face {
+      font-family: 'FontAwesome';
+      src: url('{{ "/css/fontawesome-webfont.eot"   | relative_url }}');
+      src: url('{{ "/css/fontawesome-webfont.eot"   | relative_url }}') format('embedded-opentype'),
+           url('{{ "/css/fontawesome-webfont.woff2" | relative_url }}') format('woff2'),
+           url('{{ "/css/fontawesome-webfont.woff"  | relative_url }}') format('woff'),
+           url('{{ "/css/fontawesome-webfont.ttf"   | relative_url }}') format('truetype'),
+           url('{{ "/css/fontawesome-webfont.svg"   | relative_url }}') format('svg');
+      font-weight: normal;
+      font-style: normal;
+    }
+    </style>
+    {% else %}
     <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     <script src="https://use.fontawesome.com/285a5794ed.js"></script>
+    {% endif %}
     {% include head-custom.html %}
   </head>
   <body>

@@ -1,0 +1,10 @@
+{
+  "doc": {
+    "disablePcapDownload": false,
+    "hideFiles": false,
+    "hidePcap": false,
+    "hideStats": false,
+    "packetSearch": false,
+    "removeEnabled": false
+  }
+}

@@ -547,6 +547,30 @@
                 },
                 "seen_where": {
                   "type": "keyword"
+                },
+                "confidence" : {
+                  "type": "float"
+                },
+                "threat_score" : {
+                  "type": "float"
+                },
+                "verdict" : {
+                  "type": "keyword"
+                },
+                "verdict_source" : {
+                  "type": "keyword"
+                },
+                "associated" : {
+                  "type": "keyword"
+                },
+                "category" : {
+                  "type": "keyword"
+                },
+                "campaigns" : {
+                  "type": "keyword"
+                },
+                "reports" : {
+                  "type": "keyword"
                 }
               }
             },

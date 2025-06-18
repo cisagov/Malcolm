@@ -1,0 +1,37 @@
+---
+_meta:
+  type: "config"
+  config_version: 2
+
+config:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: true
+        internalProxies: '.*'
+        remoteIpHeader: X-Forwarded-For
+    authc:
+      basic_internal_auth_domain:
+        description: "Authenticate via HTTP Basic against internal users database"
+        http_enabled: true
+        transport_enabled: true
+        order: 1
+        http_authenticator:
+          type: basic
+          challenge: true
+        authentication_backend:
+          type: internal
+      proxy_auth_domain:
+        description: "Authenticate via Malcolm"
+        http_enabled: true
+        transport_enabled: true
+        order: 0
+        http_authenticator:
+          type: proxy
+          challenge: false
+          config:
+            user_header: "X-Remote-Auth"
+            roles_header: "X-Forwarded-Roles"
+        authentication_backend:
+          type: noop

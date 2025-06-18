@@ -1,11 +1,11 @@
 {
   "doc": {
     "enabled": true,
-    "createEnabled": true,
+    "createEnabled": false,
     "webEnabled": true,
     "headerAuthEnabled": true,
     "emailSearch": true,
-    "removeEnabled": true,
+    "removeEnabled": false,
     "packetSearch": true,
     "hideStats": false,
     "hideFiles": false,

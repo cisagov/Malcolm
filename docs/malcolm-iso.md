@@ -87,4 +87,4 @@ When the system boots for the first time, the Malcolm images will load if the in
 
 Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](quickstart.md#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](authsetup.md#AuthSetup) to configure authentication. If the ISO does not include pre-packaged Malcolm images, or to retrieve the latest updates, run `docker compose --profile malcolm pull`. Finalize the configuration by running `scripts/configure` and follow the prompts as illustrated in the [installation example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig).
 
-Once Malcolm is configured, users can [start Malcolm](running.md#Starting) via the command line or by clicking the circular yellow Malcolm icon in the menu bar.
+Once Malcolm is configured, users can [start Malcolm](running.md#Starting) via the command line or by clicking the "play" icon (▷) in the menu bar.

@@ -8,7 +8,7 @@ IMAGE_DISTRIBUTION=bookworm
 BEATS_VER="8.17.0"
 BEATS_OSS="-oss"
 
-ARKIME_VER="5.6.4"
+ARKIME_VER="5.7.0"
 
 BUILD_ERROR_CODE=1
 
@@ -152,6 +152,7 @@ if [ -d "$WORKDIR" ]; then
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     . "$SCRIPT_PATH/shared/environment.chroot"
   sed -i "s/^\(show_downloads:\).*/\1 false/" "$SCRIPT_PATH"/_config.yml
+  sed -i "s/^\(offline_mode:\).*/\1 true/" "$SCRIPT_PATH"/_config.yml
   sed -i -e "/^mastodon:/,+2d" "$SCRIPT_PATH"/_config.yml
   sed -i -e "/^reddit:/,+2d" "$SCRIPT_PATH"/_config.yml
   bash "$SCRIPT_PATH/docs/documentation_build.sh" -v -r "${VCS_REVSION:-main}" -t "${GITHUB_TOKEN:-}"

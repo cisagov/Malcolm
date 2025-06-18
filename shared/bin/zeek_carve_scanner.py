@@ -125,13 +125,12 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
             # Socket to send messages to
             scanned_files_socket = context.socket(zmq.PUSH)
             scanned_files_socket.connect(f"tcp://localhost:{SINK_PORT}")
-            # todo: do I want to set this? probably not, since what else would we do if we can't send? just block
-            # scanned_files_socket.SNDTIMEO = 5000
+
             logging.info(f"{scriptName}[{scanWorkerId}]:\tconnected to sink at {SINK_PORT}")
 
             fileInfo = None
             fileName = None
-            retrySubmitFile = False  # todo: maximum file retry count?
+            retrySubmitFile = False
 
             # loop forever, or until we're told to shut down
             while not shuttingDown:
@@ -145,7 +144,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         logging.info(f"{scriptName}[{scanWorkerId}]:\t🇷\t{checkConnInfo.scanner_name()}")
 
                     except zmq.Again:
-                        # todo: what to do here?
                         logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🇷")
 
                 if shuttingDown:
@@ -195,7 +193,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                         retrySubmitFile = False
                         requestComplete = False
 
-                        # todo: maximum time we wait for a single file to be scanned?
                         while (not requestComplete) and (not shuttingDown):
                             # wait a moment then check to see if the scan is complete
                             time.sleep(scan.provider.check_interval())
@@ -221,7 +218,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
 
                             else:
                                 # impossibru! abandon ship for this file?
-                                # todo? what else? touch it?
                                 requestComplete = True
                                 scanResult = "Error checking results"
                                 eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
@@ -237,7 +233,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             logging.info(f"{scriptName}[{scanWorkerId}]:\t✅\t{fileName}")
 
                         except zmq.Again:
-                            # todo: what to do here?
                             logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
 
         else:
@@ -253,7 +248,6 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                 scannerRegistered = False
                 logging.info(f"{scriptName}[{scanWorkerId}]:\t🙃\t{checkConnInfo.scanner_name()}")
             except zmq.Again:
-                # todo: what to do here?
                 logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{checkConnInfo.scanner_name()} 🙃")
 
     logging.info(f"{scriptName}[{scanWorkerId}]:\tfinished")

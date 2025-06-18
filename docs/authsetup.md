@@ -7,7 +7,11 @@
     - [Keycloak](#AuthKeycloak)
         + [Using a remote Keycloak instance](#AuthKeycloakRemote)
         + [Using the embedded Keycloak instance](#AuthKeycloakEmbedded)
-        + [Requiring user groups and realm roles](#AuthKeycloakGroupsAndRoles)
+        + [Known Limitation with Hedgehog Linux](#AuthKeycloakHedgehog)
+        + [Groups and roles](#AuthKeycloakGroupsRoles)
+            * [Role-based access control](#AuthKeycloakRBAC)
+            * [System-wide required user groups and realm roles](#AuthKeycloakReqGroupsRoles)
+            * [Configuring Keycloak to pass groups and roles to Malcolm](#AuthKeycloakGroupsAndRolesConfig)
     - [TLS certificates](#TLSCerts)
     - [Command-line arguments](#CommandLineConfig)
 * [Log Out of Malcolm](#LoggingOut)
@@ -115,16 +119,6 @@ Malcolm can utilize Keycloak, an identity and access management (IAM) tool, to p
 
 The guides in this section cover configuring Malcolm to use Keycloak for authentication, but do not go into the details of the many capabilities Keycloak provides, including [identity providers](https://www.keycloak.org/docs/latest/server_admin/index.html#_identity_broker), [SSO protocols](https://www.keycloak.org/docs/latest/server_admin/index.html#sso-protocols), [federate one or more LDAP or Kerberos servers](https://www.keycloak.org/docs/latest/server_admin/index.html#_user-storage-federation), and more. Refer to the Keycloak [Server Administration Guide](https://www.keycloak.org/docs/latest/server_admin/index.html) for information on these and other topics.
 
-### Known Limitation with Hedgehog Linux
-
-Due to incompatibilities between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm's nginx reverse proxy, and Keycloak, if Malcolm is using a [local OpenSearch](#OpenSearchInstance) instance exposed to external hosts, that endpoint (typically port 9200/tcp) must be authenticated using [HTTP basic](#AuthBasicAccountManagement) authentication even when Keycloak is selected as Malcolm's main authentication method.
-
-When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, the credentials entered should be those described above in the section on [**local account management**](#AuthBasicAccountManagement), not Keycloak credentials. In this configuration, the administrator account can be used to manage other user accounts via a **Malcolm User Management** page as described above. These credentials are **only** valid for Malcolm's local OpenSearch API endpoint.
-
-This limitation does not apply when Malcolm is configured to use a remote OpenSearch or Elasticsearch instance.
-
-The Malcolm development team is exploring solutions to this issue.
-
 ### <a name="AuthKeycloakRemote"></a>Using a remote Keycloak instance
 
 This section outlines how to use an existing Keycloak instance managed separately from Malcolm. See [**Using the embedded Keycloak instance**](#AuthKeycloakEmbedded) for how to configure Malcolm to use its own embedded Keycloak instance. In addition to the `NGINX_AUTH_MODE` variable in `auth-common.env` described above, Malcolm uses [environment variables](malcolm-config.md#MalcolmConfigEnvVars) in `keycloak.env` to configure its use of Keycloak.
@@ -163,7 +157,7 @@ The next steps happen in the context of `auth_setup`.
 
 ![Client secret in auth_setup](./images/screenshots/keycloak_auth_setup_client_secret.png)
 
-8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+8. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakReqGroupsRoles) below for more information. These restrictions are separate from [role-based access controls](#AuthKeycloakRBAC).
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -221,13 +215,13 @@ The next steps happen in the context of `./scripts/auth_setup`.
 
 ![Specify the Keycloak URL](./images/screenshots/keycloak_auth_setup_emb_url.png)
 
-8. When configuring Keycloak for the first time, a Keycloak client ID and secret have not yet been configured, so the next two values should be left blank for now.
+8. When configuring Keycloak for the first time, a Keycloak client has not yet been created, and its secret has not yet been generated. Specify the [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) ID to be automatically created when Keycloak first starts up. Leave the secret blank for now.
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_id_empty.png)
+![Client ID in auth_setup](./images/screenshots/keycloak_auth_setup_client_name.png)
 
-![An empty value for Keycloak client ID](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
+![An empty value for Keycloak client secret](./images/screenshots/keycloak_auth_setup_client_secret_empty.png)
 
-9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**Requiring user groups and realm roles**](#AuthKeycloakGroupsAndRoles) below for more information.
+9. Enter group membership restrictions and user realm role restrictions to limit the set of users permitted to authenticate to Malcolm to those that meeting those requirements. Blank values mean that no restriction of that type will be enforced. Multiple values may be specified as a comma-separated list. See [**System-wide required user groups and realm roles**](#AuthKeycloakReqGroupsRoles) below for more information. These restrictions are separate from [role-based access controls](#AuthKeycloakRBAC).
 
 ![Required user groups](./images/screenshots/keycloak_auth_setup_group.png)
 
@@ -271,7 +265,9 @@ With the initial configuration complete, [start Malcolm](running.md#Starting).
 
 ![Deleting the temporary bootstrap user](./images/screenshots/keycloak_delete_bootstrap_user.png)
 
-20. Next, a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) must be created which will be used by Malcolm's nginx reverse proxy to handle user authentication. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
+During startup, Malcolm's embedded Keycloak instance will automatically create and configure a Keycloak [client](https://www.keycloak.org/docs/latest/server_admin/index.html#core-concepts-and-terms) using the value in `KEYCLOAK_CLIENT_ID` as its name, which will be used by Malcolm's nginx reverse proxy to handle user authentication. To create additional clients (optional), follow steps 20 through 23. Otherwise, continue with step 24.
+
+20. Navigate to the **Clients** page under **Manage** on the navigation sidebar and click **Create client**.
 
 ![Creating a new client](./images/screenshots/keycloak_clients_page.png)
 
@@ -313,7 +309,7 @@ Stopped Malcolm's ['nginx-proxy'] services
 Removed Malcolm's ['nginx-proxy'] services
 
 NAME                    IMAGE                                          COMMAND                  SERVICE       CREATED        STATUS                                     PORTS
-malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.05.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
+malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.06.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
 
 nginx-proxy-1  | root
 nginx-proxy-1  | uid=0(root) gid=0(root) groups=0(root),0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel),11(floppy),20(dialout),26(tape),27(video)
@@ -338,11 +334,22 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 
 ![Redirected to the Malcolm landing page](./images/screenshots/keycloak_post_login_landing.png)
 
-### <a name="AuthKeycloakGroupsAndRoles"></a>Requiring user groups and realm roles
+### <a name="AuthKeycloakHedgehog"></a>Known Limitation with Hedgehog Linux
 
-Full role-based fine-grained access controls will be implemented in a [future release](https://github.com/cisagov/Malcolm/issues/460) of Malcolm. In the meantime, Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
+Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts.
 
-For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
+If Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for that endpoint — even when Keycloak is selected as Malcolm’s primary authentication method.
+
+When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, use the local Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
+
+* The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
+* These basic credentials apply *only* to Malcolm’s OpenSearch API endpoint.
+
+This limitation does not apply if Malcolm is connected to a remote OpenSearch or Elasticsearch [instance](opensearch-instances.md#OpenSearchInstance).
+
+### <a name="AuthKeycloakGroupsRoles"></a>Groups and roles
+
+Malcolm can use Keycloak's realm roles to implement [role-based access controls](#AuthKeycloakRBAC). It can also use realm roles or user groups as the basis for [system-wide authentication requirements](#AuthKeycloakReqGroupsRoles).
 
 Groups can be managed in Keycloak by selecting the appropriate realm from the drop down at the top of the navigation panel and selecting **Groups** under **Manage**.
 
@@ -360,7 +367,59 @@ Users can be assigned realm roles by clicking on a username on the Keycloak **Us
 
 ![User realm role assignment](./images/screenshots/keycloak_user_realm_roles.png)
 
-Keycloak does not include group or realm role information in authentication tokens by default; clients must be configured to include this information in order for users to log in to Malcolm with group and/or role restrictions set. This can be done by navigating to the Keycloak **Clients** page, selecting the desired client, then clicking the **Client scopes** tab. Click on the name of the assigned client scope beginning with the client ID and ending in **-dedicated**, which will also have a description of "Dedicated scope and mappers for this client." Once on this **Clients** > **Client details** > **Dedicated scopes** screen, click the down arrow on the **Add mapper** button and select **By configuration**.
+For a discussion of roles vs. groups, see [**Assigning permissions using roles and groups**](https://www.keycloak.org/docs/latest/server_admin/index.html#assigning-permissions-using-roles-and-groups) in the Keycloak Server Administration Guide.
+
+#### <a name="AuthKeycloakRBAC"></a>Role-based access control
+
+Role-based access control is only available when the authentication method is `keycloak` or `keycloak_remote`. With other authentication methods such as [HTTP basic](#AuthBasicAccountManagement) or [LDAP](#AuthLDAP), or when role-based access control is disabled, all Malcolm users effectively have administrator privileges.
+
+Having chosen `keycloak` or `keycloak_remote` in `auth_setup`, select **Configure Role-Based Access Control**.
+
+![Configure RBAC](./images/screenshots/keycloak_auth_setup_rbac.png)
+
+Select **Yes** when prompted to **Enable role-based access control**.
+
+![Enable RBAC](./images/screenshots/keycloak_enable_rbac.png)
+
+The `auth_setup` dialog instructs the user to **See Keycloak or [`auth-common.env`](malcolm-config.md#MalcolmConfigEnvVars) for realm roles.**
+
+`auth-common.env` contains the [environment variables]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/auth-common.env.example) that define the names of Malcolm's "back-end" roles which are in turn mapped to roles used internally by Malcolm's several components (e.g., NetBox, OpenSearch, etc.). When using Malcolm's [embedded Keycloak](#AuthKeycloakEmbedded) instance realm roles with these names are automatically created when Keycloak starts up. When using a [remote Keycloak instance](#AuthKeycloakRemote) the user must create these realm roles manually.
+
+These environment variables are divided into two sections:
+
+* General access roles
+    * `ROLE_ADMIN` - Unrestricted administrator access
+    * `ROLE_READ_ACCESS` - Read-only access across all Malcolm components
+    * `ROLE_READ_WRITE_ACCESS` - Read/write access across all Malcolm components, excluding some administrator functions
+* Fine-grained roles
+    * `ROLE_ARKIME_ADMIN` - Maps to Arkime's [built-in](https://arkime.com/roles) `arkimeAdmin` role
+    * `ROLE_ARKIME_READ_ACCESS` - Maps to a [custom Arkime role](https://arkime.com/settings#user-role-mappings) with read-only Viewer access
+    * `ROLE_ARKIME_READ_WRITE_ACCESS` - Maps to a custom Arkime role with read/write Viewer access
+    * `ROLE_ARKIME_PCAP_ACCESS` - Maps to a custom Arkime role with access to viewing/exporting PCAP payloads in Viewer
+    * `ROLE_ARKIME_HUNT_ACCESS` - Maps to a custom Arkime role with access to [Hunt](arkime.md#ArkimeHunt) (packet search) in Viewer
+    * `ROLE_ARKIME_WISE_READ_ACCESS` - Maps to Arkime's built-in `wiseUser` role
+    * `ROLE_ARKIME_WISE_READ_WRITE_ACCESS` - Maps to Arkime's built-in `wiseAdmin` role
+    * `ROLE_DASHBOARDS_READ_ACCESS` - Read-only access to [OpenSearch Dashboards](dashboards.md#Dashboards) visualizations, but not all Dashboards apps
+    * `ROLE_DASHBOARDS_READ_ALL_APPS_ACCESS` - Read-only access to all OpenSearch Dashboards visualizations and apps
+    * `ROLE_DASHBOARDS_READ_WRITE_ACCESS` - Read/write access to OpenSearch Dashboards visualizations, but not all Dashboards apps
+    * `ROLE_DASHBOARDS_READ_WRITE_ALL_APPS_ACCESS` - Read/write access to OpenSearch Dashboards visualizations and apps
+    * `ROLE_EXTRACTED_FILES` - Access to [extracted file downloads](file-scanning.md#ZeekFileExtractionUI)
+    * `ROLE_NETBOX_READ_ACCESS` - Read-only access to [NetBox](asset-interaction-analysis.md#AssetInteractionAnalysis)
+    * `ROLE_NETBOX_READ_WRITE_ACCESS` - Read/write access to NetBox
+    * `ROLE_UPLOAD` - Access to [upload artifact interface](upload.md#Upload)
+    * `ROLE_CAPTURE_SERVICE` - Internal-use role for service account used by Arkime capture on remote [network sensor](live-analysis.md#Hedgehog)
+
+Note that the general access roles are supersets of combinations of the fine-grained roles: e.g., the role named by the `ROLE_READ_ACCESS` variable includes read-only access to Dashboards, Arkime, and NetBox.
+
+With role-based access control enabled, realm roles must exist that correspond to the names defined by these `ROLE_…` environment variables, and users must be [assigned those realm roles](#AuthKeycloakGroupsRoles) in order to use the Malcolm features to which they correspond. Users attempting to access features for which they are authorized will be presented with a ["forbidden"](https://en.wikipedia.org/wiki/HTTP_403) error message.
+
+#### <a name="AuthKeycloakReqGroupsRoles"></a>System-wide required user groups and realm roles
+
+As a simpler alternative to [role-based access control](#AuthRBAC), Malcolm can be configured to require Keycloak-authenticated users to belong to groups and assigned realm roles, respectively. The values for these groups and/or roles are specified when running `./scripts/auth_setup` under **Configure Keycloak** and are saved as `NGINX_REQUIRE_GROUP` and `NGINX_REQUIRE_ROLE` in the [`auth-common.env` configuration file](malcolm-config.md#MalcolmConfigEnvVars). An empty value for either of these settings means no restriction of that type is applied. Multiple values may be specified with a comma-separated list. These requirements are cumulative: users must match **all** of the items specified. Note that [LDAP authentication](#AuthLDAP) can also require group membership, but that is specified in `nginx_ldap.conf` by setting `require group` rather than in `auth-common.env`.
+
+#### <a name="AuthKeycloakGroupsAndRolesConfig"></a>Configuring Keycloak to pass groups and roles to Malcolm
+
+When using Malcolm's [embedded Keycloak](#AuthKeycloakEmbedded) instance, the default client is automatically created and configured. For [remote Keycloak instances](#AuthKeycloakRemote) or manually-created clients, Keycloak does not include group or realm role information in authentication tokens by default; clients must be configured to include this information in order for users to log in to Malcolm with group and/or role restrictions set. This can be done by navigating to the Keycloak **Clients** page, selecting the desired client, then clicking the **Client scopes** tab. Click on the name of the assigned client scope beginning with the client ID and ending in **-dedicated**, which will also have a description of "Dedicated scope and mappers for this client." Once on this **Clients** > **Client details** > **Dedicated scopes** screen, click the down arrow on the **Add mapper** button and select **By configuration**.
 
 To include group information in the Keycloak token for this client, select **Group Membership** from the **Configure a new mapper** list. The important information to provide for this Group Membership mapper before clicking **Save** is:
 
@@ -397,7 +456,7 @@ When users [set up authentication](#AuthSetup) for Malcolm a set of unique [self
 
 Another option is for users to generate their own certificates (or have them issued directly) and have them placed in the `nginx/certs/` directory. The certificate and key file should be named `cert.pem` and `key.pem`, respectively.
 
-A third possibility is to use a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm, so users will need to set the `NGINX_SSL` environment variable to `false` in [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) (or answer `no` to the "Require encrypted HTTPS connections?" question posed by `./scripts/configure`). If you are setting `NGINX_SSL` to `false`, **make sure** user must understand precisely what they are doing, ensuring that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying local firewall configuration.
+A third possibility is to use a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm, so users will need to set the `NGINX_SSL` environment variable to `false` in [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) (or answer `no` to the "Require encrypted HTTPS connections?" question posed by `./scripts/configure`). If you are setting `NGINX_SSL` to `false`, **make sure** users must understand precisely what they are doing, ensuring that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying local firewall configuration. Also note: in some circumstances disabling SSL in NGINX while leaving SSL enabled in Arkime can result in a "Missing token" Arkime error. This is due to Arkime's Cross-Site Request Forgery mitigation cookie being passed to the browser with the "secure" flag enabled. 
 
 ## <a name="CommandLineConfig"></a>Command-line arguments
 
@@ -424,6 +483,12 @@ Authentication Setup:
                         Configure Malcolm authentication
   --auth-noninteractive [CMDAUTHSETUPNONINTERACTIVE]
                         Configure Malcolm authentication (noninteractive using arguments provided)
+  --auth-method <basic|ldap|keycloak|keycloak_remote|no_authentication>
+                        Authentication method (for --auth-noninteractive)
+  --auth-ldap-mode <openldap|winldap>
+                        LDAP server compatibility type (for --auth-noninteractive when --auth-method is ldap)
+  --auth-ldap-start-tls [true|false]
+                        Use StartTLS (rather than LDAPS) for LDAP connection security (for --auth-noninteractive when --auth-method is ldap)
   --auth-admin-username <string>
                         Administrator username (for --auth-noninteractive)
   --auth-admin-password-openssl <string>
@@ -436,12 +501,16 @@ Authentication Setup:
                         (Re)generate self-signed certificates for HTTPS access (for --auth-noninteractive)
   --auth-generate-fwcerts [AUTHGENFWCERTS]
                         (Re)generate self-signed certificates for a remote log forwarder
+  --auth-netbox-token <string>
+                        API token for remote NetBox instance (for --auth-noninteractive when NETBOX_MODE=remote in netbox-common.env)
   --auth-generate-netbox-passwords [AUTHGENNETBOXPASSWORDS]
                         (Re)generate internal passwords for NetBox
   --auth-generate-redis-password [AUTHGENREDISPASSWORD]
                         (Re)generate internal passwords for Redis
   --auth-generate-postgres-password [AUTHGENPOSTGRESPASSWORD]
                         (Re)generate internal superuser passwords for PostgreSQL
+  --auth-generate-opensearch-internal-creds [AUTHGENOPENSEARCHCREDS]
+                        (Re)generate internal credentials for embedded OpenSearch instance
   --auth-generate-keycloak-db-password [AUTHGENKEYCLOAKDBPASSWORD]
                         (Re)generate internal passwords for Keycloak's PostgreSQL database
   --auth-keycloak-realm <string>
@@ -462,6 +531,8 @@ Authentication Setup:
                         Required group(s) to which users must belong (--auth-method is keycloak|keycloak_remote)
   --auth-require-role <string>
                         Required role(s) which users must be assigned (--auth-method is keycloak|keycloak_remote)
+  --auth-role-based-access-control [AUTHRBACENABLED]
+                        Enable Role-Based Access Control (--auth-method is keycloak|keycloak_remote)
 …
 ```
 
