@@ -1,0 +1,14 @@
+[828 - Suricata-Main] 2025-06-18 20:27:30 Notice: suricata: This is Suricata version 7.0.10 RELEASE running in SYSTEM mode
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: cpu: CPUs/cores online: 8
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: suricata: Setting engine mode to IDS mode by default
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: exception-policy: master exception-policy set to: auto
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: app-layer-ftp: FTP memcap: 67108864
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: coredump-config: Max dump is 0
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: coredump-config: Core dump setting attempted is 0
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: coredump-config: Core dump size set to 0
+[828 - Suricata-Main] 2025-06-18 20:27:30 Info: logopenfile: eve-log output device (regular) initialized: eve.json
+[828 - Suricata-Main] 2025-06-18 20:27:38 Info: detect: 1 rule files processed. 50518 rules successfully loaded, 0 rules failed, 0
+[828 - Suricata-Main] 2025-06-18 20:27:38 Info: threshold-config: Threshold config parsed: 0 rule(s) found
+[828 - Suricata-Main] 2025-06-18 20:27:38 Info: detect: 50521 signatures processed. 1228 are IP-only rules, 4346 are inspecting packet payload, 44730 inspect application layer, 109 are decoder event only
+[828 - Suricata-Main] 2025-06-18 20:27:52 Info: unix-manager: unix socket '/var/run/suricata/suricata-command.socket'
+[828 - Suricata-Main] 2025-06-18 20:27:52 Notice: threads: Threads created ->   Engine started.

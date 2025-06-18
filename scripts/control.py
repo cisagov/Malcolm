@@ -2681,7 +2681,7 @@ def authSetup():
             ClearScreen()
 
 def wipe_indices(dates=None):
-    # Wipe Opensearch indices (remote or local).
+    # Wipe OpenSearch indices (remote or local).
     # If date is provided then only wipe those indices.
     # Otherwise wipe all indices.
 
@@ -2723,14 +2723,15 @@ def wipe_indices(dates=None):
         creds = ParseCurlFile(curlrc_path)
         username = creds.get('user', '').strip('"\'' )
         password = creds.get('password', '').strip('"\'' )
-        if password:
+        if username and password:
             user = f"{username}:{password}"
-        else:
-            # If user is already in username:password format 
-            user = username
         insecure = 'insecure' in creds
-        use_curlrc = True
-        print(f"Using OpenSearch credentials from curlrc: insecure={insecure}, url={opensearch_url}")
+        # Use curlrc credentials if present
+        if user:
+            use_curlrc = True
+            print(f"Using OpenSearch credentials from curlrc: insecure={insecure}, url={opensearch_url}")
+        else:
+            use_curlrc = False
     if not use_curlrc:
         # Use local credentials from auth.env
         auth_env_path = os.path.join(args.configDir, 'auth.env')
