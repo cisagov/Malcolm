@@ -10,7 +10,7 @@ If you are reading this document online, you should first
 clone this repository:
 
 ```shell
-git clone https://github.com/cisagov/Malcolm.git
+git clone https://github.com/idaholab/Malcolm.git
 cd Malcolm/hedgehog-raspi
 ```
 

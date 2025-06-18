@@ -334,8 +334,8 @@ These instructions assume good working knowledge of AWS and EKS. Good documentat
 
 This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
 
-* The first step in each of these respective procedures is to download Malcolm.
-
+* The first step in each of these respective procedures is to download Malcolm. 
+    
     * Install some dependencies (this will vary by OS distribution, adjust as needed)
 
     ```bash

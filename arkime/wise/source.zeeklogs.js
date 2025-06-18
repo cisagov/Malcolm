@@ -5,13 +5,13 @@ const WISESource = require('./wiseSource.js');
 //////////////////////////////////////////////////////////////////////////////////
 // Arkime WISE Data Source definition for Malcolm data sources
 //
-// Part of Malcolm (https://github.com/cisagov/malcolm)
+// Part of Malcolm (https://github.com/idaholab/malcolm)
 //
 // Data may be populated with Malcolm's Logstash filters:
-//   (https://github.com/cisagov/Malcolm/tree/main/logstash/pipelines)
+//   (https://github.com/idaholab/Malcolm/tree/main/logstash/pipelines)
 //
 // Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
-// see https://raw.githubusercontent.com/cisagov/Malcolm/main/LICENSE.txt
+// see https://raw.githubusercontent.com/idaholab/Malcolm/main/LICENSE.txt
 //////////////////////////////////////////////////////////////////////////////////
 
 class MalcolmSource extends WISESource {
@@ -3365,7 +3365,7 @@ exports.initSource = function (api) {
     singleton: true,
     name: 'malcolm',
     description: 'Log fields for Arkime as part of Malcolm',
-    link: 'https://github.com/cisagov/malcolm',
+    link: 'https://github.com/idaholab/malcolm',
     types: [],
     cacheable: false,
     displayable: true,

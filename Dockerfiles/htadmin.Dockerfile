@@ -3,11 +3,11 @@ FROM debian:11-slim
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
-LABEL org.opencontainers.image.url='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.documentation='https://github.com/cisagov/Malcolm/blob/main/README.md'
-LABEL org.opencontainers.image.source='https://github.com/cisagov/Malcolm'
-LABEL org.opencontainers.image.vendor='Cybersecurity and Infrastructure Security Agency'
-LABEL org.opencontainers.image.title='ghcr.io/cisagov/malcolm/htadmin'
+LABEL org.opencontainers.image.url='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.documentation='https://github.com/idaholab/Malcolm/blob/main/README.md'
+LABEL org.opencontainers.image.source='https://github.com/idaholab/Malcolm'
+LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
+LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/htadmin'
 LABEL org.opencontainers.image.description='Malcolm container providing htadmin for managing login accounts in an htpasswd file'
 
 ARG DEFAULT_UID=33

@@ -407,7 +407,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                     i(cls="bi bi-table fs-3", title="Arkime")
                                 )
                             li(cls="list-inline-item").add(
-                                a(href=f'https://github.com/cisagov/Malcolm/', target="_blank")
+                                a(href=f'https://github.com/idaholab/Malcolm/', target="_blank")
                             ).add(i(cls="bi-github fs-3", title="GitHub"))
 
                     script(type="text/javascript", src=f"{assetsDirRespReplacer}js/bootstrap.bundle.min.js")

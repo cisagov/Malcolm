@@ -31,7 +31,7 @@ fi
 # -t tag      (Malcolm tag, e.g., v23.05.1)
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
-MALCOLM_REPO=${MALCOLM_REPO:-cisagov/Malcolm}
+MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
 MALCOLM_TAG=${MALCOLM_TAG:-v25.06.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
