@@ -2788,7 +2788,7 @@ def wipe_indices(dates=None):
                     if creation_date:
                         dt = datetime.fromtimestamp(int(creation_date) / 1000)
                         dt_str = dt.strftime('%Y.%m.%d')
-                        print(f"{index}: ceartion_date={dt_str}, filter={date_patterns} ")
+                        print(f"{index}: creation_date={dt_str}, filter={date_patterns} ")
                         if dt_str in date_patterns:
                             indices_with_dates.append(index)
                 except Exception:
