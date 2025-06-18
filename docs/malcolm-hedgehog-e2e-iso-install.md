@@ -336,7 +336,7 @@ Upon configuring time synchronization, a "Time synchronization configured succes
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication
 
-Once the [configuration](#MalcolmConfig) questions have been completed as described above, users can click the circular yellow Malcolm icon the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm. As authentication has not yet been configured, users will be prompted to do so. This authentication setup can be run again later by running [`./scripts/auth_setup`](authsetup.md#AuthSetup) from the Malcolm installation directory.
+Once the [configuration](#MalcolmConfig) questions have been completed as described above, users can click the "play" icon (▷) in the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm. As authentication has not yet been configured, users will be prompted to do so. This authentication setup can be run again later by running [`./scripts/auth_setup`](authsetup.md#AuthSetup) from the Malcolm installation directory.
 
 ![Setting up authentication on Malcolm's first run](./images/screenshots/auth_setup.png)
 
