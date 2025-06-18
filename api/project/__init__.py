@@ -351,6 +351,7 @@ def translate_roles(req):
                 app.config["ROLE_ADMIN"],
                 app.config["ROLE_READ_ACCESS"],
                 app.config["ROLE_READ_WRITE_ACCESS"],
+                app.config["ROLE_UPLOAD"],
             )
         )
         roles_map['netbox_sites'] = any(
@@ -361,6 +362,7 @@ def translate_roles(req):
                 app.config["ROLE_READ_WRITE_ACCESS"],
                 app.config["ROLE_NETBOX_READ_ACCESS"],
                 app.config["ROLE_NETBOX_READ_WRITE_ACCESS"],
+                app.config["ROLE_UPLOAD"],
             )
         )
     except Exception as e:
