@@ -283,11 +283,6 @@ if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
   truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
   cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
   rm ./wise.tmp
-else
-  sed "s|^\(wiseHost=\).*|\1""127.0.0.1""|" "${ARKIME_WISE_CONFIG_FILE}" > ./wise.tmp
-  truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
-  cat ./wise.tmp > "${ARKIME_WISE_CONFIG_FILE}"
-  rm ./wise.tmp
 fi
 
 unset OPENSEARCH_URL_FINAL
