@@ -2681,8 +2681,8 @@ def authSetup():
             ClearScreen()
 
 def wipe_indices(dates=None):
-    # Wipe Opensearch indices.
-    # If dates are provided then only wipe those indices.
+    # Wipe Opensearch indices (remote or local).
+    # If date is provided then only wipe those indices.
     # Otherwise wipe all indices.
 
     global args
@@ -2707,21 +2707,20 @@ def wipe_indices(dates=None):
         eprint("Malcolm is not running, cannot wipe indices.")
         exit(1)
 
-    # Get OpenSearch credentials based off of local or remote instance
+    # Get OpenSearch URL based off of local or remote instance
     opensearch_env_path = os.path.join(args.configDir, 'opensearch.env')
     opensearch_url = 'http://localhost:9200'
     if os.path.isfile(opensearch_env_path):
         opensearch_envs = dotenvImported.dotenv_values(opensearch_env_path)
         opensearch_url = opensearch_envs.get('OPENSEARCH_URL', opensearch_url)
     
-    # Determine credentials based off of remote or local OpenSearch
+    # Determine credentials based off of local or remote OpenSearch
     curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')
     use_curlrc = False
     user = ''
     insecure = False
     if os.path.isfile(curlrc_path):
         creds = ParseCurlFile(curlrc_path)
-        print(f"DEBUG: creds from curlrc: {creds}")
         username = creds.get('user', '').strip('"\'' )
         password = creds.get('password', '').strip('"\'' )
         if password:
@@ -2811,7 +2810,8 @@ def wipe_indices(dates=None):
             print(f"Failed to delete index: {index}")
 
 def reindex_pcaps():
-    # Move all PCAPs from ./pcap/processed to ./pcap/upload
+    # Reindec PCAPs/indices
+    # Move all PCAPs from ./pcap/processed to ./pcap/upload and touch them
 
     processed_dir = os.path.join(GetMalcolmPath(), 'pcap', 'processed')
     upload_dir = os.path.join(GetMalcolmPath(), 'pcap', 'upload')
@@ -2831,11 +2831,6 @@ def reindex_pcaps():
         os.utime(dest, None)
         print(f'Moved and touched: {pcap} -> {dest}')
     print('Reindexing complete')
-
-
-
-
-
 
 ###################################################################################################
 # main
@@ -2928,8 +2923,8 @@ def main():
         help = 'Wipe all OpenSearch indices.',
     )
     parser.add_argument(
-        '--wipe-index-dates',
-        dest = 'wipeIndexDates',
+        '--wipe-index-date',
+        dest = 'wipeIndexDate',
         metavar='<date>',
         type=str,
         nargs='*',
@@ -3562,8 +3557,8 @@ def main():
         checkEnvFilesAndValues()
 
         # wipe opensearch indices only and exit
-        if getattr(args, 'cmdWipeIndices', False) or (args.wipeIndexDates and len(args.wipeIndexDates)):
-            wipe_indices(dates=args.wipeIndexDates)
+        if getattr(args, 'cmdWipeIndices', False) or (args.wipeIndexDate and len(args.wipeIndexDate)):
+            wipe_indices(dates=args.wipeIndexDate)
             return
         
         # reindex PCAPs
