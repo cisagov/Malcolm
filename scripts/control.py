@@ -26,6 +26,11 @@ import string
 import tarfile
 import tempfile
 import time
+import base64
+import glob
+import shutil
+import json
+from datetime import datetime
 
 from malcolm_common import (
     AskForPassword,
@@ -2675,6 +2680,158 @@ def authSetup():
         if MainDialog and (not args.cmdAuthSetupNonInteractive):
             ClearScreen()
 
+def wipe_indices(dates=None):
+    # Wipe OpenSearch indices (remote or local).
+    # If date is provided then only wipe those indices.
+    # Otherwise wipe all indices.
+
+    global args
+    global dockerComposeBin
+    global orchMode
+
+    if orchMode is not OrchestrationFramework.DOCKER_COMPOSE:
+        raise Exception("Index wiping is only supported with Docker Compose mode.")
+    
+    # Check if Malcolm is running
+    osEnv = os.environ.copy()
+    if not args.noTmpDirOverride:
+        osEnv['TMPDIR'] = MalcolmTmpPath
+    err, out = run_process(
+        [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q'],
+        env=osEnv,
+        stderr=False,
+        debug=args.debug,
+    )
+    out[:] = [x for x in out if x]
+    if (err != 0) or (len(out) == 0):
+        eprint("Malcolm is not running, cannot wipe indices.")
+        exit(1)
+
+    # Get OpenSearch URL based off of local or remote instance
+    opensearch_env_path = os.path.join(args.configDir, 'opensearch.env')
+    opensearch_url = 'http://localhost:9200'
+    if os.path.isfile(opensearch_env_path):
+        opensearch_envs = dotenvImported.dotenv_values(opensearch_env_path)
+        opensearch_url = opensearch_envs.get('OPENSEARCH_URL', opensearch_url)
+    
+    # Determine credentials based off of local or remote OpenSearch
+    curlrc_path = os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')
+    use_curlrc = False
+    user = ''
+    insecure = False
+    if os.path.isfile(curlrc_path):
+        creds = ParseCurlFile(curlrc_path)
+        username = creds.get('user', '').strip('"\'' )
+        password = creds.get('password', '').strip('"\'' )
+        if username and password:
+            user = f"{username}:{password}"
+        insecure = 'insecure' in creds
+        # Use curlrc credentials if present
+        if user:
+            use_curlrc = True
+            print(f"Using OpenSearch credentials from curlrc: insecure={insecure}, url={opensearch_url}")
+        else:
+            use_curlrc = False
+    if not use_curlrc:
+        # Use local credentials from auth.env
+        auth_env_path = os.path.join(args.configDir, 'auth.env')
+        if not os.path.isfile(auth_env_path):
+            eprint(f"Authentication file not found: {auth_env_path}")   
+            exit(1)
+        envs = dotenvImported.dotenv_values(auth_env_path)
+        username = envs.get('MALCOLM_USERNAME', 'admin')
+        password_base = envs.get('MALCOLM_PASSWORD', '')
+        try:
+            password = base64.b64decode(password_base).decode('utf-8')
+        except Exception:
+            passsword = 'admin'
+        user = f"{username}:{password}"
+        insecure = True
+        print(f"Using OpenSearch credentials from auth.env: insecure={insecure}")
+
+    # Helper to run curl in right context
+    def run_curl(cmd_curl, extra_args=None, method=None):
+        base = ['curl', '-s', '-u', user]
+        if insecure:
+            base.append('-k')
+        if method:
+            base.append(f'-X{method}')
+        if extra_args:
+            base+= extra_args
+        base.append(cmd_curl)
+        if use_curlrc:
+            cmd = base
+        else:
+            cmd = [
+                dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'exec', '-T', 'opensearch'
+            ] + base
+        err, out = run_process(cmd, env=osEnv, debug=args.debug)
+        return err,out
+
+    # Get list of indices
+    err, indices = run_curl(f'{opensearch_url}/_cat/indices?h=index')
+    if err != 0:
+        eprint("Failed to get indices from OpenSearch.")
+        exit(1)
+    indices = [i.strip() for i in indices if i.strip()]
+
+    # Select indices that match the optional provided dates 
+    if dates:
+        date_patterns = [str(d) for d in dates]
+        indices_with_dates = []
+        for index in indices:
+            err, out = run_curl(f'{opensearch_url}/{index}/_settings')
+            if err == 0 and out:
+                try:
+                    settings = json.loads(''.join(out))
+                    creation_date = settings[index]['settings']['index'].get('creation_date')
+                    if creation_date:
+                        dt = datetime.fromtimestamp(int(creation_date) / 1000)
+                        dt_str = dt.strftime('%Y.%m.%d')
+                        print(f"{index}: creation_date={dt_str}, filter={date_patterns} ")
+                        if dt_str in date_patterns:
+                            indices_with_dates.append(index)
+                except Exception:
+                    pass
+        indices = indices_with_dates
+                
+    if not indices:
+        eprint("No indices found to wipe.")
+        return
+    print("Deleting indices:")
+    for index in indices:
+        print(f" - {index}")
+
+    # Delete indices    
+    for index in indices:
+        err, out = run_curl(f'{opensearch_url}/{index}', method='DELETE')
+        if err == 0:
+            print(f"Successfully deleted index: {index}")
+        else:
+            print(f"Failed to delete index: {index}")
+
+def reindex_pcaps():
+    # Reindec PCAPs/indices
+    # Move all PCAPs from ./pcap/processed to ./pcap/upload and touch them
+
+    processed_dir = os.path.join(GetMalcolmPath(), 'pcap', 'processed')
+    upload_dir = os.path.join(GetMalcolmPath(), 'pcap', 'upload')
+    if not os.path.isdir(processed_dir):
+        print(f"Processed PCAP directory not found: {processed_dir}")
+        return
+    if not os.path.isdir(upload_dir):
+        print(f"Upload PCAP directory not found: {upload_dir}")
+        return
+    pcaps = glob.glob(os.path.join(processed_dir, '*.pcap'))
+    if not pcaps:
+        print("No PCAPs found in processed directory.")
+        return
+    for pcap in pcaps:
+        dest = os.path.join(upload_dir, os.path.basename(pcap))
+        shutil.move(pcap, dest)
+        os.utime(dest, None)
+        print(f'Moved and touched: {pcap} -> {dest}')
+    print('Reindexing complete')
 
 ###################################################################################################
 # main
@@ -2756,6 +2913,32 @@ def main():
         const=True,
         default=str2bool(os.getenv('MALCOLM_NO_TMPDIR_OVERRIDE', default='False')),
         help="Don't override TMPDIR for compose commands",
+    )
+    parser.add_argument(
+        '--wipe-indices',
+        dest = 'cmdWipeIndices',
+        type = str2bool,
+        nargs = '?',
+        const = True,
+        default = False,
+        help = 'Wipe all OpenSearch indices.',
+    )
+    parser.add_argument(
+        '--wipe-index-date',
+        dest = 'wipeIndexDate',
+        metavar='<date>',
+        type=str,
+        nargs='*',
+        default=None,
+        help='Date of indices to wipe (format: YYYY.MM.DD, e.g., 2025.01.01). ',
+    )
+
+    parser.add_argument(
+        '--reindex',
+        dest='cmdReindex',
+        action='store_true',
+        default=False,
+        help='Move all PCAPs from ./pcap/processed to ./pcap/upload and touch them'
     )
 
     operationsGroup = parser.add_argument_group('Runtime Control')
@@ -3373,6 +3556,16 @@ def main():
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat
         checkEnvFilesAndValues()
+
+        # wipe opensearch indices only and exit
+        if getattr(args, 'cmdWipeIndices', False) or (args.wipeIndexDate and len(args.wipeIndexDate)):
+            wipe_indices(dates=args.wipeIndexDate)
+            return
+        
+        # reindex PCAPs
+        if getattr(args, 'cmdReindex', False):
+            reindex_pcaps()
+            return
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:
