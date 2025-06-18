@@ -4,6 +4,6 @@ Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/script
 Comment=Stop Malcolm
 Terminal=false
 Type=Application
-Icon=exit.png
+Icon=exit
 Categories=Network;
 StartupNotify=true

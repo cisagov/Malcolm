@@ -4,6 +4,6 @@ Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/script
 Comment=Monitor the debug output of Malcolm containers
 Terminal=false
 Type=Application
-Icon=terminal.png
+Icon=terminal
 Categories=Network;
 StartupNotify=true

@@ -4,6 +4,6 @@ Exec=tilix -e /bin/bash -l -c "cd ~/Malcolm && /usr/bin/python3 ~/Malcolm/script
 Comment=Start Malcolm
 Terminal=false
 Type=Application
-Icon=/usr/share/icons/hicolor/64x64/malcolm.png
+Icon=media-playback-start
 Categories=Network;
 StartupNotify=true
