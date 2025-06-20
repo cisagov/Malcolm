@@ -388,51 +388,6 @@ def checkWiseFile():
             eprint(f"Creating {wiseFile} from {os.path.basename(wiseExampleFile)}")
         shutil.copyfile(wiseExampleFile, wiseFile)
 
-        # files or directories that need to be relocated, only if:
-        #   - deployment mode is docker compose
-        #   - Malcolm is not running
-        #   - the source exists
-        #   - the destination does not exist
-        if (
-            envVarActionsYaml
-            and isinstance(envVarActionsYaml, dict)
-            and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
-            and ('relocated_files' in envVarActionsYaml)
-        ):
-            osEnv = os.environ.copy()
-            if not args.noTmpDirOverride:
-                osEnv['TMPDIR'] = MalcolmTmpPath
-            err, out = run_process(
-                [
-                    dockerComposeBin,
-                    '--profile',
-                    args.composeProfile,
-                    '-f',
-                    args.composeFile,
-                    'ps',
-                    '--services',
-                    '--status=running',
-                ],
-                env=osEnv,
-                stderr=False,
-                debug=args.debug,
-            )
-            out[:] = [x for x in out if x]
-            if (err == 0) and (len(out) == 0):
-                for src, dst in envVarActionsYaml['relocated_files'].items():
-                    srcPath = os.path.join(GetMalcolmPath(), src)
-                    dstPath = os.path.join(GetMalcolmPath(), next(iter(get_iterable(dst))))
-                    if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
-                        if args.debug:
-                            eprint(f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files')
-                    else:
-                        try:
-                            shutil.move(srcPath, dstPath)
-                            if args.debug:
-                                eprint(f'Relocated "{src}" to "{dst}"')
-                        except Exception as e:
-                            eprint(f'Error relocating "{src}" to "{dst}": {e}')
-
 
 ###################################################################################################
 # perform a service-keystore operation in a container
