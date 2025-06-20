@@ -174,11 +174,12 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
 
   if [[ ${ARKIME_WISE_PLUGIN}  == "true" ]]; then
     # make sure the wise plugin is enabled in the config file
-    WISE_FILE_ESCAPED = "wise\.so"
+    WISE_PLUGIN_NAME="wise.so"
+    WISE_PLUGIN_ESCAPED="$(echo "${WISE_PLUGIN_NAME}" | sed 's@\.@\\\.@g')"
     # clean up old references to the plugin
-    sed -i "/plugins=.*${WISE_FILE_ESCAPED}/s/;\?${WISE_FILE_ESCAPED}//g" "$ARKIME_CONFIG_FILE"
+    sed -i "/plugins=.*${WISE_PLUGIN_ESCAPED}/s/;\?${WISE_PLUGIN_ESCAPED}//g" "$ARKIME_CONFIG_FILE"
     # append wise plugin filename to end of plugins= line in config file and uncomment it if necessary
-    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1wise.so;/" "$ARKIME_CONFIG_FILE"
+    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1${WISE_PLUGIN_NAME};/" "$ARKIME_CONFIG_FILE"
     # squash semicolons
     sed -i 's/;\{2,\}/;/g' "$ARKIME_CONFIG_FILE"
     # remove trailing semicolon from plugins= line if it exists
