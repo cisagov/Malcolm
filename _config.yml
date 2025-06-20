@@ -1,4 +1,4 @@
-repository: idaholab/Malcolm
+repository: cisagov/Malcolm
 title: Malcolm
 offline_mode: false
 malcolm:
@@ -34,7 +34,7 @@ thirdparty_logs_docs_uri: docs/third-party-logs.html
 upload_docs_uri: docs/upload.html
 url:
 github:
-  owner_name: Idaho National Laboratory
+  owner_name: Cybersecurity and Infrastructure Security Agency
   default_branch: main
 plugins:
   - jekyll-relative-links
