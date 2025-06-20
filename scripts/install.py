@@ -1913,10 +1913,11 @@ class Installer(object):
                             if (netboxEnabled and netboxAutoPopulate)
                             else ''
                         )
-                        netboxAutoPopulateSubnets = ';'.join(
-                            f"{k.strip()}:{stripSpacePattern.sub('', v)}"
-                            for k, v in (item.split(':', 1) for item in netboxAutoPopulateSubnets.split(';'))
-                        )
+                        if netboxAutoPopulateSubnets:
+                            netboxAutoPopulateSubnets = ';'.join(
+                                f"{k.strip()}:{stripSpacePattern.sub('', v)}"
+                                for k, v in (item.split(':', 1) for item in netboxAutoPopulateSubnets.split(';'))
+                            )
                         if ValidNetBoxSubnetFilter(netboxAutoPopulateSubnets):
                             break
                     netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(
