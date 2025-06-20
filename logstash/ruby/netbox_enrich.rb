@@ -529,6 +529,11 @@ def log_method_timings_thread_proc
 end
 
 ##############################################################################################
+def deep_copy(o)
+  Marshal.load(Marshal.dump(o))
+end
+
+##############################################################################################
 def getset_with_tracking(cache, key)
   cache_hit = true
   result = cache.getset(key) do
@@ -636,7 +641,7 @@ def filter(
       netbox_lookup(event: event, ip_key: ip_key, site_id: _lookup_site_id)
     end
     if _lookup_tracking_result[:result]
-      _result, _key_ip, _nb_queried = _lookup_tracking_result[:result].dup
+      _result, _key_ip, _nb_queried = deep_copy(_lookup_tracking_result[:result])
     else
       _result, _key_ip, _nb_queried = nil, nil, false
     end
@@ -647,10 +652,9 @@ def filter(
 
       if _lookup_tracking_result[:cache_hit]
         # it can't have been "discovered" if it was already in the cache
-        _result.delete(:discovered)
+        _result[:discovered] = false
       else
         _result[:discovered] = _result[:discovered]&.any? if _result[:discovered].is_a?(Array)
-        _result.delete(:discovered) unless _result[:discovered]
         _discovered_flag ||= _result.fetch(:discovered, false)
       end
 
@@ -697,9 +701,13 @@ def filter(
                 oui: _autopopulate_oui,
                 result: JSON.generate(_updated_result) }) if @debug
         end
-        _lookup_hash[ip_key] = (_result = _updated_result) if _updated_result
+        if _updated_result
+          _lookup_hash[ip_key] = _updated_result
+          _result = deep_copy(_updated_result)
+        end
       end
       _result.delete(:tags)
+      _result.delete(:discovered) unless _result[:discovered]
 
       if _result.has_key?(:url) && !_result[:url]&.empty?
         _result[:url].map! { |u| u.delete_prefix(@netbox_url_base).gsub('/api/', '/') }
