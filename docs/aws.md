@@ -658,7 +658,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 
 * Create the load balancer and access Malcolm's web interface
     * The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands below can be ignored if you did not configure allowing incoming TCP connections from remote sensors.
-    * If using only the automatically-generated ALB hostnames to connect to Malcolm
+    * If using only the automatically-generated ALB hostnames to connect to Malcolm:
         * Apply [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)
 
         ```bash
@@ -675,7 +675,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 
         * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`)
 
-    * If using a custom domain name for Malcolm
+    * If using a custom domain name for Malcolm:
         * Use [`99-ingress-aws-alb-dns.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb-dns.yml.example), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
         ```bash
@@ -741,6 +741,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
         ```
 
         * Using `kubectl`
+        
         ```bash
         $ kubectl logs --follow=true -n malcolm --all-containers <pod>
         ```
