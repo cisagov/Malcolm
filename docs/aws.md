@@ -101,7 +101,41 @@ This section outlines the process of using the [AWS Command Line Interface (CLI)
 
 These steps are to be run on a Linux, Windows, or macOS system in a command line environment with the [AWS Command Line Interface (AWS CLI)](https://aws.amazon.com/cli/) installed. Users should adjust these steps to their own use cases in terms of naming resources, setting security policies, etc.
 
-* Create a [key pair for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html)
+* To enable connecting to the instance using [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html), create an [IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) for the EC2 instance and attach it to an instance profile
+
+```bash
+$ cat << EOF > ./trust-policy.json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+
+$ aws iam create-role \
+    --role-name EC2-SSM-Role \
+    --assume-role-policy-document file://trust-policy.json
+
+$ aws iam attach-role-policy \
+    --role-name EC2-SSM-Role \
+    --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+$ aws iam create-instance-profile \
+    --instance-profile-name EC2-SSM-Role
+
+$ aws iam add-role-to-instance-profile \
+    --instance-profile-name EC2-SSM-Role \
+    --role-name EC2-SSM-Role
+```
+
+* For users planning on connecting to the EC2 instance using SSH, create a [key pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html). This is not necessary for users only connecting to the instance by using [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html).
 
 ```bash
 $ aws ec2 create-key-pair \
@@ -118,11 +152,11 @@ $ chmod 600 ./malcolm-key.pem
 $ aws ec2 create-security-group \
     --group-name malcolm-sg \
     --description "Malcolm SG"
-
 ```
 
 * Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
     - These rules will allow SSH and HTTPS access from the address(es) specified
+        - The SSH port (`22`) may be omitted when only connecting to the instance via [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html)
     - Replace `#.#.#.#` with the public IP address(es) (i.e., addresses which will be allowed to connect to the Malcolm instance via SSH and HTTPS) in the following commands
 
 ```bash
@@ -135,7 +169,6 @@ $ for PORT in 22 443; do \
         --port $PORT \
         --cidr $PUBLIC_IP/32; \
 done
-
 ```
 
 * [Get a list](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) of Ubuntu Minimal [AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
@@ -157,6 +190,7 @@ $ aws ec2 describe-images \
     - Replace `INSTANCE_TYPE` with the desired instance type in the following command
         + See [EC2 Instance Types](#AWSInstanceSizing) for suggestions
     - Replace `AMI_ID` with the AMI ID from the previous step in the following command
+    - Users who skipped the `create-key-pair` step above shoult omit the `--key-name malcolm-key` argument in the following command
     - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
 
 ```bash
@@ -164,6 +198,7 @@ $ aws ec2 run-instances \
     --image-id AMI_ID \
     --instance-type INSTANCE_TYPE \
     --key-name malcolm-key \
+    --iam-instance-profile Name=EC2-SSM-Role \
     --security-group-ids malcolm-sg \
     --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":100,\"VolumeType\":\"gp3\"}}]" \
     --count 1 \
@@ -178,14 +213,27 @@ $ aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=Malcolm" \
     --query "Reservations[].Instances[].{ID:InstanceId,IP:PublicIpAddress,State:State.Name}" \
     --output table
-
 ```
 
 ### <a name="AWSEC2Install"></a> Malcolm setup
 
-The next steps are to be run as the `ubuntu` user *inside* the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in the first step.
+The next steps are to be run as the `ubuntu` user *inside* the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html) or via SSH using the key pair created in the first step.
 
-* Install `curl`, `unzip`, and `python3`
+* Verify the current shell is being run as the `ubuntu` user, and switch to it if not
+
+```bash
+$ whoami
+ssm-user
+
+$ sudo --login --user ubuntu
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+ubuntu@ip-#-#-#-#:~$ whoami
+ubuntu
+```
+
+* Install `curl`, `unzip`, and Python dependencies
 
 ```bash
 $ sudo apt-get -y update
