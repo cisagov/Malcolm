@@ -371,6 +371,14 @@ This section outlines the process of setting up a Malcolm cluster on [Amazon Ela
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
+* Create IAM policy for [AWS load balancer](https://github.com/kubernetes-sigs/aws-load-balancer-controller) (only needs to be done once per account)
+
+```bash
+$ aws iam create-policy \
+  --policy-name AmazonAWS_Load_Balancer_Controller_Policy \
+  --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json')"
+```
+
 * Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` (customizing as needed), then [create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
@@ -385,7 +393,7 @@ metadata:
 autoModeConfig:
   enabled: true
   
-# Configure IAM OIDC provider and service account for EFS CSI Driver
+# Configure IAM OIDC provider and service accounts for EFS CSI Driver and AWS Load Balancer Controller
 iam:
   withOIDC: true
   serviceAccounts:
@@ -394,6 +402,11 @@ iam:
       namespace: kube-system
     wellKnownPolicies:
       efsCSIController: true
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    attachPolicyARNs:
+      - arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy
 
 # Include the EFS CSI Driver as an addon
 addons:
@@ -435,6 +448,22 @@ $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
         --query "cluster.resourcesVpcConfig.vpcId" --output text)
 
 $ echo $VPC_ID
+```
+
+* Install [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) via Helm
+
+```bash
+$ helm repo add eks https://aws.github.io/eks-charts
+
+$ helm repo update
+
+$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=malcolm-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=us-east-1 \
+  --set vpcId=$VPC_ID
 ```
 
 * Create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for EFS
@@ -616,7 +645,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
 ```
 
 * Malcolm's web interface can be accessed either of two ways: using automatically-generated [AWS load balancer (ALB)](https://github.com/kubernetes-sigs/aws-load-balancer-controller) hostname (typically formatted like `k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`) or using DNS records associated with a custom domain owned by the user (e.g., `malcolm.example.org`). The following steps are **optional** and are only required to use a custom domain name for Malcolm.
-    
+
     * [Request a certificate](https://docs.aws.amazon.com/cli/latest/reference/acm/request-certificate.html) and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
     
     ```bash
