@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.2.8
+FROM netboxcommunity/netbox:v4.3.3
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -25,8 +25,8 @@ ENV PGROUP "ubuntu"
 ENV PUSER_PRIV_DROP true
 USER root
 
-ENV NETBOX_INITIALIZERS_VERSION "v4.2.0"
-ENV NETBOX_TOPOLOGY_VERSION "4.2.1"
+ENV NETBOX_INITIALIZERS_VERSION "v4.3.0"
+ENV NETBOX_TOPOLOGY_VERSION "4.3.0"
 ENV NETBOX_HEALTHCHECK_VERSION "0.2.0"
 
 ENV YQ_VERSION "4.45.4"
