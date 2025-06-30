@@ -615,7 +615,7 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --skip-persistent-volume-checks
 ```
 
-* Malcolm's web interface can be accessed either of two ways: using automatically-generated [AWS load balancer (ALB)](https://github.com/kubernetes-sigs/aws-load-balancer-controller) hostname (typically formatted like `https://k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`) or using DNS records associated with a custom domain owned by the user (e.g., `malcolm.example.org`). The following steps are **optional** and are only required to use a custom domain name for Malcolm.
+* Malcolm's web interface can be accessed either of two ways: using automatically-generated [AWS load balancer (ALB)](https://github.com/kubernetes-sigs/aws-load-balancer-controller) hostname (typically formatted like `k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`) or using DNS records associated with a custom domain owned by the user (e.g., `malcolm.example.org`). The following steps are **optional** and are only required to use a custom domain name for Malcolm.
     
     * [Request a certificate](https://docs.aws.amazon.com/cli/latest/reference/acm/request-certificate.html) and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
     
@@ -656,52 +656,44 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
       --query "Certificate.Status"
     ```
 
-* Create the load balancer for Malcolm
-    * To use the using automatically-generated ALB hostnames to connect to Malcolm
-        * Use [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)
+* Create the load balancer and access Malcolm's web interface
+    * The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands below can be ignored if you did not configure allowing incoming TCP connections from remote sensors.
+    * If using only the automatically-generated ALB hostnames to connect to Malcolm
+        * Apply [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)
 
         ```bash
         $ kubectl apply -f ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example
+
+        $ HTTPS_HOSTNAME=$(kubectl get service malcolm-alb-nginx-proxy -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+
+        $ echo $HTTPS_HOSTNAME
+        $ echo $LOGSTASH_HOSTNAME
+        $ echo $FILEBEAT_HOSTNAME
         ```
 
-    * To use a custom domain name for Malcolm
+        * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`)
+
+    * If using a custom domain name for Malcolm
         * Use [`99-ingress-aws-alb-dns.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb-dns.yml.example), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
         ```bash
         $ export CERT_ARN
         $ export MALCOLM_HOST=malcolm.example.org
         $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb-dns.yml.example | kubectl apply -f -
+
+        $ HTTPS_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        
+        $ echo $HTTPS_HOSTNAME
+        $ echo $LOGSTASH_HOSTNAME
+        $ echo $FILEBEAT_HOSTNAME
         ```
 
-* Get the automatically-generated ALB hostnames for the internet-facing services created. The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands can be ignored if you did not configure allowing incoming TCP connections from remote sensors.
-    * If using only the automatically-generated ALB hostnames to connect to Malcolm
-    
-    ```bash
-    $ HTTPS_HOSTNAME=$(kubectl get service malcolm-alb-nginx-proxy -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-    $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-    $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-
-    $ echo $HTTPS_HOSTNAME
-    $ echo $LOGSTASH_HOSTNAME
-    $ echo $FILEBEAT_HOSTNAME
-    ```
-    
-    * If using a custom domain name for Malcolm
-
-    ```bash
-    $ HTTPS_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-    $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-    $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-    
-    $ echo $HTTPS_HOSTNAME
-    $ echo $LOGSTASH_HOSTNAME
-    $ echo $FILEBEAT_HOSTNAME
-    ```
-
-* The following steps are **optional** and are only required to use a custom domain name for Malcolm.
-    * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors above, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
-
-* Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
+        * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
+        * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
 
 * Monitor deployment
     * Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
