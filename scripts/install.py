@@ -455,7 +455,7 @@ class Installer(object):
             # determine and create destination path for installation
             loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid installation path')
             while loopBreaker.increment():
-                defaultPath = os.path.join(origPath, 'malcolm')
+                defaultPath = os.path.join(origPath, 'Malcolm')
                 installPath = InstallerAskForString(
                     f'Enter installation path for Malcolm [{defaultPath}]', default=defaultPath, forceInteraction=True
                 )
