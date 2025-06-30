@@ -823,7 +823,7 @@ def main():
     # start worker threads which will pull filenames/tags to be processed by capture
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
         ThreadPool(
-            args.threads,
+            max(1, args.threads),
             arkimeCaptureFileWorker,
             (
                 [
@@ -844,7 +844,7 @@ def main():
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
         ThreadPool(
-            args.threads,
+            max(1, args.threads),
             zeekFileWorker,
             (
                 [
