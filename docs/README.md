@@ -83,6 +83,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Hunt](arkime.md#ArkimeHunt)
     - [Statistics](arkime.md#ArkimeStats)
     - [Settings](arkime.md#ArkimeSettings)
+    - [WISE](arkime.md#ArkimeWISE)
 * [OpenSearch Dashboards](dashboards.md#Dashboards)
     - [Discover](dashboards.md#Discover)
         + [Screenshots](dashboards.md#DiscoverGallery)
