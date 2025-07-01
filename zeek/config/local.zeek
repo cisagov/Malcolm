@@ -383,12 +383,3 @@ hook Bsap::log_policy_bsap_serial_unknown(
   filter: Log::Filter) {
   break;
 }
-
-# all ARP traffic is logged by the ethercat parser, which is overkill
-hook PacketAnalyzer::ECAT::log_policy_ecat_arp(
-  rec: PacketAnalyzer::ECAT::ECAT_ARP_INFO,
-  id: Log::ID,
-  filter: Log::Filter) {
-  break;
-}
-
