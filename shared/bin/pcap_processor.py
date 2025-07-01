@@ -123,7 +123,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         arkimeBin,
         nodeName,
         nodeHost,
@@ -163,8 +163,15 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-                if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                fileInfo[FILE_INFO_DICT_NAME] = next(
+                    (
+                        os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                        for base in pcapBaseDirs
+                        if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                    ),
+                    fileInfo[FILE_INFO_DICT_NAME],
+                )
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
@@ -250,7 +257,7 @@ def zeekFileWorker(zeekWorkerArgs):
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         zeekBin,
         autoZeek,
         forceZeek,
@@ -288,8 +295,15 @@ def zeekFileWorker(zeekWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isdir(uploadDir):
-                if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                fileInfo[FILE_INFO_DICT_NAME] = next(
+                    (
+                        os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                        for base in pcapBaseDirs
+                        if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                    ),
+                    fileInfo[FILE_INFO_DICT_NAME],
+                )
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Zeek this PCAP if it's tagged "AUTOZEEK" or if the global autoZeek flag is turned on.
@@ -400,7 +414,7 @@ def suricataFileWorker(suricataWorkerArgs):
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         autoSuricata,
         forceSuricata,
         socketPath,
@@ -460,8 +474,14 @@ def suricataFileWorker(suricataWorkerArgs):
                         )
                     )
                 ):
-                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+                    fileInfo[FILE_INFO_DICT_NAME] = next(
+                        (
+                            os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                            for base in pcapBaseDirs
+                            if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                        ),
+                        fileInfo[FILE_INFO_DICT_NAME],
+                    )
 
                     if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                         # finalize tags list
@@ -795,6 +815,10 @@ def main():
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
 
+    pcapBaseDirs = (
+        list(filter(os.path.isdir, map(str.strip, re.split(r'[;,]', args.pcapBaseDir)))) if args.pcapBaseDir else []
+    )
+
     if args.extraTags is not None:
         args.extraTags = [
             tag for tag in [re.sub(r'[^A-Za-z0-9 ._-]', '', x.strip()) for x in args.extraTags.split(',')] if tag
@@ -828,7 +852,7 @@ def main():
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.executable,
                     args.nodeName,
                     args.nodeHost,
@@ -849,7 +873,7 @@ def main():
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.executable,
                     args.autoZeek,
                     args.forceZeek,
@@ -870,7 +894,7 @@ def main():
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.autoSuricata,
                     args.forceSuricata,
                     args.suricataSocketPath,
