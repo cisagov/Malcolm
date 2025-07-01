@@ -1245,15 +1245,16 @@ def main():
         and DEFAULT_VARS['AUTO_ANALYZE_PCAP_THREADS']
     ):
         try:
-            threadCount = max(1, int(DEFAULT_VARS['AUTO_ANALYZE_PCAP_THREADS']))
+            threadCount = max(0, int(DEFAULT_VARS['AUTO_ANALYZE_PCAP_THREADS']))
         except Exception:
-            threadCount = 1
-        deep_set(cfg, ['threading', 'set-cpu-affinity'], True)
-        deep_set(
-            cfg,
-            ['threading', 'cpu-affinity'],
-            [{'worker-cpu-set': {'cpu': ["all"], 'mode': "balanced", 'threads': threadCount}}],
-        )
+            threadCount = 0
+        if threadCount:
+            deep_set(cfg, ['threading', 'set-cpu-affinity'], True)
+            deep_set(
+                cfg,
+                ['threading', 'cpu-affinity'],
+                [{'worker-cpu-set': {'cpu': ["all"], 'mode': "balanced", 'threads': threadCount}}],
+            )
 
     if DEFAULT_VARS['RUN_DIR'] is not None:
         cfg.pop('unix-command', None)

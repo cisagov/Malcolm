@@ -53,7 +53,7 @@ ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 ADD --chmod=644 zeek/requirements.txt /usr/local/src/requirements.txt
 
-ENV SUPERCRONIC_VERSION "0.2.33"
+ENV SUPERCRONIC_VERSION "0.2.34"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
