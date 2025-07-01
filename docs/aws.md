@@ -8,6 +8,11 @@
         + [Malcolm setup](#AWSEC2Install)
         + [Running Malcolm](#AWSEC2Run)
     - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS) in Auto Mode](#AWSEKSAuto)
+        + [Infrastructure Setup](#AWSEKSAutoInfrastructure)
+        + [Malcolm Setup](#AWSEKSAutoMalcolmSetup)
+        + [Run and Access Malcolm](#AWSEKSAutoMalcolmAccess)
+        + [Monitor Deployment](#AWSEKSAutoMonitor)
+        + [Cleanup](#AWSEKSAutoCleanup)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
         + [Using MFA](#AWSAMIMFA)
@@ -371,6 +376,8 @@ This section outlines the process of setting up a Malcolm cluster on [Amazon Ela
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
+### <a name="AWSEKSAutoInfrastructure"></a>Infrastructure Setup
+
 * Create IAM policy for [AWS load balancer](https://github.com/kubernetes-sigs/aws-load-balancer-controller) (only needs to be done once per account)
 
 ```bash
@@ -527,6 +534,8 @@ $ for subnet in $PRIVATE_SUBNET_IDS; do \
 done
 ```
 
+### <a name="AWSEKSAutoMalcolmSetup"></a>Malcolm Setup
+
 * Install local dependencies for the Malcolm control scripts and download Malcolm
     
     * Install dependencies (this will vary by OS distribution, adjust as needed)
@@ -636,6 +645,8 @@ done
 
 * Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy. Note that the resources defined in this file will translate to the compute [instance size(s)](#AWSInstanceSizing) chosen, and by extension the cost charged by AWS to run those resources. See **Amazon EKS Auto Mode** under [**Amazon EKS pricing**](https://aws.amazon.com/eks/pricing/) for more details.
 
+### <a name="AWSEKSAutoMalcolmAccess"></a>Run and Access Malcolm
+
 * [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace. The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above.
 
 ```bash
@@ -724,62 +735,65 @@ $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
         * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
         * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
 
-* Monitor deployment
-    * Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
+### <a name="AWSEKSAutoMonitor"></a>Monitor Deployment
+
+* Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
+
+```bash
+$ kubectl get pods -n malcolm
+NAME                                            READY   STATUS     RESTARTS   AGE
+api-deployment-8696d45f9d-pnt69                 1/1     Running   0          36m
+arkime-deployment-8564cfd96f-krmpf              1/1     Running   0          36m
+arkime-live-deployment-7c55bbd8d4-mngpg         1/1     Running   0          36m
+dashboards-deployment-5bb86dc65-kp6ll           1/1     Running   0          36m
+dashboards-helper-deployment-74644df874-tr68h   1/1     Running   0          36m
+file-monitor-deployment-7579589ff7-8blpp        1/1     Running   0          36m
+filebeat-deployment-6cf57d56dd-d4hnb            1/1     Running   0          36m
+freq-deployment-6b8cfb6f65-b5h86                1/1     Running   0          36m
+htadmin-deployment-5b74cff59f-c8z5p             1/1     Running   0          36m
+keycloak-deployment-7c598dc6d-hbm5t             1/1     Running   0          36m
+logstash-deployment-77cf7c557b-r9544            1/1     Running   0          36m
+netbox-deployment-b6cdf69bc-bpx6c               1/1     Running   0          36m
+nginx-proxy-deployment-76b56767c4-rnwk4         1/1     Running   0          36m
+opensearch-deployment-796fdc9f48-r8qfl          1/1     Running   0          36m
+pcap-capture-deployment-79cc46b569-gw6ts        1/1     Running   0          36m
+pcap-monitor-deployment-69b6d9d857-dwz4b        1/1     Running   0          36m
+postgres-deployment-f69649779-r5qss             1/1     Running   0          36m
+redis-cache-deployment-7f94f49886-swclf         1/1     Running   0          36m
+redis-deployment-6895f57c76-gbx9m               1/1     Running   0          36m
+suricata-live-deployment-7d44967bfc-hzbj9       1/1     Running   0          36m
+suricata-offline-deployment-85fb6b9b8b-z2cww    1/1     Running   0          36m
+upload-deployment-7c9798cb7d-cxqwk              1/1     Running   0          36m
+zeek-live-deployment-8c5b9b899-wsv2t            1/1     Running   0          36m
+zeek-offline-deployment-5bbf797567-2zbq7        1/1     Running   0          36m
+```
+
+* [Check](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/) all resources
+
+```bash
+$ kubectl get all -n malcolm
+```
+
+* Watch pod [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
+    * Using Malcolm's convenience script
 
     ```bash
-    $ kubectl get pods -n malcolm
-    NAME                                            READY   STATUS     RESTARTS   AGE
-    api-deployment-8696d45f9d-pnt69                 1/1     Running   0          36m
-    arkime-deployment-8564cfd96f-krmpf              1/1     Running   0          36m
-    arkime-live-deployment-7c55bbd8d4-mngpg         1/1     Running   0          36m
-    dashboards-deployment-5bb86dc65-kp6ll           1/1     Running   0          36m
-    dashboards-helper-deployment-74644df874-tr68h   1/1     Running   0          36m
-    file-monitor-deployment-7579589ff7-8blpp        1/1     Running   0          36m
-    filebeat-deployment-6cf57d56dd-d4hnb            1/1     Running   0          36m
-    freq-deployment-6b8cfb6f65-b5h86                1/1     Running   0          36m
-    htadmin-deployment-5b74cff59f-c8z5p             1/1     Running   0          36m
-    keycloak-deployment-7c598dc6d-hbm5t             1/1     Running   0          36m
-    logstash-deployment-77cf7c557b-r9544            1/1     Running   0          36m
-    netbox-deployment-b6cdf69bc-bpx6c               1/1     Running   0          36m
-    nginx-proxy-deployment-76b56767c4-rnwk4         1/1     Running   0          36m
-    opensearch-deployment-796fdc9f48-r8qfl          1/1     Running   0          36m
-    pcap-capture-deployment-79cc46b569-gw6ts        1/1     Running   0          36m
-    pcap-monitor-deployment-69b6d9d857-dwz4b        1/1     Running   0          36m
-    postgres-deployment-f69649779-r5qss             1/1     Running   0          36m
-    redis-cache-deployment-7f94f49886-swclf         1/1     Running   0          36m
-    redis-deployment-6895f57c76-gbx9m               1/1     Running   0          36m
-    suricata-live-deployment-7d44967bfc-hzbj9       1/1     Running   0          36m
-    suricata-offline-deployment-85fb6b9b8b-z2cww    1/1     Running   0          36m
-    upload-deployment-7c9798cb7d-cxqwk              1/1     Running   0          36m
-    zeek-live-deployment-8c5b9b899-wsv2t            1/1     Running   0          36m
-    zeek-offline-deployment-5bbf797567-2zbq7        1/1     Running   0          36m
+    $ ./Malcolm/scripts/logs -f "${KUBECONFIG:-$HOME/.kube/config}"
     ```
 
-    * [Check](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/) all resources
-
+    * Using `kubectl`
+    
     ```bash
-    $ kubectl get all -n malcolm
+    $ kubectl logs --follow=true -n malcolm --all-containers <pod>
     ```
 
-    * Watch pod [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
-        * Using Malcolm's convenience script
+* Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
 
-        ```bash
-        $ ./Malcolm/scripts/logs -f "${KUBECONFIG:-$HOME/.kube/config}"
-        ```
+```bash
+$ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
+```
 
-        * Using `kubectl`
-        
-        ```bash
-        $ kubectl logs --follow=true -n malcolm --all-containers <pod>
-        ```
-
-    * Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
-
-    ```bash
-    $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
-    ```
+### <a name="AWSEKSAutoCleanup"></a>Cleanup
 
 * Stop Malcolm, providing the kubeconfig file as the `--file`/`-f` parameter. This will stop the pods and remove the resources running under the `malcolm` namespace.
 
