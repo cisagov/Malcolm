@@ -28,7 +28,7 @@ Although the configuration script automates many of the following configuration 
     - The following variables configure exposing [Arkime's WISE Plugin](https://arkime.com/wise). By default, Malcolm leverages the WISE plugin internally but does not expose the functionality to the end user:
         + `ARKIME_EXPOSE_WISE_GUI` - if set to `true` the WISE interface will be available at: `https://<MALCOLM-IP>/wiseService`. This defaults to `false`
         + `ARKIME_ALLOW_WISE_GUI_CONFIG` - if set to `true` the WISE interface can be used to configure the WISE service. This only applies if `ARKIME_EXPOSE_WISE_GUI` is set to `true`. The default value is `false`.
-        + `ARKIME_WISE_CONFIG_PIN_CODE` - the WISE service requires a configuration pint. This value will be required to save any WISE configuration changes.  The default value is `WISE2019`.
+        + `ARKIME_WISE_CONFIG_PIN_CODE` - the WISE service requires a configuration pin. This value will be required to save any WISE configuration changes.  The default value is `WISE2019`.
         + `ARKIME_WISE_SERVICE_URL` - to leverage WISE, arkime-capture needs to be provided a `wiseURL` value. The value of this environment variable is copied into the `wiseURL` value in arkime-live containers.
         + `WISE` - indicates if the WISE service is `on` or `off`. This environment variable defaults to `off`.
 * **`arkime-live.env`** - settings for live traffic capture with Arkime
