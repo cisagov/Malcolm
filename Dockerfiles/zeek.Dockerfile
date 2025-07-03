@@ -48,6 +48,7 @@ ENV CCACHE_COMPRESS 1
 # add script for downloading zeek and building 3rd-party plugins
 ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/iana_lookup_zeek_generator.py /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
@@ -105,6 +106,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-bs4 \
       python3-git \
       python3-pip \
+      python3-requests \
       python3-semantic-version \
       python3-setuptools \
       python3-tz \
@@ -140,6 +142,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
       touch "${ZEEK_DIR}"/share/zeek/site/custom/__load__.zeek && \
+    /usr/local/bin/iana_lookup_zeek_generator.py --output-file "${ZEEK_DIR}"/share/zeek/site/iana_service_map.txt && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \

@@ -10,12 +10,12 @@ type IANA_Key: record {
 
 type IANA_Value: record {
   name: string;
-  category: string;
+  description: string;
 };
 
 redef record Known::ServicesInfo += {
   iana_name: string &optional &log;
-  iana_category: string &optional &log;
+  iana_description: string &optional &log;
 };
 
 redef enum Log::ID += { IANA_SERVICE_LOG };
@@ -63,7 +63,7 @@ event Known::log_known_services(rec: Known::ServicesInfo) {
       if ([proto, dport] in iana_lookup) {
         local svc = iana_lookup[proto, dport];
         r$iana_name = svc$name;
-        r$iana_category = svc$category;
+        r$iana_description = svc$description;
       }
     }
 

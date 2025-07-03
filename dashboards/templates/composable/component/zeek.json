@@ -764,7 +764,7 @@
                 "iana_name": {
                   "type": "keyword"
                 },
-                "iana_category": {
+                "iana_description": {
                   "type": "keyword"
                 }
               }

@@ -1753,7 +1753,7 @@ class MalcolmSource extends WISESource {
       "zeek.known_routers.hlim",
       "zeek.known_routers.ttl",
       "zeek.known_services.iana_name",
-      "zeek.known_services.iana_category",
+      "zeek.known_services.iana_description",
       "zeek.ldap.argument",
       "zeek.ldap.message_id",
       "zeek.ldap.object",
