@@ -45,7 +45,7 @@ for FILE in /opt/zeek/var/lib/zkg/logs/*; do
 done
 
 # build IANA mapping list
-/opt/zeek/bin/iana_lookup_zeek_generator.py --output-file "${ZEEK_DIR}"/share/zeek/site/iana_service_map.txt
+/opt/zeek/bin/zeek_iana_lookup_generator.py --output-file "${ZEEK_DIR}"/share/zeek/site/iana_service_map.txt
 
 # cleanup/strip build artifacts
 find "${ZEEK_DIR}"/lib "${ZEEK_DIR}"/var/lib/zkg \( -path "*/build/*" -o -path "*/CMakeFiles/*" \) -type f -name "*.*" -print0 | xargs -0 -I XXX bash -c 'file "XXX" | sed "s/^.*:[[:space:]]//" | grep -Pq "(ELF|gzip)" && rm -f "XXX"'
