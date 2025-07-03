@@ -45,10 +45,10 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
-# add script for downloading zeek and building 3rd-party plugins
 ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
@@ -159,7 +159,6 @@ ADD --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
 ADD zeek/scripts /usr/local/bin
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
-ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
