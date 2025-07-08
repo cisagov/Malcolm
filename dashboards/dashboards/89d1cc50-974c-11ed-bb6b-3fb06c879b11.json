@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":36,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":8,\"y\":0,\"w\":7,\"h\":13,\"i\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\"},\"panelIndex\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_1\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":15,\"y\":0,\"w\":10,\"h\":13,\"i\":\"0e6e6304-a496-47fa-a8ad-f85a6bbcb9a0\"},\"panelIndex\":\"0e6e6304-a496-47fa-a8ad-f85a6bbcb9a0\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_2\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":25,\"y\":0,\"w\":23,\"h\":13,\"i\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\"},\"panelIndex\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"embeddableConfig\":{\"hidePanelTitles\":true},\"panelRefName\":\"panel_3\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":8,\"y\":13,\"w\":17,\"h\":23,\"i\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\"},\"panelIndex\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":25,\"y\":13,\"w\":23,\"h\":23,\"i\":\"31b95677-e589-42d4-b946-d08cc170ceca\"},\"panelIndex\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":36,\"w\":24,\"h\":18,\"i\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\"},\"panelIndex\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":24,\"y\":36,\"w\":24,\"h\":18,\"i\":\"33f27d2e-207b-447c-a925-a64ae65357b5\"},\"panelIndex\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":6,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":54,\"w\":48,\"h\":25,\"i\":\"75056b07-5eba-4c6a-a808-dc7d9d5c4837\"},\"panelIndex\":\"75056b07-5eba-4c6a-a808-dc7d9d5c4837\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":79,\"w\":48,\"h\":23,\"i\":\"6ed14ebf-beeb-4d28-a8db-6ee651ba036a\"},\"panelIndex\":\"6ed14ebf-beeb-4d28-a8db-6ee651ba036a\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":8,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_9\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":102,\"w\":48,\"h\":29,\"i\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\"},\"panelIndex\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":131,\"w\":48,\"h\":29,\"i\":\"9d58f954-a73a-46c7-8459-120e883d3a42\"},\"panelIndex\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":160,\"w\":48,\"h\":25,\"i\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\"},\"panelIndex\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":37,\"i\":\"1\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"w\":7,\"x\":8,\"y\":0},\"panelIndex\":\"61e64e16-4bdf-4f7d-90ad-e2f7b7cae4d7\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"hidePanelTitles\":true,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":13,\"i\":\"0e6e6304-a496-47fa-a8ad-f85a6bbcb9a0\",\"w\":10,\"x\":15,\"y\":0},\"panelIndex\":\"0e6e6304-a496-47fa-a8ad-f85a6bbcb9a0\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"hidePanelTitles\":true},\"gridData\":{\"h\":13,\"i\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"w\":23,\"x\":25,\"y\":0},\"panelIndex\":\"7c109ebd-18d8-44d3-8f8c-042af7e71346\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":24,\"i\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"w\":9,\"x\":8,\"y\":13},\"panelIndex\":\"9a582ebb-edcf-45cc-9eac-f9933fe75965\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":4,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":4,\"direction\":\"desc\"}}},\"gridData\":{\"h\":24,\"i\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"w\":16,\"x\":17,\"y\":13},\"panelIndex\":\"31b95677-e589-42d4-b946-d08cc170ceca\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"3abb7fe5-1e2f-4a5b-bfd6-ba8752b626d1\",\"w\":15,\"x\":33,\"y\":13},\"panelIndex\":\"3abb7fe5-1e2f-4a5b-bfd6-ba8752b626d1\",\"title\":\"IANA Service Name and Transport Protocol Port Number Registry\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":18,\"i\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"w\":24,\"x\":0,\"y\":37},\"panelIndex\":\"ecdae1f4-3322-4bc5-bc46-96609856da17\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":6,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"w\":24,\"x\":24,\"y\":37},\"panelIndex\":\"33f27d2e-207b-447c-a925-a64ae65357b5\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":25,\"i\":\"75056b07-5eba-4c6a-a808-dc7d9d5c4837\",\"w\":48,\"x\":0,\"y\":55},\"panelIndex\":\"75056b07-5eba-4c6a-a808-dc7d9d5c4837\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":5,\"direction\":\"asc\"}},\"sortColumn\":{\"colIndex\":8,\"direction\":\"desc\"}}},\"gridData\":{\"h\":23,\"i\":\"6ed14ebf-beeb-4d28-a8db-6ee651ba036a\",\"w\":48,\"x\":0,\"y\":80},\"panelIndex\":\"6ed14ebf-beeb-4d28-a8db-6ee651ba036a\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"w\":48,\"x\":0,\"y\":103},\"panelIndex\":\"60d311a3-e851-4ac2-9f70-5ccb319c0d6d\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"w\":48,\"x\":0,\"y\":132},\"panelIndex\":\"9d58f954-a73a-46c7-8459-120e883d3a42\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":25,\"i\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"w\":48,\"x\":0,\"y\":161},\"panelIndex\":\"45a72660-33ae-49c7-99b7-b422c0a54fdf\",\"version\":\"3.1.0\",\"panelRefName\":\"panel_13\"}]",
         "timeRestore": false,
         "title": "Zeek Known Summary",
         "version": 1
@@ -52,44 +52,49 @@
           "type": "visualization"
         },
         {
-          "id": "14498210-976b-11ed-9269-5fb94c2c7d47",
+          "id": "8adf7ea0-5c05-11f0-9e78-6d2de2dc6ae3",
           "name": "panel_6",
           "type": "visualization"
         },
         {
-          "id": "00e456e0-976c-11ed-9269-5fb94c2c7d47",
+          "id": "14498210-976b-11ed-9269-5fb94c2c7d47",
           "name": "panel_7",
           "type": "visualization"
         },
         {
-          "id": "4ec17cb0-08c8-11f0-b234-0fe1cd8ba12d",
+          "id": "00e456e0-976c-11ed-9269-5fb94c2c7d47",
           "name": "panel_8",
           "type": "visualization"
         },
         {
-          "id": "138c4330-9784-11ed-a26e-595ac55a6057",
+          "id": "4ec17cb0-08c8-11f0-b234-0fe1cd8ba12d",
           "name": "panel_9",
           "type": "visualization"
         },
         {
-          "id": "23f44e10-974e-11ed-bb6b-3fb06c879b11",
+          "id": "138c4330-9784-11ed-a26e-595ac55a6057",
           "name": "panel_10",
-          "type": "search"
+          "type": "visualization"
         },
         {
-          "id": "1cde3330-9752-11ed-bc48-97d8989caacc",
+          "id": "23f44e10-974e-11ed-bb6b-3fb06c879b11",
           "name": "panel_11",
           "type": "search"
         },
         {
-          "id": "8cfd2630-974d-11ed-bb6b-3fb06c879b11",
+          "id": "1cde3330-9752-11ed-bc48-97d8989caacc",
           "name": "panel_12",
+          "type": "search"
+        },
+        {
+          "id": "8cfd2630-974d-11ed-bb6b-3fb06c879b11",
+          "name": "panel_13",
           "type": "search"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-03-24T15:56:54.214Z",
-      "version": "WzEwOTEsMV0="
+      "updated_at": "2025-07-08T15:02:00.345Z",
+      "version": "WzExMTIsMV0="
     },
     {
       "attributes": {
@@ -111,8 +116,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:52.499Z",
-      "version": "WzEwNzYsMV0="
+      "updated_at": "2025-07-08T14:25:51.294Z",
+      "version": "WzEwOTAsMV0="
     },
     {
       "attributes": {
@@ -141,7 +146,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
+      "updated_at": "2025-07-08T14:25:03.714Z",
       "version": "WzU2NywxXQ=="
     },
     {
@@ -170,7 +175,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
+      "updated_at": "2025-07-08T14:25:03.714Z",
       "version": "WzU2OCwxXQ=="
     },
     {
@@ -200,7 +205,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
+      "updated_at": "2025-07-08T14:25:03.714Z",
       "version": "WzU2OSwxXQ=="
     },
     {
@@ -230,7 +235,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
+      "updated_at": "2025-07-08T14:25:03.714Z",
       "version": "WzU3MCwxXQ=="
     },
     {
@@ -260,8 +265,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
+      "updated_at": "2025-07-08T14:25:03.714Z",
       "version": "WzU3MSwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"zeek.known_services.iana_name:* OR zeek.known_services.iana_description:*\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "IANA Service Lookup",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":5,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"IANA Service Lookup\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"related.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IP\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.transport\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Transport\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.known_services.iana_name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"IANA Service Name\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.known_services.iana_description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":259,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"IANA Service Description\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "8adf7ea0-5c05-11f0-9e78-6d2de2dc6ae3",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "23f44e10-974e-11ed-bb6b-3fb06c879b11",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-07-08T15:01:53.005Z",
+      "version": "WzExMTEsMV0="
     },
     {
       "attributes": {
@@ -290,8 +325,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3MiwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3MywxXQ=="
     },
     {
       "attributes": {
@@ -320,8 +355,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3MywxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3NCwxXQ=="
     },
     {
       "attributes": {
@@ -349,8 +384,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:56:12.634Z",
-      "version": "WzEwOTAsMV0="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3NSwxXQ=="
     },
     {
       "attributes": {
@@ -379,8 +414,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3NCwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3NiwxXQ=="
     },
     {
       "attributes": {
@@ -391,6 +426,8 @@
           "related.device_name",
           "related.ip",
           "destination.port",
+          "zeek.known_services.iana_name",
+          "zeek.known_services.iana_description",
           "related.role",
           "related.manufacturer",
           "related.device_type",
@@ -421,8 +458,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3NiwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3NywxXQ=="
     },
     {
       "attributes": {
@@ -462,8 +499,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3NywxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3OCwxXQ=="
     },
     {
       "attributes": {
@@ -500,8 +537,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3OCwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU3OSwxXQ=="
     },
     {
       "attributes": {
@@ -540,8 +577,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU3OSwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU4MCwxXQ=="
     },
     {
       "attributes": {
@@ -581,9 +618,9 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-03-24T15:43:06.244Z",
-      "version": "WzU4MCwxXQ=="
+      "updated_at": "2025-07-08T14:25:03.714Z",
+      "version": "WzU4MSwxXQ=="
     }
   ],
-  "version": "2.19.1"
+  "version": "3.1.0"
 }
