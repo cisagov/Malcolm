@@ -47,15 +47,6 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   fi
   [[ -z "${NODE_COUNT}" ]] && NODE_COUNT=1
 
-  # start and wait patiently for WISE
-  if [[ "$WISE" = "on" ]] ; then
-    touch /var/run/arkime/runwise
-    echo "Giving WISE time to start..."
-    sleep 5
-    until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
-    echo "WISE is running!"
-    echo
-  fi
 
   DB_INIT_ARGS=()
   if [[ -n "${ARKIME_INIT_SHARDS}" ]]; then
@@ -135,6 +126,16 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded "${DB_INIT_ARGS[@]}"
     echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
   fi # if/else OpenSearch database initialized
+
+  # start and wait patiently for WISE
+  if [[ "$WISE" = "on" ]] ; then
+    touch /var/run/arkime/runwise
+    echo "Giving WISE time to start..."
+    sleep 5
+    until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
+    echo "WISE is running!"
+    echo
+  fi
 
   # before running viewer, call _refresh to make sure everything is available for search first
   curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
