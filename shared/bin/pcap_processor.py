@@ -93,7 +93,6 @@ pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
-scriptPid = os.getpid()
 origPath = os.getcwd()
 shuttingDown = False
 workersCount = AtomicInt(value=0)
@@ -119,7 +118,7 @@ def pdb_handler(sig, frame):
 def arkimeCaptureFileWorker(arkimeWorkerArgs):
     global workersCount
 
-    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
@@ -239,7 +238,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 def zeekFileWorker(zeekWorkerArgs):
     global workersCount
 
-    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
@@ -383,7 +382,7 @@ def zeekFileWorker(zeekWorkerArgs):
 def suricataFileWorker(suricataWorkerArgs):
     global workersCount
 
-    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
+    workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
