@@ -137,7 +137,8 @@ Although the configuration script automates many of the following configuration 
 * **`ssl.env`** - TLS-related settings used by many containers
 * **`suricata.env`**, **`suricata-live.env`** and **`suricata-offline.env`** - settings for [Suricata](https://suricata.io/)
     - `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
-    - `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
+    - `SURICATA_AUTO_ANALYZE_PCAP_PROCESSES` – the number of processes available to Malcolm for processing PCAP files with Suricata (default `1`)
+    - `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads to use per Suricata process (default `0`, meaning Suricata will use its default behavior)
     - `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only [user-defined rules](custom-rules.md#Suricata) (`./suricata/rules/*.rules`).
     - `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
     - `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`
