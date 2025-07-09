@@ -62,9 +62,9 @@ spec:
           - mountPath: "/zeek/extract_files"
             name: zeek-live-zeek-volume
             subPath: "extract_files"
-          - mountPath: "/zeek/upload"
+          - mountPath: "/zeek/live"
             name: zeek-live-zeek-volume
-            subPath: "upload"
+            subPath: "live"
           - mountPath: "/opt/zeek/share/zeek/site/custom/configmap"
             name: zeek-live-custom-volume
           - mountPath: "/opt/zeek/share/zeek/site/intel-preseed/configmap"
@@ -90,7 +90,7 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/config:zeek/intel/Mandiant,zeek/intel/MISP,zeek/intel/STIX;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
+            value: "/data/config:zeek/intel/Mandiant,zeek/intel/MISP,zeek/intel/STIX;/data/zeek-logs:extract_files/preserved,extract_files/quarantine,live"
         volumeMounts:
           - name: zeek-live-intel-volume
             mountPath: "/data/config"
