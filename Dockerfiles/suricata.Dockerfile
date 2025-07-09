@@ -118,8 +118,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       usermod -a -G tty ${PUSER} && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_suricata_processor.py && \
         (echo "0 */6 * * * /bin/bash /usr/local/bin/suricata-update-rules.sh\n" > ${SUPERCRONIC_CRONTAB}) && \
-    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
-        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" && \
+    mkdir -p "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" /etc/supervisor.d && \
+        chown -R ${PUSER}:${PGROUP} "$SURICATA_CUSTOM_RULES_DIR" "$SURICATA_DEFAULT_RULES_DIR" "$SURICATA_CONFIG_DIR" "$SURICATA_CUSTOM_CONFIG_DIR" /etc/supervisor.d && \
     cp "$(dpkg -L suricata-update | grep 'update\.yaml$' | head -n 1)" \
         "$SURICATA_UPDATE_CONFIG_FILE" && \
     suricata-update update-sources --verbose --data-dir "$SURICATA_MANAGED_DIR" --config "$SURICATA_UPDATE_CONFIG_FILE" --suricata-conf "$SURICATA_CONFIG_FILE" && \
@@ -135,6 +135,7 @@ ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/suricata_socket.py /usr/local/bin/
 ADD --chmod=644 suricata/supervisord.conf /etc/supervisord.conf
+ADD --chmod=644 suricata/supervisor-templates/*.template /etc/supervisor.d/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/
@@ -150,7 +151,8 @@ ARG SURICATA_PCAP_PROCESSOR=true
 ARG SURICATA_CRON=true
 ARG SURICATA_AUTO_ANALYZE_PCAP_FILES=false
 ARG SURICATA_CUSTOM_RULES_ONLY=false
-ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=1
+ARG SURICATA_AUTO_ANALYZE_PCAP_PROCESSES=1
+ARG SURICATA_AUTO_ANALYZE_PCAP_THREADS=0
 ARG SURICATA_UPDATE_RULES=false
 ARG SURICATA_UPDATE_DEBUG=false
 ARG SURICATA_UPDATE_ETOPEN=true
@@ -169,6 +171,7 @@ ENV AUTO_TAG $AUTO_TAG
 ENV SURICATA_PCAP_PROCESSOR $SURICATA_PCAP_PROCESSOR
 ENV SURICATA_CRON $SURICATA_CRON
 ENV SURICATA_AUTO_ANALYZE_PCAP_FILES $SURICATA_AUTO_ANALYZE_PCAP_FILES
+ENV SURICATA_AUTO_ANALYZE_PCAP_PROCESSES $SURICATA_AUTO_ANALYZE_PCAP_PROCESSES
 ENV SURICATA_AUTO_ANALYZE_PCAP_THREADS $SURICATA_AUTO_ANALYZE_PCAP_THREADS
 ENV SURICATA_CUSTOM_RULES_ONLY $SURICATA_CUSTOM_RULES_ONLY
 ENV SURICATA_UPDATE_RULES $SURICATA_UPDATE_RULES
@@ -191,7 +194,7 @@ ENV PCAP_PROCESSED_DIRECTORY $PCAP_PROCESSED_DIRECTORY
 #   where I've put this workaround) in this case the PUSER_CHOWN was
 #   already being set like this, so even if I resolve that issue
 #   I probably don't want to remove this.
-ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_CUSTOM_RULES_DIR;$SURICATA_CUSTOM_CONFIG_DIR;$SURICATA_LOG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_RUN_DIR"
+ENV PUSER_CHOWN "$SURICATA_CONFIG_DIR;$SURICATA_CUSTOM_RULES_DIR;$SURICATA_CUSTOM_CONFIG_DIR;$SURICATA_LOG_DIR;$SURICATA_MANAGED_DIR;$SURICATA_RUN_DIR;/etc/supervisor.d"
 
 # see PUSER_CHOWN comment above
 VOLUME ["$SURICATA_CONFIG_DIR"]

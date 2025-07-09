@@ -1,0 +1,19 @@
+[program:socket-suricata-$INSTANCEID]
+command=/usr/bin/suricata-offline
+  -v
+  -c "%(ENV_SURICATA_CONFIG_FILE)s"
+  -l "%(ENV_SURICATA_LOG_DIR)s/socket-$INSTANCEID"
+  --unix-socket="%(ENV_SURICATA_RUN_DIR)s/suricata-command-$INSTANCEID.socket"
+  --set unix-command.enabled=true
+directory=%(ENV_SURICATA_RUN_DIR)s
+autostart=%(ENV_SURICATA_PCAP_PROCESSOR)s
+autorestart=%(ENV_SURICATA_PCAP_PROCESSOR)s
+startsecs=15
+stopwaitsecs=15
+startretries=3
+stopasgroup=true
+killasgroup=true
+stdout_logfile=/dev/fd/1
+stdout_logfile_maxbytes=0
+redirect_stderr=true
+user=%(ENV_PUSER)s

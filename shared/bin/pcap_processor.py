@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import argparse
+import glob
 import json
 import logging
 import os
@@ -56,7 +57,7 @@ PCAP_PROCESSING_MODE_SURICATA = "suricata"
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
-SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command.socket"
+SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command-1.socket"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
 SURICATA_LOG_PATH = os.path.join(SURICATA_LOG_DIR, 'suricata.log')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
@@ -446,6 +447,9 @@ def suricataFileWorker(suricataWorkerArgs):
     suricata = None
     processFailures = 0
 
+    # TODO: will this exist at this point? I should probably re-evaluate the list periodically?
+    socketPaths = sorted([f for f in glob.glob(socketPath) if os.path.isfile(f)])
+
     # loop forever, or until we're told to shut down
     while not shuttingDown:
         if suricata:
@@ -750,7 +754,7 @@ def main():
             '--suricata',
             required=False,
             dest='suricataSocketPath',
-            help="suricata socket path",
+            help="suricata socket path (accepts wildcards)",
             metavar='<STR>',
             type=str,
             default=SURICATA_SOCKET_PATH,
