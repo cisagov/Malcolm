@@ -468,6 +468,12 @@ services:
     - type: bind
       bind:
         create_host_path: false
+      source: ./arkime/etc/wise.ini
+      target: /opt/arkime/wiseini/wise.ini
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
       source: ./pcap
       target: /data/pcap
     healthcheck:
