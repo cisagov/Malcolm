@@ -93,6 +93,7 @@ pdbFlagged = False
 args = None
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
+scriptPid = os.getpid()
 origPath = os.getcwd()
 shuttingDown = False
 workersCount = AtomicInt(value=0)
@@ -116,12 +117,9 @@ def pdb_handler(sig, frame):
 
 ###################################################################################################
 def arkimeCaptureFileWorker(arkimeWorkerArgs):
-    global shuttingDown
     global workersCount
-    global arkimeProvider
-    global arkimeDataset
 
-    workerId = workersCount.increment()  # unique ID for this thread
+    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
 
     (
         newFileQueue,
@@ -239,10 +237,9 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
 ###################################################################################################
 def zeekFileWorker(zeekWorkerArgs):
-    global shuttingDown
     global workersCount
 
-    workerId = workersCount.increment()  # unique ID for this thread
+    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
 
     (
         newFileQueue,
@@ -384,10 +381,9 @@ def zeekFileWorker(zeekWorkerArgs):
 
 ###################################################################################################
 def suricataFileWorker(suricataWorkerArgs):
-    global shuttingDown
     global workersCount
 
-    workerId = workersCount.increment()  # unique ID for this thread
+    workerId = f"{scriptPid}-{workersCount.increment()}"  # unique ID for this thread
 
     (
         newFileQueue,
@@ -570,7 +566,6 @@ def main():
 
     global args
     global pdbFlagged
-    global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
     parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
