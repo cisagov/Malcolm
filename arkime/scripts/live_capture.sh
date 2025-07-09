@@ -8,7 +8,7 @@ KEY_FILE="${ARKIME_DIR}"/etc/viewer.key
 PUSER=${PUSER:-"arkime"}
 PGROUP=${PGROUP:-"arkime"}
 WISE=${WISE:-"off"}
-WISE_URL=${ARKIME_WISE_SERVICE_URL:-"https://user:password@arkime:8081"}
+WISE_URL=${ARKIME_WISE_SERVICE_URL:-"http://arkime:8081"}
 ARKIME_CONFIG_FILE="${ARKIME_DIR}"/etc/config.ini
 
 
