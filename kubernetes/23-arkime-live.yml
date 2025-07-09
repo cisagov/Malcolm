@@ -75,6 +75,10 @@ spec:
             name: arkime-live-rules-volume
           - mountPath: "/data/pcap"
             name: arkime-live-pcap-volume
+          - mountPath: "/opt/arkime/wiseini"
+            name: arkime-live-config-volume
+            subPath: "arkime/wiseini"
+            readOnly: true
       initContainers:
       - name: arkime-live-dirinit-container
         image: ghcr.io/idaholab/malcolm/dirinit:25.07.0
@@ -113,3 +117,6 @@ spec:
         - name: arkime-live-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: arkime-live-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim

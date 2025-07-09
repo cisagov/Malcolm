@@ -10,6 +10,9 @@ spec:
     - port: 8005
       protocol: TCP
       name: http
+    - port: 8081
+      protocol: TCP
+      name: wise
   selector:
     app: arkime
 
