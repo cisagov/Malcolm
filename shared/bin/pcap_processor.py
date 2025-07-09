@@ -475,9 +475,11 @@ def suricataFileWorker(suricataWorkerArgs):
                             logger.info(
                                 f"{scriptName}[{workerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
                             )
-                            # TODO: INTELLIGENTLY choose the suricata client to process this (round robin or least busy), for now I'm just choosing the first
-                            if suricataInstance := next(
-                                ((k, v) for k, v in suricataClients.items() if v is not None), None
+                            # choose the least-busy suricata client to process this
+                            if suricataInstance := min(
+                                ((k, v) for k, v in suricataClients.items() if v is not None),
+                                key=lambda item: item[1].queue_size(),
+                                default=None,
                             ):
                                 if suricataInstance[1].process_pcap(
                                     pcap_file=fileInfo[FILE_INFO_DICT_NAME],
