@@ -96,8 +96,9 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     done
 
     # TODO: until Arkime v6.0.0 is out, as per Andy Wick and I's discussion in slack, at the moment not all of the Arkime permissions can be set on roles,
-    #   so creating these doesn't really do us any good. For now, then, Arkime roles are going to be handled purely based on URI path in the NGINX stuff
-    #   (nginx/lua/nginx_auth_helpers.lua). Once all of these permissions are settable at the role level in Arkime, we can uncomment this and revisit it.
+    #   so creating these doesn't really do us any good. For now, then, Arkime roles (the user-defined ones, at least, the ones that start with role: below)
+    #   are going to be handled purely based on URI path in the NGINX stuff (nginx/lua/nginx_auth_helpers.lua).
+    #   Once all of these permissions are settable at the role level in Arkime, we can uncomment those and revisit it.
     # -SG 2025.06.17
     # echo "Creating user-defined roles..."
     # for ROLE_FILE in "$ARKIME_DIR"/etc/roles/*.json; do
