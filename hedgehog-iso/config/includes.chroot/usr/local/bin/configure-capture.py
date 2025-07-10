@@ -937,7 +937,7 @@ def main():
                     if code != Dialog.OK:
                         arkime_wise_service_enabled = "true"
 
-                    default_wise_url = previous_config_values[Constants.BEAT_OS_HOST] + "/wiseService"
+                    default_wise_url = previous_config_values[Constants.BEAT_OS_HOST] + "/wise"
                     if arkime_wise_service_enabled:
                         code, wise_url = d.inputbox(Constants.MSG_CONFIG_ARKIME_WISE_SERVICE_URL, init=default_wise_url)
                         if code == Dialog.CANCEL or code == Dialog.ESC:
