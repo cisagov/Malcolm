@@ -3366,8 +3366,8 @@ exports.initSource = function (api) {
   api.addSourceConfigDef('malcolm', {
     singleton: true,
     name: 'malcolm',
-    description: 'Log fields for Arkime as part of Malcolm',
-    link: 'https://github.com/idaholab/malcolm',
+    description: 'Defines Malcolm data source fields in Arkime',
+    link: 'https://idaholab.github.io/Malcolm',
     types: [],
     cacheable: false,
     displayable: true,

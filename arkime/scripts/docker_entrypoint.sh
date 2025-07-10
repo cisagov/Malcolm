@@ -210,12 +210,13 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     #   - https://arkime.com/settings#user-role-mappings
     #   - https://arkime.com/roles
     # TODO: until Arkime v6.0.0 is out, as per Andy Wick and I's discussion in slack, at the moment not all of the Arkime permissions can be set on roles,
-    #   so creating these doesn't really do us any good. For now, then, Arkime roles are going to be handled purely based on URI path in the NGINX stuff
-    #   (nginx/lua/nginx_auth_helpers.lua). Once all of these permissions are settable at the role level in Arkime, we can uncomment this and revisit it.
+    #   so creating these doesn't really do us any good. For now, then, Arkime roles (the user-defined ones, at least, the ones that start with role: below)
+    #   are going to be handled purely based on URI path in the NGINX stuff (nginx/lua/nginx_auth_helpers.lua).
+    #   Once all of these permissions are settable at the role level in Arkime, we can uncomment those and revisit it.
     # -SG 2025.06.17
-    # RBAC_FILE="$(mktemp)"
-    # CONFIG_RBAC_FILE="$(mktemp)"
-    # echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
+    RBAC_FILE="$(mktemp)"
+    CONFIG_RBAC_FILE="$(mktemp)"
+    echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
     # if [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
     #   echo "arkimeUser=true" >> "${RBAC_FILE}"
     #   [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
@@ -235,21 +236,27 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     # else
     #   echo "arkimeAdmin=true" >> "${RBAC_FILE}"
     # fi
-    # echo -e "\n" >> "${RBAC_FILE}"
-    # awk '
-    #     FNR==NR { insert_lines[NR] = $0; insert_count = NR; next }
-    #     /^\[custom-fields\]/ && !inserted {
-    #         for (i = 1; i <= insert_count; i++) print insert_lines[i]
-    #         inserted = 1
-    #     }
-    #     { print }
-    #     END {
-    #         if (!inserted) {
-    #             for (i = 1; i <= insert_count; i++) print insert_lines[i]
-    #         }
-    #     }
-    # ' "${RBAC_FILE}" "${ARKIME_CONFIG_FILE}" > "${CONFIG_RBAC_FILE}" && mv "${CONFIG_RBAC_FILE}" "${ARKIME_CONFIG_FILE}"
-    # rm -f "${RBAC_FILE}" "${CONFIG_RBAC_FILE}"
+    # TODO: in the meantime, until I can get the above to work, we're basically giving all users all privs at the Arkime level, but do not fear:
+    #   RBAC will still be enforced at the NGINX level based on URIs.
+    echo "arkimeUser=true" >> "${RBAC_FILE}"
+    echo "arkimeAdmin=true" >> "${RBAC_FILE}"
+    echo "wiseUser=true" >> "${RBAC_FILE}"
+    echo "wiseAdmin=true" >> "${RBAC_FILE}"
+    echo -e "\n" >> "${RBAC_FILE}"
+    awk '
+        FNR==NR { insert_lines[NR] = $0; insert_count = NR; next }
+        /^\[custom-fields\]/ && !inserted {
+            for (i = 1; i <= insert_count; i++) print insert_lines[i]
+            inserted = 1
+        }
+        { print }
+        END {
+            if (!inserted) {
+                for (i = 1; i <= insert_count; i++) print insert_lines[i]
+            }
+        }
+    ' "${RBAC_FILE}" "${ARKIME_CONFIG_FILE}" > "${CONFIG_RBAC_FILE}" && mv "${CONFIG_RBAC_FILE}" "${ARKIME_CONFIG_FILE}"
+    rm -f "${RBAC_FILE}" "${CONFIG_RBAC_FILE}"
 
     # make sure permissions and ownership are nice
     chmod 600 "${ARKIME_CONFIG_FILE}" || true
