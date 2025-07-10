@@ -31,7 +31,7 @@ config:
           type: proxy
           challenge: false
           config:
-            user_header: "X-Remote-Auth"
+            user_header: "X-Forwarded-User"
             roles_header: "X-Forwarded-Roles"
         authentication_backend:
           type: noop
