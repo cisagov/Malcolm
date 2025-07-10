@@ -217,31 +217,25 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
     RBAC_FILE="$(mktemp)"
     CONFIG_RBAC_FILE="$(mktemp)"
     echo -e "\n[user-role-mappings]" >> "${RBAC_FILE}"
-    # if [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
-    #   echo "arkimeUser=true" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
-    #     echo "arkimeAdmin=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_READ_ACCESS" ]]  && \
-    #     echo "role:read_access=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_ACCESS')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_READ_WRITE_ACCESS" ]]  && \
-    #     echo "role:read_write_access=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_WRITE_ACCESS')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_PCAP_ACCESS" ]]  && \
-    #   echo "role:pcap_access=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_PCAP_ACCESS')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_HUNT_ACCESS" ]]  && \
-    #   echo "role:hunt_access=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_HUNT_ACCESS')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_WISE_READ_ACCESS" ]]  && \
-    #     echo "wiseUser=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_ACCESS')" >> "${RBAC_FILE}"
-    #   [[ -n "$ROLE_ARKIME_WISE_READ_WRITE_ACCESS" ]]  && \
-    #     echo "wiseAdmin=(vals['X-Forwarded-Roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_WRITE_ACCESS')" >> "${RBAC_FILE}"
-    # else
-    #   echo "arkimeAdmin=true" >> "${RBAC_FILE}"
-    # fi
-    # TODO: in the meantime, until I can get the above to work, we're basically giving all users all privs at the Arkime level, but do not fear:
-    #   RBAC will still be enforced at the NGINX level based on URIs.
-    echo "arkimeUser=true" >> "${RBAC_FILE}"
-    echo "arkimeAdmin=true" >> "${RBAC_FILE}"
-    echo "wiseUser=true" >> "${RBAC_FILE}"
-    echo "wiseAdmin=true" >> "${RBAC_FILE}"
+    if [[ "${ROLE_BASED_ACCESS,,}" =~ ^(1|true|yes|on)$ ]]; then
+      echo "arkimeUser=true" >> "${RBAC_FILE}"
+      [[ -n "$ROLE_ARKIME_ADMIN" ]] && \
+        echo "arkimeAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_ADMIN')" >> "${RBAC_FILE}"
+      # [[ -n "$ROLE_ARKIME_READ_ACCESS" ]]  && \
+      #   echo "role:read_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_ACCESS')" >> "${RBAC_FILE}"
+      # [[ -n "$ROLE_ARKIME_READ_WRITE_ACCESS" ]]  && \
+      #   echo "role:read_write_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_READ_WRITE_ACCESS')" >> "${RBAC_FILE}"
+      # [[ -n "$ROLE_ARKIME_PCAP_ACCESS" ]]  && \
+      #   echo "role:pcap_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_PCAP_ACCESS')" >> "${RBAC_FILE}"
+      # [[ -n "$ROLE_ARKIME_HUNT_ACCESS" ]]  && \
+      #   echo "role:hunt_access=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_HUNT_ACCESS')" >> "${RBAC_FILE}"
+      [[ -n "$ROLE_ARKIME_WISE_READ_ACCESS" ]]  && \
+        echo "wiseUser=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_ACCESS')" >> "${RBAC_FILE}"
+      [[ -n "$ROLE_ARKIME_WISE_READ_WRITE_ACCESS" ]]  && \
+        echo "wiseAdmin=(vals['x-forwarded-roles'] || '').split(',').map(s => s.trim()).includes('$ROLE_ARKIME_WISE_READ_WRITE_ACCESS')" >> "${RBAC_FILE}"
+    else
+      echo "arkimeAdmin=true" >> "${RBAC_FILE}"
+    fi
     echo -e "\n" >> "${RBAC_FILE}"
     awk '
         FNR==NR { insert_lines[NR] = $0; insert_count = NR; next }

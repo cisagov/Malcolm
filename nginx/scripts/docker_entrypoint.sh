@@ -79,8 +79,9 @@ NGINX_OPENSEARCH_API_LINK=${NGINX_CONF_DIR}/nginx_opensearch_api_rt.conf
 NGINX_OPENSEARCH_API_CONF=${NGINX_CONF_DIR}/nginx_opensearch_api.conf
 NGINX_OPENSEARCH_API_501_CONF=${NGINX_CONF_DIR}/nginx_opensearch_api_501.conf
 
-# runtime "include" file for opensearch endpoint auth method (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, or NGINX_NO_AUTH_CONF)
-NGINX_RUNTIME_AUTH_OPENSEARCH_LINK=${NGINX_CONF_DIR}/nginx_auth_opensearch_rt.conf
+# runtime "include" file for endpoints for service accounts that have to use a simpler auth method
+#   (link to NGINX_BASIC_AUTH_CONF, NGINX_LDAP_AUTH_CONF, or NGINX_NO_AUTH_CONF)
+NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK=${NGINX_CONF_DIR}/nginx_auth_service_acct_rt.conf
 
 # runtime "include" file for ldap config (link to either NGINX_BLANK_CONF or (possibly modified) NGINX_LDAP_USER_CONF)
 NGINX_RUNTIME_LDAP_LINK=${NGINX_CONF_DIR}/nginx_ldap_rt.conf
@@ -228,7 +229,7 @@ if [[ -z $NGINX_AUTH_MODE ]] || [[ "$NGINX_AUTH_MODE" == "basic" ]] || [[ "$NGIN
 
   # point nginx_auth_rt.conf to nginx_auth_basic.conf
   ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
-  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
 
   # ldap configuration is empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
@@ -246,7 +247,7 @@ elif [[ "$NGINX_AUTH_MODE" == "no_authentication" ]] || [[ "$NGINX_AUTH_MODE" ==
 
   # point nginx_auth_rt.conf to nginx_auth_disabled.conf
   ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
-  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  ln -sf "$NGINX_NO_AUTH_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
 
   # ldap configuration is empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_RUNTIME_LDAP_LINK"
@@ -263,13 +264,13 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak_remote" ]]; then
   # point nginx_auth_rt.conf to nginx_auth_keycloak.conf
   ln -sf "$NGINX_KEYCLOAK_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
 
-  # TODO: we can't yet handle proxying client API requests to the opensearch
-  #   endpoint with Keycloak so we have to use basic for now
+  # TODO: we can't yet handle proxying client API requests to some endpoints
+  #   with Keycloak so we have to use basic for now
   if [[ "${NGINX_KEYCLOAK_BASIC_AUTH:-false}" == "true" ]]; then
     # experimental
-    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
   else
-    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
   fi
 
   # ldap configuration is empty
@@ -289,13 +290,13 @@ elif [[ "$NGINX_AUTH_MODE" == "keycloak" ]]; then
   # point nginx_auth_rt.conf to nginx_auth_keycloak.conf
   ln -sf "$NGINX_KEYCLOAK_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
 
-  # TODO: we can't yet handle proxying client API requests to the opensearch
-  #   endpoint with Keycloak so we have to use basic for now
+  # TODO: we can't yet handle proxying client API requests to some endpoints
+  #   with Keycloak so we have to use basic for now
   if [[ "${NGINX_KEYCLOAK_BASIC_AUTH:-false}" == "true" ]]; then
     # experimental
-    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+    ln -sf "$NGINX_KEYCLOAK_AUTH_BASIC_TRANSLATE_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
   else
-    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+    ln -sf "$NGINX_BASIC_AUTH_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
   fi
 
   # ldap configuration is empty
@@ -314,7 +315,7 @@ elif [[ "$NGINX_AUTH_MODE" == "ldap" ]] || [[ "$NGINX_AUTH_MODE" == "false" ]]; 
 
   # point nginx_auth_rt.conf to nginx_auth_ldap.conf
   ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_LINK"
-  ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_OPENSEARCH_LINK"
+  ln -sf "$NGINX_LDAP_AUTH_CONF" "$NGINX_RUNTIME_AUTH_SERVICE_ACCT_LINK"
 
   # /auth and /keycloak locations are empty
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_AUTH_LOCATION_LINK"
