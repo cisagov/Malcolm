@@ -83,14 +83,27 @@ while true ; do
 
           # re-check disk capacity
           USAGE_PCT=$(df -k . 2>/dev/null | awk '{gsub("%",""); capacity=$5}; END {print capacity}')
-          USAGE_GB=$(du -sb . 2>/dev/null | awk '{printf "%.0f\n", $1/1000/1000/1000}')
-          if ( (( $THRESHOLD_PCT > 0 )) && (( $USAGE_PCT > $THRESHOLD_PCT )) ) || ( (( $MAXSIZE_GB > 0 )) && (( $USAGE_GB > $MAXSIZE_GB )) ); then
-            # we still exceed the threshold, continue to loop
-            [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
+          if ( (( THRESHOLD_PCT > 0 )) && (( USAGE_PCT > THRESHOLD_PCT )) ) ; then
+            # we still exceed the perdent threshold, continue to loop
+            [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity, pruning..." >&2
+            exceeds_pct=true
           else
-            # we're below the limit, break
-            [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB)" >&2
-            break
+            # we're below the percent limit, now check usage gigabyte limit.
+            [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity" >&2
+            exceeds_pct=false
+          fi
+
+          if ! $exceeds_pct; then
+              # Perform this expensive check only if needed.
+              USAGE_GB=$(du -sb . 2>/dev/null | awk '{printf "%.0f\n", $1/1000/1000/1000}')
+              if ( (( MAXSIZE_GB > 0 )) && (( USAGE_GB > MAXSIZE_GB )) ); then
+                # we still exceed the threshold, continue to loop
+                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB), pruning..." >&2
+              else
+                # we're below the gigabyte limit as well, break
+                [[ "$VERBOSE" == "1" ]] && echo "\"$PRUNE_PATH\" is at $USAGE_PCT% of capacity ($USAGE_GB GB)" >&2
+                break
+              fi
           fi
 
         fi # file was rm'ed
