@@ -29,7 +29,7 @@ suricataDir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/")
 suricataLiveDir = suricataDir + "live/"
 
 nowTime = time.time()
-logMimeTypeRegex = re.compile(r"(text/plain|application/(x-nd)?json)")
+logMimeTypeRegex = re.compile(r"(text/plain|text/x-file|application/(x-nd)?json)")
 archiveMimeTypeRegex = re.compile(
     r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)"
 )
