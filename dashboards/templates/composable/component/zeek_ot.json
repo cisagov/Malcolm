@@ -3372,9 +3372,6 @@
             },
             "opcua_binary": {
               "properties": {
-                "encoding_mask": {
-                  "type": "long"
-                },
                 "endpoint_url": {
                   "type": "keyword"
                 },
@@ -3382,12 +3379,6 @@
                   "type": "long"
                 },
                 "filter_source_link_id": {
-                  "type": "keyword"
-                },
-                "identifier": {
-                  "type": "long"
-                },
-                "identifier_str": {
                   "type": "keyword"
                 },
                 "is_final": {
@@ -3402,13 +3393,7 @@
                 "max_msg_size": {
                   "type": "long"
                 },
-                "msg_size": {
-                  "type": "long"
-                },
                 "msg_type": {
-                  "type": "keyword"
-                },
-                "namespace_idx": {
                   "type": "keyword"
                 },
                 "opcua_link_id": {
@@ -3489,17 +3474,11 @@
                 "sec_channel_id": {
                   "type": "long"
                 },
-                "sec_token_id": {
-                  "type": "long"
-                },
                 "sec_policy_uri": {
                   "type": "keyword"
                 },
                 "sec_policy_uri_len": {
                   "type": "integer"
-                },
-                "seq_number": {
-                  "type": "long"
                 },
                 "snd_buf_size": {
                   "type": "long"
@@ -3510,11 +3489,56 @@
                 "snd_cert_len": {
                   "type": "integer"
                 },
+                "total_size": {
+                  "type": "long"
+                },
                 "variant_source_link_id": {
                   "type": "keyword"
                 },
                 "version": {
                   "type": "long"
+                },
+                "req_opcua_link_id": {
+                  "type": "keyword"
+                },
+                "req_msg_size": {
+                  "type": "long"
+                },
+                "req_seq_number": {
+                  "type": "long"
+                },
+                "req_encoding_mask": {
+                  "type": "long"
+                },
+                "req_namespace_idx": {
+                  "type": "long"
+                },
+                "req_identifier": {
+                  "type": "long"
+                },
+                "req_identifier_str": {
+                  "type": "keyword"
+                },
+                "res_opcua_link_id": {
+                  "type": "keyword"
+                },
+                "res_msg_size": {
+                  "type": "long"
+                },
+                "res_seq_number": {
+                  "type": "long"
+                },
+                "res_encoding_mask": {
+                  "type": "long"
+                },
+                "res_namespace_idx": {
+                  "type": "long"
+                },
+                "res_identifier": {
+                  "type": "long"
+                },
+                "res_identifier_str": {
+                  "type": "keyword"
                 }
               }
             },
