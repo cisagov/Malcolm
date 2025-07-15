@@ -121,6 +121,7 @@ local uri_role_mappings = {
                                     "ROLE_ARKIME_READ_WRITE_ACCESS",
                                     "ROLE_ARKIME_PCAP_ACCESS",
                                     "ROLE_ARKIME_HUNT_ACCESS",
+                                    "ROLE_ARKIME_WISE_READ_ACCESS",
                                     "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" },
         { from = "ROLE_READ_ACCESS", to = { "ROLE_ARKIME_READ_ACCESS",
                                             "ROLE_ARKIME_PCAP_ACCESS",
@@ -128,6 +129,7 @@ local uri_role_mappings = {
         { from = "ROLE_READ_WRITE_ACCESS", to = { "ROLE_ARKIME_READ_WRITE_ACCESS",
                                                   "ROLE_ARKIME_PCAP_ACCESS",
                                                   "ROLE_ARKIME_HUNT_ACCESS",
+                                                  "ROLE_ARKIME_WISE_READ_ACCESS",
                                                   "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" } }
     },
     ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
