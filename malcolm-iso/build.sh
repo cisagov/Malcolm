@@ -113,6 +113,7 @@ if [ -d "$WORKDIR" ]; then
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
+  mkdir -p "$MALCOLM_DEST_DIR/arkime/etc/"
   mkdir -p "$MALCOLM_DEST_DIR/arkime/lua/"
   mkdir -p "$MALCOLM_DEST_DIR/arkime/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/config/"
@@ -172,6 +173,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./kubernetes/*.* "$MALCOLM_DEST_DIR/kubernetes/"
   grep -v "^#" ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$MALCOLM_DEST_DIR/kubernetes/XXX"
+  cp ./arkime/etc/wise.ini.example "$MALCOLM_DEST_DIR/arkime/etc/"
   cp ./arkime/rules/*.yml "$MALCOLM_DEST_DIR/arkime/rules/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
