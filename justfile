@@ -122,6 +122,7 @@ config:
     --live-capture-stats "$LIVE_CAPTURE_STATS" \
     --live-capture-netsniff "$LIVE_CAPTURE_NETSNIFF" \
     --live-capture-tcpdump "$LIVE_CAPTURE_TCPDUMP" \
+    --live-capture-arkime "$LIVE_CAPTURE_ARKIME" \
     --live-capture-zeek "$LIVE_CAPTURE_ZEEK" \
     --live-capture-suricata "$LIVE_CAPTURE_SURICATA"
 
