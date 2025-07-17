@@ -92,6 +92,7 @@ ZKG_GITHUB_URLS=(
   "https://github.com/amzn/zeek-plugin-tds|master"
   "https://github.com/cisagov/icsnpp-bacnet"
   "https://github.com/cisagov/icsnpp-bsap"
+  "https://github.com/cisagov/icsnpp-c1222"
   "https://github.com/cisagov/icsnpp-dnp3"
   "https://github.com/cisagov/icsnpp-enip"
   "https://github.com/cisagov/icsnpp-ethercat"
