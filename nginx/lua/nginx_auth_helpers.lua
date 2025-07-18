@@ -117,17 +117,19 @@ local path_role_envs = {
 --   define all the roles, but this is a convenient way to avoid duplication.
 local uri_role_mappings = {
     ["^/(arkime|iddash2ark|wise)"] = {
-        { from = "ROLE_ADMIN", to = "ROLE_ARKIME_ADMIN",
-                                    "ROLE_ARKIME_READ_WRITE_ACCESS",
-                                    "ROLE_ARKIME_PCAP_ACCESS",
-                                    "ROLE_ARKIME_HUNT_ACCESS",
-                                    "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" },
+        { from = "ROLE_ADMIN", to = { "ROLE_ARKIME_ADMIN",
+                                      "ROLE_ARKIME_READ_WRITE_ACCESS",
+                                      "ROLE_ARKIME_PCAP_ACCESS",
+                                      "ROLE_ARKIME_HUNT_ACCESS",
+                                      "ROLE_ARKIME_WISE_READ_ACCESS",
+                                      "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" } },
         { from = "ROLE_READ_ACCESS", to = { "ROLE_ARKIME_READ_ACCESS",
                                             "ROLE_ARKIME_PCAP_ACCESS",
                                             "ROLE_ARKIME_WISE_READ_ACCESS" } },
         { from = "ROLE_READ_WRITE_ACCESS", to = { "ROLE_ARKIME_READ_WRITE_ACCESS",
                                                   "ROLE_ARKIME_PCAP_ACCESS",
                                                   "ROLE_ARKIME_HUNT_ACCESS",
+                                                  "ROLE_ARKIME_WISE_READ_ACCESS",
                                                   "ROLE_ARKIME_WISE_READ_WRITE_ACCESS" } }
     },
     ["^/(dashboards/app/)?(hh-)?extracted-files"] = {
@@ -227,6 +229,7 @@ function _M.set_headers(username, token, groups, roles)
             for r, _ in pairs(role_set) do
                 table.insert(final_roles, r)
             end
+            ngx.log(ngx.DEBUG, "Final rules for user " .. username .. " (" .. request_uri .. ": " .. cjson.encode(final_roles))
             -- Set the header with the final expanded roles
             ngx.req.set_header("X-Forwarded-Roles", table.concat(final_roles, ","))
         else

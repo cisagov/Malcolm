@@ -66,6 +66,7 @@ if mkdir "$DESTDIR"; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
+  mkdir $VERBOSE -p "$DESTDIR/arkime/etc/"
   mkdir $VERBOSE -p "$DESTDIR/arkime/lua/"
   mkdir $VERBOSE -p "$DESTDIR/arkime/rules/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
@@ -112,6 +113,7 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/malcolm_kubernetes.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
   cp $VERBOSE ./README.md "$DESTDIR/"
+  cp $VERBOSE ./arkime/etc/wise.ini.example "$DESTDIR/arkime/etc/"
   cp $VERBOSE ./arkime/rules/*.yml "$DESTDIR/arkime/rules/"
   cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
