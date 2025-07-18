@@ -9,8 +9,8 @@ type IANA_Key: record {
 };
 
 type IANA_Value: record {
-  name: string;
-  description: string;
+  name: string &optional;
+  description: string &optional;
 };
 
 redef record Known::ServicesInfo += {
