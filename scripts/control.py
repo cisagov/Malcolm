@@ -420,9 +420,10 @@ def checkEnvFilesAndValues():
                         except Exception as e:
                             eprint(f'Error relocating "{src}" to "{dst}": {e}')
 
+
 ###################################################################################################
 # The Arkime wise service stores all information in  .ini file.
-# This function creates the .ini file if it does not exist. 
+# This function creates the .ini file if it does not exist.
 # This files is based off of th wise.ini.example file.
 #
 def checkWiseFile():
