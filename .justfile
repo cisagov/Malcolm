@@ -207,6 +207,10 @@ wipe:
     --namespace "$MALCOLM_K8S_NAMESPACE" \
     --delete-namespace "$MALCOLM_K8S_DELETE_NAMESPACE"
 
+nuke:
+  {{call_recipe}} wipe
+  rm -rf ./postgres/*
+
 stop:
   #!/usr/bin/env bash
   ./scripts/stop \
