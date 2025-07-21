@@ -1916,7 +1916,8 @@ class Installer(object):
                         if netboxAutoPopulateSubnets:
                             netboxAutoPopulateSubnets = ';'.join(
                                 f"{k.strip()}:{stripSpacePattern.sub('', v)}"
-                                for k, v in (item.split(':', 1) for item in netboxAutoPopulateSubnets.split(';'))
+                                for item in netboxAutoPopulateSubnets.split(';')
+                                for k, v in [item.split(':', 1) if ':' in item else ('*', item)]
                             )
                         if ValidNetBoxSubnetFilter(netboxAutoPopulateSubnets):
                             break
