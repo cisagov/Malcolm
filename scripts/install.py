@@ -112,7 +112,7 @@ MAC_BREW_DOCKER_SETTINGS = '/Users/{}/Library/Group Containers/group.com.docker/
 
 BACK_LABEL = 'Go Back'
 
-LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx2500m -Xms2500m -Xss2048k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
+LOGSTASH_JAVA_OPTS_DEFAULT = '-server -Xmx3g -Xms3g -Xss2048k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 OPENSEARCH_JAVA_OPTS_DEFAULT = '-server -Xmx10g -Xms10g -Xss256k -XX:-HeapDumpOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom -Dlog4j.formatMsgNoLookups=true'
 
 ###################################################################################################
@@ -558,14 +558,15 @@ class Installer(object):
 
             if self.totalMemoryGigs >= 63.0:
                 osMemory = '24g'
-                lsMemory = '3g'
+                lsMemory = '4g'
             elif self.totalMemoryGigs >= 31.0:
                 osMemory = '16g'
-                lsMemory = '2500m'
+                lsMemory = '3g'
             elif self.totalMemoryGigs >= 15.0:
                 osMemory = '10g'
                 lsMemory = '2500m'
             elif self.totalMemoryGigs >= 11.0:
+                eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '6g'
                 lsMemory = '2g'
             elif self.totalMemoryGigs >= 7.0:
@@ -853,7 +854,7 @@ class Installer(object):
                                     extraLabel=BACK_LABEL,
                                 )
                             lsMemory = InstallerAskForString(
-                                'Enter memory for Logstash (e.g., 4g, 2500m, etc.)',
+                                'Enter memory for Logstash (e.g., 3g, 4500m, etc.)',
                                 extraLabel=BACK_LABEL,
                             )
 
@@ -4364,7 +4365,7 @@ def main():
         metavar='<string>',
         type=str,
         default=None,
-        help='Memory for Logstash (e.g., 4g, 2500m, etc.)',
+        help='Memory for Logstash (e.g., 3g, 4500m, etc.)',
     )
     logstashArgGroup.add_argument(
         '--logstash-workers',
