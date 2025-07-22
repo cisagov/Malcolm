@@ -559,7 +559,7 @@ class Installer(object):
             if self.totalMemoryGigs >= 63.0:
                 osMemory = '24g'
                 lsMemory = '4g'
-            elif self.totalMemoryGigs >= 31.0:
+            elif self.totalMemoryGigs >= 30.0:
                 osMemory = '16g'
                 lsMemory = '3g'
             elif self.totalMemoryGigs >= 15.0:
