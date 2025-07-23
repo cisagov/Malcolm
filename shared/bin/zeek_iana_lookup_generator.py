@@ -104,7 +104,7 @@ def processCsv(inputFileName, outputFileName):
 
                     if (
                         proto
-                        and not proto.lower().startswith('unassigned')
+                        and (proto.lower() in ('tcp', 'udp', 'icmp'))
                         and port
                         and port.isdigit()
                         and (
@@ -119,7 +119,7 @@ def processCsv(inputFileName, outputFileName):
                         )
                     ):
                         if (proto, port) not in alreadyWritten:
-                            alreadyWritten[(proto, port)] = f"{proto}\t{port}\t{service or '-'}\t{note or '-'}"
+                            alreadyWritten[(proto, port)] = f"{proto}\t{port}\t{service or ''}\t{note or ''}"
                             outfile.write(f"{alreadyWritten[(proto, port)]}\n")
 
                 return True

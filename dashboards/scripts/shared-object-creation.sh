@@ -25,6 +25,7 @@ DASHBOARDS_PREFIX=${DASHBOARDS_PREFIX:-}
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX#"${DASHBOARDS_PREFIX%%[![:space:]]*}"}"
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX%"${DASHBOARDS_PREFIX##*[![:space:]]}"}"
 DASHBOARDS_PREFIX="$(echo "$DASHBOARDS_PREFIX" | tr -d '"\\')"
+DASHBOARDS_NAVIGATION_TEXT_FILE=
 
 MALCOLM_TEMPLATES_DIR="/opt/templates"
 MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
@@ -47,6 +48,25 @@ function cleanup_work_dir {
 
 function get_tmp_output_filename {
   mktemp -p "$TMP_WORK_DIR" curl-XXXXXXX
+}
+
+function escape_for_dashboard_markdown() {
+  local INPUT_MARKDOWN_FILE="$1"
+  [[ -r "$INPUT_MARKDOWN_FILE" ]] && \
+    awk '
+    {
+      # If the line starts with [ and ends with ), it’s likely a solo link
+      if ($0 ~ /^\[[^]]+\]\([^)]*\)$/) {
+        printf "%s  \\\\n", $0
+      } else {
+        # Escape newlines for all other lines
+        printf "%s\\\\n", $0
+      }
+    }
+    END {
+      print ""
+    }
+    ' "$INPUT_MARKDOWN_FILE"
 }
 
 function DoReplacersInFile() {
@@ -167,6 +187,13 @@ function DoReplacersInFile() {
     fi
 
     if [[ "$FILE_TYPE" == "dashboard" ]]; then
+
+      # navigation markdown shared by all dashboards
+      if [[ -n "$DASHBOARDS_NAVIGATION_TEXT_FILE" ]] && [[ -r "$DASHBOARDS_NAVIGATION_TEXT_FILE" ]]; then
+        DASHBOARDS_NAVIGATION_TEXT_ESCAPED="$(printf '%q' "$(cat "$DASHBOARDS_NAVIGATION_TEXT_FILE")")"
+        sed -i "s|MALCOLM_NAVIGATION_MARKDOWN_REPLACER|$DASHBOARDS_NAVIGATION_TEXT_ESCAPED|g" "${REPLFILE}"
+      fi
+
       if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
         # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
         sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/arkime)//' "${REPLFILE}"
@@ -175,7 +202,7 @@ function DoReplacersInFile() {
       fi
 
       # at this point dashboards are the older-style JSON dashboards (top-level objects array)
-      if jq -e 'type == "object" and (.objects | type == "array")' "${REPLFILE}" >/dev/null; then
+      if jq -e 'type == "object" and (.objects | type == "array")' "${REPLFILE}" >/dev/null 2>/dev/null; then
 
         # prepend $DASHBOARDS_PREFIX to dashboards' titles
         [[ -n "$DASHBOARDS_PREFIX" ]] && \
@@ -505,8 +532,11 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           #     objects. If the dashboard doesn't already exist, or if the file-to-be-imported date is newer than the old one,
           #     then import the dashboard.
 
+
           DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t dashboards-XXXXXX)"
           rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
+          DASHBOARDS_NAVIGATION_TEXT_FILE="$DASHBOARDS_IMPORT_DIR"/navigation_escaped.txt
+          escape_for_dashboard_markdown "$DASHBOARDS_IMPORT_DIR"/navigation.md >"$DASHBOARDS_NAVIGATION_TEXT_FILE" 2>/dev/null
           DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
           for i in "${DASHBOARDS_IMPORT_DIR}"/*.ndjson; do
 

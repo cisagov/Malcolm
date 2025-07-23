@@ -84,7 +84,7 @@ Compress local OpenSearch index snapshots? (y / N): n
 
 Forward Logstash logs to a secondary remote document store? (y / N): n
 
-Setting 16g for OpenSearch and 2500m for Logstash. Is this OK? (Y / n): y
+Setting 16g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
 
 Setting 3 workers for Logstash pipelines. Is this OK? (Y / n): y
 
