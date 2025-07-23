@@ -1229,7 +1229,7 @@ def dashboard_export(dashid):
     request : Request
         Uses 'replace' from requests arguments, true (default) or false; indicates whether or not to do
         MALCOLM_NETWORK_INDEX_PATTERN_REPLACER, MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER,
-        MALCOLM_OTHER_INDEX_PATTERN_REPLACER
+        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_NAVIGATION_MARKDOWN_REPLACER
 
     Returns
     -------
@@ -1265,6 +1265,14 @@ def dashboard_export(dashid):
                 }
                 pattern = re.compile('|'.join(re.escape(key) for key in replacements))
                 responseText = pattern.sub(lambda match: replacements[match.group(0)], response.text)
+                # handle the navigation panel's markdown content, so we don't duplicate it in all of our dashboards
+                responseText = re.sub(
+                    r'("visState":\s*"{\\?"title\\?":\\?"Navigation\\?",\\?"type\\?":\\?"markdown\\?",\\?"params\\?":{\\?"markdown\\?":\\?")(.+?)(\\?"\,\\?"type\\?":\\?"markdown\\?")',
+                    r'\1MALCOLM_NAVIGATION_MARKDOWN_REPLACER\3',
+                    responseText,
+                    flags=re.DOTALL,
+                )
+
             else:
                 # ... or just return it as-is
                 responseText = response.text
