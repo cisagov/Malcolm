@@ -21,6 +21,7 @@ import pprint
 import math
 import re
 import shutil
+import sys
 import tarfile
 import tempfile
 import time
@@ -59,9 +60,12 @@ from malcolm_common import (
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
     PLATFORM_LINUX,
+    PLATFORM_LINUX_ALMA,
+    PLATFORM_LINUX_AMAZON,
     PLATFORM_LINUX_CENTOS,
     PLATFORM_LINUX_DEBIAN,
     PLATFORM_LINUX_FEDORA,
+    PLATFORM_LINUX_ROCKY,
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
@@ -330,11 +334,10 @@ class Installer(object):
         self.requiredPackages = []
         self.dockerComposeCmd = None
 
-        self.pipCmd = 'pip3'
-        if not which(self.pipCmd, debug=self.debug):
-            self.pipCmd = 'pip'
-
         self.tempDirName = tempfile.mkdtemp()
+
+        self.pipCmd = None
+        self.ensure_pip()
 
         self.totalMemoryGigs = 0.0
         self.totalCores = 0
@@ -394,6 +397,28 @@ class Installer(object):
         if len(self.requiredPackages) > 0:
             eprint(f"Installing required packages: {self.requiredPackages}")
         return self.install_package(self.requiredPackages)
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    def ensure_pip(self, prompt_to_bootstrap=False):
+        if not self.pipCmd:
+            if which('pip3', debug=self.debug):
+                self.pipCmd = 'pip3'
+            else:
+                err, out = self.run_process([sys.executable, '-m', 'pip', '--version'])
+                if out and (err == 0):
+                    self.pipCmd = [sys.executable, '-m', 'pip']
+                elif prompt_to_bootstrap and InstallerYesOrNo(
+                    f"Python's pip package manager is not available, attempt to install with \"ensurepip\"?",
+                    default=False,
+                    forceInteraction=True,
+                ):
+                    err, out = self.run_process([sys.executable, '-m', 'ensurepip', '--upgrade'])
+                    if out and (err == 0):
+                        err, out = self.run_process([sys.executable, '-m', 'pip', '--version'])
+                        if out and (err == 0):
+                            self.pipCmd = [sys.executable, '-m', 'pip']
+
+        return self.pipCmd
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker_images(self, docker_image_file, malcolm_install_path):
@@ -3165,14 +3190,20 @@ class LinuxInstaller(Installer):
 
         # try release-specific files
         if self.distro is None:
-            if os.path.isfile('/etc/centos-release'):
-                distroFile = '/etc/centos-release'
-            if os.path.isfile('/etc/redhat-release'):
-                distroFile = '/etc/redhat-release'
-            elif os.path.isfile('/etc/issue'):
-                distroFile = '/etc/issue'
-            else:
-                distroFile = None
+            distroFile = next(
+                (
+                    path
+                    for path in [
+                        '/etc/rocky-release',
+                        '/etc/almalinux-release',
+                        '/etc/centos-release',
+                        '/etc/redhat-release',
+                        '/etc/issue',
+                    ]
+                    if os.path.isfile(path)
+                ),
+                None,
+            )
             if distroFile is not None:
                 with open(distroFile, 'r') as f:
                     distroVals = f.read().lower().split()
@@ -3193,7 +3224,10 @@ class LinuxInstaller(Installer):
             self.codename = self.distro
 
         # determine packages required by Malcolm itself (not docker, those will be done later)
-        if (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN):
+        if self.distro in (
+            PLATFORM_LINUX_UBUNTU,
+            PLATFORM_LINUX_DEBIAN,
+        ):
             self.requiredPackages.extend(
                 [
                     'apache2-utils',
@@ -3206,7 +3240,10 @@ class LinuxInstaller(Installer):
                     'xz-utils',
                 ]
             )
-        elif (self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS):
+        elif self.distro in (
+            PLATFORM_LINUX_FEDORA,
+            PLATFORM_LINUX_CENTOS,
+        ):
             self.requiredPackages.extend(
                 [
                     'httpd-tools',
@@ -3216,6 +3253,21 @@ class LinuxInstaller(Installer):
                     'python3-dotenv',
                     'python3-requests',
                     'python3-ruamel.yaml',
+                    'xz',
+                ]
+            )
+        elif self.distro in (
+            PLATFORM_LINUX_ALMA,
+            PLATFORM_LINUX_AMAZON,
+            PLATFORM_LINUX_ROCKY,
+        ):
+            self.requiredPackages.extend(
+                [
+                    'httpd-tools',
+                    'make',
+                    'openssl',
+                    'python3-requests',
+                    'python3-ruamel-yaml',
                     'xz',
                 ]
             )
@@ -3320,6 +3372,12 @@ class LinuxInstaller(Installer):
                         requiredRepoPackages = ['dnf-plugins-core']
                     elif self.distro == PLATFORM_LINUX_CENTOS:
                         requiredRepoPackages = ['yum-utils', 'device-mapper-persistent-data', 'lvm2']
+                    elif self.distro in (
+                        PLATFORM_LINUX_ALMA,
+                        PLATFORM_LINUX_AMAZON,
+                        PLATFORM_LINUX_ROCKY,
+                    ):
+                        requiredRepoPackages = ['dnf-utils']
                     else:
                         requiredRepoPackages = []
 
@@ -3419,6 +3477,34 @@ class LinuxInstaller(Installer):
                                 ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
                             )
 
+                    elif self.distro in (
+                        PLATFORM_LINUX_ALMA,
+                        PLATFORM_LINUX_ROCKY,
+                    ):
+                        # add docker rhel repository
+                        if self.debug:
+                            eprint("Adding docker repository")
+                        err, out = self.run_process(
+                            [
+                                'dnf',
+                                'config-manager',
+                                '-y',
+                                '--add-repo',
+                                'https://download.docker.com/linux/centos/docker-ce.repo',
+                            ],
+                            privileged=True,
+                        )
+
+                        # docker packages to install
+                        if err == 0:
+                            dockerPackages.extend(
+                                ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+                            )
+
+                    elif self.distro == PLATFORM_LINUX_AMAZON:
+                        # docker packages to install
+                        dockerPackages.extend(['docker'])
+
                     else:
                         err, out = None, None
 
@@ -3451,9 +3537,18 @@ class LinuxInstaller(Installer):
             if (
                 result
                 and args.runtimeBin.startswith('docker')
-                and ((self.distro == PLATFORM_LINUX_FEDORA) or (self.distro == PLATFORM_LINUX_CENTOS))
+                and (
+                    self.distro
+                    in (
+                        PLATFORM_LINUX_ALMA,
+                        PLATFORM_LINUX_AMAZON,
+                        PLATFORM_LINUX_CENTOS,
+                        PLATFORM_LINUX_FEDORA,
+                        PLATFORM_LINUX_ROCKY,
+                    )
+                )
             ):
-                # centos/fedora don't automatically start/enable the daemon, so do so now
+                # this platform doesn't automatically start/enable the daemon, so do so now
                 err, out = self.run_process(['systemctl', 'start', 'docker'], privileged=True)
                 if err == 0:
                     err, out = self.run_process(['systemctl', 'enable', 'docker'], privileged=True)
@@ -3464,7 +3559,7 @@ class LinuxInstaller(Installer):
 
             # at this point we either have installed docker successfully or we have to give up, as we've tried all we could
             err, out = self.run_process([args.runtimeBin, 'info'], privileged=True, retry=6, retrySleepSec=5)
-            if result and (err == 0):
+            if out and (err == 0):
                 if self.debug:
                     eprint(f'"{args.runtimeBin} info" succeeded')
 
@@ -5089,15 +5184,18 @@ def main():
         installer.install_required_packages()
 
     DialogInit()
-    requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-    yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-    dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-    if args.debug:
-        eprint(f"Imported requests: {requests_imported}")
-        eprint(f"Imported yaml: {yaml_imported}")
-        eprint(f"Imported dotenv: {dotenv_imported}")
-    if (not requests_imported) or (not yaml_imported) or (not dotenv_imported):
-        exit(2)
+    for pkgLoop in (1, 2):
+        requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
+        yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
+        dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
+        if args.debug:
+            eprint(f"Imported requests: {requests_imported}")
+            eprint(f"Imported yaml: {yaml_imported}")
+            eprint(f"Imported dotenv: {dotenv_imported}")
+        if (not all((requests_imported, yaml_imported, dotenv_imported))) and (
+            (pkgLoop != 1) or (not installer.ensure_pip(prompt_to_bootstrap=not args.acceptDefaultsNonInteractive))
+        ):
+            exit(2)
 
     # If Malcolm and images tarballs are provided, we will use them.
     # If they are not provided, look in the pwd first, then in the script directory, to see if we
