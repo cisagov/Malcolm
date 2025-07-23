@@ -3763,25 +3763,21 @@ class LinuxInstaller(Installer):
                 [],
                 '/etc/sysctl.conf',
                 'vm.dirty_background_ratio=',
-                'vm.dirty_background_ratio defines the percentage of system memory fillable with "dirty" pages before flushing',
+                'vm.dirty_background_ratio defines the percent of memory filled with dirty data before the system starts writing it to disk in the background',
                 [
-                    '# the % of system memory fillable with "dirty" pages before flushing',
+                    '# % of memory filled with dirty data before the system starts writing it to disk in the background',
                     'vm.dirty_background_ratio=40',
                 ],
             ),
             ConfigLines(
                 [],
                 '/etc/sysctl.conf',
-                'vm.dirty_background_ratio=',
-                'vm.dirty_background_ratio defines the percentage of dirty system memory before flushing',
-                ['# maximum % of dirty system memory before committing everything', 'vm.dirty_background_ratio=40'],
-            ),
-            ConfigLines(
-                [],
-                '/etc/sysctl.conf',
                 'vm.dirty_ratio=',
-                'vm.dirty_ratio defines the maximum percentage of dirty system memory before committing everything',
-                ['# maximum % of dirty system memory before committing everything', 'vm.dirty_ratio=80'],
+                'vm.dirty_ratio defines the maximum percent of memory that can be dirty before all new writes are forced to flush to disk',
+                [
+                    '# maximum % of memory that can be dirty before all new writes are forced to flush to disk',
+                    'vm.dirty_ratio=80',
+                ],
             ),
             ConfigLines(
                 [],
@@ -3795,11 +3791,18 @@ class LinuxInstaller(Installer):
                 '/etc/systemd/system.conf.d/limits.conf',
                 '',
                 '/etc/systemd/system.conf.d/limits.conf increases the allowed maximums for file handles and memlocked segments',
-                ['[Manager]', 'DefaultLimitNOFILE=65535:65535', 'DefaultLimitMEMLOCK=infinity'],
+                [
+                    '[Manager]',
+                    'DefaultLimitNOFILE=65535:65535',
+                    'DefaultLimitMEMLOCK=infinity',
+                ],
             ),
             ConfigLines(
                 [
                     'bionic',
+                    'bookworm',
+                    'bullseye',
+                    'buster',
                     'cosmic',
                     'disco',
                     'eoan',
@@ -3812,13 +3815,14 @@ class LinuxInstaller(Installer):
                     'lunar',
                     'mantic',
                     'noble',
-                    'stretch',
-                    'buster',
-                    'bookworm',
-                    'bullseye',
+                    'plucky',
                     'sid',
+                    'stretch',
                     'trixie',
-                    'fedora',
+                    PLATFORM_LINUX_ALMA,
+                    PLATFORM_LINUX_AMAZON,
+                    PLATFORM_LINUX_FEDORA,
+                    PLATFORM_LINUX_ROCKY,
                 ],
                 '/etc/security/limits.d/limits.conf',
                 '',
@@ -3889,7 +3893,7 @@ class LinuxInstaller(Installer):
                 [
                     'bash',
                     '-c',
-                    f'sed -i \'s/^GRUB_CMDLINE_LINUX="/&cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem /\' {grubFileName}',
+                    f'sed -i \'s/^GRUB_CMDLINE_LINUX="/&systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem /\' {grubFileName}',
                 ],
                 privileged=True,
             )
@@ -3898,6 +3902,8 @@ class LinuxInstaller(Installer):
                     err, out = self.run_process(['update-grub'], privileged=True)
                 elif which('update-grub2', debug=self.debug):
                     err, out = self.run_process(['update-grub2'], privileged=True)
+                elif which('grub2-mkconfig', debug=self.debug) and os.path.isfile('/boot/grub2/grub.cfg'):
+                    err, out = self.run_process(['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True)
                 else:
                     InstallerDisplayMessage(
                         f"{grubFileName} has been modified, consult your distribution's documentation generate new grub config file"
