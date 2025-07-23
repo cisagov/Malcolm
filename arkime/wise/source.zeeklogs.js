@@ -830,7 +830,7 @@ class MalcolmSource extends WISESource {
       "zeek.c1222_identification_service.version",
       "zeek.c1222_identification_service.revision",
       "zeek.c1222_identification_service.security_mechanism",
-      "zeek.c1222_identification_service.nbrsession_supported",
+      "zeek.c1222_identification_service.nbr_session_supported",
       "zeek.c1222_identification_service.sessionless_supported",
       "zeek.c1222_identification_service.device_class",
       "zeek.c1222_identification_service.device_identity_format",
