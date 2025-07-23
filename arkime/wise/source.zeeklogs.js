@@ -870,7 +870,6 @@ class MalcolmSource extends WISESource {
       "zeek.c1222_user_information.epsem_control",
       "zeek.c1222_user_information.ed_class",
       "zeek.c1222_user_information.encrypted_epsem",
-      "zeek.c1222_user_information.services",
       "zeek.c1222_wait_service.time_s",
       "zeek.cip.attribute_id",
       "zeek.cip.cip_extended_status",
