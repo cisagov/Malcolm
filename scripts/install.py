@@ -3812,6 +3812,7 @@ class LinuxInstaller(Installer):
                     'lunar',
                     'mantic',
                     'noble',
+                    'plucky',
                     'stretch',
                     'buster',
                     'bookworm',
@@ -3889,7 +3890,7 @@ class LinuxInstaller(Installer):
                 [
                     'bash',
                     '-c',
-                    f'sed -i \'s/^GRUB_CMDLINE_LINUX="/&cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem /\' {grubFileName}',
+                    f'sed -i \'s/^GRUB_CMDLINE_LINUX="/&systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem /\' {grubFileName}',
                 ],
                 privileged=True,
             )
@@ -3898,6 +3899,8 @@ class LinuxInstaller(Installer):
                     err, out = self.run_process(['update-grub'], privileged=True)
                 elif which('update-grub2', debug=self.debug):
                     err, out = self.run_process(['update-grub2'], privileged=True)
+                elif which('grub2-mkconfig', debug=self.debug) and os.path.isfile('/boot/grub2/grub.cfg'):
+                    err, out = self.run_process(['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True)
                 else:
                     InstallerDisplayMessage(
                         f"{grubFileName} has been modified, consult your distribution's documentation generate new grub config file"
