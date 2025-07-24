@@ -80,7 +80,6 @@ unknown_transport	3848	0	IT Environmental Monitor	-
 unknown_transport	3873	0	Fagor DNC	Fagor Automation
 unknown_transport	3875	0	PNBSCADA	-
 unknown_transport	3881	0	Intelligent Data Acquisition and Control IDAC	-
-unknown_transport	4000	0	Fisher ROC Plus	Emerson Electric
 tcp	4120	0	Rockwell Bizware Production Server	Rockwell Automation
 tcp	4121	0	Rockwell Bizware Server Manager	Rockwell Automation
 tcp	4122	0	Rockwell Bizware PlantMetrics Server	Rockwell Automation

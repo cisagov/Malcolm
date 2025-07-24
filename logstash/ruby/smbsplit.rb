@@ -22,11 +22,11 @@ def filter(event)
   #                                                                       v
   elsif parts = _value.match(/^\s*(\\\\[^\\\/]+)?(\\[^\\\/\$]+\$?)?[\\\/]?(.*)$/) then
     host, share, path = parts.captures
-    host = host.delete_prefix('\\\\') unless host.nil?
-    share = share.delete_prefix('\\').delete_suffix('$') unless share.nil?
-    event.set("#{@host}", host) unless host.nil? or (host.length == 0)
-    event.set("#{@share}", share) unless share.nil? or (share.length == 0)
-    event.set("#{@path}", path) unless path.nil? or (path.length == 0)
+    host = host.delete_prefix('\\\\') unless host.to_s.empty?
+    share = share.delete_prefix('\\').delete_suffix('$') unless share.to_s.empty?
+    event.set("#{@host}", host) unless host.to_s.empty?
+    event.set("#{@share}", share) unless share.to_s.empty?
+    event.set("#{@path}", path) unless path.to_s.empty?
   end
 
   [event]
