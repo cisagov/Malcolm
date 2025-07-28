@@ -422,6 +422,21 @@ def checkEnvFilesAndValues():
 
 
 ###################################################################################################
+# The Arkime wise service stores all information in  .ini file.
+# This function creates the .ini file if it does not exist.
+# This files is based off of th wise.ini.example file.
+#
+def checkWiseFile():
+    arkimePath = "./arkime/etc"
+    wiseFile = os.path.join(arkimePath, 'wise.ini')
+    wiseExampleFile = os.path.join(arkimePath, 'wise.ini.example')
+    if not os.path.isfile(wiseFile):
+        if args.debug:
+            eprint(f"Creating {wiseFile} from {os.path.basename(wiseExampleFile)}")
+        shutil.copyfile(wiseExampleFile, wiseFile)
+
+
+###################################################################################################
 # perform a service-keystore operation in a container
 #
 # service - the service in the docker-compose YML file
@@ -2944,7 +2959,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.06.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.07.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3476,6 +3491,7 @@ def main():
         # the compose file references various .env files in just about every operation this script does,
         # so make sure they exist right off the bat
         checkEnvFilesAndValues()
+        checkWiseFile()
 
         # stop Malcolm (and wipe data if requestsed)
         if args.cmdRestart or args.cmdStop or args.cmdWipe:

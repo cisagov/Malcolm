@@ -1229,7 +1229,7 @@ def dashboard_export(dashid):
     request : Request
         Uses 'replace' from requests arguments, true (default) or false; indicates whether or not to do
         MALCOLM_NETWORK_INDEX_PATTERN_REPLACER, MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER,
-        MALCOLM_OTHER_INDEX_PATTERN_REPLACER
+        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_NAVIGATION_MARKDOWN_REPLACER
 
     Returns
     -------
@@ -1241,62 +1241,77 @@ def dashboard_export(dashid):
 
     args = get_request_arguments(request)
     try:
-        # call the API to get the dashboard JSON
-        response = requests.get(
-            f"{dashboardsUrl}/api/{'kibana' if (databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote) else 'opensearch-dashboards'}/dashboards/export",
-            params={
-                'dashboard': dashid,
-            },
-            auth=opensearchReqHttpAuth,
-            verify=opensearchSslVerify,
-        )
-        response.raise_for_status()
+        if databaseMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+            # TODO: this is deprecated, but still works in OpenSearch. Need to replace with "api/saved_objects/_export",
+            #   but that exports NDJSON instead of JSON so we'd need to do a little more than just change the API.
+            # call the API to get the dashboard JSON
+            response = requests.get(
+                f"{dashboardsUrl}/api/{'kibana' if (databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote) else 'opensearch-dashboards'}/dashboards/export",
+                params={
+                    'dashboard': dashid,
+                },
+                auth=opensearchReqHttpAuth,
+                verify=opensearchSslVerify,
+            )
+            response.raise_for_status()
 
-        if doReplacers := malcolm_utils.str2bool(args.get('replace', 'true')):
-            # replace references to index pattern names with the _REPLACER strings, which will allow other Malcolm
-            #   instances that use different index pattern names to import them and substitute their own names
-            replacements = {
-                app.config['MALCOLM_NETWORK_INDEX_PATTERN']: 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER',
-                app.config['MALCOLM_NETWORK_INDEX_TIME_FIELD']: 'MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER',
-                app.config['MALCOLM_OTHER_INDEX_PATTERN']: 'MALCOLM_OTHER_INDEX_PATTERN_REPLACER',
-            }
-            pattern = re.compile('|'.join(re.escape(key) for key in replacements))
-            responseText = pattern.sub(lambda match: replacements[match.group(0)], response.text)
-        else:
-            # ... or just return it as-is
-            responseText = response.text
+            if doReplacers := malcolm_utils.str2bool(args.get('replace', 'true')):
+                # replace references to index pattern names with the _REPLACER strings, which will allow other Malcolm
+                #   instances that use different index pattern names to import them and substitute their own names
+                replacements = {
+                    app.config['MALCOLM_NETWORK_INDEX_PATTERN']: 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER',
+                    app.config['MALCOLM_NETWORK_INDEX_TIME_FIELD']: 'MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER',
+                    app.config['MALCOLM_OTHER_INDEX_PATTERN']: 'MALCOLM_OTHER_INDEX_PATTERN_REPLACER',
+                }
+                pattern = re.compile('|'.join(re.escape(key) for key in replacements))
+                responseText = pattern.sub(lambda match: replacements[match.group(0)], response.text)
+                # handle the navigation panel's markdown content, so we don't duplicate it in all of our dashboards
+                responseText = re.sub(
+                    r'("visState":\s*"{\\?"title\\?":\\?"Navigation\\?",\\?"type\\?":\\?"markdown\\?",\\?"params\\?":{\\?"markdown\\?":\\?")(.+?)(\\?"\,\\?"type\\?":\\?"markdown\\?")',
+                    r'\1MALCOLM_NAVIGATION_MARKDOWN_REPLACER\3',
+                    responseText,
+                    flags=re.DOTALL,
+                )
 
-        # remove index pattern definition from exported dashboard as they get created programatically
-        #   on Malcolm startup and we don't want them to come in with imported dashboards
-        if responseParsed := malcolm_utils.LoadStrIfJson(responseText):
-            if 'objects' in responseParsed and isinstance(responseParsed['objects'], list):
-                responseParsed['objects'] = [
-                    o
-                    for o in responseParsed['objects']
-                    if not (
-                        (o.get("type") == "index-pattern")
-                        and (
-                            o.get("id")
-                            in [
-                                (
-                                    "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
-                                    if doReplacers
-                                    else app.config['MALCOLM_NETWORK_INDEX_PATTERN']
-                                ),
-                                (
-                                    "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
-                                    if doReplacers
-                                    else app.config['MALCOLM_OTHER_INDEX_PATTERN']
-                                ),
-                            ]
+            else:
+                # ... or just return it as-is
+                responseText = response.text
+
+            # remove index pattern definition from exported dashboard as they get created programatically
+            #   on Malcolm startup and we don't want them to come in with imported dashboards
+            if responseParsed := malcolm_utils.LoadStrIfJson(responseText):
+                if 'objects' in responseParsed and isinstance(responseParsed['objects'], list):
+                    responseParsed['objects'] = [
+                        o
+                        for o in responseParsed['objects']
+                        if not (
+                            (o.get("type") == "index-pattern")
+                            and (
+                                o.get("id")
+                                in [
+                                    (
+                                        "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER"
+                                        if doReplacers
+                                        else app.config['MALCOLM_NETWORK_INDEX_PATTERN']
+                                    ),
+                                    (
+                                        "MALCOLM_OTHER_INDEX_PATTERN_REPLACER"
+                                        if doReplacers
+                                        else app.config['MALCOLM_OTHER_INDEX_PATTERN']
+                                    ),
+                                ]
+                            )
                         )
-                    )
-                ]
-            return jsonify(responseParsed)
+                    ]
+                return jsonify(responseParsed)
 
+            else:
+                # what we got back from the API wasn't valid JSON, so sad
+                return jsonify(error=f'Could not process export response for {dashid}')
         else:
-            # what we got back from the API wasn't valid JSON, so sad
-            return jsonify(error=f'Could not process export response for {dashid}')
+            return jsonify(
+                error=f'dashboard-export not implemented for {malcolm_utils.DatabaseModeEnumToStr(databaseMode)}'
+            )
 
     except Exception as e:
         errStr = f"{type(e).__name__}: {str(e)} exporting OpenSearch Dashboard {dashid}"

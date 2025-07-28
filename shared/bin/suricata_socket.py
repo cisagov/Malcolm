@@ -10,6 +10,7 @@ from typing import Optional, Dict, Any, Union
 
 
 SuricataMaxRetriesDefault = 30
+SuricataQueueSizeError = 999
 
 
 class SuricataSocketClient:
@@ -195,6 +196,28 @@ class SuricataSocketClient:
         except Exception as e:
             self._debug(f"ERROR: Exception processing PCAP: {e}")
             return False
+
+    def queue_size(
+        self,
+    ) -> int:
+        """Get pcap-file-number for the client"""
+        try:
+            submit_response = self._send_command({"command": "pcap-file-number"})
+            if (
+                (not submit_response)
+                or (submit_response.get("return") != "OK")
+                or (not str(submit_response.get("message")).isdigit())
+            ):
+                self._debug(f"ERROR: Failed to get queue size: {submit_response}")
+                return SuricataQueueSizeError
+
+            count = submit_response.get("message", SuricataQueueSizeError)
+            self._debug(f"Successfully got queue size: {count}")
+            return count
+
+        except Exception as e:
+            self._debug(f"ERROR: Exception getting queue size: {e}")
+            return SuricataQueueSizeError
 
     def close(
         self,

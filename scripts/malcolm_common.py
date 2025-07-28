@@ -5,14 +5,17 @@
 
 import getpass
 import importlib
+import importlib.util
 import ipaddress
 import json
 import os
 import math
 import platform
 import re
+import site
 import string
 import sys
+import time
 
 import malcolm_utils
 from malcolm_utils import (
@@ -64,6 +67,9 @@ PLATFORM_LINUX_CENTOS = 'centos'
 PLATFORM_LINUX_DEBIAN = 'debian'
 PLATFORM_LINUX_FEDORA = 'fedora'
 PLATFORM_LINUX_UBUNTU = 'ubuntu'
+PLATFORM_LINUX_ROCKY = 'rocky'
+PLATFORM_LINUX_ALMA = 'almalinux'
+PLATFORM_LINUX_AMAZON = 'amazon'
 
 ###################################################################################################
 YAML_VERSION = (1, 1)
@@ -832,7 +838,9 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
         pyExec = sys.executable
         pipCmd = "pip3"
         if not malcolm_utils.which(pipCmd, debug=debug):
-            pipCmd = "pip"
+            err, out = run_process([sys.executable, '-m', 'pip', '--version'], debug=debug)
+            if out and (err == 0):
+                pipCmd = [sys.executable, '-m', 'pip']
 
         eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
@@ -855,6 +863,8 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
                     eprint(f"Installation of {pipPkgName} module apparently succeeded")
+                    importlib.reload(site)
+                    importlib.invalidate_caches()
                     try:
                         tmpImport = importlib.import_module(importName)
                         if tmpImport:
@@ -1066,6 +1076,7 @@ LOG_IGNORE_REGEX = re.compile(
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
   | POST\s+HTTP/[\d\.].+\b200\b
+  | POST\s+/wise/get.+\b200\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)

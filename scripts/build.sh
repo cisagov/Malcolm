@@ -145,6 +145,7 @@ if (( $# == 0 )); then
     "/opt/netbox-devicetype-library-import/repo/schema/components.json;netbox"
     "/opt/zeek/bin/zeek;zeek"
     "/opt/zeek/bin/spicyz;zeek"
+    "/opt/zeek/share/zeek/site/iana_service_map.txt;zeek"
     "/usr/share/nginx/html/index.html;nginx-proxy"
   )
   for i in ${FILES_IN_IMAGES[@]}; do

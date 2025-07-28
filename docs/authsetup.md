@@ -309,7 +309,7 @@ Stopped Malcolm's ['nginx-proxy'] services
 Removed Malcolm's ['nginx-proxy'] services
 
 NAME                    IMAGE                                          COMMAND                  SERVICE       CREATED        STATUS                                     PORTS
-malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.06.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
+malcolm-nginx-proxy-1   ghcr.io/idaholab/malcolm/nginx-proxy:25.07.0   "/sbin/tini -- /usr/…"   nginx-proxy   1 second ago   Up Less than a second (health: starting)   
 
 nginx-proxy-1  | root
 nginx-proxy-1  | uid=0(root) gid=0(root) groups=0(root),0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel),11(floppy),20(dialout),26(tape),27(video)
@@ -336,14 +336,14 @@ nginx-proxy-1  | 2025-03-11 17:29:14,283 INFO success: nginx entered RUNNING sta
 
 ### <a name="AuthKeycloakHedgehog"></a>Known Limitation with Hedgehog Linux
 
-Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts.
+Due to known compatibility issues between Arkime capture on [Hedgehog Linux](live-analysis.md#Hedgehog), Malcolm’s nginx reverse proxy, and Keycloak, special authentication handling is required when using a [local OpenSearch instance](opensearch-instances.md#OpenSearchInstance) exposed to external hosts as well as Malcolm's instance of Arkime's [WISE service](arkime.md#ArkimeWise).
 
-If Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for that endpoint — even when Keycloak is selected as Malcolm’s primary authentication method.
+For the WISE service, and if Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for those endpoints — even when Keycloak is selected as Malcolm’s primary authentication method.
 
 When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#Hedgehogarkime-capture) on Hedgehog Linux, use the local Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
 
 * The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
-* These basic credentials apply *only* to Malcolm’s OpenSearch API endpoint.
+* These basic credentials apply *only* to Malcolm’s OpenSearch API and Arkime WISE endpoints.
 
 This limitation does not apply if Malcolm is connected to a remote OpenSearch or Elasticsearch [instance](opensearch-instances.md#OpenSearchInstance).
 

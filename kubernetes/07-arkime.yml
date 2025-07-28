@@ -10,6 +10,9 @@ spec:
     - port: 8005
       protocol: TCP
       name: http
+    - port: 8081
+      protocol: TCP
+      name: wise
   selector:
     app: arkime
 
@@ -35,7 +38,7 @@ spec:
     spec:
       containers:
       - name: arkime-container
-        image: ghcr.io/idaholab/malcolm/arkime:25.06.0
+        image: ghcr.io/idaholab/malcolm/arkime:25.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -85,9 +88,12 @@ spec:
             name: arkime-rules-volume
           - mountPath: "/data/pcap"
             name: arkime-pcap-volume
+          - mountPath: "/opt/arkime/wiseini"
+            name: arkime-config-volume
+            subPath: "arkime/wiseini"  
       initContainers:
       - name: arkime-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.06.0
+        image: ghcr.io/idaholab/malcolm/dirinit:25.07.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -103,10 +109,12 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/pcap:processed"
+            value: "/data/config:arkime/wiseini;/data/pcap:processed"
         volumeMounts:
           - name: arkime-pcap-volume
             mountPath: "/data/pcap"
+          - name: arkime-config-volume
+            mountPath: "/data/config"
       volumes:
         - name: arkime-var-local-catrust-volume
           configMap:
@@ -123,3 +131,6 @@ spec:
         - name: arkime-pcap-volume
           persistentVolumeClaim:
             claimName: pcap-claim
+        - name: arkime-config-volume
+          persistentVolumeClaim:
+            claimName: config-claim

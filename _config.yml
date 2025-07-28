@@ -2,17 +2,17 @@ repository: cisagov/Malcolm
 title: Malcolm
 offline_mode: false
 malcolm:
-  version: 25.06.0
+  version: 25.07.0
 description: A powerful, easily deployable network traffic analysis tool suite for network security monitoring
 logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0
 youtube_url: https://www.youtube.com/@MalcolmNetworkTrafficAnalysis
 mastodon:
-  id:
-  url:
+  id: malcolm@malcolm.fyi
+  url: https://infosec.exchange/@mmguero
 reddit:
-  id:
-  url:
+  id: Malcolm on Reddit
+  url: https://reddit.com/r/Malcolm
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html

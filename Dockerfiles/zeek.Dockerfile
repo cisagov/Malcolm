@@ -33,7 +33,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=7.2.1-0
+ARG ZEEK_VERSION=7.2.2-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -45,15 +45,16 @@ ENV PATH "${ZEEK_DIR}/bin:${PATH}"
 ENV CCACHE_DIR "/var/spool/ccache"
 ENV CCACHE_COMPRESS 1
 
-# add script for downloading zeek and building 3rd-party plugins
 ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
+ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 ADD --chmod=644 zeek/requirements.txt /usr/local/src/requirements.txt
 
-ENV SUPERCRONIC_VERSION "0.2.33"
+ENV SUPERCRONIC_VERSION "0.2.34"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
@@ -105,6 +106,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-bs4 \
       python3-git \
       python3-pip \
+      python3-requests \
       python3-semantic-version \
       python3-setuptools \
       python3-tz \
@@ -140,6 +142,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \
       touch "${ZEEK_DIR}"/share/zeek/site/custom/__load__.zeek && \
+    /usr/local/bin/zeek_iana_lookup_generator.py --output-file "${ZEEK_DIR}"/share/zeek/site/iana_service_map.txt && \
     cd /usr/lib/locale && \
       ( ls | grep -Piv "^(en|en_US|en_US\.utf-?8|C\.utf-?8)$" | xargs -l -r rm -rf ) && \
     cd /tmp && \
@@ -156,7 +159,6 @@ ADD --chmod=755 shared/bin/zeekdeploy.sh ${ZEEK_DIR}/bin/
 ADD zeek/scripts /usr/local/bin
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
-ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek*threat*.py ${ZEEK_DIR}/bin/
 ADD shared/pcaps /tmp/pcaps
 ADD --chmod=644 zeek/supervisord.conf /etc/supervisord.conf
@@ -177,7 +179,7 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
-ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_ROC_PLUS_TCP|ANALYZER_ROC_PLUS_UDP|ANALYZER_OMRON_FINS_TCP|ANALYZER_OMRON_FINS_UDP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka)"
+ENV ZEEK_THIRD_PARTY_PLUGINS_GREP  "(Zeek::Spicy|ANALYZER_SPICY_OSPF|ANALYZER_SPICY_OPENVPN_UDP\b|ANALYZER_SPICY_IPSEC_UDP\b|ANALYZER_SPICY_TFTP|ANALYZER_SPICY_WIREGUARD|ANALYZER_C1222_UDP|ANALYZER_C1222_TCP|ANALYZER_SPICY_HART_IP_UDP|ANALYZER_SPICY_HART_IP_TCP|ANALYZER_ROC_PLUS_TCP|ANALYZER_ROC_PLUS_UDP|ANALYZER_OMRON_FINS_TCP|ANALYZER_OMRON_FINS_UDP|ANALYZER_SYNCHROPHASOR_TCP|ANALYZER_GENISYS_TCP|ANALYZER_SPICY_GE_SRTP|ANALYZER_SPICY_PROFINET_IO_CM|ANALYZER_S7COMM_TCP|Corelight::PE_XOR|ICSNPP::BACnet|ICSNPP::BSAP|ICSNPP::ENIP|ICSNPP::ETHERCAT|ICSNPP::OPCUA_Binary|Salesforce::GQUIC|Zeek::PROFINET|Zeek::TDS|Seiso::Kafka)"
 ENV ZEEK_THIRD_PARTY_SCRIPTS_GREP  "(bro-is-darknet/main|bro-simple-scan/scan|bzar/main|callstranger-detector/callstranger|cve-2020-0601/cve-2020-0601|cve-2020-13777/cve-2020-13777|CVE-2020-16898/CVE-2020-16898|CVE-2021-1675/main|CVE-2021-31166/detect|CVE-2021-38647/omigod|CVE-2021-41773/CVE_2021_41773|CVE-2021-42292/main|cve-2021-44228/CVE_2021_44228|cve-2022-21907/main|cve-2022-22954/main|CVE-2022-23270-PPTP/main|CVE-2022-24491/main|CVE-2022-24497/main|cve-2022-26809/main|CVE-2022-26937/main|CVE-2022-30216/main|CVE-2022-3602/__load__|hassh/hassh|http-more-files-names/main|ja4/main|pingback/detect|ripple20/ripple20|SIGRed/CVE-2020-1350|zeek-agenttesla-detector/main|zeek-asyncrat-detector/main|zeek-EternalSafety/main|zeek-httpattacks/main|zeek-netsupport-detector/main|zeek-quasarrat-detector/main|zeek-sniffpass/__load__|zeek-strrat-detector/main|zerologon/main|zeek-long-connections/main)\.(zeek|bro)"
 
 RUN mkdir -p /tmp/logs && \
@@ -256,6 +258,7 @@ ARG ZEEK_DISABLE_LOG_PASSWORDS=
 ARG ZEEK_DISABLE_SSL_VALIDATE_CERTS=
 ARG ZEEK_DISABLE_TRACK_ALL_ASSETS=
 ARG ZEEK_DISABLE_DETECT_ROUTERS=true
+ARG ZEEK_DISABLE_IANA_LOOKUP=
 ARG ZEEK_DISABLE_BEST_GUESS_ICS=true
 ARG ZEEK_DISABLE_SPICY_IPSEC=
 ARG ZEEK_DISABLE_SPICY_LDAP=
@@ -265,6 +268,14 @@ ARG ZEEK_DISABLE_SPICY_STUN=
 ARG ZEEK_DISABLE_SPICY_TAILSCALE=
 ARG ZEEK_DISABLE_SPICY_TFTP=
 ARG ZEEK_DISABLE_SPICY_WIREGUARD=
+ARG ZEEK_C1222_AUTHENTICATION_VALUE=true
+ARG ZEEK_C1222_IDENTIFICATION_SERVICE=true
+ARG ZEEK_C1222_READ_WRITE_SERVICE=true
+ARG ZEEK_C1222_LOGON_SECURITY_SERVICE=true
+ARG ZEEK_C1222_WAIT_SERVICE=true
+ARG ZEEK_C1222_DEREG_REG_SERVICE=true
+ARG ZEEK_C1222_RESOLVE_SERVICE=true
+ARG ZEEK_C1222_TRACE_SERVICE=true
 ARG ZEEK_SYNCHROPHASOR_DETAILED=
 ARG ZEEK_OMRON_FINS_DETAILED=true
 ARG ZEEK_KAFKA_ENABLED=
@@ -277,6 +288,7 @@ ENV ZEEK_DISABLE_LOG_PASSWORDS $ZEEK_DISABLE_LOG_PASSWORDS
 ENV ZEEK_DISABLE_SSL_VALIDATE_CERTS $ZEEK_DISABLE_SSL_VALIDATE_CERTS
 ENV ZEEK_DISABLE_TRACK_ALL_ASSETS $ZEEK_DISABLE_TRACK_ALL_ASSETS
 ENV ZEEK_DISABLE_DETECT_ROUTERS $ZEEK_DISABLE_DETECT_ROUTERS
+ENV ZEEK_DISABLE_IANA_LOOKUP $ZEEK_DISABLE_IANA_LOOKUP
 ENV ZEEK_DISABLE_BEST_GUESS_ICS $ZEEK_DISABLE_BEST_GUESS_ICS
 
 ENV ZEEK_DISABLE_SPICY_IPSEC $ZEEK_DISABLE_SPICY_IPSEC
@@ -287,6 +299,14 @@ ENV ZEEK_DISABLE_SPICY_STUN $ZEEK_DISABLE_SPICY_STUN
 ENV ZEEK_DISABLE_SPICY_TAILSCALE $ZEEK_DISABLE_SPICY_TAILSCALE
 ENV ZEEK_DISABLE_SPICY_TFTP $ZEEK_DISABLE_SPICY_TFTP
 ENV ZEEK_DISABLE_SPICY_WIREGUARD $ZEEK_DISABLE_SPICY_WIREGUARD
+ENV ZEEK_C1222_AUTHENTICATION_VALUE $ZEEK_C1222_AUTHENTICATION_VALUE
+ENV ZEEK_C1222_IDENTIFICATION_SERVICE $ZEEK_C1222_IDENTIFICATION_SERVICE
+ENV ZEEK_C1222_READ_WRITE_SERVICE $ZEEK_C1222_READ_WRITE_SERVICE
+ENV ZEEK_C1222_LOGON_SECURITY_SERVICE $ZEEK_C1222_LOGON_SECURITY_SERVICE
+ENV ZEEK_C1222_WAIT_SERVICE $ZEEK_C1222_WAIT_SERVICE
+ENV ZEEK_C1222_DEREG_REG_SERVICE $ZEEK_C1222_DEREG_REG_SERVICE
+ENV ZEEK_C1222_RESOLVE_SERVICE $ZEEK_C1222_RESOLVE_SERVICE
+ENV ZEEK_C1222_TRACE_SERVICE $ZEEK_C1222_TRACE_SERVICE
 ENV ZEEK_SYNCHROPHASOR_DETAILED $ZEEK_SYNCHROPHASOR_DETAILED
 ENV ZEEK_OMRON_FINS_DETAILED $ZEEK_OMRON_FINS_DETAILED
 ENV ZEEK_KAFKA_ENABLED $ZEEK_KAFKA_ENABLED

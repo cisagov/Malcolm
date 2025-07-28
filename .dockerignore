@@ -26,6 +26,7 @@ opensearch
 opensearch-backup
 arkime-logs
 arkime-raw
+arkime/wiseini
 kubernetes
 malcolm-iso
 hedgehog-iso

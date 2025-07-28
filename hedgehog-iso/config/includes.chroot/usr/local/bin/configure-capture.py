@@ -135,6 +135,10 @@ class Constants:
     MSG_CONFIG_MODE_AUTOSTART = 'Configure Autostart Services'
     MSG_CONFIG_GENERIC = 'Configure {}'
     MSG_CONFIG_ARKIME = (f'{ARKIMECAP}', f'Configure Arkime session forwarding via {ARKIMECAP}')
+    MSG_CONFIG_ARKIME_WISE_SERVICE_ENABLED = 'Should the Arkime capture process get data from a WISE service?'
+    MSG_CONFIG_ARKIME_WISE_SERVICE_PROTOCOL = 'Specify Arkime WISE service protocol'
+    MSG_CONFIG_ARKIME_WISE_SERVICE_URL = 'Specify Arkime WISE service URL'
+
     MSG_CONFIG_ARKIME_COMPRESSION = 'Specify Arkime PCAP compression mode'
     MSG_CONFIG_ARKIME_COMPRESSION_LEVEL = 'Specify Arkime PCAP {} compression level'
     MSG_CONFIG_FILEBEAT = (f'{FILEBEAT}', f'Configure Zeek and Suricata log forwarding via {FILEBEAT}')
@@ -929,6 +933,45 @@ def main():
                     if arkime_password:
                         arkime_config_dict[Constants.ARKIME_PASSWORD_SECRET] = arkime_password
 
+                    # arkime WISE service settings
+                    arkime_wise_service_enabled = (
+                        d.yesno(Constants.MSG_CONFIG_ARKIME_WISE_SERVICE_ENABLED, yes_label="No", no_label="Yes")
+                        != Dialog.OK
+                    )
+                    arkime_config_dict["ARKIME_WISE_PLUGIN"] = str(arkime_wise_service_enabled).lower()
+
+                    if arkime_wise_service_enabled:
+                        wise_protocol = (
+                            "https"
+                            if (
+                                d.yesno(
+                                    Constants.MSG_CONFIG_ARKIME_WISE_SERVICE_PROTOCOL,
+                                    yes_label="HTTPS",
+                                    no_label="HTTP",
+                                )
+                                == Dialog.OK
+                            )
+                            else "http"
+                        )
+                        code, wise_url = d.inputbox(
+                            Constants.MSG_CONFIG_ARKIME_WISE_SERVICE_URL,
+                            init=previous_config_values[Constants.BEAT_OS_HOST] + "/wise",
+                        )
+                        if code == Dialog.CANCEL or code == Dialog.ESC:
+                            raise CancelledError
+
+                        arkime_config_dict["ARKIME_WISE_URL"] = (
+                            wise_protocol
+                            + "://"
+                            + arkime_config_dict["OS_USERNAME"]
+                            + ":"
+                            + arkime_config_dict["OS_PASSWORD"]
+                            + "@"
+                            + wise_url
+                        )
+                    else:
+                        arkime_config_dict["ARKIME_WISE_URL"] = ''
+
                     # arkime PCAP compression settings
                     code, compression_type = d.radiolist(
                         Constants.MSG_CONFIG_ARKIME_COMPRESSION,
@@ -976,7 +1019,7 @@ def main():
                         [
                             f"{k}={v}"
                             for k, v in arkime_config_dict.items()
-                            if ("PASSWORD" not in k) and (not k.startswith("#"))
+                            if ("PASSWORD" not in k) and (k != "ARKIME_WISE_URL") and (not k.startswith("#"))
                         ]
                     )
 
