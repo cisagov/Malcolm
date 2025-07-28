@@ -13,6 +13,14 @@ global disable_ssl_validate_certs = (getenv("ZEEK_DISABLE_SSL_VALIDATE_CERTS") =
 global disable_track_all_assets = (getenv("ZEEK_DISABLE_TRACK_ALL_ASSETS") == true_regex) ? T : F;
 global disable_best_guess_ics = (getenv("ZEEK_DISABLE_BEST_GUESS_ICS") == true_regex) ? T : F;
 global disable_detect_routers = (getenv("ZEEK_DISABLE_DETECT_ROUTERS") == true_regex) ? T : F;
+global c1222_authentication_value = (getenv("ZEEK_C1222_AUTHENTICATION_VALUE") == true_regex) ? T : F;
+global c1222_identification_service =(getenv("ZEEK_C1222_IDENTIFICATION_SERVICE") == true_regex) ? T : F;
+global c1222_read_write_service = (getenv("ZEEK_C1222_READ_WRITE_SERVICE") == true_regex) ? T : F;
+global c1222_logon_security_service =(getenv("ZEEK_C1222_LOGON_SECURITY_SERVICE") == true_regex) ? T : F;
+global c1222_wait_service =(getenv("ZEEK_C1222_WAIT_SERVICE") == true_regex) ? T : F;
+global c1222_dereg_reg_service = (getenv("ZEEK_C1222_DEREG_REG_SERVICE") == true_regex) ? T : F;
+global c1222_resolve_service = (getenv("ZEEK_C1222_RESOLVE_SERVICE") == true_regex) ? T : F;
+global c1222_trace_service = (getenv("ZEEK_C1222_TRACE_SERVICE") == true_regex) ? T : F;
 global omron_fins_detailed = (getenv("ZEEK_OMRON_FINS_DETAILED") == true_regex) ? T : F;
 global synchrophasor_detailed = (getenv("ZEEK_SYNCHROPHASOR_DETAILED") == true_regex) ? T : F;
 global synchrophasor_ports_str = getenv("ZEEK_SYNCHROPHASOR_PORTS");
@@ -36,6 +44,7 @@ global disable_spicy_wireguard = (getenv("ZEEK_DISABLE_SPICY_WIREGUARD") == true
 global disable_ics_all = (getenv("ZEEK_DISABLE_ICS_ALL") == true_regex) ? T : F;
 global disable_ics_bacnet = (getenv("ZEEK_DISABLE_ICS_BACNET") == true_regex) ? T : F;
 global disable_ics_bsap = (getenv("ZEEK_DISABLE_ICS_BSAP") == true_regex) ? T : F;
+global disable_ics_c1222 = (getenv("ZEEK_DISABLE_ICS_C1222") == true_regex) ? T : F;
 global disable_ics_dnp3 = (getenv("ZEEK_DISABLE_ICS_DNP3") == true_regex) ? T : F;
 global disable_ics_enip = (getenv("ZEEK_DISABLE_ICS_ENIP") == true_regex) ? T : F;
 global disable_ics_ethercat = (getenv("ZEEK_DISABLE_ICS_ETHERCAT") == true_regex) ? T : F;
@@ -162,6 +171,10 @@ event zeek_init() &priority=-5 {
   }
   if (disable_ics_all || disable_ics_bsap) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_BSAP);
+  }
+  if (disable_ics_all || disable_ics_c1222) {
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_C1222_TCP);
+    Analyzer::disable_analyzer(Analyzer::ANALYZER_C1222_UDP);
   }
   if (disable_ics_all || disable_ics_dnp3) {
     Analyzer::disable_analyzer(Analyzer::ANALYZER_DNP3_TCP);
@@ -351,6 +364,39 @@ redef LongConnection::do_notice = long_conn_do_notice;
       break;
   }
 @endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_authentication_value))
+  redef C1222::log_authentication_value = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_identification_service))
+  redef C1222::log_identification_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_read_write_service))
+  redef C1222::log_read_write_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_logon_security_service))
+  redef C1222::log_logon_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_wait_service))
+  redef C1222::log_wait_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_dereg_reg_service))
+  redef C1222::log_dereg_reg_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_resolve_service))
+  redef C1222::log_resolve_service = T;
+@endif
+
+@if ((!disable_ics_all) && (!disable_ics_c1222) && (c1222_trace_service))
+  redef C1222::log_trace_service = T;
+@endif
+
 @if ((!disable_ics_all) && (!disable_ics_omron_fins) && (!omron_fins_detailed))
   hook OMRON_FINS::log_policy_detail(
     rec : OMRON_FINS::detail_log,
