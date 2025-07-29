@@ -852,7 +852,7 @@ class MalcolmSource extends WISESource {
       "zeek.c1222_service_error.sigerr_resp",
       "zeek.c1222.elements",
       "zeek.c1222.is_encrypted_epsem",
-      "zeek.c1222.service",
+      "zeek.c1222.epsem_service",
       "zeek.c1222.req_resp",
       "zeek.c1222.ap_title",
       "zeek.c1222.ap_invocation_id",
