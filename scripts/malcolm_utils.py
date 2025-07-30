@@ -5,6 +5,7 @@
 
 import contextlib
 import enum
+import fnmatch
 import hashlib
 import inspect
 import ipaddress
@@ -532,6 +533,41 @@ def ChownRecursive(path, uid, gid):
                 os.chown(os.path.join(dirpath, dname), int(uid), int(gid))
             for fname in filenames:
                 os.chown(os.path.join(dirpath, fname), int(uid), int(gid), follow_symlinks=False)
+
+
+###################################################################################################
+# recursively delete a directory tree while excluding specific files based on glob-style patterns
+def rmtree_except(path, exclude_patterns=None, ignore_errors=False):
+    if exclude_patterns is None:
+        exclude_patterns = []
+
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            full_path = os.path.join(root, name)
+            if not any(fnmatch.fnmatch(name, pattern) for pattern in exclude_patterns):
+                try:
+                    os.remove(full_path)
+                except Exception as e:
+                    if not ignore_errors:
+                        raise
+
+        for name in dirs:
+            full_path = os.path.join(root, name)
+            try:
+                os.rmdir(full_path)
+            except OSError:
+                pass
+            except Exception:
+                if not ignore_errors:
+                    raise
+
+    try:
+        os.rmdir(path)
+    except OSError:
+        pass
+    except Exception:
+        if not ignore_errors:
+            raise
 
 
 ###################################################################################################

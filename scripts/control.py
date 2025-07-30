@@ -75,6 +75,7 @@ from malcolm_utils import (
     ParseCurlFile,
     pushd,
     RemoveEmptyFolders,
+    rmtree_except,
     run_process,
     same_file_or_dir,
     str2bool,
@@ -1200,8 +1201,8 @@ def stop(wipe=False):
                                 tmpPath = os.path.join(localPath, relDir)
                                 if os.path.isdir(tmpPath):
                                     if args.debug:
-                                        eprint(f'Performing rmtree on "{tmpPath}"')
-                                    shutil.rmtree(tmpPath, ignore_errors=True)
+                                        eprint(f'Performing rmtree_except on "{tmpPath}"')
+                                    rmtree_except(tmpPath, exclude_patterns=['.gitignore'], ignore_errors=True)
                         # cleanup empty directories
                         if boundPath.clean_empty_dirs:
                             for cleanDir in get_iterable(boundPath.clean_empty_dirs):
