@@ -1,3 +1,9 @@
+# .envrc and .justfile can be used by direnv (https://github.com/direnv/direnv) and
+#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/configure
+#   and ./scripts/auth_setup. This will all likely be made obsolete when cisagov/Malcolm#395
+#   is complete. This hasn't been exhaustively tested, so it's recommended more for
+#   development convenience than it is for production use.
+
 call_recipe := just_executable() + " --justfile=" + justfile()
 
 _base_config +CAPTURE_FLAGS:
@@ -100,6 +106,7 @@ _base_config +CAPTURE_FLAGS:
       "opensearch.env:MALCOLM_NETWORK_INDEX_SUFFIX=$MALCOLM_NETWORK_INDEX_SUFFIX" \
       "opensearch.env:MALCOLM_OTHER_INDEX_ALIAS=$MALCOLM_OTHER_INDEX_ALIAS" \
       "opensearch.env:MALCOLM_OTHER_INDEX_SUFFIX=$MALCOLM_OTHER_INDEX_SUFFIX" \
+      "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_PROCESSES=$SURICATA_AUTO_ANALYZE_PCAP_PROCESSES" \
       "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_THREADS=$SURICATA_AUTO_ANALYZE_PCAP_THREADS" \
       "upload-common.env:PCAP_PIPELINE_IGNORE_PREEXISTING=$PCAP_PIPELINE_IGNORE_PREEXISTING" \
       "upload-common.env:MALCOLM_API_DEBUG=$MALCOLM_API_DEBUG" \
@@ -146,6 +153,10 @@ auth-setup:
     --profile "$MALCOLM_PROFILE" \
     --auth-method "$AUTH_METHOD" \
     --auth-generate-opensearch-internal-creds "$AUTH_GENERATE_OPENSEARCH_CREDS" \
+    --auth-generate-netbox-passwords "$AUTH_GENERATE_NETBOX_PASSWORDS" \
+    --auth-generate-redis-password "$AUTH_GENERATE_REDIS_PASSWORD" \
+    --auth-generate-postgres-password "$AUTH_GENERATE_POSTGRES_PASSWORD" \
+    --auth-generate-keycloak-db-password "$AUTH_GENERATE_KEYCLOAK_DB_PASSWORD" \
     --auth-admin-username "$AUTH_ADMIN_USERNAME" \
     --auth-admin-password-openssl "$(echo -n "$AUTH_ADMIN_PASSWORD" | openssl passwd -1 --stdin)" \
     --auth-admin-password-htpasswd "$(echo -n "$AUTH_ADMIN_PASSWORD" | htpasswd -i -n -B username | cut -d: -f2 | head -n 1)" \
@@ -157,6 +168,7 @@ auth-setup:
     --auth-keycloak-url "$AUTH_KEYCLOAK_URL" \
     --auth-keycloak-client-id "$AUTH_KEYCLOAK_CLIENT_ID" \
     --auth-keycloak-client-secret "$AUTH_KEYCLOAK_CLIENT_SECRET" \
+    --auth-keycloak-bootstrap-password "$AUTH_KEYCLOAK_BOOTSTRAP_PASSWORD" \
     --auth-require-group "$AUTH_REQUIRE_GROUP" \
     --auth-require-role "$AUTH_REQUIRE_ROLE" \
     --auth-netbox-token "$NETBOX_TOKEN" \
@@ -194,6 +206,10 @@ wipe:
     --profile "$MALCOLM_PROFILE" \
     --namespace "$MALCOLM_K8S_NAMESPACE" \
     --delete-namespace "$MALCOLM_K8S_DELETE_NAMESPACE"
+
+nuke:
+  {{call_recipe}} wipe
+  rm -rf ./postgres/*
 
 stop:
   #!/usr/bin/env bash

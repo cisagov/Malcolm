@@ -8,7 +8,7 @@ IMAGE_DISTRIBUTION=bookworm
 BEATS_VER="8.17.0"
 BEATS_OSS="-oss"
 
-ARKIME_VER="5.7.0"
+ARKIME_VER="5.7.1"
 
 BUILD_ERROR_CODE=1
 
@@ -118,6 +118,7 @@ if [ -d "$WORKDIR" ]; then
   rsync -a "$SCRIPT_PATH/shared/bin/" ./config/includes.chroot/usr/local/bin/
   mkdir -p ./config/includes.chroot/opt/zeek/bin/
   mv ./config/includes.chroot/usr/local/bin/zeekdeploy.sh ./config/includes.chroot/opt/zeek/bin/
+  mv ./config/includes.chroot/usr/local/bin/zeek_iana_lookup_generator.py ./config/includes.chroot/opt/zeek/bin/
   ln -s -r ./config/includes.chroot/usr/local/bin/malcolm_utils.py ./config/includes.chroot/opt/zeek/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/zeek/bin/
   rsync -a "$SCRIPT_PATH/suricata/" ./config/includes.chroot/opt/sensor/sensor_ctl/suricata/

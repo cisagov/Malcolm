@@ -33,7 +33,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_VERSION "5.7.0"
+ENV ARKIME_VERSION "5.7.1"
 ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -148,7 +148,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     cd /tmp && \
       curl -fsSL -o ./arkime.deb "$(echo "${ARKIME_DEB_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
       dpkg -i /tmp/arkime.deb && \
-      rm -f ${ARKIME_DIR}/wiseService/source.* ${ARKIME_DIR}/etc/*.systemd.service && \
+      rm -f ${ARKIME_DIR}/etc/*.systemd.service && \
     mkdir -p "${ARKIME_DIR}"/plugins "${ARKIME_DIR}"/rules && \
       curl -fsSL -o "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" "$(echo "${ARKIME_JA4_SO_URL}" | sed "s/XXX/${DEBARCH}/g")" && \
       chmod 755 "${ARKIME_DIR}/plugins/ja4plus.${DEBARCH}.so" && \

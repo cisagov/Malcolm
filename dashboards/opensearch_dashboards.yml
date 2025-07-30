@@ -19,7 +19,7 @@ opensearch:
     - "securitytenant"
     - "Authorization"
     - "X-Forwarded-For"
-    - "X-Remote-Auth"
+    - "X-Forwarded-User"
     - "X-Forwarded-Roles"
   requestTimeout: 180000
 
@@ -28,7 +28,7 @@ opensearch_security:
     type: ["basicauth","proxy"]
     multiple_auth_enabled: true
   proxycache:
-    user_header: "X-Remote-Auth"
+    user_header: "X-Forwarded-User"
     roles_header: "X-Forwarded-Roles"
   multitenancy:
     enabled: false

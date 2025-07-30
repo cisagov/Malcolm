@@ -25,6 +25,7 @@ DASHBOARDS_PREFIX=${DASHBOARDS_PREFIX:-}
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX#"${DASHBOARDS_PREFIX%%[![:space:]]*}"}"
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX%"${DASHBOARDS_PREFIX##*[![:space:]]}"}"
 DASHBOARDS_PREFIX="$(echo "$DASHBOARDS_PREFIX" | tr -d '"\\')"
+DASHBOARDS_NAVIGATION_TEXT_FILE=
 
 MALCOLM_TEMPLATES_DIR="/opt/templates"
 MALCOLM_TEMPLATE_FILE_ORIG="$MALCOLM_TEMPLATES_DIR/malcolm_template.json"
@@ -47,6 +48,25 @@ function cleanup_work_dir {
 
 function get_tmp_output_filename {
   mktemp -p "$TMP_WORK_DIR" curl-XXXXXXX
+}
+
+function escape_for_dashboard_markdown() {
+  local INPUT_MARKDOWN_FILE="$1"
+  [[ -r "$INPUT_MARKDOWN_FILE" ]] && \
+    awk '
+    {
+      # If the line starts with [ and ends with ), it’s likely a solo link
+      if ($0 ~ /^\[[^]]+\]\([^)]*\)$/) {
+        printf "%s  \\\\n", $0
+      } else {
+        # Escape newlines for all other lines
+        printf "%s\\\\n", $0
+      }
+    }
+    END {
+      print ""
+    }
+    ' "$INPUT_MARKDOWN_FILE"
 }
 
 function DoReplacersInFile() {
@@ -165,7 +185,38 @@ function DoReplacersInFile() {
       # Elasticsearch - flattened - https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html
       sed -i "s/flat_object/flattened/g" "${REPLFILE}" || true
     fi
-  fi
+
+    if [[ "$FILE_TYPE" == "dashboard" ]]; then
+
+      # navigation markdown shared by all dashboards
+      if [[ -n "$DASHBOARDS_NAVIGATION_TEXT_FILE" ]] && [[ -r "$DASHBOARDS_NAVIGATION_TEXT_FILE" ]]; then
+        DASHBOARDS_NAVIGATION_TEXT_ESCAPED="$(printf '%q' "$(cat "$DASHBOARDS_NAVIGATION_TEXT_FILE")")"
+        sed -i "s|MALCOLM_NAVIGATION_MARKDOWN_REPLACER|$DASHBOARDS_NAVIGATION_TEXT_ESCAPED|g" "${REPLFILE}"
+      fi
+
+      if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
+        # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
+        sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/arkime)//' "${REPLFILE}"
+        # take care of a few other substitutions
+        sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "${REPLFILE}"
+      fi
+
+      # at this point dashboards are the older-style JSON dashboards (top-level objects array)
+      if jq -e 'type == "object" and (.objects | type == "array")' "${REPLFILE}" >/dev/null 2>/dev/null; then
+
+        # prepend $DASHBOARDS_PREFIX to dashboards' titles
+        [[ -n "$DASHBOARDS_PREFIX" ]] && \
+          jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" \
+            < "${REPLFILE}" \
+            | sponge "${REPLFILE}"
+
+        # convert old-style JSON dashboards to NDJSON format
+        jq -c '.objects[]' < "${REPLFILE}" > "${REPLFILE%.json}.ndjson" && \
+          [[ -s "${REPLFILE%.json}.ndjson" ]] && \
+          rm -f "${REPLFILE}"
+      fi # check for old-school .json dashboards
+    fi # FILE_TYPE is dashboard
+  fi # file exists
 }
 
 function DoReplacersForDir() {
@@ -180,10 +231,10 @@ function DoReplacersForDir() {
   fi
 }
 
-# store in an associative array the id, title, and .updated_at timestamp of a JSON file representing a dashboard
+# store in an associative array the id, title, and .updated_at timestamp of a JSON/NDJSON file representing a dashboard
 #   arguments:
 #     1 - the name of an associative array hash into which to insert the data
-#     2 - the filename of the JSON file to check
+#     2 - the filename to check
 #     3 - if the timestamp is not found, the fallback timestamp to use
 function GetDashboardJsonInfo() {
   local -n RESULT_HASH=$1
@@ -197,9 +248,17 @@ function GetDashboardJsonInfo() {
 
   if [[ -f "$JSON_FILE_TO_IMPORT" ]]; then
     set +e
-    DASHBOARD_TO_IMPORT_ID="$(jq -r '.objects[] | select(.type == "dashboard") | .id' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
-    DASHBOARD_TO_IMPORT_TITLE="$(jq -r '.objects[] | select(.type == "dashboard") | .attributes.title' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
-    DASHBOARD_TO_IMPORT_TIMESTAMP="$(jq -r '.objects[] | select(.type == "dashboard") | .updated_at' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | sort | tail -n 1)"
+    if jq -e 'type == "object" and (.objects | type == "array")' "$JSON_FILE_TO_IMPORT" >/dev/null; then
+      # old-school JSON format
+      DASHBOARD_TO_IMPORT_ID="$(jq -r '.objects[] | select(.type == "dashboard") | .id' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
+      DASHBOARD_TO_IMPORT_TITLE="$(jq -r '.objects[] | select(.type == "dashboard") | .attributes.title' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
+      DASHBOARD_TO_IMPORT_TIMESTAMP="$(jq -r '.objects[] | select(.type == "dashboard") | .updated_at' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | sort | tail -n 1)"
+    else
+      # new NDJSON format
+      DASHBOARD_TO_IMPORT_ID="$(jq -r 'select(.type == "dashboard") | .id' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
+      DASHBOARD_TO_IMPORT_TITLE="$(jq -r 'select(.type == "dashboard") | .attributes.title' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | head -n 1)"
+      DASHBOARD_TO_IMPORT_TIMESTAMP="$(jq -r 'select(.type == "dashboard") | .updated_at' < "$JSON_FILE_TO_IMPORT" 2>/dev/null | sort | tail -n 1)"
+    fi
     set -e
   fi
 
@@ -468,44 +527,40 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
           #############################################################################################################################
           # Dashboards
-          #   - Dashboard JSON files have an .updated_at field with an ISO 8601-formatted date (e.g., "2024-04-29T15:49:16.000Z").
+          #   - Dashboard NDJSON files have an .updated_at field with an ISO 8601-formatted date (e.g., "2024-04-29T15:49:16.000Z").
           #     For each dashboard, query to see if the object exists and get the .updated_at field for the .type == "dashboard"
           #     objects. If the dashboard doesn't already exist, or if the file-to-be-imported date is newer than the old one,
           #     then import the dashboard.
 
+
           DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t dashboards-XXXXXX)"
           rsync -a /opt/dashboards/ "$DASHBOARDS_IMPORT_DIR"/
+          DASHBOARDS_NAVIGATION_TEXT_FILE="$DASHBOARDS_IMPORT_DIR"/navigation_escaped.txt
+          escape_for_dashboard_markdown "$DASHBOARDS_IMPORT_DIR"/navigation.md >"$DASHBOARDS_NAVIGATION_TEXT_FILE" 2>/dev/null
           DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
-          for i in "${DASHBOARDS_IMPORT_DIR}"/*.json; do
+          for i in "${DASHBOARDS_IMPORT_DIR}"/*.ndjson; do
 
             # get info about the dashboard to be imported
             declare -A NEW_DASHBOARD_INFO
             GetDashboardJsonInfo NEW_DASHBOARD_INFO "$i" "$CURRENT_ISO_TIMESTAMP"
 
-            # get the old dashboard JSON and its info
+            # get the old dashboard NDJSON and its info
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
-              -XGET "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/export?dashboard=$DASHBOARD_TO_IMPORT_ID" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || true
+              -XPOST "$DASHB_URL/api/saved_objects/_export" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+              -d "$(jq -n --arg id "$DASHBOARD_TO_IMPORT_ID" '{objects:[{type:"dashboard",id:$id}],includeReferencesDeep:true}')" || true
             declare -A OLD_DASHBOARD_INFO
             GetDashboardJsonInfo OLD_DASHBOARD_INFO "${i}_old" "$EPOCH_ISO_TIMESTAMP"
             rm -f "${i}_old"
 
             # compare the timestamps and import if it's newer
             if [[ "${NEW_DASHBOARD_INFO["timestamp"]}" > "${OLD_DASHBOARD_INFO["timestamp"]}" ]]; then
-              if [[ "$DATASTORE_TYPE" == "elasticsearch" ]]; then
-                # strip out Arkime and NetBox links from dashboards' navigation pane when doing Kibana import (idaholab/Malcolm#286)
-                sed -i 's/  \\\\n\[↪ NetBox\](\/netbox\/)  \\\\n\[↪ Arkime\](\/arkime)//' "$i"
-                # take care of a few other substitutions
-                sed -i 's/opensearchDashboardsAddFilter/kibanaAddFilter/g' "$i"
-              fi
-              # prepend $DASHBOARDS_PREFIX to dashboards' titles
-              [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
               # import the dashboard
               echo "Importing dashboard \"${NEW_DASHBOARD_INFO["title"]}\" (${NEW_DASHBOARD_INFO["timestamp"]} > ${OLD_DASHBOARD_INFO["timestamp"]}) ..."
               CURL_OUT=$(get_tmp_output_filename)
               curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-                -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i" || ( cat "$CURL_OUT" && echo )
+                -XPOST "$DASHB_URL/api/saved_objects/_import?overwrite=true" \
+                -H "$XSRF_HEADER:true" --form "file=@$i" || ( cat "$CURL_OUT" && echo )
             fi # timestamp check
           done
 
@@ -516,7 +571,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t beats-XXXXXX)"
           rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
           DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
-          for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.json; do
+          for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.ndjson; do
 
             # get info about the dashboard to be imported
             declare -A NEW_DASHBOARD_INFO
@@ -524,22 +579,21 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             # get the old dashboard JSON and its info
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
-              -XGET "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/export?dashboard=$DASHBOARD_TO_IMPORT_ID" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' || true
+              -XPOST "$DASHB_URL/api/saved_objects/_export" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+              -d "$(jq -n --arg id "$DASHBOARD_TO_IMPORT_ID" '{objects:[{type:"dashboard",id:$id}],includeReferencesDeep:true}')" || true
             declare -A OLD_DASHBOARD_INFO
             GetDashboardJsonInfo OLD_DASHBOARD_INFO "${i}_old" "$EPOCH_ISO_TIMESTAMP"
             rm -f "${i}_old"
 
             # compare the timestamps and import if it's newer
             if [[ "${NEW_DASHBOARD_INFO["timestamp"]}" > "${OLD_DASHBOARD_INFO["timestamp"]}" ]]; then
-              # prepend $DASHBOARDS_PREFIX to dashboards' titles
-              [[ -n "$DASHBOARDS_PREFIX" ]] && jq ".objects |= map(if .type == \"dashboard\" then .attributes.title |= \"${DASHBOARDS_PREFIX} \" + . else . end)" < "$i" | sponge "$i"
               # import the dashboard
               echo "Importing dashboard \"${NEW_DASHBOARD_INFO["title"]}\" (${NEW_DASHBOARD_INFO["timestamp"]} > ${OLD_DASHBOARD_INFO["timestamp"]}) ..."
               CURL_OUT=$(get_tmp_output_filename)
               curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-                -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/dashboards/import?force=true" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "@$i" || ( cat "$CURL_OUT" && echo )
+                -XPOST "$DASHB_URL/api/saved_objects/_import?overwrite=true" \
+                -H "$XSRF_HEADER:true" --form "file=@$i" || ( cat "$CURL_OUT" && echo )
             fi # timestamp check
           done
 

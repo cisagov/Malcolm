@@ -47,15 +47,6 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
   fi
   [[ -z "${NODE_COUNT}" ]] && NODE_COUNT=1
 
-  # start and wait patiently for WISE
-  if [[ "$WISE" = "on" ]] ; then
-    touch /var/run/arkime/runwise
-    echo "Giving WISE time to start..."
-    sleep 5
-    until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
-    echo "WISE is running!"
-    echo
-  fi
 
   DB_INIT_ARGS=()
   if [[ -n "${ARKIME_INIT_SHARDS}" ]]; then
@@ -105,8 +96,9 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     done
 
     # TODO: until Arkime v6.0.0 is out, as per Andy Wick and I's discussion in slack, at the moment not all of the Arkime permissions can be set on roles,
-    #   so creating these doesn't really do us any good. For now, then, Arkime roles are going to be handled purely based on URI path in the NGINX stuff
-    #   (nginx/lua/nginx_auth_helpers.lua). Once all of these permissions are settable at the role level in Arkime, we can uncomment this and revisit it.
+    #   so creating these doesn't really do us any good. For now, then, Arkime roles (the user-defined ones, at least, the ones that start with role: below)
+    #   are going to be handled purely based on URI path in the NGINX stuff (nginx/lua/nginx_auth_helpers.lua).
+    #   Once all of these permissions are settable at the role level in Arkime, we can uncomment those and revisit it.
     # -SG 2025.06.17
     # echo "Creating user-defined roles..."
     # for ROLE_FILE in "$ARKIME_DIR"/etc/roles/*.json; do
@@ -135,6 +127,16 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" upgradenoprompt --ifneeded "${DB_INIT_ARGS[@]}"
     echo "$OPENSEARCH_PRIMARY database is up-to-date for Arkime version $ARKIME_VERSION!"
   fi # if/else OpenSearch database initialized
+
+  # start and wait patiently for WISE
+  if [[ "$WISE" = "on" ]] ; then
+    touch /var/run/arkime/runwise
+    echo "Giving WISE time to start..."
+    sleep 5
+    until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
+    echo "WISE is running!"
+    echo
+  fi
 
   # before running viewer, call _refresh to make sure everything is available for search first
   curl "${CURL_CONFIG_PARAMS[@]}" -sS -XPOST "${OPENSEARCH_URL}/_refresh"
