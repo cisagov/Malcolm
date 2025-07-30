@@ -45,12 +45,8 @@ def filter(event)
     end
   end
 
-  _names = _names.uniq
-  if _names.length > 1
-    event.set("#{@target}", _names)
-  elsif _names.length > 0
-    event.set("#{@target}", _names.first)
-  end
+  names = _names.uniq
+  event.set("#{@target}", names.size > 1 ? names : names.first) unless names.empty?
 
   [event]
 end
@@ -64,11 +60,7 @@ def psych_load_yaml(filename)
   parser.code_point_limit = 64*1024*1024
   parser.parse(IO.read(filename, :mode => 'r:bom|utf-8'))
   yaml_obj = Psych::Visitors::ToRuby.create().accept(parser.handler.root)
-  if yaml_obj.is_a?(Array) && (yaml_obj.length() == 1)
-    yaml_obj.first
-  else
-    yaml_obj
-  end
+  yaml_obj.is_a?(Array) && yaml_obj.size == 1 ? yaml_obj.first : yaml_obj
 end
 
 ###############################################################################

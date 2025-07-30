@@ -79,7 +79,11 @@ if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; t
         --auth-admin-password-htpasswd '$2y$05$a8jiJsLZ1mFnt5srJD3HAOKC8IUaZcOlsqp8txBlmMjW6wUXUtN3S' \
         --auth-generate-webcerts \
         --auth-generate-fwcerts \
-        --auth-generate-netbox-passwords
+        --auth-generate-netbox-passwords \
+        --auth-generate-redis-password \
+        --auth-generate-postgres-password \
+        --auth-generate-keycloak-db-password \
+        --auth-generate-opensearch-internal-creds
 
     python3 ./scripts/start
 

@@ -376,7 +376,7 @@ if [[ -f "$MALCOLM_DOCKER_COMPOSE" ]] && \
       $($GREP -q -P "NGINX_AUTH_MODE\s*=s*no_authentication" "$MALCOLM_PATH"/config/auth-common.env && echo guest); do
       ${DOCKER_COMPOSE_BIN[@]} --profile "$MALCOLM_PROFILE" -f "$MALCOLM_FILE" exec -T arkime curl -ksSL -XGET \
         --header 'Content-type:application/json' \
-        --header "http_auth_http_user:$USER" \
+        --header "X-Forwarded-User:$USER" \
         --header "Authorization:" \
         "https://localhost:8005" || true
     done

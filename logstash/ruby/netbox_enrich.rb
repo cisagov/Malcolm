@@ -202,9 +202,7 @@ def register(
 
   # field containing site ID (or name) to use in queries for enrichment lookups and autopopulation
   @lookup_site_id = params["lookup_site_id"]
-  if !@lookup_site_id.nil? && @lookup_site_id.empty?
-    @lookup_site_id = nil
-  end
+  @lookup_site_id = nil if @lookup_site_id.respond_to?(:empty?) && @lookup_site_id.empty?
 
   # fallback/default site value to use in queries for enrichment lookups and autopopulation,
   #   either specified directly or read from ENV
@@ -213,9 +211,7 @@ def register(
   if @lookup_site.nil? && !_lookup_site_env.nil?
     @lookup_site = ENV[_lookup_site_env]
   end
-  if !@lookup_site.nil? && @lookup_site.empty?
-    @lookup_site = nil
-  end
+  @lookup_site = nil if @lookup_site.respond_to?(:empty?) && @lookup_site.empty?
 
   # whether or not to enrich service for ip_device
   _lookup_service_str = params["lookup_service"]
@@ -260,9 +256,7 @@ def register(
   if @add_tag.nil? && !_add_tag_env.nil?
     @add_tag = ENV[_add_tag_env]
   end
-  if !@add_tag.nil? && @add_tag.empty?
-    @add_tag = nil
-  end
+  @add_tag = nil if @add_tag.respond_to?(:empty?) && @add_tag.empty?
 
   # verbose - either specified directly or read from ENV via verbose_env
   #   false - store the "name" (fallback to "display") and "id" value(s) as @target.name and @target.id
@@ -354,9 +348,7 @@ def register(
   if @default_manuf.nil? && !_default_manuf_env.nil?
     @default_manuf = ENV[_default_manuf_env]
   end
-  if !@default_manuf.nil? && @default_manuf.empty?
-    @default_manuf = nil
-  end
+  @default_manuf = nil if @default_manuf.respond_to?(:empty?) && @default_manuf.empty?
 
   _vendor_oui_map_path = params.fetch("vendor_oui_map_path", "/etc/vendor_macs.yaml")
   if File.exist?(_vendor_oui_map_path)
@@ -389,18 +381,14 @@ def register(
   if @default_dtype.nil? && !_default_dtype_env.nil?
     @default_dtype = ENV[_default_dtype_env]
   end
-  if !@default_dtype.nil? && @default_dtype.empty?
-    @default_dtype = nil
-  end
+  @default_dtype = nil if @default_dtype.respond_to?(:empty?) && @default_dtype.empty?
 
   @default_role = params["default_role"]
   _default_role_env = params["default_role_env"]
   if @default_role.nil? && !_default_role_env.nil?
     @default_role = ENV[_default_role_env]
   end
-  if !@default_role.nil? && @default_role.empty?
-    @default_role = nil
-  end
+  @default_role = nil if @default_role.respond_to?(:empty?) && @default_role.empty?
 
   # threshold for fuzzy string matching (for manufacturer, etc.)
   _autopopulate_fuzzy_threshold_str = params["autopopulate_fuzzy_threshold"]
@@ -408,7 +396,7 @@ def register(
   if _autopopulate_fuzzy_threshold_str.nil? && !_autopopulate_fuzzy_threshold_str_env.nil?
     _autopopulate_fuzzy_threshold_str = ENV[_autopopulate_fuzzy_threshold_str_env]
   end
-  if _autopopulate_fuzzy_threshold_str.nil? || _autopopulate_fuzzy_threshold_str.empty?
+  if _autopopulate_fuzzy_threshold_str.to_s.empty?
     @autopopulate_fuzzy_threshold = 0.95
   else
     @autopopulate_fuzzy_threshold = _autopopulate_fuzzy_threshold_str.to_f
@@ -435,9 +423,7 @@ def register(
   if _autopopulate_subnets.nil? && !_autopopulate_subnets_env.nil?
     _autopopulate_subnets = ENV[_autopopulate_subnets_env]
   end
-  if !_autopopulate_subnets.nil? && _autopopulate_subnets.empty?
-    _autopopulate_subnets = nil
-  end
+  _autopopulate_subnets = nil if _autopopulate_subnets.respond_to?(:empty?) && _autopopulate_subnets.empty?
 
   if !_autopopulate_subnets.nil? &&
      ($global_autopopulate_subnets_config_site_hash_populated.value == 0) &&
@@ -795,11 +781,7 @@ def psych_load_yaml(
   parser.code_point_limit = 64*1024*1024
   parser.parse(IO.read(filename, :mode => 'r:bom|utf-8'))
   yaml_obj = Psych::Visitors::ToRuby.create().accept(parser.handler.root)
-  if yaml_obj.is_a?(Array) && (yaml_obj.length() == 1)
-    yaml_obj.first
-  else
-    yaml_obj
-  end
+  yaml_obj.is_a?(Array) && yaml_obj.size == 1 ? yaml_obj.first : yaml_obj
 end
 
 def collect_values(
@@ -882,7 +864,7 @@ def lookup_or_create_site(
         if (_sites_response = _nb_to_use.get('dcim/sites/', _query).body) &&
            _sites_response.is_a?(Hash) &&
            (_tmp_sites = _sites_response.fetch(:results, [])) &&
-           (_tmp_sites.length() > 0)
+           (_tmp_sites.size > 0)
         then
            _site = _tmp_sites.first
         elsif @debug
@@ -916,7 +898,7 @@ def lookup_or_create_site(
         if (_sites_response = _nb_to_use.get('dcim/sites/', _query).body) &&
            _sites_response.is_a?(Hash) &&
            (_tmp_sites = _sites_response.fetch(:results, [])) &&
-           (_tmp_sites.length() > 0)
+           (_tmp_sites.size > 0)
         then
            _site = _tmp_sites.first
         elsif @debug
@@ -986,8 +968,8 @@ def lookup_manuf(
                              :vm => false }
               end
             end
-            _query[:offset] += _tmp_manufs.length()
-            break unless (_tmp_manufs.length() >= @page_size)
+            _query[:offset] += _tmp_manufs.size
+            break unless (_tmp_manufs.size >= @page_size)
           else
             break
           end
@@ -1052,7 +1034,7 @@ def lookup_or_create_manuf_and_dtype(
         if (_manufs_response = nb.get('dcim/manufacturers/', _query).body) &&
            _manufs_response.is_a?(Hash) &&
            (_tmp_manufs = _manufs_response.fetch(:results, [])) &&
-           (_tmp_manufs.length() > 0)
+           (_tmp_manufs.size > 0)
         then
            _manuf[:id] = _tmp_manufs.first.fetch(:id, nil)
            _manuf[:match] = 1.0
@@ -1087,7 +1069,7 @@ def lookup_or_create_manuf_and_dtype(
         if (_dtypes_response = nb.get('dcim/device-types/', _query).body) &&
            _dtypes_response.is_a?(Hash) &&
            (_tmp_dtypes = _dtypes_response.fetch(:results, [])) &&
-           (_tmp_dtypes.length() > 0)
+           (_tmp_dtypes.size > 0)
         then
            _dtype = _tmp_dtypes.first
         end
@@ -1155,8 +1137,8 @@ def lookup_prefixes(
                         :tags => p.fetch(:tags, nil),
                         :details => @verbose ? p : nil }
         end
-        _query[:offset] += _tmp_prefixes.length()
-        break unless (_tmp_prefixes.length() >= @page_size)
+        _query[:offset] += _tmp_prefixes.size
+        break unless (_tmp_prefixes.size >= @page_size)
       else
         break
       end
@@ -1185,7 +1167,7 @@ def lookup_or_create_role(
         if (_roles_response = nb.get('dcim/device-roles/', _query).body) &&
            _roles_response.is_a?(Hash) &&
            (_tmp_roles = _roles_response.fetch(:results, [])) &&
-           (_tmp_roles.length() > 0)
+           (_tmp_roles.size > 0)
         then
            _role = _tmp_roles.first
         end
@@ -1270,8 +1252,8 @@ def lookup_devices(
                 then
                   _tmp_services = _services_response.fetch(:results, [])
                   _services.unshift(*_tmp_services) unless _tmp_services.nil? || _tmp_services.empty?
-                  _service_query[:offset] += _tmp_services.length()
-                  break unless (_tmp_services.length() >= @page_size)
+                  _service_query[:offset] += _tmp_services.size
+                  break unless (_tmp_services.size >= @page_size)
                 else
                   break
                 end
@@ -1293,8 +1275,8 @@ def lookup_devices(
                           :details => @verbose ? _device : nil }
           end
         end
-        _query[:offset] += _tmp_ip_addresses.length()
-        break unless (_tmp_ip_addresses.length() >= @page_size)
+        _query[:offset] += _tmp_ip_addresses.size
+        break unless (_tmp_ip_addresses.size >= @page_size)
       else
         # weird/bad response, bail
         break
@@ -1636,7 +1618,7 @@ def netbox_lookup(
         #       oui: _autopopulate_oui.to_s }) if @debug
 
         if _previous_device_id.is_a?(Array) &&
-          (_previous_device_id.length() == 1) &&
+          (_previous_device_id.size == 1) &&
           (_previous_device_id = _previous_device_id.first)
         then
           if !_autopopulate_hostname.to_s.empty? &&

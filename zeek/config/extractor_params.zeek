@@ -21,6 +21,7 @@ export {
     "application/xml",
     "text/json",
     "text/plain",
+    "text/x-file",
     "text/xml",
   } &redef;
 
@@ -886,6 +887,7 @@ export {
     ["text/x-asm"] = "asm",
     ["text/x-c"] = "c",
     ["text/x-component"] = "htc",
+    ["text/x-file"] = "txt",
     ["text/x-fortran"] = "f",
     ["text/x-hdml"] = "hdml",
     ["text/x-html-insertion"] = "qhtm",

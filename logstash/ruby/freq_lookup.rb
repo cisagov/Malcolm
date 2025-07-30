@@ -67,8 +67,8 @@ def filter(event)
   rescue Exception => _e
     event.set('ruby_exception', 'ruby_dns_freq_lookup: ' + _e.message)
   end
-  event.set("#{@target_1}", _scores_v1) unless (_scores_v1.length == 0)
-  event.set("#{@target_2}", _scores_v2) unless (_scores_v2.length == 0)
+  event.set("#{@target_1}", _scores_v1) unless _scores_v1.empty?
+  event.set("#{@target_2}", _scores_v2) unless _scores_v2.empty?
 
   [event]
 end

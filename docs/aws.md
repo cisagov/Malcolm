@@ -7,10 +7,12 @@
         + [Instance creation](#AWSEC2Instance)
         + [Malcolm setup](#AWSEC2Install)
         + [Running Malcolm](#AWSEC2Run)
-    - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)](#KubernetesEKS)
-        + [Deploying with EKS](#AWSEKS)
-        + [Deploying with EKS Auto Mode](#AWSEKSAuto)
-        + [Common Steps for EKS Deployments](#AWSEKSCommon)
+    - [Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS) in Auto Mode](#AWSEKSAuto)
+        + [Infrastructure Setup](#AWSEKSAutoInfrastructure)
+        + [Malcolm Setup](#AWSEKSAutoMalcolmSetup)
+        + [Run and Access Malcolm](#AWSEKSAutoMalcolmAccess)
+        + [Monitor Deployment](#AWSEKSAutoMonitor)
+        + [Cleanup](#AWSEKSAutoCleanup)
     - [Generating a Malcolm Amazon Machine Image (AMI)](#AWSAMI)
         + [Launching an EC2 instance from the Malcolm AMI](#AWSAMILaunch)
         + [Using MFA](#AWSAMIMFA)
@@ -101,7 +103,40 @@ This section outlines the process of using the [AWS Command Line Interface (CLI)
 
 These steps are to be run on a Linux, Windows, or macOS system in a command line environment with the [AWS Command Line Interface (AWS CLI)](https://aws.amazon.com/cli/) installed. Users should adjust these steps to their own use cases in terms of naming resources, setting security policies, etc.
 
-* Create a [key pair for the EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html)
+* To enable connecting to the instance using [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html), create an [IAM role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) for the EC2 instance and attach it to an instance profile
+
+```bash
+$ aws iam create-role \
+    --role-name EC2-SSM-Role \
+    --assume-role-policy-document file://<(cat <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ec2.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+)
+
+$ aws iam attach-role-policy \
+    --role-name EC2-SSM-Role \
+    --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+$ aws iam create-instance-profile \
+    --instance-profile-name EC2-SSM-Role
+
+$ aws iam add-role-to-instance-profile \
+    --instance-profile-name EC2-SSM-Role \
+    --role-name EC2-SSM-Role
+```
+
+* For users planning on connecting to the EC2 instance using SSH, create a [key pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html). This is not necessary for users only connecting to the instance by using [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html).
 
 ```bash
 $ aws ec2 create-key-pair \
@@ -118,11 +153,11 @@ $ chmod 600 ./malcolm-key.pem
 $ aws ec2 create-security-group \
     --group-name malcolm-sg \
     --description "Malcolm SG"
-
 ```
 
 * Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
     - These rules will allow SSH and HTTPS access from the address(es) specified
+        - The SSH port (`22`) may be omitted when only connecting to the instance via [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html)
     - Replace `#.#.#.#` with the public IP address(es) (i.e., addresses which will be allowed to connect to the Malcolm instance via SSH and HTTPS) in the following commands
 
 ```bash
@@ -135,7 +170,6 @@ $ for PORT in 22 443; do \
         --port $PORT \
         --cidr $PUBLIC_IP/32; \
 done
-
 ```
 
 * [Get a list](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html) of Ubuntu Minimal [AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
@@ -150,13 +184,13 @@ $ aws ec2 describe-images \
     --filters "Name=name,Values=ubuntu-minimal/images/*/ubuntu-noble-24.04-ARCH*" \
     --query "Images[*].[Name,ImageId,CreationDate]" \
     --output text | sort
-
 ```
 
 * Launch selected AMI
     - Replace `INSTANCE_TYPE` with the desired instance type in the following command
         + See [EC2 Instance Types](#AWSInstanceSizing) for suggestions
     - Replace `AMI_ID` with the AMI ID from the previous step in the following command
+    - Users who skipped the `create-key-pair` step above shoult omit the `--key-name malcolm-key` argument in the following command
     - The size of the storage volume will vary depending on the amount of data users plan to process and retain in Malcolm. The example here uses 100 GiB; users should adjust as needed for their specific use case.
 
 ```bash
@@ -164,11 +198,11 @@ $ aws ec2 run-instances \
     --image-id AMI_ID \
     --instance-type INSTANCE_TYPE \
     --key-name malcolm-key \
+    --iam-instance-profile Name=EC2-SSM-Role \
     --security-group-ids malcolm-sg \
     --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":100,\"VolumeType\":\"gp3\"}}]" \
     --count 1 \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=Malcolm}]"
-
 ```
 
 * Get [instance details](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html) and check its status
@@ -178,14 +212,27 @@ $ aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=Malcolm" \
     --query "Reservations[].Instances[].{ID:InstanceId,IP:PublicIpAddress,State:State.Name}" \
     --output table
-
 ```
 
 ### <a name="AWSEC2Install"></a> Malcolm setup
 
-The next steps are to be run as the `ubuntu` user *inside* the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created in the first step.
+The next steps are to be run as the `ubuntu` user *inside* the EC2 instance, either connected via [Session Manager](https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/connect-to-an-amazon-ec2-instance-by-using-session-manager.html) or via SSH using the key pair created in the first step.
 
-* Install `curl`, `unzip`, and `python3`
+* Verify the current shell is being run as the `ubuntu` user, and switch to it if not
+
+```bash
+$ whoami
+ssm-user
+
+$ sudo --login --user ubuntu
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+ubuntu@ip-#-#-#-#:~$ whoami
+ubuntu
+```
+
+* Install `curl`, `unzip`, and Python dependencies
 
 ```bash
 $ sudo apt-get -y update
@@ -198,7 +245,6 @@ $ sudo apt-get -y install --no-install-recommends \
     python3-dotenv \
     python3-pip \
     python3-ruamel.yaml
-
 ```
 
 * [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
@@ -239,7 +285,6 @@ Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
 Attempt to install Docker using official repositories? (Y / n): y
 
 Apply recommended system tweaks automatically without asking for confirmation? y
-
 ```
 
 * `install.py` part 2: Malcolm configuration
@@ -258,12 +303,11 @@ Apply recommended system tweaks automatically without asking for confirmation? y
     - [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the remaining prompts.
 
 ```bash
-$ cd ~/malcolm
+$ cd ~/Malcolm
 
 $ ./scripts/auth_setup
 
 all        Configure all authentication-related settings
-
 ```
 
 ### <a name="AWSEC2Run"></a> Running Malcolm
@@ -274,7 +318,7 @@ all        Configure all authentication-related settings
     - Once Malcolm is running, the start script will output **Started Malcolm** and return to the command prompt.
 
 ```bash
-$ cd ~/malcolm
+$ cd ~/Malcolm
 
 $ ./scripts/start
 
@@ -290,7 +334,7 @@ Malcolm services can be accessed at https://<IP address>/
     - Running `./scripts/status` in the Malcolm installation directory will display the status of Malcolm's services.
 
 ```bash
-$ cd ~/malcolm
+$ cd ~/Malcolm
 
 $ ./scripts/status
 NAME                          IMAGE                                                      COMMAND                  SERVICE             CREATED         STATUS                   PORTS
@@ -325,228 +369,66 @@ malcolm-zeek-live-1           ghcr.io/idaholab/malcolm/zeek:{{ site.malcolm.vers
     - Log in with the credentials specified when setting up authentication
     - See the Malcolm [Learning Tree](https://github.com/cisagov/Malcolm/wiki/Learning) and [documentation](README.md) for next steps.
 
-## <a name="KubernetesEKS"></a>Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS)
+## <a name="AWSEKSAuto"></a>Deploying Malcolm on Amazon Elastic Kubernetes Service (EKS) in Auto Mode
 
-This section outlines the process of setting up a cluster on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services (AWS)](https://aws.amazon.com/).
+This section outlines the process of setting up a Malcolm cluster on [Amazon Elastic Kubernetes Service (EKS)](https://aws.amazon.com/eks/) using [Amazon Web Services (AWS)](https://aws.amazon.com/) with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
 
 These instructions assume good working knowledge of AWS and EKS. Good documentation resources can be found in the [AWS documentation](https://docs.aws.amazon.com/index.html), the [EKS documentation](https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
 ) and the [EKS Workshop](https://www.eksworkshop.com/).
 
-This section covers two deployment options: deploying Malcolm in a standard Kubernetes cluster on Amazon EKS, and deploying Malcolm with [EKS auto mode](https://aws.amazon.com/eks/auto-mode/).
+### <a name="AWSEKSAutoInfrastructure"></a>Infrastructure Setup
 
-* The first step in each of these respective procedures is to download Malcolm. 
-    
-    * Install some dependencies (this will vary by OS distribution, adjust as needed)
-
-    ```bash
-    $ sudo apt-get -y update
-
-    $ sudo apt-get -y install --no-install-recommends \
-        apache2-utils \
-        curl \
-        openssl \
-        python3 \
-        python3-dialog \
-        python3-dotenv \
-        python3-kubernetes \
-        python3-pip \
-        python3-ruamel.yaml \
-        unzip \
-        xz-utils
-
-    ```
-
-    * [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
-        - Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example), and either download the Malcolm release ZIP file there or use `curl` to do so:
-
-    ```bash
-    $ curl -OJsSLf https://github.com/cisagov/Malcolm/releases/latest/download/malcolm-{{ site.malcolm.version }}-docker_install.zip
-
-    $ ls -l malcolm*.zip
-    -rw-rw-r-- 1 ubuntu ubuntu 191053 Apr 10 14:26 malcolm-{{ site.malcolm.version }}-docker_install.zip
-    ```
-
-    * Extract the Malcolm release ZIP file
-
-    ```bash
-    $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
-    Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
-      inflating: install.py
-      inflating: malcolm_20250401_225238_df27028c.README.txt
-      inflating: malcolm_20250401_225238_df27028c.tar.gz
-      inflating: malcolm_common.py
-      inflating: malcolm_kubernetes.py
-      inflating: malcolm_utils.py
-    ```
-
-### <a name="AWSEKS"></a>Deploying with EKS
-
-* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed (see [EC2 Instance Types](#AWSInstanceSizing) for suggestions for `instanceType`)
-
-```yml
-# cluster.yaml
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
-metadata:
-  name: malcolm-cluster
-  region: us-east-1
-
-nodeGroups:
-  - name: private-nodes
-    instanceType: t3.2xlarge
-    desiredCapacity: 2
-    minSize: 1
-    maxSize: 3
-    privateNetworking: true
-```
-
-* [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
-
-```bash
-$ eksctl create cluster -f cluster.yaml
-
-```
-
-* Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
-
-```bash
-$ eksctl utils associate-iam-oidc-provider \
-    --region=us-east-1 --cluster=malcolm-cluster --approve
-
-```
-
-* Create namespace
-
-```bash
-$ kubectl create namespace malcolm
-
-```
-
-* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
-
-### <a name="AWSEKSAuto"></a> Deploying with [EKS Auto Mode](https://aws.amazon.com/eks/auto-mode/)
-
-* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` and customize as needed
-
-```yml
-# cluster.yaml
-apiVersion: eksctl.io/v1alpha5
-kind: ClusterConfig
-
-metadata:
-  name: malcolm-cluster
-  region: us-east-1
-
-addonsConfig:
-  disableDefaultAddons: true
-
-autoModeConfig:
-  enabled: true
-```
-
-* [Create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
-
-```bash
-$ eksctl create cluster -f cluster.yaml
-
-```
-
-* Enable [OIDC provider](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
-
-```bash
-$ eksctl utils associate-iam-oidc-provider \
-    --region=us-east-1 --cluster=malcolm-cluster --approve
-
-```
-
-* Deploy [metrics-server](https://docs.aws.amazon.com/eks/latest/userguide/metrics-server.html)
-    * This step is optional: it is only needed for Malcolm's `./scripts/status` script used for monitoring the Malcolm deployment
-
-```bash
-$ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-
-```
-
-* Create namespace
-
-```bash
-$ kubectl create namespace malcolm
-
-```
-
-* Proceed to [Common Steps for EKS Deployments](#AWSEKSCommon)
-
-### <a name="AWSEKSCommon"></a> Common Steps for EKS Deployments
-
-* Configure Malcolm
-    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
-    * Malcolm's configuration scripts will guide users through the setup process.
-    * Use the following resources to answer the installation and configuration questions:
-        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
-        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
-    * Configure [authentication](authsetup.md#AuthSetup)
-        * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
-        * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
-
-* Create [IAM policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) for [EFS CSI driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver)
-
-```bash
-$ aws iam create-policy \
-  --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
-  --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-driver/refs/heads/master/docs/iam-policy-example.json')"
-
-```
-
-* Create [service account](https://eksctl.io/usage/iamserviceaccounts/) for EFS CSI driver
-
-```bash
-$ eksctl create iamserviceaccount \
-    --cluster malcolm-cluster \
-    --namespace kube-system \
-    --name efs-csi-controller-sa \
-    --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonEKS_EFS_CSI_Driver_Policy \
-    --approve \
-    --override-existing-serviceaccounts \
-    --region us-east-1
-
-```
-
-* Create IAM policy for [AWS load balancer](https://github.com/kubernetes-sigs/aws-load-balancer-controller)
+* Create IAM policy for [AWS load balancer](https://github.com/kubernetes-sigs/aws-load-balancer-controller) (only needs to be done once per account)
 
 ```bash
 $ aws iam create-policy \
   --policy-name AmazonAWS_Load_Balancer_Controller_Policy \
   --policy-document "$(curl -fsSL 'https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json')"
-
 ```
 
-* Create service account for AWS load balancer
+* Create a [file](https://eksctl.io/usage/creating-and-managing-clusters/#using-config-files) called `cluster.yaml` (customizing as needed), then [create the cluster](https://eksctl.io/usage/creating-and-managing-clusters/) using `eksctl`
 
 ```bash
-$ eksctl create iamserviceaccount \
-    --cluster malcolm-cluster \
-    --namespace kube-system \
-    --name aws-load-balancer-controller \
-    --attach-policy-arn arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy \
-    --approve \
-    --override-existing-serviceaccounts \
-    --region us-east-1
+$ cat <<EOF> cluster.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: malcolm-cluster
+  region: us-east-1
 
+# Enable EKS Auto Mode
+autoModeConfig:
+  enabled: true
+  
+# Configure IAM OIDC provider and service accounts for EFS CSI Driver and AWS Load Balancer Controller
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: efs-csi-controller-sa
+      namespace: kube-system
+    wellKnownPolicies:
+      efsCSIController: true
+  - metadata:
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    attachPolicyARNs:
+      - arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):policy/AmazonAWS_Load_Balancer_Controller_Policy
+
+# Include the EFS CSI Driver as an addon
+addons:
+  - name: aws-efs-csi-driver
+    version: latest
+    resolveConflicts: preserve
+EOF
+
+$ eksctl create cluster -f cluster.yaml
 ```
 
-* Install [AWS EFS CSI Driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver?tab=readme-ov-file#amazon-efs-csi-driver) via Helm
+* Create namespace
 
 ```bash
-$ helm repo add efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver
-
-$ helm repo update
-
-$ helm install efs-csi-driver efs-csi-driver/aws-efs-csi-driver \
-  -n kube-system \
-  --set controller.serviceAccount.create=false \
-  --set controller.serviceAccount.name=efs-csi-controller-sa
-
+$ kubectl create namespace malcolm
 ```
 
 * Create [EFS file system](https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html)
@@ -566,19 +448,6 @@ $ EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
 $ echo $EFS_ID
 ```
 
-* Create file system [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html)
-
-```bash
-$ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
-    aws efs create-access-point \
-            --file-system-id $EFS_ID \
-            --client-token $(head -c 1024 /dev/urandom 2>/dev/null | tr -cd 'a-f0-9' | head -c 32) \
-            --root-directory "Path=/malcolm/$AP,CreationInfo={OwnerUid=1000,OwnerGid=1000,Permissions=0770}" \
-            --tags "Key=Name,Value=$AP"; \
-done
-
-```
-
 * Get [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) ID
 
 ```bash
@@ -586,6 +455,22 @@ $ VPC_ID=$(aws eks describe-cluster --name malcolm-cluster \
         --query "cluster.resourcesVpcConfig.vpcId" --output text)
 
 $ echo $VPC_ID
+```
+
+* Install [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) via Helm
+
+```bash
+$ helm repo add eks https://aws.github.io/eks-charts
+
+$ helm repo update
+
+$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=malcolm-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=us-east-1 \
+  --set vpcId=$VPC_ID
 ```
 
 * Create [Security Group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) for EFS
@@ -618,10 +503,21 @@ $ for SG in $(kubectl get nodes \
         --port 2049 \
         --source-group "$SG"; \
 done
-
 ```
 
-* Get subnet IDs
+* Create file system [access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html)
+
+```bash
+$ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
+    aws efs create-access-point \
+            --file-system-id $EFS_ID \
+            --client-token $(head -c 1024 /dev/urandom 2>/dev/null | tr -cd 'a-f0-9' | head -c 32) \
+            --root-directory "Path=/malcolm/$AP,CreationInfo={OwnerUid=1000,OwnerGid=1000,Permissions=0770}" \
+            --tags "Key=Name,Value=$AP"; \
+done
+```
+
+* Create [EFS mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for subnets
 
 ```bash
 $ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
@@ -629,76 +525,81 @@ $ PRIVATE_SUBNET_IDS=$(aws ec2 describe-subnets \
     --query 'Subnets[*].SubnetId' --output text)
 
 $ echo $PRIVATE_SUBNET_IDS
-```
 
-* Create [EFS mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for subnets
-
-```bash
 $ for subnet in $PRIVATE_SUBNET_IDS; do \
     aws efs create-mount-target \
         --file-system-id $EFS_ID \
         --subnet-id $subnet \
         --security-groups $EFS_SG_ID; \
 done
-
 ```
 
-* Associate necessary EFS permissions with node role (**not required for EKS Auto Mode**)
+### <a name="AWSEKSAutoMalcolmSetup"></a>Malcolm Setup
 
-```bash
-$ NODE_ROLE_NAME=$(aws iam list-roles \
-                     --query "Roles[?contains(RoleName, 'eksctl-malcolm-cluster-nodegroup')].RoleName" \
-                     --output text)
+* Install local dependencies for the Malcolm control scripts and download Malcolm
+    
+    * Install dependencies (this will vary by OS distribution, adjust as needed)
 
-$ echo $NODE_ROLE_NAME
+    ```bash
+    $ sudo apt-get -y update
 
-$ EFS_ARN="arn:aws:elasticfilesystem:us-east-1:$(aws sts get-caller-identity --query Account --output text):file-system/${EFS_ID}"
+    $ sudo apt-get -y install --no-install-recommends \
+        apache2-utils \
+        curl \
+        jq \
+        openssl \
+        python3 \
+        python3-dialog \
+        python3-dotenv \
+        python3-kubernetes \
+        python3-pip \
+        python3-ruamel.yaml \
+        unzip \
+        xz-utils
+    ```
 
-$ echo $EFS_ARN
+    * [Download](download.md#DownloadDockerImages) the latest Malcolm release ZIP file
+        - Navigate a web browser to the [Malcolm releases page]({{ site.github.repository_url }}/releases/latest) and identify the version number of the latest Malcolm release (`{{ site.malcolm.version }}` is used in this example), and either download the Malcolm release ZIP file there or use `curl` to do so:
 
-$ aws iam put-role-policy \
-  --role-name $NODE_ROLE_NAME \
-  --policy-name AllowEFSAccess \
-  --policy-document file://<(cat <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "elasticfilesystem:DescribeMountTargets",
-        "elasticfilesystem:DescribeFileSystems",
-        "elasticfilesystem:ClientMount",
-        "elasticfilesystem:ClientWrite"
-      ],
-      "Resource": "$EFS_ARN"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ec2:DescribeAvailabilityZones"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-)
-```
+    ```bash
+    $ curl -OJsSLf https://github.com/cisagov/Malcolm/releases/latest/download/malcolm-{{ site.malcolm.version }}-docker_install.zip
+
+    $ ls -l malcolm*.zip
+    -rw-rw-r-- 1 ubuntu ubuntu 191053 Apr 10 14:26 malcolm-{{ site.malcolm.version }}-docker_install.zip
+    ```
+
+    * Extract the Malcolm release ZIP file
+
+    ```bash
+    $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
+    Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
+      inflating: install.py
+      inflating: malcolm_20250401_225238_df27028c.README.txt
+      inflating: malcolm_20250401_225238_df27028c.tar.gz
+      inflating: malcolm_common.py
+      inflating: malcolm_kubernetes.py
+      inflating: malcolm_utils.py
+    ```
+
+* Configure Malcolm
+    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * Malcolm's configuration scripts will guide users through the setup process.
+    * Use the following resources to answer the installation and configuration questions:
+        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
+        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
+    * Configure [authentication](authsetup.md#AuthSetup)
+        * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
+        * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.
 
 * Create [Persistent Volumes](https://docs.aws.amazon.com/eks/latest/best-practices/windows-storage.html) (PV) and Persistent Volume Claims (PVC) using static provisioning
-    * Ensure file system ID is exported in `$EFS_ID`
+    * Set Access Point ID environment variables
 
     ```bash
     $ export EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
         --query 'FileSystems[0].FileSystemId' --output text)
 
     $ echo $EFS_ID
-    ```
 
-    * Ensure the Access Point IDs are exported in `$EFS_ACCESS_POINT_CONFIG_ID`, etc.
-
-    ```bash
     $ for AP in config opensearch opensearch-backup pcap runtime-logs suricata-logs zeek-logs; do \
         AP_UPPER=$(echo "$AP" | tr 'a-z-' 'A-Z_'); \
         ACCESS_POINT_ID=$(aws efs describe-access-points \
@@ -710,14 +611,12 @@ EOF
     done
 
     $ env | grep EFS_ACCESS_POINT_
-
     ```
 
     * Create and verify PVs and PVCs to be used by Malcolm services (see [`01-volumes-aws-efs.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/01-volumes-aws-efs.yml.example))
 
     ```bash
     $ envsubst < ./Malcolm/kubernetes/01-volumes-aws-efs.yml.example | kubectl apply -f -
-
     ```
 
     * Verify PVs and PVCs have "Bound" status
@@ -744,65 +643,9 @@ EOF
     zeek-claim                Bound    zeek-volume                50Gi       RWX            efs-sc         <unset>                 39s
     ```
 
-* Install [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html) via Helm
+* Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy. Note that the resources defined in this file will translate to the compute [instance size(s)](#AWSInstanceSizing) chosen, and by extension the cost charged by AWS to run those resources. See **Amazon EKS Auto Mode** under [**Amazon EKS pricing**](https://aws.amazon.com/eks/pricing/) for more details.
 
-```bash
-$ helm repo add eks https://aws.github.io/eks-charts
-
-$ helm repo update
-
-$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  -n kube-system \
-  --set clusterName=malcolm-cluster \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=aws-load-balancer-controller \
-  --set region=us-east-1 \
-  --set vpcId=$VPC_ID
-
-```
-
-* [Request a certificate](https://docs.aws.amazon.com/cli/latest/reference/acm/request-certificate.html) and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
-
-```bash
-$ aws acm request-certificate \
-  --domain-name malcolm.example.org \
-  --validation-method DNS \
-  --region us-east-1
-
-$ CERT_ARN=$(aws acm list-certificates \
-    --region us-east-1 \
-    --query "CertificateSummaryList[?DomainName=='malcolm.example.org'].CertificateArn" \
-    --output text)
-
-$ echo $CERT_ARN
-```
-
-* Get the DNS [validation record](https://docs.aws.amazon.com/cli/latest/reference/acm/describe-certificate.html) from ACM
-
-```bash
-$ VALIDATION_RECORD=$(aws acm describe-certificate \
-  --certificate-arn "$CERT_ARN" \
-  --region us-east-1 \
-  --query "Certificate.DomainValidationOptions[0].ResourceRecord" \
-  --output json)
-
-$ echo $VALIDATION_RECORD
-```
-
-* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
-
-* Periodically check the status of the certificate until it has changed from `PENDING_VALIDATION` to `ISSUED`.
-
-```bash
-$ aws acm describe-certificate \
-  --certificate-arn "$CERT_ARN" \
-  --region us-east-1 \
-  --query "Certificate.Status"
-
-```
-
-* Copy [`./Malcolm/config/kubernetes-container-resources.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config/kubernetes-container-resources.yml.example) to `./Malcolm/config/kubernetes-container-resources.yml` and [adjust container resources](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits) in the copy.
-    * This step is **required** for EKS Auto Mode and **optional** for standard EKS.
+### <a name="AWSEKSAutoMalcolmAccess"></a>Run and Access Malcolm
 
 * [Start Malcolm](kubernetes.md#Running), providing the kubeconfig file as the `--file`/`-f` parameter and the additional parameters listed here. This will start the create the resources and start the pods running under the `malcolm` namespace. The `--inject-resources` argument is only required if you adjusted `kubernetes-container-resources.yml` as described above.
 
@@ -810,143 +653,192 @@ $ aws acm describe-certificate \
 $ ./Malcolm/scripts/start -f "${KUBECONFIG:-$HOME/.kube/config}" \
     --inject-resources \
     --skip-persistent-volume-checks
-
 ```
 
-* Create the ALB ingress for Malcolm (see [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
+* Malcolm's web interface can be accessed either of two ways: using automatically-generated [AWS load balancer (ALB)](https://github.com/kubernetes-sigs/aws-load-balancer-controller) hostname (typically formatted like `k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`) or using DNS records associated with a custom domain owned by the user (e.g., `malcolm.example.org`). The following steps are **optional** and are only required to use a custom domain name for Malcolm.
 
+    * [Request a certificate](https://docs.aws.amazon.com/cli/latest/reference/acm/request-certificate.html) and get its ARN (here `malcolm.example.org` is placeholder that should be replaced with the domain name which will point to the Malcolm instance)
+    
     ```bash
-    $ export CERT_ARN
-    $ export MALCOLM_HOST=malcolm.example.org
-    $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example | kubectl apply -f -
-
+    $ aws acm request-certificate \
+      --domain-name malcolm.example.org \
+      --validation-method DNS \
+      --region us-east-1
+    
+    $ CERT_ARN=$(aws acm list-certificates \
+        --region us-east-1 \
+        --query "CertificateSummaryList[?DomainName=='malcolm.example.org'].CertificateArn" \
+        --output text)
+    
+    $ echo $CERT_ARN
+    ```
+    
+    * Get the DNS [validation record](https://docs.aws.amazon.com/cli/latest/reference/acm/describe-certificate.html) from ACM
+    
+    ```bash
+    $ VALIDATION_RECORD=$(aws acm describe-certificate \
+      --certificate-arn "$CERT_ARN" \
+      --region us-east-1 \
+      --query "Certificate.DomainValidationOptions[0].ResourceRecord" \
+      --output json)
+    
+    $ echo $VALIDATION_RECORD
+    ```
+    
+    * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to the subdomain part of `Name` (e.g., `_0954b44630d36d77d12d12ed6c03c1e4.aws` if `Name` was `_0954b44630d36d77d12d12ed6c03c1e4.aws.malcolm.example.org.`) and the value/target set to `Value` (normally including the trailing dot; however, if your domain name provider gives an error it may be attempted without the trailing dot) of `$VALIDATION_RECORD`. Wait five to ten minutes for DNS to propogate.
+    
+    * Periodically check the status of the certificate until it has changed from `PENDING_VALIDATION` to `ISSUED`.
+    
+    ```bash
+    $ aws acm describe-certificate \
+      --certificate-arn "$CERT_ARN" \
+      --region us-east-1 \
+      --query "Certificate.Status"
     ```
 
-* Allow incoming TCP connections from remote sensors using [Network Load Balancer (NLB)](https://aws.amazon.com/elasticloadbalancing/network-load-balancer/)
-    * This step is **not required** for EKS Auto Mode.
-    * **OPTIONAL**: This is only needed to allow forwarding from a remote [Hedgehog Linux](live-analysis.md#Hedgehog) network sensor.
-    * Create and assign a security group for Logstash (5044/tcp) and Filebeat (5045/tcp) to accept logs. Replacing `0.0.0.0/0` with a more limited CIDR block in the following commands is recommended.
+* Create the load balancer and access Malcolm's web interface
+    * The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands below can be ignored if you did not configure allowing incoming TCP connections from remote sensors.
+    * If using only the automatically-generated ALB hostnames to connect to Malcolm:
+        * Apply [`99-ingress-aws-alb.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb.yml.example)
 
-    ```bash
-    $ aws ec2 create-security-group \
-        --group-name malcolm-raw-tcp-sg \
-        --description "Security group for raw TCP services" \
-        --vpc-id $VPC_ID
+        ```bash
+        $ kubectl apply -f ./Malcolm/kubernetes/99-ingress-aws-alb.yml.example
 
-    $ TCP_SG_ID=$(aws ec2 describe-security-groups \
-                    --filters Name=group-name,Values=malcolm-raw-tcp-sg \
-                    --query 'SecurityGroups[0].GroupId' \
-                    --output text)
+        $ HTTPS_HOSTNAME=$(kubectl get service malcolm-alb-nginx-proxy -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
 
-    $ echo $TCP_SG_ID
+        $ echo $HTTPS_HOSTNAME
+        $ echo $LOGSTASH_HOSTNAME
+        $ echo $FILEBEAT_HOSTNAME
+        ```
 
-    $ for PORT in 5044 5045; do \
-        aws ec2 authorize-security-group-ingress \
-            --group-id $TCP_SG_ID \
-            --protocol tcp \
-            --port $PORT \
-            --cidr 0.0.0.0/0; \
-    done
+        * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://k8s-malcolm-malcolma-5bec647d77-ab139a8b15d42932.elb.us-east-1.amazonaws.com`)
 
-    ```
+    * If using a custom domain name for Malcolm:
+        * Use [`99-ingress-aws-alb-dns.yml.example`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-aws-alb-dns.yml.example), replacing `malcolm.example.org` with the the domain name which will point to the Malcolm instance.
 
-    * Assign the new security group to the network interfaces
+        ```bash
+        $ export CERT_ARN
+        $ export MALCOLM_HOST=malcolm.example.org
+        $ envsubst < ./Malcolm/kubernetes/99-ingress-aws-alb-dns.yml.example | kubectl apply -f -
 
-    ```bash
-    $ for POD in logstash filebeat; do \
-        POD_NAME="$(kubectl get pods -n malcolm --no-headers -o custom-columns=':metadata.name' | grep "$POD" | head -n 1)"; \
-        ( [[ -n "$POD_NAME" ]] && [[ "$POD_NAME" != "None" ]] ) || continue; \
-        POD_IP="$(kubectl get pod -n malcolm "$POD_NAME" -o jsonpath='{.status.podIP}')"; \
-        ( [[ -n "$POD_IP" ]] && [[ "$POD_IP" != "None" ]] ) || continue; \
-        NIC_ID="$(aws ec2 describe-network-interfaces --filters "Name=addresses.private-ip-address,Values=$POD_IP" --query "NetworkInterfaces[0].NetworkInterfaceId" --output text)"; \
-        ( [[ -n "$NIC_ID" ]] && [[ "$NIC_ID" != "None" ]] ) || continue; \
-        NIC_GROUPS="$(aws ec2 describe-network-interfaces --network-interface-ids "$NIC_ID" --query "NetworkInterfaces[0].Groups[].GroupId" --output text)"; \
-        ( [[ -n "$NIC_GROUPS" ]] && [[ "$NIC_GROUPS" != "None" ]] ) || continue; \
-        aws ec2 modify-network-interface-attribute \
-          --network-interface-id "$NIC_ID" \
-          --groups $TCP_SG_ID $NIC_GROUPS; \
-    done
+        $ HTTPS_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        $ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        $ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
+        
+        $ echo $HTTPS_HOSTNAME
+        $ echo $LOGSTASH_HOSTNAME
+        $ echo $FILEBEAT_HOSTNAME
+        ```
 
-    ```
+        * Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
+        * Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
 
-* Get the LoadBalancer hostnames for the internet-facing services created from `./Malcolm/kubernetes/99-ingress-aws-alb.yml`. The `LOGSTASH_HOSTNAME` and `FILEBEAT_HOSTNAME` commands can be ignored if you did not configure allowing incoming TCP connections from remote sensors in the previous step.
+### <a name="AWSEKSAutoMonitor"></a>Monitor Deployment
+
+* Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
 
 ```bash
-$ HTTPS_HOSTNAME=$(kubectl get ingress malcolm-ingress-https -n malcolm -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-$ LOGSTASH_HOSTNAME=$(kubectl get service malcolm-nlb-logstash -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-$ FILEBEAT_HOSTNAME=$(kubectl get service malcolm-nlb-tcp-json -n malcolm -o jsonpath='{.status.loadBalancer.ingress[*].hostname}')
-
-$ echo $HTTPS_HOSTNAME
-$ echo $LOGSTASH_HOSTNAME
-$ echo $FILEBEAT_HOSTNAME
+$ kubectl get pods -n malcolm
+NAME                                            READY   STATUS     RESTARTS   AGE
+api-deployment-8696d45f9d-pnt69                 1/1     Running   0          36m
+arkime-deployment-8564cfd96f-krmpf              1/1     Running   0          36m
+arkime-live-deployment-7c55bbd8d4-mngpg         1/1     Running   0          36m
+dashboards-deployment-5bb86dc65-kp6ll           1/1     Running   0          36m
+dashboards-helper-deployment-74644df874-tr68h   1/1     Running   0          36m
+file-monitor-deployment-7579589ff7-8blpp        1/1     Running   0          36m
+filebeat-deployment-6cf57d56dd-d4hnb            1/1     Running   0          36m
+freq-deployment-6b8cfb6f65-b5h86                1/1     Running   0          36m
+htadmin-deployment-5b74cff59f-c8z5p             1/1     Running   0          36m
+keycloak-deployment-7c598dc6d-hbm5t             1/1     Running   0          36m
+logstash-deployment-77cf7c557b-r9544            1/1     Running   0          36m
+netbox-deployment-b6cdf69bc-bpx6c               1/1     Running   0          36m
+nginx-proxy-deployment-76b56767c4-rnwk4         1/1     Running   0          36m
+opensearch-deployment-796fdc9f48-r8qfl          1/1     Running   0          36m
+pcap-capture-deployment-79cc46b569-gw6ts        1/1     Running   0          36m
+pcap-monitor-deployment-69b6d9d857-dwz4b        1/1     Running   0          36m
+postgres-deployment-f69649779-r5qss             1/1     Running   0          36m
+redis-cache-deployment-7f94f49886-swclf         1/1     Running   0          36m
+redis-deployment-6895f57c76-gbx9m               1/1     Running   0          36m
+suricata-live-deployment-7d44967bfc-hzbj9       1/1     Running   0          36m
+suricata-offline-deployment-85fb6b9b8b-z2cww    1/1     Running   0          36m
+upload-deployment-7c9798cb7d-cxqwk              1/1     Running   0          36m
+zeek-live-deployment-8c5b9b899-wsv2t            1/1     Running   0          36m
+zeek-offline-deployment-5bbf797567-2zbq7        1/1     Running   0          36m
 ```
 
-* Using the dashboard or other tools provided by your domain name provider (i.e., the issuer of `malcolm.example.org` in this example), create a [DNS record of type `CNAME`](https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html) with the host set to your subdomain (e.g., `malcolm` if the domain is `malcolm.example.org`) and the value/target set to the value of `$HTTPS_HOSTNAME`. Wait five to ten minutes for DNS to propogate. If you also configured allowing incoming TCP connections from remote sensors above, create `CNAME` records for `$LOGSTASH_HOSTNAME` and `$FILEBEAT_HOSTNAME` as well (e.g., `logstash.malcolm.example.org` and `filebeat.malcolm.example.org`, respectively).
+* [Check](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/) all resources
 
-* Open a [web browser](quickstart.md#UserInterfaceURLs) to connect to the Malcolm cluster (e.g., `https://malcolm.example.org`)
+```bash
+$ kubectl get all -n malcolm
+```
 
-* Monitor deployment
-    * Check [pods](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
-
-    ```bash
-    $ kubectl get pods -n malcolm -w
-    kubectl get pods -n malcolm -w
-    NAME                                            READY   STATUS     RESTARTS   AGE
-    api-deployment-5c8b9c7c5b-dtpkq                 1/1     Running    0          3m6s
-    arkime-deployment-fcbb44c8f-plh8k               1/1     Running    0          3m6s
-    dashboards-deployment-95467ff6f-h2zx5           1/1     Running    0          3m7s
-    dashboards-helper-deployment-7686756dc4-vxw4r   1/1     Running    0          3m5s
-    file-monitor-deployment-7fccbb7c98-8hxrv        1/1     Running    0          3m5s
-    filebeat-deployment-57db54b549-zvfb4            1/1     Running    0          3m4s
-    freq-deployment-6c7688b4c-zhdfw                 1/1     Running    0          3m2s
-    htadmin-deployment-767c78b4bf-sjzmf             1/1     Running    0          3m2s
-    keycloak-deployment-7ff7bb9c8c-trkc6            1/1     Running    0          3m2s
-    logstash-deployment-54ffd8c85-spmh5             1/1     Running    0          3m4s
-    netbox-deployment-7bdbfcbf6c-xc725              1/1     Running    0          3m3s
-    nginx-proxy-deployment-864c896ff6-v8jrs         1/1     Running    0          3m1s
-    opensearch-deployment-654b79f6f9-2tss2          1/1     Running    0          3m7s
-    pcap-monitor-deployment-5f644fb9b-tzk8k         1/1     Running    0          3m6s
-    postgres-deployment-76fb787976-pgwsr            1/1     Running    0          3m3s
-    redis-cache-deployment-6f9b9d65bf-dssjt         1/1     Running    0          3m3s
-    redis-deployment-7b985fb7d7-zz9jb               1/1     Running    0          3m4s
-    suricata-offline-deployment-669c759f88-nt24v    1/1     Running    0          3m5s
-    upload-deployment-76c6c49cb5-9zdtp              1/1     Running    0          3m7s
-    zeek-offline-deployment-c56f7f46f-m62sd         1/1     Running    0          3m5s
-    ```
-
-    * [Check](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_get/) all resources
+* Watch pod [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
+    * Using Malcolm's convenience script
 
     ```bash
-    $ kubectl get all -n malcolm
-
+    $ ./Malcolm/scripts/logs -f "${KUBECONFIG:-$HOME/.kube/config}"
     ```
 
-    * Watch pod [logs](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/)
-        * Using Malcolm's convenience script
-
-        ```bash
-        $ ./Malcolm/scripts/logs -f "${KUBECONFIG:-$HOME/.kube/config}"
-
-        ```
-
-        * Using `kubectl`
-        ```bash
-        $ kubectl logs --follow=true -n malcolm --all-containers <pod>
-
-        ```
-
-    * Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
-
+    * Using `kubectl`
+    
     ```bash
-    $ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
-
+    $ kubectl logs --follow=true -n malcolm --all-containers <pod>
     ```
+
+* Get all [events](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/) in the namespace for more detailed information and debugging
+
+```bash
+$ kubectl get events -n malcolm --sort-by='.metadata.creationTimestamp'
+```
+
+### <a name="AWSEKSAutoCleanup"></a>Cleanup
 
 * Stop Malcolm, providing the kubeconfig file as the `--file`/`-f` parameter. This will stop the pods and remove the resources running under the `malcolm` namespace.
 
 ```bash
 $ ./Malcolm/scripts/stop -f "${KUBECONFIG:-$HOME/.kube/config}"
+```
 
+* Cleanup script
+
+```bash
+# Delete Malcolm Deployments
+kubectl delete all --all -n malcolm
+
+# Cleanup EFS
+# Find the EFS ID, mount Targets and SecurityGroup ID
+EFS_ID=$(aws efs describe-file-systems --creation-token malcolm-efs \
+    --query 'FileSystems[0].FileSystemId' --output text)
+MOUNT_TARGETS=$(aws efs describe-mount-targets --file-system-id $EFS_ID \
+    --query 'MountTargets[*].MountTargetId' --output json)
+SG_ID=$(aws efs describe-mount-target-security-groups --mount-target-id $(echo $MOUNT_TARGETS | jq -r '.[0]') \
+    --query 'SecurityGroups[0]' --output text)
+
+# Delete all mount targets
+for MT_ID in $(echo $MOUNT_TARGETS | jq -r '.[]'); do
+  echo "Deleting mount target: $MT_ID"
+  aws efs delete-mount-target --mount-target-id $MT_ID
+done
+
+echo "Waiting 30 seconds for mount targets to be deleted..."
+sleep 30
+aws efs describe-file-systems --file-system-id $EFS_ID \
+    --query 'FileSystems[0].NumberOfMountTargets' --output text
+
+# Delete the security group
+echo "Deleting security group: $SG_ID"
+aws ec2 delete-security-group --group-id $SG_ID
+
+# Delete EFS
+echo "Deleting file system: $EFS_ID"
+aws efs delete-file-system --file-system-id $EFS_ID
+
+echo "Cleanup complete!"
+
+#Cleanup EKS Cluster
+eksctl delete cluster -f cluster.yaml
 ```
 
 ## <a name="AWSAMI"></a> Generating a Malcolm Amazon Machine Image (AMI)
@@ -1039,7 +931,6 @@ $ chmod 600 ./malcolm-key.pem
 $ aws ec2 create-security-group \
     --group-name malcolm-sg \
     --description "Malcolm SG"
-
 ```
 
 * Set inbound [security group rules](https://docs.aws.amazon.com/vpc/latest/userguide/security-group-rules.html)
@@ -1056,7 +947,6 @@ $ for PORT in 22 443; do \
         --port $PORT \
         --cidr $PUBLIC_IP/32; \
 done
-
 ```
 
 * Launch selected AMI
@@ -1074,7 +964,6 @@ $ aws ec2 run-instances \
     --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":100,\"VolumeType\":\"gp3\"}}]" \
     --count 1 \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=Malcolm}]"
-
 ```
 
 * Get [instance details](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html) and check its status
@@ -1084,7 +973,6 @@ $ aws ec2 describe-instances \
     --filters "Name=tag:Name,Values=Malcolm" \
     --query "Reservations[].Instances[].{ID:InstanceId,IP:PublicIpAddress,State:State.Name}" \
     --output table
-
 ```
 
 * Connect via [Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html) or via SSH using the key pair created above.

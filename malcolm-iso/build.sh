@@ -113,6 +113,7 @@ if [ -d "$WORKDIR" ]; then
   # grab things from the Malcolm parent directory into /etc/skel so the user's got it set up in their home/Malcolm dir
   pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
   MALCOLM_DEST_DIR="$WORKDIR/work/$IMAGE_NAME-Live-Build/config/includes.chroot/etc/skel/Malcolm"
+  mkdir -p "$MALCOLM_DEST_DIR/arkime/etc/"
   mkdir -p "$MALCOLM_DEST_DIR/arkime/lua/"
   mkdir -p "$MALCOLM_DEST_DIR/arkime/rules/"
   mkdir -p "$MALCOLM_DEST_DIR/config/"
@@ -150,7 +151,8 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX/"
   cp ./docker-compose.yml "$MALCOLM_DEST_DIR/docker-compose.yml"
-  cp ./justfile "$MALCOLM_DEST_DIR/justfile"
+  cp ./.justfile "$MALCOLM_DEST_DIR/.justfile"
+  cp ./.envrc.example "$MALCOLM_DEST_DIR/.envrc.example"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
@@ -172,6 +174,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./kubernetes/*.* "$MALCOLM_DEST_DIR/kubernetes/"
   grep -v "^#" ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$MALCOLM_DEST_DIR/kubernetes/XXX"
+  cp ./arkime/etc/wise.ini.example "$MALCOLM_DEST_DIR/arkime/etc/"
   cp ./arkime/rules/*.yml "$MALCOLM_DEST_DIR/arkime/rules/"
   cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"

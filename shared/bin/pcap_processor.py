@@ -11,6 +11,7 @@
 ###################################################################################################
 
 import argparse
+import glob
 import json
 import logging
 import os
@@ -39,6 +40,7 @@ from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or
 from multiprocessing.pool import ThreadPool
 from collections import deque
 from itertools import chain, repeat
+from collections import defaultdict
 
 try:
     from suricata_socket import SuricataSocketClient
@@ -56,7 +58,7 @@ PCAP_PROCESSING_MODE_SURICATA = "suricata"
 ARKIME_CAPTURE_PATH = "/opt/arkime/bin/capture-offline"
 ARKIME_AUTOARKIME_TAG = 'AUTOARKIME'
 
-SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command.socket"
+SURICATA_SOCKET_PATH = "/var/run/suricata/suricata-command-1.socket"
 SURICATA_LOG_DIR = os.getenv('SURICATA_LOG_DIR', '/var/log/suricata')
 SURICATA_LOG_PATH = os.path.join(SURICATA_LOG_DIR, 'suricata.log')
 SURICATA_CONFIG_FILE = os.getenv('SURICATA_CONFIG_FILE', '/etc/suricata/suricata.yaml')
@@ -114,16 +116,13 @@ def pdb_handler(sig, frame):
 
 ###################################################################################################
 def arkimeCaptureFileWorker(arkimeWorkerArgs):
-    global shuttingDown
     global workersCount
-    global arkimeProvider
-    global arkimeDataset
 
     workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         arkimeBin,
         nodeName,
         nodeHost,
@@ -134,20 +133,7 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
         notLocked,
         logger,
         debug,
-    ) = (
-        arkimeWorkerArgs[0],
-        arkimeWorkerArgs[1],
-        arkimeWorkerArgs[2],
-        arkimeWorkerArgs[3],
-        arkimeWorkerArgs[4],
-        arkimeWorkerArgs[5],
-        arkimeWorkerArgs[6],
-        arkimeWorkerArgs[7],
-        arkimeWorkerArgs[8],
-        arkimeWorkerArgs[9],
-        arkimeWorkerArgs[10],
-        arkimeWorkerArgs[11],
-    )
+    ) = arkimeWorkerArgs
 
     if not logger:
         logger = logging
@@ -163,8 +149,15 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
-                if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                fileInfo[FILE_INFO_DICT_NAME] = next(
+                    (
+                        os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                        for base in pcapBaseDirs
+                        if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                    ),
+                    fileInfo[FILE_INFO_DICT_NAME],
+                )
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Arkime this PCAP if it's tagged "AUTOARKIME" or if the global autoArkime flag is turned on.
@@ -243,14 +236,13 @@ def arkimeCaptureFileWorker(arkimeWorkerArgs):
 
 ###################################################################################################
 def zeekFileWorker(zeekWorkerArgs):
-    global shuttingDown
     global workersCount
 
     workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         zeekBin,
         autoZeek,
         forceZeek,
@@ -260,19 +252,7 @@ def zeekFileWorker(zeekWorkerArgs):
         defaultExtractFileMode,
         logger,
         debug,
-    ) = (
-        zeekWorkerArgs[0],
-        zeekWorkerArgs[1],
-        zeekWorkerArgs[2],
-        zeekWorkerArgs[3],
-        zeekWorkerArgs[4],
-        zeekWorkerArgs[5],
-        zeekWorkerArgs[6],
-        zeekWorkerArgs[7],
-        zeekWorkerArgs[8],
-        zeekWorkerArgs[9],
-        zeekWorkerArgs[10],
-    )
+    ) = zeekWorkerArgs
 
     if not logger:
         logger = logging
@@ -288,8 +268,15 @@ def zeekFileWorker(zeekWorkerArgs):
             time.sleep(1)
         else:
             if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo) and os.path.isdir(uploadDir):
-                if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                    fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+
+                fileInfo[FILE_INFO_DICT_NAME] = next(
+                    (
+                        os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                        for base in pcapBaseDirs
+                        if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                    ),
+                    fileInfo[FILE_INFO_DICT_NAME],
+                )
 
                 if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                     # Zeek this PCAP if it's tagged "AUTOZEEK" or if the global autoZeek flag is turned on.
@@ -393,48 +380,38 @@ def zeekFileWorker(zeekWorkerArgs):
 
 ###################################################################################################
 def suricataFileWorker(suricataWorkerArgs):
-    global shuttingDown
     global workersCount
 
     workerId = workersCount.increment()  # unique ID for this thread
 
     (
         newFileQueue,
-        pcapBaseDir,
+        pcapBaseDirs,
         autoSuricata,
         forceSuricata,
-        socketPath,
+        socketPathWildCard,
         extraTags,
         autoTag,
         uploadDir,
         suricataConfig,
         logger,
         debug,
-    ) = (
-        suricataWorkerArgs[0],
-        suricataWorkerArgs[1],
-        suricataWorkerArgs[2],
-        suricataWorkerArgs[3],
-        suricataWorkerArgs[4],
-        suricataWorkerArgs[5],
-        suricataWorkerArgs[6],
-        suricataWorkerArgs[7],
-        suricataWorkerArgs[8],
-        suricataWorkerArgs[9],
-        suricataWorkerArgs[10],
-    )
+    ) = suricataWorkerArgs
 
     if not logger:
         logger = logging
 
     logger.info(f"{scriptName}[{workerId}]:\tstarted")
 
-    suricata = None
-    processFailures = 0
+    suricataClients = defaultdict(lambda: None)
+    processFailures = defaultdict(lambda: 0)
+    lastClientRefreshTime = 0  # epoch time of last action
+    lastClientRefreshInterval = 30  # seconds
 
     # loop forever, or until we're told to shut down
     while not shuttingDown:
-        if suricata:
+        now = time.time()
+        if clientsExist := any(v is not None for v in suricataClients.values()):
             try:
                 # pull an item from the queue of files that need to be processed
                 fileInfo = newFileQueue.popleft()
@@ -442,7 +419,7 @@ def suricataFileWorker(suricataWorkerArgs):
                 time.sleep(1)
                 continue
 
-            if isinstance(fileInfo, dict) and (FILE_INFO_DICT_NAME in fileInfo):
+            if isinstance(fileInfo, dict) and fileInfo.get(FILE_INFO_DICT_NAME, None):
                 # Suricata this PCAP if it's tagged "AUTOSURICATA" or if the global autoSuricata flag is turned on.
                 # However, skip "live" PCAPs Malcolm is capturing and rotating through for Arkime capture,
                 # as Suricata now does its own network capture in Malcolm standalone mode.
@@ -460,8 +437,14 @@ def suricataFileWorker(suricataWorkerArgs):
                         )
                     )
                 ):
-                    if pcapBaseDir and os.path.isdir(pcapBaseDir):
-                        fileInfo[FILE_INFO_DICT_NAME] = os.path.join(pcapBaseDir, fileInfo[FILE_INFO_DICT_NAME])
+                    fileInfo[FILE_INFO_DICT_NAME] = next(
+                        (
+                            os.path.join(base, fileInfo[FILE_INFO_DICT_NAME])
+                            for base in pcapBaseDirs
+                            if os.path.isfile(os.path.join(base, fileInfo[FILE_INFO_DICT_NAME]))
+                        ),
+                        fileInfo[FILE_INFO_DICT_NAME],
+                    )
 
                     if os.path.isfile(fileInfo[FILE_INFO_DICT_NAME]):
                         # finalize tags list
@@ -482,52 +465,79 @@ def suricataFileWorker(suricataWorkerArgs):
                             f"suricata-{processTimeUsec}-{workerId}-({','.join(fileInfo[FILE_INFO_DICT_TAGS])})",
                         )
 
+                        suricataInstance = None
                         try:
                             logger.info(
                                 f"{scriptName}[{workerId}]:\t📥\tSubmitting {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} to Suricata"
                             )
-                            if suricata.process_pcap(
-                                pcap_file=fileInfo[FILE_INFO_DICT_NAME],
-                                output_dir=output_dir,
+                            # choose the least-busy suricata client to process this
+                            if suricataInstance := min(
+                                ((k, v) for k, v in suricataClients.items() if v is not None),
+                                key=lambda item: item[1].queue_size(),
+                                default=None,
                             ):
-                                # suricata over socket mode doesn't let us know when a PCAP file is done processing,
-                                #   so all we do here is submit it and then we'll let filebeat tail the results
-                                #   as long as it needs to
-                                logger.info(
-                                    f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
-                                )
-                                processFailures = 0
+                                if suricataInstance[1].process_pcap(
+                                    pcap_file=fileInfo[FILE_INFO_DICT_NAME],
+                                    output_dir=output_dir,
+                                ):
+                                    # suricata over socket mode doesn't let us know when a PCAP file is done processing,
+                                    #   so all we do here is submit it and then we'll let filebeat tail the results
+                                    #   as long as it needs to
+                                    logger.info(
+                                        f"{scriptName}[{workerId}]:\t✅\t{os.path.basename(fileInfo[FILE_INFO_DICT_NAME])} with {os.path.basename(suricataInstance[0])}"
+                                    )
+                                    processFailures[suricataInstance[0]] = 0
 
+                                else:
+                                    logger.error(
+                                        f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                    )
+                                    processFailures[suricataInstance[0]] = processFailures[suricataInstance[0]] + 1
                             else:
                                 logger.error(
-                                    f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
+                                    f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}, no Suricata instance available"
                                 )
-                                processFailures = processFailures + 1
+                                processFailures['all'] = processFailures['all'] + 1
                         except Exception as e:
                             logger.error(
                                 f"{scriptName}[{workerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}"
                             )
-                            processFailures = processFailures + 1
+                            if suricataInstance is None:
+                                processFailures['all'] = processFailures['all'] + 1
+                            else:
+                                processFailures[suricataInstance[0]] = processFailures[suricataInstance[0]] + 1
 
-                        if processFailures > SURICATA_FAILURES_FORCE_RECONNECT:
+                        if processFailures['all'] > SURICATA_FAILURES_FORCE_RECONNECT:
                             # force a reconnect the next time we come around the loop
-                            suricata = None
-                            processFailures = 0
+                            suricataClients.clear()
+                            clientsExist = False
+                            processFailures.clear()
 
-        else:
-            # create a single socket client for this worker
-            try:
-                suricata = SuricataSocketClient(
-                    socket_path=socketPath,
-                    logger=logger,
-                    debug=debug,
-                    output_dir=uploadDir,
+        if (not clientsExist) or ((now - lastClientRefreshTime) >= lastClientRefreshInterval):
+            # create socket clients for this worker
+            for socketPath in sorted([f for f in glob.glob(socketPathWildCard)]):
+                try:
+                    if (not suricataClients.get(socketPath, None)) or (
+                        processFailures[socketPath] > SURICATA_FAILURES_FORCE_RECONNECT
+                    ):
+                        suricataClients[socketPath] = SuricataSocketClient(
+                            socket_path=socketPath,
+                            logger=logger,
+                            debug=debug,
+                            output_dir=uploadDir,
+                        )
+                        processFailures[socketPath] = 0
+                        logger.info(f"{scriptName}[{workerId}]:\tConnected to {os.path.basename(socketPath)}")
+                except Exception as e:
+                    logger.error(f"Failed to create Suricata socket client for {socketPath}, will retry: {e}")
+                    suricataClients[socketPath] = None
+                    processFailures[socketPath] = 0
+            if not any(v is not None for v in suricataClients.values()):
+                logger.warning(
+                    f"{scriptName}[{workerId}]:\t∅\tNo Suricata clients connected for {','.join(sorted([os.path.basename(f) for f in glob.glob(socketPathWildCard)]))} ({socketPathWildCard})"
                 )
-            except Exception as e:
-                logger.error(f"Failed to create Suricata socket client, will retry: {e}")
-                suricata = None
-            if not suricata:
                 time.sleep(5)
+            lastClientRefreshTime = now
 
     logger.info(f"{scriptName}[{workerId}]:\tfinished")
 
@@ -555,7 +565,6 @@ def main():
 
     global args
     global pdbFlagged
-    global shuttingDown
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
     parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
@@ -730,7 +739,7 @@ def main():
             '--suricata',
             required=False,
             dest='suricataSocketPath',
-            help="suricata socket path",
+            help="suricata socket path (accepts wildcards)",
             metavar='<STR>',
             type=str,
             default=SURICATA_SOCKET_PATH,
@@ -795,6 +804,10 @@ def main():
     signal.signal(signal.SIGTERM, shutdown_handler)
     signal.signal(signal.SIGUSR1, pdb_handler)
 
+    pcapBaseDirs = (
+        list(filter(os.path.isdir, map(str.strip, re.split(r'[;,]', args.pcapBaseDir)))) if args.pcapBaseDir else []
+    )
+
     if args.extraTags is not None:
         args.extraTags = [
             tag for tag in [re.sub(r'[^A-Za-z0-9 ._-]', '', x.strip()) for x in args.extraTags.split(',')] if tag
@@ -823,12 +836,12 @@ def main():
     # start worker threads which will pull filenames/tags to be processed by capture
     if processingMode == PCAP_PROCESSING_MODE_ARKIME:
         ThreadPool(
-            args.threads,
+            max(1, args.threads),
             arkimeCaptureFileWorker,
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.executable,
                     args.nodeName,
                     args.nodeHost,
@@ -844,12 +857,12 @@ def main():
         )
     elif processingMode == PCAP_PROCESSING_MODE_ZEEK:
         ThreadPool(
-            args.threads,
+            max(1, args.threads),
             zeekFileWorker,
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.executable,
                     args.autoZeek,
                     args.forceZeek,
@@ -870,7 +883,7 @@ def main():
             (
                 [
                     newFileQueue,
-                    args.pcapBaseDir,
+                    pcapBaseDirs,
                     args.autoSuricata,
                     args.forceSuricata,
                     args.suricataSocketPath,

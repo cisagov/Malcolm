@@ -25,6 +25,12 @@ Although the configuration script automates many of the following configuration 
         + `INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS` - the retention time period (weeks) for Arkime history data (default `13`)
         + `INDEX_MANAGEMENT_SEGMENTS` - the number of segments Arlime will use to optimize sessions (default `1`)
         + `INDEX_MANAGEMENT_HOT_WARM_ENABLED` - whether or not Arkime should use a hot/warm design (storing non-session data in a warm index); setting up hot/warm index policies also requires configuration on the local nodes in accordance with the [Arkime documentation](https://arkime.com/faq#ilm)
+    - The following variables configure exposing [Arkime's WISE Plugin](https://arkime.com/wise). By default, Malcolm leverages the WISE plugin internally but does not expose the functionality to the end user:
+        + `ARKIME_EXPOSE_WISE_GUI` - if set to `true` the WISE interface will be available at: `https://<MALCOLM-IP>/wise`. This defaults to `false`
+        + `ARKIME_ALLOW_WISE_GUI_CONFIG` - if set to `true` the WISE interface can be used to configure the WISE service. This only applies if `ARKIME_EXPOSE_WISE_GUI` is set to `true`. The default value is `false`.
+        + `ARKIME_WISE_CONFIG_PIN_CODE` - the WISE service requires a configuration pin. This value will be required to save any WISE configuration changes.  The default value is `WISE2019`.
+        + `ARKIME_WISE_SERVICE_URL` - to leverage WISE, arkime-capture needs to be provided a `wiseURL` value. The value of this environment variable is copied into the `wiseURL` value in arkime-live containers.
+        + `WISE` - indicates if the WISE service is `on` or `off`. This environment variable defaults to `off`.
 * **`arkime-live.env`** - settings for live traffic capture with Arkime
     - See [**Tuning Arkime**](live-analysis.md#LiveAnalysisTuningArkime) for variables related to managing Arkime's performance and resource utilization during live capture.
 * **`auth-common.env`** - [authentication](authsetup.md)-related settings
@@ -131,7 +137,8 @@ Although the configuration script automates many of the following configuration 
 * **`ssl.env`** - TLS-related settings used by many containers
 * **`suricata.env`**, **`suricata-live.env`** and **`suricata-offline.env`** - settings for [Suricata](https://suricata.io/)
     - `SURICATA_AUTO_ANALYZE_PCAP_FILES` – if set to `true`, all PCAP files imported into Malcolm will automatically be analyzed by Suricata, and the resulting logs will also be imported (default `false`)
-    - `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads available to Malcolm for analyzing Suricata logs (default `1`)
+    - `SURICATA_AUTO_ANALYZE_PCAP_PROCESSES` – the number of processes available to Malcolm for processing PCAP files with Suricata (default `1`)
+    - `SURICATA_AUTO_ANALYZE_PCAP_THREADS` – the number of threads to use per Suricata process (default `0`, meaning Suricata will use its default behavior)
     - `SURICATA_CUSTOM_RULES_ONLY` – if set to `true`, Malcolm will bypass the default [Suricata ruleset](https://github.com/OISF/suricata/tree/master/rules) and use only [user-defined rules](custom-rules.md#Suricata) (`./suricata/rules/*.rules`).
     - `SURICATA_UPDATE_RULES` – if set to `true`, Suricata signatures will periodically be updated (default `false`)
     - `SURICATA_LIVE_CAPTURE` - if set to `true`, Suricata will monitor live traffic on the local interface(s) defined by `PCAP_FILTER`

@@ -3,6 +3,9 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 export ARKIME_HTTPS_FLAG=""
+ARKIME_WISE_PLUGIN=${ARKIME_WISE_PLUGIN-"false"}
+ARKIME_WISE_URL=${ARKIME_WISE_URL-"127.0.0.1"}
+
 
 if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; then
 
@@ -166,8 +169,23 @@ if [[ -n $SUPERVISOR_PATH ]] && [[ -r "$SUPERVISOR_PATH"/arkime/config.ini ]]; t
       mv ./newcerts/server.crt "$CRT_FILESPEC"
       mv ./newcerts/server.key "$KEY_FILESPEC"
       rm -rf ./newcerts
-      popd >/dev/null 2>&1      
+      popd >/dev/null 2>&1
     fi
+  fi
+
+  if [[ ${ARKIME_WISE_PLUGIN}  == "true" ]]; then
+    # make sure the wise plugin is enabled in the config file
+    WISE_PLUGIN_NAME="wise.so"
+    WISE_PLUGIN_ESCAPED="$(echo "${WISE_PLUGIN_NAME}" | sed 's@\.@\\\.@g')"
+    # clean up old references to the plugin
+    sed -i "/plugins=.*${WISE_PLUGIN_ESCAPED}/s/;\?${WISE_PLUGIN_ESCAPED}//g" "$ARKIME_CONFIG_FILE"
+    # append wise plugin filename to end of plugins= line in config file and uncomment it if necessary
+    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1${WISE_PLUGIN_NAME};/" "$ARKIME_CONFIG_FILE"
+    # squash semicolons
+    sed -i 's/;\{2,\}/;/g' "$ARKIME_CONFIG_FILE"
+    # remove trailing semicolon from plugins= line if it exists
+    sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "$ARKIME_CONFIG_FILE"
+    sed -i "s|^\(wiseURL=\).*|\1""${ARKIME_WISE_URL}""|" "${ARKIME_CONFIG_FILE}"
   fi
 
   # update the firewall ACL (via ufw) to allow retrieval of packets
