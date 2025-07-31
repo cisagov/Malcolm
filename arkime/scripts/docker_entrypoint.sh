@@ -189,6 +189,7 @@ if [[ ! -f "${ARKIME_CONFIG_FILE}" ]] && [[ -r "${ARKIME_DIR}"/etc/config.orig.i
         sed -i "s/^\(wisePort=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i "s/^\(viewerPlugins=\)/# \1/" "${ARKIME_CONFIG_FILE}"
         sed -i '/^\[custom-fields\]/,$d' "${ARKIME_CONFIG_FILE}"
+        sed -i "s|^\(wiseURL=\).*|\1""${ARKIME_WISE_SERVICE_URL}""|" "${ARKIME_CONFIG_FILE}"
     fi
 
     # enable ja4+ plugin if it's present
