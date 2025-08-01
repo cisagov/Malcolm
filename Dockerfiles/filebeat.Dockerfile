@@ -145,7 +145,7 @@ RUN for INPUT in logs nginx tcp syslog-tcp syslog-udp; do \
       chmod 770 /usr/share/filebeat-$INPUT/data; \
     done; \
     chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py && \
-    (echo "* * * * * /usr/local/bin/filebeat-process-zeek-folder.sh\n*/5 * * * * /usr/local/bin/clean-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
+    (echo "* * * * * /usr/local/bin/filebeat-process-zeek-folder.sh\n* * * * * /usr/local/bin/clean-processed-folder.py" > ${SUPERCRONIC_CRONTAB})
 
 ENV AUTO_TAG $AUTO_TAG
 ENV LOG_CLEANUP_MINUTES $LOG_CLEANUP_MINUTES
