@@ -619,7 +619,7 @@ def rmtree_except(path, exclude_patterns=None, ignore_errors=False):
             if not any(fnmatch.fnmatch(name, pattern) for pattern in exclude_patterns):
                 try:
                     os.remove(full_path)
-                except Exception as e:
+                except Exception:
                     if not ignore_errors:
                         raise
 
