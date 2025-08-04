@@ -15,7 +15,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile, get_iterable
+from malcolm_utils import eprint, str2bool, ParseCurlFile, get_iterable, set_logging
 
 ###################################################################################################
 scriptName = os.path.basename(__file__)
