@@ -27,7 +27,16 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool, deep_set, pushd, run_process, append_to_file, set_logging, log_level_is_debug
+from malcolm_utils import (
+    val2bool,
+    deep_set,
+    pushd,
+    run_process,
+    append_to_file,
+    set_logging,
+    get_verbosity_env_var_count,
+    log_level_is_debug,
+)
 
 ###################################################################################################
 args = None
@@ -664,13 +673,11 @@ def main():
         add_help=True,
         usage='{} <arguments>'.format(script_name),
     )
-    verbose_env_val = os.getenv("SURICATA_TEST_CONFIG_VERBOSITY", "")
-    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=1,
+        default=get_verbosity_env_var_count("SURICATA_TEST_CONFIG_VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(

@@ -35,7 +35,15 @@ from pcap_utils import (
     tags_from_filename,
 )
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile, remove_prefix, set_logging, touch
+from malcolm_utils import (
+    eprint,
+    str2bool,
+    ParseCurlFile,
+    remove_prefix,
+    set_logging,
+    get_verbosity_env_var_count,
+    touch,
+)
 import watch_common
 
 from collections import defaultdict
@@ -277,15 +285,11 @@ def main():
     global AuthenticationException
 
     parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
-    verbose_env_val = os.getenv("PCAP_PIPELINE_VERBOSITY", "")
-    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=(
-            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
-        ),
+        default=get_verbosity_env_var_count("PCAP_PIPELINE_VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(

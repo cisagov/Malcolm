@@ -11,7 +11,7 @@ import tempfile
 import logging
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, set_logging
+from malcolm_utils import eprint, str2bool, set_logging, get_verbosity_env_var_count
 
 try:
     import ruamel.yaml as yaml
@@ -41,15 +41,11 @@ def bits_left(mac_str):
 # main
 def main():
     parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
-    verbose_env_val = os.getenv("VERBOSITY", "")
-    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=(
-            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
-        ),
+        default=get_verbosity_env_var_count("VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
