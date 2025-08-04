@@ -28,13 +28,24 @@ suricataDir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/")
 nowTime = time.time()
 
 _LOG_MIME_TYPES = (
-    "text/plain", "text/x-file", "application/x-ndjson", "application/json"
+    "application/json",
+    "application/x-ndjson",
+    "text/plain",
+    "text/x-file",
 )
 _ARCHIVE_MIME_TYPES = (
-    "application/gzip", "application/x-gzip", "application/x-7z-compressed", "application/x-bzip2",
-    "application/x-cpio", "application/x-lzip", "application/x-lzma",
-    "application/x-rar-compressed", "application/x-tar", "application/x-xz", "application/zip",
-    "application/x-ms-evtx"
+    "application/gzip",
+    "application/x-7z-compressed",
+    "application/x-bzip2",
+    "application/x-cpio",
+    "application/x-gzip",
+    "application/x-lzip",
+    "application/x-lzma",
+    "application/x-ms-evtx",
+    "application/x-rar-compressed",
+    "application/x-tar",
+    "application/x-xz",
+    "application/zip",
 )
 
 
@@ -69,13 +80,15 @@ def checkFile(filename, fb_files: list[tuple[int, int]], checkLogs=True, checkAr
             # The file is in use by another process.
             return
 
-        # get the file type
-        # Treat zero-length files as log files.
+        # get the file type (treat zero-length files as log files)
         fileType = magic.from_file(filename, mime=True)
-        if ((checkLogs is True) and (cleanLogSeconds > 0) and
-            (os.path.getsize(filename) == 0 or fileType in _LOG_MIME_TYPES)):
+        if (
+            (checkLogs is True)
+            and (cleanLogSeconds > 0)
+            and ((fileStatInfo.st_size == 0) or (fileType in _LOG_MIME_TYPES))
+        ):
             cleanSeconds = cleanLogSeconds
-        elif (checkArchives is True) and (cleanZipSeconds > 0) and fileType in _ARCHIVE_MIME_TYPES:
+        elif (checkArchives is True) and (cleanZipSeconds > 0) and (fileType in _ARCHIVE_MIME_TYPES):
             cleanSeconds = cleanZipSeconds
         else:
             # not a file we're going to be messing with
@@ -126,8 +139,7 @@ def pruneFiles():
         with open(fbRegFilename) as f:
             fbReg = LoadFileIfJson(f, attemptLines=True)
 
-    # Extract file device and inode information from the registry for faster
-    # processing.
+    # Extract file device and inode information from the registry for faster processing
     fb_files: list[tuple[int, int]] = []
     for entry in fbReg:
         device = deep_get(entry, ['v', 'FileStateOS', 'device'])
@@ -160,7 +172,7 @@ def pruneFiles():
 
     # check the suricata logs (live and otherwise) as well
     suricata_found_files: list[str] = []
-    for (dir_path, _, filenames) in os.walk(suricataDir):
+    for dir_path, _, filenames in os.walk(suricataDir):
         for filename in filenames:
             path = f"{dir_path}/{filename}"
             suricata_found_files.append(path)
