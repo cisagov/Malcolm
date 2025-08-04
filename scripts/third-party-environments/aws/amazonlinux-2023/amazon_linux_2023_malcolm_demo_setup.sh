@@ -228,7 +228,7 @@ function InstallEnvPackages {
         kubernetes==32.0.1 \
         python-dotenv==1.1.0 \
         pythondialog==3.5.3 \
-        mmguero==1.3.4
+        mmguero==1.4.4
     fi
   fi
 
