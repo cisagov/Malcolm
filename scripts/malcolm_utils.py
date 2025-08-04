@@ -10,6 +10,7 @@ import hashlib
 import inspect
 import ipaddress
 import json
+import logging
 import mmap
 import os
 import re
@@ -127,6 +128,73 @@ def base64_decode_if_prefixed(s: str):
         return b64decode(s[7:]).decode('utf-8')
     else:
         return s
+
+
+###################################################################################################
+def set_logging(
+    log_level_str,
+    flag_level_count,
+    logger=None,
+    set_traceback_limit=False,
+    logfmt='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+):
+    """
+    Configures logging based on a log level string or verbosity count.
+
+    Args:
+        log_level_str (str): A string like 'debug', 'info', etc. May be None.
+        flag_level_count (int): Number of -v flags passed (0–5).
+        logger (logging.Logger, optional): If provided, configures this logger
+                                           instead of the global root logger.
+
+    Returns:
+        int: The final effective logging level (e.g., logging.DEBUG).
+    """
+
+    # level-based logging verbosity
+    cli_level = None
+    if log_level_str:
+        cli_level = {
+            'CRITICAL': logging.CRITICAL,
+            'ERROR': logging.ERROR,
+            'WARNING': logging.WARNING,
+            'INFO': logging.INFO,
+            'DEBUG': logging.DEBUG,
+        }.get(log_level_str.strip().upper(), logging.CRITICAL)
+
+    # flag-based logging verbosity
+    flag_level = max(logging.NOTSET, min(logging.CRITICAL - (10 * flag_level_count), logging.CRITICAL))
+
+    # final log level: pick more verbose (lower number)
+    log_level = min(flag_level, cli_level) if cli_level is not None else flag_level
+
+    # Configure logging
+    if logger is None:
+        # Set global logging config (root logger)
+        logging.basicConfig(
+            level=log_level,
+            format=logfmt,
+            datefmt=datefmt,
+        )
+    else:
+        # Configure a specific logger
+        handler = logging.StreamHandler()
+        handler.setFormatter(
+            logging.Formatter(
+                logfmt,
+                datefmt=datefmt,
+            )
+        )
+        logger.setLevel(log_level)
+        logger.handlers.clear()
+        logger.addHandler(handler)
+        logger.propagate = False  # Don't double-log to the root logger
+
+    if set_traceback_limit and (log_level > logging.DEBUG):
+        sys.tracebacklimit = 0
+
+    return log_level
 
 
 ###################################################################################################
