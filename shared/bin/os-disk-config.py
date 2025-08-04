@@ -14,6 +14,7 @@
 import os
 import json
 import re
+import logging
 import glob
 import sys
 import uuid
@@ -23,7 +24,6 @@ from collections import defaultdict
 from fstab import Fstab
 
 from malcolm_utils import (
-    eprint,
     HEDGEHOG_PCAP_DIR,
     HEDGEHOG_ZEEK_DIR,
     LoadFileIfJson,
@@ -301,13 +301,9 @@ def main():
             if len(mountDetails) >= 2:
                 mountPoint = mountDetails[1]
                 if mountPoint.startswith(OS_PARAMS[osMode][MOUNT_ROOT_PATH]):
-                    eprint(
-                        f"It appears there is already a device mounted under {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} at {mountPoint}."
+                    logging.critical(
+                        f"It appears there is already a device mounted under {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} at {mountPoint}. If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
                     )
-                    eprint(
-                        "If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
-                    )
-                    eprint()
                     parser.print_help()
                     exit(2)
 
@@ -402,8 +398,8 @@ def main():
                 f'Partition and format {device}{" (dry-run)" if args.dryrun else ""}?'
             ):
                 if args.dryrun:
-                    eprint(f"Partitioning {device} (dry run only)...")
-                    eprint(
+                    logging.info(f"Partitioning {device} (dry run only)...")
+                    logging.info(
                         f'\t/sbin/parted --script --align optimal {device} -- mklabel gpt \\\n\t\tunit mib mkpart primary 1 100%'
                     )
                     ecode = 0

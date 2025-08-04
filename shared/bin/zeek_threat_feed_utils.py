@@ -41,7 +41,7 @@ import re
 import requests
 import urllib3
 
-from malcolm_utils import eprint, base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
+from malcolm_utils import base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
 
 # keys for dict returned by map_*_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'

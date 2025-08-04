@@ -17,7 +17,7 @@ from netaddr import EUI
 from operator import itemgetter
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, set_logging, get_verbosity_env_var_count
+from malcolm_utils import str2bool, set_logging, get_verbosity_env_var_count
 
 ###################################################################################################
 args = None

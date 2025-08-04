@@ -11,7 +11,7 @@ import tempfile
 import logging
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, set_logging, get_verbosity_env_var_count
+from malcolm_utils import str2bool, set_logging, get_verbosity_env_var_count
 
 try:
     import ruamel.yaml as yaml

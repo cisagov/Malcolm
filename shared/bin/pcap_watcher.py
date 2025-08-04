@@ -36,7 +36,6 @@ from pcap_utils import (
 )
 import malcolm_utils
 from malcolm_utils import (
-    eprint,
     str2bool,
     ParseCurlFile,
     remove_prefix,

@@ -37,7 +37,6 @@ from pcap_utils import (
     tags_from_filename,
 )
 from malcolm_utils import (
-    eprint,
     str2bool,
     AtomicInt,
     run_process,
@@ -556,7 +555,7 @@ def suricataFileWorker(suricataWorkerArgs):
 def main():
     processingMode = None
     if 'pcap_processor' in scriptName:
-        eprint(
+        logging.critical(
             f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)
@@ -567,7 +566,7 @@ def main():
     elif PCAP_PROCESSING_MODE_SURICATA in scriptName:
         processingMode = PCAP_PROCESSING_MODE_SURICATA
     else:
-        eprint(
+        logging.critical(
             f"{scriptName} could not determine PCAP processing mode. Create a symlink to {scriptName} with the processor (e.g., arkime, suricata, zeek) in the name and run that instead."
         )
         exit(2)

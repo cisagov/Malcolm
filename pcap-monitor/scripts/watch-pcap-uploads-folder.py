@@ -22,7 +22,7 @@ import sys
 import time
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
+from malcolm_utils import str2bool, remove_suffix, set_logging, get_verbosity_env_var_count
 import watch_common
 
 ###################################################################################################

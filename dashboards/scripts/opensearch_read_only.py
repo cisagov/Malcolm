@@ -15,7 +15,7 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile, set_logging, get_verbosity_env_var_count
+from malcolm_utils import str2bool, ParseCurlFile, set_logging, get_verbosity_env_var_count
 
 ###################################################################################################
 scriptName = os.path.basename(__file__)

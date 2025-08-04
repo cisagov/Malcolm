@@ -297,8 +297,8 @@ def main():
                                 fieldsNames.append(field)
                                 getFieldsList.append(mergedFieldInfo)
 
-                            # elif debug:
-                            #   malcolm_utils.eprint('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
+                            # else:
+                            #   logging.debug('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
 
             except Exception as e:
                 logging.error('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))

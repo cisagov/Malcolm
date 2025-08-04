@@ -25,7 +25,7 @@ from subprocess import PIPE, Popen
 from threading import get_ident
 from threading import Lock
 
-from malcolm_utils import eprint, sha256sum, run_process, AtomicInt, dictsearch
+from malcolm_utils import sha256sum, run_process, AtomicInt, dictsearch
 
 ###################################################################################################
 VENTILATOR_PORT = 5987

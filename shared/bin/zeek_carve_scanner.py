@@ -54,7 +54,7 @@ from zeek_carve_utils import (
     ZEEK_SIGNATURE_NOTICE,
 )
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, AtomicInt, set_logging, get_verbosity_env_var_count
+from malcolm_utils import str2bool, AtomicInt, set_logging, get_verbosity_env_var_count
 
 
 ###################################################################################################
@@ -209,18 +209,18 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                                 elif isinstance(response.result, dict) and ("error" in response.result):
                                     # scan errored out, report the error
                                     scanResult = response.result["error"]
-                                    eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                                    logging.error(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
                                 else:
                                     # result is unrecognizable
                                     scanResult = "Invalid scan result format"
-                                    eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                                    logging.error(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
                             else:
                                 # impossibru! abandon ship for this file?
                                 requestComplete = True
                                 scanResult = "Error checking results"
-                                eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
+                                logging.error(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
 
                     else:
                         # we were denied (rate limiting, probably), so we'll need wait for a slot to clear up
@@ -236,7 +236,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
 
         else:
-            eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
+            logging.critical(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
 
     finally:
         # "unregister" this scanner with the logger
@@ -404,7 +404,7 @@ def main():
         )
     else:
         if not args.enableClamAv:
-            eprint('No scanner specified, defaulting to ClamAV')
+            logging.warning('No scanner specified, defaulting to ClamAV')
         checkConnInfo = ClamAVScan(
             logger=logging,
             socketFileName=args.clamAvSocket,
@@ -428,7 +428,7 @@ def main():
 
     # graceful shutdown
     if debug:
-        eprint(f"{scriptName}: shutting down...")
+        logging.info(f"{scriptName}: shutting down...")
     time.sleep(5)
 
 

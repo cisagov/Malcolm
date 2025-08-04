@@ -36,7 +36,7 @@ from zeek_carve_utils import (
 )
 
 import malcolm_utils
-from malcolm_utils import touch, eprint, str2bool, set_logging, get_verbosity_env_var_count
+from malcolm_utils import touch, str2bool, set_logging, get_verbosity_env_var_count
 import watch_common
 
 ###################################################################################################
