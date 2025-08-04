@@ -13,9 +13,6 @@ from tempfile import gettempdir
 from subprocess import DEVNULL
 from malcolm_utils import LoadFileIfJson, deep_get, set_logging
 
-script_name = os.path.basename(__file__)
-script_path = os.path.dirname(os.path.realpath(__file__))
-
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
 cleanZipSeconds = int(os.getenv('ZIP_CLEANUP_MINUTES', "120")) * 60

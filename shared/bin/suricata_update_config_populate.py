@@ -27,7 +27,7 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool
+from malcolm_utils import val2bool, set_logging
 
 ###################################################################################################
 args = None
@@ -84,14 +84,18 @@ def main():
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
-        add_help=False,
+        add_help=True,
         usage='{} <arguments>'.format(script_name),
     )
+    verbose_env_val = os.getenv("SURICATA_TEST_CONFIG_VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=1,
+        default=(
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        ),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
@@ -131,26 +135,21 @@ def main():
         help="Output YAML file (take precedence over --inplace)",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
     inFileParts = os.path.splitext(args.input)
     args.output = (
         args.output if args.output else args.input if args.inplace else inFileParts[0] + "_new" + inFileParts[1]
     )
 
-    args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    args.verbose = set_logging(os.getenv("SURICATA_TEST_CONFIG_LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     logging.info(os.path.join(script_path, script_name))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     ##################################################################################################
     # back up the old YAML file if we need to first

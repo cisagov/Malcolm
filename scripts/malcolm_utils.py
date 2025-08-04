@@ -131,6 +131,10 @@ def base64_decode_if_prefixed(s: str):
 
 
 ###################################################################################################
+def log_level_is_debug(log_level):
+    return log_level <= logging.DEBUG
+
+
 def set_logging(
     log_level_str,
     flag_level_count,

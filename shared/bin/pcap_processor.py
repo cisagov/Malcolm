@@ -36,7 +36,7 @@ from pcap_utils import (
     PCAP_TOPIC_PORT,
     tags_from_filename,
 )
-from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or_dir
+from malcolm_utils import eprint, str2bool, AtomicInt, run_process, same_file_or_dir, set_logging, log_level_is_debug
 from multiprocessing.pool import ThreadPool
 from collections import deque
 from itertools import chain, repeat
@@ -489,17 +489,17 @@ def suricataFileWorker(suricataWorkerArgs):
                                     processFailures[suricataInstance[0]] = 0
 
                                 else:
-                                    logger.error(
+                                    logger.critical(
                                         f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}"
                                     )
                                     processFailures[suricataInstance[0]] = processFailures[suricataInstance[0]] + 1
                             else:
-                                logger.error(
+                                logger.critical(
                                     f"{scriptName}[{workerId}]:\t❌\tFailed to process {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}, no Suricata instance available"
                                 )
                                 processFailures['all'] = processFailures['all'] + 1
                         except Exception as e:
-                            logger.error(
+                            logger.critical(
                                 f"{scriptName}[{workerId}]:\t💥\tError processing {os.path.basename(fileInfo[FILE_INFO_DICT_NAME])}: {e}"
                             )
                             if suricataInstance is None:
@@ -529,7 +529,7 @@ def suricataFileWorker(suricataWorkerArgs):
                         processFailures[socketPath] = 0
                         logger.info(f"{scriptName}[{workerId}]:\tConnected to {os.path.basename(socketPath)}")
                 except Exception as e:
-                    logger.error(f"Failed to create Suricata socket client for {socketPath}, will retry: {e}")
+                    logger.critical(f"Failed to create Suricata socket client for {socketPath}, will retry: {e}")
                     suricataClients[socketPath] = None
                     processFailures[socketPath] = 0
             if not any(v is not None for v in suricataClients.values()):
@@ -566,8 +566,18 @@ def main():
     global args
     global pdbFlagged
 
-    parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
+    verbose_env_val = os.getenv("PCAP_PIPELINE_VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=(
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        ),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
     parser.add_argument(
         '--start-sleep',
         dest='startSleepSec',
@@ -783,21 +793,16 @@ def main():
             default=SURICATA_LOG_DIR,
         )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    args.verbose = set_logging(os.getenv("PCAP_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     logging.info(os.path.join(scriptPath, scriptName))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
@@ -851,7 +856,7 @@ def main():
                     args.autoTag,
                     args.notLocked,
                     logging,
-                    args.verbose <= logging.DEBUG,
+                    log_level_is_debug(args.verbose),
                 ],
             ),
         )
@@ -871,7 +876,7 @@ def main():
                     args.zeekUploadDir,
                     args.zeekExtractFileMode,
                     logging,
-                    args.verbose <= logging.DEBUG,
+                    log_level_is_debug(args.verbose),
                 ],
             ),
         )
@@ -892,7 +897,7 @@ def main():
                     args.suricataUploadDir,
                     args.suricataConfigFile,
                     logging,
-                    args.verbose <= logging.DEBUG,
+                    log_level_is_debug(args.verbose),
                 ],
             ),
         )

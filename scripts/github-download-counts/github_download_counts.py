@@ -39,14 +39,18 @@ def main():
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
-        add_help=False,
+        add_help=True,
         usage=f'{script_name} <arguments>',
     )
+    verbose_env_val = os.getenv("VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=1,
+        default=(
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        ),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
@@ -126,11 +130,11 @@ def main():
         help="List of regular expressions against which to match container image tags (e.g., ^24\\.10)",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        sys.exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
     # if the GitHub token was not obtained from environment variable or as an argument,
     #   see if it can be loaded from a file
@@ -138,15 +142,10 @@ def main():
         with open(args.githubTokenFile) as f:
             args.githubToken = f.readline().strip()
 
-    args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    args.verbose = mmguero.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     logging.info(os.path.join(script_path, script_name))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     # resolve the start and end times for searching
     dateFrom = ParseDate(args.dateFromStr)

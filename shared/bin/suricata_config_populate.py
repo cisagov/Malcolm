@@ -27,7 +27,7 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool, deep_set, pushd, run_process, append_to_file
+from malcolm_utils import val2bool, deep_set, pushd, run_process, append_to_file, set_logging, log_level_is_debug
 
 ###################################################################################################
 args = None
@@ -661,9 +661,11 @@ def main():
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
-        add_help=False,
+        add_help=True,
         usage='{} <arguments>'.format(script_name),
     )
+    verbose_env_val = os.getenv("SURICATA_TEST_CONFIG_VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
         '--verbose',
         '-v',
@@ -718,11 +720,11 @@ def main():
         help="Suricata binary",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
     inFileParts = os.path.splitext(args.input)
     args.output = (
@@ -730,15 +732,12 @@ def main():
     )
 
     argsOrigVerbose = args.verbose
-    args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    args.verbose = set_logging(
+        os.getenv("SURICATA_TEST_CONFIG_LOGLEVEL", ""), argsOrigVerbose, set_traceback_limit=True
     )
     logging.info(os.path.join(script_path, script_name))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     ##################################################################################################
     # back up the old YAML file if we need to first
@@ -1310,12 +1309,12 @@ def main():
                     tmpLogDir,
                     '-T',
                 ],
-                debug=args.verbose <= logging.DEBUG,
+                debug=log_level_is_debug(args.verbose),
                 logger=logging,
             )
             logging.info(f'suricata configuration test returned {script_return_code}')
             if script_return_code != 0:
-                logging.error(output)
+                logging.critical(output)
 
     # final tweaks
     deep_set(cfg, ['stats', 'enabled'], val2bool(DEFAULT_VARS['STATS_ENABLED']))

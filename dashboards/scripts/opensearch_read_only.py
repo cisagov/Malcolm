@@ -6,6 +6,7 @@
 import argparse
 import json
 import requests
+import logging
 import os
 import sys
 import urllib3
@@ -14,10 +15,9 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile
+from malcolm_utils import eprint, str2bool, ParseCurlFile, set_logging
 
 ###################################################################################################
-debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 urllib3.disable_warnings()
@@ -26,18 +26,17 @@ urllib3.disable_warnings()
 ###################################################################################################
 # main
 def main():
-    global debug
-
     parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
+    verbose_env_val = os.getenv("OPENSEARCH_INDEX_READ_ONLY_VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=str2bool(os.getenv('OPENSEARCH_INDEX_READ_ONLY_DEBUG', default='False')),
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=(
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        ),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-i',
@@ -121,19 +120,18 @@ def main():
         help="Dry-run, do not actually PUT request",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except Exception:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("Arguments: {}".format(sys.argv[1:]))
-        eprint("Arguments: {}".format(args))
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(
+        os.getenv("OPENSEARCH_INDEX_READ_ONLY_LOGLEVEL", ""), args.verbose, set_traceback_limit=True
+    )
+    logging.info(os.path.join(scriptPath, scriptName))
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
@@ -157,8 +155,7 @@ def main():
     )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
-    if debug:
-        eprint(f'OpenSearch version is {opensearchVersion}')
+    logging.info(f'OpenSearch version is {opensearchVersion}')
 
     # for the whole cluster:
     # PUT _cluster/settings
@@ -184,9 +181,7 @@ def main():
             )
         }
     }
-    if debug:
-        eprint(f'PUT "{settingsUrl}"')
-        eprint(f"    {json.dumps(settingsInfo)}")
+    logging.debug(f'PUT "{settingsUrl}"\n    {json.dumps(settingsInfo)}')
 
     if not args.dryRun:
         # make the PUT request to change the index/cluster setting and raise an exception if it fails
@@ -198,25 +193,23 @@ def main():
             verify=args.opensearchSslVerify,
         )
         putResponse.raise_for_status()
-        if debug:
-            print(putResponse.json())
+        logging.debug(putResponse.json())
 
-    if debug:
-        # request settings to verify change(s)
-        checkResponse = requests.get(
-            settingsUrl,
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        if args.index == '_cluster':
-            eprint(json.dumps(checkResponse.json()))
-        else:
-            for index, indexInfo in sorted(checkResponse.json().items()):
-                try:
-                    eprint(f"{index} - {json.dumps(indexInfo['settings']['index']['blocks'])}")
-                except KeyError:
-                    # not found, assume that means "not read-only"
-                    eprint(f"{index} - {json.dumps({'read_only': None})}")
+    # request settings to verify change(s)
+    checkResponse = requests.get(
+        settingsUrl,
+        auth=opensearchReqHttpAuth,
+        verify=args.opensearchSslVerify,
+    )
+    if args.index == '_cluster':
+        logging.info(json.dumps(checkResponse.json()))
+    else:
+        for index, indexInfo in sorted(checkResponse.json().items()):
+            try:
+                logging.info(f"{index} - {json.dumps(indexInfo['settings']['index']['blocks'])}")
+            except KeyError:
+                # not found, assume that means "not read-only"
+                logging.warning(f"{index} - {json.dumps({'read_only': None})}")
 
 
 if __name__ == '__main__':

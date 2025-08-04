@@ -22,7 +22,7 @@ import sys
 import time
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, remove_suffix
+from malcolm_utils import eprint, str2bool, remove_suffix, set_logging
 import watch_common
 
 ###################################################################################################
@@ -97,7 +97,7 @@ def file_processor(pathname, **kwargs):
                 os.unlink(pathname)
 
         except Exception as genericError:
-            logger.error(f"{scriptName}:\texception: {genericError}")
+            logger.critical(f"{scriptName}:\texception: {genericError}")
 
 
 ###################################################################################################
@@ -107,10 +107,20 @@ def main():
 
     parser = argparse.ArgumentParser(
         description=scriptName,
-        add_help=False,
+        add_help=True,
         usage='{} <arguments>'.format(scriptName),
     )
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    verbose_env_val = os.getenv("PCAP_PIPELINE_VERBOSITY", "")
+    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=(
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        ),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
     parser.add_argument(
         '-r',
         '--recursive-directory',
@@ -220,21 +230,16 @@ def main():
     )
 
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    args.verbose = set_logging(os.getenv("PCAP_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     logging.info(os.path.join(scriptPath, scriptName))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
