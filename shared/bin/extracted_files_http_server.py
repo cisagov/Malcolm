@@ -559,7 +559,7 @@ def main():
         '--verbose',
         '-v',
         action='count',
-        default=get_verbosity_env_var_count("EXTRACTED_FILE_HTTP_SERVER_VERBOSITY"),
+        default=get_verbosity_env_var_count("VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
