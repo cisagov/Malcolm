@@ -3299,9 +3299,9 @@ def main():
         set_traceback_limit=True,
         logfmt='%(message)s',
     )
-    logging.info(os.path.join(ScriptPath, ScriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(ScriptPath, ScriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
     logging.info(f"Malcolm path: {GetMalcolmPath()}")
 
     # handle sigint and sigterm for graceful shutdown

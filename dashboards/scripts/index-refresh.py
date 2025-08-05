@@ -148,9 +148,9 @@ def main():
         sys.exit(e.code)
 
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
@@ -195,7 +195,7 @@ def main():
     )
     opensearchInfo = opensearchInfoResponse.json()
     opensearchVersion = opensearchInfo['version']['number']
-    logging.debug('OpenSearch version is {}'.format(opensearchVersion))
+    logging.info('OpenSearch version is {}'.format(opensearchVersion))
 
     # if they actually just specified the name of the environment variable, resolve that for the index name
     if args.index.startswith('MALCOLM_'):
@@ -303,7 +303,7 @@ def main():
             except Exception as e:
                 logging.error('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
 
-        logging.debug('{} would have {} fields'.format(args.index, len(getFieldsList)))
+        logging.info('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
         # first get the previous field format map as a starting point, if any
         getResponse = requests.get(

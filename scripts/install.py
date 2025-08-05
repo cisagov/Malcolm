@@ -3125,8 +3125,8 @@ class Installer(object):
 ###################################################################################################
 class LinuxInstaller(Installer):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def __init__(self, orchMode, debug=False, configOnly=False):
-        super().__init__(orchMode, debug, configOnly)
+    def __init__(self, orchMode, configOnly=False):
+        super().__init__(orchMode, configOnly)
 
         self.distro = None
         self.codename = None
@@ -3885,7 +3885,7 @@ class LinuxInstaller(Installer):
 ###################################################################################################
 class MacInstaller(Installer):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def __init__(self, orchMode, debug=False, configOnly=False):
+    def __init__(self, orchMode, configOnly=False):
         super().__init__(orchMode, debug, configOnly)
 
         self.sudoCmd = []
@@ -5105,9 +5105,9 @@ def main():
         set_traceback_limit=True,
         logfmt='%(message)s',
     )
-    logging.info(os.path.join(ScriptPath, ScriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(ScriptPath, ScriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.imageArch is not None:
         args.imageArch = (

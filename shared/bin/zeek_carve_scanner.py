@@ -367,9 +367,9 @@ def main():
     args.verbose = set_logging(
         os.getenv("EXTRACTED_FILE_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True
     )
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)

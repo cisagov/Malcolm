@@ -265,8 +265,8 @@ def main():
         sys.exit(e.code)
 
     args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True, logfmt='%(message)s')
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM):
         osMode = args.osMode

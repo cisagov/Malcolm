@@ -451,9 +451,9 @@ def main():
         sys.exit(e.code)
 
     args.verbose = set_logging(os.getenv("PCAP_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'

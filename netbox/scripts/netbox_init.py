@@ -301,9 +301,9 @@ def main():
         sys.exit(e.code)
 
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(script_path, script_name))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     args.netboxToken = args.netboxToken or os.getenv('NETBOX_TOKEN') or os.getenv('SUPERUSER_API_TOKEN')
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')

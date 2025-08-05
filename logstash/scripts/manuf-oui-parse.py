@@ -69,9 +69,9 @@ def main():
         sys.exit(e.code)
 
     args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.input.lower().startswith('http') and not os.path.isfile(args.input):
         tmpf = tempfile.NamedTemporaryFile(delete=True, suffix=".txt")

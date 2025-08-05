@@ -177,9 +177,9 @@ def main():
         sys.exit(e.code)
 
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(script_path, script_name))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     netboxVenvPy = os.path.join(os.path.join(os.path.join(args.netboxDir, 'venv'), 'bin'), 'python')
     manageScript = os.path.join(os.path.join(args.netboxDir, 'netbox'), 'manage.py')

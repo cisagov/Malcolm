@@ -314,9 +314,9 @@ def main():
 
     # set up logging
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.info(os.path.join(script_path, script_name))
-    logging.info(f"Arguments: {sys.argv[1:]}")
-    logging.info(f"Arguments: {args}")
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     # this array will hold all of the different log types until the end when we print them out
     records = []
