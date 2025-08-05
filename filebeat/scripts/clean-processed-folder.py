@@ -11,10 +11,7 @@ import sys
 import time
 from tempfile import gettempdir
 from subprocess import DEVNULL
-from malcolm_utils import LoadFileIfJson, deep_get, set_logging
-
-script_name = os.path.basename(__file__)
-script_path = os.path.dirname(os.path.realpath(__file__))
+from malcolm_utils import LoadFileIfJson, deep_get, set_logging, get_verbosity_env_var_count
 
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
@@ -215,11 +212,9 @@ def pruneFiles():
 
 
 def main():
-    verbose_env_val = os.getenv("FILEBEAT_CLEANUP_VERBOSITY", "")
-    verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
-    log_level = set_logging(
+    set_logging(
         os.getenv("FILEBEAT_CLEANUP_LOGLEVEL", ""),
-        verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0,
+        get_verbosity_env_var_count("FILEBEAT_CLEANUP_VERBOSITY"),
         set_traceback_limit=True,
         logfmt='%(message)s',
     )

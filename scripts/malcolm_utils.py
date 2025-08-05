@@ -131,6 +131,21 @@ def base64_decode_if_prefixed(s: str):
 
 
 ###################################################################################################
+def get_verbosity_env_var_count(var_name):
+    if var_name:
+        verbose_env_val = os.getenv(var_name, "")
+        verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
+        return (
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        )
+    else:
+        return 0
+
+
+def log_level_is_debug(log_level):
+    return log_level <= logging.DEBUG
+
+
 def set_logging(
     log_level_str,
     flag_level_count,
