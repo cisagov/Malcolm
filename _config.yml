@@ -13,6 +13,9 @@ mastodon:
 reddit:
   id: Malcolm on Reddit
   url: https://reddit.com/r/Malcolm
+umami:
+  id:
+  url:
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html

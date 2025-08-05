@@ -156,6 +156,7 @@ if [ -d "$WORKDIR" ]; then
   sed -i "s/^\(offline_mode:\).*/\1 true/" "$SCRIPT_PATH"/_config.yml
   sed -i -e "/^mastodon:/,+2d" "$SCRIPT_PATH"/_config.yml
   sed -i -e "/^reddit:/,+2d" "$SCRIPT_PATH"/_config.yml
+  sed -i -e "/^umami:/,+2d" "$SCRIPT_PATH"/_config.yml
   bash "$SCRIPT_PATH/docs/documentation_build.sh" -v -r "${VCS_REVSION:-main}" -t "${GITHUB_TOKEN:-}"
   mkdir -p ./config/includes.chroot/usr/share/doc
   cp -r "$SCRIPT_PATH/_site" ./config/includes.chroot/usr/share/doc/hedgehog
