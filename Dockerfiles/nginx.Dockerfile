@@ -24,6 +24,7 @@ RUN find /site -type f -name "*.md" -exec sed -i "s/{{[[:space:]]*site.github.bu
     sed -i "s/^\(offline_mode:\).*/\1 true/" /site/_config.yml && \
     sed -i -e "/^mastodon:/,+2d" /site/_config.yml && \
     sed -i -e "/^reddit:/,+2d" /site/_config.yml && \
+    sed -i -e "/^umami:/,+2d" /site/_config.yml && \
     docker-entrypoint.sh bundle exec jekyll build && \
     sh -c 'awk '\'' \
         /window\.FontAwesomeCdnConfig *= *{/ { \
