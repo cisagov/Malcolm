@@ -63,6 +63,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     echo "Initializing $OPENSEARCH_PRIMARY database (${DB_INIT_ARGS[*]})"
 
     $ARKIME_DIR/db/db.pl $DB_SSL_FLAG "${OPENSEARCH_URL_FULL}" initnoprompt "${DB_INIT_ARGS[@]}"
+    ARKIME_DID_INIT=1
 
     if [[ "${INDEX_MANAGEMENT_ENABLED:-false}" == "true" ]]; then
       [[ "${INDEX_MANAGEMENT_HOT_WARM_ENABLED:-false}" == "true" ]] && HOT_WARM_FLAG=--hotwarm || HOT_WARM_FLAG=
@@ -76,13 +77,6 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
   	# this username/password isn't going to be used by Arkime, nginx will do the auth instead
   	$ARKIME_DIR/bin/arkime_add_user.sh "${MALCOLM_USERNAME}" "${MALCOLM_USERNAME}" "ignored" --admin --webauthonly --webauth $DB_SSL_FLAG >/dev/null 2>&1
-
-    echo "Initializing fields..."
-
-    # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
-    touch /tmp/not_a_packet.pcap
-    $ARKIME_DIR/bin/capture-offline $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
-    rm -f /tmp/not_a_packet.pcap
 
     echo "Initializing views..."
 
@@ -121,6 +115,7 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
 
     echo -e "\n$OPENSEARCH_PRIMARY database initialized!\n"
   else
+    ARKIME_DID_INIT=0
     echo "$OPENSEARCH_PRIMARY database previously initialized! (${DB_INIT_ARGS[*]})"
     echo
 
@@ -136,6 +131,14 @@ if [[ "$MALCOLM_PROFILE" == "malcolm" ]]; then
     until curl -fsS --output /dev/null "http://localhost:8081/fields?ver=1" 2>/dev/null; do sleep 1; done
     echo "WISE is running!"
     echo
+  fi
+
+  if [[ "$ARKIME_DID_INIT" == "1" ]]; then
+    echo "Initializing fields..."
+    # this is a hacky way to get all of the Arkime-parseable field definitions put into E.S.
+    touch /tmp/not_a_packet.pcap
+    $ARKIME_DIR/bin/capture-offline $DB_SSL_FLAG --packetcnt 0 -r /tmp/not_a_packet.pcap >/dev/null 2>&1
+    rm -f /tmp/not_a_packet.pcap
   fi
 
   # before running viewer, call _refresh to make sure everything is available for search first

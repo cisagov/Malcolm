@@ -5,10 +5,12 @@
 
 import contextlib
 import enum
+import fnmatch
 import hashlib
 import inspect
 import ipaddress
 import json
+import logging
 import mmap
 import os
 import re
@@ -126,6 +128,88 @@ def base64_decode_if_prefixed(s: str):
         return b64decode(s[7:]).decode('utf-8')
     else:
         return s
+
+
+###################################################################################################
+def get_verbosity_env_var_count(var_name):
+    if var_name:
+        verbose_env_val = os.getenv(var_name, "")
+        verbose_env_val = f"-{'v' * int(verbose_env_val)}" if verbose_env_val.isdigit() else verbose_env_val
+        return (
+            verbose_env_val.count("v") if verbose_env_val.startswith("-") and set(verbose_env_val[1:]) <= {"v"} else 0
+        )
+    else:
+        return 0
+
+
+def log_level_is_debug(log_level):
+    return log_level <= logging.DEBUG
+
+
+def set_logging(
+    log_level_str,
+    flag_level_count,
+    logger=None,
+    set_traceback_limit=False,
+    logfmt='%(asctime)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+):
+    """
+    Configures logging based on a log level string or verbosity count.
+
+    Args:
+        log_level_str (str): A string like 'debug', 'info', etc. May be None.
+        flag_level_count (int): Number of -v flags passed (0–5).
+        logger (logging.Logger, optional): If provided, configures this logger
+                                           instead of the global root logger.
+
+    Returns:
+        int: The final effective logging level (e.g., logging.DEBUG).
+    """
+
+    # level-based logging verbosity
+    cli_level = None
+    if log_level_str:
+        cli_level = {
+            'CRITICAL': logging.CRITICAL,
+            'ERROR': logging.ERROR,
+            'WARNING': logging.WARNING,
+            'INFO': logging.INFO,
+            'DEBUG': logging.DEBUG,
+        }.get(log_level_str.strip().upper(), logging.CRITICAL)
+
+    # flag-based logging verbosity
+    flag_level = max(logging.NOTSET, min(logging.CRITICAL - (10 * flag_level_count), logging.CRITICAL))
+
+    # final log level: pick more verbose (lower number)
+    log_level = min(flag_level, cli_level) if cli_level is not None else flag_level
+
+    # Configure logging
+    if logger is None:
+        # Set global logging config (root logger)
+        logging.basicConfig(
+            level=log_level,
+            format=logfmt,
+            datefmt=datefmt,
+        )
+    else:
+        # Configure a specific logger
+        handler = logging.StreamHandler()
+        handler.setFormatter(
+            logging.Formatter(
+                logfmt,
+                datefmt=datefmt,
+            )
+        )
+        logger.setLevel(log_level)
+        logger.handlers.clear()
+        logger.addHandler(handler)
+        logger.propagate = False  # Don't double-log to the root logger
+
+    if set_traceback_limit and (log_level > logging.DEBUG):
+        sys.tracebacklimit = 0
+
+    return log_level
 
 
 ###################################################################################################
@@ -532,6 +616,41 @@ def ChownRecursive(path, uid, gid):
                 os.chown(os.path.join(dirpath, dname), int(uid), int(gid))
             for fname in filenames:
                 os.chown(os.path.join(dirpath, fname), int(uid), int(gid), follow_symlinks=False)
+
+
+###################################################################################################
+# recursively delete a directory tree while excluding specific files based on glob-style patterns
+def rmtree_except(path, exclude_patterns=None, ignore_errors=False):
+    if exclude_patterns is None:
+        exclude_patterns = []
+
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            full_path = os.path.join(root, name)
+            if not any(fnmatch.fnmatch(name, pattern) for pattern in exclude_patterns):
+                try:
+                    os.remove(full_path)
+                except Exception:
+                    if not ignore_errors:
+                        raise
+
+        for name in dirs:
+            full_path = os.path.join(root, name)
+            try:
+                os.rmdir(full_path)
+            except OSError:
+                pass
+            except Exception:
+                if not ignore_errors:
+                    raise
+
+    try:
+        os.rmdir(path)
+    except OSError:
+        pass
+    except Exception:
+        if not ignore_errors:
+            raise
 
 
 ###################################################################################################
