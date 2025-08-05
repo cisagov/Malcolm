@@ -1,10 +1,15 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+# Workflow for building and deploying a Jekyll site to GitHub Pages
 name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
-  # Runs on pushes targeting the default branch
+  # Runs on documentation in the specified branch
   push:
-    branches: ["main"]
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/jekyll-gh-pages.yml'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -30,6 +35,12 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Replace Umami secrets in _config.yml
+        run: |
+          sed -i -e "/^umami:/,+2d" ./_config.yml
+          echo "umami:" >> ./_config.yml
+          echo "  id: '${{ secrets.UMAMI_ID }}'" >> ./_config.yml
+          echo "  url: '${{ secrets.UMAMI_URL }}'" >> ./_config.yml
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
