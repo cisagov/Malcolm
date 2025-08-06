@@ -14,8 +14,8 @@ reddit:
   id: Malcolm on Reddit
   url: https://reddit.com/r/Malcolm
 umami:
-  id:
-  url:
+  id: 7f0744a8-42b9-404b-969c-cd037cc50f4a
+  url: https://umami.guero.org/script.js
 docs_uri: docs/
 alerting_docs_uri: docs/alerting.html
 anomaly_detection_docs_uri: docs/anomaly-detection.html
