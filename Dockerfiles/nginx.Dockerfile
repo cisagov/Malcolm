@@ -59,8 +59,8 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/nginx-proxy'
 LABEL org.opencontainers.image.description='Malcolm container providing an NGINX reverse proxy for the other services'
 
-ARG DEFAULT_UID=101
-ARG DEFAULT_GID=101
+ARG DEFAULT_UID=1000
+ARG DEFAULT_GID=1000
 ENV DEFAULT_UID $DEFAULT_UID
 ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "nginx"
