@@ -32,6 +32,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     <script src="https://use.fontawesome.com/285a5794ed.js"></script>
+    {% if site.umami.id and site.umami.url %}
+    <script defer src="{{ site.umami.url }}" data-website-id="{{ site.umami.id }}"></script>
+    {% endif %}
     {% endif %}
     {% include head-custom.html %}
   </head>

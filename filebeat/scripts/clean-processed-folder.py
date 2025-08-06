@@ -2,18 +2,16 @@
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-
-import os
-from os.path import splitext
-from tempfile import gettempdir
-import errno
-import time
 import fcntl
+import logging
 import magic
-import json
-import re
-from subprocess import Popen, PIPE, DEVNULL
-from malcolm_utils import LoadFileIfJson, deep_get
+import os
+import subprocess
+import sys
+import time
+from tempfile import gettempdir
+from subprocess import DEVNULL
+from malcolm_utils import LoadFileIfJson, deep_get, set_logging, get_verbosity_env_var_count
 
 lockFilename = os.path.join(gettempdir(), '{}.lock'.format(os.path.basename(__file__)))
 cleanLogSeconds = int(os.getenv('LOG_CLEANUP_MINUTES', "30")) * 60
@@ -26,12 +24,28 @@ zeekCurrentDir = zeekDir + "current/"
 zeekProcessedDir = zeekDir + "processed/"
 
 suricataDir = os.path.join(os.getenv('FILEBEAT_SURICATA_LOG_PATH', "/suricata/"), '')
-suricataLiveDir = suricataDir + "live/"
 
 nowTime = time.time()
-logMimeTypeRegex = re.compile(r"(text/plain|inode/x-empty|text/x-file|application/(x-nd)?json)")
-archiveMimeTypeRegex = re.compile(
-    r"(application/gzip|application/x-gzip|application/x-7z-compressed|application/x-bzip2|application/x-cpio|application/x-lzip|application/x-lzma|application/x-rar-compressed|application/x-tar|application/x-xz|application/zip|application/x-ms-evtx)"
+
+_LOG_MIME_TYPES = (
+    "application/json",
+    "application/x-ndjson",
+    "text/plain",
+    "text/x-file",
+)
+_ARCHIVE_MIME_TYPES = (
+    "application/gzip",
+    "application/x-7z-compressed",
+    "application/x-bzip2",
+    "application/x-cpio",
+    "application/x-gzip",
+    "application/x-lzip",
+    "application/x-lzma",
+    "application/x-ms-evtx",
+    "application/x-rar-compressed",
+    "application/x-tar",
+    "application/x-xz",
+    "application/zip",
 )
 
 
@@ -45,57 +59,53 @@ def silentRemove(filename):
         pass
 
 
-def checkFile(filename, filebeatReg=None, checkLogs=True, checkArchives=True):
+def checkFile(filename, fb_files: list[tuple[int, int]], checkLogs=True, checkArchives=True):
     try:
         # first check to see if it's in the filebeat registry
-        if filebeatReg is not None:
-            fileStatInfo = os.stat(filename)
-            if fileStatInfo:
-                fileFound = any(
-                    (
-                        (deep_get(entry, ['v', 'FileStateOS', 'device']) == fileStatInfo.st_dev)
-                        and (deep_get(entry, ['v', 'FileStateOS', 'inode']) == fileStatInfo.st_ino)
-                    )
-                    for entry in filebeatReg
-                )
-                if fileFound:
-                    # found a file in the filebeat registry, so leave it alone!
-                    # we only want to delete files that filebeat has forgotten
-                    # print(f"{filename} is found in registry!")
-                    return
-                # else:
-                #     print(f"{filename} is NOT found in registry!")
+        fileStatInfo = os.stat(filename)
+        if (fileStatInfo.st_dev, fileStatInfo.st_ino) in fb_files:
+            # It's still in the filebeat registry.
+            return
+
+        logTime = os.path.getmtime(filename)
+        lastUseTime = nowTime - logTime
+        if lastUseTime < min(cleanLogSeconds, cleanZipSeconds):
+            # Too new to remove regardless of type.
+            return
 
         # now see if the file is in use by any other process in the system
-        fuserProcess = Popen(["fuser", "-s", filename], stdout=PIPE, stderr=DEVNULL)
-        fuserProcess.communicate()
-        fuserExitCode = fuserProcess.wait()
-        if fuserExitCode != 0:
-            # the file is not in use, let's check it's mtime/ctime
-            logTime = max(os.path.getctime(filename), os.path.getmtime(filename))
-            lastUseTime = nowTime - logTime
+        fuserProcess = subprocess.run(["fuser", "-s", filename], stdout=DEVNULL, stderr=DEVNULL)
+        fuserExitCode = fuserProcess.returncode
+        if fuserExitCode == 0:
+            # The file is in use by another process.
+            return
 
-            # get the file type
-            fileType = magic.from_file(filename, mime=True)
-            if (checkLogs is True) and (cleanLogSeconds > 0) and logMimeTypeRegex.match(fileType) is not None:
-                cleanSeconds = cleanLogSeconds
-            elif (checkArchives is True) and (cleanZipSeconds > 0) and archiveMimeTypeRegex.match(fileType) is not None:
-                cleanSeconds = cleanZipSeconds
-            else:
-                # not a file we're going to be messing with
-                cleanSeconds = 0
+        # get the file type (treat zero-length files as log files)
+        fileType = magic.from_file(filename, mime=True)
+        if (
+            (checkLogs is True)
+            and (cleanLogSeconds > 0)
+            and ((fileStatInfo.st_size == 0) or (fileType in _LOG_MIME_TYPES))
+        ):
+            cleanSeconds = cleanLogSeconds
+        elif (checkArchives is True) and (cleanZipSeconds > 0) and (fileType in _ARCHIVE_MIME_TYPES):
+            cleanSeconds = cleanZipSeconds
+        else:
+            # not a file we're going to be messing with
+            logging.debug(f"Ignoring {filename} due to {fileType=}")
+            return
 
-            if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
-                # this is a closed file that is old, so delete it
-                print(f'removing old file "{filename}" ({fileType}, used {lastUseTime} seconds ago)')
-                silentRemove(filename)
+        if (cleanSeconds > 0) and (lastUseTime >= cleanSeconds):
+            # this is a closed file that is old, so delete it
+            silentRemove(filename)
+            logging.info(f'Removed old file "{filename}" ({fileType}, used {lastUseTime:.0f} seconds ago)')
 
     except FileNotFoundError:
         # file's already gone, oh well
         pass
 
     except Exception as e:
-        print(f"{type(e).__name__} for '{filename}': {e}")
+        logging.error(f"{type(e).__name__} for '{filename}': {e}")
 
 
 def pruneFiles():
@@ -113,6 +123,7 @@ def pruneFiles():
         if os.path.isdir(zeekProcessedDir)
         else []
     )
+    logging.debug(f"Found {len(zeekFoundFiles)} Zeek processed directory files to consider.")
 
     # look for rotated files from live zeek instance
     zeekRotatedFiles = (
@@ -120,6 +131,7 @@ def pruneFiles():
         if os.path.isdir(zeekLiveDir)
         else []
     )
+    logging.debug(f"Found {len(zeekRotatedFiles)} Zeek live directory files to consider.")
 
     # look up the filebeat registry file and try to read it
     fbReg = None
@@ -127,27 +139,55 @@ def pruneFiles():
         with open(fbRegFilename) as f:
             fbReg = LoadFileIfJson(f, attemptLines=True)
 
+    # Extract file device and inode information from the registry for faster processing
+    fb_files: list[tuple[int, int]] = []
+    for entry in fbReg:
+        device = deep_get(entry, ['v', 'FileStateOS', 'device'])
+        inode = deep_get(entry, ['v', 'FileStateOS', 'inode'])
+        if device is not None and inode is not None:
+            fb_files.append((int(device), int(inode)))
+
     # see if the files we found are in use and old enough to be pruned
+    start = time.time()
     for file in zeekFoundFiles:
-        checkFile(file, filebeatReg=fbReg, checkLogs=True, checkArchives=True)
+        checkFile(file, fb_files=fb_files, checkLogs=True, checkArchives=True)
+    duration = time.time() - start
+    file_rate = len(zeekFoundFiles) / duration
+    logging.debug(
+        f"Checked {len(zeekFoundFiles)} Zeek processed directory files at a rate of {file_rate:.0f} files/second."
+    )
+
+    start = time.time()
     for file in zeekRotatedFiles:
-        checkFile(file, filebeatReg=None, checkLogs=False, checkArchives=True)
+        checkFile(file, fb_files=fb_files, checkLogs=False, checkArchives=True)
+    duration = time.time() - start
+    file_rate = len(zeekRotatedFiles) / duration
+    logging.debug(
+        f"Checked {len(zeekRotatedFiles)} Zeek live directory files at a rate of {file_rate:.0f} files/second."
+    )
 
     # clean up any broken symlinks in the Zeek current/ directory
     if os.path.isdir(zeekCurrentDir):
         for current in os.listdir(zeekCurrentDir):
             currentFileSpec = os.path.join(zeekCurrentDir, current)
             if os.path.islink(currentFileSpec) and not os.path.exists(currentFileSpec):
-                print(f'removing dead symlink "{currentFileSpec}"')
                 silentRemove(currentFileSpec)
+                logging.info(f'Removed dead symlink "{currentFileSpec}"')
 
     # check the suricata logs (live and otherwise) as well
-    for surDir in [suricataDir, suricataLiveDir]:
-        if os.path.isdir(surDir):
-            for eve in os.listdir(surDir):
-                eveFile = os.path.join(surDir, eve)
-                if os.path.isfile(eveFile):
-                    checkFile(eveFile, filebeatReg=fbReg, checkLogs=True, checkArchives=False)
+    suricata_found_files: list[str] = []
+    for dir_path, _, filenames in os.walk(suricataDir):
+        for filename in filenames:
+            path = f"{dir_path}/{filename}"
+            suricata_found_files.append(path)
+    logging.debug(f"Found {len(suricata_found_files)} Suricata files to consider.")
+
+    start = time.time()
+    for file in suricata_found_files:
+        checkFile(file, fb_files=fb_files, checkLogs=True, checkArchives=False)
+    duration = time.time() - start
+    file_rate = len(suricata_found_files) / duration
+    logging.debug(f"Checked {len(suricata_found_files)} Suricata files at a rate of {file_rate:.0f} files/second.")
 
     # clean up any old and empty directories in Zeek processed/ and suricata non-live directories
     cleanDirSeconds = min(i for i in (cleanLogSeconds, cleanZipSeconds) if i > 0)
@@ -166,12 +206,19 @@ def pruneFiles():
         if dirAge >= cleanDirSeconds:
             try:
                 os.rmdir(dirToRm)
-                print(f'removed empty directory "{dirToRm}" (used {dirAge} seconds ago)')
+                logging.info(f'Removed empty directory "{dirToRm}" (used {dirAge} seconds ago)')
             except OSError:
                 pass
 
 
 def main():
+    set_logging(
+        os.getenv("FILEBEAT_CLEANUP_LOGLEVEL", ""),
+        get_verbosity_env_var_count("FILEBEAT_CLEANUP_VERBOSITY"),
+        set_traceback_limit=True,
+        logfmt='%(message)s',
+    )
+
     with open(lockFilename, 'w') as lock_file:
         try:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -179,6 +226,7 @@ def main():
             return
         else:
             pruneFiles()
+            logging.debug("Finished pruning files.")
         finally:
             os.remove(lockFilename)
 

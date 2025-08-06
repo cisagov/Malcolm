@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - v25.08.0
     paths:
       - 'htadmin/**'
       - 'Dockerfiles/htadmin.Dockerfile'
