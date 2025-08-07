@@ -8,11 +8,11 @@ logo: docs/images/logo/Malcolm_outline_banner_dark.png
 remote_theme: pages-themes/minimal@v0.2.0
 youtube_url: https://www.youtube.com/@MalcolmNetworkTrafficAnalysis
 mastodon:
-  id:
-  url:
+  id: malcolm@malcolm.fyi
+  url: https://infosec.exchange/@mmguero
 reddit:
-  id:
-  url:
+  id: Malcolm on Reddit
+  url: https://reddit.com/r/Malcolm
 umami:
   id: 7f0744a8-42b9-404b-969c-cd037cc50f4a
   url: https://umami.guero.org/script.js
