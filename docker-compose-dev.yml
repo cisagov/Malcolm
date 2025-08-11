@@ -35,6 +35,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
@@ -205,6 +206,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
@@ -909,6 +911,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
