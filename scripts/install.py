@@ -3684,56 +3684,56 @@ class LinuxInstaller(Installer):
         configLinesToAdd = [
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.file-max=',
                 'fs.file-max increases allowed maximum for file handles',
                 ['# the maximum number of open file handles', 'fs.file-max=2097152'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_user_watches=',
                 'fs.inotify.max_user_watches increases allowed maximum for monitored files',
                 ['# the maximum number of user inotify watches', 'fs.inotify.max_user_watches=131072'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_queued_events=',
                 'fs.inotify.max_queued_events increases queue size for monitored files',
                 ['# the inotify event queue size', 'fs.inotify.max_queued_events=131072'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_user_instances=',
                 'fs.inotify.max_user_instances increases allowed maximum monitor file watchers',
                 ['# the maximum number of user inotify monitors', 'fs.inotify.max_user_instances=512'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.max_map_count=',
                 'vm.max_map_count increases allowed maximum for memory segments',
                 ['# the maximum number of memory map areas a process may have', 'vm.max_map_count=262144'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'net.core.somaxconn=',
                 'net.core.somaxconn increases allowed maximum for socket connections',
                 ['# the maximum number of incoming connections', 'net.core.somaxconn=65535'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.swappiness=',
                 'vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages',
                 ['# decrease "swappiness" (swapping out runtime memory vs. dropping pages)', 'vm.swappiness=1'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.dirty_background_ratio=',
                 'vm.dirty_background_ratio defines the percent of memory filled with dirty data before the system starts writing it to disk in the background',
                 [
@@ -3743,7 +3743,7 @@ class LinuxInstaller(Installer):
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.dirty_ratio=',
                 'vm.dirty_ratio defines the maximum percent of memory that can be dirty before all new writes are forced to flush to disk',
                 [
@@ -3753,7 +3753,7 @@ class LinuxInstaller(Installer):
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'net.ipv4.tcp_retries2=',
                 'net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions',
                 ['# maximum number of TCP retransmissions', 'net.ipv4.tcp_retries2=5'],
