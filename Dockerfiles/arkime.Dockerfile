@@ -117,14 +117,14 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       liblua5.4-0 \
       libmaxminddb0 \
       libpcap0.8 \
-      libpcre3 \
+      libpcre2-8-0 \
       librdkafka1 \
       libssl3 \
       libtool \
       libwww-perl \
       libyaml-0-2 \
       libyaml-dev \
-      libyara9 \
+      libyara10 \
       libzmq5 \
       lua5.4 \
       lzma \

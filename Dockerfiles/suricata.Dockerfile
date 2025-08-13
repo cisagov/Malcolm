@@ -73,7 +73,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         libevent-2.1-7 \
         libevent-pthreads-2.1-7 \
         libgeoip1 \
-        libhiredis0.14 \
+        libhiredis1.1.0 \
         libhtp2 \
         libhtp2 \
         libhyperscan5 \
@@ -89,7 +89,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         libnfnetlink0 \
         libnss3 \
         libpcap0.8 \
-        libpcre3 \
+        libpcre2-8-0 \
         libyaml-0-2 \
         moreutils \
         procps \

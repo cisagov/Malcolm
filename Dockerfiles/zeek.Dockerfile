@@ -106,7 +106,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-bs4 \
       python3-git \
       python3-pip \
-      python3-requests \
       python3-semantic-version \
       python3-setuptools \
       python3-tz \
