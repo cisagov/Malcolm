@@ -13,7 +13,7 @@ fi
 IMAGE_NAME=hedgehog
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bookworm
+IMAGE_DISTRIBUTION=trixie
 
 # Determine number of proc cores available
 # Use caution messing with this value; build process may trigger OOM and fail!!
@@ -60,7 +60,7 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_${ARCH}.deb"
+    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_${ARCH}.deb"
     curl -fsSL -o /tmp/arkime-deb/arkime.deb "${ARKIME_DEB_URL}"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
@@ -340,7 +340,7 @@ install_deps() {
     # aide is removed as we're not applying the same hardening requirements ot the rpi image
     declare -a graphical_deps=( aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb )
     graphical_deps+=( gparted gdebi  google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x )
-    graphical_deps+=( hfsplus hfsprogs hfsutils htpdate libgtk2.0-bin menu neofetch pmount rar )
+    graphical_deps+=( hfsplus hfsprogs htpdate libgtk2.0-bin menu pmount rar )
     graphical_deps+=( ssh-askpass udisks2 upower user-setup xbitmaps zenity zenity-common )
     graphical_deps+=( libsmbclient samba-common samba-common-bin samba-dsdb-modules samba-libs smbclient )
 

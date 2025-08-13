@@ -3772,7 +3772,7 @@ class LinuxInstaller(Installer):
             ConfigLines(
                 [
                     'bionic',
-                    'bookworm',
+                    'trixie',
                     'bullseye',
                     'buster',
                     'cosmic',

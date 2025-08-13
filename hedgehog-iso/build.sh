@@ -3,7 +3,7 @@
 IMAGE_NAME=hedgehog
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bookworm
+IMAGE_DISTRIBUTION=trixie
 
 BEATS_VER="8.17.0"
 BEATS_OSS="-oss"
@@ -196,7 +196,7 @@ if [ -d "$WORKDIR" ]; then
   # download Arkime .deb package
   curl -s -S -L \
     -o ./config/packages.chroot/arkime_"${ARKIME_VER}"_amd64.deb \
-    "https://github.com/arkime/arkime/releases/download/v${ARKIME_VER}/arkime_${ARKIME_VER}-1.debian12_amd64.deb"
+    "https://github.com/arkime/arkime/releases/download/v${ARKIME_VER}/arkime_${ARKIME_VER}-1.debian13_amd64.deb"
 
   # download Zeek .deb packages
   bash "$SCRIPT_PATH/shared/bin/zeek-deb-download.sh" -o ./config/packages.chroot/ -f "$SCRIPT_PATH/shared/zeek_url.txt"
@@ -219,7 +219,7 @@ if [ -d "$WORKDIR" ]; then
     --apt-source-archives false \
     --architectures amd64 \
     --archive-areas 'main contrib non-free non-free-firmware' \
-    --backports true \
+    --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
     --bootappend-live "boot=live components username=sensor nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \

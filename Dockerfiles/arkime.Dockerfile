@@ -1,6 +1,6 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-FROM debian:12-slim
+FROM debian:13-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_VERSION "5.7.1"
-ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
+ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes

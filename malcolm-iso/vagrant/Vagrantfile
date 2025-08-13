@@ -14,7 +14,7 @@ end
 Vagrant.configure("2") do |config|
 
   config.vm.define "vagrant-malcolm-build"
-  config.vm.box = "bento/debian-12"
+  config.vm.box = "bento/debian-13"
 
   config.vm.network "private_network", type: "dhcp"
   config.ssh.config = "ssh_config"

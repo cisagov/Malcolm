@@ -28,7 +28,6 @@ cryptmount
 cryptsetup
 cryptsetup-bin
 cryptsetup-initramfs
-cryptsetup-run
 debsums
 dialog
 direnv
@@ -69,7 +68,6 @@ gzip
 hdparm
 hfsplus
 hfsprogs
-hfsutils
 htop
 hwdata
 javascript-common
@@ -103,7 +101,7 @@ libsodium23
 libssl3
 libtcmalloc-minimal4
 libtool
-libtsan0
+libtsan2
 libubsan1
 libunwind8
 libwww-perl
@@ -127,7 +125,6 @@ moreutils
 mtools
 multitail
 ncdu
-neofetch
 net-tools
 ntfs-3g
 p7zip
@@ -137,11 +134,11 @@ parprouted
 partclone
 parted
 pciutils
-pcregrep
 pigz
 pkg-config
 pmount
-policykit-1
+pkexec
+polkitd
 procps
 psmisc
 pv

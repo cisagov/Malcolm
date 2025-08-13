@@ -23,7 +23,7 @@ function vm_execute() {
 
 unset FORCE_PROVISION
 XZ_EXT=
-IMAGE=raspi_4_bookworm.img
+IMAGE=raspi_4_trixie.img
 while getopts 'fi:z' OPTION; do
   case "$OPTION" in
     f)

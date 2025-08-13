@@ -410,10 +410,10 @@ function CreateCommonLinuxConfig {
 # SystemConfig - configure sysctl parameters, kernel parameters, and limits
 function SystemConfig {
 
-  if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
+  if [[ -r /etc/sysctl.d ]] && ! grep -q swappiness /etc/sysctl.d/*.conf; then
     CONFIRMATION=$(_GetConfirmation "Tweak sysctl.conf (swap, NIC buffers, handles, etc.) [Y/n]?" Y)
     if [[ $CONFIRMATION =~ ^[Yy] ]]; then
-      $SUDO_CMD tee -a /etc/sysctl.conf > /dev/null <<'EOT'
+      $SUDO_CMD tee -a /etc/sysctl.d/99-sysctl-performance.conf > /dev/null <<'EOT'
 
 # allow dmg reading
 kernel.dmesg_restrict=0

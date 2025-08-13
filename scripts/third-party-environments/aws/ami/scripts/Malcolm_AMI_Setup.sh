@@ -165,9 +165,9 @@ function InstallDocker {
 function SystemConfig {
     echo "Configuring system settings..." >&2
 
-    if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
+    if [[ -d /etc/sysctl.d ]] && ! grep -q swappiness /etc/sysctl.d/*.conf; then
 
-        $SUDO_CMD tee -a /etc/sysctl.conf > /dev/null <<'EOT'
+        $SUDO_CMD tee -a /etc/sysctl.d/99-sysctl-performance.conf > /dev/null <<'EOT'
 
 # allow dmg reading
 kernel.dmesg_restrict=0

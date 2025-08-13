@@ -49,7 +49,7 @@ else
 fi
 
 # performance parameters for networking, disk, etc.
-cat << 'EOF' >> /etc/sysctl.conf
+cat << 'EOF' >> /etc/sysctl.d/99-sysctl-performance.conf
 # don't restrict dmesg to root
 kernel.dmesg_restrict=0
 

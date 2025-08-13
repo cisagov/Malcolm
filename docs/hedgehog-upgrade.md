@@ -38,10 +38,10 @@ Acquire::https {
         + modify `/etc/apt/source.list` to point to your apt-mirror:
 
 ```
-deb https://XXXXXX:443/debian buster main contrib non-free
-deb https://XXXXXX:443/debian-security buster/updates main contrib non-free
-deb https://XXXXXX:443/debian buster-updates main contrib non-free
-deb https://XXXXXX:443/debian buster-backports main contrib non-free
+deb https://XXXXXX:443/debian trixie main contrib non-free
+deb https://XXXXXX:443/debian-security trixie/updates main contrib non-free
+deb https://XXXXXX:443/debian trixie-updates main contrib non-free
+deb https://XXXXXX:443/debian trixie-backports main contrib non-free
 ```
 
 5. Update underlying system packages with `apt-get`

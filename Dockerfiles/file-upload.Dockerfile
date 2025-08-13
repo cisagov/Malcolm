@@ -1,4 +1,4 @@
-FROM debian:12-slim AS npmget
+FROM debian:13-slim AS npmget
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -15,7 +15,7 @@ RUN apt-get -q update && \
       filepond-plugin-file-rename \
       @jcubic/tagger
 
-FROM debian:12-slim AS runtime
+FROM debian:13-slim AS runtime
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
