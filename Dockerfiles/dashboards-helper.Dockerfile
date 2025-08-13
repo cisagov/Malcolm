@@ -51,7 +51,8 @@ ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
-ADD dashboards/security_analytics_mappings /opt/security_analytics_mappings
+# TODO: restore after we resolve cisagov/Malcolm#746
+# ADD dashboards/security_analytics_mappings /opt/security_analytics_mappings
 ADD dashboards/alerting /opt/alerting
 ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
