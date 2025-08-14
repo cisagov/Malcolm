@@ -107,18 +107,26 @@ trap cleanup_shared_and_docs EXIT
 # send source code to VM
 vagrant rsync
 
+# build image
 vm_execute "sudo bash -c \"whoami && cd /Malcolm/hedgehog-raspi && pwd && make ${IMAGE}${XZ_EXT}\""
 
 # retrieve build artifacts from VM
-read -r -a rsync_cmd <<< $(vagrant ssh-config | awk -v dest="$SCRIPT_PATH" '
+BUILD_ARTIFACTS="/Malcolm/hedgehog-raspi/raspi_4_trixie*.*"
+eval "$(vagrant ssh-config | awk '
 /HostName/ {host=$2}
 /Port/ {port=$2}
 /User / {user=$2}
 /IdentityFile/ {key=$2}
 END {
-    printf "rsync -avz -e \"ssh -p %s -i %s -o IdentityAgent=none -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null\" %s@%s:/Malcolm/hedgehog-raspi/raspi_4_trixie*.* %s", port, key, user, host, dest
-}')
-"${rsync_cmd[@]}"
+    printf("V_HOST=%s\nV_PORT=%s\nV_USER=%s\nV_KEY=%s\n", host, port, user, key)
+}')"
+RSYNC_CMD=(
+    rsync -avz
+    -e "ssh -p $V_PORT -i $V_KEY -o IdentityAgent=none -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    "$V_USER@$V_HOST:$BUILD_ARTIFACTS"
+    "$SCRIPT_PATH"
+)
+"${RSYNC_CMD[@]}"
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2
