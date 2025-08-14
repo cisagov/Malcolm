@@ -22,7 +22,6 @@ bzip2
 cifs-utils
 coreutils
 cpio
-cpufrequtils
 cracklib-runtime
 cryptmount
 cryptsetup

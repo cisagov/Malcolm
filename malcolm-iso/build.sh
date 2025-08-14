@@ -32,7 +32,7 @@ RUN_PATH="$(pwd)"
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
-WORKDIR="$(mktemp -d -t malcolm-XXXXXX)"
+WORKDIR="$(mktemp -d -p "$HOME" -t malcolm-XXXXXX)"
 
 function cleanup {
   echo "Cleaning up..." 1>&2

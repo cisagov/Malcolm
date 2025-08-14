@@ -82,7 +82,9 @@ else
   DOCKER_IMAGES_TGZ_REMOTE=""
 fi
 
+vagrant rsync
 vm_execute "sudo bash -c \"whoami && cd /malcolm-build/malcolm-iso && pwd && ./build.sh -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
+vagrant rsync-back
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2

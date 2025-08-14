@@ -23,7 +23,6 @@ ccache
 cifs-utils
 coreutils
 cpio
-cpufrequtils
 cracklib-runtime
 cryptmount
 cryptsetup

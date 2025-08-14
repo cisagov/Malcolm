@@ -29,7 +29,7 @@ RUN_PATH="(pwd)"
 DEBS_DIR="${HOME}/debs"
 DEPS_DIR='/opt/deps'
 SHARED_DIR='/opt/buildshared'
-WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
+WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
 ARKIME_VERSION="5.7.1"
