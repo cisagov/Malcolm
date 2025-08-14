@@ -36,6 +36,7 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
       curl \
+      git \
       jq \
       procps \
       psmisc \

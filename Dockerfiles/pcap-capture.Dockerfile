@@ -62,24 +62,31 @@ ADD --chmod=755 shared/bin/nic-capture-setup.sh /usr/local/bin/
 ADD --chmod=644 pcap-capture/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 pcap-capture/scripts/*.sh /usr/local/bin/
 ADD --chmod=644 pcap-capture/templates/*.template /etc/supervisor.d/
+ADD --chmod=644 pcap-capture/requirements.txt /usr/local/src/requirements.txt
 
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
       bc \
       ethtool \
+      git \
       jq \
       libcap2-bin \
       netsniff-ng \
       openssl \
       procps \
       psmisc \
+      python3-pip \
+      python3-setuptools \
+      python3-wheel \
       rsync \
-      supervisor \
       tcpdump \
       tini && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+        apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} && \
     mkdir -p /etc/supervisor.d && \

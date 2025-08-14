@@ -92,6 +92,7 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         cpio \
         curl \
         file \
+        git \
         gzip \
         inotify-tools \
         lzma \
@@ -118,7 +119,8 @@ RUN export EVTXARCH=$(uname -m | sed 's/arm64/aarch64/') && \
         chmod 755 /usr/local/bin/yq && \
     curl -fsSL -o /usr/local/bin/evtx "$(echo "${EVTX_URL}" | sed "s/XXX/${EVTXARCH}/g")" && \
         chmod 755 /usr/local/bin/evtx && \
-    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+        apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

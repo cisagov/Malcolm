@@ -61,7 +61,7 @@ if [[ -d ./"$CONFIG_DIR" && ("$CONTROL_COMMAND" = "start" || "$CONTROL_COMMAND" 
         break
       fi
     done
-  done <<< "$(supervisorctl -c "$CONFIG_FILE" status all | awk '{print $1}')"
+  done <<< "$(supervisorctl -c "$CONFIG_FILE" status all | grep -v '^INFO:' | awk '{print $1}')"
 
   # issue the command with the full, group-included names
   if [ ${#CONTROL_PROGS_WITH_GROUP[@]} -gt 0 ]; then

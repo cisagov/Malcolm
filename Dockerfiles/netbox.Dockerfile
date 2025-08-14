@@ -78,7 +78,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-dev \
       ripgrep \
       rsync \
-      supervisor \
       tini && \
     curl -fsSL -o /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
       "${NETBOX_PATH}/venv/bin/python" /tmp/get-pip.py && \
@@ -130,7 +129,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "netbox"]
 
-CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

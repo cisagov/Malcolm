@@ -73,6 +73,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       bash \
       bc \
       curl \
+      git \
       jq \
       moreutils \
       openssl \
@@ -100,6 +101,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec bash -c "jq 'walk(if type == \"object\" and has(\"synthetic_source_keep\") then del(.synthetic_source_keep) else . end)' \"{}\" | sponge \"{}\"" \; && \
       rm -rf /opt/ecs && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     chown -R ${PUSER}:${PGROUP} /data/init \
                                 /opt/alerting \
                                 /opt/anomaly_detectors \

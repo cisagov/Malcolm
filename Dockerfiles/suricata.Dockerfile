@@ -56,6 +56,8 @@ ENV SURICATA_UPDATE_DIR "$SURICATA_MANAGED_DIR/update"
 ENV SURICATA_UPDATE_SOURCES_DIR "$SURICATA_UPDATE_DIR/sources"
 ENV SURICATA_UPDATE_CACHE_DIR "$SURICATA_UPDATE_DIR/cache"
 
+ADD --chmod=644 suricata/requirements.txt /usr/local/src/requirements.txt
+
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
     apt-get -q update && \
@@ -64,6 +66,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         bc \
         curl \
         file \
+        git \
         inotify-tools \
         iproute2 \
         jq \
@@ -100,13 +103,12 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
         python3-wheel \
         python3-zmq \
         rsync \
-        supervisor \
         suricata=${SURICATA_VERSION_PATTERN} \
         suricata-update \
         tini \
         vim-tiny \
         zlib1g && \
-    python3 -m pip install --break-system-packages --no-compile --no-cache-dir watchdog==6.0.0 && \
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
       chmod +x /usr/local/bin/supercronic && \
     curl -fsSL -o /usr/bin/yq "${YQ_URL}${BINARCH}" && \
@@ -125,8 +127,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     cp /usr/bin/suricata /usr/bin/suricata-offline && \
     chown root:${PGROUP} /usr/bin/suricata && \
       setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip CAP_IPC_LOCK+eip' /usr/bin/suricata && \
-    apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
@@ -211,7 +215,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "-s", "suricata", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

@@ -132,6 +132,8 @@ ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff'
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf' /usr/share/nginx/html/css/
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular' /usr/share/nginx/html/css/fontawesome-webfont.svg
 
+ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
+
 
 RUN set -x ; \
     CONFIG="\
@@ -207,6 +209,10 @@ RUN set -x ; \
     openssl-dev \
     pcre-dev \
     perl-dev \
+    python3 \
+    py3-pip \
+    py3-setuptools \
+    py3-wheel \
     tar \
     zlib-dev \
     ; \
@@ -250,7 +256,6 @@ RUN set -x ; \
     openldap \
     shadow \
     stunnel \
-    supervisor \
     tini \
     tzdata \
     wget; \
@@ -261,6 +266,7 @@ RUN set -x ; \
   /usr/local/openresty/bin/opm install bungle/lua-resty-session=3.10 ; \
   /usr/local/openresty/bin/opm install cdbattags/lua-resty-jwt ; \
   /usr/local/openresty/bin/opm install zmartzone/lua-resty-openidc ; \
+  python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \

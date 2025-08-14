@@ -1,2 +1,2 @@
-six==1.17.0
 git+https://github.com/Supervisor/supervisor.git
+watchdog==6.0.0
