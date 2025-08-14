@@ -3,7 +3,6 @@
 Official downloads of the Hedgehog Linux installer ISO [can be downloaded](download.md#DownloadISOs) from the GitHub releases page. It can also be built easily on an Internet-connected system with Vagrant:
 
 * [Vagrant](https://www.vagrantup.com/)
-    - [`vagrant-rsync-back`](https://github.com/smerrill/vagrant-rsync-back) plugin
     - [`bento/debian-13`](https://app.vagrantup.com/bento/boxes/debian-13) Vagrant box
 
 The build should work with a variety of [Vagrant providers](https://developer.hashicorp.com/vagrant/docs/providers):

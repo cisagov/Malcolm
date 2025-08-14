@@ -89,7 +89,7 @@ if [ -d "$WORKDIR" ]; then
       echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       echo "PYTHONUNBUFFERED=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
-      echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
+      echo -n "python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       while read LINE; do
         echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       done <"$SCRIPT_PATH/$SUBDIR/requirements.txt"
