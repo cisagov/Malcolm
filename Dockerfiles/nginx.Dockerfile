@@ -134,7 +134,6 @@ ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#f
 
 ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
-
 RUN set -x ; \
     CONFIG="\
     --prefix=/usr/local/openresty \
@@ -197,6 +196,7 @@ RUN set -x ; \
     g++ \
     gcc \
     geoip-dev \
+    git \
     gnupg \
     libbsd-dev \
     libc-dev \
@@ -209,7 +209,6 @@ RUN set -x ; \
     openssl-dev \
     pcre-dev \
     perl-dev \
-    python3 \
     py3-pip \
     py3-setuptools \
     py3-wheel \
@@ -254,6 +253,7 @@ RUN set -x ; \
     libbsd \
     luajit \
     openldap \
+    python3 \
     shadow \
     stunnel \
     tini \
@@ -266,15 +266,16 @@ RUN set -x ; \
   /usr/local/openresty/bin/opm install bungle/lua-resty-session=3.10 ; \
   /usr/local/openresty/bin/opm install cdbattags/lua-resty-jwt ; \
   /usr/local/openresty/bin/opm install zmartzone/lua-resty-openidc ; \
-  python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
+  cd /usr/local/src/ ; \
+    pip3 install --break-system-packages --no-compile --no-cache-dir -r ./requirements.txt ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz; \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf && \
-  find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; && \
-  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; && \
-  cd /usr/share/nginx/html/assets/img && \
+  rm -rf /usr/src/* /usr/local/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz ; \
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf ; \
+  find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; ; \
+  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; ; \
+  cd /usr/share/nginx/html/assets/img ; \
   ln -s ./Malcolm_background.png ./bg-masthead.png
 
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
@@ -302,7 +303,7 @@ ENTRYPOINT ["/sbin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
-CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:

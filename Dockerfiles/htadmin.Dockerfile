@@ -102,7 +102,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "htadmin"]
 
-CMD ["/usr/local/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:
