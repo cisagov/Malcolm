@@ -302,7 +302,7 @@ ENTRYPOINT ["/sbin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:
