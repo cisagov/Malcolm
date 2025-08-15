@@ -18,7 +18,8 @@ Vagrant.configure("2") do |config|
     disabled: false,
     type: "rsync",
     rsync__auto: false,
-    rsync__exclude: [".git/"]
+    rsync__exclude: [".git/",
+                     "hedgehog-iso/hedgehog-*.*"]
   config.vm.synced_folder '.', '/vagrant', disabled: true
 
   if Vagrant.has_plugin?("vagrant-vbguest")
