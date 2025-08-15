@@ -149,7 +149,7 @@ build_interface() {
     if [[ $BUILD_GUI -eq 1 ]]; then
         # Items below required for GUI interface. Requires graphical DE to be useful
         sed -i "s@/home/sensor/sensor_interface@${SENSOR_DIR}@g" "${interface_dir}/kiosk.service"
-        python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall \
+        python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall \
          --upgrade -r requirements.txt
         rm -rf "${interface_dir}/.git" "${interface_dir}/requirements.txt"
     else

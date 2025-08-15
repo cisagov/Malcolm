@@ -8,11 +8,27 @@ apt-get -y --purge remove bluez-firmware \
                           docker-buildx-plugin \
                           docker-ce-rootless-extras \
                           gdebi* \
-                          gdb \
+                          firmware-ast \
+                          firmware-b43-installer \
+                          firmware-b43legacy-installer \
+                          firmware-carl9170 \
+                          firmware-cavium \
+                          firmware-cirrus \
+                          firmware-intel-sound \
+                          firmware-ipw2x00 \
+                          firmware-ivtv \
                           firmware-libertas \
+                          firmware-marvell-prestera \
+                          firmware-myricom \
                           firmware-netronome \
+                          firmware-netxen \
                           firmware-nvidia* \
                           firmware-qcom-soc \
+                          firmware-qlogic \
+                          firmware-siano \
+                          firmware-sof-signed \
+                          firmware-zd1211 \
+                          gdb \
                           gnome-accessibility-themes \
                           libasound2-plugins \
                           libx264* \
