@@ -76,6 +76,9 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       procps \
       psmisc \
       python3-dev \
+      python3-pip \
+      python3-setuptools \
+      python3-wheel \
       ripgrep \
       rsync \
       tini && \
@@ -129,7 +132,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "netbox"]
 
-CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/opt/netbox/docker-entrypoint.sh", "${NETBOX_PATH}/venv/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE
