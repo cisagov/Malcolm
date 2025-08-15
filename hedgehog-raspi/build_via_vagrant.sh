@@ -121,7 +121,7 @@ END {
     printf("V_HOST=%s\nV_PORT=%s\nV_USER=%s\nV_KEY=%s\n", host, port, user, key)
 }')"
 RSYNC_CMD=(
-    rsync -avz
+    rsync -av
     -e "ssh -p $V_PORT -i $V_KEY -o IdentityAgent=none -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     "$V_USER@$V_HOST:$BUILD_ARTIFACTS"
     "$SCRIPT_PATH"
