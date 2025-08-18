@@ -111,7 +111,7 @@ vagrant rsync
 vm_execute "sudo bash -c \"whoami && cd /Malcolm/hedgehog-raspi && pwd && make ${IMAGE}${XZ_EXT}\""
 
 # retrieve build artifacts from VM
-BUILD_ARTIFACTS="/Malcolm/hedgehog-raspi/raspi_4_trixie*.*"
+BUILD_ARTIFACTS="/Malcolm/hedgehog-raspi/raspi_*_trixie*.*"
 eval "$(vagrant ssh-config | awk '
 /HostName/ {host=$2}
 /Port/ {port=$2}
