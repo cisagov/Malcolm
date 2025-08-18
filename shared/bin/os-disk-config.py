@@ -97,6 +97,7 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
 
 
 osMode = None
+args = None
 
 
 ###################################################################################################
@@ -141,6 +142,9 @@ def CreateMapperDeviceName(device):
 ###################################################################################################
 # determine if a device (eg., sda) is an internal (True) or removable (False) device
 def IsInternalDevice(name):
+    if args.internalDevs and name in args.internalDevs:
+        return True
+
     rootdir_pattern = re.compile(r'^.*?/devices')
 
     removableFlagFile = '/sys/block/%s/device/block/%s/removable' % (name, name)
@@ -188,6 +192,7 @@ def GetDeviceSize(device):
 # main
 ###################################################################################################
 def main():
+    global args
     global osMode
 
     # to parse fdisk output, look for partitions after partitions header line
@@ -256,6 +261,14 @@ def main():
         const=True,
         default=False,
         help="Encrypt formatted volumes",
+    )
+    parser.add_argument(
+        '--internal',
+        dest='internalDevs',
+        nargs='*',
+        type=str,
+        default=[],
+        help="Force given device name(s) (e.g., sda) to be regarded as internal",
     )
     try:
         args = parser.parse_args()

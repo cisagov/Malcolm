@@ -160,6 +160,13 @@ sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntpsec/ntp.conf
 sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntpsec
 usermod -d /var/lib/ntpsec ntpsec
 
+# disable htpdate service, we're going to use cron instead
+systemctl disable htpdate || true
+if [[ -f /etc/default/htpdate ]]; then
+	sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
+	sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
+fi
+
 # disable default fluentbit configuration
 systemctl disable fluent-bit || true
 
