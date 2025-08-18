@@ -126,6 +126,7 @@ build_htpdate() {
     curl -sSL "$htpdate_url/tarball/v$htpdate_vers" | tar xzf - --strip-components=1
 
     sed -i '/.*man8.*/d' Makefile
+    rm -f scripts/*
 
     make https
 
