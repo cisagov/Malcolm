@@ -56,20 +56,14 @@ The argument to `make` is constructed as follows:
 
 Whereby <model\> is one of `4` or `5`; <release\> is `trixie`; and <result-type\> is `img` or `yaml`.
 
-Model `1` should be used for the Raspberry Pi 0, 0w and 1, models A and
-B. Model `2` for the Raspberry Pi 2 models A and B. Model `3` for all
-models of the Raspberry Pi 3, model `4` for all models of the
-Raspberry Pi 4, and model `5` for all models of the
-Raspberry Pi 5.
-So if you want to build the default image for a Raspberry Pi 4 with
-Trixie, you can just issue:
+Model `4` for all models of the Raspberry Pi 4, and model `5` for all models of the Raspberry Pi 5.
+So if you want to build the default image for a Raspberry Pi 4 with Trixie, you can just issue:
 
 ```shell
    make raspi_4_trixie.img
 ```
 
 At this point; it might be wise to go do something else. The build **WILL** take a while. 
-Initial testing on a 8-core 16GB build machine took approximately 5.5 hours to complete the image.
 
 **NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
 that any variant other than RPI 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
