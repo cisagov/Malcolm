@@ -40,7 +40,6 @@ function CleanDefaultAccounts() {
   [ ! -d /run/systemd/resolve ] && ((mkdir -p /run/systemd/resolve && chown systemd-resolve:systemd-resolve /run/systemd/resolve && chmod 700 /run/systemd/resolve) || true)
   [ ! -d /var/lib/usbmux ] && ((mkdir -p /var/lib/usbmux && chown usbmux:plugdev /var/lib/usbmux && chmod 700 /var/lib/usbmux) || true)
   [ ! -d /var/lib/ntp ] && ((mkdir -p /var/lib/ntp && chown ntp:ntp /var/lib/ntp && chmod 700 /var/lib/ntp) || true)
-  ((mkdir -p /var/lib/systemd-coredump && chown systemd-coredump:nogroup /var/lib/systemd-coredump && chmod 700 /var/lib/systemd-coredump && usermod -m -d /var/lib/systemd-coredump systemd-coredump) || true)
   chmod 600 "/etc/crontab" >/dev/null 2>&1 || true
   chmod 644 "/etc/passwd-" "/etc/group-" >/dev/null 2>&1 || true
   chmod 640 "/etc/shadow-" "/etc/gshadow-" >/dev/null 2>&1 || true

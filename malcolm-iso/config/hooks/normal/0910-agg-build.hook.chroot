@@ -71,7 +71,6 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/var/lib/plymouth(/|$)
 !/var/lib/samba(/|$)
 !/var/lib/sudo/lectured(/|$)
-!/var/lib/systemd-coredump$
 !/var/log(/|$)
 !/var/mail(/|$)
 !/var/run(/|$)

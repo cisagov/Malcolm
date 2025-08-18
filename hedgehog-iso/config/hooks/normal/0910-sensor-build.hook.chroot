@@ -154,7 +154,6 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 !/var/lib/samba(/|$)
 !/var/lib/sudo/lectured(/|$)
 !/var/lib/suricata(/|$)
-!/var/lib/systemd-coredump$
 !/var/log(/|$)
 !/var/mail(/|$)
 !/var/run(/|$)
