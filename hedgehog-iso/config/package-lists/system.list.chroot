@@ -95,6 +95,7 @@ libpcre2-16-0
 libpcre2-32-0
 libpcre2-8-0
 librdkafka1
+librdkafka++1
 libsodium23
 libssl3
 libtcmalloc-minimal4
