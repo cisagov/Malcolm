@@ -22,6 +22,7 @@ bzip2
 cifs-utils
 coreutils
 cpio
+cppzmq-dev
 cpufrequtils
 cracklib-runtime
 cryptmount
@@ -110,6 +111,7 @@ libwww-perl
 libyaml-dev
 libykpers-1-1
 libyubikey0
+libzmq3-dev
 libzmq5
 lm-sensors
 localepurge
