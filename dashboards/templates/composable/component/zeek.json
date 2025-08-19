@@ -1415,8 +1415,20 @@
             },
             "redis": {
               "properties": {
-                "cmd": {
+                "cmd_name": {
                   "type": "keyword"
+                },
+                "cmd_key": {
+                  "type": "keyword"
+                },
+                "cmd_value": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
                 },
                 "success": {
                   "type": "keyword"
