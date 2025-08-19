@@ -33,7 +33,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=7.2.2-0
+ARG ZEEK_VERSION=8.0.0-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -69,6 +69,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ca-certificates \
       ccache \
       cmake \
+      cppzmq-dev \
       curl \
       file \
       flex \
@@ -89,11 +90,14 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       libmaxminddb0 \
       libpcap-dev \
       libpcap0.8 \
+      librdkafka++1 \
       librdkafka-dev \
+      librdkafka1 \
       libssl-dev \
       libssl3 \
       libtcmalloc-minimal4 \
       libunwind8 \
+      libzmq3-dev \
       libzmq5 \
       locales-all \
       make \
