@@ -4,7 +4,7 @@
 
 unset VERBOSE
 command -v dpkg >/dev/null 2>&1 && ARCH="$(dpkg --print-architecture)" || ARCH=amd64
-DISTRO=Debian_Testing
+DISTRO=Debian_13
 OUTPUT_DIR=/tmp
 ZEEK_VERSION=8.0.0-0
 PRESERVE_HIERARCHY=false
