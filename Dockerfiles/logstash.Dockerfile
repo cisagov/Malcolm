@@ -1,4 +1,4 @@
-FROM docker.elastic.co/logstash/logstash-oss:8.17.0
+FROM docker.elastic.co/logstash/logstash-oss:8.19.2
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -58,7 +58,7 @@ RUN set -x && \
         python3-requests \
         rsync \
         tini && \
-    pip3 install -r /usr/local/src/requirements.txt && \
+    python3 -m pip install --no-compile --no-cache-dir --break-system-packages -r /usr/local/src/requirements.txt && \
     export JAVA_HOME=/usr/share/logstash/jdk && \
     /usr/share/logstash/vendor/jruby/bin/jruby -S gem install bundler && \
     echo "gem 'concurrent-ruby'" >> /usr/share/logstash/Gemfile && \
