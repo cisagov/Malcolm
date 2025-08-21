@@ -1046,6 +1046,7 @@ LOG_IGNORE_REGEX = re.compile(
   | but\s+there\s+are\s+no\s+living\s+connections
   | \d+\s+changes\s+in\s+\d+\s+seconds\.\s+Saving
   | Cleaning\s+registries\s+for\s+queue:
+  | Closing\s+because\s+(close_renamed|close_eof|close_inactive)
   | Connecting\s+to\s+backoff
   | Could\s+not\s+assign\s+group.+to\s+remotely-authenticated\s+user.+Group\s+not\s+found
   | curl.+localhost.+GET\s+/api/status\s+200
@@ -1053,6 +1054,7 @@ LOG_IGNORE_REGEX = re.compile(
   | DEPRECATION
   | descheduling\s+job\s*id
   | DON'T\s+DO\s+IT.*bad\s+idea
+  | Error\s+during\s+file\s+comparison:.*no\s+such\s+file
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
