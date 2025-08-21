@@ -30,7 +30,7 @@ from taxii2client.v21 import Server as TaxiiServer_v21
 from threading import Lock
 from time import sleep, mktime
 from types import GeneratorType, FunctionType, LambdaType
-from typing import Tuple, Union
+from typing import Tuple, Union, Iterator
 from urllib.parse import urljoin, urlparse
 from logging import DEBUG as LOGGING_DEBUG
 import copy
@@ -510,6 +510,29 @@ def map_stix_indicator_to_zeek(
     return results
 
 
+def all_misp_event_attributes(
+    attr: MISPAttribute,
+    event: MISPEvent,
+) -> Iterator[MISPAttribute]:
+    """
+    Yield attributes from:
+      1. a single attr,
+      2. event.attributes,
+      3. all attributes from event.objects
+
+    Yields in priority order: attr → event.attributes → object attributes.
+    """
+    if attr:
+        yield attr
+
+    if event:
+        if event.attributes:
+            yield from event.attributes
+
+        for obj in event.objects:
+            yield from obj.attributes
+
+
 def map_misp_attribute_to_zeek(
     attribute: MISPAttribute,
     source: Union[Tuple[str], None] = None,
@@ -765,7 +788,7 @@ class FeedParserZeekPrinter(object):
                                 certainty = None
 
                     # loop through and process the attribute(s)
-                    for attribute in [attr] if attr else event.attributes:
+                    for attribute in all_misp_event_attributes(attr, event):
                         # map attribute to Zeek value(s)
                         if (
                             ((not hasattr(attribute, 'deleted')) or (not attribute.deleted))
