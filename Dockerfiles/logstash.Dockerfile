@@ -65,7 +65,6 @@ RUN set -x && \
     echo "gem 'deep_merge'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'fuzzy-string-match'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'lru_reredux', git: 'https://github.com/mmguero-dev/lru_reredux'" >> /usr/share/logstash/Gemfile && \
-    echo "gem 'psych'" >> /usr/share/logstash/Gemfile && \
     echo "gem 'stringex'" >> /usr/share/logstash/Gemfile && \
     /usr/share/logstash/bin/ruby -S bundle install && \
     logstash-plugin install --preserve logstash-filter-translate logstash-filter-cidr logstash-filter-dns \
