@@ -1,4 +1,4 @@
 beautifulsoup4==4.13.3
 pyzmq==26.3.0
 watchdog==6.0.0
-git+https://github.com/Supervisor/supervisor.git
+supervisor==4.3.0

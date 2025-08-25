@@ -1,2 +1,2 @@
 six==1.17.0
-git+https://github.com/Supervisor/supervisor.git
+supervisor==4.3.0

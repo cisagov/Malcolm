@@ -3,4 +3,4 @@ dateparser==1.2.1
 pymisp==2.4.170.1
 stix2==3.0.1
 taxii2-client==2.3.0
-git+https://github.com/Supervisor/supervisor.git
+supervisor==4.3.0

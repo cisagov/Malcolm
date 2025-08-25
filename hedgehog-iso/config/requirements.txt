@@ -4,7 +4,7 @@ debinterface==3.5.0
 dominate==2.9.1
 git+https://github.com/google/mandiant-ti-client
 git+https://github.com/mmguero-dev/python-humanfriendly.git
-git+https://github.com/Supervisor/supervisor.git
+supervisor==4.3.0
 pymisp==2.4.170.1
 python-dotenv==1.1.0
 pytz==2025.2

@@ -5,6 +5,6 @@ psutil==7.0.0
 pycryptodome==3.22.0
 python-magic==0.4.27
 stream-zip==0.0.83
-git+https://github.com/Supervisor/supervisor.git
+supervisor==4.3.0
 watchdog==6.0.0
 yara-python==4.5.1
