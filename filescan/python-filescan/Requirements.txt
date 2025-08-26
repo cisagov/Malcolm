@@ -1,0 +1,17 @@
+anyio==4.10.0
+asyncclick==8.2.2.2
+Flask==3.1.2
+grpcio==1.74.0
+grpcio-tools==1.74.0
+human-id==0.2.0
+inflection==0.5.1
+pydantic==2.11.7
+python-magic==0.4.27
+redis==6.4.0
+ruamel.yaml==0.18.14
+setuptools==80.9.0
+supervisor==4.2.5
+watchdog==6.0.0
+
+Cython
+./python-statfs

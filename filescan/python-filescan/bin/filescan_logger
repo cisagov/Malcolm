@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+__version__ = '0.1a'
+
+from filescan import logging
+logging.basicConfig()
+log = logging.getLogger(__name__)
+
+import anyio
+import redis.exceptions
+import sys
+from datetime import datetime, UTC, timedelta
+from filescan.click import click
+from filescan.config import BaseConfig
+from filescan.model import AnyScanMessageType, FileScanMap
+from pathlib import Path
+from pydantic import BaseModel
+from redis.asyncio import Redis
+from typing import TextIO
+
+
+################################################################################
+
+
+class LoggerOptions(BaseModel, frozen=True):
+    max_scan_time: timedelta | None = None
+
+class LoggerConfig(BaseConfig, frozen=True):
+    logger: LoggerOptions = LoggerOptions()
+
+
+async def watch_pubsub(
+    config: LoggerConfig,
+    connection: Redis,
+    output: TextIO,
+) -> None:
+    scans = FileScanMap(
+        max_scan_time=config.logger.max_scan_time,
+    )
+    keys = {
+        config.redis.keys.notify,
+        config.redis.keys.result,
+    }
+    log.info(
+        'subscribing to keys: %s:%d/%d => {%s}',
+        config.redis.host,config.redis.port, config.redis.db,
+        ', '.join(keys),
+    )
+    try:
+        pubsub = connection.pubsub()
+        await pubsub.subscribe(*keys)
+        while True:
+            msg = await pubsub.get_message(ignore_subscribe_messages=True)
+            if not msg or msg.get('type') != 'message' \
+                    or not msg.get('channel') \
+                    or not (data := msg.get('data')):
+                continue
+
+            if scans.update(AnyScanMessageType.validate_json(data)):
+                for scan in scans.get_completed_scans():
+                    log.debug('complete: %r', scan)
+                    log.info('complete: %s', scan.id)
+                    output.write(scan.model_dump_json())
+                    output.flush()
+                    await connection.publish(
+                        config.redis.keys.notify,
+                        scan.get_complete().model_dump_json(),
+                    )
+
+    except anyio.get_cancelled_exc_class():
+        pass
+
+
+
+################################################################################
+## MAIN LOGIC ##################################################################
+################################################################################
+
+
+@click.command()
+@click.version_option(
+        __version__,
+        help = "print the version of this tool and exit")
+@click.option(
+        "--verbose", "-v",
+        count= True,
+        help = "increase logging verbosity (may be repeated)")
+@click.option(
+        "--quiet/--no-quiet", "-q",
+        help = "run silently except for critical errors")
+@click.option(
+        "--config", "-c",
+        type = click.Path(exists=True, dir_okay=False, path_type=Path),
+        help = "specify a config file to load")
+@click.option(
+        "--output", "-o",
+        type = click.Path(path_type=Path),
+        default = Path('./logger-%(ts)s.log'),
+        help = "specify an output path, can contain %(ts)s to create "
+               "timestamped output file")
+async def main(
+    verbose: int,
+    quiet: bool,
+    config: Path | None,
+    output: Path,
+) -> None:
+    # setup logging properly as early as possible
+    logging.basicConfig(verbosity=verbose, quiet=quiet, force=True)
+
+    # get an options object, one way or another
+    if config:
+        options = LoggerConfig.from_path(config)
+    else:
+        log.warning('no config file specified, this is probably not what you '
+                    'want! continuing anyway...')
+        options = LoggerConfig()
+
+    try:
+        try:
+            connection = Redis(
+                host=options.redis.host,
+                port=options.redis.port,
+                db=options.redis.db,
+                username=options.redis.username,
+                password=options.redis.password,
+                decode_responses=True,
+                client_name=Path(sys.argv[0]).stem,
+            )
+            await connection.ping()
+
+        except redis.exceptions.ConnectionError as exc:
+            # log the error, but don't print a novel
+            exc.__suppress_context__ = True
+            log.debug(
+                'failed to open primary redis connection',
+                exc_info=True,
+            )
+            log.fatal(
+                'unable to open primary redis connection: %s:%d/%d',
+                options.redis.host, options.redis.port, options.redis.db,
+            )
+            # this is an error we can't really recover from
+            sys.exit(1)
+
+        # FIXME: we could/should probably make this handle also be async
+        output = Path(str(output) % {
+            'ts': datetime.now(UTC).isoformat(),
+        })
+        with output.open('w') as out_fh:
+            async with (
+                anyio.create_task_group() as group,
+            ):
+                group.start_soon(watch_pubsub, options, connection, out_fh)
+                await anyio.sleep_forever()
+
+    except anyio.get_cancelled_exc_class():
+        pass
+
+
+if __name__ == "__main__":
+    main()
+

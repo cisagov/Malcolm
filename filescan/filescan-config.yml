@@ -1,0 +1,29 @@
+redis:
+  host: ${REDIS_CACHE_HOST}
+  port: ${REDIS_CACHE_PORT}
+  db: ${FILESCAN_REDIS_DB}
+  password: ${REDIS_PASSWORD}
+path_maps:
+  /zeek/extracted-files: ${ZEEK_EXTRACTOR_PATH}
+  /filescan/files: /filescan/data/files
+
+watcher:
+  watches:
+    - type: redis
+      source: zeek
+      keys:
+        - zeek_notify
+      redis:
+        host: ${REDIS_HOST}
+        port: ${REDIS_PORT}
+        db: ${LOGSTASH_ZEEK_REDIS_DB}
+        password: ${REDIS_PASSWORD}
+    - type: directory
+      path: /filescan/data/files
+      recursive: true
+
+strelka:
+  host: ${STRELKA_HOST}
+  port: ${STRELKA_PORT}
+  secure: false
+

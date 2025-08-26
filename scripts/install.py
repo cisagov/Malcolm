@@ -2910,9 +2910,9 @@ class Installer(object):
                             BoundPathReplacer("filebeat", "/suricata", suricataLogDir),
                             BoundPathReplacer("filebeat", "/zeek", zeekLogDir),
                             BoundPathReplacer(
-                                "file-monitor", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
+                                "filescan", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
                             ),
-                            BoundPathReplacer("file-monitor", "/zeek/logs", os.path.join(zeekLogDir, 'current')),
+                            BoundPathReplacer("filescan", "/zeek/logs", os.path.join(zeekLogDir, 'current')),
                             BoundPathReplacer("opensearch", "/usr/share/opensearch/data", indexDir),
                             BoundPathReplacer("opensearch", "/opt/opensearch/backup", indexSnapshotDir),
                             BoundPathReplacer("pcap-capture", "/pcap", os.path.join(pcapDir, 'upload')),

@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+__version__ = '0.1a'
+
+from filescan import logging
+logging.basicConfig()
+log = logging.getLogger(__name__)
+
+from functools import cached_property
+from pathlib import Path
+
+from filescan.config import BaseConfig
+from filescan.model import ScanRequest
+from filescan.scanner import ScannerOptions, Scanner, scanner_main
+from filescan import strelka
+from typing import ClassVar
+
+
+################################################################################
+
+
+class StrelkaOptions(ScannerOptions, frozen=True):
+    host: str = 'localhost'
+    port: int = 57314
+    gatekeeper: bool = True
+    cert: Path | None = None
+    secure: bool = True
+    timeout: float = 3600.0
+    chunksize: int = 128 * 1024
+
+class StrelkaConfig(BaseConfig, frozen=True):
+    strelka: StrelkaOptions = StrelkaOptions()
+
+
+################################################################################
+
+
+class StrelkaScanner(Scanner[StrelkaConfig, StrelkaOptions]):
+    scanner_name: ClassVar = 'strelka'
+    config_class: ClassVar = StrelkaConfig
+
+    @cached_property
+    def frontend(self) -> strelka.StrelkaFrontend:
+        sc = self.scanner_config
+        return strelka.StrelkaFrontend(
+            host=sc.host,
+            port=sc.port,
+            cert=sc.cert,
+            secure=sc.secure,
+            gatekeeper=sc.gatekeeper,
+            client='malcolm-filescan',
+            timeout=sc.timeout,
+            chunksize=sc.chunksize,
+        )
+
+    async def scan(self, request: ScanRequest) -> strelka.Event:
+        fe_req = self.frontend.request_for_path(
+            request.file.resolve_path(self.global_config.path_maps),
+            uid=request.id,
+            source=request.source,
+            metadata=request.metadata,
+        )
+        async for result in self.frontend.scan(fe_req):
+            return result
+        raise RuntimeError('recieved no response from Strelka?')
+
+
+################################################################################
+
+if __name__ == '__main__':
+    scanner_main(StrelkaScanner)
+

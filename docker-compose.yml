@@ -205,6 +205,7 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
+    - ./config/redis.env
     - ./config/beats-common.env
     - ./config/lookup-common.env
     - ./config/logstash.env
@@ -311,6 +312,11 @@ services:
         create_host_path: false
       source: ./suricata-logs
       target: /suricata
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan-data/logs
+      target: /filescan
     - type: bind
       bind:
         create_host_path: false
@@ -726,8 +732,62 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
-  file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:25.08.0
+  #file-monitor:
+  #  image: ghcr.io/idaholab/malcolm/file-monitor:25.08.0
+  #  profiles: ["malcolm", "hedgehog"]
+  #  userns_mode: keep-id
+  #  logging:
+  #    driver: local
+  #    options:
+  #      max-size: 200m
+  #      max-file: 2
+  #      compress: "false"
+  #  restart: "no"
+  #  stdin_open: false
+  #  tty: true
+  #  hostname: file-monitor
+  #  networks:
+  #  - default
+  #  env_file:
+  #  - ./config/process.env
+  #  - ./config/ssl.env
+  #  - ./config/auth-common.env
+  #  - ./config/dashboards.env
+  #  - ./config/zeek.env
+  #  - ./config/zeek-secret.env
+  #  environment:
+  #    VIRTUAL_HOST: 'file-monitor.malcolm.local'
+  #  volumes:
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./nginx/ca-trust
+  #    target: /var/local/ca-trust
+  #    read_only: true
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./zeek-logs/extract_files
+  #    target: /zeek/extract_files
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./zeek-logs/current
+  #    target: /zeek/logs
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./yara/rules
+  #    target: /yara-rules/custom
+  #    read_only: true
+  #  healthcheck:
+  #    test: ["CMD", "/usr/local/bin/container_health.sh"]
+  #    interval: 30s
+  #    timeout: 15s
+  #    retries: 3
+  #    start_period: 60s
+  filescan:
+    image: ghcr.io/idaholab/malcolm/filescan:25.08.0
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -739,25 +799,19 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: file-monitor
+    hostname: filescan
     networks:
     - default
     env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    - ./config/auth-common.env
-    - ./config/dashboards.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
+    - ./config/logstash.env
+    - ./config/redis.env
+    - ./config/strelka.env
+    - ./config/filescan.env
     environment:
-      VIRTUAL_HOST: 'file-monitor.malcolm.local'
+      VIRTUAL_HOST: 'filescan.malcolm.local'
     volumes:
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./nginx/ca-trust
-      target: /var/local/ca-trust
-      read_only: true
     - type: bind
       bind:
         create_host_path: false
@@ -766,14 +820,13 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./zeek-logs/current
-      target: /zeek/logs
+      source: ./filescan-data/logs
+      target: /filescan/data/logs
     - type: bind
       bind:
         create_host_path: false
-      source: ./yara/rules
-      target: /yara-rules/custom
-      read_only: true
+      source: ./filescan-data/files
+      target: /filescan/data/files
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
@@ -1313,7 +1366,7 @@ services:
     - api
     - arkime
     - dashboards
-    - file-monitor
+    - filescan
     - htadmin
     - keycloak
     - netbox
