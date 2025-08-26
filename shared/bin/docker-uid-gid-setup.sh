@@ -2,13 +2,13 @@
 
 # attempt to set ulimits (as root)
 if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
-  ulimit -c 0 >/dev/null 2>&1
-  ulimit -l unlimited >/dev/null 2>&1
-  ulimit -m unlimited >/dev/null 2>&1
-  ulimit -v unlimited >/dev/null 2>&1
-  ulimit -x unlimited >/dev/null 2>&1
-  ulimit -n 65535 >/dev/null 2>&1
-  ulimit -u 262144 >/dev/null 2>&1
+  ulimit -c ${PUSER_RLIMIT_C:-0} >/dev/null 2>&1
+  ulimit -l ${PUSER_RLIMIT_L:-unlimited} >/dev/null 2>&1
+  ulimit -m ${PUSER_RLIMIT_M:-unlimited} >/dev/null 2>&1
+  ulimit -v ${PUSER_RLIMIT_V:-unlimited} >/dev/null 2>&1
+  ulimit -x ${PUSER_RLIMIT_X:-unlimited} >/dev/null 2>&1
+  ulimit -n ${PUSER_RLIMIT_N:-65535} >/dev/null 2>&1
+  ulimit -u ${PUSER_RLIMIT_U:-262144} >/dev/null 2>&1
 fi
 
 set -e
@@ -194,13 +194,13 @@ export HOME="${USER_HOME}"
 whoami
 id
 if [[ "${PUSER_RLIMIT_UNLOCK:-false}" == "true" ]] && command -v ulimit >/dev/null 2>&1; then
-  ulimit -c 0 >/dev/null 2>&1
-  ulimit -l unlimited >/dev/null 2>&1
-  ulimit -m unlimited >/dev/null 2>&1
-  ulimit -v unlimited >/dev/null 2>&1
-  ulimit -x unlimited >/dev/null 2>&1
-  ulimit -n 65535 >/dev/null 2>&1
-  ulimit -u 262144 >/dev/null 2>&1
+  ulimit -c ${PUSER_RLIMIT_C:-0} >/dev/null 2>&1
+  ulimit -l ${PUSER_RLIMIT_L:-unlimited} >/dev/null 2>&1
+  ulimit -m ${PUSER_RLIMIT_M:-unlimited} >/dev/null 2>&1
+  ulimit -v ${PUSER_RLIMIT_V:-unlimited} >/dev/null 2>&1
+  ulimit -x ${PUSER_RLIMIT_X:-unlimited} >/dev/null 2>&1
+  ulimit -n ${PUSER_RLIMIT_N:-65535} >/dev/null 2>&1
+  ulimit -u ${PUSER_RLIMIT_U:-262144} >/dev/null 2>&1
 fi
 if [[ ! -z "${ENTRYPOINT_CMD}" ]]; then
   if [[ -z "${ENTRYPOINT_ARGS}" ]]; then
