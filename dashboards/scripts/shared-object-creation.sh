@@ -442,10 +442,20 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
         for i in "$TEMPLATES_IMPORT_DIR"/*.json; do
           TEMP_BASENAME="$(basename "$i")"
           TEMP_FILENAME="${TEMP_BASENAME%.*}"
+          TIME_FIELD="@timestamp"
           if [[ "$TEMP_FILENAME" != "malcolm_template" ]]; then
+            set -f   # template index patterns may contain an asterisk "*" character which bash expands
+            # check if a _meta: {"timeField": "@value"} was provided to override the default @timestamp
+            # or a _meta: {"timeField": null} to specify non-time-series data (like the arkime_stats_v30 index)
+            TIME_FIELD_OVERRIDE=$(jq -r 'if has("_meta") then ._meta.timeField else "__missing__" end' "$i")
+            if [ "$TIME_FIELD_OVERRIDE" != "__missing__" ]; then
+              # _meta: field is available so use the specified value
+              TIME_FIELD=$TIME_FIELD_OVERRIDE
+            fi
             for TEMPLATE_INDEX_PATTERN in $(jq -r '.index_patterns[]' "$i"); do
-              OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;@timestamp")
+              OTHER_INDEX_PATTERNS+=("$TEMPLATE_INDEX_PATTERN;$TEMPLATE_INDEX_PATTERN;$TIME_FIELD")
             done
+            set +f
           fi
         done
 
@@ -507,7 +517,13 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
 
             MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
-            echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+            if [[ $IDX_TIME_FIELD == null ]]; then
+              # omit quotes around null IDX_TIME_FIELD
+              echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":$IDX_TIME_FIELD}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+            else
+              # include quotes around IDX_TIME_FIELD value
+              echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":\"$IDX_TIME_FIELD\"}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
+            fi
             if (( $MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE > 64 )); then
               echo "Preserving existing field formatting for \"$IDX_NAME\"..."
               jq --slurpfile fieldFormatMap "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP" '.attributes.fieldFormatMap = $fieldFormatMap[0]' "$MALCOLM_INDEX_PATTERN_FILE_TEMP" | sponge "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
