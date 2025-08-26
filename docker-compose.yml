@@ -1415,6 +1415,180 @@ services:
     labels:
       traefik.enable: false
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.42
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: jaeger
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'jaeger.malcolm.local'
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+    - default
+    ports:
+    - 16686:16686
+    - 6831:6831/udp
+    - 4317:4317
+    - 4318:4318
+    - 14268:14268
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-backend:
+    image: ghcr.io/idaholab/malcolm/strelka-backend:25.01.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-backend
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-backend.malcolm.local'
+    depends_on:
+    - strelka-coordinator
+    networks:
+    - default
+    shm_size: 512mb
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./strelka/configs/python/backend/
+      target: /etc/strelka/
+      read_only: false # FIXME: this should be false, but I need to see if that breaks anything!
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./strelka/plugins/
+      target: /strelka/plugins/
+      read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-frontend:
+    image: ghcr.io/idaholab/malcolm/strelka-frontend:25.01.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-frontend
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-frontend.malcolm.local'
+    command:
+    - strelka-frontend
+    - -locallog=true
+    - -kafkalog=false
+    depends_on:
+    - strelka-coordinator
+    - strelka-gatekeeper
+    networks:
+    - default
+    ports:
+    - 57314:57314
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./strelka/configs/go/frontend/
+      target: /etc/strelka/
+      read_only: true
+    - strelka-logs:/var/log/strelka/
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-manager:
+    image: ghcr.io/idaholab/malcolm/strelka-manager:25.01.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-manager
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-manager.malcolm.local'
+    command:
+    - strelka-manager
+    depends_on:
+    - strelka-coordinator
+    networks:
+    - default
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./strelka/configs/go/manager/
+      target: /etc/strelka/
+      read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  # FIXME: this should point to our redis
+  strelka-coordinator:
+    image: redis:alpine
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-coordinator
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-coordinator.malcolm.local'
+    command:
+    - sh
+    - -c
+    - redis-server --save '' --appendonly no
+    networks:
+    - default
+    ports:
+    - 16379:6379
+    logging:
+      driver: local
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli ping | grep PONG
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  # FIXME: this should point to our redis
+  strelka-gatekeeper:
+    image: redis:alpine
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-gatekeeper
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-gatekeeper.malcolm.local'
+    command:
+    - sh
+    - -c
+    - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru
+    networks:
+    - default
+    ports:
+    - 16380:6379
+    logging:
+      driver: local
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli ping | grep PONG
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  #strelka-clamav:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfiles/strelka-clamav.Dockerfile
+  #  image: ghcr.io/idaholab/malcolm/strelka-clamav:25.01.0
+  #  profiles: ["malcolm", "hedgehog"]
+  #  restart: 'no'
+  #  hostname: strelka-clamav
+  #  environment:
+  #    VIRTUAL_HOST: 'strelka-clamav.malcolm.local'
+  #  networks:
+  #  - default
+  #  ports:
+  #  - 3301:3301
+  #  volumes:
+  #  - strelka-clamav:/var/lib/clamav/
+  #  logging:
+  #    driver: local
+  #  # FIXME: healthcheck?
+
 volumes:
   # shared named volume so filebeat can access nginx access logs
   nginx-log-path:
