@@ -201,7 +201,7 @@ RUN mkdir -p /install-filescan
 COPY --chmod=644 \
     filescan/python-filescan \
     /install-filescan/
-RUN cd /install-filescan/python-filescan && \
+RUN cd /install-filescan && \
     python3 -m pip install --break-system-packages --no-cache-dir -r Requirements.txt && \
     make && \
     python3 -m pip install --break-system-packages --no-cache-dir .

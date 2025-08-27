@@ -1,6 +1,6 @@
 # Base and setup configuration
-FROM ubuntu:24.04
-# FROM ubuntu:22.04
+#FROM ubuntu:24.04
+FROM ubuntu:22.04
 ARG DEBIAN_FRONTEND=noninteractive
 LABEL maintainer="Target Brands, Inc. TTS-CFC-OpenSource@target.com"
 
@@ -191,7 +191,8 @@ USER root
 #COPY ./strelka/build/python/backend/strelka-backend-entrypoint.py /strelka-backend-entrypoint.py
 #RUN chmod a+rx /strelka-backend-entrypoint-venv-wrapper.sh
 #RUN chmod a+rx /strelka-backend-entrypoint.py
-COPY ./strelka/configs/python/backend/ /etc/strelka/
+#COPY ./strelka/configs/python/backend/ /etc/strelka/
+COPY ./filescan/strelka-configs/python/backend/ /etc/strelka/
 
 ## Run tests as non-root user
 #USER $USERNAME
@@ -228,8 +229,9 @@ ENTRYPOINT ["/tini", "--"]
 #        "--manifest-dir", "/strelka/manifests", \
 #        "--poetry", "/home/strelka/venv/bin/poetry", \
 #        "--"]
-CMD ["/home/strelka/venv/bin/python", "-m", "strelka", \
-        "-c", "/etc/strelka/backend.yaml"]
+#CMD ["/home/strelka/venv/bin/python", "-m", "strelka", \
+#        "-c", "/etc/strelka/backend.yaml"]
 # "-P", "/strelka/plugins", \
 # "start"]
+CMD ["/home/strelka/venv/bin/strelka-backend"]
 

@@ -1,0 +1,29 @@
+server: ":57314"
+coordinator:
+  addr: 'strelka-coordinator:6379'
+  db: 0
+  pool: 100
+  read: 10s
+#  blockingpoptime: 5s
+gatekeeper:
+  addr: 'strelka-gatekeeper:6379'
+  db: 0
+  pool: 100
+  read: 10s
+  ttl: 1h
+response:
+  log: "/var/log/strelka/strelka.log"
+broker:
+  bootstrap: "full broker here"
+  protocol: "protocol here"
+  certlocation: "path to cert location"
+  keylocation: "path to key location"
+  calocation: "path to target ca bundle"
+  topic: "topic name here"
+  s3redundancy: "Boolean to pipe logs to S3 if kafka connection interrupted"
+s3:
+  accesskey: "S3 Access Key"
+  secretkey: "S3 Secret Key"
+  bucketName: "S3 bucket name"
+  region: "Region that the S3 Bucket resides in"
+  endpoint: "Endpoint that the S3 bucket refers to"

@@ -1573,12 +1573,12 @@ services:
       COLLECTOR_OTLP_ENABLED: true
     networks:
     - default
-    ports:
-    - 16686:16686
-    - 6831:6831/udp
-    - 4317:4317
-    - 4318:4318
-    - 14268:14268
+    #ports:
+    #- 16686:16686
+    #- 6831:6831/udp
+    #- 4317:4317
+    #- 4318:4318
+    #- 14268:14268
     logging:
       driver: local
     # FIXME: healthcheck?
@@ -1601,15 +1601,15 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./strelka/configs/python/backend/
+      source: ./filescan/strelka-configs/python/backend/
       target: /etc/strelka/
       read_only: false # FIXME: this should be false, but I need to see if that breaks anything!
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./strelka/plugins/
-      target: /strelka/plugins/
-      read_only: true
+    #- type: bind
+    #  bind:
+    #    create_host_path: false
+    #  source: ./strelka/plugins/
+    #  target: /strelka/plugins/
+    #  read_only: true
     logging:
       driver: local
     # FIXME: healthcheck?
@@ -1632,13 +1632,13 @@ services:
     - strelka-gatekeeper
     networks:
     - default
-    ports:
-    - 57314:57314
+    #ports:
+    #- 57314:57314
     volumes:
     - type: bind
       bind:
         create_host_path: false
-      source: ./strelka/configs/go/frontend/
+      source: ./filescan/strelka-configs/go/frontend/
       target: /etc/strelka/
       read_only: true
     - strelka-logs:/var/log/strelka/
@@ -1665,7 +1665,7 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./strelka/configs/go/manager/
+      source: ./filescan/strelka-configs/go/manager/
       target: /etc/strelka/
       read_only: true
     logging:
@@ -1686,8 +1686,8 @@ services:
     - redis-server --save '' --appendonly no
     networks:
     - default
-    ports:
-    - 16379:6379
+    #ports:
+    #- 16379:6379
     logging:
       driver: local
     healthcheck:
@@ -1713,8 +1713,8 @@ services:
     - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru
     networks:
     - default
-    ports:
-    - 16380:6379
+    #ports:
+    #- 16380:6379
     logging:
       driver: local
     healthcheck:

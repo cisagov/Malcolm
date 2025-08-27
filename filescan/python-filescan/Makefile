@@ -19,6 +19,7 @@ all: $(out_files)
 clean:
 	find $(python_src) -iname __pycache__ -type d -exec rm -rf {} \+
 	rm -f $(out_files)
+	rm -rf build filescan.egg-info
 	rm -rf python-statfs/build python-statfs/python_statfs.egg-info
 
 .PRECIOUS: $(out_files)
