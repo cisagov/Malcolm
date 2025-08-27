@@ -121,7 +121,7 @@ function InitializeSensorNetworking() {
 function InitializeAggregatorNetworking() {
   unset NEED_NETWORKING_RESTART
 
-  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  # we're going to let Network Manager manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
   NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
   if [ $NET_IFACES_LINES -gt 4 ] ; then
     echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
