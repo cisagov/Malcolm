@@ -584,11 +584,6 @@ services:
     hostname: zeek
     networks:
     - default
-    ulimits:
-      # see cisagov/Malcolm#747
-      nofile:
-        soft: 65535
-        hard: 65535
     env_file:
     - ./config/process.env
     - ./config/ssl.env
@@ -660,11 +655,6 @@ services:
     stdin_open: false
     tty: true
     network_mode: host
-    ulimits:
-      # see cisagov/Malcolm#747
-      nofile:
-        soft: 65535
-        hard: 65535
     cap_add:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
     - NET_ADMIN
