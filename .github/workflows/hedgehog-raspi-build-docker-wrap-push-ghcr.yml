@@ -11,7 +11,7 @@ on:
       - 'hedgehog-raspi/**'
       - 'shared/bin/*'
       - '!shared/bin/pcap_processor.py'
-      - '.trigger_raspi_workflow_build'
+      - '.trigger_iso_workflow_build'
       - '.github/workflows/hedgehog-raspi-build-docker-wrap-push-ghcr.yml'
   workflow_dispatch:
   repository_dispatch:
