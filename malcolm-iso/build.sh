@@ -167,19 +167,18 @@ if [ -d "$WORKDIR" ]; then
   ln -s ./control.py wipe
   ln -s ./install.py configure
   popd >/dev/null 2>&1
-  cp ./config/*.example "$MALCOLM_DEST_DIR/config/"
-  cp ./config/*.yml "$MALCOLM_DEST_DIR/config/"
+  git ls-files -z ./config/*.example | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/config/"
+  git ls-files -z ./config/*.yml | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/config/"
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
-  cp ./kubernetes/*.* "$MALCOLM_DEST_DIR/kubernetes/"
-  grep -v "^#" ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$MALCOLM_DEST_DIR/kubernetes/XXX"
+  git ls-files -z ./kubernetes/*.* | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/kubernetes/"
   cp ./arkime/etc/wise.ini.example "$MALCOLM_DEST_DIR/arkime/etc/"
-  cp ./arkime/rules/*.yml "$MALCOLM_DEST_DIR/arkime/rules/"
-  cp ./logstash/certs/*.conf "$MALCOLM_DEST_DIR/logstash/certs/"
+  git ls-files -z ./arkime/rules/*.yml | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/arkime/rules/"
+  git ls-files -z ./logstash/certs/*.conf | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/logstash/certs/"
   cp ./logstash/maps/malcolm_severity.yaml "$MALCOLM_DEST_DIR/logstash/maps/"
-  cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
-  cp ./netbox/preload/*.yml "$MALCOLM_DEST_DIR/netbox/preload/"
+  git ls-files ./netbox/config | /usr/bin/rsync -R --files-from=- ./ "$MALCOLM_DEST_DIR/"
+  git ls-files -z ./netbox/preload/*.yml | xargs -0 -I{} cp "{}" "$MALCOLM_DEST_DIR/netbox/preload/"
 
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
