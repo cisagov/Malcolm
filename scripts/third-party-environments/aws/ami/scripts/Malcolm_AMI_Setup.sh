@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v25.08.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v25.08.1}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -165,9 +165,9 @@ function InstallDocker {
 function SystemConfig {
     echo "Configuring system settings..." >&2
 
-    if [[ -r /etc/sysctl.conf ]] && ! grep -q swappiness /etc/sysctl.conf; then
+    if [[ -d /etc/sysctl.d ]] && ! grep -q swappiness /etc/sysctl.d/*.conf; then
 
-        $SUDO_CMD tee -a /etc/sysctl.conf > /dev/null <<'EOT'
+        $SUDO_CMD tee -a /etc/sysctl.d/99-sysctl-performance.conf > /dev/null <<'EOT'
 
 # allow dmg reading
 kernel.dmesg_restrict=0

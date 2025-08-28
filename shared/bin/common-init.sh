@@ -40,7 +40,6 @@ function CleanDefaultAccounts() {
   [ ! -d /run/systemd/resolve ] && ((mkdir -p /run/systemd/resolve && chown systemd-resolve:systemd-resolve /run/systemd/resolve && chmod 700 /run/systemd/resolve) || true)
   [ ! -d /var/lib/usbmux ] && ((mkdir -p /var/lib/usbmux && chown usbmux:plugdev /var/lib/usbmux && chmod 700 /var/lib/usbmux) || true)
   [ ! -d /var/lib/ntp ] && ((mkdir -p /var/lib/ntp && chown ntp:ntp /var/lib/ntp && chmod 700 /var/lib/ntp) || true)
-  ((mkdir -p /var/lib/systemd-coredump && chown systemd-coredump:nogroup /var/lib/systemd-coredump && chmod 700 /var/lib/systemd-coredump && usermod -m -d /var/lib/systemd-coredump systemd-coredump) || true)
   chmod 600 "/etc/crontab" >/dev/null 2>&1 || true
   chmod 644 "/etc/passwd-" "/etc/group-" >/dev/null 2>&1 || true
   chmod 640 "/etc/shadow-" "/etc/gshadow-" >/dev/null 2>&1 || true
@@ -94,10 +93,15 @@ function InjectSkeleton() {
 function InitializeSensorNetworking() {
   unset NEED_NETWORKING_RESTART
 
+  # /etc/network/interfaces.d/sensor will manage network interfaces, not /etc/network/interfaces
+  # interfaces are configured by the system admin via configure-interfaces.py.
+  NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
+  if [ $NET_IFACES_LINES -gt 4 ] ; then
+    echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
+    NEED_NETWORKING_RESTART=0
+  fi
+
   if [[ ! -f /etc/network/interfaces.d/sensor ]]; then
-    # /etc/network/interfaces.d/sensor can be further configured by the system admin via configure-interfaces.py.
-    echo "" >> /etc/network/interfaces
-    echo "# sensor interfaces should be configured in \"/etc/network/interfaces.d/sensor\"" >> /etc/network/interfaces
     for IFACE_NAME in "${!IFACES[@]}"; do
       echo "auto $IFACE_NAME" >> /etc/network/interfaces.d/sensor
       echo "allow-hotplug $IFACE_NAME" >> /etc/network/interfaces.d/sensor
@@ -108,7 +112,6 @@ function InitializeSensorNetworking() {
     done
     NEED_NETWORKING_RESTART=0
   fi
-
 
   if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
     # only wait 1 minute during boot for network interfaces to come up
@@ -122,7 +125,7 @@ function InitializeSensorNetworking() {
 function InitializeAggregatorNetworking() {
   unset NEED_NETWORKING_RESTART
 
-  # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
+  # we're going to let Network Manager manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
   NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
   if [ $NET_IFACES_LINES -gt 4 ] ; then
     echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces

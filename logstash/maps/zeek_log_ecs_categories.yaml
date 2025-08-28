@@ -136,6 +136,7 @@
 "profinet_io_cm": ["ot", "network"]
 "radius": ["authentication", "iam", "network"]
 "rdp": ["network"]
+"redis": ["database", "network"]
 "rfb": ["network"]
 "roc_plus": ["ot", "network"]
 "roc_plus_configurable_opcode": ["ot", "network"]

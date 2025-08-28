@@ -82,7 +82,29 @@ else
   DOCKER_IMAGES_TGZ_REMOTE=""
 fi
 
+# send source code to VM
+vagrant rsync
+
+# build ISO
 vm_execute "sudo bash -c \"whoami && cd /malcolm-build/malcolm-iso && pwd && ./build.sh -d \\\"$DOCKER_IMAGES_TGZ_REMOTE\\\"\""
+
+# retrieve build artifacts from VM
+BUILD_ARTIFACTS="/malcolm-build/malcolm-iso/malcolm-*.*"
+eval "$(vagrant ssh-config | awk '
+/HostName/ {host=$2}
+/Port/ {port=$2}
+/User / {user=$2}
+/IdentityFile/ {key=$2}
+END {
+    printf("V_HOST=%s\nV_PORT=%s\nV_USER=%s\nV_KEY=%s\n", host, port, user, key)
+}')"
+RSYNC_CMD=(
+    rsync -av
+    -e "ssh -p $V_PORT -i $V_KEY -o IdentityAgent=none -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    "$V_USER@$V_HOST:$BUILD_ARTIFACTS"
+    "$SCRIPT_PATH"
+)
+"${RSYNC_CMD[@]}"
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2

@@ -2,7 +2,7 @@
 
 services:
   opensearch:
-    image: ghcr.io/idaholab/malcolm/opensearch:25.08.0
+    image: ghcr.io/idaholab/malcolm/opensearch:25.08.1
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -32,6 +32,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
@@ -78,7 +79,7 @@ services:
       retries: 3
       start_period: 180s
   dashboards-helper:
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.08.0
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -130,7 +131,7 @@ services:
       retries: 3
       start_period: 30s
   dashboards:
-    image: ghcr.io/idaholab/malcolm/dashboards:25.08.0
+    image: ghcr.io/idaholab/malcolm/dashboards:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -174,7 +175,7 @@ services:
       retries: 3
       start_period: 210s
   logstash:
-    image: ghcr.io/idaholab/malcolm/logstash-oss:25.08.0
+    image: ghcr.io/idaholab/malcolm/logstash-oss:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -193,6 +194,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
@@ -262,7 +264,7 @@ services:
       retries: 3
       start_period: 600s
   filebeat:
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.08.0
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -336,7 +338,7 @@ services:
       retries: 3
       start_period: 60s
   arkime:
-    image: ghcr.io/idaholab/malcolm/arkime:25.08.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -407,7 +409,7 @@ services:
       retries: 3
       start_period: 210s
   arkime-live:
-    image: ghcr.io/idaholab/malcolm/arkime:25.08.0
+    image: ghcr.io/idaholab/malcolm/arkime:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -483,7 +485,7 @@ services:
       retries: 3
       start_period: 210s
   zeek:
-    image: ghcr.io/idaholab/malcolm/zeek:25.08.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -498,6 +500,11 @@ services:
     hostname: zeek
     networks:
     - default
+    ulimits:
+      # see cisagov/Malcolm#747
+      nofile:
+        soft: 65535
+        hard: 65535
     env_file:
     - ./config/process.env
     - ./config/ssl.env
@@ -547,7 +554,7 @@ services:
       retries: 3
       start_period: 60s
   zeek-live:
-    image: ghcr.io/idaholab/malcolm/zeek:25.08.0
+    image: ghcr.io/idaholab/malcolm/zeek:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -560,6 +567,11 @@ services:
     stdin_open: false
     tty: true
     network_mode: host
+    ulimits:
+      # see cisagov/Malcolm#747
+      nofile:
+        soft: 65535
+        hard: 65535
     cap_add:
       # NET_ADMIN and NET_RAW - to turn on promiscuous mode and capture raw packets
     - NET_ADMIN
@@ -609,7 +621,7 @@ services:
       retries: 3
       start_period: 60s
   suricata:
-    image: ghcr.io/idaholab/malcolm/suricata:25.08.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -666,7 +678,7 @@ services:
       retries: 3
       start_period: 120s
   suricata-live:
-    image: ghcr.io/idaholab/malcolm/suricata:25.08.0
+    image: ghcr.io/idaholab/malcolm/suricata:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -727,7 +739,7 @@ services:
       retries: 3
       start_period: 120s
   file-monitor:
-    image: ghcr.io/idaholab/malcolm/file-monitor:25.08.0
+    image: ghcr.io/idaholab/malcolm/file-monitor:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -781,7 +793,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-capture:
-    image: ghcr.io/idaholab/malcolm/pcap-capture:25.08.0
+    image: ghcr.io/idaholab/malcolm/pcap-capture:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -798,6 +810,7 @@ services:
       memlock:
         soft: -1
         hard: -1
+    oom_score_adj: -500
     cap_add:
       # IPC_LOCK - to lock memory, preventing swapping
     - IPC_LOCK
@@ -831,7 +844,7 @@ services:
       retries: 3
       start_period: 60s
   pcap-monitor:
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.08.0
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.08.1
     profiles: ["malcolm", "hedgehog"]
     userns_mode: keep-id
     logging:
@@ -883,7 +896,7 @@ services:
       retries: 3
       start_period: 90s
   upload:
-    image: ghcr.io/idaholab/malcolm/file-upload:25.08.0
+    image: ghcr.io/idaholab/malcolm/file-upload:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -925,7 +938,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:25.08.0
+    image: ghcr.io/idaholab/malcolm/htadmin:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -971,7 +984,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:25.08.0
+    image: ghcr.io/idaholab/malcolm/freq:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1006,7 +1019,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:25.08.0
+    image: ghcr.io/idaholab/malcolm/netbox:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1073,7 +1086,7 @@ services:
       retries: 3
       start_period: 120s
   postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:25.08.0
+    image: ghcr.io/idaholab/malcolm/postgresql:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1114,7 +1127,7 @@ services:
       retries: 3
       start_period: 45s
   redis:
-    image: ghcr.io/idaholab/malcolm/redis:25.08.0
+    image: ghcr.io/idaholab/malcolm/redis:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1159,7 +1172,7 @@ services:
       retries: 3
       start_period: 45s
   redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:25.08.0
+    image: ghcr.io/idaholab/malcolm/redis:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1199,7 +1212,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:25.08.0
+    image: ghcr.io/idaholab/malcolm/api:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:
@@ -1247,7 +1260,7 @@ services:
       retries: 3
       start_period: 60s
   keycloak:
-    image: ghcr.io/idaholab/malcolm/keycloak:25.08.0
+    image: ghcr.io/idaholab/malcolm/keycloak:25.08.1
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1284,7 +1297,7 @@ services:
       retries: 3
       start_period: 45s
   nginx-proxy:
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.08.0
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.08.1
     profiles: ["malcolm"]
     userns_mode: keep-id
     logging:

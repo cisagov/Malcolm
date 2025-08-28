@@ -1,9 +1,9 @@
 all: shasums
 
 # List all the supported and built Pi platforms here. They get expanded
-# to names like 'raspi_4_bookworm.yaml' and 'raspi_5_bookworm.img.xz'.
+# to names like 'raspi_4_trixie.yaml' and 'raspi_5_trixie.img.xz'.
 BUILD_FAMILIES := 4 5
-BUILD_RELEASES := bookworm
+BUILD_RELEASES := trixie
 
 platforms := $(foreach plat, $(BUILD_FAMILIES),$(foreach rel, $(BUILD_RELEASES),  raspi_$(plat)_$(rel)))
 
@@ -57,7 +57,7 @@ _ck_root:
 	[ `whoami` = 'root' ] # Only root can summon vmdb2 ☹
 
 _clean_yaml:
-	rm -f $(addsuffix .yaml,$(platforms)) raspi_base_bookworm.yaml
+	rm -f $(addsuffix .yaml,$(platforms)) raspi_base_trixie.yaml
 _clean_images:
 	rm -f $(addsuffix .img,$(platforms))
 _clean_xzimages:

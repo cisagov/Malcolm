@@ -13,7 +13,7 @@ fi
 IMAGE_NAME=hedgehog
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bookworm
+IMAGE_DISTRIBUTION=trixie
 
 # Determine number of proc cores available
 # Use caution messing with this value; build process may trigger OOM and fail!!
@@ -29,12 +29,12 @@ RUN_PATH="(pwd)"
 DEBS_DIR="${HOME}/debs"
 DEPS_DIR='/opt/deps'
 SHARED_DIR='/opt/buildshared'
-WORK_DIR="$(mktemp -d -t hedgehog-XXXXXX)"
+WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
 ARKIME_VERSION="5.7.1"
 
-BEATS_VER="8.17.0"
+BEATS_VER="8.19.2"
 BEATS_OSS="-oss"
 
 # Option to build from sources if desired
@@ -60,7 +60,7 @@ BUILD_ERROR_CODE=1
 
 build_arkime(){
     mkdir -p /tmp/arkime-deb
-    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_${ARCH}.deb"
+    ARKIME_DEB_URL="https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_${ARCH}.deb"
     curl -fsSL -o /tmp/arkime-deb/arkime.deb "${ARKIME_DEB_URL}"
     dpkg -i /tmp/arkime-deb/*.deb || apt-get -f install -y --no-install-suggests
 }
@@ -126,6 +126,7 @@ build_htpdate() {
     curl -sSL "$htpdate_url/tarball/v$htpdate_vers" | tar xzf - --strip-components=1
 
     sed -i '/.*man8.*/d' Makefile
+    rm -f scripts/*
 
     make https
 
@@ -149,7 +150,7 @@ build_interface() {
     if [[ $BUILD_GUI -eq 1 ]]; then
         # Items below required for GUI interface. Requires graphical DE to be useful
         sed -i "s@/home/sensor/sensor_interface@${SENSOR_DIR}@g" "${interface_dir}/kiosk.service"
-        python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall \
+        python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall \
          --upgrade -r requirements.txt
         rm -rf "${interface_dir}/.git" "${interface_dir}/requirements.txt"
     else
@@ -340,7 +341,7 @@ install_deps() {
     # aide is removed as we're not applying the same hardening requirements ot the rpi image
     declare -a graphical_deps=( aide aide-common efibootmgr fonts-dejavu fuseext2 fusefat fuseiso gdb )
     graphical_deps+=( gparted gdebi  google-perftools gvfs gvfs-daemons gvfs-fuse ghostscript ghostscript-x )
-    graphical_deps+=( hfsplus hfsprogs hfsutils htpdate libgtk2.0-bin menu neofetch pmount rar )
+    graphical_deps+=( hfsplus hfsprogs htpdate libgtk2.0-bin menu pmount rar )
     graphical_deps+=( ssh-askpass udisks2 upower user-setup xbitmaps zenity zenity-common )
     graphical_deps+=( libsmbclient samba-common samba-common-bin samba-dsdb-modules samba-libs smbclient )
 
@@ -442,7 +443,7 @@ install_hooks() {
         echo "export LANG=C.UTF-8" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
         echo "PYTHONDONTWRITEBYTECODE=1" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
         echo "PYTHONUNBUFFERED=1" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
-        echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
+        echo -n "python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
         while read LINE; do
           echo -n -e " \\\\\n  $LINE" >> ${hooks_dir}/0${HOOK_COUNTER}-pip-sensor-$SUBDIR-installs.hook.chroot
         done <"$SENSOR_DIR/requirements-$REQTYPE.txt"

@@ -49,7 +49,7 @@ else
 fi
 
 # performance parameters for networking, disk, etc.
-cat << 'EOF' >> /etc/sysctl.conf
+cat << 'EOF' >> /etc/sysctl.d/99-sysctl-performance.conf
 # don't restrict dmesg to root
 kernel.dmesg_restrict=0
 
@@ -159,11 +159,6 @@ sed -i "s/^\(restrict -6\)/# \1/" /etc/ntpsec/ntp.conf
 sed -i "s/^\(restrict ::1\)/# \1/" /etc/ntpsec/ntp.conf
 sed -r -i "s/^(NTPD_OPTS=).*/\1'-4 -g'/" /etc/default/ntpsec
 usermod -d /var/lib/ntpsec ntpsec
-
-# disable htpdate service, we're going to use cron instead
-systemctl disable htpdate || true
-sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
-sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
 # disable default fluentbit configuration
 systemctl disable fluent-bit || true

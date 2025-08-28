@@ -117,7 +117,7 @@ ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.s
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg /usr/share/nginx/html/assets/img/
 ADD https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg /usr/share/nginx/html/assets/img/
 ADD https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/logo/cyberchef.svg /usr/share/nginx/html/assets/img/
-ADD https://raw.githubusercontent.com/netbox-community/netbox/develop/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
+ADD https://raw.githubusercontent.com/netbox-community/netbox/main/netbox/project-static/img/netbox_icon.svg /usr/share/nginx/html/assets/img/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u8w4BMUTPHjxsAXC-v.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share/nginx/html/css/
@@ -132,6 +132,7 @@ ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff'
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.ttf' /usr/share/nginx/html/css/
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.svg#fontawesomeregular' /usr/share/nginx/html/css/fontawesome-webfont.svg
 
+ADD --chmod=644 nginx/requirements.txt /usr/local/src/requirements.txt
 
 RUN set -x ; \
     CONFIG="\
@@ -195,6 +196,7 @@ RUN set -x ; \
     g++ \
     gcc \
     geoip-dev \
+    git \
     gnupg \
     libbsd-dev \
     libc-dev \
@@ -207,6 +209,9 @@ RUN set -x ; \
     openssl-dev \
     pcre-dev \
     perl-dev \
+    py3-pip \
+    py3-setuptools \
+    py3-wheel \
     tar \
     zlib-dev \
     ; \
@@ -248,9 +253,9 @@ RUN set -x ; \
     libbsd \
     luajit \
     openldap \
+    python3 \
     shadow \
     stunnel \
-    supervisor \
     tini \
     tzdata \
     wget; \
@@ -261,14 +266,16 @@ RUN set -x ; \
   /usr/local/openresty/bin/opm install bungle/lua-resty-session=3.10 ; \
   /usr/local/openresty/bin/opm install cdbattags/lua-resty-jwt ; \
   /usr/local/openresty/bin/opm install zmartzone/lua-resty-openidc ; \
+  cd /usr/local/src/ ; \
+    pip3 install --break-system-packages --no-compile --no-cache-dir -r ./requirements.txt ; \
   apk del .nginx-build-deps ; \
   apk del .gettext ; \
   mv /tmp/envsubst /usr/local/bin/ ; \
-  rm -rf /usr/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz; \
-  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf && \
-  find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; && \
-  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; && \
-  cd /usr/share/nginx/html/assets/img && \
+  rm -rf /usr/src/* /usr/local/src/* /var/tmp/* /var/cache/apk/* /openresty.tar.gz /nginx-auth-ldap.tar.gz ; \
+  touch /etc/nginx/nginx_ldap.conf /etc/nginx/nginx_blank.conf ; \
+  find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; ; \
+  find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; ; \
+  cd /usr/share/nginx/html/assets/img ; \
   ln -s ./Malcolm_background.png ./bg-masthead.png
 
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
@@ -296,7 +303,7 @@ ENTRYPOINT ["/sbin/tini", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
-CMD ["supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:

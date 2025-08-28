@@ -23,7 +23,7 @@ function vm_execute() {
 
 unset FORCE_PROVISION
 XZ_EXT=
-IMAGE=raspi_4_bookworm.img
+IMAGE=raspi_4_trixie.img
 while getopts 'fi:z' OPTION; do
   case "$OPTION" in
     f)
@@ -104,7 +104,29 @@ YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-co
 echo "VCS_REVSION=$( git rev-parse --short HEAD 2>/dev/null || echo main )" >> "$SCRIPT_PATH"/shared/environment.chroot
 trap cleanup_shared_and_docs EXIT
 
+# send source code to VM
+vagrant rsync
+
+# build image
 vm_execute "sudo bash -c \"whoami && cd /Malcolm/hedgehog-raspi && pwd && make ${IMAGE}${XZ_EXT}\""
+
+# retrieve build artifacts from VM
+BUILD_ARTIFACTS="/Malcolm/hedgehog-raspi/raspi_*_trixie*.*"
+eval "$(vagrant ssh-config | awk '
+/HostName/ {host=$2}
+/Port/ {port=$2}
+/User / {user=$2}
+/IdentityFile/ {key=$2}
+END {
+    printf("V_HOST=%s\nV_PORT=%s\nV_USER=%s\nV_KEY=%s\n", host, port, user, key)
+}')"
+RSYNC_CMD=(
+    rsync -av
+    -e "ssh -p $V_PORT -i $V_KEY -o IdentityAgent=none -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    "$V_USER@$V_HOST:$BUILD_ARTIFACTS"
+    "$SCRIPT_PATH"
+)
+"${RSYNC_CMD[@]}"
 
 if [[ -n $NEED_SHUTDOWN ]]; then
   echo "Shutting down $VM_NAME..." >&2

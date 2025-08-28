@@ -197,7 +197,7 @@ OpenSearch has some [important settings](https://opensearch.org/docs/latest/inst
 
 Settings that likely need to be changed in the underlying host running Kubernetes include:
 
-* System settings (e.g., in `/etc/sysctl.conf`)
+* System settings (e.g., under `/etc/sysctl.d/`)
         ```
         # the maximum number of memory map areas a process may have
         vm.max_map_count=262144

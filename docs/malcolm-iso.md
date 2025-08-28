@@ -15,8 +15,7 @@ Malcolm can be packaged into an installer ISO based on the current [stable relea
 Official downloads of the Malcolm installer ISO [can be downloaded](download.md#DownloadISOs) from the GitHub releases page. It can also be built easily on an Internet-connected system with Vagrant:
 
 * [Vagrant](https://www.vagrantup.com/)
-    - [`vagrant-sshfs`](https://github.com/dustymabe/vagrant-sshfs) plugin
-    - [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box
+    - [`bento/debian-13`](https://app.vagrantup.com/bento/boxes/debian-13) Vagrant box
 
 The build should work with a variety of [Vagrant providers](https://developer.hashicorp.com/vagrant/docs/providers):
 
@@ -24,7 +23,7 @@ The build should work with a variety of [Vagrant providers](https://developer.ha
     - [`vagrant-vmware-desktop`](https://github.com/hashicorp/vagrant-vmware-desktop) plugin
 * [libvirt](https://libvirt.org/) 
     - [`vagrant-libvirt`](https://github.com/vagrant-libvirt/vagrant-libvirt) provider plugin
-    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-12`](https://app.vagrantup.com/bento/boxes/debian-12) Vagrant box to `libvirt` format
+    - [`vagrant-mutate`](https://github.com/sciurus/vagrant-mutate) plugin to convert [`bento/debian-13`](https://app.vagrantup.com/bento/boxes/debian-13) Vagrant box to `libvirt` format
 * [VirtualBox](https://www.virtualbox.org/) [provider](https://developer.hashicorp.com/vagrant/docs/providers/virtualbox)
     - [`vagrant-vbguest`](https://github.com/dotless-de/vagrant-vbguest) plugin
 

@@ -48,7 +48,7 @@ common_script_0 = <<-SHELL
 * soft core 0
 * hard core 0
 EOF
-    cat >> /etc/sysctl.conf <<EOF
+    cat >> /etc/sysctl.d/99-sysctl-performance.conf <<EOF
 # don't restrict dmesg to root
 kernel.dmesg_restrict=0
 
@@ -168,7 +168,7 @@ nfs_script_0 = <<-SHELL
   SHELL
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "bento/debian-12"
+  config.vm.box = "bento/debian-13"
   config.ssh.config = "ssh_config"
 
   config.vm.define "server", primary: true do |server|

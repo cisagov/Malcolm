@@ -27,7 +27,7 @@ from ruamel.yaml import YAML
 from shutil import move as MoveFile, copyfile as CopyFile
 from subprocess import PIPE, Popen
 
-from malcolm_utils import val2bool
+from malcolm_utils import val2bool, set_logging, get_verbosity_env_var_count
 
 ###################################################################################################
 args = None
@@ -84,14 +84,14 @@ def main():
             ]
         ),
         formatter_class=argparse.RawTextHelpFormatter,
-        add_help=False,
+        add_help=True,
         usage='{} <arguments>'.format(script_name),
     )
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=1,
+        default=get_verbosity_env_var_count("SURICATA_TEST_CONFIG_VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
@@ -131,26 +131,21 @@ def main():
         help="Output YAML file (take precedence over --inplace)",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
     inFileParts = os.path.splitext(args.input)
     args.output = (
         args.output if args.output else args.input if args.inplace else inFileParts[0] + "_new" + inFileParts[1]
     )
 
-    args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    logging.info(os.path.join(script_path, script_name))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(os.getenv("SURICATA_TEST_CONFIG_LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     ##################################################################################################
     # back up the old YAML file if we need to first

@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -51,7 +51,8 @@ ENV ECS_RELEASES_URL "https://api.github.com/repos/elastic/ecs/releases/latest"
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD dashboards/dashboards /opt/dashboards
 ADD dashboards/anomaly_detectors /opt/anomaly_detectors
-ADD dashboards/security_analytics_mappings /opt/security_analytics_mappings
+# TODO: restore after we resolve cisagov/Malcolm#746
+# ADD dashboards/security_analytics_mappings /opt/security_analytics_mappings
 ADD dashboards/alerting /opt/alerting
 ADD dashboards/notifications /opt/notifications
 ADD dashboards/maps /opt/maps
@@ -72,6 +73,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       bash \
       bc \
       curl \
+      git \
       jq \
       moreutils \
       openssl \
@@ -99,6 +101,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       find /opt/ecs-templates-os -name "*.json" -exec sed -i 's/\("type"[[:space:]]*:[[:space:]]*\)"number"/\1"long"/' "{}" \; && \
       find /opt/ecs-templates-os -name "*.json" -exec bash -c "jq 'walk(if type == \"object\" and has(\"synthetic_source_keep\") then del(.synthetic_source_keep) else . end)' \"{}\" | sponge \"{}\"" \; && \
       rm -rf /opt/ecs && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     chown -R ${PUSER}:${PGROUP} /data/init \
                                 /opt/alerting \
                                 /opt/anomaly_detectors \
@@ -110,7 +116,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
                                 /opt/templates && \
     chmod 755 /usr/local/bin/*.sh /usr/local/bin/*.py /data/init && \
     chmod 400 /opt/maps/* && \
-    (echo "*/2 * * * * /usr/local/bin/shared-object-creation.sh\n0 10 * * * /usr/local/bin/index-refresh.py --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /usr/local/bin/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /usr/local/bin/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
+    (echo "*/2 * * * * /usr/local/bin/shared-object-creation.sh\n0 10 * * * /usr/local/bin/index-refresh.py -vvv --index MALCOLM_NETWORK_INDEX_PATTERN --template malcolm_template --unassigned\n30 */2 * * * /usr/local/bin/index-refresh.py --index MALCOLM_OTHER_INDEX_PATTERN --template malcolm_beats_template --unassigned\n*/20 * * * * /usr/local/bin/opensearch_index_size_prune.py" > ${SUPERCRONIC_CRONTAB})
 
 EXPOSE $OFFLINE_REGION_MAPS_PORT
 

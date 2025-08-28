@@ -14,6 +14,7 @@ import fileinput
 import getpass
 import glob
 import json
+import logging
 import os
 import pathlib
 import platform
@@ -92,13 +93,15 @@ from malcolm_utils import (
     MALCOLM_LOGS_DIR,
     deep_get,
     deep_set,
-    eprint,
     flatten,
     get_iterable,
     LoadFileIfJson,
+    log_level_is_debug,
     remove_prefix,
     remove_suffix,
     run_process,
+    set_logging,
+    get_verbosity_env_var_count,
     same_file_or_dir,
     str2bool,
     touch,
@@ -180,7 +183,6 @@ def InstallerYesOrNo(
     noLabel='No',
     extraLabel=None,
 ):
-    global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
         defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -206,7 +208,6 @@ def InstallerAskForString(
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
     extraLabel=None,
 ):
-    global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
         defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -230,7 +231,6 @@ def InstallerChooseOne(
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
     extraLabel=None,
 ):
-    global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
         defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -254,7 +254,6 @@ def InstallerChooseMultiple(
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
     extraLabel=None,
 ):
-    global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
         defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -277,7 +276,6 @@ def InstallerDisplayMessage(
     uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
     extraLabel=None,
 ):
-    global args
     defBehavior = defaultBehavior
     if args.acceptDefaultsNonInteractive and not forceInteraction:
         defBehavior = defBehavior + UserInputDefaultsBehavior.DefaultsNonInteractive
@@ -321,10 +319,10 @@ def DetermineUid(
 ###################################################################################################
 class Installer(object):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def __init__(self, orchMode, debug=False, configOnly=False):
+    def __init__(self, orchMode, configOnly=False):
         self.orchMode = orchMode
-        self.debug = debug
         self.configOnly = configOnly
+        self.debug = log_level_is_debug(args.verbose)
 
         self.platform = platform.system()
         self.scriptUser = getpass.getuser()
@@ -395,7 +393,7 @@ class Installer(object):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_required_packages(self):
         if len(self.requiredPackages) > 0:
-            eprint(f"Installing required packages: {self.requiredPackages}")
+            logging.info(f"Installing required packages: {self.requiredPackages}")
         return self.install_package(self.requiredPackages)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -422,8 +420,6 @@ class Installer(object):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker_images(self, docker_image_file, malcolm_install_path):
-        global args
-
         result = False
         composeFile = os.path.join(malcolm_install_path, 'docker-compose.yml')
 
@@ -439,7 +435,7 @@ class Installer(object):
                 if ecode == 0:
                     result = True
                 else:
-                    eprint(f"Loading Malcolm images failed: {out}")
+                    logging.error(f"Loading Malcolm images failed: {out}")
 
             elif (
                 os.path.isfile(composeFile)
@@ -460,14 +456,13 @@ class Installer(object):
                 if ecode == 0:
                     result = True
                 else:
-                    eprint(f"Pulling Malcolm images failed: {out}")
+                    logging.error(f"Pulling Malcolm images failed: {out}")
 
         return result
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_malcolm_files(self, malcolm_install_file, default_config_dir):
         global args
-
         result = False
         installPath = None
         if (
@@ -487,7 +482,7 @@ class Installer(object):
                 if len(installPath) == 0:
                     installPath = defaultPath
                 if os.path.isdir(installPath):
-                    eprint(f"{installPath} already exists, please specify a different installation path")
+                    logging.error(f"{installPath} already exists, please specify a different installation path")
                 else:
                     try:
                         os.makedirs(installPath)
@@ -496,13 +491,12 @@ class Installer(object):
                     if os.path.isdir(installPath):
                         break
                     else:
-                        eprint(f"Failed to create {installPath}, please specify a different installation path")
+                        logging.error(f"Failed to create {installPath}, please specify a different installation path")
 
             # extract runtime files
             if installPath and os.path.isdir(installPath):
                 SetMalcolmPath(installPath)
-                if self.debug:
-                    eprint(f"Created {installPath} for Malcolm runtime files")
+                logging.info(f"Created {installPath} for Malcolm runtime files")
 
                 # extract the .tar.gz and chown the results
                 extUid, extGid = DetermineUid(self.scriptUser, self.platform, malcolm_install_file)
@@ -516,8 +510,7 @@ class Installer(object):
                 # .tar.gz normally will contain an intermediate subdirectory. if so, move files back one level
                 childDir = glob.glob(f'{installPath}/*/')
                 if (len(childDir) == 1) and os.path.isdir(childDir[0]):
-                    if self.debug:
-                        eprint(f"{installPath} only contains {childDir[0]}")
+                    logging.debug(f"{installPath} only contains {childDir[0]}")
                     for f in os.listdir(childDir[0]):
                         shutil.move(os.path.join(childDir[0], f), installPath)
                     shutil.rmtree(childDir[0], ignore_errors=True)
@@ -532,21 +525,19 @@ class Installer(object):
                         pass
                     else:
                         raise
-                if self.debug:
-                    eprint(f"Created {args.configDir} for Malcolm configuration files")
+                logging.info(f"Created {args.configDir} for Malcolm configuration files")
 
                 # verify the installation worked
                 if os.path.isfile(os.path.join(installPath, "docker-compose.yml")):
-                    eprint(f"Malcolm runtime files extracted to {installPath}")
+                    logging.info(f"Malcolm runtime files extracted to {installPath}")
                     result = True
                 else:
-                    eprint(f"Malcolm install file extracted to {installPath}, but missing runtime files?")
+                    logging.error(f"Malcolm install file extracted to {installPath}, but missing runtime files")
 
         return result, installPath
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def tweak_malcolm_runtime(self, malcolm_install_path):
-        global args
         global raw_args
         global dotenv_imported
 
@@ -576,10 +567,9 @@ class Installer(object):
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
             # guestimate how much memory we should use based on total system memory
 
-            if self.debug:
-                eprint(
-                    f'{malcolm_install_path} with "{configFiles}" and "{args.configDir}", system memory is {self.totalMemoryGigs} GiB'
-                )
+            logging.info(
+                f'{malcolm_install_path} with "{configFiles}" and "{args.configDir}", system memory is {self.totalMemoryGigs} GiB'
+            )
 
             if self.totalMemoryGigs >= 63.0:
                 osMemory = '24g'
@@ -591,19 +581,19 @@ class Installer(object):
                 osMemory = '10g'
                 lsMemory = '2500m'
             elif self.totalMemoryGigs >= 11.0:
-                eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
+                logging.warning(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '6g'
                 lsMemory = '2g'
             elif self.totalMemoryGigs >= 7.0:
-                eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
+                logging.warning(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '4g'
                 lsMemory = '2g'
             elif self.totalMemoryGigs > 0.0:
-                eprint(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
+                logging.warning(f"Detected only {self.totalMemoryGigs} GiB of memory; performance will be suboptimal")
                 osMemory = '3500m'
                 lsMemory = '2g'
             else:
-                eprint("Failed to determine system memory size, using defaults; performance may be suboptimal")
+                logging.error("Failed to determine system memory size, using defaults; performance may be suboptimal")
                 osMemory = '8g'
                 lsMemory = '3g'
         else:
@@ -1266,20 +1256,18 @@ class Installer(object):
                             os.path.join(zeekLogDirFull, os.path.join('extract_files', 'quarantine')),
                         ):
                             try:
-                                if self.debug:
-                                    eprint(f"Creating {pathToCreate}")
+                                logging.info(f"Creating {pathToCreate}")
                                 pathlib.Path(pathToCreate).mkdir(parents=True, exist_ok=True)
                                 if (
                                     ((self.platform == PLATFORM_LINUX) or (self.platform == PLATFORM_MAC))
                                     and (self.scriptUser == "root")
                                     and (getpwuid(os.stat(pathToCreate).st_uid).pw_name == self.scriptUser)
                                 ):
-                                    if self.debug:
-                                        eprint(f"Setting permissions of {pathToCreate} to {puid}:{pgid}")
+                                    logging.info(f"Setting permissions of {pathToCreate} to {puid}:{pgid}")
                                     # change ownership of newly-created directory to match puid/pgid
                                     os.chown(pathToCreate, int(puid), int(pgid))
                             except Exception as e:
-                                eprint(f"Creating {pathToCreate} failed: {e}")
+                                logging.error(f"Creating {pathToCreate} failed: {e}")
 
                 ###################################################################################
                 elif currentStep == ConfigOptions.ILMISM:
@@ -2126,8 +2114,7 @@ class Installer(object):
             for envExampleFile in glob.glob(os.path.join(examplesConfigDir, '*.env.example')):
                 envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
                 if not os.path.isfile(envFile):
-                    if self.debug:
-                        eprint(f"Creating {envFile} from {envExampleFile}")
+                    logging.info(f"Creating {envFile} from {envExampleFile}")
                     shutil.copyfile(envExampleFile, envFile)
 
         EnvValues = [
@@ -2791,7 +2778,7 @@ class Installer(object):
 
                     if not extraFile.endswith('.env'):
                         # only allow extra settings to modify .env files
-                        eprint(
+                        logging.error(
                             f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (not .env file)"
                         )
 
@@ -2805,7 +2792,7 @@ class Installer(object):
                         # if this is one of the values that's settable through one of the
                         #   normal command-line arguments, don't allow it: force them
                         #   to use the appropriate command-line argument instead
-                        eprint(
+                        logging.error(
                             f"Ignoring extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} (use dedicated CLI argument)"
                         )
 
@@ -2820,10 +2807,9 @@ class Installer(object):
                                 ),
                             ]
                         )
-                    if self.debug:
-                        eprint(
-                            f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} {'succeeded' if extraValSuccess else 'failed'}"
-                        )
+                    logging.info(
+                        f"Setting extra value ({extraVar}={extraVal}) in {os.path.basename(extraFile)} {'succeeded' if extraValSuccess else 'failed'}"
+                    )
 
         # change ownership of .envs file to match puid/pgid
         if (
@@ -2831,8 +2817,7 @@ class Installer(object):
             and (self.scriptUser == "root")
             and (getpwuid(os.stat(args.configDir).st_uid).pw_name == self.scriptUser)
         ):
-            if self.debug:
-                eprint(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
+            logging.info(f"Setting permissions of {args.configDir} to {puid}:{pgid}")
             os.chown(args.configDir, int(puid), int(pgid))
         envFiles = []
         for exts in ('*.env', '*.env.example'):
@@ -2843,8 +2828,7 @@ class Installer(object):
                 and (self.scriptUser == "root")
                 and (getpwuid(os.stat(envFile).st_uid).pw_name == self.scriptUser)
             ):
-                if self.debug:
-                    eprint(f"Setting permissions of {envFile} to {puid}:{pgid}")
+                logging.info(f"Setting permissions of {envFile} to {puid}:{pgid}")
                 os.chown(envFile, int(puid), int(pgid))
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -2973,7 +2957,7 @@ class Installer(object):
                                 privileged=True,
                             )
                             if err != 0:
-                                eprint(f"Resetting UFW firewall failed: {out}")
+                                logging.error(f"Resetting UFW firewall failed: {out}")
 
                         for service, portInfos in {
                             'filebeat': [
@@ -3004,7 +2988,7 @@ class Installer(object):
                                                     privileged=True,
                                                 )
                                                 if err != 0:
-                                                    eprint(
+                                                    logging.error(
                                                         f"Setting UFW 'allow {portInfo[1]}/{portInfo[3]}' failed: {out}"
                                                     )
                                     if not data['services'][service]['ports']:
@@ -3032,7 +3016,7 @@ class Installer(object):
                                             privileged=True,
                                         )
                                         if err != 0:
-                                            eprint(
+                                            logging.error(
                                                 f"Setting UFW 'allow {'9200' if nginxSSL else '9201'}/tcp' failed: {out}"
                                             )
 
@@ -3133,17 +3117,16 @@ class Installer(object):
                 tmpUser = f"{tmpUser}:{out[0]}"
             err, out = self.run_process(['chown', '-R', tmpUser, malcolm_install_path], stderr=True)
             if err == 0:
-                if self.debug:
-                    eprint(f"Changing ownership of {malcolm_install_path} to {tmpUser} succeeded")
+                logging.info(f"Changing ownership of {malcolm_install_path} to {tmpUser} succeeded")
             else:
-                eprint(f"Changing ownership of {malcolm_install_path} to {tmpUser} failed: {out}")
+                logging.error(f"Changing ownership of {malcolm_install_path} to {tmpUser} failed: {out}")
 
 
 ###################################################################################################
 class LinuxInstaller(Installer):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def __init__(self, orchMode, debug=False, configOnly=False):
-        super().__init__(orchMode, debug, configOnly)
+    def __init__(self, orchMode, configOnly=False):
+        super().__init__(orchMode, configOnly)
 
         self.distro = None
         self.codename = None
@@ -3215,10 +3198,9 @@ class LinuxInstaller(Installer):
         if self.distro is None:
             self.distro = "linux"
 
-        if self.debug:
-            eprint(
-                f"distro: {self.distro}{f' {self.codename}' if self.codename else ''}{f' {self.release}' if self.release else ''}"
-            )
+        logging.info(
+            f"distro: {self.distro}{f' {self.codename}' if self.codename else ''}{f' {self.release}' if self.release else ''}"
+        )
 
         if not self.codename:
             self.codename = self.distro
@@ -3335,7 +3317,6 @@ class LinuxInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker(self):
-        global args
         global requests_imported
 
         result = False
@@ -3382,7 +3363,7 @@ class LinuxInstaller(Installer):
                         requiredRepoPackages = []
 
                     if len(requiredRepoPackages) > 0:
-                        eprint(f"Installing required packages: {requiredRepoPackages}")
+                        logging.info(f"Installing required packages: {requiredRepoPackages}")
                         self.install_package(requiredRepoPackages)
 
                     # install docker via repo if possible
@@ -3391,8 +3372,7 @@ class LinuxInstaller(Installer):
                         (self.distro == PLATFORM_LINUX_UBUNTU) or (self.distro == PLATFORM_LINUX_DEBIAN)
                     ) and self.codename:
                         # for debian/ubuntu, add docker GPG key and check its fingerprint
-                        if self.debug:
-                            eprint("Requesting docker GPG key for package signing")
+                        logging.info("Requesting docker GPG key for package signing")
                         dockerGpgKey = requests_imported.get(
                             f'https://download.docker.com/linux/{self.distro}/gpg', allow_redirects=True
                         )
@@ -3409,8 +3389,7 @@ class LinuxInstaller(Installer):
 
                         # add docker .deb repository
                         if err == 0:
-                            if self.debug:
-                                eprint("Adding docker repository")
+                            logging.info("Adding docker repository")
                             err, out = self.run_process(
                                 [
                                     'add-apt-repository',
@@ -3438,8 +3417,7 @@ class LinuxInstaller(Installer):
 
                     elif self.distro == PLATFORM_LINUX_FEDORA:
                         # add docker fedora repository
-                        if self.debug:
-                            eprint("Adding docker repository")
+                        logging.info("Adding docker repository")
                         err, out = self.run_process(
                             [
                                 'dnf',
@@ -3459,8 +3437,7 @@ class LinuxInstaller(Installer):
 
                     elif self.distro == PLATFORM_LINUX_CENTOS:
                         # add docker centos repository
-                        if self.debug:
-                            eprint("Adding docker repository")
+                        logging.info("Adding docker repository")
                         err, out = self.run_process(
                             [
                                 'yum-config-manager',
@@ -3482,8 +3459,7 @@ class LinuxInstaller(Installer):
                         PLATFORM_LINUX_ROCKY,
                     ):
                         # add docker rhel repository
-                        if self.debug:
-                            eprint("Adding docker repository")
+                        logging.info("Adding docker repository")
                         err, out = self.run_process(
                             [
                                 'dnf',
@@ -3509,12 +3485,12 @@ class LinuxInstaller(Installer):
                         err, out = None, None
 
                     if len(dockerPackages) > 0:
-                        eprint(f"Installing docker packages: {dockerPackages}")
+                        logging.info(f"Installing docker packages: {dockerPackages}")
                         if self.install_package(dockerPackages):
-                            eprint("Installation of docker packages apparently succeeded")
+                            logging.info("Installation of docker packages apparently succeeded")
                             result = True
                         else:
-                            eprint("Installation of docker packages failed")
+                            logging.error("Installation of docker packages failed")
 
                 # the user either chose not to use the official repos, the official repo installation failed, or there are not official repos available
                 # see if we want to attempt using the convenience script at https://get.docker.com (see https://github.com/docker/docker-install)
@@ -3527,12 +3503,12 @@ class LinuxInstaller(Installer):
                         os.chmod(tempFileName, 493)  # 493 = 0o755
                         err, out = self.run_process(([tempFileName]), privileged=True)
                         if err == 0:
-                            eprint("Installation of docker apparently succeeded")
+                            logging.info("Installation of docker apparently succeeded")
                             result = True
                         else:
-                            eprint(f"Installation of docker failed: {out}")
+                            logging.error(f"Installation of docker failed: {out}")
                     else:
-                        eprint(f"Downloading https://get.docker.com/ to {tempFileName} failed")
+                        logging.error(f"Downloading https://get.docker.com/ to {tempFileName} failed")
 
             if (
                 result
@@ -3553,15 +3529,14 @@ class LinuxInstaller(Installer):
                 if err == 0:
                     err, out = self.run_process(['systemctl', 'enable', 'docker'], privileged=True)
                     if err != 0:
-                        eprint(f"Enabling docker service failed: {out}")
+                        logging.error(f"Enabling docker service failed: {out}")
                 else:
-                    eprint(f"Starting docker service failed: {out}")
+                    logging.error(f"Starting docker service failed: {out}")
 
             # at this point we either have installed docker successfully or we have to give up, as we've tried all we could
             err, out = self.run_process([args.runtimeBin, 'info'], privileged=True, retry=6, retrySleepSec=5)
             if out and (err == 0):
-                if self.debug:
-                    eprint(f'"{args.runtimeBin} info" succeeded')
+                logging.info(f'"{args.runtimeBin} info" succeeded')
 
                 if args.runtimeBin.startswith('docker'):
                     # add non-root user to docker group if required
@@ -3579,10 +3554,9 @@ class LinuxInstaller(Installer):
                     for user in usersToAdd:
                         err, out = self.run_process(['usermod', '-a', '-G', 'docker', user], privileged=True)
                         if err == 0:
-                            if self.debug:
-                                eprint(f'Adding {user} to "docker" group succeeded')
+                            logging.info(f'Adding {user} to "docker" group succeeded')
                         else:
-                            eprint(f'Adding {user} to "docker" group failed')
+                            logging.error(f'Adding {user} to "docker" group failed')
 
             elif err != 0:
                 result = False
@@ -3599,7 +3573,6 @@ class LinuxInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker_compose(self):
-        global args
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -3651,29 +3624,29 @@ class LinuxInstaller(Installer):
                                 (['cp', '-f', tempFileName, '/usr/local/bin/docker-compose']), privileged=True
                             )
                             if err == 0:
-                                eprint("Download and installation of docker-compose apparently succeeded")
+                                logging.info("Download and installation of docker-compose apparently succeeded")
                                 tmpComposeCmd = '/usr/local/bin/docker-compose'
                             else:
                                 raise Exception(f'Error copying {tempFileName} to /usr/local/bin: {out}')
 
                         else:
-                            eprint(f"Downloading {dockerComposeUrl} to {tempFileName} failed")
+                            logging.error(f"Downloading {dockerComposeUrl} to {tempFileName} failed")
 
                 elif InstallerYesOrNo('Install docker-compose via pip (privileged)?', default=False):
                     # install docker-compose via pip (as root)
                     err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=True)
                     if err == 0:
-                        eprint("Installation of docker-compose apparently succeeded")
+                        logging.info("Installation of docker-compose apparently succeeded")
                     else:
-                        eprint(f"Install docker-compose via pip failed with {err}, {out}")
+                        logging.error(f"Install docker-compose via pip failed with {err}, {out}")
 
                 elif InstallerYesOrNo('Install docker-compose via pip (user)?', default=True):
                     # install docker-compose via pip (regular user)
                     err, out = self.run_process([self.pipCmd, 'install', 'docker-compose'], privileged=False)
                     if err == 0:
-                        eprint("Installation of docker-compose apparently succeeded")
+                        logging.info("Installation of docker-compose apparently succeeded")
                     else:
-                        eprint(f"Install docker-compose via pip failed with {err}, {out}")
+                        logging.error(f"Install docker-compose via pip failed with {err}, {out}")
 
             # see if docker-compose is now installed and runnable (try non-root and root)
             for priv in (False, True):
@@ -3684,8 +3657,7 @@ class LinuxInstaller(Installer):
             if err == 0:
                 self.dockerComposeCmd = tmpComposeCmd
                 result = True
-                if self.debug:
-                    eprint(f'{args.runtimeBin} compose succeeded')
+                logging.info(f'{args.runtimeBin} compose succeeded')
 
             else:
                 if args.runtimeBin.startswith('docker'):
@@ -3712,56 +3684,56 @@ class LinuxInstaller(Installer):
         configLinesToAdd = [
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.file-max=',
                 'fs.file-max increases allowed maximum for file handles',
                 ['# the maximum number of open file handles', 'fs.file-max=2097152'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_user_watches=',
                 'fs.inotify.max_user_watches increases allowed maximum for monitored files',
                 ['# the maximum number of user inotify watches', 'fs.inotify.max_user_watches=131072'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_queued_events=',
                 'fs.inotify.max_queued_events increases queue size for monitored files',
                 ['# the inotify event queue size', 'fs.inotify.max_queued_events=131072'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'fs.inotify.max_user_instances=',
                 'fs.inotify.max_user_instances increases allowed maximum monitor file watchers',
                 ['# the maximum number of user inotify monitors', 'fs.inotify.max_user_instances=512'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.max_map_count=',
                 'vm.max_map_count increases allowed maximum for memory segments',
                 ['# the maximum number of memory map areas a process may have', 'vm.max_map_count=262144'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'net.core.somaxconn=',
                 'net.core.somaxconn increases allowed maximum for socket connections',
                 ['# the maximum number of incoming connections', 'net.core.somaxconn=65535'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.swappiness=',
                 'vm.swappiness adjusts the preference of the system to swap vs. drop runtime memory pages',
                 ['# decrease "swappiness" (swapping out runtime memory vs. dropping pages)', 'vm.swappiness=1'],
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.dirty_background_ratio=',
                 'vm.dirty_background_ratio defines the percent of memory filled with dirty data before the system starts writing it to disk in the background',
                 [
@@ -3771,7 +3743,7 @@ class LinuxInstaller(Installer):
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'vm.dirty_ratio=',
                 'vm.dirty_ratio defines the maximum percent of memory that can be dirty before all new writes are forced to flush to disk',
                 [
@@ -3781,7 +3753,7 @@ class LinuxInstaller(Installer):
             ),
             ConfigLines(
                 [],
-                '/etc/sysctl.conf',
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'net.ipv4.tcp_retries2=',
                 'net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions',
                 ['# maximum number of TCP retransmissions', 'net.ipv4.tcp_retries2=5'],
@@ -3800,7 +3772,7 @@ class LinuxInstaller(Installer):
             ConfigLines(
                 [
                     'bionic',
-                    'bookworm',
+                    'trixie',
                     'bullseye',
                     'buster',
                     'cosmic',
@@ -3913,7 +3885,7 @@ class LinuxInstaller(Installer):
 ###################################################################################################
 class MacInstaller(Installer):
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def __init__(self, orchMode, debug=False, configOnly=False):
+    def __init__(self, orchMode, configOnly=False):
         super().__init__(orchMode, debug, configOnly)
 
         self.sudoCmd = []
@@ -3940,17 +3912,15 @@ class MacInstaller(Installer):
             if err != 0:
                 self.install_package(['cask'])
                 if err == 0:
-                    if self.debug:
-                        eprint('"brew install cask" succeeded')
+                    logging.info('"brew install cask" succeeded')
                 else:
-                    eprint(f'"brew install cask" failed with {err}, {out}')
+                    logging.error(f'"brew install cask" failed with {err}, {out}')
 
             err, out = self.run_process(['brew', 'tap', 'homebrew/cask-versions'])
             if err == 0:
-                if self.debug:
-                    eprint('"brew tap homebrew/cask-versions" succeeded')
+                logging.info('"brew tap homebrew/cask-versions" succeeded')
             else:
-                eprint(f'"brew tap homebrew/cask-versions" failed with {err}, {out}')
+                logging.error(f'"brew tap homebrew/cask-versions" failed with {err}, {out}')
 
             self.checkPackageCmds.append(['brew', 'cask', 'ls', '--versions'])
             self.installPackageCmds.append(['brew', 'cask', 'install'])
@@ -3983,7 +3953,6 @@ class MacInstaller(Installer):
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def install_docker(self):
-        global args
         result = False
 
         if self.orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -3997,7 +3966,9 @@ class MacInstaller(Installer):
                 and self.package_is_installed(MAC_BREW_DOCKER_PACKAGE)
             ):
                 # if docker is installed via brew, but not running, prompt them to start it
-                eprint(f'{MAC_BREW_DOCKER_PACKAGE} appears to be installed via Homebrew, but "docker info" failed')
+                logging.error(
+                    f'{MAC_BREW_DOCKER_PACKAGE} appears to be installed via Homebrew, but "docker info" failed'
+                )
                 while True:
                     response = InstallerAskForString(
                         'Starting Docker the first time may require user interaction. Please find and start Docker in the Applications folder, then return here and type YES'
@@ -4016,9 +3987,9 @@ class MacInstaller(Installer):
                 if self.useBrew:
                     # install docker via brew cask (requires user interaction)
                     dockerPackages = [MAC_BREW_DOCKER_PACKAGE, MAC_BREW_DOCKER_COMPOSE_PACKAGE]
-                    eprint(f"Installing docker packages: {dockerPackages}")
+                    logging.info(f"Installing docker packages: {dockerPackages}")
                     if self.install_package(dockerPackages):
-                        eprint("Installation of docker packages apparently succeeded")
+                        logging.info("Installation of docker packages apparently succeeded")
                         while True:
                             response = InstallerAskForString(
                                 'Starting Docker the first time may require user interaction. Please find and start Docker in the Applications folder, then return here and type YES'
@@ -4026,7 +3997,7 @@ class MacInstaller(Installer):
                             if response == 'yes':
                                 break
                     else:
-                        eprint("Installation of docker packages failed")
+                        logging.error("Installation of docker packages failed")
 
                 else:
                     # install docker via downloaded dmg file (requires user interaction)
@@ -4049,8 +4020,7 @@ class MacInstaller(Installer):
                 err, out = self.run_process([args.runtimeBin, 'info'], retry=12, retrySleepSec=5)
                 if err == 0:
                     result = True
-                    if self.debug:
-                        eprint(f'"{args.runtimeBin} info" succeeded')
+                    logging.info(f'"{args.runtimeBin} info" succeeded')
 
                 elif err != 0:
                     raise Exception(
@@ -4124,7 +4094,7 @@ class MacInstaller(Installer):
                         # and don't have the whole banana at our disposal
                         self.totalMemoryGigs = newMemoryGiB
 
-                        eprint("Docker resource settings adjusted, attempting restart...")
+                        logging.info("Docker resource settings adjusted, attempting restart...")
 
                         err, out = self.run_process(['osascript', '-e', 'quit app "Docker"'])
                         if err == 0:
@@ -4134,11 +4104,10 @@ class MacInstaller(Installer):
                         if err == 0:
                             err, out = self.run_process(['docker', 'info'], retry=12, retrySleepSec=5)
                             if err == 0:
-                                if self.debug:
-                                    eprint('"docker info" succeeded')
+                                logging.info('"docker info" succeeded')
 
                         else:
-                            eprint(f"Restarting Docker automatically failed: {out}")
+                            logging.error(f"Restarting Docker automatically failed: {out}")
                             while True:
                                 response = InstallerAskForString(
                                     'Please restart Docker via the system taskbar, then return here and type YES'
@@ -4162,18 +4131,14 @@ def main():
     # extract arguments from the command line
     # print (sys.argv[1:]);
     parser = argparse.ArgumentParser(
-        description='Malcolm install script', add_help=False, usage=f'{ScriptName} <arguments>'
+        description='Malcolm install script', add_help=True, usage=f'{ScriptName} <arguments>'
     )
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        metavar="true|false",
-        const=True,
-        default=False,
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-d',
@@ -5125,22 +5090,24 @@ def main():
     except Exception:
         pass
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
     except SystemExit as e:
-        eprint(f'Invalid arguments: {e}')
-        parser.print_help()
-        exit(2)
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
     if os.path.islink(os.path.join(ScriptPath, ScriptName)) and ScriptName.startswith('configure'):
         args.configOnly = True
 
-    if args.debug:
-        eprint(os.path.join(ScriptPath, ScriptName))
-        eprint(f"Arguments: {sys.argv[1:]}")
-        eprint(f"Arguments: {args}")
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(
+        os.getenv("LOGLEVEL", ""),
+        args.verbose,
+        set_traceback_limit=True,
+        logfmt='%(message)s',
+    )
+    logging.debug(os.path.join(ScriptPath, ScriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.imageArch is not None:
         args.imageArch = (
@@ -5165,12 +5132,12 @@ def main():
 
     installerPlatform = platform.system()
     if installerPlatform == PLATFORM_LINUX:
-        installer = LinuxInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+        installer = LinuxInstaller(orchMode, configOnly=args.configOnly)
     elif installerPlatform == PLATFORM_MAC:
-        installer = MacInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+        installer = MacInstaller(orchMode, configOnly=args.configOnly)
     elif installerPlatform == PLATFORM_WINDOWS:
         raise Exception(f'{ScriptName} is not yet supported on {installerPlatform}')
-        # installer = WindowsInstaller(orchMode, debug=args.debug, configOnly=args.configOnly)
+        # installer = WindowsInstaller(orchMode, configOnly=args.configOnly)
 
     if orchMode == OrchestrationFramework.DOCKER_COMPOSE:
         if GetPlatformOSRelease() == 'hedgehog-malcolm':
@@ -5183,21 +5150,25 @@ def main():
                     'Select container runtime engine',
                     choices=[(x, '', x == runtimeOptions[0]) for x in runtimeOptions],
                 )
-        if args.debug:
-            eprint(f"Container engine: {args.runtimeBin}")
+        logging.info(f"Container engine: {args.runtimeBin}")
 
     if (not args.configOnly) and hasattr(installer, 'install_required_packages'):
         installer.install_required_packages()
 
     DialogInit()
     for pkgLoop in (1, 2):
-        requests_imported = RequestsDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-        yaml_imported = YAMLDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-        dotenv_imported = DotEnvDynamic(debug=args.debug, forceInteraction=(not args.acceptDefaultsNonInteractive))
-        if args.debug:
-            eprint(f"Imported requests: {requests_imported}")
-            eprint(f"Imported yaml: {yaml_imported}")
-            eprint(f"Imported dotenv: {dotenv_imported}")
+        requests_imported = RequestsDynamic(
+            debug=log_level_is_debug(args.verbose), forceInteraction=(not args.acceptDefaultsNonInteractive)
+        )
+        yaml_imported = YAMLDynamic(
+            debug=log_level_is_debug(args.verbose), forceInteraction=(not args.acceptDefaultsNonInteractive)
+        )
+        dotenv_imported = DotEnvDynamic(
+            debug=log_level_is_debug(args.verbose), forceInteraction=(not args.acceptDefaultsNonInteractive)
+        )
+        logging.info(f"Imported requests: {requests_imported}")
+        logging.info(f"Imported yaml: {yaml_imported}")
+        logging.info(f"Imported dotenv: {dotenv_imported}")
         if (not all((requests_imported, yaml_imported, dotenv_imported))) and (
             (pkgLoop != 1) or (not installer.ensure_pip(prompt_to_bootstrap=not args.acceptDefaultsNonInteractive))
         ):
@@ -5229,12 +5200,11 @@ def main():
         if not os.path.isfile(imageFile):
             imageFile = None
 
-    if args.debug:
-        if args.configOnly:
-            eprint("Only doing configuration, not installation")
-        else:
-            eprint(f"Malcolm install file: {malcolmFile}")
-            eprint(f"Malcolm images file: {imageFile}")
+    if args.configOnly:
+        logging.info("Only doing configuration, not installation")
+    else:
+        logging.info(f"Malcolm install file: {malcolmFile}")
+        logging.info(f"Malcolm images file: {imageFile}")
 
     if not args.configOnly:
         if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
@@ -5256,14 +5226,13 @@ def main():
         if (exc.errno == errno.EEXIST) and os.path.isdir(args.configDir):
             pass
         else:
-            eprint(f"Creating {args.configDir} failed: {exc}, attempting to continue anyway")
+            logging.error(f"Creating {args.configDir} failed: {exc}, attempting to continue anyway")
     except Exception as e:
-        eprint(f"Creating {args.configDir} failed: {e}, attempting to continue anyway")
+        logging.error(f"Creating {args.configDir} failed: {e}, attempting to continue anyway")
 
     if orchMode is OrchestrationFramework.KUBERNETES:
-        kube_imported = KubernetesDynamic(debug=args.debug)
-        if args.debug:
-            eprint(f"Imported kubernetes: {kube_imported}")
+        kube_imported = KubernetesDynamic(debug=log_level_is_debug(args.verbose))
+        logging.info(f"Imported kubernetes: {kube_imported}")
         if kube_imported:
             kube_imported.config.load_kube_config(args.configFile)
         else:
@@ -5290,8 +5259,7 @@ def main():
                     installPath = testPath
                     break
 
-        if args.debug:
-            eprint(f"Malcolm installation detected at {installPath}")
+        logging.info(f"Malcolm installation detected at {installPath}")
 
     if (installPath is not None) and os.path.isdir(installPath):
         if hasattr(installer, 'tweak_malcolm_runtime'):

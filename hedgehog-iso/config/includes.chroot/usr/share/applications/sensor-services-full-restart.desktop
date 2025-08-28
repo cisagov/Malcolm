@@ -5,6 +5,6 @@ Exec=/usr/bin/tilix -t "Restart Sensor Services" -e bash -c "echo 'Stopping serv
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=reload
+Icon=xfsm-reboot
 Categories=Network;
 StartupNotify=true

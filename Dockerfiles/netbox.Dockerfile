@@ -1,4 +1,4 @@
-FROM netboxcommunity/netbox:v4.3.4
+FROM netboxcommunity/netbox:v4.3.6
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -76,9 +76,11 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       procps \
       psmisc \
       python3-dev \
+      python3-pip \
+      python3-setuptools \
+      python3-wheel \
       ripgrep \
       rsync \
-      supervisor \
       tini && \
     curl -fsSL -o /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
       "${NETBOX_PATH}/venv/bin/python" /tmp/get-pip.py && \
@@ -130,7 +132,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "netbox"]
 
-CMD ["/opt/netbox/docker-entrypoint.sh", "/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/opt/netbox/docker-entrypoint.sh", "supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

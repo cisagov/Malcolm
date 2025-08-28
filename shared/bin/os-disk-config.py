@@ -14,6 +14,7 @@
 import os
 import json
 import re
+import logging
 import glob
 import sys
 import uuid
@@ -23,7 +24,6 @@ from collections import defaultdict
 from fstab import Fstab
 
 from malcolm_utils import (
-    eprint,
     HEDGEHOG_PCAP_DIR,
     HEDGEHOG_ZEEK_DIR,
     LoadFileIfJson,
@@ -34,6 +34,8 @@ from malcolm_utils import (
     OS_MODE_MALCOLM,
     remove_prefix,
     run_subprocess,
+    set_logging,
+    get_verbosity_env_var_count,
     sizeof_fmt,
     str2bool,
 )
@@ -94,8 +96,8 @@ OS_PARAMS[OS_MODE_MALCOLM].update(
 )
 
 
-debug = False
 osMode = None
+args = None
 
 
 ###################################################################################################
@@ -140,6 +142,9 @@ def CreateMapperDeviceName(device):
 ###################################################################################################
 # determine if a device (eg., sda) is an internal (True) or removable (False) device
 def IsInternalDevice(name):
+    if args.internalDevs and name in args.internalDevs:
+        return True
+
     rootdir_pattern = re.compile(r'^.*?/devices')
 
     removableFlagFile = '/sys/block/%s/device/block/%s/removable' % (name, name)
@@ -187,7 +192,7 @@ def GetDeviceSize(device):
 # main
 ###################################################################################################
 def main():
-    global debug
+    global args
     global osMode
 
     # to parse fdisk output, look for partitions after partitions header line
@@ -199,7 +204,14 @@ def main():
 
     # extract arguments from the command line
     parser = argparse.ArgumentParser(
-        description='os-disk-config.py', add_help=False, usage='os-disk-config.py [options]'
+        description='os-disk-config.py', add_help=True, usage='os-disk-config.py [options]'
+    )
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-m',
@@ -231,9 +243,6 @@ def main():
         help="Unmount storage directories before determining candidate drives",
     )
     parser.add_argument(
-        '-v', '--verbose', dest='debug', type=str2bool, nargs='?', const=True, default=False, help="Verbose output"
-    )
-    parser.add_argument(
         '-n',
         '--dry-run',
         dest='dryrun',
@@ -253,18 +262,24 @@ def main():
         default=False,
         help="Encrypt formatted volumes",
     )
+    parser.add_argument(
+        '--internal',
+        dest='internalDevs',
+        nargs='*',
+        type=str,
+        default=[],
+        help="Force given device name(s) (e.g., sda) to be regarded as internal",
+    )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        eprint(f"Arguments: {sys.argv[1:]}")
-    if debug:
-        eprint(f"Arguments: {args}")
+    args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True, logfmt='%(message)s')
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM):
         osMode = args.osMode
@@ -275,8 +290,7 @@ def main():
     # unmount existing mounts if requested
     if args.umount and (not args.dryrun):
         if (not args.interactive) or YesOrNo('Unmount any mounted storage path(s)?'):
-            if debug:
-                eprint("Attempting unmount of storage path(s)...")
+            logging.info("Attempting unmount of storage path(s)...")
             for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                 run_subprocess(f"umount {os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir)}")
             run_subprocess(f"umount {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
@@ -285,14 +299,12 @@ def main():
                 remove_prefix(x, '/dev/mapper/')
                 for x in glob.glob(f"/dev/mapper/{OS_PARAMS[osMode][CRYPT_DEV_PREFIX]}*")
             ]:
-                if debug:
-                    eprint(f"Running crypsetup luksClose on {cryptDev}...")
+                logging.info(f"Running crypsetup luksClose on {cryptDev}...")
                 _, cryptOut = run_subprocess(
                     f"/sbin/cryptsetup --verbose luksClose {cryptDev}", stdout=True, stderr=True, timeout=300
                 )
-                if debug:
-                    for line in cryptOut:
-                        eprint(f"\t{line}")
+                for line in cryptOut:
+                    logging.info(f"\t{line}")
             _, reloadOut = run_subprocess("systemctl daemon-reload")
 
     # check existing mounts, if the path(s) are already mounted, then abort
@@ -302,20 +314,15 @@ def main():
             if len(mountDetails) >= 2:
                 mountPoint = mountDetails[1]
                 if mountPoint.startswith(OS_PARAMS[osMode][MOUNT_ROOT_PATH]):
-                    eprint(
-                        f"It appears there is already a device mounted under {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} at {mountPoint}."
+                    logging.critical(
+                        f"It appears there is already a device mounted under {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} at {mountPoint}. If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
                     )
-                    eprint(
-                        "If you wish to continue, you may run this script with the '-u|--umount' option to umount first."
-                    )
-                    eprint()
                     parser.print_help()
                     exit(2)
 
     # get physical disks, partitions, device maps, and any mountpoints and UUID associated
     allDisks = defaultdict(list)
-    if debug:
-        eprint("Block devices:")
+    logging.info("Block devices:")
     for device in GetInternalDevices():
         ecode, deviceTree = run_subprocess(
             f'/bin/lsblk -o name,uuid,mountpoint --paths --noheadings /dev/{device}', stdout=True, stderr=False
@@ -327,8 +334,7 @@ def main():
             for line in deviceTree:
                 line = line.rstrip()
                 if len(line) > 0:
-                    if debug:
-                        eprint(f"\t{line}")
+                    logging.info(f"\t{line}")
                     if line == f"/dev/{device}":
                         currentDev = line
                         currentPar = None
@@ -385,8 +391,7 @@ def main():
 
     # sort candidate devices largest to smallest
     candidateDevs = sorted(candidateDevs, key=lambda x: GetDeviceSize(x), reverse=True)
-    if debug:
-        eprint(f"Device candidates: {[(x, sizeof_fmt(GetDeviceSize(x))) for x in candidateDevs]}")
+    logging.info(f"Device candidates: {[(x, sizeof_fmt(GetDeviceSize(x))) for x in candidateDevs]}")
 
     if len(candidateDevs) > 0:
         if args.encrypt:
@@ -406,8 +411,8 @@ def main():
                 f'Partition and format {device}{" (dry-run)" if args.dryrun else ""}?'
             ):
                 if args.dryrun:
-                    eprint(f"Partitioning {device} (dry run only)...")
-                    eprint(
+                    logging.info(f"Partitioning {device} (dry run only)...")
+                    logging.info(
                         f'\t/sbin/parted --script --align optimal {device} -- mklabel gpt \\\n\t\tunit mib mkpart primary 1 100%'
                     )
                     ecode = 0
@@ -415,27 +420,23 @@ def main():
 
                 else:
                     # use parted to create a gpt partition table with a single partition consuming 100% of the disk minus one megabyte at the beginning
-                    if debug:
-                        eprint(f"Partitioning {device}...")
+                    logging.info(f"Partitioning {device}...")
                     ecode, partedOut = run_subprocess(
                         f'/sbin/parted --script --align optimal {device} -- mklabel gpt \\\n unit mib mkpart primary 1 100%',
                         stdout=True,
                         stderr=True,
                         timeout=300,
                     )
-                    if debug:
-                        eprint(partedOut)
+                    logging.info(partedOut)
                     if ecode == 0:
-                        if debug:
-                            eprint(f"Success partitioning {device}")
+                        logging.info(f"Success partitioning {device}")
 
                         # get the list of partitions from the newly partitioned device (should be just one)
                         _, fdiskOut = run_subprocess(f'fdisk -l {device}')
                         pars = []
                         parsList = False
                         for line in fdiskOut:
-                            if debug:
-                                eprint(f"\t{line}")
+                            logging.info(f"\t{line}")
                             if (not parsList) and fdisk_pars_begin_pattern.search(line):
                                 parsList = True
                             elif parsList:
@@ -460,46 +461,43 @@ def main():
                                         for line in f:
                                             line = line.rstrip("\n")
                                             if line.startswith(f"{CreateMapperName(parDev)}"):
-                                                if debug:
-                                                    eprint(f"removed {line} from {OS_PARAMS[osMode][CRYPTTAB_FILE]}")
+                                                logging.info(f"removed {line} from {OS_PARAMS[osMode][CRYPTTAB_FILE]}")
                                             else:
                                                 print(line)
 
                                 _, reloadOut = run_subprocess("systemctl daemon-reload")
 
                                 # for good measure, run luksErase in case it was a previous luks volume
-                                if debug:
-                                    eprint(f"Running crypsetup luksErase on {parDev}...")
+                                logging.info(f"Running crypsetup luksErase on {parDev}...")
                                 _, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksErase {parDev}",
                                     stdout=True,
                                     stderr=True,
                                     timeout=600,
                                 )
-                                if debug:
-                                    for line in cryptOut:
-                                        eprint(f"\t{line}")
+                                for line in cryptOut:
+                                    logging.info(f"\t{line}")
 
                                 _, reloadOut = run_subprocess("systemctl daemon-reload")
 
                                 # luks volume creation
 
                                 # format device as a luks volume
-                                if debug:
-                                    eprint(f"Running crypsetup luksFormat on {device}...")
+                                logging.info(f"Running crypsetup luksFormat on {device}...")
                                 ecode, cryptOut = run_subprocess(
                                     f"/sbin/cryptsetup --verbose --batch-mode luksFormat {parDev} --uuid='{parUuid}' --key-file {OS_PARAMS[osMode][CRYPT_KEYFILE]}",
                                     stdout=True,
                                     stderr=True,
                                     timeout=3600,
                                 )
-                                if debug or (ecode != 0):
-                                    for line in cryptOut:
-                                        eprint(f"\t{line}")
+                                for line in cryptOut:
+                                    if ecode != 0:
+                                        logging.error(f"\t{line}")
+                                    else:
+                                        logging.info(f"\t{line}")
                                 if ecode == 0:
                                     # open the luks volume in /dev/mapper/
-                                    if debug:
-                                        eprint(f"Running crypsetup luksOpen on {device}...")
+                                    logging.info(f"Running crypsetup luksOpen on {device}...")
                                     parMapperDev = CreateMapperDeviceName(parDev)
                                     ecode, cryptOut = run_subprocess(
                                         f"/sbin/cryptsetup --verbose luksOpen {parDev} {CreateMapperName(parDev)} --key-file {OS_PARAMS[osMode][CRYPT_KEYFILE]}",
@@ -507,34 +505,33 @@ def main():
                                         stderr=True,
                                         timeout=180,
                                     )
-                                    if debug or (ecode != 0):
-                                        for line in cryptOut:
-                                            eprint(f"\t{line}")
+                                    for line in cryptOut:
+                                        if ecode != 0:
+                                            logging.error(f"\t{line}")
+                                        else:
+                                            logging.info(f"\t{line}")
                                     if ecode == 0:
                                         # we have everything we need for luks
                                         okToFormat = True
 
                                     else:
-                                        eprint(f"Error {ecode} opening LUKS on {parDev}, giving up on {device}")
+                                        logging.error(f"Error {ecode} opening LUKS on {parDev}, giving up on {device}")
                                 else:
-                                    eprint(f"Error {ecode} formatting LUKS on {parDev}, giving up on {device}")
+                                    logging.error(f"Error {ecode} formatting LUKS on {parDev}, giving up on {device}")
 
                             # format the partition as an XFS file system
                             if okToFormat:
-                                if debug:
-                                    eprint(f'Created {parDev}, assigning {parUuid}')
+                                logging.info(f'Created {parDev}, assigning {parUuid}')
                                 if args.encrypt:
                                     formatCmd = f"/sbin/mkfs.xfs -f {parMapperDev}"
                                 else:
                                     formatCmd = f"/sbin/mkfs.xfs -f -m uuid='{parUuid}' {parDev}"
-                                if debug:
-                                    eprint(f"Formatting: {formatCmd}")
+                                logging.info(f"Formatting: {formatCmd}")
                                 ecode, mkfsOut = run_subprocess(formatCmd, stdout=True, stderr=True, timeout=3600)
-                                if debug:
-                                    for line in mkfsOut:
-                                        eprint(f"\t{line}")
+                                for line in mkfsOut:
+                                    logging.info(f"\t{line}")
                                 if ecode == 0:
-                                    eprint(f"Success formatting {parMapperDev if args.encrypt else parDev}")
+                                    logging.info(f"Success formatting {parMapperDev if args.encrypt else parDev}")
                                     formattedDevs.append(
                                         PartitionInfo(
                                             device=device,
@@ -546,17 +543,17 @@ def main():
                                     )
 
                                 else:
-                                    eprint(
+                                    logging.error(
                                         f"Error {ecode} formatting {parMapperDev if args.encrypt else parDev}, giving up on {device}"
                                     )
 
                         else:
-                            eprint(
+                            logging.error(
                                 f"Error partitioning {device}, unexpected partitions after running parted, giving up on {device}"
                             )
 
                     elif ecode != 0:
-                        eprint(f"Error {ecode} partitioning {device}, giving up on {device}")
+                        logging.error(f"Error {ecode} partitioning {device}, giving up on {device}")
 
         # now that we have formatted our device(s), decide where they're going to mount (these are already sorted)
         devIdx = 0
@@ -567,8 +564,7 @@ def main():
             else:
                 break
 
-        if debug:
-            eprint(formattedDevs)
+        logging.info(formattedDevs)
 
         # mountpoints are probably not already mounted, but this will make sure
         for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
@@ -583,16 +579,14 @@ def main():
                 os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir),
                 path=OS_PARAMS[osMode][FSTAB_FILE],
             ):
-                if debug:
-                    eprint(
-                        f"Removed previous {os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir)} mount from {OS_PARAMS[osMode][FSTAB_FILE]}"
-                    )
+                logging.info(
+                    f"Removed previous {os.path.join(OS_PARAMS[osMode][MOUNT_ROOT_PATH], subdir)} mount from {OS_PARAMS[osMode][FSTAB_FILE]}"
+                )
 
         if Fstab.remove_by_mountpoint(OS_PARAMS[osMode][MOUNT_ROOT_PATH], path=OS_PARAMS[osMode][FSTAB_FILE]):
-            if debug:
-                eprint(
-                    f"Removed previous {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} mount from {OS_PARAMS[osMode][FSTAB_FILE]}"
-                )
+            logging.info(
+                f"Removed previous {OS_PARAMS[osMode][MOUNT_ROOT_PATH]} mount from {OS_PARAMS[osMode][FSTAB_FILE]}"
+            )
 
         # reload tab files with systemctl
         _, reloadOut = run_subprocess("systemctl daemon-reload")
@@ -623,14 +617,11 @@ def main():
         if os.path.isdir(OS_PARAMS[osMode][MOUNT_ROOT_PATH]):
             for root, dirs, files in os.walk(OS_PARAMS[osMode][MOUNT_ROOT_PATH], topdown=False):
                 for name in dirs:
-                    if debug:
-                        eprint(f"Removing {os.path.join(root, name)}")
+                    logging.info(f"Removing {os.path.join(root, name)}")
                     os.rmdir(os.path.join(root, name))
-            if debug:
-                eprint(f"Removing {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
+            logging.info(f"Removing {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
             os.rmdir(OS_PARAMS[osMode][MOUNT_ROOT_PATH])
-            if debug:
-                eprint(f"Creating {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
+            logging.info(f"Creating {OS_PARAMS[osMode][MOUNT_ROOT_PATH]}")
             os.makedirs(OS_PARAMS[osMode][MOUNT_ROOT_PATH], exist_ok=True)
             os.chown(OS_PARAMS[osMode][MOUNT_ROOT_PATH], -1, ownerGuid)
             os.chmod(OS_PARAMS[osMode][MOUNT_ROOT_PATH], OS_PARAMS[osMode][DIR_PERMS])
@@ -645,13 +636,11 @@ def main():
                         f"{CreateMapperName(par.partition)} UUID={par.uuid} {OS_PARAMS[osMode][CRYPT_KEYFILE]} luks\n"
                     )
                     f.write(crypttabLine)
-                    if debug:
-                        eprint(f'Added "{crypttabLine}" to {OS_PARAMS[osMode][CRYPTTAB_FILE]}')
+                    logging.info(f'Added "{crypttabLine}" to {OS_PARAMS[osMode][CRYPTTAB_FILE]}')
 
         # recreate mount directories and add fstab entries
         for par in formattedDevs:
-            if debug:
-                eprint(f"Creating {par.mount}")
+            logging.info(f"Creating {par.mount}")
             os.makedirs(par.mount, exist_ok=True)
             if args.encrypt:
                 entry = Fstab.add(
@@ -671,7 +660,7 @@ def main():
                     filesystem='xfs',
                     path=OS_PARAMS[osMode][FSTAB_FILE],
                 )
-            eprint(f'Added "{entry}" to {OS_PARAMS[osMode][FSTAB_FILE]} for {par.partition}')
+            logging.info(f'Added "{entry}" to {OS_PARAMS[osMode][FSTAB_FILE]} for {par.partition}')
 
         # reload tab files with systemctl
         _, reloadOut = run_subprocess("systemctl daemon-reload")
@@ -680,8 +669,7 @@ def main():
         for par in formattedDevs:
             ecode, mountOut = run_subprocess(f"mount {par.mount}")
             if ecode == 0:
-                if debug:
-                    eprint(f'Mounted {par.partition} at {par.mount}')
+                logging.info(f'Mounted {par.partition} at {par.mount}')
 
                 userDirs = []
                 if par.mount == OS_PARAMS[osMode][MOUNT_ROOT_PATH]:
@@ -698,8 +686,7 @@ def main():
                     os.makedirs(userDir, exist_ok=True)
                     os.chown(userDir, OS_PARAMS[osMode][USER_UID], ownerGuid)
                     os.chmod(userDir, OS_PARAMS[osMode][SUBDIR_PERMS])
-                    if debug:
-                        eprint(f'Created "{userDir}" for writing by unprivileged user')
+                    logging.info(f'Created "{userDir}" for writing by unprivileged user')
                     for subdir in OS_PARAMS[osMode][MOUNT_DIRS]:
                         if f"{os.path.sep}{subdir}{os.path.sep}" in userDir:
                             createdUserDirs[subdir] = userDir
@@ -743,10 +730,10 @@ def main():
                         os.chmod(configFilePath, OS_PARAMS[osMode][CRYPT_KEYFILE_PERMS])
 
             else:
-                eprint(f"Error {ecode} mounting {par.partition}")
+                logging.error(f"Error {ecode} mounting {par.partition}")
 
     else:
-        eprint("Could not find any unmounted devices greater than 100GB, giving up")
+        logging.error("Could not find any unmounted devices greater than 100GB, giving up")
 
 
 if __name__ == '__main__':

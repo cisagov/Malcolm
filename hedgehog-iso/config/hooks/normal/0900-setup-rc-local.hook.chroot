@@ -35,7 +35,7 @@ fi
 
 systemctl mask ctrl-alt-del.target
 
-if [ ! -s /var/lib/aide/aide.db ]; then
+if [ -x /usr/sbin/aideinit ] && [ ! -s /var/lib/aide/aide.db ]; then
     echo "Running Aide init" > /dev/tty0
     > /var/lib/aide/aide.db
     /usr/sbin/aideinit --yes --force
