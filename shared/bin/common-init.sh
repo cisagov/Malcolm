@@ -93,10 +93,15 @@ function InjectSkeleton() {
 function InitializeSensorNetworking() {
   unset NEED_NETWORKING_RESTART
 
+  # /etc/network/interfaces.d/sensor will manage network interfaces, not /etc/network/interfaces
+  # interfaces are configured by the system admin via configure-interfaces.py.
+  NET_IFACES_LINES=$(wc -l /etc/network/interfaces | awk '{print $1}')
+  if [ $NET_IFACES_LINES -gt 4 ] ; then
+    echo -e "source /etc/network/interfaces.d/*\n\nauto lo\niface lo inet loopback" > /etc/network/interfaces
+    NEED_NETWORKING_RESTART=0
+  fi
+
   if [[ ! -f /etc/network/interfaces.d/sensor ]]; then
-    # /etc/network/interfaces.d/sensor can be further configured by the system admin via configure-interfaces.py.
-    echo "" >> /etc/network/interfaces
-    echo "# sensor interfaces should be configured in \"/etc/network/interfaces.d/sensor\"" >> /etc/network/interfaces
     for IFACE_NAME in "${!IFACES[@]}"; do
       echo "auto $IFACE_NAME" >> /etc/network/interfaces.d/sensor
       echo "allow-hotplug $IFACE_NAME" >> /etc/network/interfaces.d/sensor
@@ -107,7 +112,6 @@ function InitializeSensorNetworking() {
     done
     NEED_NETWORKING_RESTART=0
   fi
-
 
   if ! grep --quiet ^TimeoutStartSec=1min /etc/systemd/system/network-online.target.wants/networking.service; then
     # only wait 1 minute during boot for network interfaces to come up
