@@ -1,4 +1,4 @@
-FROM debian:12-slim AS npmget
+FROM debian:13-slim AS npmget
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
@@ -15,7 +15,7 @@ RUN apt-get -q update && \
       filepond-plugin-file-rename \
       @jcubic/tagger
 
-FROM debian:12-slim AS runtime
+FROM debian:13-slim AS runtime
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -47,7 +47,7 @@ USER root
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
 
-ARG PHP_VERSION=8.2
+ARG PHP_VERSION=8.4
 ENV PHP_VERSION $PHP_VERSION
 
 ARG FILEPOND_SERVER_BRANCH=master
@@ -66,6 +66,7 @@ COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-validate-typ
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-metadata /var/www/upload/filepond-plugin-file-metadata
 COPY --from=npmget /usr/local/lib/node_modules/filepond-plugin-file-rename /var/www/upload/filepond-plugin-file-rename
 COPY --from=npmget /usr/local/lib/node_modules/@jcubic /var/www/upload/@jcubic
+ADD --chmod=644 file-upload/requirements.txt /usr/local/src/requirements.txt
 
 RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
     apt-get -q update && \
@@ -74,6 +75,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ca-certificates \
       curl \
       file \
+      git \
       jq \
       less \
       nginx-light \
@@ -81,8 +83,10 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       php$PHP_VERSION \
       php$PHP_VERSION-apcu \
       php$PHP_VERSION-fpm \
+      python3 \
+      python3-dev \
+      python3-pip \
       rsync \
-      supervisor \
       tini \
       vim-tiny && \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" && \
@@ -92,8 +96,11 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     cd /tmp && \
       curl -sSL "https://github.com/pqina/filepond-server-php/archive/${FILEPOND_SERVER_BRANCH}.tar.gz" | tar xzvf - -C ./filepond-server --strip-components 1 && \
       rsync -a --include="*/" --include="*.php" --exclude="*" ./filepond-server/ /var/www/upload/server/php/ && \
-    apt-get clean -y -q && \
-    rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
+    python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt  && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+      apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+      apt-get clean && \
+      rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
@@ -141,7 +148,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "-s", "upload", \
             "/docker-entrypoint.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/supervisord.conf", "-u", "root", "-n"]
 
 # to be populated at build-time:
 ARG BUILD_DATE

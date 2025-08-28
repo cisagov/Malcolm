@@ -71,6 +71,7 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/arkime/rules/"
   mkdir $VERBOSE -p "$DESTDIR/filebeat/certs/"
   mkdir $VERBOSE -p "$DESTDIR/htadmin/"
+  mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/certs/"
   mkdir $VERBOSE -p "$DESTDIR/logstash/maps/"
   mkdir $VERBOSE -p "$DESTDIR/netbox/custom-plugins/requirements/"
@@ -103,8 +104,8 @@ if mkdir "$DESTDIR"; then
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/MISP/"
   mkdir $VERBOSE -p "$DESTDIR/zeek/intel/STIX/"
 
-  cp $VERBOSE ./config/*.example "$DESTDIR/config/"
-  cp $VERBOSE ./config/*.yml "$DESTDIR/config/"
+  git ls-files -z ./config/*.example | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/config/"
+  git ls-files -z ./config/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/config/"
   cp $VERBOSE ./docker-compose.yml "$DESTDIR/docker-compose.yml"
   cp $VERBOSE ./.justfile "$DESTDIR/.justfile"
   cp $VERBOSE ./.envrc.example "$DESTDIR/.envrc.example"
@@ -113,17 +114,14 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_kubernetes.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
+  git ls-files -z ./kubernetes/*.* | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/kubernetes/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./arkime/etc/wise.ini.example "$DESTDIR/arkime/etc/"
-  cp $VERBOSE ./arkime/rules/*.yml "$DESTDIR/arkime/rules/"
-  cp $VERBOSE ./logstash/certs/*.conf "$DESTDIR/logstash/certs/"
+  git ls-files -z ./arkime/rules/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/arkime/rules/"
+  git ls-files -z ./logstash/certs/*.conf | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/logstash/certs/"
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
-  cp $VERBOSE -r ./netbox/config/ "$DESTDIR/netbox/"
-  cp $VERBOSE ./netbox/preload/*.yml "$DESTDIR/netbox/preload/"
-
-  mkdir $VERBOSE -p "$DESTDIR/kubernetes/"
-  cp $VERBOSE ./kubernetes/*.* "$DESTDIR/kubernetes/"
-  grep -v '^#' ./kubernetes/.gitignore | xargs -r -I XXX rm -f "$DESTDIR/kubernetes/XXX"
+  git ls-files ./netbox/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
+  git ls-files -z ./netbox/preload/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/netbox/preload/"
 
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc

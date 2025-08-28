@@ -133,14 +133,14 @@ def main():
     parser = argparse.ArgumentParser(
         description='\n'.join([]),
         formatter_class=argparse.RawTextHelpFormatter,
-        add_help=False,
+        add_help=True,
         usage='{} <arguments>'.format(script_name),
     )
     parser.add_argument(
         '--verbose',
         '-v',
         action='count',
-        default=1,
+        default=malcolm_utils.get_verbosity_env_var_count("VERBOSITY"),
         help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     # https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv
@@ -172,21 +172,16 @@ def main():
         help="Output filename for resultant Zeek table",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    args.verbose = logging.CRITICAL - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
-    )
+    args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     logging.debug(os.path.join(script_path, script_name))
-    logging.debug("Arguments: {}".format(sys.argv[1:]))
-    logging.debug("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if not args.outputFile:
         args.outputFile = '/tmp/iana.zeek'
@@ -204,7 +199,7 @@ def main():
                         # TODO
                         break
                 except Exception as e:
-                    logging.error(e)
+                    logging.critical(e)
 
 
 ###################################################################################################

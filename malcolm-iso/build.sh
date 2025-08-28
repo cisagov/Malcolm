@@ -3,7 +3,7 @@
 IMAGE_NAME=malcolm
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
-IMAGE_DISTRIBUTION=bookworm
+IMAGE_DISTRIBUTION=trixie
 
 BUILD_ERROR_CODE=1
 
@@ -32,7 +32,7 @@ RUN_PATH="$(pwd)"
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
-WORKDIR="$(mktemp -d -t malcolm-XXXXXX)"
+WORKDIR="$(mktemp -d -p "$HOME" -t malcolm-XXXXXX)"
 
 function cleanup {
   echo "Cleaning up..." 1>&2
@@ -89,7 +89,7 @@ if [ -d "$WORKDIR" ]; then
       echo "export LANG=C.UTF-8" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       echo "PYTHONUNBUFFERED=1" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
-      echo -n "python3 -m pip install --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
+      echo -n "python3 -m pip install --ignore-installed --break-system-packages --no-compile --no-cache-dir --force-reinstall --upgrade" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       while read LINE; do
         echo -n -e " \\\\\n  $LINE" >> ./config/hooks/normal/0${HOOK_COUNTER}-pip-$SUBDIR-installs.hook.chroot
       done <"$SCRIPT_PATH/$SUBDIR/requirements.txt"

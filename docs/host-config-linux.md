@@ -31,7 +31,7 @@ Please follow [this link](https://docs.docker.com/compose/install/) on docker.co
 
 The host system (i.e., the one running Docker) must be configured for the [best possible OpenSearch performance](https://www.elastic.co/guide/en/elasticsearch/reference/master/system-config.html). Here are a few suggestions for Linux hosts (these may vary from distribution to distribution):
 
-* Append the following lines to `/etc/sysctl.conf`:
+* Append the following lines to `/etc/sysctl.d/99-sysctl-performance.conf`:
 
 ```
 # the maximum number of open file handles
@@ -58,7 +58,7 @@ vm.dirty_background_ratio=40
 vm.dirty_ratio=80
 ```
 
-* In addition, the [some suggest](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config-tcpretries.html) lowering the TCP retransmission timeout to `5`. However, if your host communicates with other systems over a low-quality network, this low of a setting may be detrimental to those communications. To set this value, add the following to `/etc/sysctl.conf`:
+* In addition, the [some suggest](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config-tcpretries.html) lowering the TCP retransmission timeout to `5`. However, if your host communicates with other systems over a low-quality network, this low of a setting may be detrimental to those communications. To set this value, add the following to `/etc/sysctl.d/99-sysctl-performance.conf`:
 
 ```
 # maximum number of TCP retransmissions

@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -29,11 +29,12 @@ ENV PGROUP "zeeker"
 # docker-uid-gid-setup.sh will cause them to be lost, so we need
 # a final check in docker_entrypoint.sh before startup
 ENV PUSER_PRIV_DROP false
+ENV PUSER_RLIMIT_UNLOCK true
 USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=7.2.2-0
+ARG ZEEK_VERSION=8.0.1-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -69,6 +70,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ca-certificates \
       ccache \
       cmake \
+      cppzmq-dev \
       curl \
       file \
       flex \
@@ -89,11 +91,14 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       libmaxminddb0 \
       libpcap-dev \
       libpcap0.8 \
+      librdkafka++1 \
       librdkafka-dev \
+      librdkafka1 \
       libssl-dev \
       libssl3 \
       libtcmalloc-minimal4 \
       libunwind8 \
+      libzmq3-dev \
       libzmq5 \
       locales-all \
       make \
@@ -106,7 +111,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-bs4 \
       python3-git \
       python3-pip \
-      python3-requests \
       python3-semantic-version \
       python3-setuptools \
       python3-tz \
@@ -114,7 +118,6 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       python3-yaml \
       python3-zmq \
       rsync \
-      supervisor \
       swig \
       tini \
       vim-tiny \
@@ -334,7 +337,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "zeek"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 USER root
 

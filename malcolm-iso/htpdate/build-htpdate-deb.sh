@@ -24,7 +24,8 @@ cd /tmp
 mkdir ./htpdate
 curl -sSL "$HTPDATE_URL/tarball/v$HTPDATE_VER" | tar xzf - -C ./htpdate --strip-components 1
 cd ./htpdate
-grep -v man8 Makefile > Makefile.new && mv Makefile.new Makefile
+sed -i '/.*man8.*/d' Makefile
+rm -f scripts/*
 make https
 checkinstall -y -D --nodoc --strip=yes --stripso=yes --install=no --fstrans=no --pkgname=htpdate --pkgversion="$HTPDATE_VER" --pkgarch="amd64" --pkgsource="$HTPDATE_URL"
 ls -l *.deb && mv -v *.deb "$OUTPUT_DIR"/

@@ -64,9 +64,9 @@ touch /opt/sensor/sensor_ctl/zeek/custom/__load__.zeek
 
 # cleanup
 cd /usr/local/src
-tar czf zeek-hedgehog.tar.gz -C /opt zeek spicy
+tar czf zeek-hedgehog.tar.gz -C /opt zeek
 mv ./zeek-hedgehog.tar.gz /opt/hedgehog_install_artifacts/
-rm -Rf zeek* spicy*
+rm -Rf zeek*
 ###
 
 # get Arkime JA4+ plugin
@@ -79,8 +79,8 @@ cp "/opt/arkime/plugins/ja4plus.${ARCH}.so" /opt/hedgehog_install_artifacts/
 
 if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 	# tweak some stuff for aide
-	chmod a-x /etc/cron.daily/aide
-	chattr +i /etc/cron.daily/aide
+	chmod a-x /etc/cron.daily/dailyaidecheck
+	chattr +i /etc/cron.daily/dailyaidecheck
 	mkdir -p /etc/aide/aide.conf.d /var/lib/aide
 	touch /var/lib/aide/aide.db
 	chmod 600 /var/lib/aide/aide.db
@@ -154,7 +154,6 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 !/var/lib/samba(/|$)
 !/var/lib/sudo/lectured(/|$)
 !/var/lib/suricata(/|$)
-!/var/lib/systemd-coredump$
 !/var/log(/|$)
 !/var/mail(/|$)
 !/var/run(/|$)
@@ -164,14 +163,6 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 EOF
 fi
 ###
-
-# Some apt-get installs that needed to be handled manually
-#   (e.g., I want to force stuff from backports without apt-pinning)
-if [[ -f /etc/apt/forced-backports-packages.conf ]]; then
-	apt-get -y update
-  apt-get install -y --no-install-recommends -t bookworm-backports \
-    $(cat /etc/apt/forced-backports-packages.conf)
-fi
 
 # update suricata rules
 /usr/bin/suricata-update -v -D /var/lib/suricata --etopen

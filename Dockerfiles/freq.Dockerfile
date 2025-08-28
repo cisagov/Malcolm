@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -36,6 +36,7 @@ RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get -y --no-install-recommends install \
       curl \
+      git \
       jq \
       procps \
       psmisc \

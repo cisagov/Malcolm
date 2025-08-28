@@ -22,7 +22,6 @@ from sensorcommon import (
     NIC_BLINK_SECONDS,
 )
 from malcolm_utils import (
-    eprint,
     run_subprocess,
     remove_prefix,
     aggressive_url_encode,

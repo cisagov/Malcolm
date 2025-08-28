@@ -38,6 +38,7 @@
 -a always,exit -F dir=/etc/logrotate.d/ -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/profile -F perm=wa -k config_file_change
 -a always,exit -F path=/etc/sysctl.conf -F perm=wa -k config_file_change
+-a always,exit -F path=/etc/sysctl.d/99-sysctl-performance.conf -F perm=wa -k config_file_change
 -a always,exit -F dir=/etc/ufw/ -F perm=wa -k ufw_config_file_chg
 -a always,exit -F path=/sbin/apparmor_parser -F perm=x -F auid>=1000 -F auid!=4294967295 -k MAC-policy
 -a always,exit -F path=/sbin/iptables-restore -F perm=x -k iptables_restore_exec

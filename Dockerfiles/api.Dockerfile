@@ -1,4 +1,4 @@
-FROM python:3-slim-bookworm as builder
+FROM python:3-slim-trixie as builder
 
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM xterm
@@ -18,7 +18,7 @@ WORKDIR /usr/src/app
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
     && flake8 --ignore=E203,E501,F401,W503
 
-FROM python:3-slim-bookworm
+FROM python:3-slim-trixie
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"

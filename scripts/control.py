@@ -15,6 +15,7 @@ import getpass
 import glob
 import gzip
 import json
+import logging
 import os
 import platform
 import re
@@ -65,18 +66,21 @@ from malcolm_utils import (
     CountUntilException,
     deep_get,
     dictsearch,
-    eprint,
     flatten,
     EscapeAnsi,
     EscapeForCurl,
     get_iterable,
     get_primary_ip,
     LoadStrIfJson,
+    log_level_is_debug,
     ParseCurlFile,
     pushd,
     RemoveEmptyFolders,
+    rmtree_except,
     run_process,
     same_file_or_dir,
+    set_logging,
+    get_verbosity_env_var_count,
     str2bool,
     touch,
     which,
@@ -186,16 +190,15 @@ def checkEnvFilesAndValues():
                         if os.path.isfile(sourceEnvFileName):
                             if not os.path.isfile(destEnvFileName):
                                 shutil.move(sourceEnvFileName, destEnvFileName)
-                                if args.debug:
-                                    eprint(
-                                        f"Renamed {os.path.basename(sourceEnvFileName)} to {os.path.basename(destEnvFileName)}"
-                                    )
-                            elif args.debug:
-                                eprint(
+                                logging.info(
+                                    f"Renamed {os.path.basename(sourceEnvFileName)} to {os.path.basename(destEnvFileName)}"
+                                )
+                            else:
+                                logging.info(
                                     f"{os.path.basename(destEnvFileName)} does not exist, ignoring rename from {os.path.basename(sourceEnvFileName)}"
                                 )
-                        elif args.debug:
-                            eprint(
+                        else:
+                            logging.info(
                                 f"{os.path.basename(sourceEnvFileName)} does not exist, ignoring rename to {os.path.basename(destEnvFileName)}"
                             )
 
@@ -214,8 +217,7 @@ def checkEnvFilesAndValues():
                                 examplesConfigDir, os.path.basename(destEnvFileName) + '.example'
                             )
                             if os.path.isfile(envExampleFile):
-                                if args.debug:
-                                    eprint(f"Creating {destEnvFileName} from {os.path.basename(envExampleFile)}")
+                                logging.info(f"Creating {destEnvFileName} from {os.path.basename(envExampleFile)}")
                                 shutil.copyfile(envExampleFile, destEnvFileName)
                         destVars = (
                             dotenvImported.dotenv_values(destEnvFileName) if os.path.isfile(destEnvFileName) else dict()
@@ -273,10 +275,9 @@ def checkEnvFilesAndValues():
                                         and sourceVarName in sourceVars
                                     ):
                                         if isinstance(sourceKey, str):
-                                            if args.debug:
-                                                eprint(
-                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
-                                                )
+                                            logging.info(
+                                                f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
+                                            )
                                             destEnvValues.append(
                                                 EnvValue(
                                                     True,
@@ -291,10 +292,9 @@ def checkEnvFilesAndValues():
                                                 str(k): str(v) for k, v in sourceKey[sourceVarName].items()
                                             }.get(str(sourceVars[sourceVarName]), None)
                                         ):
-                                            if args.debug:
-                                                eprint(
-                                                    f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
-                                                )
+                                            logging.info(
+                                                f"Creating {os.path.basename(destEnvFileName)}:{destKey} from {os.path.basename(sourceEnvFileName)}:{sourceVarName} ({type(sourceKey).__name__})"
+                                            )
                                             destEnvValues.append(
                                                 EnvValue(
                                                     True,
@@ -334,22 +334,19 @@ def checkEnvFilesAndValues():
                                 ]
                                 if remainingLines:
                                     # write the remaining unfiltered lines to the .env file
-                                    if args.debug:
-                                        eprint(f"Removing {keys} from {os.path.basename(envFileName)}")
+                                    logging.info(f"Removing {keys} from {os.path.basename(envFileName)}")
                                     with open(envFileName, 'w') as f:
                                         f.write("\n".join(filteredLines))
                                 else:
                                     # nothing left, no reason to save this .env file
-                                    if args.debug:
-                                        eprint(f"Removing {keys}, deleting {os.path.basename(envFileName)}")
+                                    logging.info(f"Removing {keys}, deleting {os.path.basename(envFileName)}")
                                     os.unlink(envFileName)
 
         # creating missing .env file from .env.example file
         for envExampleFile in sorted(glob.glob(os.path.join(examplesConfigDir, '*.env.example'))):
             envFile = os.path.join(args.configDir, os.path.basename(envExampleFile[: -len('.example')]))
             if not os.path.isfile(envFile):
-                if args.debug:
-                    eprint(f"Creating {envFile} from {os.path.basename(envExampleFile)}")
+                logging.info(f"Creating {envFile} from {os.path.basename(envExampleFile)}")
                 shutil.copyfile(envExampleFile, envFile)
 
         # now, example the .env and .env.example file for individual values, and create any that are
@@ -361,10 +358,9 @@ def checkEnvFilesAndValues():
                 exampleValues = dotenvImported.dotenv_values(envExampleFile)
                 missingVars = list(set(exampleValues.keys()).difference(set(envValues.keys())))
                 if missingVars:
-                    if args.debug:
-                        eprint(
-                            f"Missing {missingVars} in {os.path.basename(envFile)} from {os.path.basename(envExampleFile)}"
-                        )
+                    logging.warning(
+                        f"Missing {missingVars} in {os.path.basename(envFile)} from {os.path.basename(envExampleFile)}"
+                    )
                     with open(envFile, "a") as envFileHandle:
                         print('', file=envFileHandle)
                         print('', file=envFileHandle)
@@ -402,7 +398,7 @@ def checkEnvFilesAndValues():
                 ],
                 env=osEnv,
                 stderr=False,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             out[:] = [x for x in out if x]
             if (err == 0) and (len(out) == 0):
@@ -410,15 +406,13 @@ def checkEnvFilesAndValues():
                     srcPath = os.path.join(GetMalcolmPath(), src)
                     dstPath = os.path.join(GetMalcolmPath(), next(iter(get_iterable(dst))))
                     if os.path.exists(dstPath) or (not os.path.exists(srcPath)):
-                        if args.debug:
-                            eprint(f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files')
+                        logging.info(f'Either "{dst}" already exists or "{src}" does not, ignoring in relocated_files')
                     else:
                         try:
                             shutil.move(srcPath, dstPath)
-                            if args.debug:
-                                eprint(f'Relocated "{src}" to "{dst}"')
+                            logging.info(f'Relocated "{src}" to "{dst}"')
                         except Exception as e:
-                            eprint(f'Error relocating "{src}" to "{dst}": {e}')
+                            logging.error(f'Error relocating "{src}" to "{dst}": {e}')
 
 
 ###################################################################################################
@@ -431,8 +425,7 @@ def checkWiseFile():
     wiseFile = os.path.join(arkimePath, 'wise.ini')
     wiseExampleFile = os.path.join(arkimePath, 'wise.ini.example')
     if not os.path.isfile(wiseFile):
-        if args.debug:
-            eprint(f"Creating {wiseFile} from {os.path.basename(wiseExampleFile)}")
+        logging.info(f"Creating {wiseFile} from {os.path.basename(wiseExampleFile)}")
         shutil.copyfile(wiseExampleFile, wiseFile)
 
 
@@ -500,7 +493,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'ps', '-q', service],
                     env=osEnv,
                     stderr=False,
-                    debug=args.debug,
+                    debug=log_level_is_debug(args.verbose),
                 )
                 out[:] = [x for x in out if x]
                 if (err == 0) and (len(out) > 0):
@@ -597,7 +590,9 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
                     dockerCmd[:] = [x for x in dockerCmd if x]
 
                     # execute the command, passing through run_process_kwargs to run_process as expanded keyword arguments
-                    err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, **run_process_kwargs)
+                    err, results = run_process(
+                        dockerCmd, env=osEnv, debug=log_level_is_debug(args.verbose), **run_process_kwargs
+                    )
                     if (err != 0) or (not os.path.isfile(localKeystore)):
                         raise Exception(f'Error processing command {service} keystore: {results}')
 
@@ -613,17 +608,16 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
             if err == 0:
                 err = -1
 
-            # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistant item
             if (
-                (not args.debug)
-                and list(keystore_args)
+                list(keystore_args)
                 and (len(list(keystore_args)) > 0)
                 and (list(keystore_args)[0].lower() in ('create', 'remove'))
                 and localKeystorePreExists
             ):
-                pass
+                # don't be so whiny if the "create" failed just because it already existed or a 'remove' failed on a nonexistant item
+                logging.info(e)
             else:
-                eprint(e)
+                logging.warning(e)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         cmd = [keystoreBinProc]
@@ -643,12 +637,13 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
         err = 0 if all([deep_get(v, ['err'], 1) == 0 for k, v in podsResults.items()]) else 1
         results = list(chain(*[deep_get(v, ['output'], '') for k, v in podsResults.items()]))
 
-        if args.debug:
-            dbgStr = f"{len(podsResults)} pods: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {err}: {results}"
-            eprint(dbgStr)
-            for podname, podResults in podsResults.items():
-                dbgStr = f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
-                eprint(dbgStr)
+        logging.debug(
+            f"{len(podsResults)} pods: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {err}: {results}"
+        )
+        for podname, podResults in podsResults.items():
+            logging.debug(
+                f"{podname}: {cmd}({run_process_kwargs['stdin'][:80] + bool(run_process_kwargs['stdin'][80:]) * '...' if 'stdin' in run_process_kwargs and run_process_kwargs['stdin'] else ''}) returned {deep_get(podResults, ['err'], 1)}: {deep_get(podResults, ['output'], 'unknown')}"
+            )
 
     else:
         raise Exception(
@@ -677,26 +672,25 @@ def status():
         err, out = run_process(
             cmd,
             env=osEnv,
-            debug=args.debug,
+            debug=log_level_is_debug(args.verbose),
         )
         if err == 0:
             print("\n".join(out))
         else:
-            eprint("Failed to display Malcolm status\n")
-            eprint("\n".join(out))
+            logging.warning("Failed to display Malcolm status\n")
+            logging.warning("\n".join(out))
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         try:
             PrintNodeStatus()
             print()
         except Exception as e:
-            if args.debug:
-                eprint(f'Error getting node status: {e}')
+            logging.debug(f'Error getting node status: {e}')
         try:
             PrintPodStatus(namespace=args.namespace)
             print()
         except Exception as e:
-            eprint(f'Error getting {args.namespace} status: {e}')
+            logging.error(f'Error getting {args.namespace} status: {e}')
 
     else:
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
@@ -767,7 +761,9 @@ def netboxBackup(backupFileName=None):
             postgresEnvs.get('POSTGRES_NETBOX_DB', 'netbox'),
         ]
 
-        err, results = run_process(dockerCmd, env=osEnv, debug=args.debug, stdout=True, stderr=False)
+        err, results = run_process(
+            dockerCmd, env=osEnv, debug=log_level_is_debug(args.verbose), stdout=True, stderr=False
+        )
         if (err != 0) or (len(results) == 0):
             raise Exception('Error creating NetBox configuration database backup')
 
@@ -856,7 +852,7 @@ def netboxRestore(backupFileName=None):
 
             # get remote temporary directory for restore
             dockerCmd = dockerCmdBase + ['mktemp', '-d', '-t', 'restore.XXXXXXXXXX']
-            err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+            err, results = run_process(dockerCmd, env=osEnv, debug=log_level_is_debug(args.verbose))
             if (err == 0) and results:
                 tmpRestoreDir = results[0]
             else:
@@ -872,7 +868,12 @@ def netboxRestore(backupFileName=None):
                     dockerCmd = dockerCmdBase + ['tee', os.path.join(tmpRestoreDir, os.path.basename(tmpFile))]
                     with open(tmpFile, 'rb') as f:
                         err, results = run_process(
-                            dockerCmd, env=osEnv, debug=args.debug, stdout=False, stderr=True, stdin=f.read()
+                            dockerCmd,
+                            env=osEnv,
+                            debug=log_level_is_debug(args.verbose),
+                            stdout=False,
+                            stderr=True,
+                            stdin=f.read(),
                         )
                     if err != 0:
                         raise Exception(
@@ -886,7 +887,7 @@ def netboxRestore(backupFileName=None):
                     '--preload-backup',
                     os.path.join(tmpRestoreDir, os.path.basename(backupFileName)),
                 ]
-                err, results = run_process(dockerCmd, env=osEnv, debug=args.debug)
+                err, results = run_process(dockerCmd, env=osEnv, debug=log_level_is_debug(args.verbose))
                 if err != 0:
                     raise Exception(
                         f'Error {err} restoring NetBox database {os.path.basename(backupFileName)}: {results}'
@@ -902,7 +903,7 @@ def netboxRestore(backupFileName=None):
                         '-c',
                         f"rm -f {tmpRestoreDir}/{os.path.splitext(backupFileName)[0]}*",
                     ]
-                run_process(dockerCmd, env=osEnv, debug=args.debug)
+                run_process(dockerCmd, env=osEnv, debug=log_level_is_debug(args.verbose))
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
             # copy database backup and media backup to remote temporary directory
@@ -999,7 +1000,7 @@ def logs():
         err, out = run_process(
             cmd,
             env=osEnv,
-            debug=args.debug,
+            debug=log_level_is_debug(args.verbose),
         )
         print("\n".join(out))
 
@@ -1029,7 +1030,7 @@ def logs():
                 "--template",
                 (
                     '{{.Namespace}}/{{color .PodColor .PodName}}/{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
-                    if args.debug
+                    if log_level_is_debug(args.verbose)
                     else '{{color .ContainerColor .ContainerName}} | {{.Message}}{{"\\n"}}'
                 ),
                 '--tail',
@@ -1056,7 +1057,7 @@ def logs():
             list(flatten(cmd)),
             env=osEnv,
             stdout=PIPE,
-            stderr=None if args.debug else DEVNULL,
+            stderr=None if log_level_is_debug(args.verbose) else DEVNULL,
         )
         while not shuttingDown[0]:
             output = process.stdout.readline()
@@ -1066,7 +1067,7 @@ def logs():
                 else:
                     time.sleep(0.5)
 
-            elif output := ProcessLogLine(output, debug=args.debug):
+            elif output := ProcessLogLine(output, debug=log_level_is_debug(args.verbose)):
                 print(output)
 
             if (
@@ -1107,25 +1108,25 @@ def stop(wipe=False):
             err, out = run_process(
                 [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'stop'] + args.service,
                 env=osEnv,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err == 0:
-                eprint(f"Stopped Malcolm's {args.service} services\n")
+                logging.info(f"Stopped Malcolm's {args.service} services\n")
                 err, out = run_process(
                     [dockerComposeBin, '--profile', args.composeProfile, '-f', args.composeFile, 'rm', '--force']
                     + args.service,
                     env=osEnv,
-                    debug=args.debug,
+                    debug=log_level_is_debug(args.verbose),
                 )
                 if err == 0:
-                    eprint(f"Removed Malcolm's {args.service} services\n")
+                    logging.info(f"Removed Malcolm's {args.service} services\n")
                 else:
-                    eprint(f"Malcolm's {args.service} services failed to remove\n")
-                    eprint("\n".join(out))
+                    logging.critical(f"Malcolm's {args.service} services failed to remove\n")
+                    logging.critical("\n".join(out))
                     exit(err)
             else:
-                eprint(f"Malcolm's {args.service} services failed to stop\n")
-                eprint("\n".join(out))
+                logging.critical(f"Malcolm's {args.service} services failed to stop\n")
+                logging.critical("\n".join(out))
                 exit(err)
 
         else:
@@ -1137,13 +1138,13 @@ def stop(wipe=False):
                     : 7 if wipe else -1
                 ],
                 env=osEnv,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err == 0:
-                eprint("Stopped Malcolm\n")
+                logging.info("Stopped Malcolm\n")
             else:
-                eprint("Malcolm failed to stop\n")
-                eprint("\n".join(out))
+                logging.critical("Malcolm failed to stop\n")
+                logging.critical("\n".join(out))
                 exit(err)
 
             if wipe:
@@ -1182,8 +1183,7 @@ def stop(wipe=False):
                     if localPath and os.path.isdir(localPath):
                         # delete files
                         if boundPath.files:
-                            if args.debug:
-                                eprint(f'Walking "{localPath}" for file deletion')
+                            logging.info(f'Walking "{localPath}" for file deletion')
                             for root, dirnames, filenames in os.walk(localPath, topdown=True, onerror=None):
                                 for file in filenames:
                                     fileSpec = os.path.join(root, file)
@@ -1199,19 +1199,17 @@ def stop(wipe=False):
                             for relDir in get_iterable(boundPath.relative_dirs):
                                 tmpPath = os.path.join(localPath, relDir)
                                 if os.path.isdir(tmpPath):
-                                    if args.debug:
-                                        eprint(f'Performing rmtree on "{tmpPath}"')
-                                    shutil.rmtree(tmpPath, ignore_errors=True)
+                                    logging.info(f'Performing rmtree_except on "{tmpPath}"')
+                                    rmtree_except(tmpPath, exclude_patterns=['.gitignore'], ignore_errors=True)
                         # cleanup empty directories
                         if boundPath.clean_empty_dirs:
                             for cleanDir in get_iterable(boundPath.clean_empty_dirs):
                                 tmpPath = os.path.join(localPath, cleanDir)
                                 if os.path.isdir(tmpPath):
-                                    if args.debug:
-                                        eprint(f'Performing RemoveEmptyFolders on "{tmpPath}"')
+                                    logging.info(f'Performing RemoveEmptyFolders on "{tmpPath}"')
                                     RemoveEmptyFolders(tmpPath, removeRoot=False)
 
-                eprint("Malcolm has been stopped and its data cleared\n")
+                logging.info("Malcolm has been stopped and its data cleared\n")
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
         stopResults = StopMalcolm(
@@ -1220,17 +1218,14 @@ def stop(wipe=False):
             deletePVCsAndPVs=wipe,
         )
         if dictsearch(stopResults, 'error'):
-            eprint(f"Removing resources in the {args.namespace} namespace returned the following error(s):\n")
-            eprint(stopResults)
-            eprint()
+            logging.error(f"Removing resources in the {args.namespace} namespace returned the following error(s):\n")
+            logging.error(stopResults)
         else:
-            eprint(f"The resources in the {args.namespace} namespace have been removed\n")
-            if args.debug:
-                eprint(stopResults)
-                eprint()
+            logging.info(f"The resources in the {args.namespace} namespace have been removed\n")
+            logging.debug(stopResults)
 
         if wipe:
-            eprint(
+            logging.warning(
                 f'Underlying storage artifacts on PersistentVolumes cannot be deleted by {ScriptName}: they must be deleted manually\n'
             )
 
@@ -1332,8 +1327,7 @@ def start():
                 )
                 if localPath:
                     try:
-                        if args.debug:
-                            eprint(f'Ensuring "{localPath}" exists')
+                        logging.info(f'Ensuring "{localPath}" exists')
                         os.makedirs(localPath)
                     except OSError as exc:
                         if (exc.errno == errno.EEXIST) and os.path.isdir(localPath):
@@ -1344,8 +1338,7 @@ def start():
                         for relDir in get_iterable(boundPath.relative_dirs):
                             tmpPath = os.path.join(localPath, relDir)
                             try:
-                                if args.debug:
-                                    eprint(f'Ensuring "{tmpPath}" exists')
+                                logging.info(f'Ensuring "{tmpPath}" exists')
                                 os.makedirs(tmpPath)
                             except OSError as exc:
                                 if (exc.errno == errno.EEXIST) and os.path.isdir(tmpPath):
@@ -1377,11 +1370,11 @@ def start():
         err, out = run_process(
             cmd,
             env=osEnv,
-            debug=args.debug,
+            debug=log_level_is_debug(args.verbose),
         )
         if err != 0:
-            eprint("Malcolm failed to start\n")
-            eprint("\n".join(out))
+            logging.critical("Malcolm failed to start\n")
+            logging.critical("\n".join(out))
             exit(err)
 
     elif orchMode is OrchestrationFramework.KUBERNETES:
@@ -1404,16 +1397,13 @@ def start():
             )
 
             if dictsearch(startResults, 'error'):
-                eprint(
+                logging.error(
                     f"Starting the {args.namespace} namespace and creating its underlying resources returned the following error(s):\n"
                 )
-                eprint(startResults)
-                eprint()
+                logging.error(startResults)
 
-            elif args.debug:
-                eprint()
-                eprint(startResults)
-                eprint()
+            else:
+                logging.debug(startResults)
 
         else:
             groupedStorageEntries = {
@@ -1445,7 +1435,7 @@ def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
             err, out = run_process(
                 [opensslBin, 'genrsa', '-out', 'client.key', '2048'],
                 stderr=True,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err != 0:
                 raise Exception(f'Unable to generate client.key: {out}')
@@ -1464,7 +1454,7 @@ def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
                     clientConf,
                 ],
                 stderr=True,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err != 0:
                 raise Exception(f'Unable to generate client.csr: {out}')
@@ -1494,7 +1484,7 @@ def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
                     clientConf,
                 ],
                 stderr=True,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err != 0:
                 raise Exception(f'Unable to generate client.crt: {out}')
@@ -1926,7 +1916,7 @@ def authSetup():
                             [opensslBin, 'passwd', '-1', '-stdin'],
                             stdin=password,
                             stderr=False,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if (err == 0) and (len(out) > 0) and (len(out[0]) > 0):
                             passwordEncrypted = out[0]
@@ -1958,7 +1948,9 @@ def authSetup():
                         htpasswdCmd = ['htpasswd', '-i', '-B', htpasswdFile, username]
                         if not os.path.isfile(htpasswdFile):
                             htpasswdCmd.insert(1, '-c')
-                        err, out = run_process(htpasswdCmd, stdin=password, stderr=True, debug=args.debug)
+                        err, out = run_process(
+                            htpasswdCmd, stdin=password, stderr=True, debug=log_level_is_debug(args.verbose)
+                        )
                         if err != 0:
                             raise Exception(f'Unable to generate htpasswd file: {out}')
 
@@ -2006,7 +1998,7 @@ def authSetup():
                         err, out = run_process(
                             [opensslBin, 'dhparam', '-out', 'dhparam.pem', '2048'],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate dhparam.pem file: {out}')
@@ -2030,7 +2022,7 @@ def authSetup():
                                 '3650',
                             ],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate key.pem/cert.pem file(s): {out}')
@@ -2048,7 +2040,7 @@ def authSetup():
                         err, out = run_process(
                             [opensslBin, 'genrsa', '-out', 'ca.key', '2048'],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate ca.key: {out}')
@@ -2071,7 +2063,7 @@ def authSetup():
                                 'ca.crt',
                             ],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate ca.crt: {out}')
@@ -2080,7 +2072,7 @@ def authSetup():
                         err, out = run_process(
                             [opensslBin, 'genrsa', '-out', 'server.key', '2048'],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate server.key: {out}')
@@ -2099,7 +2091,7 @@ def authSetup():
                                 'server.conf',
                             ],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate server.csr: {out}')
@@ -2127,7 +2119,7 @@ def authSetup():
                                 'server.conf',
                             ],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate server.crt: {out}')
@@ -2136,7 +2128,7 @@ def authSetup():
                         err, out = run_process(
                             [opensslBin, 'pkcs8', '-in', 'server.key.pem', '-topk8', '-nocrypt', '-out', 'server.key'],
                             stderr=True,
-                            debug=args.debug,
+                            debug=log_level_is_debug(args.verbose),
                         )
                         if err != 0:
                             raise Exception(f'Unable to generate server.key: {out}')
@@ -2199,7 +2191,7 @@ def authSetup():
                                 )
                                 if (len(esUsername) > 0) and (':' not in esUsername):
                                     break
-                                eprint("Username is blank (or contains a colon, which is not allowed)")
+                                logging.error("Username is blank (or contains a colon, which is not allowed)")
 
                             loopBreaker = CountUntilException(
                                 MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
@@ -2229,7 +2221,7 @@ def authSetup():
                                     )
                                 if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
                                     break
-                                eprint("Passwords do not match")
+                                logging.error("Passwords do not match")
 
                             esSslVerify = YesOrNo(
                                 'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
@@ -2290,7 +2282,7 @@ def authSetup():
                         )
                         if emailPassword and (emailPassword == emailPasswordConfirm):
                             break
-                        eprint("Passwords do not match")
+                        logging.error("Passwords do not match")
 
                     # create OpenSearch keystore file, don't complain if it already exists, and set the keystore items
                     usernameKey = f'plugins.alerting.destination.email.{emailSender}.username'
@@ -2308,10 +2300,10 @@ def authSetup():
                         if x and (not x.upper().startswith('WARNING')) and (not x.upper().startswith('KEYSTORE'))
                     ]
                     if success and (usernameKey in results) and (passwordKey in results):
-                        eprint(f"Email alert sender account variables stored: {', '.join(results)}")
+                        logging.info(f"Email alert sender account variables stored: {', '.join(results)}")
                     else:
-                        eprint("Failed to store email alert sender account variables:\n")
-                        eprint("\n".join(results))
+                        logging.error("Failed to store email alert sender account variables:\n")
+                        logging.error("\n".join(results))
 
                 elif authItem[0] == 'keycloak':
                     with pushd(args.configDir):
@@ -2476,7 +2468,7 @@ def authSetup():
                                         envValues[opt[1]][opt[2]] = tmpVal
                                         break
                                     else:
-                                        eprint(f"{opt[0]} cannot be empty")
+                                        logging.error(f"{opt[0]} cannot be empty")
 
                         # update .env file(s) with the new values, if any
                         for filename in [f for f, changed in changeMade.items() if changed]:
@@ -2656,7 +2648,7 @@ def authSetup():
                         ).lower()
                         if (len(netboxToken) == 40) and all(c in string.hexdigits for c in netboxToken):
                             break
-                        eprint("Invalid NetBox API token")
+                        logging.error("Invalid NetBox API token")
 
                     with pushd(args.configDir):
                         UpdateEnvFiles(
@@ -2706,7 +2698,7 @@ def authSetup():
                         )
                         if arkimePassword and (arkimePassword == arkimePasswordConfirm):
                             break
-                        eprint("Passwords do not match")
+                        logging.error("Passwords do not match")
 
                     if (not arkimePassword) and args.cmdAuthSetupNonInteractive and args.authArkimePassword:
                         arkimePassword = args.authArkimePassword
@@ -2794,18 +2786,15 @@ def main():
     # print (sys.argv[1:]);
     parser = argparse.ArgumentParser(
         description='Malcolm control script',
-        add_help=False,
+        add_help=True,
         usage=f'{ScriptName} <arguments>',
     )
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-f',
@@ -2959,7 +2948,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.08.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.08.1"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
@@ -3298,34 +3287,34 @@ def main():
     )
 
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
     except SystemExit as e:
-        eprint(f'Invalid arguments: {e}')
-        parser.print_help()
-        exit(2)
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    if args.debug:
-        eprint(os.path.join(ScriptPath, ScriptName))
-        eprint(f"Arguments: {sys.argv[1:]}")
-        eprint(f"Arguments: {args}")
-        eprint("Malcolm path:", GetMalcolmPath())
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(
+        os.getenv("LOGLEVEL", ""),
+        args.verbose,
+        set_traceback_limit=True,
+        logfmt='%(message)s',
+    )
+    logging.debug(os.path.join(ScriptPath, ScriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
+    logging.info(f"Malcolm path: {GetMalcolmPath()}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
     signal.signal(signal.SIGTERM, shutdown_handler)
 
-    yamlImported = YAMLDynamic(debug=args.debug)
-    if args.debug:
-        eprint(f"Imported yaml: {yamlImported}")
+    yamlImported = YAMLDynamic(debug=log_level_is_debug(args.verbose))
+    logging.info(f"Imported yaml: {yamlImported}")
     if not yamlImported:
         exit(2)
 
-    dotenvImported = DotEnvDynamic(debug=args.debug)
-    if args.debug:
-        eprint(f"Imported dotenv: {dotenvImported}")
+    dotenvImported = DotEnvDynamic(debug=log_level_is_debug(args.verbose))
+    logging.info(f"Imported dotenv: {dotenvImported}")
     if not dotenvImported:
         exit(2)
 
@@ -3388,11 +3377,10 @@ def main():
             if not dockerBin:
                 dockerBin = 'docker.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('docker.exe')) else 'docker'
                 runtimeBinSrc = 'default'
-            if args.debug:
-                eprint(f"Container runtime ({runtimeBinSrc}): {dockerBin}")
+            logging.info(f"Container runtime ({runtimeBinSrc}): {dockerBin}")
 
             # make sure docker and docker compose are available
-            err, out = run_process([dockerBin, 'info'], debug=args.debug)
+            err, out = run_process([dockerBin, 'info'], debug=log_level_is_debug(args.verbose))
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker, please run install.py')
             # first check if compose is available as a docker plugin
@@ -3400,7 +3388,7 @@ def main():
             err, out = run_process(
                 [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
                 env=osEnv,
-                debug=args.debug,
+                debug=log_level_is_debug(args.verbose),
             )
             if err != 0:
                 if (pyPlatform == PLATFORM_WINDOWS) and which('docker-compose.exe'):
@@ -3420,7 +3408,7 @@ def main():
                 err, out = run_process(
                     [dockerComposeBin, '--profile', PROFILE_MALCOLM, '-f', args.composeFile, 'version'],
                     env=osEnv,
-                    debug=args.debug,
+                    debug=log_level_is_debug(args.verbose),
                 )
             if err != 0:
                 raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
@@ -3430,9 +3418,8 @@ def main():
                 dockerComposeYaml = yamlImported.YAML(typ='safe', pure=True).load(cf)
 
         elif orchMode is OrchestrationFramework.KUBERNETES:
-            kubeImported = KubernetesDynamic(debug=args.debug)
-            if args.debug:
-                eprint(f"Imported kubernetes: {kubeImported}")
+            kubeImported = KubernetesDynamic(debug=log_level_is_debug(args.verbose))
+            logging.info(f"Imported kubernetes: {kubeImported}")
             if kubeImported:
                 kubeImported.config.load_kube_config(args.composeFile)
             else:
@@ -3448,19 +3435,18 @@ def main():
                 if os.path.isfile(profileEnvFile):
                     args.composeProfile = dotenvImported.get_key(profileEnvFile, PROFILE_KEY)
                     runProfileSrc = os.path.basename(profileEnvFile)
-                elif args.debug:
-                    runProfileSrc = 'process.env not found'
+                else:
+                    logging.warning('process.env not found')
             except Exception as e:
                 runProfileSrc = f'exception ({e})'
-        elif args.debug:
+        else:
             runProfileSrc = 'specified'
         if (not args.composeProfile) or (
             (args.composeProfile not in (PROFILE_MALCOLM, PROFILE_HEDGEHOG)) and str2bool(args.composeProfile)
         ):
             args.composeProfile = PROFILE_MALCOLM
             runProfileSrc = runProfileSrc or 'default'
-        if args.debug:
-            eprint(f"Run profile ({runProfileSrc}): {args.composeProfile}")
+        logging.info(f"Run profile ({runProfileSrc}): {args.composeProfile}")
 
         # identify openssl binary
         opensslBin = 'openssl.exe' if ((pyPlatform == PLATFORM_WINDOWS) and which('openssl.exe')) else 'openssl'

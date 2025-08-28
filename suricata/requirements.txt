@@ -1,0 +1,2 @@
+supervisor==4.3.0
+watchdog==6.0.0

@@ -9,16 +9,32 @@ apt-get -y --purge remove \
   libc6-dbg \
   ninja-build \
   sparse \
-  $(dpkg --get-selections | grep -Pv "(^(dpkg|libbroker|libc6|libcrypt|libdbus|libffi|libfl|libgoogle-perftools|libgcc|libkrb5|librdkafka|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libtirpc|libunwind|libxml|libyaml|libz|linux-libc|python3|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
+  $(dpkg --get-selections | grep -Pv "(^(cppzmq-dev|dpkg|libbroker|libc6|libcrypt|libdbus|libffi|libfl|libgoogle-perftools|libgcc|libkrb5|librdkafka|libmaxminddb|libncurses|libnsl|libobjc|libomp|libpcap|libssl|libstdc|libtinfo|libzmq5|libzmq3-dev|libtirpc|libunwind|libxml|libyaml|libz|linux-libc|python3|zeek|zlib1g)|deinstall$)" | cut -f1 | grep -P -- '-dev(:\w+)?$') || true
 rm -rf /var/spool/ccache
 
 # remove unwanted packages
 apt-get -y --purge remove \
   bluez-firmware \
+  firmware-ast \
+  firmware-b43-installer \
+  firmware-b43legacy-installer \
+  firmware-carl9170 \
+  firmware-cavium \
+  firmware-cirrus \
+  firmware-intel-sound \
+  firmware-ipw2x00 \
+  firmware-ivtv \
   firmware-libertas \
+  firmware-marvell-prestera \
+  firmware-myricom \
   firmware-netronome \
+  firmware-netxen \
   firmware-nvidia* \
   firmware-qcom-soc \
+  firmware-qlogic \
+  firmware-siano \
+  firmware-sof-signed \
+  firmware-zd1211 \
   gdb \
   gdebi* \
   gnome-accessibility-themes \
@@ -55,6 +71,5 @@ systemctl disable clamav-daemon.service || true
 systemctl disable clamav-freshclam.service || true
 systemctl disable ctrl-alt-del.target || true
 systemctl disable filebeat.service || true
-systemctl disable supervisor.service || true
 systemctl disable suricata.service || true
 systemctl disable fluent-bit.service || true

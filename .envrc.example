@@ -10,7 +10,7 @@ export MALCOLM_CONTAINER_RUNTIME=docker
 export MALCOLM_URL=
 
 # main configuration variables
-export VERBOSE=false
+export VERBOSE=
 export MALCOLM_PROFILE=true
 export NODE_NAME=malcolm
 export DARK_MODE=true

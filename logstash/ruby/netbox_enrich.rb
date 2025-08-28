@@ -797,12 +797,17 @@ def crush(
   if thing.is_a?(Array)
     thing.each_with_object([]) do |v, a|
       v = crush(v)
-      a << v unless [nil, [], {}, "", "Unspecified", "unspecified"].include?(v)
+      a << v unless [nil, [], {}, ""].include?(v)
     end
   elsif thing.is_a?(Hash)
     thing.each_with_object({}) do |(k,v), h|
       v = crush(v)
-      h[k] = v unless ([nil, [], {}, "", "Unspecified", "unspecified"].include?(v) || (k == :url))
+      # Keep role field even if it's "Unspecified" - needed for aggregations
+      if k == :role
+        h[k] = v unless [nil, [], {}, ""].include?(v)
+      else
+        h[k] = v unless ([nil, [], {}, "", "Unspecified", "unspecified"].include?(v) || (k == :url))
+      end
     end
   else
     thing

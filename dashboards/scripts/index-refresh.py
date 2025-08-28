@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import logging
 import malcolm_utils
 import re
 import requests
@@ -25,7 +26,6 @@ SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
 NETBOX_URL_DEFAULT = 'http://netbox:8080/netbox'
 
 ###################################################################################################
-debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
@@ -35,18 +35,13 @@ urllib3.disable_warnings()
 ###################################################################################################
 # main
 def main():
-    global debug
-
-    parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
+    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage=f'{scriptName} <arguments>')
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=malcolm_utils.str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=malcolm_utils.get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-i',
@@ -146,19 +141,16 @@ def main():
         help="Dry run (no PUT)",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        malcolm_utils.eprint(os.path.join(scriptPath, scriptName))
-        malcolm_utils.eprint("Arguments: {}".format(sys.argv[1:]))
-        malcolm_utils.eprint("Arguments: {}".format(args))
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
@@ -194,8 +186,7 @@ def main():
     statusInfoResponse.raise_for_status()
     statusInfo = statusInfoResponse.json()
     dashboardsVersion = statusInfo['version']['number']
-    if debug:
-        malcolm_utils.eprint('Dashboards version is {}'.format(dashboardsVersion))
+    logging.info('Dashboards version is {}'.format(dashboardsVersion))
 
     opensearchInfoResponse = requests.get(
         args.opensearchUrl,
@@ -204,8 +195,7 @@ def main():
     )
     opensearchInfo = opensearchInfoResponse.json()
     opensearchVersion = opensearchInfo['version']['number']
-    if debug:
-        malcolm_utils.eprint('OpenSearch version is {}'.format(opensearchVersion))
+    logging.info('OpenSearch version is {}'.format(opensearchVersion))
 
     # if they actually just specified the name of the environment variable, resolve that for the index name
     if args.index.startswith('MALCOLM_'):
@@ -221,8 +211,7 @@ def main():
     getIndexInfoResponse.raise_for_status()
     getIndexInfo = getIndexInfoResponse.json()
     indexId = getIndexInfo['saved_objects'][0]['id'] if (len(getIndexInfo['saved_objects']) > 0) else None
-    if debug:
-        malcolm_utils.eprint('Index ID for {} is {}'.format(args.index, indexId))
+    logging.debug('Index ID for {} is {}'.format(args.index, indexId))
 
     if indexId is not None:
         # get the current fields list
@@ -308,14 +297,13 @@ def main():
                                 fieldsNames.append(field)
                                 getFieldsList.append(mergedFieldInfo)
 
-                            # elif debug:
-                            #   malcolm_utils.eprint('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
+                            # else:
+                            #   logging.debug('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
 
             except Exception as e:
-                malcolm_utils.eprint('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
+                logging.error('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
 
-        if debug:
-            malcolm_utils.eprint('{} would have {} fields'.format(args.index, len(getFieldsList)))
+        logging.info('{} would have {} fields'.format(args.index, len(getFieldsList)))
 
         # first get the previous field format map as a starting point, if any
         getResponse = requests.get(

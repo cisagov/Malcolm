@@ -54,22 +54,16 @@ you'll need to execute `make` as root.
 The argument to `make` is constructed as follows:
 `raspi_<model>_<release>.<result-type>`
 
-Whereby <model\> is one of `4` or `5`; <release\> is `bookworm`; and <result-type\> is `img` or `yaml`.
+Whereby <model\> is one of `4` or `5`; <release\> is `trixie`; and <result-type\> is `img` or `yaml`.
 
-Model `1` should be used for the Raspberry Pi 0, 0w and 1, models A and
-B. Model `2` for the Raspberry Pi 2 models A and B. Model `3` for all
-models of the Raspberry Pi 3, model `4` for all models of the
-Raspberry Pi 4, and model `5` for all models of the
-Raspberry Pi 5.
-So if you want to build the default image for a Raspberry Pi 4 with
-Bookworm, you can just issue:
+Model `4` for all models of the Raspberry Pi 4, and model `5` for all models of the Raspberry Pi 5.
+So if you want to build the default image for a Raspberry Pi 4 with Trixie, you can just issue:
 
 ```shell
-   make raspi_4_bookworm.img
+   make raspi_4_trixie.img
 ```
 
 At this point; it might be wise to go do something else. The build **WILL** take a while. 
-Initial testing on a 8-core 16GB build machine took approximately 5.5 hours to complete the image.
 
 **NOTE:** While this setup will build hedgehog for all raspberry pi variants, it is highly unlikely 
 that any variant other than RPI 4 (8GB version) or higher will have adequate resources to function effectively as a sensor.
@@ -86,7 +80,7 @@ If the build completes properly, it can be tested locally before writing to an S
 To do so, simply run (as root):
 
 ```shell
-   mount -o loop,offset=$((1048576*512)) raspi_4_bookworm.img /mnt && chroot /mnt
+   mount -o loop,offset=$((1048576*512)) raspi_4_trixie.img /mnt && chroot /mnt
 ```
 
 If an error is returned by the mount command, there is a chance the image was corrupted during the build.
@@ -100,20 +94,20 @@ important parts of your system.  Double check it's the correct
 device!), copy the image onto the SD card:
 
 ```shell
-bmaptool copy raspi_3_bookworm.img.xz /dev/mmcblk0
+bmaptool copy raspi_3_trixie.img.xz /dev/mmcblk0
 ```
 
 Alternatively, if you don't have `bmap-tools` installed, you can use
 `dd` with the compressed image:
 
 ```shell
-xzcat raspi_3_bookworm.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+xzcat raspi_3_trixie.img.xz | dd of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Or with the uncompressed image:
 
 ```shell
-dd if=raspi_3_bookworm.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
+dd if=raspi_3_trixie.img of=/dev/mmcblk0 bs=64k oflag=dsync status=progress
 ```
 
 Then, plug the SD card into the Raspberry Pi, and power it up.

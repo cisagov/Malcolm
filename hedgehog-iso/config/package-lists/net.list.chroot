@@ -14,6 +14,7 @@ libssh2-1
 macchanger
 netcat-openbsd
 netsniff-ng
+nftables
 ntpsec
 openssh-client
 openssh-server
@@ -22,6 +23,8 @@ rsync
 snmp
 socat
 ssh-askpass
+suricata
+suricata-update
 tcpdump
 traceroute
 ufw

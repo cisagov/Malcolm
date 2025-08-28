@@ -40,7 +40,7 @@ cat << 'EOF' > /etc/docker/daemon.json
 EOF
 
 # performance parameters for networking, disk, etc.
-cat << 'EOF' >> /etc/sysctl.conf
+cat << 'EOF' >> /etc/sysctl.d/99-sysctl-performance.conf
 # don't restrict dmesg to root
 kernel.dmesg_restrict=0
 
@@ -156,11 +156,6 @@ cat << 'EOF' >> /etc/fluent-bit/parsers.conf
     Name logfmt
     Format logfmt
 EOF
-
-# disable htpdate service, we're going to use cron instead
-systemctl disable htpdate || true
-sed -i "s/#[[:space:]]*HTP_IFUP=.*/HTP_IFUP=no/" /etc/default/htpdate
-sed -i "s/#[[:space:]]*HTP_DAEMON=.*/HTP_DAEMON=no/" /etc/default/htpdate
 
 # remove identifying operating system information from /etc/issue*
 truncate -s 0 /etc/motd
