@@ -111,6 +111,7 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 /var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m-i
 /var/lib/aide$ d VarDirInode-n-c-m
 /var/lib/samba$ d VarDir-n-c-m
+/var/lib/xfsprogs$ d VarDir-n-c-m
 
 !/(.+/)?__pycache__(/|$)
 !/capture(/|$)
@@ -119,8 +120,7 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 !/etc/aide/.*\.swp$
 !/etc/cron\.d/htpdate$
 !/etc/ld\.so\.cache$
-!/etc/lvm/archive(/|$)
-!/etc/lvm/backup(/|$)
+!/etc/lvm(/|$)
 !/etc/network/interfaces.d(/|$)
 !/etc/NetworkManager/system-connections(/|$)
 !/etc/rc\d*\.d/.*ntp$
@@ -143,17 +143,19 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 !/var/lib/clamav(/|$)
 !/var/lib/colord(/|$)
 !/var/lib/containerd(/|$)
-!/var/lib/dhcp(/|$)
+!/var/lib/dhcpcd(/|$)
 !/var/lib/docker(/|$)
 !/var/lib/dpkg/info(/|$)
-!/var/lib/dpkg/triggers/Lock$
+!/var/lib/dpkg/triggers(/|$)
 !/var/lib/lightdm(/|$)
-!/var/lib/logrotate$
+!/var/lib/logrotate(/|$)
 !/var/lib/NetworkManager(/|$)
 !/var/lib/plymouth(/|$)
 !/var/lib/samba(/|$)
 !/var/lib/sudo/lectured(/|$)
 !/var/lib/suricata(/|$)
+!/var/lib/systemd/timers(/|$)
+!/var/lib/xfsprogs(/|$)
 !/var/log(/|$)
 !/var/mail(/|$)
 !/var/run(/|$)
