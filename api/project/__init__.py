@@ -1229,7 +1229,8 @@ def dashboard_export(dashid):
     request : Request
         Uses 'replace' from requests arguments, true (default) or false; indicates whether or not to do
         MALCOLM_NETWORK_INDEX_PATTERN_REPLACER, MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER,
-        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_NAVIGATION_MARKDOWN_REPLACER
+        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER,
+        MALCOLM_NAVIGATION_MARKDOWN_REPLACER
 
     Returns
     -------
@@ -1262,6 +1263,7 @@ def dashboard_export(dashid):
                     app.config['MALCOLM_NETWORK_INDEX_PATTERN']: 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER',
                     app.config['MALCOLM_NETWORK_INDEX_TIME_FIELD']: 'MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER',
                     app.config['MALCOLM_OTHER_INDEX_PATTERN']: 'MALCOLM_OTHER_INDEX_PATTERN_REPLACER',
+                    app.config['MALCOLM_OTHER_INDEX_TIME_FIELD']: 'MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER',
                 }
                 pattern = re.compile('|'.join(re.escape(key) for key in replacements))
                 responseText = pattern.sub(lambda match: replacements[match.group(0)], response.text)
