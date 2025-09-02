@@ -36,7 +36,7 @@ from zeek_carve_utils import (
 )
 
 import malcolm_utils
-from malcolm_utils import touch, eprint, str2bool
+from malcolm_utils import touch, str2bool, set_logging, get_verbosity_env_var_count
 import watch_common
 
 ###################################################################################################
@@ -134,8 +134,14 @@ def main():
     global pdbFlagged
     global shuttingDown
 
-    parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("EXTRACTED_FILE_PIPELINE_VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
     parser.add_argument(
         '--ignore-existing',
         dest='ignoreExisting',
@@ -213,21 +219,18 @@ def main():
     )
 
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    args.verbose = set_logging(
+        os.getenv("EXTRACTED_FILE_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True
     )
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)

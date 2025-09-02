@@ -54,7 +54,7 @@ from zeek_carve_utils import (
     ZEEK_SIGNATURE_NOTICE,
 )
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, AtomicInt
+from malcolm_utils import str2bool, AtomicInt, set_logging, get_verbosity_env_var_count
 
 
 ###################################################################################################
@@ -209,18 +209,18 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                                 elif isinstance(response.result, dict) and ("error" in response.result):
                                     # scan errored out, report the error
                                     scanResult = response.result["error"]
-                                    eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                                    logging.error(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
                                 else:
                                     # result is unrecognizable
                                     scanResult = "Invalid scan result format"
-                                    eprint(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
+                                    logging.error(f"{scriptName}[{scanWorkerId}]:\t❗\t{fileName} {scanResult}")
 
                             else:
                                 # impossibru! abandon ship for this file?
                                 requestComplete = True
                                 scanResult = "Error checking results"
-                                eprint(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
+                                logging.error(f"{scriptName}[{scanWorkerId}]:\t❗{fileName} {scanResult}")
 
                     else:
                         # we were denied (rate limiting, probably), so we'll need wait for a slot to clear up
@@ -236,7 +236,7 @@ def scanFileWorker(checkConnInfo, carvedFileSub):
                             logging.debug(f"{scriptName}[{scanWorkerId}]:\t🕑\t{fileName}")
 
         else:
-            eprint(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
+            logging.critical(f"{scriptName}[{scanWorkerId}]:\tinvalid scanner provider specified")
 
     finally:
         # "unregister" this scanner with the logger
@@ -260,8 +260,14 @@ def main():
     global pdbFlagged
     global shuttingDown
 
-    parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
-    parser.add_argument('--verbose', '-v', action='count', default=1, help='Increase verbosity (e.g., -v, -vv, etc.)')
+    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
+    parser.add_argument(
+        '--verbose',
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("EXTRACTED_FILE_PIPELINE_VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
+    )
     parser.add_argument(
         '--start-sleep',
         dest='startSleepSec',
@@ -352,21 +358,18 @@ def main():
     )
 
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    args.verbose = logging.ERROR - (10 * args.verbose) if args.verbose > 0 else 0
-    logging.basicConfig(
-        level=args.verbose, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S'
+    args.verbose = set_logging(
+        os.getenv("EXTRACTED_FILE_PIPELINE_LOGLEVEL", ""), args.verbose, set_traceback_limit=True
     )
-    logging.info(os.path.join(scriptPath, scriptName))
-    logging.info("Arguments: {}".format(sys.argv[1:]))
-    logging.info("Arguments: {}".format(args))
-    if args.verbose > logging.DEBUG:
-        sys.tracebacklimit = 0
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     # handle sigint and sigterm for graceful shutdown
     signal.signal(signal.SIGINT, shutdown_handler)
@@ -401,7 +404,7 @@ def main():
         )
     else:
         if not args.enableClamAv:
-            eprint('No scanner specified, defaulting to ClamAV')
+            logging.warning('No scanner specified, defaulting to ClamAV')
         checkConnInfo = ClamAVScan(
             logger=logging,
             socketFileName=args.clamAvSocket,
@@ -425,7 +428,7 @@ def main():
 
     # graceful shutdown
     if debug:
-        eprint(f"{scriptName}: shutting down...")
+        logging.info(f"{scriptName}: shutting down...")
     time.sleep(5)
 
 

@@ -765,23 +765,25 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
 
             #############################################################################################################################
             # OpenSearch security analytics fields mappings
-            echo "Creating $DATASTORE_TYPE security analytics mappings..."
+            if [[ -d /opt/security_analytics_mappings ]]; then
+              echo "Creating $DATASTORE_TYPE security analytics mappings..."
 
-            SA_MAPPINGS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t sa-mappings-XXXXXX)"
-            rsync -a /opt/security_analytics_mappings/ "$SA_MAPPINGS_IMPORT_DIR"/
-            DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" sa_mapping
-            for i in "${SA_MAPPINGS_IMPORT_DIR}"/*.json; do
-              set +e
-              RULE_TOPIC="$(jq -r '.rule_topic' 2>/dev/null < "$i")"
-              INDEX_NAME="$(jq -r '.index_name' 2>/dev/null < "$i")"
-              echo "Creating mappings for \"${INDEX_NAME}\" / \"${RULE_TOPIC}\" ..." && \
-              CURL_OUT=$(get_tmp_output_filename)
-              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-                -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_security_analytics/mappings" \
-                -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-                -d "@$i" || ( cat "$CURL_OUT" && echo )
-              set -e
-            done
+              SA_MAPPINGS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t sa-mappings-XXXXXX)"
+              rsync -a /opt/security_analytics_mappings/ "$SA_MAPPINGS_IMPORT_DIR"/
+              DoReplacersForDir "$SA_MAPPINGS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" sa_mapping
+              for i in "${SA_MAPPINGS_IMPORT_DIR}"/*.json; do
+                set +e
+                RULE_TOPIC="$(jq -r '.rule_topic' 2>/dev/null < "$i")"
+                INDEX_NAME="$(jq -r '.index_name' 2>/dev/null < "$i")"
+                echo "Creating mappings for \"${INDEX_NAME}\" / \"${RULE_TOPIC}\" ..." && \
+                CURL_OUT=$(get_tmp_output_filename)
+                curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+                  -XPOST "$OPENSEARCH_URL_TO_USE/_plugins/_security_analytics/mappings" \
+                  -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
+                  -d "@$i" || ( cat "$CURL_OUT" && echo )
+                set -e
+              done
+            fi
 
             # end OpenSearch security analytics
             #############################################################################################################################

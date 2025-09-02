@@ -8,9 +8,10 @@ import re
 import requests
 import sys
 import tempfile
+import logging
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool
+from malcolm_utils import str2bool, set_logging, get_verbosity_env_var_count
 
 try:
     import ruamel.yaml as yaml
@@ -23,7 +24,6 @@ padded_mac_high = 'FF:FF:FF:FF:FF:FF'
 mac_pattern = re.compile(r"[-:\.]")
 
 ###################################################################################################
-debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
@@ -40,18 +40,13 @@ def bits_left(mac_str):
 ###################################################################################################
 # main
 def main():
-    global debug
-
-    parser = argparse.ArgumentParser(description=scriptName, add_help=False, usage='{} <arguments>'.format(scriptName))
+    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=False,
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-i',
@@ -67,19 +62,16 @@ def main():
         '-o', '--output', required=True, dest='output', metavar='<STR>', type=str, default='', help='Output file'
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("Arguments: {}".format(sys.argv[1:]))
-        eprint("Arguments: {}".format(args))
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.input.lower().startswith('http') and not os.path.isfile(args.input):
         tmpf = tempfile.NamedTemporaryFile(delete=True, suffix=".txt")

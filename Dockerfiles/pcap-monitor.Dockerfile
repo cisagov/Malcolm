@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -58,6 +58,7 @@ ADD --chmod=644 pcap-monitor/requirements.txt /usr/local/src/requirements.txt
 RUN apt-get -q update && \
     apt-get -y -q --no-install-recommends upgrade && \
     apt-get install --no-install-recommends -y -q \
+      git \
       file \
       inotify-tools \
       jq \
@@ -68,12 +69,13 @@ RUN apt-get -q update && \
       python3-setuptools \
       python3-wheel \
       rsync \
-      supervisor \
       tini \
       vim-tiny && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
     python3 -m pip install --break-system-packages --no-compile --no-cache-dir -r /usr/local/src/requirements.txt && \
+    apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages --purge remove git && \
+        apt-get -y -q --allow-downgrades --allow-remove-essential --allow-change-held-packages autoremove && \
+        apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER}
 
@@ -96,7 +98,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "/usr/local/bin/service_check_passthrough.sh", \
             "-s", "pcap-monitor"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-u", "root", "-n"]
 
 
 # to be populated at build-time:

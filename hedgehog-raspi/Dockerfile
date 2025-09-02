@@ -22,4 +22,4 @@ ENV QEMU_RESTART false
 ENV QEMU_START false
 
 ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} https://raw.githubusercontent.com/idaholab/Malcolm/main/docs/images/hedgehog/logo/favicon.ico /image/favicon.ico
-ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} raspi_4_bookworm*.* /image/
+ADD --chown=${DEFAULT_UID}:${DEFAULT_GID} raspi_4_trixie*.* /image/

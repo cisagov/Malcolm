@@ -12,6 +12,7 @@ import argparse
 import dominate
 import functools
 import hashlib
+import logging
 import magic
 import os
 import re
@@ -27,13 +28,14 @@ from stream_zip import ZIP_32, stream_zip
 from urllib.parse import urlparse, parse_qs
 
 from malcolm_utils import (
-    eprint,
     EVP_BytesToKey,
     EVP_KEY_SIZE,
     OPENSSL_ENC_MAGIC,
     PKCS5_SALT_LEN,
     pushd,
     remove_prefix,
+    set_logging,
+    get_verbosity_env_var_count,
     sizeof_fmt,
     str2bool,
     temporary_filename,
@@ -41,7 +43,6 @@ from malcolm_utils import (
 
 ###################################################################################################
 args = None
-debug = False
 script_name = os.path.basename(__file__)
 script_path = os.path.dirname(os.path.realpath(__file__))
 orig_path = os.getcwd()
@@ -75,7 +76,6 @@ class HTTPHandler(SimpleHTTPRequestHandler):
 
     # override do_GET for fancy directory listing and so that files are encrypted/zipped, if requested
     def do_GET(self):
-        global debug
         global args
 
         client_roles = [
@@ -158,7 +158,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                             if args.links or (not os.path.islink(child)):
                                                 items.append(('dir', dirname, child))
                                         except Exception as e:
-                                            eprint(f'Error with directory "{dirname}"": {e}')
+                                            logging.error(f'Error with directory "{dirname}"": {e}')
                                     # list files
                                     for filename in sorted(filenames, key=str.casefold):
                                         try:
@@ -166,7 +166,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                             if args.links or (not os.path.islink(child)):
                                                 items.append(('file', filename, child))
                                         except Exception as e:
-                                            eprint(f'Error with file "{filename}"": {e}')
+                                            logging.error(f'Error with file "{filename}"": {e}')
                                     # our "walk" is not recursive right now, we only need to go one level deep
                                     break
 
@@ -248,7 +248,9 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                             )
                                                         except Exception as te:
                                                             if timestampStr:
-                                                                eprint(f'Error with time "{str(timestampStr)}": {te}')
+                                                                logging.error(
+                                                                    f'Error with time "{str(timestampStr)}": {te}'
+                                                                )
                                                         # put UIDs and FUIDs into a single event.id-filterable column
                                                         fids = list(
                                                             [
@@ -338,7 +340,7 @@ class HTTPHandler(SimpleHTTPRequestHandler):
                                                         t.add(th(), th(), th())
 
                                         except Exception as e:
-                                            eprint(f'Error with file "{filename}": {e}')
+                                            logging.error(f'Error with file "{filename}": {e}')
 
                                 # pagination controls
                                 br()
@@ -536,10 +538,8 @@ def serve_on_port(
 # main
 def main():
     global args
-    global debug
     global orig_path
 
-    defaultDebug = os.getenv('EXTRACTED_FILE_HTTP_SERVER_DEBUG', 'false')
     defaultZip = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ZIP', 'false')
     defaultRecursive = os.getenv('EXTRACTED_FILE_HTTP_SERVER_RECURSIVE', 'false')
     defaultMagic = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MAGIC', 'false')
@@ -554,19 +554,13 @@ def main():
     defaultAssetsDirRespReplacer = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR_RESP_REPLACER', '/assets')
     defaultRBAC = os.getenv('ROLE_BASED_ACCESS', 'false')
 
-    parser = argparse.ArgumentParser(
-        description=script_name, add_help=False, usage='{} <arguments>'.format(script_name)
-    )
+    parser = argparse.ArgumentParser(description=script_name, add_help=True, usage='{} <arguments>'.format(script_name))
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=defaultDebug,
-        metavar='true|false',
-        help=f"Verbose/debug output ({defaultDebug})",
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-p',
@@ -712,19 +706,18 @@ def main():
         help=f"Include columns for Zeek-extracted files in Malcolm ({defaultMalcolm})",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except SystemExit:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        eprint(os.path.join(script_path, script_name))
-        eprint("Arguments: {}".format(sys.argv[1:]))
-        eprint("Arguments: {}".format(args))
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(
+        os.getenv('EXTRACTED_FILE_HTTP_SERVER_LOGLEVEL', ''), args.verbose, set_traceback_limit=True
+    )
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     if args.assetsDirReqReplacer:
         args.assetsDirReqReplacer = os.path.join(args.assetsDirReqReplacer, '')

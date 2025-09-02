@@ -27,7 +27,6 @@ from malcolm_common import (
     YAML_VERSION,
 )
 from malcolm_utils import (
-    eprint,
     deep_get,
     deep_set,
     deep_merge_in_place,

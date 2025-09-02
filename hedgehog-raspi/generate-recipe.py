@@ -23,7 +23,7 @@ if version not in ["4", "5"]:
     sys.exit(1)
 
 suite = sys.argv[2]
-if suite not in ['bookworm']:
+if suite not in ['trixie']:
     print("E: unsupported suite %s" % suite, file=sys.stderr)
     sys.exit(1)
 target_yaml = 'raspi_%s_%s.yaml' % (version, suite)
@@ -51,7 +51,7 @@ wireless_firmware = 'firmware-brcm80211'
 bluetooth_firmware = 'bluez-firmware'
 
 # We're pulling suricata from backports
-backports_enable = True
+backports_enable = False
 backports_suite = '%s-backports' % suite
 
 # Serial console:

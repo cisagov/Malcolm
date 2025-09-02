@@ -13,6 +13,12 @@
           "properties": {
             "analyzer": {
               "properties": {
+                "analyzer_kind": {
+                  "type": "keyword"
+                },
+                "analyzer_name": {
+                  "type": "keyword"
+                },
                 "cause": {
                   "type": "keyword",
                   "ignore_above": 1024,
@@ -22,13 +28,7 @@
                     }
                   }
                 },
-                "analyzer_kind": {
-                  "type": "keyword"
-                },
-                "analyzer_name": {
-                  "type": "keyword"
-                },
-                "failure_reason": {
+                "failure_data": {
                   "type": "keyword",
                   "ignore_above": 1024,
                   "fields": {
@@ -37,7 +37,7 @@
                     }
                   }
                 },
-                "failure_data": {
+                "failure_reason": {
                   "type": "keyword",
                   "ignore_above": 1024,
                   "fields": {
@@ -228,22 +228,6 @@
                   "type": "float"
                 },
                 "Z": {
-                  "type": "keyword"
-                }
-              }
-            },
-            "dpd": {
-              "properties": {
-                "failure_reason": {
-                  "type": "keyword",
-                  "ignore_above": 1024,
-                  "fields": {
-                    "text": {
-                      "type": "text"
-                    }
-                  }
-                },
-                "service": {
                   "type": "keyword"
                 }
               }
@@ -1425,6 +1409,31 @@
                   "type": "keyword"
                 },
                 "security_protocol": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "redis": {
+              "properties": {
+                "cmd_name": {
+                  "type": "keyword"
+                },
+                "cmd_key": {
+                  "type": "keyword"
+                },
+                "cmd_value": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  }
+                },
+                "success": {
+                  "type": "keyword"
+                },
+                "reply": {
                   "type": "keyword"
                 }
               }

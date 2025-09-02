@@ -3,6 +3,7 @@
 
 import argparse
 import humanfriendly
+import logging
 import json
 import re
 import requests
@@ -14,10 +15,9 @@ from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
-from malcolm_utils import eprint, str2bool, ParseCurlFile, get_iterable
+from malcolm_utils import str2bool, ParseCurlFile, get_iterable, set_logging, get_verbosity_env_var_count
 
 ###################################################################################################
-debug = False
 scriptName = os.path.basename(__file__)
 scriptPath = os.path.dirname(os.path.realpath(__file__))
 urllib3.disable_warnings()
@@ -26,18 +26,13 @@ urllib3.disable_warnings()
 ###################################################################################################
 # main
 def main():
-    global debug
-
     parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
     parser.add_argument(
-        '-v',
         '--verbose',
-        dest='debug',
-        type=str2bool,
-        nargs='?',
-        const=True,
-        default=str2bool(os.getenv('OPENSEARCH_INDEX_SIZE_PRUNE_DEBUG', default='False')),
-        help="Verbose output",
+        '-v',
+        action='count',
+        default=get_verbosity_env_var_count("VERBOSITY"),
+        help='Increase verbosity (e.g., -v, -vv, etc.)',
     )
     parser.add_argument(
         '-i',
@@ -140,19 +135,16 @@ def main():
         help="Sort indices by name (vs. creation date)",
     )
     try:
-        parser.error = parser.exit
         args = parser.parse_args()
-    except Exception:
-        parser.print_help()
-        exit(2)
+    except SystemExit as e:
+        if e.code == 2:
+            parser.print_help()
+        sys.exit(e.code)
 
-    debug = args.debug
-    if debug:
-        eprint(os.path.join(scriptPath, scriptName))
-        eprint("Arguments: {}".format(sys.argv[1:]))
-        eprint("Arguments: {}".format(args))
-    else:
-        sys.tracebacklimit = 0
+    args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
+    logging.debug(os.path.join(scriptPath, scriptName))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
 
     # short-circuit without printing anything else
     if (args.limit == '0') or (not args.index):
@@ -180,8 +172,7 @@ def main():
     )
     osInfo = osInfoResponse.json()
     opensearchVersion = osInfo['version']['number']
-    if debug:
-        eprint(f'OpenSearch version is {opensearchVersion}')
+    logging.info(f'OpenSearch version is {opensearchVersion}')
 
     # as mulitple index patterns may be specified, deduplicate
     args.index = list(set(get_iterable(args.index)))
@@ -228,8 +219,7 @@ def main():
                     }
                 )
 
-        if debug:
-            eprint(json.dumps(esDiskUsageStats))
+        logging.debug(json.dumps(esDiskUsageStats))
 
         # esDiskUsageStats should now look like:
         # [
@@ -258,10 +248,9 @@ def main():
         raise Exception(f'Invalid (or unable to calculate) limit megabytes from {args.limit}')
 
     # now the limit has been calculated and stored (as megabytes) in limitMegabytes
-    if debug:
-        eprint(
-            f'Index limit for {args.index} is {humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))}'
-        )
+    logging.info(
+        f'Index limit for {args.index} is {humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))}'
+    )
 
     # now determine the total size of the indices from the index pattern(s)
     totalSizeInMegabytes = 0
@@ -283,18 +272,16 @@ def main():
             pass
         except Exception as e:
             raise Exception(f'Error getting {idx} size_in_bytes: {e}')
-    if debug:
-        eprint(
-            f'Total {args.index} megabytes: is {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))}'
-        )
+    logging.info(
+        f'Total {args.index} megabytes: is {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))}'
+    )
 
     if totalSizeInMegabytes > limitMegabytes:
         # the indices have outgrown their bounds, we need to delete the oldest
 
-        if debug:
-            eprint(
-                f'{totalIndices} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
-            )
+        logging.info(
+            f'{totalIndices} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
+        )
 
         # get list of indexes in index pattern(s) and sort by creation date
         osInfo = []

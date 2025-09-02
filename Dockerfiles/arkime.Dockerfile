@@ -1,6 +1,6 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-FROM debian:12-slim
+FROM debian:13-slim
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -34,7 +34,7 @@ ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
 ENV ARKIME_VERSION "5.7.1"
-ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian12_XXX.deb"
+ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
 ENV ARKIME_INET yes
@@ -107,6 +107,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       ethtool \
       file \
       geoip-bin \
+      git \
       gzip \
       inotify-tools \
       jq \
@@ -117,14 +118,14 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       liblua5.4-0 \
       libmaxminddb0 \
       libpcap0.8 \
-      libpcre3 \
+      libpcre2-8-0 \
       librdkafka1 \
       libssl3 \
       libtool \
       libwww-perl \
       libyaml-0-2 \
       libyaml-dev \
-      libyara9 \
+      libyara10 \
       libzmq5 \
       lua5.4 \
       lzma \
@@ -136,7 +137,6 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
       python3-setuptools \
       python3-wheel \
       rsync \
-      supervisor \
       tar \
       tini \
       unrar \
@@ -156,7 +156,7 @@ RUN export DEBARCH=$(dpkg --print-architecture) && \
     ln -sfr $ARKIME_DIR/bin/npm /usr/local/bin/npm && \
       ln -sfr $ARKIME_DIR/bin/node /usr/local/bin/node && \
       ln -sfr $ARKIME_DIR/bin/npx /usr/local/bin/npx && \
-    apt-get -q -y --purge remove gcc gcc-12 cpp cpp-12 && \
+    apt-get -q -y --purge remove git gcc gcc-12 cpp cpp-12 && \
       apt-get -q -y autoremove && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -216,7 +216,7 @@ ENTRYPOINT ["/usr/bin/tini", \
             "-s", "arkime", \
             "/usr/local/bin/docker_entrypoint.sh"]
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
+CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
 
 # to be populated at build-time:

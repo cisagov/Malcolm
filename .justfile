@@ -8,8 +8,7 @@ call_recipe := just_executable() + " --justfile=" + justfile()
 
 _base_config +CAPTURE_FLAGS:
   #!/usr/bin/env bash
-  ./scripts/configure --defaults \
-  --verbose "$VERBOSE" \
+  ./scripts/configure $VERBOSE --defaults \
     --configure-file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -144,8 +143,7 @@ config-nocap:
 
 auth-setup:
   #!/usr/bin/env bash
-  ./scripts/auth_setup --auth-noninteractive true \
-    --verbose "$VERBOSE" \
+  ./scripts/auth_setup $VERBOSE --auth-noninteractive true \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -176,8 +174,7 @@ auth-setup:
 
 logs *SERVICES:
   #!/usr/bin/env bash
-  ./scripts/logs \
-    --verbose "$VERBOSE" \
+  ./scripts/logs $VERBOSE \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -187,8 +184,7 @@ logs *SERVICES:
 
 status *SERVICES:
   #!/usr/bin/env bash
-  ./scripts/status \
-    --verbose "$VERBOSE" \
+  ./scripts/status $VERBOSE \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -198,8 +194,7 @@ status *SERVICES:
 
 wipe:
   #!/usr/bin/env bash
-  ./scripts/wipe \
-    --verbose "$VERBOSE" \
+  ./scripts/wipe $VERBOSE \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -213,8 +208,7 @@ nuke:
 
 stop:
   #!/usr/bin/env bash
-  ./scripts/stop \
-    --verbose "$VERBOSE" \
+  ./scripts/stop $VERBOSE \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -223,9 +217,8 @@ stop:
 
 start:
   #!/usr/bin/env bash
-  ./scripts/start \
+  ./scripts/start $VERBOSE \
     --quiet \
-    --verbose "$VERBOSE" \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \
@@ -240,9 +233,8 @@ start:
 
 restart *SERVICES:
   #!/usr/bin/env bash
-  ./scripts/restart \
+  ./scripts/restart $VERBOSE \
     --quiet \
-    --verbose "$VERBOSE" \
     --file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \

@@ -1,4 +1,4 @@
-FROM debian:12-slim
+FROM debian:13-slim
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -52,7 +52,6 @@ ARG EXTRACTED_FILE_ENABLE_YARA=false
 ARG EXTRACTED_FILE_YARA_CUSTOM_ONLY=false
 ARG EXTRACTED_FILE_ENABLE_CAPA=false
 ARG EXTRACTED_FILE_CAPA_VERBOSE=false
-ARG EXTRACTED_FILE_HTTP_SERVER_DEBUG=false
 ARG EXTRACTED_FILE_HTTP_SERVER_ENABLE=false
 ARG EXTRACTED_FILE_HTTP_SERVER_ZIP=true
 ARG EXTRACTED_FILE_HTTP_SERVER_KEY=infected
@@ -93,7 +92,6 @@ ENV YARA_URL "https://github.com/VirusTotal/yara/archive/v${YARA_VERSION}.tar.gz
 ENV YARA_RULES_SRC_DIR "/yara-rules-src"
 ENV YARA_RULES_DIR "/yara-rules"
 ENV EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR "/opt/assets"
-ENV EXTRACTED_FILE_HTTP_SERVER_DEBUG $EXTRACTED_FILE_HTTP_SERVER_DEBUG
 ENV EXTRACTED_FILE_HTTP_SERVER_ENABLE $EXTRACTED_FILE_HTTP_SERVER_ENABLE
 ENV EXTRACTED_FILE_HTTP_SERVER_ZIP $EXTRACTED_FILE_HTTP_SERVER_ZIP
 ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
@@ -128,7 +126,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       gcc \
       git \
       jq \
-      libclamunrar11 \
+      libclamunrar12 \
       libjansson-dev \
       libjansson4 \
       libmagic-dev \

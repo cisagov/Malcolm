@@ -61,16 +61,16 @@ if [[ -d ./"$CONFIG_DIR" && ("$CONTROL_COMMAND" = "start" || "$CONTROL_COMMAND" 
         break
       fi
     done
-  done <<< "$(supervisorctl -c "$CONFIG_FILE" status all | awk '{print $1}')"
+  done <<< "$(supervisorctl -c "$CONFIG_FILE" status all | grep -v '^INFO:' | awk '{print $1}')"
 
   # issue the command with the full, group-included names
   if [ ${#CONTROL_PROGS_WITH_GROUP[@]} -gt 0 ]; then
-    supervisorctl -c "$CONFIG_FILE" "$CONTROL_COMMAND" "${CONTROL_PROGS_WITH_GROUP[@]}"
+    supervisorctl -c "$CONFIG_FILE" "$CONTROL_COMMAND" "${CONTROL_PROGS_WITH_GROUP[@]}" | grep -v '^INFO: Included extra file'
   fi
 
 else
   # simply pass the command through to supervisorctl
-  supervisorctl -c "$CONFIG_FILE" "$CONTROL_COMMAND" "${CONTROL_PROCESS[@]}"
+  supervisorctl -c "$CONFIG_FILE" "$CONTROL_COMMAND" "${CONTROL_PROCESS[@]}" | grep -v '^INFO: Included extra file'
 
   # if zeek doesn't want to go down in a timely manner (or at all), make it an offer it can't refuse
   if [[ ("$CONTROL_COMMAND" = "stop" || "$CONTROL_COMMAND" = "shutdown") && ("$CONTROL_PROCESS" = "all" || "$CONTROL_PROCESS" = "zeek"*) ]]; then

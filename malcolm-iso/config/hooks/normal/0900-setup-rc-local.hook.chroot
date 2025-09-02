@@ -27,7 +27,7 @@ echo "Running Malcolm initialization" > /dev/tty0
 
 systemctl mask ctrl-alt-del.target
 
-if [ ! -s /var/lib/aide/aide.db ]; then
+if [ -x /usr/sbin/aideinit ] && [ ! -s /var/lib/aide/aide.db ]; then
     > /var/lib/aide/aide.db
     /usr/sbin/aideinit --yes --force
 fi
