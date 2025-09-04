@@ -1297,6 +1297,7 @@ def dashboard_export(dashid):
                                         if doReplacers
                                         else app.config['MALCOLM_OTHER_INDEX_PATTERN']
                                     ),
+                                    app.config['ARKIME_STATS_INDEX_PATTERN'],
                                 ]
                             )
                         )
