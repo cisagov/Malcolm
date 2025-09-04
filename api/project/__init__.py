@@ -268,9 +268,7 @@ def get_request_arguments(req):
 def translate_roles(req):
     roles_map = defaultdict(lambda: True)
     try:
-        client_roles = [
-            role for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(',')) if role
-        ]
+        client_roles = [role for role in map(str.strip, req.headers.get('X-Forwarded-Roles', '').split(',')) if role]
         roles_map['event'] = any(
             role in client_roles
             for role in (
@@ -378,9 +376,7 @@ def check_roles(req):
         result = translate_roles(req)[caller_name]
         if debugApi and (caller_name != "ping"):
             client_roles = [
-                role
-                for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(','))
-                if role
+                role for role in map(str.strip, req.headers.get('X-Forwarded-Roles', '').split(',')) if role
             ]
             print(f"Role(s) satisfied for \"{caller_name}\" with {client_roles}: {result}")
         return result
