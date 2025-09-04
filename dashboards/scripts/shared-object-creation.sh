@@ -517,7 +517,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
             MALCOLM_FIELD_FORMAT_MAP_FILE_SIZE=$(stat -c%s "$MALCOLM_FIELD_FORMAT_MAP_FILE_TEMP")
 
             MALCOLM_INDEX_PATTERN_FILE_TEMP="$(mktemp -p "$TMP_WORK_DIR")"
-            if [[ $IDX_TIME_FIELD == null ]]; then
+            if [[ "$IDX_TIME_FIELD" == "null" ]]; then
               # omit quotes around null IDX_TIME_FIELD
               echo "{\"attributes\":{\"title\":\"$IDX_NAME\",\"timeFieldName\":$IDX_TIME_FIELD}}" > "$MALCOLM_INDEX_PATTERN_FILE_TEMP"
             else
