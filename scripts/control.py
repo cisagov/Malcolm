@@ -990,6 +990,8 @@ def logs():
     if not args.noTmpDirOverride:
         osEnv['TMPDIR'] = MalcolmTmpPath
 
+    cmd = []
+
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
@@ -1049,7 +1051,6 @@ def logs():
             )
 
     else:
-        cmd = []
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
     if cmd:
