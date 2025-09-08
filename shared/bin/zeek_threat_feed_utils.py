@@ -36,6 +36,7 @@ from logging import DEBUG as LOGGING_DEBUG
 import copy
 import json
 import mandiant_threatintel
+import vt
 import os
 import re
 import requests

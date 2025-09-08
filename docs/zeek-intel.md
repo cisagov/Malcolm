@@ -3,6 +3,7 @@
 * [Zeek Intelligence Framework](#ZeekIntel)
     - [STIX™ and TAXII™](#ZeekIntelSTIX)
     - [MISP](#ZeekIntelMISP)
+    - [Google Threat Intelligence](#ZeekIntelGoogle)
     - [Mandiant](#ZeekIntelMandiant)
     - [Endorsement Disclaimer](#IntelFeedDisclaimer)
 
@@ -109,6 +110,24 @@ Upon Malcolm connects to the URLs for the MISP feeds in `.misp_input.txt`, it wi
 Note that only a subset of MISP [attribute types](https://www.misp-project.org/datamodels/#attribute-categories-vs-types) can be expressed with the Zeek intelligence [indicator types](https://docs.zeek.org/en/master/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type). MISP attributes with other types will be silently ignored.
 
 Malcolm uses the [MISP/PyMISP](https://github.com/MISP/PyMISP) Python library to access MISP threat intelligence feeds.
+
+## <a name="ZeekIntelGoogle"></a>Google Threat Intelligence
+
+If a [YAML](https://yaml.org/) file named `google.yaml` is found in `./zeek/intel/Google`, that file will be read and processed as parameters for the [Google Threat Intelligence](https://cloud.google.com/security/products/threat-intelligence) service. This file should minimally include:
+
+```yaml
+- type: google
+  api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+**TODO**
+These other parameters can also optionally be provided:
+
+```yaml
+```
+
+Malcolm uses the [VirusTotal/vt-py](https://github.com/VirusTotal/vt-py) Python library to access Google Threat Intelligence feeds.
+
 
 ## <a name="ZeekIntelMandiant"></a>Mandiant
 

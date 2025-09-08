@@ -147,6 +147,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/processed/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek-logs/upload/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/custom/"
+  mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/Google/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/Mandiant/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/MISP/"
   mkdir -p "$MALCOLM_DEST_DIR/zeek/intel/STIX/"

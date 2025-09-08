@@ -141,6 +141,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
       ( find "${ZEEK_DIR}"/lib/zeek/plugins/packages -type f -name "*.hlto" -exec chmod 755 "{}" \; || true ) && \
     mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/STIX && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/MISP && \
+      mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/Google && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/intel/Mandiant && \
       mkdir -p "${ZEEK_DIR}"/share/zeek/site/custom && \
       touch "${ZEEK_DIR}"/share/zeek/site/intel/__load__.zeek && \

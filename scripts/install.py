@@ -1860,7 +1860,7 @@ class Installer(object):
                             )
 
                         InstallerDisplayMessage(
-                            f'Place feed definitions in\n\n  * TAXII - {os.path.join(malcolm_install_path, "zeek/intel/STIX/taxii.yaml")}\n  * MISP - {os.path.join(malcolm_install_path, "zeek/intel/MISP/misp.yaml")}\n  * Mandiant - {os.path.join(malcolm_install_path, "zeek/intel/Mandiant/mandiant.yaml")}\n\nSee Zeek Intelligence Framework in Malcolm documentation.',
+                            f'Place feed definitions in\n\n  * TAXII - {os.path.join(malcolm_install_path, "zeek/intel/STIX/taxii.yaml")}\n  * MISP - {os.path.join(malcolm_install_path, "zeek/intel/MISP/misp.yaml")}\n  * Google - {os.path.join(malcolm_install_path, "zeek/intel/Google/google.yaml")}\n  * Mandiant - {os.path.join(malcolm_install_path, "zeek/intel/Mandiant/mandiant.yaml")}\n\nSee Zeek Intelligence Framework in Malcolm documentation.',
                         )
 
                 ###################################################################################
