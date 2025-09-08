@@ -990,6 +990,8 @@ def logs():
     if not args.noTmpDirOverride:
         osEnv['TMPDIR'] = MalcolmTmpPath
 
+    cmd = []
+
     if orchMode is OrchestrationFramework.DOCKER_COMPOSE:
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
         osEnv['COMPOSE_HTTP_TIMEOUT'] = '100000000'
@@ -1044,12 +1046,11 @@ def logs():
             cmd.append(args.service if args.service else '.*')
 
         else:
-            raise Exception(
+            logging.error(
                 f'{sys._getframe().f_code.co_name} with orchestration mode {orchMode} requires "stern" (https://github.com/stern/stern/releases/latest)'
             )
 
     else:
-        cmd = []
         raise Exception(f'{sys._getframe().f_code.co_name} does not yet support {orchMode}')
 
     if cmd:

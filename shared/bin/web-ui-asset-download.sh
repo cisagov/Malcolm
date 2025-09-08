@@ -22,8 +22,9 @@ ASSETS=(
     "https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf|"
     "https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf|"
     "https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf|"
-    "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d|bootstrap-icons.woff2"
-    "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d|bootstrap-icons.woff"
+    "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff2|"
+    "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff|"
+    "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css|"
     "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot|"
     "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2|"
     "https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff|"
@@ -44,6 +45,7 @@ for i in ${ASSETS[@]}; do
         fi
     fi
 done
+[[ -f ./bootstrap-icons.css ]] && sed -i '/bootstrap-icons\.woff/ { s|\./fonts/|./|g; s|[?][^")]*||g }' ./bootstrap-icons.css
 popd >/dev/null 2>&1
 
 
