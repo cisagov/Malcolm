@@ -1044,7 +1044,7 @@ def logs():
             cmd.append(args.service if args.service else '.*')
 
         else:
-            raise Exception(
+            logging.error(
                 f'{sys._getframe().f_code.co_name} with orchestration mode {orchMode} requires "stern" (https://github.com/stern/stern/releases/latest)'
             )
 
