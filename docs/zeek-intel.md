@@ -120,14 +120,13 @@ If a [YAML](https://yaml.org/) file named `google.yaml` is found in `./zeek/inte
   api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-**TODO**
 These other parameters can also optionally be provided:
 
 ```yaml
+  collection_type: collection,threat-actor,malware-family,software-toolkit,campaign,report
 ```
 
 Malcolm uses the [VirusTotal/vt-py](https://github.com/VirusTotal/vt-py) Python library to access Google Threat Intelligence feeds.
-
 
 ## <a name="ZeekIntelMandiant"></a>Mandiant
 

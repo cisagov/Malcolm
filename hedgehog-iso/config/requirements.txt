@@ -7,7 +7,6 @@ git+https://github.com/mmguero-dev/python-humanfriendly.git
 supervisor==4.3.0
 pymisp==2.4.170.1
 python-dotenv==1.1.0
-pytz==2025.2
 ruamel.yaml==0.18.10
 stix2==3.0.1
 stream-zip==0.0.83
