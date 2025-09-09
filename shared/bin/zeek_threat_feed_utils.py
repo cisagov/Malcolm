@@ -347,75 +347,38 @@ def map_google_indicator_to_zeek(
             logger.debug(f"{indicator_type}={indicator} from {collection.id if collection else "unknown collection"}")
 
         zeekItem = defaultdict(lambda: '-')
+        names = []
         tags = []
-        sources = []
 
+        if collection.get('name', []):
+            names.append(collection.get('name'))
+        if collection.get('alt_names', []):
+            names.append(collection.get('alt_names'))
+        zeekItem[ZEEK_INTEL_META_DESC] = ','.join([x.replace(',', '\\x2c') for x in list(set(names))])
+        zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
-
-        if colId := collection.name or connection.id:
-            zeekItem[ZEEK_INTEL_META_DESC] = colId
-            zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
-
-        # zeekItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{indicator.id}'
-        # if hasattr(indicator, 'mscore'):
-        #     zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(indicator.mscore)
-        #     zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(indicator.mscore / 10))
-        # if hasattr(indicator, 'first_seen'):
-        #     zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = str(mktime(indicator.first_seen.timetuple()))
-        #     zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
-        # if hasattr(indicator, 'last_seen'):
-        #     zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.last_seen.timetuple()))
-        #     zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
-        # if hasattr(indicator, 'sources'):
-        #     sources.extend(list({entry['source_name'] for entry in indicator.sources if 'source_name' in entry}))
-        #     if categories := list(
-        #         {
-        #             category
-        #             for item in indicator.sources
-        #             if 'category' in item and item['category']
-        #             for category in item['category']
-        #         }
-        #     ):
-        #         tags.extend(categories)
-
-        # if hasattr(indicator, 'misp'):
-        #     if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
-        #         tags.extend(trueMispAttrs)
-
-        # if tags:
-        #     zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
-
-        # # The MD5Indicator class can actually have multiple types of hashes,
-        # #   and we want to create a zeek intel item for each. I'm accessing
-        # #   the underlying API response directly here (rather than through getattr)
-        # #   to avoid extra GET requests to the API attempting to find a value
-        # #   that didn't come with the initial request.
-        # #   Performance-wise, if we didn't get it with the indicator object in
-        # #   the first place it's not something we need to make an entire extra
-        # #   network communication to attempt.
-        # if (
-        #     isinstance(indicator, mandiant_threatintel.MD5Indicator)
-        #     and indicator._api_response
-        #     and (hashes := indicator._api_response.get('associated_hashes', []))
-        # ):
-        #     for hashish in hashes:
-        #         if hashVal := hashish.get('value'):
-        #             tmpItem = copy.deepcopy(zeekItem)
-        #             tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
-        #             if newId := hashish.get('id'):
-        #                 tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
-        #             if sources:
-        #                 tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
-        #             results.append(tmpItem)
-        #             if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
-        #                 logger.debug(tmpItem)
-
-        # elif hasattr(indicator, 'value') and (val := indicator.value):
-        #     # handle other types besides the file hash
-
         zeekItem[ZEEK_INTEL_INDICATOR] = indicator
-        if sources:
-            zeekItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
+        zeekItem[ZEEK_INTEL_META_CATEGORY] = collection.collection_type
+        zeekItem[ZEEK_INTEL_META_SOURCE] = collection.get('origin', "Google Threat Intelligence")
+        if first_time := collection.get('first_seen', collection.get('creation_date')):
+            zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = f"{first_time}.0"
+            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
+        if last_time := collection.get('last_seen', collection.get('last_modification_date')):
+            zeekItem[ZEEK_INTEL_META_LASTSEEN] = f"{last_time}.0"
+            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
+
+        if collection.get('link'):
+            zeekItem[ZEEK_INTEL_META_URL] = collection.get('link')
+        else:
+            zeekItem[ZEEK_INTEL_META_URL] = f"https://www.virustotal.com/gui/collection/{collection.id}"
+
+        if collection.get('tags', []):
+            tags.extend(collection.get('tags'))
+        if collection.get('autogenerated_tags', []):
+            tags.extend(collection.get('autogenerated_tags'))
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in list(set(tags))])
+
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(zeekItem)
