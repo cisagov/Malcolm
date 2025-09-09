@@ -40,6 +40,7 @@ import vt
 import os
 import re
 import requests
+import sys
 import urllib3
 
 from malcolm_utils import base64_decode_if_prefixed, get_iterable, LoadStrIfJson, LoadFileIfJson, isprivateip
@@ -1284,13 +1285,24 @@ def UpdateFromMandiant(
         raise Exception("Could not connect to Mandiant threat intelligence service")
 
 
-def iter_google_collections_since(client, ctype='collection', since=None):
+# uncomment for debugging the vt.Client's HTTP calls
+# _original_get_async = vt.Client.get_async
+# async def debug_get_async(self, path: str, *path_args, params=None, **kwargs):
+#     print(f"[VT DEBUG] GET {path} {path_args} params={params} kwargs={kwargs}", file=sys.stderr)
+#     return await _original_get_async(self, path, *path_args, params=params, **kwargs)
+# vt.Client.get_async = debug_get_async
+
+
+def iter_google_collections_since(client, ctype='report', filters=None, since=None):
     # https://gtidocs.virustotal.com/reference/list-threats
     # https://gtidocs.virustotal.com/reference/ioc-collection-object
+    searchFilter = f"collection_type:{ctype}"
+    if filters:
+        searchFilter += f" AND ({filters})"
     for collection in client.iterator(
         "/collections",
         params={
-            "filter": f"collection_type:{ctype}",
+            "filter": searchFilter,
             # sort by last modification date descending, so we can short-circuit based on "since"
             "order": "last_modification_date-",
         },
@@ -1320,12 +1332,12 @@ def UpdateFromGoogle(
     # allow an individual feed source to override the global "since" value passed in
     since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
 
-    # TODO: what should the default collection_type(s) be?
     ctypes = [
         s.strip()
-        for s in connInfo.get('collection_type', 'threat-actor,malware-family,campaign,report').split(",")
+        for s in connInfo.get('collection_type', 'report,campaign,threat-actor,malware-family').split(",")
         if s.strip()
     ]
+    filters = connInfo.get('filters')
 
     try:
         with vt.Client(
@@ -1337,6 +1349,7 @@ def UpdateFromGoogle(
                 for collection in iter_google_collections_since(
                     google_client,
                     ctype=ctype,
+                    filters=filters,
                     since=since,
                 ):
                     try:

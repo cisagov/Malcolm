@@ -120,10 +120,16 @@ If a [YAML](https://yaml.org/) file named `google.yaml` is found in `./zeek/inte
   api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-These other parameters can also optionally be provided:
+The `collection_type` parameter may be optionally provided, consisting of a comma-separated list of the values supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats).
 
 ```yaml
-  collection_type: collection,threat-actor,malware-family,software-toolkit,campaign,report
+  collection_type: report,campaign,threat-actor,malware-family
+```
+
+Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats#searches-observations). Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
+
+```yaml
+  filters: 'motivation:espionage targeted_industry:government targeted_region:US'
 ```
 
 Malcolm uses the [VirusTotal/vt-py](https://github.com/VirusTotal/vt-py) Python library to access Google Threat Intelligence feeds.
