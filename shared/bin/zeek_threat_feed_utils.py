@@ -1323,9 +1323,7 @@ def UpdateFromGoogle(
     # TODO: what should the default collection_type(s) be?
     ctypes = [
         s.strip()
-        for s in connInfo.get(
-            'collection_type', 'collection,threat-actor,malware-family,software-toolkit,campaign,report'
-        ).split(",")
+        for s in connInfo.get('collection_type', 'threat-actor,malware-family,campaign,report').split(",")
         if s.strip()
     ]
 
