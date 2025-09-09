@@ -1365,14 +1365,7 @@ def UpdateFromGoogle(
 
 def ProcessThreatInputWorker(threatInputWorkerArgs):
     inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, successCount, logger = (
-        threatInputWorkerArgs[0],
-        threatInputWorkerArgs[1],
-        threatInputWorkerArgs[2],
-        threatInputWorkerArgs[3],
-        threatInputWorkerArgs[4],
-        threatInputWorkerArgs[5],
-        threatInputWorkerArgs[6],
-        threatInputWorkerArgs[7],
+        threatInputWorkerArgs
     )
 
     with workerThreadCount as workerId:
