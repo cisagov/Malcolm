@@ -359,7 +359,7 @@ def map_google_indicator_to_zeek(
             names.append(collection.get('name'))
         if collection.get('alt_names', []):
             names.extend(collection.get('alt_names'))
-        zeekItem[ZEEK_INTEL_META_DESC] = ','.join([x.replace(',', '\\x2c') for x in list(set(names))])
+        zeekItem[ZEEK_INTEL_META_DESC] = '\\x7c'.join([x.replace(',', '\\x2c') for x in list(set(names))])
         zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
 
         if first_time := collection.get('first_seen', collection.get('creation_date')):
@@ -373,7 +373,7 @@ def map_google_indicator_to_zeek(
         urls = [f"https://www.virustotal.com/gui/collection/{collection.id}"]
         if collection.get('link'):
             urls.append(collection.get('link'))
-        zeekItem[ZEEK_INTEL_META_URL] = ','.join([x.replace(',', '\\x2c') for x in list(set(urls))])
+        zeekItem[ZEEK_INTEL_META_URL] = '\\x7c'.join([x.replace(',', '\\x2c') for x in list(set(urls))])
 
         tags = []
         if collection.get('tags', []):
