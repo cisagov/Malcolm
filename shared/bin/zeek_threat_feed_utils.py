@@ -1293,10 +1293,20 @@ def UpdateFromMandiant(
 # vt.Client.get_async = debug_get_async
 
 
-def iter_google_collections_since(client, ctype='report', filters=None, since=None):
+def iter_google_collections_since(
+    client,
+    ctypes=[
+        'report',
+        'campaign',
+        'threat-actor',
+        'malware-family',
+    ],
+    filters=None,
+    since=None,
+):
     # https://gtidocs.virustotal.com/reference/list-threats
     # https://gtidocs.virustotal.com/reference/ioc-collection-object
-    searchFilter = f"collection_type:{ctype}"
+    searchFilter = "(" + " OR ".join(f'collection_type:"{c}"' for c in ctypes) + ")"
     if filters:
         searchFilter += f" AND ({filters})"
     for collection in client.iterator(
@@ -1342,32 +1352,29 @@ def UpdateFromGoogle(
     try:
         with vt.Client(
             apikey=connInfo.get('api_key'),
-            agent='Malcolm',
+            agent=' '.join(filter(None, ['Malcolm', os.getenv('MALCOLM_VERSION')])),
             verify_ssl=sslVerify,
         ) as google_client:
-            for ctype in ctypes:
-                for collection in iter_google_collections_since(
-                    google_client,
-                    ctype=ctype,
-                    filters=filters,
-                    since=since,
-                ):
-                    try:
-                        # export a download of the collection's IoCs via the download endpoint
-                        #   https://gtidocs.virustotal.com/reference/export-threat-iocs
-                        if (
-                            iocDownload := google_client.get_json(f"/collections/{collection.id}/download/json")
-                        ) and isinstance(iocDownload, dict):
-                            for ioc_type in ["domains", "files", "ip_addresses", "urls"]:
-                                if (ioc_list := iocDownload.get(ioc_type, [])) and isinstance(ioc_list, list):
-                                    for ioc in ioc_list:
-                                        if zeekPrinter.ProcessGoogle(ioc, ioc_type, collection):
-                                            successCount.increment()
-                    except Exception as e:
-                        if logger is not None:
-                            logger.warning(
-                                f"[{workerId}]: {type(e).__name__} for Google collection {collection.id}: {e}"
-                            )
+            for collection in iter_google_collections_since(
+                google_client,
+                ctypes=ctypes,
+                filters=filters,
+                since=since,
+            ):
+                try:
+                    # export a download of the collection's IoCs via the download endpoint
+                    #   https://gtidocs.virustotal.com/reference/export-threat-iocs
+                    if (
+                        iocDownload := google_client.get_json(f"/collections/{collection.id}/download/json")
+                    ) and isinstance(iocDownload, dict):
+                        for ioc_type in ["domains", "files", "ip_addresses", "urls"]:
+                            if (ioc_list := iocDownload.get(ioc_type, [])) and isinstance(ioc_list, list):
+                                for ioc in ioc_list:
+                                    if zeekPrinter.ProcessGoogle(ioc, ioc_type, collection):
+                                        successCount.increment()
+                except Exception as e:
+                    if logger is not None:
+                        logger.warning(f"[{workerId}]: {type(e).__name__} for Google collection {collection.id}: {e}")
 
     except Exception as e:
         if logger is not None:
