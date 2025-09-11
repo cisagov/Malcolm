@@ -70,14 +70,12 @@ ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 # TODO: STILL NEED TO MAP THESE:
-#   - ZEEK_INTEL_META_CATEGORY
+#   - ZEEK_INTEL_META_ASSOCIATED
+#   - ZEEK_INTEL_META_CAMPAIGNS
+#   - ZEEK_INTEL_META_REPORTS
 #   - ZEEK_INTEL_META_THREAT_SCORE
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
-#   - ZEEK_INTEL_META_ASSOCIATED
-#   - ZEEK_INTEL_META_CATEGORY
-#   - ZEEK_INTEL_META_CAMPAIGNS
-#   - ZEEK_INTEL_META_REPORTS
 
 ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
 
@@ -277,7 +275,7 @@ def map_mandiant_indicator_to_zeek(
                     for category in item['category']
                 }
             ):
-                tags.extend(categories)
+                zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in categories])
 
         if hasattr(indicator, 'misp'):
             if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
@@ -573,14 +571,10 @@ def map_stix_indicator_to_zeek(
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.modified.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
-        tags = []
-        tags.extend([x for x in indicator.get('labels', []) if x])
-        tags.extend([x for x in indicator.get('indicator_types', []) if x])
-        if len(tags) > 0:
+        if tags := [x for x in indicator.get('labels', []) if x]:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
-
-        # TODO: revoked?
-        # TODO: confidence?
+        if indicatorTypes := [x for x in indicator.get('indicator_types', []) if x]:
+            zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in indicatorTypes])
 
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
@@ -677,10 +671,9 @@ def map_misp_attribute_to_zeek(
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(attribute.timestamp.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
-        if tags is not None and len(tags) > 0:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in [attribute.category] + tags])
-        else:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
+        zeekItem[ZEEK_INTEL_META_CATEGORY] = attribute.category.replace(',', '\\x2c')
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
         if confidence is not None:
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
             zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
