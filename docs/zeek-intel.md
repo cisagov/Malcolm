@@ -135,7 +135,7 @@ Additionally, the `filters` parameter may be optionally provided, consisting of 
 Filter values that contain spaces should be enclosed in quotation marks:
 
 ```yaml
-filters: 'targeted_industry:"Energy & Utilities"'
+  filters: 'targeted_industry:"Energy & Utilities"'
 ```
 
 While there is no comprehensive list of possible values for [these filters](https://gtidocs.virustotal.com/reference/list-threats#allowed-filters-by-object-collection_type), here are some examples:
