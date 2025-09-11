@@ -126,7 +126,7 @@ The `collection_type` parameter may be optionally provided, consisting of a comm
   collection_type: report,campaign,threat-actor,malware-family
 ```
 
-Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats#allowed-filters-by-object-collection_type). See these [examples](https://gtidocs.virustotal.com/reference/list-threats#examples) of filtering syntax. Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
+Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats#searches-observations). See these [examples](https://gtidocs.virustotal.com/reference/list-threats#examples) of filtering syntax. Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
 
 ```yaml
   filters: 'motivation:espionage targeted_industry:government targeted_region:US'
