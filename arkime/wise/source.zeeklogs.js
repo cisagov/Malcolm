@@ -710,6 +710,11 @@ class MalcolmSource extends WISESource {
       "suricata.tx_id",
       "tags",
       "threat.framework",
+      "threat.indicator.description",
+      "threat.indicator.name",
+      "threat.indicator.provider",
+      "threat.indicator.reference",
+      "threat.indicator.type",
       "threat.tactic.id",
       "threat.tactic.name",
       "threat.tactic.reference",
@@ -3372,6 +3377,10 @@ class MalcolmSource extends WISESource {
     var apiURL = "/mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
     this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, all: true });
 
+    // add right-click for threat indicator references
+    var referenceStr = allFields.filter(value => /\.reference$/i.test(value)).join(',');
+    this.api.addValueAction("malcolm_reference_url", { name: "Reference", url: "/dashboards/app/refred/%TEXT%", fields: referenceStr });
+
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "/mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
 
@@ -3402,6 +3411,14 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
       "    +arrayList(session.vulnerability, 'enumeration', 'Vulnerability Enumeration', 'vulnerability.enumeration')\n" +
       "    +arrayList(session.vulnerability, 'id', 'Vulnerability ID', 'vulnerability.id')\n" +
+      "    +arrayList(session.vulnerability, 'description', 'Vulnerability Description', 'vulnerability.description')\n" +
+      "    +arrayList(session.vulnerability, 'reference', 'Vulnerability Reference', 'vulnerability.reference')\n" +
+      "    +arrayList(session.vulnerability, 'scanner.vendor', 'Vulnerability Scanner Vendor', 'vulnerability.scanner.vendor')\n" +
+      "    +arrayList(session.threat, 'framework', 'Threat Framework', 'threat.framework')\n" +
+      "    +arrayList(session.threat, 'tactic.id', 'Threat Tactic ID', 'threat.tactic.id')\n" +
+      "    +arrayList(session.threat, 'tactic.name', 'Threat Tactic', 'threat.tactic.name')\n" +
+      "    +arrayList(session.threat, 'technique.id', 'Threat Technique ID', 'threat.technique.id')\n" +
+      "    +arrayList(session.threat, 'technique.name', 'Threat Technique', 'threat.technique.name')\n" +
       "    +arrayList(session.network, 'direction', 'Direction', 'network.direction')\n" +
       "    +arrayList(session.network, 'is_orig', 'Is Originator', 'network.is_orig')\n" +
       "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +
