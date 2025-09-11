@@ -138,7 +138,8 @@ While there is no comprehensive list of possible values for [these filters](http
   <summary><code>source_region</code> and <code>targeted_region</code></summary>
   <ul>
     <li>Country codes may specified using the <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO code 2</a> standard.</li>
-  </details>
+  </ul>
+</details>
 <details>
   <summary><code>motivation</code></summary>
   <ul>
