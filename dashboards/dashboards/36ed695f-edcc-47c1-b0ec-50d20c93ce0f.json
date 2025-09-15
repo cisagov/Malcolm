@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"*\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"h\":35,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":11,\"i\":\"3\",\"w\":34,\"x\":14,\"y\":0},\"panelIndex\":\"3\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":true}},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"5\",\"w\":10,\"x\":14,\"y\":11},\"panelIndex\":\"5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":25,\"i\":\"6\",\"w\":9,\"x\":24,\"y\":11},\"panelIndex\":\"6\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":223.5}],\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"7\",\"w\":8,\"x\":0,\"y\":35},\"panelIndex\":\"7\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"8\",\"w\":8,\"x\":0,\"y\":53},\"panelIndex\":\"8\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":25,\"i\":\"11\",\"w\":15,\"x\":33,\"y\":11},\"panelIndex\":\"11\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":198.5},{\"colIndex\":1,\"width\":257.8333333333333}],\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"12\",\"w\":7,\"x\":41,\"y\":36},\"panelIndex\":\"12\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"13\",\"w\":6,\"x\":8,\"y\":11},\"panelIndex\":\"13\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_8\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":24,\"i\":\"14\",\"w\":48,\"x\":0,\"y\":71},\"panelIndex\":\"14\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":11,\"i\":\"17\",\"w\":6,\"x\":8,\"y\":0},\"panelIndex\":\"17\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":42,\"i\":\"0e155d98-1bd9-4e89-9a2b-3c18ca7d5c6c\",\"w\":16,\"x\":8,\"y\":29},\"panelIndex\":\"0e155d98-1bd9-4e89-9a2b-3c18ca7d5c6c\",\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_11\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":18,\"i\":\"978c0a0d-4a22-4b08-a1f3-8910250e35de\",\"w\":17,\"x\":24,\"y\":36},\"panelIndex\":\"978c0a0d-4a22-4b08-a1f3-8910250e35de\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":456}],\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_12\"},{\"version\":\"3.2.0\",\"gridData\":{\"h\":17,\"i\":\"ee2e2983-4383-49f4-9a1d-c3b49cef7aaf\",\"w\":24,\"x\":24,\"y\":54},\"panelIndex\":\"ee2e2983-4383-49f4-9a1d-c3b49cef7aaf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":43,\"i\":\"2\",\"w\":8,\"x\":0,\"y\":0},\"panelIndex\":\"2\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":true}},\"gridData\":{\"h\":18,\"i\":\"3\",\"w\":25,\"x\":23,\"y\":0},\"panelIndex\":\"3\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":25,\"i\":\"5\",\"w\":10,\"x\":8,\"y\":18},\"panelIndex\":\"5\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":284.5}],\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":25,\"i\":\"6\",\"w\":13,\"x\":24,\"y\":43},\"panelIndex\":\"6\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"7\",\"w\":11,\"x\":0,\"y\":73},\"panelIndex\":\"7\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"8\",\"w\":13,\"x\":11,\"y\":73},\"panelIndex\":\"8\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":198.5},{\"colIndex\":1,\"width\":257.8333333333333},{\"colIndex\":0,\"width\":180.66666666666674}],\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":25,\"i\":\"11\",\"w\":15,\"x\":33,\"y\":18},\"panelIndex\":\"11\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":25,\"i\":\"12\",\"w\":11,\"x\":37,\"y\":43},\"panelIndex\":\"12\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"13\",\"w\":9,\"x\":14,\"y\":0},\"panelIndex\":\"13\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"14\",\"w\":48,\"x\":0,\"y\":92},\"panelIndex\":\"14\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":9,\"i\":\"17\",\"w\":6,\"x\":8,\"y\":0},\"panelIndex\":\"17\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":456},{\"colIndex\":0,\"width\":402}],\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":25,\"i\":\"978c0a0d-4a22-4b08-a1f3-8910250e35de\",\"w\":15,\"x\":18,\"y\":18},\"panelIndex\":\"978c0a0d-4a22-4b08-a1f3-8910250e35de\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_11\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":30,\"i\":\"0e155d98-1bd9-4e89-9a2b-3c18ca7d5c6c\",\"w\":24,\"x\":0,\"y\":43},\"panelIndex\":\"0e155d98-1bd9-4e89-9a2b-3c18ca7d5c6c\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_12\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":24,\"i\":\"ee2e2983-4383-49f4-9a1d-c3b49cef7aaf\",\"w\":24,\"x\":24,\"y\":68},\"panelIndex\":\"ee2e2983-4383-49f4-9a1d-c3b49cef7aaf\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_13\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":9,\"i\":\"e4888fee-c2bb-4786-8b83-8ca10c2013ad\",\"w\":6,\"x\":8,\"y\":9},\"panelIndex\":\"e4888fee-c2bb-4786-8b83-8ca10c2013ad\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_14\"}]",
         "timeRestore": false,
         "title": "Threat Intelligence",
         "version": 1
@@ -77,12 +77,12 @@
           "type": "visualization"
         },
         {
-          "id": "685f03d0-8e84-11f0-8c7a-6dd4f3af709c",
+          "id": "31a53d80-8e86-11f0-8c7a-6dd4f3af709c",
           "name": "panel_11",
           "type": "visualization"
         },
         {
-          "id": "31a53d80-8e86-11f0-8c7a-6dd4f3af709c",
+          "id": "685f03d0-8e84-11f0-8c7a-6dd4f3af709c",
           "name": "panel_12",
           "type": "visualization"
         },
@@ -90,11 +90,16 @@
           "id": "011bc5f0-8e84-11f0-8c7a-6dd4f3af709c",
           "name": "panel_13",
           "type": "visualization"
+        },
+        {
+          "id": "90280890-927f-11f0-8039-5f2e390fd567",
+          "name": "panel_14",
+          "type": "visualization"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-15T19:58:49.050Z",
-      "version": "WzExNDYsMV0="
+      "updated_at": "2025-09-15T22:03:52.438Z",
+      "version": "WzExNDgsMV0="
     },
     {
       "attributes": {
@@ -116,7 +121,7 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:05:09.086Z",
+      "updated_at": "2025-09-15T21:24:40.515Z",
       "version": "WzExMjMsMV0="
     },
     {
@@ -146,7 +151,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
+      "updated_at": "2025-09-15T21:23:26.185Z",
       "version": "WzI3MSwxXQ=="
     },
     {
@@ -176,8 +181,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:46:47.820Z",
-      "version": "WzExMzYsMV0="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI3MiwxXQ=="
     },
     {
       "attributes": {
@@ -206,8 +211,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:47:42.718Z",
-      "version": "WzExMzcsMV0="
+      "updated_at": "2025-09-15T22:00:06.078Z",
+      "version": "WzExNDEsMV0="
     },
     {
       "attributes": {
@@ -236,8 +241,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:50:09.247Z",
-      "version": "WzExNDEsMV0="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI3NCwxXQ=="
     },
     {
       "attributes": {
@@ -266,8 +271,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:49:49.088Z",
-      "version": "WzExNDAsMV0="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI3NSwxXQ=="
     },
     {
       "attributes": {
@@ -296,20 +301,20 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:58:08.913Z",
-      "version": "WzExNDQsMV0="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI3NiwxXQ=="
     },
     {
       "attributes": {
         "description": "",
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
         "title": "Intel - MIME Type",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
         "version": 1,
-        "visState": "{\"title\":\"Intel - MIME Type\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"zeek.intel.file_mime_type\",\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":100,\"order\":\"desc\",\"orderBy\":\"1\",\"customLabel\":\"MIME Type\"}}],\"listeners\":{}}"
+        "visState": "{\"title\":\"Intel - MIME Type\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.intel.file_mime_type\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MIME Type\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"showMetricsAtAllLevels\":false,\"percentageCol\":\"\"}}"
       },
       "id": "a27464ba-582d-405f-931d-003d8252ff4a",
       "migrationVersion": {
@@ -326,8 +331,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
-      "version": "WzI3NywxXQ=="
+      "updated_at": "2025-09-15T22:00:38.630Z",
+      "version": "WzExNDIsMV0="
     },
     {
       "attributes": {
@@ -356,7 +361,7 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
+      "updated_at": "2025-09-15T21:23:26.185Z",
       "version": "WzI3OCwxXQ=="
     },
     {
@@ -403,20 +408,20 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-15T19:03:54.644Z",
+      "updated_at": "2025-09-15T21:23:26.185Z",
       "version": "WzI3OSwxXQ=="
     },
     {
       "attributes": {
         "description": "",
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
         "title": "Intel - Log Count",
         "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
         "version": 1,
-        "visState": "{\"title\":\"Intel - Log Count\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":\"30\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}],\"listeners\":{}}"
+        "visState": "{\"title\":\"Intel - Log Count\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"colorSchema\":\"Green to Red\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"style\":{\"fontSize\":24,\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"},\"metricColorMode\":\"None\"}}}"
       },
       "id": "AWDG-Qf8xQT5EBNmq4G5",
       "migrationVersion": {
@@ -433,8 +438,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
-      "version": "WzI4MCwxXQ=="
+      "updated_at": "2025-09-15T22:02:13.018Z",
+      "version": "WzExNDUsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Intel - Indicator Description",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Intel - Indicator Description\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.indicator.description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Description\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "31a53d80-8e86-11f0-8c7a-6dd4f3af709c",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "5154d8e9-c83e-4d42-bde3-33ad0c7d1798",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-15T21:54:39.982Z",
+      "version": "WzExMzgsMV0="
     },
     {
       "attributes": {
@@ -463,38 +498,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:48:12.428Z",
-      "version": "WzExMzgsMV0="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "Intel - Indicator Description",
-        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}}",
-        "version": 1,
-        "visState": "{\"title\":\"Intel - Indicator Description\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.intel.category\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Category\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"threat.indicator.description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":250,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"-\",\"customLabel\":\"Description\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
-      },
-      "id": "31a53d80-8e86-11f0-8c7a-6dd4f3af709c",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "5154d8e9-c83e-4d42-bde3-33ad0c7d1798",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
-      "version": "WzI4MywxXQ=="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI4MSwxXQ=="
     },
     {
       "attributes": {
@@ -523,8 +528,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-15T19:03:54.644Z",
-      "version": "WzI4MiwxXQ=="
+      "updated_at": "2025-09-15T21:23:26.185Z",
+      "version": "WzI4MywxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Intel - Unique Indicators",
+        "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Intel - Unique Indicators\",\"type\":\"metric\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"threat.indicator.name\"},\"schema\":\"metric\"}],\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"colorSchema\":\"Green to Red\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":false,\"color\":\"black\"},\"style\":{\"fontSize\":24,\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"bgFill\":\"#FB9E00\"},\"metricColorMode\":\"None\"}}}"
+      },
+      "id": "90280890-927f-11f0-8039-5f2e390fd567",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "5154d8e9-c83e-4d42-bde3-33ad0c7d1798",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-15T22:03:37.740Z",
+      "version": "WzExNDcsMV0="
     }
   ],
   "version": "3.2.0"
