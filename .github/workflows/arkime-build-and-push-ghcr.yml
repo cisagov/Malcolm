@@ -29,5 +29,6 @@ jobs:
     with:
       service: arkime
       dockerfile: ./Dockerfiles/arkime.Dockerfile
+    secrets:
       maxmind_license_key: ${{ secrets.MAXMIND_GEOIP_DB_LICENSE_KEY }}
       maxmind_alternate_url: ${{ secrets.MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL }}
