@@ -9,6 +9,12 @@ on:
       dockerfile:
         required: true
         type: string
+      maxmind_license_key:
+        required: false
+        type: string
+      maxmind_alternate_url:
+        required: false
+        type: string
       extra_build_args:
         required: false
         type: string
@@ -93,6 +99,8 @@ jobs:
             BUILD_DATE=${{ steps.generate_build_timestamp.outputs.btimestamp }}
             VCS_REVISION=${{ steps.extract_commit_sha.outputs.sha }}
             ${{ inputs.extra_build_args || '' }}
+            ${{ inputs.maxmind_license_key && format('MAXMIND_GEOIP_DB_LICENSE_KEY={0}', inputs.maxmind_license_key) || '' }}
+            ${{ inputs.maxmind_alternate_url && format('MAXMIND_GEOIP_DB_ALTERNATE_DOWNLOAD_URL={0}', inputs.maxmind_alternate_url) || '' }}
           push: true
           provenance: false
           platforms: ${{ matrix.platform }}
