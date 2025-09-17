@@ -20,6 +20,9 @@ OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS=${MALCOLM_OTHER_INDEX_LIFECYCLE_ROLLOVER_AL
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
+TIMEPICKER_FROM=${DASHBOARDS_TIMEPICKER_FROM:-"now-24h"}
+TIMEPICKER_TO=${DASHBOARDS_TIMEPICKER_TO:-"now"}
+
 DASHBOARDS_PREFIX=${DASHBOARDS_PREFIX:-}
 # trim leading and trailing spaces and remove characters that need JSON-escaping from DASHBOARDS_PREFIX
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX#"${DASHBOARDS_PREFIX%%[![:space:]]*}"}"
@@ -640,6 +643,14 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}" || ( cat "$CURL_OUT" && echo )
 
+            # set default time range
+            echo "Setting $DATASTORE_TYPE default query time frame (\"$TIMEPICKER_FROM\" to \"$TIMEPICKER_TO\")..."
+            TIMEPICKER_ARG="{\"value\":\"{\\\"from\\\":\\\"${TIMEPICKER_FROM}\\\",\\\"to\\\":\\\"${TIMEPICKER_TO}\\\"}\"}"
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+              -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/timepicker:timeDefaults" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$TIMEPICKER_ARG" || ( cat "$CURL_OUT" && echo )
+
             # pin filters by default
             echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
             CURL_OUT=$(get_tmp_output_filename)
@@ -649,7 +660,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
                 -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
             # enable in-session storage
-            echo "Enabled $DATASTORE_TYPE in-session storage for dashboards..."
+            echo "Enabling $DATASTORE_TYPE in-session storage for dashboards..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" \
