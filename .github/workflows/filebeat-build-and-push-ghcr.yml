@@ -28,5 +28,5 @@ jobs:
   docker:
     uses: ./.github/workflows/docker-build-push-scan.yml
     with:
-      service: filebeat
+      service: filebeat-oss
       dockerfile: ./Dockerfiles/filebeat.Dockerfile
