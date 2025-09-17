@@ -81,6 +81,7 @@ if [ -d "$WORKDIR" ]; then
   for CFGFILE in ./config/includes.binary/install/*_nolvm.cfg; do
     sed -i -e 's|\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm|\1regular|' \
            -e '/^d-i[[:space:]]\+partman-.*lvm/d' \
+           -e 's/[[:space:]]*\$defaultignore{ }//g' \
            -e 's/[[:space:]]*\$lvmok{ }//g' \
            -e 's/[[:space:]]*in_vg[^{]*{[^}]*}[[:space:]]*lv_name{[^}]*}//g' \
       "$CFGFILE"
