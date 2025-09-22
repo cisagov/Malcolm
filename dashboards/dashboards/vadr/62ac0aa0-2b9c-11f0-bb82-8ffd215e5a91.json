@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":21,\"i\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\"},\"panelIndex\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":6,\"y\":0,\"w\":14,\"h\":21,\"i\":\"51185dae-f178-44b6-bb85-de24e8474a92\"},\"panelIndex\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":20,\"y\":0,\"w\":20,\"h\":21,\"i\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\"},\"panelIndex\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":40,\"y\":0,\"w\":7,\"h\":21,\"i\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\"},\"panelIndex\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":21,\"w\":47,\"h\":29,\"i\":\"823f42bc-e67f-4227-9769-65309d15fe51\"},\"panelIndex\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":21,\"i\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\"},\"panelIndex\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":12,\"h\":21,\"i\":\"51185dae-f178-44b6-bb85-de24e8474a92\"},\"panelIndex\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":23,\"h\":21,\"i\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\"},\"panelIndex\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":41,\"y\":0,\"w\":7,\"h\":21,\"i\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\"},\"panelIndex\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":21,\"w\":48,\"h\":29,\"i\":\"823f42bc-e67f-4227-9769-65309d15fe51\"},\"panelIndex\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
         "timeRestore": false,
         "title": "VADR - Outdated",
         "version": 1
@@ -48,8 +48,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNzUsMV0="
+      "updated_at": "2025-09-22T23:02:14.507Z",
+      "version": "WzEyNzEsMV0="
     },
     {
       "attributes": {
@@ -71,8 +71,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDAsMV0="
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MiwxXQ=="
     },
     {
       "attributes": {
@@ -100,8 +100,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:57:12.784Z",
-      "version": "WzYwMiwxXQ=="
+      "updated_at": "2025-09-22T22:52:03.625Z",
+      "version": "Wzg0OCwxXQ=="
     },
     {
       "attributes": {
@@ -130,8 +130,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNTAsMV0="
+      "updated_at": "2025-09-22T22:51:07.838Z",
+      "version": "WzE5MywxXQ=="
     },
     {
       "attributes": {
@@ -153,8 +153,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNjYsMV0="
+      "updated_at": "2025-09-22T22:51:10.928Z",
+      "version": "WzIyMiwxXQ=="
     },
     {
       "attributes": {
@@ -183,8 +183,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExMzksMV0="
+      "updated_at": "2025-09-22T23:08:14.460Z",
+      "version": "WzEyNzksMV0="
     },
     {
       "attributes": {
@@ -227,8 +227,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T21:57:44.795Z",
-      "version": "Wzk3NiwxXQ=="
+      "updated_at": "2025-09-22T22:52:35.597Z",
+      "version": "WzEyMjIsMV0="
     }
   ],
   "version": "3.2.0"

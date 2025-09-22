@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":22,\"i\":\"9de60eb7-402f-4f34-b221-2ea372a9b8b0\"},\"panelIndex\":\"9de60eb7-402f-4f34-b221-2ea372a9b8b0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":6,\"y\":0,\"w\":41,\"h\":15,\"i\":\"349a5fa7-d063-4009-87d9-aaadee7b047e\"},\"panelIndex\":\"349a5fa7-d063-4009-87d9-aaadee7b047e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":6,\"y\":15,\"w\":41,\"h\":6,\"i\":\"1217d919-83ec-4d3b-8184-6f8efe9f3af8\"},\"panelIndex\":\"1217d919-83ec-4d3b-8184-6f8efe9f3af8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":6,\"y\":21,\"w\":20,\"h\":25,\"i\":\"0bd0bf70-64ea-4641-8d29-878e08bf951b\"},\"panelIndex\":\"0bd0bf70-64ea-4641-8d29-878e08bf951b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":26,\"y\":21,\"w\":21,\"h\":25,\"i\":\"8a28c2b4-5f79-4bb6-887d-a81496190eaa\"},\"panelIndex\":\"8a28c2b4-5f79-4bb6-887d-a81496190eaa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":22,\"w\":6,\"h\":24,\"i\":\"7b0a28fb-73d2-4961-8cf0-65d69e02cfe6\"},\"panelIndex\":\"7b0a28fb-73d2-4961-8cf0-65d69e02cfe6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":25,\"i\":\"9de60eb7-402f-4f34-b221-2ea372a9b8b0\"},\"panelIndex\":\"9de60eb7-402f-4f34-b221-2ea372a9b8b0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":42,\"h\":16,\"i\":\"349a5fa7-d063-4009-87d9-aaadee7b047e\"},\"panelIndex\":\"349a5fa7-d063-4009-87d9-aaadee7b047e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":16,\"w\":42,\"h\":9,\"i\":\"1217d919-83ec-4d3b-8184-6f8efe9f3af8\"},\"panelIndex\":\"1217d919-83ec-4d3b-8184-6f8efe9f3af8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":25,\"w\":6,\"h\":25,\"i\":\"7b0a28fb-73d2-4961-8cf0-65d69e02cfe6\"},\"panelIndex\":\"7b0a28fb-73d2-4961-8cf0-65d69e02cfe6\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":25,\"w\":21,\"h\":25,\"i\":\"0bd0bf70-64ea-4641-8d29-878e08bf951b\"},\"panelIndex\":\"0bd0bf70-64ea-4641-8d29-878e08bf951b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":27,\"y\":25,\"w\":21,\"h\":25,\"i\":\"8a28c2b4-5f79-4bb6-887d-a81496190eaa\"},\"panelIndex\":\"8a28c2b4-5f79-4bb6-887d-a81496190eaa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"}]",
         "timeRestore": false,
         "title": "VADR - Inventory",
         "version": 1
@@ -37,24 +37,24 @@
           "type": "visualization"
         },
         {
-          "id": "278df510-2b78-11f0-92dc-5f54cacd4f4e",
+          "id": "c5b7e390-9e06-11ef-8358-f36ccc4ae837",
           "name": "panel_3",
           "type": "visualization"
         },
         {
-          "id": "7a488bd0-2b78-11f0-92dc-5f54cacd4f4e",
+          "id": "278df510-2b78-11f0-92dc-5f54cacd4f4e",
           "name": "panel_4",
           "type": "visualization"
         },
         {
-          "id": "c5b7e390-9e06-11ef-8358-f36ccc4ae837",
+          "id": "7a488bd0-2b78-11f0-92dc-5f54cacd4f4e",
           "name": "panel_5",
           "type": "visualization"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExODUsMV0="
+      "updated_at": "2025-09-22T22:59:37.706Z",
+      "version": "WzEyNjksMV0="
     },
     {
       "attributes": {
@@ -76,8 +76,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDAsMV0="
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MiwxXQ=="
     },
     {
       "attributes": {
@@ -106,8 +106,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExODEsMV0="
+      "updated_at": "2025-09-22T22:51:13.010Z",
+      "version": "WzIzNSwxXQ=="
     },
     {
       "attributes": {
@@ -136,8 +136,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExODIsMV0="
+      "updated_at": "2025-09-22T22:51:13.010Z",
+      "version": "WzIzNiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR - Vendor Pie",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR - Vendor Pie\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"source.mac\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.device.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":15,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"top\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
+      },
+      "id": "c5b7e390-9e06-11ef-8358-f36ccc4ae837",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:55:00.890Z",
+      "version": "WzEyNjcsMV0="
     },
     {
       "attributes": {
@@ -166,8 +196,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExODMsMV0="
+      "updated_at": "2025-09-22T22:51:13.010Z",
+      "version": "WzIzNywxXQ=="
     },
     {
       "attributes": {
@@ -196,38 +226,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExODQsMV0="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "Vendor Pie",
-        "uiStateJSON": "{}",
-        "version": 1,
-        "visState": "{\"title\":\"Vendor Pie\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"source.mac\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.device.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":15,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"top\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
-      },
-      "id": "c5b7e390-9e06-11ef-8358-f36ccc4ae837",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNjAsMV0="
+      "updated_at": "2025-09-22T22:51:13.010Z",
+      "version": "WzIzOCwxXQ=="
     },
     {
       "attributes": {
@@ -270,8 +270,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T21:57:44.795Z",
-      "version": "Wzk3NiwxXQ=="
+      "updated_at": "2025-09-22T22:52:35.597Z",
+      "version": "WzEyMjIsMV0="
     }
   ],
   "version": "3.2.0"

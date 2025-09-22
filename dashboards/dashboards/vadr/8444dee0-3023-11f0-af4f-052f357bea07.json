@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"NOT rule.name: (*STREAM* OR *checksum)\",\"language\":\"lucene\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"useMargins\":true}",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":21,\"i\":\"40bdc3d5-6930-40c7-a33e-0ec02ba05619\",\"w\":6,\"x\":0,\"y\":0},\"panelIndex\":\"40bdc3d5-6930-40c7-a33e-0ec02ba05619\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"331da8a4-a726-4c07-9ff0-5f95eab912c8\",\"w\":8,\"x\":6,\"y\":0},\"panelIndex\":\"331da8a4-a726-4c07-9ff0-5f95eab912c8\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":11,\"i\":\"daab2b41-3ca9-4410-a1c8-e1ba32e95de9\",\"w\":34,\"x\":14,\"y\":0},\"panelIndex\":\"daab2b41-3ca9-4410-a1c8-e1ba32e95de9\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":16,\"i\":\"cdd4f7f8-4cd3-449d-9076-6e236f946ef3\",\"w\":19,\"x\":6,\"y\":11},\"panelIndex\":\"cdd4f7f8-4cd3-449d-9076-6e236f946ef3\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":35,\"i\":\"aa99aaa4-9970-4910-9762-07eac21bffc5\",\"w\":22,\"x\":25,\"y\":11},\"panelIndex\":\"aa99aaa4-9970-4910-9762-07eac21bffc5\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"688db712-7f7f-4903-b484-367c3a52f15e\",\"w\":10,\"x\":0,\"y\":27},\"panelIndex\":\"688db712-7f7f-4903-b484-367c3a52f15e\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":19,\"i\":\"6a87656d-7ae9-4a7f-af93-e4bf91a39160\",\"w\":15,\"x\":10,\"y\":27},\"panelIndex\":\"6a87656d-7ae9-4a7f-af93-e4bf91a39160\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"e76eaf12-21aa-44bd-80ff-2383ccfee2a8\",\"w\":10,\"x\":0,\"y\":46},\"panelIndex\":\"e76eaf12-21aa-44bd-80ff-2383ccfee2a8\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"4884a3be-aece-45b8-942b-1a25221b5049\",\"w\":14,\"x\":10,\"y\":46},\"panelIndex\":\"4884a3be-aece-45b8-942b-1a25221b5049\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"3b293194-f08c-490a-8c29-34b99a5dc0db\",\"w\":12,\"x\":24,\"y\":46},\"panelIndex\":\"3b293194-f08c-490a-8c29-34b99a5dc0db\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"gridData\":{\"h\":18,\"i\":\"19552ae8-56c1-488b-a559-f26fc2c0f881\",\"w\":11,\"x\":36,\"y\":46},\"panelIndex\":\"19552ae8-56c1-488b-a559-f26fc2c0f881\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":30,\"i\":\"cd3b95fd-6dda-48d9-b91b-9e6b3d0bd125\",\"w\":48,\"x\":0,\"y\":64},\"panelIndex\":\"cd3b95fd-6dda-48d9-b91b-9e6b3d0bd125\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_11\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":27,\"i\":\"40bdc3d5-6930-40c7-a33e-0ec02ba05619\"},\"panelIndex\":\"40bdc3d5-6930-40c7-a33e-0ec02ba05619\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":8,\"h\":11,\"i\":\"331da8a4-a726-4c07-9ff0-5f95eab912c8\"},\"panelIndex\":\"331da8a4-a726-4c07-9ff0-5f95eab912c8\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":14,\"y\":0,\"w\":34,\"h\":11,\"i\":\"daab2b41-3ca9-4410-a1c8-e1ba32e95de9\"},\"panelIndex\":\"daab2b41-3ca9-4410-a1c8-e1ba32e95de9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":11,\"w\":19,\"h\":16,\"i\":\"cdd4f7f8-4cd3-449d-9076-6e236f946ef3\"},\"panelIndex\":\"cdd4f7f8-4cd3-449d-9076-6e236f946ef3\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":25,\"y\":11,\"w\":23,\"h\":35,\"i\":\"aa99aaa4-9970-4910-9762-07eac21bffc5\"},\"panelIndex\":\"aa99aaa4-9970-4910-9762-07eac21bffc5\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":19,\"i\":\"688db712-7f7f-4903-b484-367c3a52f15e\"},\"panelIndex\":\"688db712-7f7f-4903-b484-367c3a52f15e\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":10,\"y\":27,\"w\":15,\"h\":19,\"i\":\"6a87656d-7ae9-4a7f-af93-e4bf91a39160\"},\"panelIndex\":\"6a87656d-7ae9-4a7f-af93-e4bf91a39160\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":46,\"w\":10,\"h\":18,\"i\":\"e76eaf12-21aa-44bd-80ff-2383ccfee2a8\"},\"panelIndex\":\"e76eaf12-21aa-44bd-80ff-2383ccfee2a8\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_7\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":10,\"y\":46,\"w\":13,\"h\":18,\"i\":\"4884a3be-aece-45b8-942b-1a25221b5049\"},\"panelIndex\":\"4884a3be-aece-45b8-942b-1a25221b5049\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_8\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":23,\"y\":46,\"w\":13,\"h\":18,\"i\":\"3b293194-f08c-490a-8c29-34b99a5dc0db\"},\"panelIndex\":\"3b293194-f08c-490a-8c29-34b99a5dc0db\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_9\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":36,\"y\":46,\"w\":12,\"h\":18,\"i\":\"19552ae8-56c1-488b-a559-f26fc2c0f881\"},\"panelIndex\":\"19552ae8-56c1-488b-a559-f26fc2c0f881\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":1,\"direction\":\"desc\"}}},\"panelRefName\":\"panel_10\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":64,\"w\":48,\"h\":30,\"i\":\"cd3b95fd-6dda-48d9-b91b-9e6b3d0bd125\"},\"panelIndex\":\"cd3b95fd-6dda-48d9-b91b-9e6b3d0bd125\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"}]",
         "timeRestore": false,
         "title": "VADR - IDS ",
         "version": 1
@@ -83,8 +83,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNjQsMV0="
+      "updated_at": "2025-09-22T23:04:12.457Z",
+      "version": "WzEyNzUsMV0="
     },
     {
       "attributes": {
@@ -106,8 +106,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDAsMV0="
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MiwxXQ=="
     },
     {
       "attributes": {
@@ -136,8 +136,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQyOCwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3NCwxXQ=="
     },
     {
       "attributes": {
@@ -166,8 +166,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQyOSwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3NSwxXQ=="
     },
     {
       "attributes": {
@@ -196,8 +196,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzMCwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3NiwxXQ=="
     },
     {
       "attributes": {
@@ -226,8 +226,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzMSwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3NywxXQ=="
     },
     {
       "attributes": {
@@ -256,8 +256,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzMiwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3OCwxXQ=="
     },
     {
       "attributes": {
@@ -286,8 +286,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzMywxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY3OSwxXQ=="
     },
     {
       "attributes": {
@@ -316,8 +316,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzNCwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY4MCwxXQ=="
     },
     {
       "attributes": {
@@ -346,8 +346,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzNSwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY4MSwxXQ=="
     },
     {
       "attributes": {
@@ -376,8 +376,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzNywxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY4MywxXQ=="
     },
     {
       "attributes": {
@@ -406,8 +406,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzNiwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY4MiwxXQ=="
     },
     {
       "attributes": {
@@ -444,8 +444,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T21:56:58.245Z",
-      "version": "WzQzOCwxXQ=="
+      "updated_at": "2025-09-22T22:51:49.255Z",
+      "version": "WzY4NCwxXQ=="
     }
   ],
   "version": "3.2.0"

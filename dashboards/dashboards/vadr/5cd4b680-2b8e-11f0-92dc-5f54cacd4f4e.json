@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"394dbb58-fbac-4cb0-9dd5-f0f8f41266ac\",\"w\":6,\"x\":0,\"y\":0},\"panelIndex\":\"394dbb58-fbac-4cb0-9dd5-f0f8f41266ac\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"89f0d965-ae69-4c58-8c01-4d6af0ac6e5a\",\"w\":12,\"x\":6,\"y\":0},\"panelIndex\":\"89f0d965-ae69-4c58-8c01-4d6af0ac6e5a\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"d22419bf-e872-4720-84af-67668799c8e9\",\"w\":8,\"x\":18,\"y\":0},\"panelIndex\":\"d22419bf-e872-4720-84af-67668799c8e9\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":22,\"i\":\"f41de99f-0ff7-49c6-90c5-43e5d8c435cf\",\"w\":8,\"x\":27,\"y\":0},\"panelIndex\":\"f41de99f-0ff7-49c6-90c5-43e5d8c435cf\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":208.66666666666666}]}},\"gridData\":{\"h\":22,\"i\":\"8ca4807e-4a22-46b8-8267-0b7aa636c3a2\",\"w\":12,\"x\":35,\"y\":0},\"panelIndex\":\"8ca4807e-4a22-46b8-8267-0b7aa636c3a2\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"054bec9d-e005-423b-944c-b7bd2112e096\",\"w\":6,\"x\":0,\"y\":22},\"panelIndex\":\"054bec9d-e005-423b-944c-b7bd2112e096\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"68b074ed-2ead-4b6c-83d4-000c06970bf7\",\"w\":20,\"x\":6,\"y\":22},\"panelIndex\":\"68b074ed-2ead-4b6c-83d4-000c06970bf7\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"9b751a86-8bf1-4f1e-9e1d-c8663f3e1f24\",\"w\":20,\"x\":27,\"y\":22},\"panelIndex\":\"9b751a86-8bf1-4f1e-9e1d-c8663f3e1f24\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":37,\"i\":\"9563c4ea-a4b3-469d-b2a7-fdd2dc282230\",\"w\":47,\"x\":0,\"y\":41},\"panelIndex\":\"9563c4ea-a4b3-469d-b2a7-fdd2dc282230\",\"version\":\"2.19.1\",\"panelRefName\":\"panel_8\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":22,\"i\":\"394dbb58-fbac-4cb0-9dd5-f0f8f41266ac\"},\"panelIndex\":\"394dbb58-fbac-4cb0-9dd5-f0f8f41266ac\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":13,\"h\":22,\"i\":\"89f0d965-ae69-4c58-8c01-4d6af0ac6e5a\"},\"panelIndex\":\"89f0d965-ae69-4c58-8c01-4d6af0ac6e5a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":8,\"h\":22,\"i\":\"d22419bf-e872-4720-84af-67668799c8e9\"},\"panelIndex\":\"d22419bf-e872-4720-84af-67668799c8e9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":27,\"y\":0,\"w\":8,\"h\":22,\"i\":\"f41de99f-0ff7-49c6-90c5-43e5d8c435cf\"},\"panelIndex\":\"f41de99f-0ff7-49c6-90c5-43e5d8c435cf\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":35,\"y\":0,\"w\":13,\"h\":22,\"i\":\"8ca4807e-4a22-46b8-8267-0b7aa636c3a2\"},\"panelIndex\":\"8ca4807e-4a22-46b8-8267-0b7aa636c3a2\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":208.66666666666666}]}},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":22,\"w\":6,\"h\":19,\"i\":\"054bec9d-e005-423b-944c-b7bd2112e096\"},\"panelIndex\":\"054bec9d-e005-423b-944c-b7bd2112e096\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":22,\"w\":21,\"h\":19,\"i\":\"68b074ed-2ead-4b6c-83d4-000c06970bf7\"},\"panelIndex\":\"68b074ed-2ead-4b6c-83d4-000c06970bf7\",\"embeddableConfig\":{},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":27,\"y\":22,\"w\":21,\"h\":19,\"i\":\"9b751a86-8bf1-4f1e-9e1d-c8663f3e1f24\"},\"panelIndex\":\"9b751a86-8bf1-4f1e-9e1d-c8663f3e1f24\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":41,\"w\":48,\"h\":37,\"i\":\"9563c4ea-a4b3-469d-b2a7-fdd2dc282230\"},\"panelIndex\":\"9563c4ea-a4b3-469d-b2a7-fdd2dc282230\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"}]",
         "timeRestore": false,
         "title": "VADR - External Communication",
         "version": 1
@@ -68,8 +68,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNzQsMV0="
+      "updated_at": "2025-09-22T23:02:44.862Z",
+      "version": "WzEyNzIsMV0="
     },
     {
       "attributes": {
@@ -91,8 +91,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDAsMV0="
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MiwxXQ=="
     },
     {
       "attributes": {
@@ -120,8 +120,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDYsMV0="
+      "updated_at": "2025-09-22T22:51:06.846Z",
+      "version": "WzE4MCwxXQ=="
     },
     {
       "attributes": {
@@ -149,8 +149,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:57:12.784Z",
-      "version": "WzYwNywxXQ=="
+      "updated_at": "2025-09-22T22:52:03.625Z",
+      "version": "Wzg1MywxXQ=="
     },
     {
       "attributes": {
@@ -178,8 +178,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T21:57:12.784Z",
-      "version": "WzYwNiwxXQ=="
+      "updated_at": "2025-09-22T22:52:03.625Z",
+      "version": "Wzg1MiwxXQ=="
     },
     {
       "attributes": {
@@ -208,8 +208,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDcsMV0="
+      "updated_at": "2025-09-22T22:51:06.846Z",
+      "version": "WzE4MywxXQ=="
     },
     {
       "attributes": {
@@ -238,8 +238,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNzIsMV0="
+      "updated_at": "2025-09-22T22:51:06.846Z",
+      "version": "WzE4NCwxXQ=="
     },
     {
       "attributes": {
@@ -268,8 +268,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNzMsMV0="
+      "updated_at": "2025-09-22T22:51:06.846Z",
+      "version": "WzE4NSwxXQ=="
     },
     {
       "attributes": {
@@ -298,8 +298,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExNDUsMV0="
+      "updated_at": "2025-09-22T22:51:06.846Z",
+      "version": "WzE4NiwxXQ=="
     },
     {
       "attributes": {
@@ -328,8 +328,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:01:44.786Z",
-      "version": "WzExMzksMV0="
+      "updated_at": "2025-09-22T23:08:14.460Z",
+      "version": "WzEyNzksMV0="
     },
     {
       "attributes": {
@@ -372,8 +372,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T21:57:44.795Z",
-      "version": "Wzk3NiwxXQ=="
+      "updated_at": "2025-09-22T22:52:35.597Z",
+      "version": "WzEyMjIsMV0="
     },
     {
       "attributes": {
@@ -417,8 +417,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T21:57:47.842Z",
-      "version": "WzEwMTQsMV0="
+      "updated_at": "2025-09-22T22:52:38.777Z",
+      "version": "WzEyNjAsMV0="
     }
   ],
   "version": "3.2.0"

@@ -15,6 +15,7 @@
 [Signatures](#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)
 [Suricata Alerts](#/dashboard/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)
 [Asset Interaction Analysis](#/dashboard/677ee170-809e-11ed-8d5b-07069f823b6f)
+[Validated Architecture Design Review](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)
 [↪ NetBox](/netbox/)
 [↪ Arkime](/arkime/)
 
