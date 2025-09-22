@@ -1,0 +1,235 @@
+{
+  "objects": [
+    {
+      "attributes": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":21,\"i\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\"},\"panelIndex\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":6,\"y\":0,\"w\":14,\"h\":21,\"i\":\"51185dae-f178-44b6-bb85-de24e8474a92\"},\"panelIndex\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":20,\"y\":0,\"w\":20,\"h\":21,\"i\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\"},\"panelIndex\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":40,\"y\":0,\"w\":7,\"h\":21,\"i\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\"},\"panelIndex\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"2.19.1\",\"gridData\":{\"x\":0,\"y\":21,\"w\":47,\"h\":29,\"i\":\"823f42bc-e67f-4227-9769-65309d15fe51\"},\"panelIndex\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "timeRestore": false,
+        "title": "VADR - Outdated",
+        "version": 1
+      },
+      "id": "62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91",
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "80e29db0-9149-11ef-b768-49f7d512ac9c",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "6e338fc0-2ba0-11f0-bb82-8ffd215e5a91",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
+          "name": "panel_4",
+          "type": "visualization"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2025-09-22T22:01:44.786Z",
+      "version": "WzExNzUsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "VADR Network Logs",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\n### General 120 Byte\\n[Malcolm Homepage (Overview)](#/dashboard/0ad3d7c2-3441-485e-9dfe-dbb22e84e576)  \\n[Security Overview](#/dashboard/95479950-41f2-11ea-88fa-7151df485405)  \\n[ICS/IoT Security Overview](#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)  \\n[Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)  \\n[Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)  \\n[Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)  \\n[Asset Interaction Analysis](#/dashboard/677ee170-809e-11ed-8d5b-07069f823b6f)  \\n[Best Guess](#/dashboard/12e3a130-d83b-11eb-a0b0-f328ce09b0b7)     \\n[↪ NetBox](/netbox/)  \\n[↪ Arkime](/arkime/)  \\n●   [DNS](#/dashboard/2cf94cd0-ecab-40a5-95a7-8419f3a39cd9)   ●   [NTP](#/dashboard/af5df620-eeb6-11e9-bdef-65a192b7f586)   ●   [SNMP](#/dashboard/4e5f106e-c60a-4226-8f64-d534abb912ab)   \",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
+      },
+      "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:01:44.786Z",
+      "version": "WzExNDAsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"(NOT event.dataset:known*) AND ((network.protocol:ssh AND network.protocol_version < 2) OR (network.protocol:smb AND network.protocol_version < 2) OR (network.protocol:tls AND NOT network.protocol_version:(*TLS*v12* OR *TLS*v13*)) OR (network.protocol:ntp AND network.protocol_version < 4) OR (network.protocol:rfb AND network.protocol_version < 3.8) OR (network.protocol:rdp AND network.protocol_version < 6.0) OR (network.protocol:snmp AND network.protocol_version < 3) OR (network.protocol:ldap AND network.protocol_version < 3) OR (network.protocol:ftp) OR (network.protocol:tftp) OR (network.protocol:telnet) OR (network.protocol:rlogin) OR (network.protocol:rsh))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "title": "Outdated/Insecure Application Protocols",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Outdated/Insecure Application Protocols\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Application Protocol\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Protocol Version\"}}]}"
+      },
+      "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T21:57:12.784Z",
+      "version": "WzYwMiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"destination.port:(20 OR 21 OR 79 OR 80 OR 110 OR 137 OR 138 OR 139 OR 389 OR 512 OR 513 OR 514) \\n\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR Problematic Ports",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR Problematic Ports\",\"type\":\"histogram\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":1000,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination Port\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"histogram\",\"grid\":{\"categoryLines\":true,\"valueAxis\":\"ValueAxis-1\"},\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"type\":\"category\",\"position\":\"bottom\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"linear\"},\"labels\":{\"show\":true,\"filter\":true,\"truncate\":100},\"title\":{}}],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"name\":\"LeftAxis-1\",\"type\":\"value\",\"position\":\"left\",\"show\":true,\"style\":{},\"scale\":{\"type\":\"square root\",\"mode\":\"normal\"},\"labels\":{\"show\":true,\"rotate\":0,\"filter\":false,\"truncate\":100},\"title\":{\"text\":\"Count\"}}],\"seriesParams\":[{\"show\":true,\"type\":\"histogram\",\"mode\":\"stacked\",\"data\":{\"label\":\"Count\",\"id\":\"1\"},\"valueAxis\":\"ValueAxis-1\",\"drawLinesBetweenPoints\":true,\"lineWidth\":2,\"showCircles\":true}],\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"times\":[],\"addTimeMarker\":false,\"labels\":{\"show\":true},\"thresholdLine\":{\"show\":false,\"value\":10,\"width\":1,\"style\":\"full\",\"color\":\"#E7664C\"},\"row\":false}}"
+      },
+      "id": "80e29db0-9149-11ef-b768-49f7d512ac9c",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:01:44.786Z",
+      "version": "WzExNTAsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "title": "Port Services",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Port Services\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"20 - FTP   \\n21 - FTP   \\n22 - SSH   \\n23 - Telnet   \\n69 - TFTP   \\n79  - Finger   \\n80 - HTTP   \\n110 - POP3   \\n137 - NetBIOS   \\n138 - NetBIOS   \\n139 - NetBIOS   \\n389 - Plaintext LDAP   \\n512 - Remote Execution (rexec)   \\n513 - Remote Login  (rlogin)   \\n514 - Remote Shell (rshell)   \\n3389 - RDP   \\n5900 - VNC   \\n5901 - VNC   \\n5902 - VNC   \\n5938 - TeamViewer   \\n6568 - AnyDesk   \\n\\n\\n\"}}"
+      },
+      "id": "6e338fc0-2ba0-11f0-bb82-8ffd215e5a91",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:01:44.786Z",
+      "version": "WzExNjYsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "NAVV_1.0",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":10,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"NAVV_1.0\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source MAC\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source Network\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination Network\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination MAC\"},\"schema\":\"bucket\"},{\"id\":\"8\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"},{\"id\":\"9\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unmapped\",\"customLabel\":\"Service\"},\"schema\":\"bucket\"},{\"id\":\"10\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"No Protocol\",\"customLabel\":\"Protocol\"},\"schema\":\"bucket\"},{\"id\":\"11\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.conn.conn_state_description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Conn State\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":100,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"row\":true}}"
+      },
+      "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:01:44.786Z",
+      "version": "WzExMzksMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "network.transport",
+          "network.protocol",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
+          "network.bytes",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"(event.provider:zeek AND event.dataset:conn) OR (event.provider:suricata AND event.dataset:flow)\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
+            "desc"
+          ]
+        ],
+        "title": "Connections - Logs",
+        "version": 1
+      },
+      "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-09-22T21:57:44.795Z",
+      "version": "Wzk3NiwxXQ=="
+    }
+  ],
+  "version": "3.2.0"
+}
