@@ -85,9 +85,11 @@ Upon Booting the Malcolm installation ISO, users are presented with the followin
 The next screen of the installer presents the following options relevant to installation:
 
 * **Quick Install** - Installs Malcolm without full disk encryption using default partitioning.
+* **Quick Install** (no LVM) - The same as **Quick Install**, only does not use Logical Volume Management (LVM) framework.
 * **Encrypted Quick Install** - Installs Malcolm with full disk encryption using default partitioning. Users will be prompted for a password for full disk encryption during installation which must be entered each time the system boots.
 * **Expert Install** - Allows users to configure the options of the [Debian](https://wiki.debian.org/DebianInstaller)-based installation system. Only recommended when needed for expert Linux users.
-* **Virtual Machine Single Partition Quick Install** - The same as **Quick Install** except that all system files are stored in a single partition. Use this option when installing Malcolm onto a virtual machine.
+* **Virtual Machine Single Partition Quick Install** - The same as **Quick Install** except that all system files are stored in a single partition. Use this option (or the equivalent **no LVM** option) when installing Malcolm onto a virtual machine.
+* **Virtual Machine Single Partition Quick Install (no LVM)** - The same as **Virtual Machine Single Partition Quick Install**, only does not use Logical Volume Management (LVM) framework. Use this option (or the preceding one) when installing Malcolm onto a virtual machine.
 
 ![](./images/screenshots/iso_install_malcolm_iso_menu_2.png)
 
@@ -110,7 +112,7 @@ After the passwords have been entered, the installer will proceed to format the 
 
 At the end of the installation process, users will be prompted with a few self-explanatory yes/no questions:
 
-* **Format non-OS drive(s) for artifact storage?**
+* **Format non-OS drive(s) for artifact storage?** *(Note that if the [**Encrypted Quick Install**](#ISOInstallMalcolm) installation option was chosen, any non-OS drives formatted for artifact storage will also be configured with full-disk encryption)*
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
