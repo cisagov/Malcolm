@@ -385,6 +385,7 @@ The Hedgehog Linux installation ISO follows the same process as the [Malcolm ins
 
 The installer will ask for a few pieces of information prior to installing Hedgehog Linux:
 
+* **Hostname** - the name of the Hedgehog Linux system used to identify itself on the network
 * **Root password** – a password for the privileged root account, which is rarely needed (only during the configuration of the sensors network interfaces and setting the sensor host name)
 * **User password** – a password for the non-privileged `sensor` account under which the various sensor capture and forwarding services run
 * **Encryption password** – (optional) if the encrypted installation option was selected at boot, the encryption password must be entered every time the sensor boots
