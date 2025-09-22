@@ -1289,7 +1289,6 @@ def UpdateFromMandiant(
 def iter_google_collections_since(
     client,
     ctypes=[
-        'campaign',
         'threat-actor',
         'malware-family',
     ],
@@ -1336,7 +1335,7 @@ def UpdateFromGoogle(
 
     ctypes = [
         s.strip()
-        for s in connInfo.get('collection_type', 'campaign,threat-actor,malware-family').split(",")
+        for s in connInfo.get('collection_type', 'threat-actor,malware-family').split(",")
         if s.strip()
     ]
     filters = connInfo.get('filters')

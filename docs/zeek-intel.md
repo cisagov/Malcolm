@@ -120,10 +120,18 @@ If a [YAML](https://yaml.org/) file named `google.yaml` is found in `./zeek/inte
   api_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-The `collection_type` parameter may be optionally provided, consisting of a comma-separated list of the values supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats).
+The `collection_type` parameter may be optionally provided, consisting of a comma-separated list of the values supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats):
+
+* [`threat-actor`](https://gtidocs.virustotal.com/reference/threat-actor-object)
+* [`malware-family`](https://gtidocs.virustotal.com/reference/malware-family-object)
+* [`campaign`](https://gtidocs.virustotal.com/reference/campaign-object)
+* [`collection`](https://gtidocs.virustotal.com/reference/ioc-collection-object)
+* [`software-toolkit`](https://gtidocs.virustotal.com/reference/software-toolkit-object)
+
+For example:
 
 ```yaml
-  collection_type: campaign,threat-actor,malware-family
+  collection_type: threat-actor,malware-family
 ```
 
 Additionally, the `filters` parameter may be optionally provided, consisting of filters as supported by the Google Threat Intelligence [collections API](https://gtidocs.virustotal.com/reference/list-threats#searches-observations). See these [examples](https://gtidocs.virustotal.com/reference/list-threats#examples) of filtering syntax. Note: filtering by collection type should be done with the `collection_type` parameter described above and not as part of `filters`.
