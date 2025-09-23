@@ -2,13 +2,13 @@
   "objects": [
     {
       "attributes": {
-        "description": "Statistics and diagnostics for packet capture from Zeek and Suricata",
+        "description": "Statistics and diagnostics for packet capture from Zeek, Suricata, and Arkime",
         "hits": 0,
         "kibanaSavedObjectMeta": {
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2f6e911c-f4e2-46b9-8fcd-782142363917\"},\"panelIndex\":\"2f6e911c-f4e2-46b9-8fcd-782142363917\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":15,\"i\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\"},\"panelIndex\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":15,\"i\":\"b483d809-a528-4280-b79e-aa7ada17d275\"},\"panelIndex\":\"b483d809-a528-4280-b79e-aa7ada17d275\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_2\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":8,\"y\":15,\"w\":11,\"h\":10,\"i\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\"},\"panelIndex\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_3\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":19,\"y\":15,\"w\":11,\"h\":10,\"i\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\"},\"panelIndex\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_4\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":30,\"y\":15,\"w\":18,\"h\":20,\"i\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\"},\"panelIndex\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\",\"embeddableConfig\":{\"columns\":[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"host.name\",\"zeek.capture_loss.peer\",\"zeek.capture_loss.acks\",\"zeek.capture_loss.gaps\",\"zeek.capture_loss.percent_lost\"]},\"panelRefName\":\"panel_5\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":8,\"y\":25,\"w\":11,\"h\":10,\"i\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\"},\"panelIndex\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_6\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":19,\"y\":25,\"w\":11,\"h\":10,\"i\":\"687597e3-4848-4629-8b85-45c0773efb79\"},\"panelIndex\":\"687597e3-4848-4629-8b85-45c0773efb79\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_7\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":15,\"i\":\"0174654c-2010-463a-b49e-fa5759b61b9c\"},\"panelIndex\":\"0174654c-2010-463a-b49e-fa5759b61b9c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":24,\"y\":35,\"w\":24,\"h\":15,\"i\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\"},\"panelIndex\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\",\"embeddableConfig\":{},\"panelRefName\":\"panel_9\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":50,\"w\":48,\"h\":21,\"i\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\"},\"panelIndex\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":71,\"w\":48,\"h\":21,\"i\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\"},\"panelIndex\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":92,\"w\":48,\"h\":7,\"i\":\"3307251f-bea4-4055-bb53-0621e3da28df\"},\"panelIndex\":\"3307251f-bea4-4055-bb53-0621e3da28df\",\"embeddableConfig\":{\"sort\":[],\"columns\":[\"currentTime\",\"hostname\",\"nodeName\",\"totalSessions\",\"totalPackets\",\"totalK\",\"totalDropped\"]},\"panelRefName\":\"panel_12\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":99,\"w\":13,\"h\":20,\"i\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\"},\"panelIndex\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":13,\"y\":99,\"w\":35,\"h\":20,\"i\":\"f15e46fe-040f-4602-ad13-01aab36b372a\"},\"panelIndex\":\"f15e46fe-040f-4602-ad13-01aab36b372a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_14\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":0,\"y\":119,\"w\":16,\"h\":17,\"i\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\"},\"panelIndex\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"3.1.0\",\"gridData\":{\"x\":16,\"y\":119,\"w\":32,\"h\":17,\"i\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\"},\"panelIndex\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\",\"embeddableConfig\":{\"columns\":[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"host.name\",\"zeek.reporter.level\",\"zeek.reporter.msg\",\"zeek.reporter.location\"]},\"panelRefName\":\"panel_16\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"2f6e911c-f4e2-46b9-8fcd-782142363917\"},\"panelIndex\":\"2f6e911c-f4e2-46b9-8fcd-782142363917\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":11,\"h\":15,\"i\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\"},\"panelIndex\":\"0c179e97-9bcf-4f72-b717-b7a93667c1a0\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":19,\"y\":0,\"w\":29,\"h\":15,\"i\":\"b483d809-a528-4280-b79e-aa7ada17d275\"},\"panelIndex\":\"b483d809-a528-4280-b79e-aa7ada17d275\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":15,\"w\":11,\"h\":10,\"i\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\"},\"panelIndex\":\"e10dc0a6-f197-4cbc-a1ad-e67194f95a63\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":19,\"y\":15,\"w\":11,\"h\":10,\"i\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\"},\"panelIndex\":\"01b20859-4d95-47e0-a536-6b1e9932c35b\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":30,\"y\":15,\"w\":18,\"h\":30,\"i\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\"},\"panelIndex\":\"8e013ce7-3205-4d06-a805-6285826c1c5d\",\"embeddableConfig\":{\"columns\":[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"host.name\",\"zeek.capture_loss.peer\",\"zeek.capture_loss.acks\",\"zeek.capture_loss.gaps\",\"zeek.capture_loss.percent_lost\"]},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":25,\"w\":11,\"h\":10,\"i\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\"},\"panelIndex\":\"147b45ae-804b-4d9e-a9a9-806772ad3b35\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":19,\"y\":25,\"w\":11,\"h\":10,\"i\":\"687597e3-4848-4629-8b85-45c0773efb79\"},\"panelIndex\":\"687597e3-4848-4629-8b85-45c0773efb79\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_7\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":35,\"w\":15,\"h\":10,\"i\":\"6c03ebf3-0b60-42e0-95cf-f5985b69db55\"},\"panelIndex\":\"6c03ebf3-0b60-42e0-95cf-f5985b69db55\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":15,\"y\":35,\"w\":15,\"h\":10,\"i\":\"f318b6a8-d90d-40fe-abc2-e044dea79720\"},\"panelIndex\":\"f318b6a8-d90d-40fe-abc2-e044dea79720\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"panelRefName\":\"panel_9\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":45,\"w\":24,\"h\":15,\"i\":\"0174654c-2010-463a-b49e-fa5759b61b9c\"},\"panelIndex\":\"0174654c-2010-463a-b49e-fa5759b61b9c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_10\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":24,\"y\":45,\"w\":24,\"h\":15,\"i\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\"},\"panelIndex\":\"2ecc4ac3-d694-46ab-a6b1-9c86e5e9d394\",\"embeddableConfig\":{},\"panelRefName\":\"panel_11\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":60,\"w\":48,\"h\":21,\"i\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\"},\"panelIndex\":\"36e03a4a-e017-42b8-82cf-205d26b2ed6b\",\"embeddableConfig\":{},\"panelRefName\":\"panel_12\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":81,\"w\":48,\"h\":21,\"i\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\"},\"panelIndex\":\"e1c0f1e0-de36-4527-bafa-a297fe9452a2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_13\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":102,\"w\":48,\"h\":16,\"i\":\"3307251f-bea4-4055-bb53-0621e3da28df\"},\"panelIndex\":\"3307251f-bea4-4055-bb53-0621e3da28df\",\"embeddableConfig\":{\"columns\":[\"currentTime\",\"hostname\",\"nodeName\",\"totalSessions\",\"totalPackets\",\"totalK\",\"totalDropped\"],\"sort\":[]},\"panelRefName\":\"panel_14\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":118,\"w\":13,\"h\":20,\"i\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\"},\"panelIndex\":\"74a841b8-2ffc-4f6d-8b5a-ca7960eb6b10\",\"embeddableConfig\":{},\"panelRefName\":\"panel_15\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":13,\"y\":118,\"w\":35,\"h\":20,\"i\":\"f15e46fe-040f-4602-ad13-01aab36b372a\"},\"panelIndex\":\"f15e46fe-040f-4602-ad13-01aab36b372a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_16\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":138,\"w\":16,\"h\":17,\"i\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\"},\"panelIndex\":\"bfdc6d50-66f1-4f9a-9ea5-cd30bc01099d\",\"embeddableConfig\":{},\"panelRefName\":\"panel_17\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":16,\"y\":138,\"w\":32,\"h\":17,\"i\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\"},\"panelIndex\":\"efbd7f15-5af7-4e39-9889-c1c944a40dc2\",\"embeddableConfig\":{\"columns\":[\"MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER\",\"host.name\",\"zeek.reporter.level\",\"zeek.reporter.msg\",\"zeek.reporter.location\"]},\"panelRefName\":\"panel_18\"}]",
         "timeRestore": false,
         "title": "Packet Capture Statistics",
         "version": 1
@@ -62,54 +62,64 @@
           "type": "visualization"
         },
         {
-          "id": "6b7b9a40-faa1-11e6-86b1-cd7735ff7e23",
+          "id": "282c5a40-97dc-11f0-8633-9f5a026c27d1",
           "name": "panel_8",
           "type": "visualization"
         },
         {
-          "id": "089b85d0-1b16-11e7-b09e-037021c4f8df",
+          "id": "e064df90-97d9-11f0-8633-9f5a026c27d1",
           "name": "panel_9",
           "type": "visualization"
         },
         {
-          "id": "9c6a1610-d7d8-11ee-9ed3-e7afff29e59a",
+          "id": "6b7b9a40-faa1-11e6-86b1-cd7735ff7e23",
           "name": "panel_10",
-          "type": "search"
+          "type": "visualization"
         },
         {
-          "id": "b0aabf40-d7fa-11ee-b25e-e793ed358448",
+          "id": "089b85d0-1b16-11e7-b09e-037021c4f8df",
           "name": "panel_11",
-          "type": "search"
+          "type": "visualization"
         },
         {
-          "id": "44f1a000-8291-11f0-8afc-31c0c90efce4",
+          "id": "9c6a1610-d7d8-11ee-9ed3-e7afff29e59a",
           "name": "panel_12",
           "type": "search"
         },
         {
-          "id": "abcfca50-d7dd-11ee-b25e-e793ed358448",
+          "id": "b0aabf40-d7fa-11ee-b25e-e793ed358448",
           "name": "panel_13",
-          "type": "visualization"
+          "type": "search"
         },
         {
-          "id": "351ef380-d7d9-11ee-9ed3-e7afff29e59a",
+          "id": "44f1a000-8291-11f0-8afc-31c0c90efce4",
           "name": "panel_14",
           "type": "search"
         },
         {
-          "id": "c75b6df0-d7e3-11ee-b25e-e793ed358448",
+          "id": "abcfca50-d7dd-11ee-b25e-e793ed358448",
           "name": "panel_15",
           "type": "visualization"
         },
         {
-          "id": "17619ea0-d7da-11ee-9ed3-e7afff29e59a",
+          "id": "351ef380-d7d9-11ee-9ed3-e7afff29e59a",
           "name": "panel_16",
+          "type": "search"
+        },
+        {
+          "id": "c75b6df0-d7e3-11ee-b25e-e793ed358448",
+          "name": "panel_17",
+          "type": "visualization"
+        },
+        {
+          "id": "17619ea0-d7da-11ee-9ed3-e7afff29e59a",
+          "name": "panel_18",
           "type": "search"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-08-26T15:39:56.676Z",
-      "version": "WzExODEsNV0="
+      "updated_at": "2025-09-22T18:07:31.494Z",
+      "version": "WzEzMDQsMl0="
     },
     {
       "attributes": {
@@ -131,8 +141,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:58.016Z",
-      "version": "WzExMDcsMV0="
+      "updated_at": "2025-09-22T16:39:32.862Z",
+      "version": "WzExMjQsMV0="
     },
     {
       "attributes": {
@@ -160,8 +170,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMTgsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzQsMV0="
     },
     {
       "attributes": {
@@ -183,8 +193,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMTksMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzUsMV0="
     },
     {
       "attributes": {
@@ -206,8 +216,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjAsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzYsMV0="
     },
     {
       "attributes": {
@@ -229,8 +239,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjEsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzcsMV0="
     },
     {
       "attributes": {
@@ -266,8 +276,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjIsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzgsMV0="
     },
     {
       "attributes": {
@@ -289,8 +299,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjMsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwMzksMV0="
     },
     {
       "attributes": {
@@ -312,8 +322,54 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjQsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDAsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "title": "Arkime Stats - Packets and Bytes",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Arkime Stats - Packets and Bytes\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"terms\",\"split_color_mode\":\"opensearchDashboards\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"totalPackets\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"axis_scale\":\"normal\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Packets Seen\",\"terms_field\":\"nodeName\",\"terms_order_by\":\"_key\"},{\"id\":\"7256ab80-97db-11f0-9434-57d9330a7f4c\",\"color\":\"#68BC00\",\"split_mode\":\"terms\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"7256ab81-97db-11f0-9434-57d9330a7f4c\",\"type\":\"top_hit\",\"field\":\"totalK\"},{\"id\":\"d4bccb60-97db-11f0-9434-57d9330a7f4c\",\"type\":\"math\",\"variables\":[{\"id\":\"d7cc0730-97db-11f0-9434-57d9330a7f4c\",\"name\":\"kbytes\",\"field\":\"7256ab81-97db-11f0-9434-57d9330a7f4c\"}],\"script\":\"params.kbytes*1000\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"bytes\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Total Bytes Seen\",\"terms_field\":\"nodeName\",\"terms_order_by\":\"_key\"}],\"time_field\":\"currentTime\",\"index_pattern\":\"arkime_stats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"MALCOLM_NETWORK_INDEX_PATTERN_REPLACER\",\"default_timefield\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"e8246790-97da-11f0-9434-57d9330a7f4c\"}],\"filter\":{\"query\":\"(NOT (hostname:arkime))\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}"
+      },
+      "id": "282c5a40-97dc-11f0-8633-9f5a026c27d1",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-09-22T18:06:00.951Z",
+      "version": "WzEyOTEsMl0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "Arkime Stats - Capture Loss",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Arkime Stats - Capture Loss\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"metric\",\"series\":[{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"#54B399\",\"split_mode\":\"terms\",\"metrics\":[{\"size\":1,\"agg_with\":\"max\",\"order\":\"desc\",\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"top_hit\",\"field\":\"totalDropped\",\"order_by\":null}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"label\":\"Packets Dropped\",\"terms_field\":\"nodeName\",\"terms_order_by\":\"_key\"}],\"time_field\":\"currentTime\",\"index_pattern\":\"arkime_stats_*\",\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"default_index_pattern\":\"MALCOLM_NETWORK_INDEX_PATTERN_REPLACER\",\"default_timefield\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"isModelInvalid\":false,\"background_color_rules\":[{\"id\":\"28bcc800-d7e4-11ee-ad81-217e54128a4b\"}],\"filter\":{\"query\":\"(NOT (hostname:arkime))\",\"language\":\"kuery\"},\"time_range_mode\":\"entire_time_range\"}}"
+      },
+      "id": "e064df90-97d9-11f0-8633-9f5a026c27d1",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-09-22T18:06:43.161Z",
+      "version": "WzEyOTksMl0="
     },
     {
       "attributes": {
@@ -335,8 +391,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:55.971Z",
-      "version": "WzEwNzcsMV0="
+      "updated_at": "2025-09-22T16:39:30.673Z",
+      "version": "WzEwOTQsMV0="
     },
     {
       "attributes": {
@@ -358,8 +414,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:55.971Z",
-      "version": "WzEwNzgsMV0="
+      "updated_at": "2025-09-22T16:39:30.673Z",
+      "version": "WzEwOTUsMV0="
     },
     {
       "attributes": {
@@ -400,8 +456,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjcsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDMsMV0="
     },
     {
       "attributes": {
@@ -441,8 +497,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjgsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDQsMV0="
     },
     {
       "attributes": {
@@ -458,7 +514,7 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\n  \"query\": {\n    \"query\": \"nodeName: (NOT arkime)\",\n    \"language\": \"lucene\"\n  },\n  \"highlightAll\": true,\n  \"version\": true,\n  \"filter\": [],\n  \"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"\n}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"(NOT (hostname:arkime))\",\"language\":\"lucene\"},\"highlightAll\":true,\"version\":true,\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
         },
         "sort": [],
         "title": "Packet Capture - Arkime Stats",
@@ -479,8 +535,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-26T16:14:14.033Z",
-      "version": "WzExODQsNV0="
+      "updated_at": "2025-09-22T18:05:36.176Z",
+      "version": "WzEyODcsMl0="
     },
     {
       "attributes": {
@@ -509,8 +565,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMjksMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDYsMV0="
     },
     {
       "attributes": {
@@ -547,8 +603,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMzAsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDcsMV0="
     },
     {
       "attributes": {
@@ -577,8 +633,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMzEsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDgsMV0="
     },
     {
       "attributes": {
@@ -612,9 +668,9 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-08-25T14:54:49.880Z",
-      "version": "WzEwMzIsMV0="
+      "updated_at": "2025-09-22T16:39:24.477Z",
+      "version": "WzEwNDksMV0="
     }
   ],
-  "version": "3.1.0"
+  "version": "3.2.0"
 }

@@ -116,6 +116,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel)
         + [STIX™ and TAXII™](zeek-intel.md#ZeekIntelSTIX)
         + [MISP](zeek-intel.md#ZeekIntelMISP)
+        + [Google](zeek-intel.md#ZeekIntelGoogle)
         + [Mandiant](zeek-intel.md#ZeekIntelMandiant)
     - ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess)
     - [Asset Interaction Analysis](asset-interaction-analysis.md#AssetInteractionAnalysis)

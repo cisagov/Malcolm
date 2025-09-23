@@ -710,6 +710,11 @@ class MalcolmSource extends WISESource {
       "suricata.tx_id",
       "tags",
       "threat.framework",
+      "threat.indicator.description",
+      "threat.indicator.name",
+      "threat.indicator.provider",
+      "threat.indicator.reference",
+      "threat.indicator.type",
       "threat.tactic.id",
       "threat.tactic.name",
       "threat.tactic.reference",
@@ -3323,38 +3328,38 @@ class MalcolmSource extends WISESource {
 
     // add URL link for assigned transport protocol numbers
     var protoFieldsStr = allFields.filter(value => /^(network\.transport|ip\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_proto_v", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
-    this.api.addFieldAction("malcolm_websearch_proto_f", { name: "Protocol Registry", url: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
+    this.api.addValueAction("malcolm_websearch_proto_v", { name: "Protocol Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
+    this.api.addFieldAction("malcolm_websearch_proto_f", { name: "Protocol Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml', fields: protoFieldsStr });
 
     // add right-click for searching IANA for services
     var serviceFieldsStr = allFields.filter(value => /^(protocols?|network\.protocol)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_service", { name: "Service Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: serviceFieldsStr });
+    this.api.addValueAction("malcolm_websearch_service", { name: "Service Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: serviceFieldsStr });
 
     // add right-click for searching VirusTotal for other IP addresses
     var ipFieldsStr = allFields.filter(value => /[_\.-](h|ip)$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_ip", { name: "VirusTotal IP", url: "https://www.virustotal.com/en/ip-address/%TEXT%/information", fields: ipFieldsStr });
+    this.api.addValueAction("malcolm_websearch_ip", { name: "VirusTotal IP", url: "/dashboards/app/refred/https://www.virustotal.com/en/ip-address/%TEXT%/information", fields: ipFieldsStr });
 
     // add right-click for searching IANA for ports
     var portFieldsStr = allFields.filter(value => /(^|src|dst|source|dest|destination|[\b_\.-])p(ort)?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_port", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: portFieldsStr });
-    this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
+    this.api.addValueAction("malcolm_websearch_port", { name: "Port Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', fields: portFieldsStr });
+    this.api.addValueAction("malcolm_websearch_port_arkime", { name: "Port Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%TEXT%', category: "port" });
 
     // add right-click for searching VirusTotal for hash signatures
     var hashFieldsStr = allFields.filter(value => /(^|[\b_\.-])(md5|sha(1|256|384|512))\b/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
-    this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
+    this.api.addValueAction("malcolm_vt_fields_hash", { name: "VirusTotal Hash", url: "/dashboards/app/refred/https://www.virustotal.com/gui/file/%TEXT%/detection", fields: hashFieldsStr });
+    this.api.addValueAction("malcolm_vt_fields_hash_arkime", { name: "VirusTotal Hash", url: "/dashboards/app/refred/https://www.virustotal.com/gui/file/%TEXT%/detection", category: "md5" });
 
     // add right-click for searching the web for signature IDs
     var sigFieldsStr = allFields.filter(value => /(^|[\b_\.-])(hit|signature(_?id))?s?$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_sig", { name: "Web Search", url: 'https://duckduckgo.com/?q="%TEXT%"', fields: sigFieldsStr });
+    this.api.addValueAction("malcolm_websearch_sig", { name: "Web Search", url: '/dashboards/app/refred/https://duckduckgo.com/?q="%TEXT%"', fields: sigFieldsStr });
 
     // add right-click for searching ARIN for ASN
     var asnFieldsStr = allFields.filter(value => /(as\.number|(src|dst)ASN|asn\.(src|dst))$/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_asn", { name: "ARIN ASN", url: 'https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields: asnFieldsStr });
+    this.api.addValueAction("malcolm_websearch_asn", { name: "ARIN ASN", url: '/dashboards/app/refred/https://search.arin.net/rdap/?query=%TEXT%&searchFilter=asn', fields: asnFieldsStr });
 
     // add right-click for searching mime/media/content types
     var mimeFieldsStr = allFields.filter(value => /mime[_\.-]?type/i.test(value)).join(',');
-    this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: 'https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
+    this.api.addValueAction("malcolm_websearch_mime", { name: "Media Type Registry", url: '/dashboards/app/refred/https://www.iana.org/assignments/media-types/%TEXT%', fields: mimeFieldsStr });
 
     // add right-click for extracted files from zeek
     // var carvedFieldsStr = allFields.filter(value => /^zeek\.files\.extracted$/i.test(value)).join(',');
@@ -3371,6 +3376,10 @@ class MalcolmSource extends WISESource {
     var apiLabel = "Aggregate %DBFIELD%";
     var apiURL = "/mapi/agg/%DBFIELD%?from=%ISOSTART%&to=%ISOSTOP%";
     this.api.addFieldAction("malcolm_mapi_fields_zeek", { name: apiLabel, url: apiURL, all: true });
+
+    // add right-click for threat indicator references
+    var referenceStr = allFields.filter(value => /\.reference$/i.test(value)).join(',');
+    this.api.addValueAction("malcolm_reference_url", { name: "Reference", url: "/dashboards/app/refred/%TEXT%", fields: referenceStr });
 
     // add right-click for viewing original JSON document
     this.api.addValueAction("malcolm_json_source", { name: "%DBFIELD% Document(s) JSON", url: "/mapi/document?filter={\"%DBFIELD%\":\"%TEXT%\"}", fields: "communityId,event.id,id,network.community_id,rootId,zeek.fuid,zeek.uid" });
@@ -3402,6 +3411,14 @@ class MalcolmSource extends WISESource {
       "    +arrayList(session.vulnerability, 'category', 'Vulnerability Category', 'vulnerability.category')\n" +
       "    +arrayList(session.vulnerability, 'enumeration', 'Vulnerability Enumeration', 'vulnerability.enumeration')\n" +
       "    +arrayList(session.vulnerability, 'id', 'Vulnerability ID', 'vulnerability.id')\n" +
+      "    +arrayList(session.vulnerability, 'description', 'Vulnerability Description', 'vulnerability.description')\n" +
+      "    +arrayList(session.vulnerability, 'reference', 'Vulnerability Reference', 'vulnerability.reference')\n" +
+      "    +arrayList(session.vulnerability, 'scanner.vendor', 'Vulnerability Scanner Vendor', 'vulnerability.scanner.vendor')\n" +
+      "    +arrayList(session.threat, 'framework', 'Threat Framework', 'threat.framework')\n" +
+      "    +arrayList(session.threat, 'tactic.id', 'Threat Tactic ID', 'threat.tactic.id')\n" +
+      "    +arrayList(session.threat, 'tactic.name', 'Threat Tactic', 'threat.tactic.name')\n" +
+      "    +arrayList(session.threat, 'technique.id', 'Threat Technique ID', 'threat.technique.id')\n" +
+      "    +arrayList(session.threat, 'technique.name', 'Threat Technique', 'threat.technique.name')\n" +
       "    +arrayList(session.network, 'direction', 'Direction', 'network.direction')\n" +
       "    +arrayList(session.network, 'is_orig', 'Is Originator', 'network.is_orig')\n" +
       "    +arrayList(session.source, 'ip', 'Originating Host', 'source.ip')\n" +

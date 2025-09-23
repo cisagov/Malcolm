@@ -20,6 +20,9 @@ OTHER_INDEX_LIFECYCLE_ROLLOVER_ALIAS=${MALCOLM_OTHER_INDEX_LIFECYCLE_ROLLOVER_AL
 OTHER_INDEX_TIME_FIELD=${MALCOLM_OTHER_INDEX_TIME_FIELD:-"@timestamp"}
 DUMMY_DETECTOR_NAME=${DUMMY_DETECTOR_NAME:-"malcolm_init_dummy"}
 DARK_MODE=${DASHBOARDS_DARKMODE:-"true"}
+TIMEPICKER_FROM=${DASHBOARDS_TIMEPICKER_FROM:-"now-24h"}
+TIMEPICKER_TO=${DASHBOARDS_TIMEPICKER_TO:-"now"}
+
 DASHBOARDS_PREFIX=${DASHBOARDS_PREFIX:-}
 # trim leading and trailing spaces and remove characters that need JSON-escaping from DASHBOARDS_PREFIX
 DASHBOARDS_PREFIX="${DASHBOARDS_PREFIX#"${DASHBOARDS_PREFIX%%[![:space:]]*}"}"
@@ -225,9 +228,9 @@ function DoReplacersForDir() {
   CLUSTER_NODE_COUNT="$3"
   FILE_TYPE="$4"
   if [[ -n "$REPLDIR" ]] && [[ -d "$REPLDIR" ]]; then
-    while IFS= read -r fname; do
-        DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$CLUSTER_NODE_COUNT" "$FILE_TYPE"
-    done < <( find "$REPLDIR"/ -type f 2>/dev/null )
+    while IFS= read -r -d '' fname; do
+      DoReplacersInFile "$fname" "$DATASTORE_TYPE" "$CLUSTER_NODE_COUNT" "$FILE_TYPE"
+    done < <( find "$REPLDIR"/ -type f -print0 2>/dev/null )
   fi
 }
 
@@ -554,20 +557,21 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
           DASHBOARDS_NAVIGATION_TEXT_FILE="$DASHBOARDS_IMPORT_DIR"/navigation_escaped.txt
           escape_for_dashboard_markdown "$DASHBOARDS_IMPORT_DIR"/navigation.md >"$DASHBOARDS_NAVIGATION_TEXT_FILE" 2>/dev/null
           DoReplacersForDir "$DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
-          for i in "${DASHBOARDS_IMPORT_DIR}"/*.ndjson; do
+
+          while IFS= read -r -d '' DASHBOARD_FILE; do
 
             # get info about the dashboard to be imported
             declare -A NEW_DASHBOARD_INFO
-            GetDashboardJsonInfo NEW_DASHBOARD_INFO "$i" "$CURRENT_ISO_TIMESTAMP"
+            GetDashboardJsonInfo NEW_DASHBOARD_INFO "$DASHBOARD_FILE" "$CURRENT_ISO_TIMESTAMP"
 
             # get the old dashboard NDJSON and its info
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${DASHBOARD_FILE}_old" \
               -XPOST "$DASHB_URL/api/saved_objects/_export" \
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d "$(jq -n --arg id "$DASHBOARD_TO_IMPORT_ID" '{objects:[{type:"dashboard",id:$id}],includeReferencesDeep:true}')" || true
             declare -A OLD_DASHBOARD_INFO
-            GetDashboardJsonInfo OLD_DASHBOARD_INFO "${i}_old" "$EPOCH_ISO_TIMESTAMP"
-            rm -f "${i}_old"
+            GetDashboardJsonInfo OLD_DASHBOARD_INFO "${DASHBOARD_FILE}_old" "$EPOCH_ISO_TIMESTAMP"
+            rm -f "${DASHBOARD_FILE}_old"
 
             # compare the timestamps and import if it's newer
             if [[ "${NEW_DASHBOARD_INFO["timestamp"]}" > "${OLD_DASHBOARD_INFO["timestamp"]}" ]]; then
@@ -576,42 +580,10 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               CURL_OUT=$(get_tmp_output_filename)
               curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
                 -XPOST "$DASHB_URL/api/saved_objects/_import?overwrite=true" \
-                -H "$XSRF_HEADER:true" --form "file=@$i" || ( cat "$CURL_OUT" && echo )
+                -H "$XSRF_HEADER:true" --form "file=@$DASHBOARD_FILE" || ( cat "$CURL_OUT" && echo )
             fi # timestamp check
-          done
 
-          # beats will no longer import its dashboards into OpenSearch
-          # (see opensearch-project/OpenSearch-Dashboards#656 and
-          # opensearch-project/OpenSearch-Dashboards#831). As such, we're going to
-          # manually add load our dashboards in /opt/dashboards/beats as well.
-          BEATS_DASHBOARDS_IMPORT_DIR="$(mktemp -p "$TMP_WORK_DIR" -d -t beats-XXXXXX)"
-          rsync -a /opt/dashboards/beats/ "$BEATS_DASHBOARDS_IMPORT_DIR"/
-          DoReplacersForDir "$BEATS_DASHBOARDS_IMPORT_DIR" "$DATASTORE_TYPE" "$NODE_COUNT" dashboard
-          for i in "${BEATS_DASHBOARDS_IMPORT_DIR}"/*.ndjson; do
-
-            # get info about the dashboard to be imported
-            declare -A NEW_DASHBOARD_INFO
-            GetDashboardJsonInfo NEW_DASHBOARD_INFO "$i" "$CURRENT_ISO_TIMESTAMP"
-
-            # get the old dashboard JSON and its info
-            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail --silent --output "${i}_old" \
-              -XPOST "$DASHB_URL/api/saved_objects/_export" \
-              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
-              -d "$(jq -n --arg id "$DASHBOARD_TO_IMPORT_ID" '{objects:[{type:"dashboard",id:$id}],includeReferencesDeep:true}')" || true
-            declare -A OLD_DASHBOARD_INFO
-            GetDashboardJsonInfo OLD_DASHBOARD_INFO "${i}_old" "$EPOCH_ISO_TIMESTAMP"
-            rm -f "${i}_old"
-
-            # compare the timestamps and import if it's newer
-            if [[ "${NEW_DASHBOARD_INFO["timestamp"]}" > "${OLD_DASHBOARD_INFO["timestamp"]}" ]]; then
-              # import the dashboard
-              echo "Importing dashboard \"${NEW_DASHBOARD_INFO["title"]}\" (${NEW_DASHBOARD_INFO["timestamp"]} > ${OLD_DASHBOARD_INFO["timestamp"]}) ..."
-              CURL_OUT=$(get_tmp_output_filename)
-              curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
-                -XPOST "$DASHB_URL/api/saved_objects/_import?overwrite=true" \
-                -H "$XSRF_HEADER:true" --form "file=@$i" || ( cat "$CURL_OUT" && echo )
-            fi # timestamp check
-          done
+          done < <( find "${DASHBOARDS_IMPORT_DIR}" -type f -name "*.ndjson" -print0 2>/dev/null )
 
           echo "$DATASTORE_TYPE Dashboards saved objects import complete!"
 
@@ -640,6 +612,14 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d "{\"value\":\"/app/dashboards#/view/${DEFAULT_DASHBOARD}\"}" || ( cat "$CURL_OUT" && echo )
 
+            # set default time range
+            echo "Setting $DATASTORE_TYPE default query time frame (\"$TIMEPICKER_FROM\" to \"$TIMEPICKER_TO\")..."
+            TIMEPICKER_ARG="{\"value\":\"{\\\"from\\\":\\\"${TIMEPICKER_FROM}\\\",\\\"to\\\":\\\"${TIMEPICKER_TO}\\\"}\"}"
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
+              -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/timepicker:timeDefaults" \
+              -H "$XSRF_HEADER:true" -H 'Content-type:application/json' -d "$TIMEPICKER_ARG" || ( cat "$CURL_OUT" && echo )
+
             # pin filters by default
             echo "Setting $DATASTORE_TYPE to pin dashboard filters by default..."
             CURL_OUT=$(get_tmp_output_filename)
@@ -649,7 +629,7 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
                 -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
             # enable in-session storage
-            echo "Enabled $DATASTORE_TYPE in-session storage for dashboards..."
+            echo "Enabling $DATASTORE_TYPE in-session storage for dashboards..."
             CURL_OUT=$(get_tmp_output_filename)
             curl "${CURL_CONFIG_PARAMS[@]}" --location --fail-with-body --output "$CURL_OUT" --silent \
               -XPOST "$DASHB_URL/api/$DASHBOARDS_URI_PATH/settings/state:storeInSessionStorage" \

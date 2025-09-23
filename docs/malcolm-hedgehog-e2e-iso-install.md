@@ -85,9 +85,11 @@ Upon Booting the Malcolm installation ISO, users are presented with the followin
 The next screen of the installer presents the following options relevant to installation:
 
 * **Quick Install** - Installs Malcolm without full disk encryption using default partitioning.
+* **Quick Install** (no LVM) - The same as **Quick Install**, only does not use Logical Volume Management (LVM) framework.
 * **Encrypted Quick Install** - Installs Malcolm with full disk encryption using default partitioning. Users will be prompted for a password for full disk encryption during installation which must be entered each time the system boots.
 * **Expert Install** - Allows users to configure the options of the [Debian](https://wiki.debian.org/DebianInstaller)-based installation system. Only recommended when needed for expert Linux users.
-* **Virtual Machine Single Partition Quick Install** - The same as **Quick Install** except that all system files are stored in a single partition. Use this option when installing Malcolm onto a virtual machine.
+* **Virtual Machine Single Partition Quick Install** - The same as **Quick Install** except that all system files are stored in a single partition. Use this option (or the equivalent **no LVM** option) when installing Malcolm onto a virtual machine.
+* **Virtual Machine Single Partition Quick Install (no LVM)** - The same as **Virtual Machine Single Partition Quick Install**, only does not use Logical Volume Management (LVM) framework. Use this option (or the preceding one) when installing Malcolm onto a virtual machine.
 
 ![](./images/screenshots/iso_install_malcolm_iso_menu_2.png)
 
@@ -110,7 +112,7 @@ After the passwords have been entered, the installer will proceed to format the 
 
 At the end of the installation process, users will be prompted with a few self-explanatory yes/no questions:
 
-* **Format non-OS drive(s) for artifact storage?**
+* **Format non-OS drive(s) for artifact storage?** *(Note that if the [**Encrypted Quick Install**](#ISOInstallMalcolm) installation option was chosen, any non-OS drives formatted for artifact storage will also be configured with full-disk encryption)*
 * **Disable IPv6?**
 * **Automatically login to the GUI session?**
 * **Should the GUI session be locked due to inactivity?**
@@ -278,7 +280,7 @@ The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's quest
     - **Cron expression for scheduled pulls from threat intelligence feeds**
         + Specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) (using [`cronexpr`](https://github.com/aptible/supercronic/tree/master/cronexpr#implementation)-compatible syntax) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files.
     - **Threat indicator "since" period**
-        + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`7 days ago`).
+        + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), [Google](zeek-intel.md#ZeekIntelGoogle), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`7 days ago`). Note that this value can be overridden per-feed by adding a `since:` value to each feed's respective configuration YAML file.
     - **`Intel::item_expiration` timeout for intelligence items (`-1min` to disable)**
         + Specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration).
 * **Should Malcolm utilize NetBox, an infrastructure resource modeling tool?**
@@ -385,6 +387,7 @@ The Hedgehog Linux installation ISO follows the same process as the [Malcolm ins
 
 The installer will ask for a few pieces of information prior to installing Hedgehog Linux:
 
+* **Hostname** - the name of the Hedgehog Linux system used to identify itself on the network
 * **Root password** – a password for the privileged root account, which is rarely needed (only during the configuration of the sensors network interfaces and setting the sensor host name)
 * **User password** – a password for the non-privileged `sensor` account under which the various sensor capture and forwarding services run
 * **Encryption password** – (optional) if the encrypted installation option was selected at boot, the encryption password must be entered every time the sensor boots

@@ -54,6 +54,8 @@ spec:
               name: process-env
           - configMapRef:
               name: ssl-env
+          - configMapRef:
+              name: upload-common-env
           - secretRef:
               name: auth-env
         env:

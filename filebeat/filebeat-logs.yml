@@ -129,6 +129,38 @@ filebeat.inputs:
   close_eof: ${FILEBEAT_CLOSE_EOF:true}
   clean_removed: ${FILEBEAT_CLEAN_REMOVED:true}
 
+#-------------------------- network interface stats (as JSON) ---------------
+#                           (see netdev-json.sh)
+- type: log
+  paths:
+    - ${FILEBEAT_ZEEK_LOG_LIVE_PATH:/zeek/live}/netdev-stats*.json
+  symlinks: true
+  json:
+    expand_keys: false
+    add_error_key: false
+    ignore_decoding_error: true
+    keys_under_root: false
+    target: miscbeat.network
+  fields:
+    miscbeat.module: network
+  processors:
+    - rename:
+        fields:
+          - from: "fields.miscbeat.module"
+            to: "miscbeat.module"
+          - from: "json"
+            to: "miscbeat.network"
+  tags: ["_malcolm_beats", "_malcolm_miscbeat"]
+  compression_level: 0
+  scan_frequency: ${FILEBEAT_SCAN_FREQUENCY:10s}
+  clean_inactive: ${FILEBEAT_CLEAN_INACTIVE:180m}
+  ignore_older: ${FILEBEAT_IGNORE_OLDER:120m}
+  close_inactive: ${FILEBEAT_CLOSE_INACTIVE_LIVE:90m}
+  close_renamed: true
+  close_removed: true
+  close_eof: true
+  clean_removed: true
+
 #================================ Outputs ======================================
 
 #-------------------------- Logstash Output ------------------------------------

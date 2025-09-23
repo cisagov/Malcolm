@@ -5,9 +5,8 @@
 
 from collections import deque
 from dateparser import parse as ParseDate
-from datetime import datetime
+from datetime import datetime, timezone
 from multiprocessing.pool import ThreadPool
-from pytz import utc as UTCTimeZone
 from time import sleep
 import argparse
 import logging
@@ -158,9 +157,9 @@ def main():
         args.input = []
     yamlInputs = []
     since = (
-        ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
+        ParseDate(args.since).astimezone(timezone.utc) if (args.since is not None) and (len(args.since) > 0) else None
     )
-    defaultNow = datetime.now().astimezone(UTCTimeZone)
+    defaultNow = datetime.now().astimezone(timezone.utc)
     successCount = malcolm_utils.AtomicInt(value=0)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:
