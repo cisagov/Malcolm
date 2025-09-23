@@ -78,14 +78,16 @@ class HTTPHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         global args
 
-        client_roles = [
-            role
-            for role in (x.strip() for x in str(dict(self.headers).get('X-Forwarded-Roles', '')).split(','))
-            if role
-        ]
+        # SimpleHTTPRequestHandler's headers lookup is case-insensitive
+        client_roles = [role for role in map(str.strip, self.headers.get('X-Forwarded-Roles', '').split(',')) if role]
         rolesSatisfied = (not args.rbacEnabled) or any(
             role in client_roles for role in [x for x in (os.getenv('ROLE_EXTRACTED_FILES', ''),) if x]
         )
+
+        logging.debug(
+            f"{rolesSatisfied=}; {client_roles=}; {os.getenv('ROLE_EXTRACTED_FILES', '')=}; {dict(self.headers)=}"
+        )
+
         if rolesSatisfied:
 
             showMalcolmCols = args.malcolm or (malcolm_forward_header in dict(self.headers))

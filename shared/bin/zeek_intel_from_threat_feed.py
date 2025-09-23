@@ -5,9 +5,8 @@
 
 from collections import deque
 from dateparser import parse as ParseDate
-from datetime import datetime
+from datetime import datetime, timezone
 from multiprocessing.pool import ThreadPool
-from pytz import utc as UTCTimeZone
 from time import sleep
 import argparse
 import logging
@@ -48,7 +47,8 @@ def main():
                 ' - MISP default feeds: https://www.misp-project.org/feeds/',
                 ' - Managing MISP feeds: https://misp.gitbooks.io/misp-book/content/managing-feeds/',
                 ' - Expand MISP usage: https://github.com/idaholab/Malcolm/issues/336',
-                ' - Mandiant Threat Intelligence Indicators API: https://docs.mandiant.com/home/mati-threat-intelligence-api-v4#tag/Indicators'
+                ' - Mandiant Threat Intelligence Indicators API: https://gtidocs.virustotal.com/reference/ioc-collection-object'
+                ' - Google Threat Intelligence IoC Collection API: https://gtidocs.virustotal.com/reference/ioc-collection-object'
                 '',
                 'Note: The Zeek intelligence framework only supports simple indicators matched against a single value.',
                 'The STIX™ standard can express more complex indicators that cannot be expressed with Zeek intelligence items.',
@@ -157,9 +157,9 @@ def main():
         args.input = []
     yamlInputs = []
     since = (
-        ParseDate(args.since).astimezone(UTCTimeZone) if (args.since is not None) and (len(args.since) > 0) else None
+        ParseDate(args.since).astimezone(timezone.utc) if (args.since is not None) and (len(args.since) > 0) else None
     )
-    defaultNow = datetime.now().astimezone(UTCTimeZone)
+    defaultNow = datetime.now().astimezone(timezone.utc)
     successCount = malcolm_utils.AtomicInt(value=0)
 
     with open(args.output, 'w') if args.output is not None else nullcontext() as outfile:

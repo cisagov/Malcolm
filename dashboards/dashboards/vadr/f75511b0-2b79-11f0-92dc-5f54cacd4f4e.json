@@ -1,0 +1,347 @@
+{
+  "objects": [
+    {
+      "attributes": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":22,\"i\":\"57cc5c08-f479-4a9f-87b2-5294a55cdbe2\"},\"panelIndex\":\"57cc5c08-f479-4a9f-87b2-5294a55cdbe2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":9,\"h\":22,\"i\":\"85a3f184-3069-47d7-ad7e-46edbcc5e924\"},\"panelIndex\":\"85a3f184-3069-47d7-ad7e-46edbcc5e924\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":95.66666666666666}]}},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":9,\"h\":22,\"i\":\"10b372d3-bcd5-4fac-9d59-3190717b02a2\"},\"panelIndex\":\"10b372d3-bcd5-4fac-9d59-3190717b02a2\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":161}]}},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":10,\"h\":22,\"i\":\"3ec6f07c-d6bb-4e81-8541-8c56a527ea63\"},\"panelIndex\":\"3ec6f07c-d6bb-4e81-8541-8c56a527ea63\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":1,\"width\":184.33333333333334}],\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}}}},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":34,\"y\":0,\"w\":14,\"h\":22,\"i\":\"9b543937-715a-4890-9119-8ce076a79e06\"},\"panelIndex\":\"9b543937-715a-4890-9119-8ce076a79e06\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":22,\"w\":30,\"h\":27,\"i\":\"91b736a5-f168-42b8-9abc-3607db9f221c\"},\"panelIndex\":\"91b736a5-f168-42b8-9abc-3607db9f221c\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":30,\"y\":22,\"w\":18,\"h\":27,\"i\":\"30754091-0e43-4251-9d17-58c86dff4d94\"},\"panelIndex\":\"30754091-0e43-4251-9d17-58c86dff4d94\",\"embeddableConfig\":{\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":89}]}},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":49,\"w\":48,\"h\":39,\"i\":\"44a97040-25b7-4b41-8f4a-d2d3fc36a2a9\"},\"panelIndex\":\"44a97040-25b7-4b41-8f4a-d2d3fc36a2a9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_7\"}]",
+        "timeRestore": false,
+        "title": "VADR - Misconfigurations",
+        "version": 1
+      },
+      "id": "f75511b0-2b79-11f0-92dc-5f54cacd4f4e",
+      "migrationVersion": {
+        "dashboard": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "a089cf40-0250-11ef-ac17-3f5318aece94",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "61096450-3014-11f0-af4f-052f357bea07",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
+          "name": "panel_3",
+          "type": "visualization"
+        },
+        {
+          "id": "a4d1f720-2ba4-11f0-bb82-8ffd215e5a91",
+          "name": "panel_4",
+          "type": "visualization"
+        },
+        {
+          "id": "dfce9920-2d14-11f0-af4f-052f357bea07",
+          "name": "panel_5",
+          "type": "visualization"
+        },
+        {
+          "id": "2bea77f0-2ba5-11f0-bb82-8ffd215e5a91",
+          "name": "panel_6",
+          "type": "visualization"
+        },
+        {
+          "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
+          "name": "panel_7",
+          "type": "visualization"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2025-09-22T23:01:33.858Z",
+      "version": "WzEyNzAsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":{\"query_string\":{\"query\":\"*\"}},\"language\":\"lucene\"},\"filter\":[]}"
+        },
+        "title": "VADR Network Logs",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\nMALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
+      },
+      "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"destination.device.name: *.255 AND NOT source.device.name: *.1\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Sending to Broadcast",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Sending to Broadcast\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing Segment\",\"customLabel\":\"Source Network\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "a089cf40-0250-11ef-ac17-3f5318aece94",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0MywxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"event.dataset:conn AND destination.ip:224.0.0.0/16\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "Sending to Multicast",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"Sending to Multicast\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing Segment\",\"customLabel\":\"Source Network\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
+      },
+      "id": "61096450-3014-11f0-af4f-052f357bea07",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0NCwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"(NOT event.dataset:known*) AND ((network.protocol:ssh AND network.protocol_version < 2) OR (network.protocol:smb AND network.protocol_version < 2) OR (network.protocol:tls AND NOT network.protocol_version:(*TLS*v12* OR *TLS*v13*)) OR (network.protocol:ntp AND network.protocol_version < 4) OR (network.protocol:rfb AND network.protocol_version < 3.8) OR (network.protocol:rdp AND network.protocol_version < 6.0) OR (network.protocol:snmp AND network.protocol_version < 3) OR (network.protocol:ldap AND network.protocol_version < 3) OR (network.protocol:ftp) OR (network.protocol:tftp) OR (network.protocol:telnet) OR (network.protocol:rlogin) OR (network.protocol:rsh))\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "title": "Outdated/Insecure Application Protocols",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"}}}}",
+        "version": 1,
+        "visState": "{\"title\":\"Outdated/Insecure Application Protocols\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":0,\"direction\":\"asc\"},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"dimensions\":{\"metrics\":[{\"accessor\":2,\"format\":{\"id\":\"number\"},\"params\":{},\"aggType\":\"count\"}],\"buckets\":[{\"accessor\":0,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"},{\"accessor\":1,\"format\":{\"id\":\"terms\",\"params\":{\"id\":\"string\",\"otherBucketLabel\":\"Other\",\"missingBucketLabel\":\"Missing\"}},\"params\":{},\"aggType\":\"terms\"}]}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Application Protocol\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"network.protocol_version\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Protocol Version\"}}]}"
+      },
+      "id": "e9f27fa0-41f8-11ea-88fa-7151df485405",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:52:03.625Z",
+      "version": "Wzg0OCwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"source.ip:(169.254.0.0/16 OR \\\"fe80::/10\\\")\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR - Self-Assigned",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR - Self-Assigned\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Self Assigned IP\"},\"schema\":\"bucket\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.mac\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"L2 Address\"},\"schema\":\"split\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"related.oui\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Vendor\"},\"schema\":\"metric\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"row\":true}}"
+      },
+      "id": "a4d1f720-2ba4-11f0-bb82-8ffd215e5a91",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0NiwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.type:ipv6\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR - IPV6",
+        "uiStateJSON": "{\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":279}]}}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR - IPV6\",\"type\":\"table\",\"aggs\":[{\"id\":\"4\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"source.oui\",\"aggregate\":\"concat\",\"size\":1,\"sortField\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Vendor\"},\"schema\":\"metric\"},{\"id\":\"1\",\"enabled\":true,\"type\":\"top_hits\",\"params\":{\"field\":\"source.ip\",\"aggregate\":\"concat\",\"size\":5,\"sortField\":\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"sortOrder\":\"desc\",\"customLabel\":\"Related Addresses\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":false,\"type\":\"terms\",\"params\":{\"field\":\"source.mac\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":1000,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MAC Address\"},\"schema\":\"split\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"related.ip\",\"customLabel\":\"Distinct IPs per MAC\"},\"schema\":\"metric\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.mac\",\"orderBy\":\"3\",\"order\":\"desc\",\"size\":1000,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MAC Address\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"row\":true}}"
+      },
+      "id": "dfce9920-2d14-11f0-af4f-052f357bea07",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0NywxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"network.type:ipv6\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR - IPV6 Bytes",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR - IPV6 Bytes\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"sum\",\"params\":{\"field\":\"network.bytes\",\"customLabel\":\"Bytes\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.mac\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":500,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"MAC Address\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"IPV6\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":15,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":true,\"totalFunc\":\"sum\",\"percentageCol\":\"Bytes\"}}"
+      },
+      "id": "2bea77f0-2ba5-11f0-bb82-8ffd215e5a91",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T22:51:14.045Z",
+      "version": "WzI0OCwxXQ=="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "NAVV_1.0",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":10,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"NAVV_1.0\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source MAC\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source Network\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination Network\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination MAC\"},\"schema\":\"bucket\"},{\"id\":\"8\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"},{\"id\":\"9\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unmapped\",\"customLabel\":\"Service\"},\"schema\":\"bucket\"},{\"id\":\"10\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"No Protocol\",\"customLabel\":\"Protocol\"},\"schema\":\"bucket\"},{\"id\":\"11\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.conn.conn_state_description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Conn State\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":100,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"row\":true}}"
+      },
+      "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-09-22T23:08:14.460Z",
+      "version": "WzEyNzksMV0="
+    },
+    {
+      "attributes": {
+        "columns": [
+          "network.transport",
+          "network.protocol",
+          "source.ip",
+          "source.port",
+          "destination.ip",
+          "destination.port",
+          "network.bytes",
+          "event.id"
+        ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"filter\":[],\"query\":{\"query\":{\"query_string\":{\"query\":\"(event.provider:zeek AND event.dataset:conn) OR (event.provider:suricata AND event.dataset:flow)\",\"analyze_wildcard\":true}},\"language\":\"lucene\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [
+          [
+            "MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER",
+            "desc"
+          ]
+        ],
+        "title": "Connections - Logs",
+        "version": 1
+      },
+      "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+      "migrationVersion": {
+        "search": "7.9.3"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "type": "search",
+      "updated_at": "2025-09-22T22:52:35.597Z",
+      "version": "WzEyMjIsMV0="
+    }
+  ],
+  "version": "3.2.0"
+}

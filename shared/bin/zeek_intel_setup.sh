@@ -47,7 +47,7 @@ if mkdir -- "$LOCK_DIR" 2>/dev/null; then
         done < <(echo "${CONFIG_MAP_DIR:-configmap;secretmap}" | tr ';' '\n')
 
         rsync --recursive --delete --delete-excluded "${EXCLUDES[@]}" --filter="protect $(basename "${LOCK_DIR}")/" "${INTEL_PRESEED_DIR}"/ "${INTEL_DIR}"/
-        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant || true
+        mkdir -p "${INTEL_DIR}"/MISP "${INTEL_DIR}"/STIX "${INTEL_DIR}"/Mandiant "${INTEL_DIR}"/Google || true
     fi
 
     # create directive to @load every subdirectory in /opt/zeek/share/zeek/site/intel
@@ -95,8 +95,8 @@ EOF
             fi
         done
 
-        # process STIX/MISP/Mandiant inputs by converting them to Zeek intel format
-        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/taxii.yaml ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./MISP/misp.yaml ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
+        # process STIX/MISP/Mandiant/Google inputs by converting them to Zeek intel format
+        if ( (( ${#THREAT_JSON_FILES[@]} )) || [[ -r ./STIX/.stix_input.txt ]] || [[ -r ./STIX/taxii.yaml ]] || [[ -r ./MISP/.misp_input.txt ]] || [[ -r ./MISP/misp.yaml ]] || [[ -r ./Google/google.yaml ]] || [[ -r ./Mandiant/mandiant.yaml ]] ) && [[ -x "${THREAT_FEED_TO_ZEEK_SCRIPT}" ]]; then
             "${THREAT_FEED_TO_ZEEK_SCRIPT}" \
                 --ssl-verify ${ZEEK_INTEL_FEED_SSL_CERTIFICATE_VERIFICATION} \
                 --since "${ZEEK_INTEL_FEED_SINCE}" \
@@ -108,6 +108,7 @@ EOF
                     ./STIX/taxii.yaml \
                     ./MISP/.misp_input.txt \
                     ./MISP/misp.yaml \
+                    ./Google/google.yaml \
                     ./Mandiant/mandiant.yaml
             if [[ $? -eq 0 ]]; then
                 rm -f ./.threat_autogen.zeek.old

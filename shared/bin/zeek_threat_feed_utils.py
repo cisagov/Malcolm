@@ -10,11 +10,11 @@ from bs4 import BeautifulSoup
 from collections import defaultdict
 from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
-from datetime import datetime
+from datetime import datetime, timezone
+from dateparser import parse as ParseDate
 from dateutil.relativedelta import relativedelta
 from multiprocessing import RawValue
 from pymisp import MISPEvent, MISPAttribute, PyMISP
-from pytz import utc as UTCTimeZone
 from stix2 import parse as STIXParse
 from stix2.exceptions import STIXError
 from stix2.v20 import Indicator as STIX_Indicator_v20
@@ -36,12 +36,14 @@ from logging import DEBUG as LOGGING_DEBUG
 import copy
 import json
 import mandiant_threatintel
+import vt
 import os
 import re
 import requests
+import sys
 import urllib3
 
-from malcolm_utils import base64_decode_if_prefixed, LoadStrIfJson, LoadFileIfJson, isprivateip
+from malcolm_utils import base64_decode_if_prefixed, get_iterable, LoadStrIfJson, LoadFileIfJson, isprivateip
 
 # keys for dict returned by map_*_indicator_to_zeek for Zeek intel file fields
 ZEEK_INTEL_INDICATOR = 'indicator'
@@ -68,14 +70,12 @@ ZEEK_INTEL_CIF_FIRSTSEEN = 'meta.cif_firstseen'
 ZEEK_INTEL_CIF_LASTSEEN = 'meta.cif_lastseen'
 
 # TODO: STILL NEED TO MAP THESE:
-#   - ZEEK_INTEL_META_CATEGORY
+#   - ZEEK_INTEL_META_ASSOCIATED
+#   - ZEEK_INTEL_META_CAMPAIGNS
+#   - ZEEK_INTEL_META_REPORTS
 #   - ZEEK_INTEL_META_THREAT_SCORE
 #   - ZEEK_INTEL_META_VERDICT
 #   - ZEEK_INTEL_META_VERDICT_SOURCE
-#   - ZEEK_INTEL_META_ASSOCIATED
-#   - ZEEK_INTEL_META_CATEGORY
-#   - ZEEK_INTEL_META_CAMPAIGNS
-#   - ZEEK_INTEL_META_REPORTS
 
 ZEEK_INTEL_WORKER_THREADS_DEFAULT = 2
 
@@ -157,6 +157,16 @@ MANDIANT_ZEEK_INTEL_TYPE_MAP = {
     mandiant_threatintel.MD5Indicator: 'FILE_HASH',
 }
 
+# See the documentation for the Zeek INTEL framework [1] and Google threat intel API [2]
+# [1] https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#type-Intel::Type
+# [2] https://gtidocs.virustotal.com/reference/export-threat-iocs
+GOOGLE_ZEEK_INTEL_TYPE_MAP = {
+    'domains': 'DOMAIN',
+    'files': 'FILE_HASH',
+    'ip_addresses': 'ADDR',
+    'urls': 'URL',
+}
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
@@ -231,7 +241,7 @@ def map_mandiant_indicator_to_zeek(
     results = []
 
     # get matching Zeek intel type
-    if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator), None):
+    if zeek_type := MANDIANT_ZEEK_INTEL_TYPE_MAP.get(type(indicator)):
 
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
             logger.debug(mandiant_indicator_as_json_str(indicator, skip_attr_map=skip_attr_map))
@@ -265,7 +275,7 @@ def map_mandiant_indicator_to_zeek(
                     for category in item['category']
                 }
             ):
-                tags.extend(categories)
+                zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in categories])
 
         if hasattr(indicator, 'misp'):
             if trueMispAttrs := [key for key, value in indicator.misp.items() if value]:
@@ -288,10 +298,10 @@ def map_mandiant_indicator_to_zeek(
             and (hashes := indicator._api_response.get('associated_hashes', []))
         ):
             for hashish in hashes:
-                if hashVal := hashish.get('value', None):
+                if hashVal := hashish.get('value'):
                     tmpItem = copy.deepcopy(zeekItem)
                     tmpItem[ZEEK_INTEL_INDICATOR] = hashVal
-                    if newId := hashish.get('id', None):
+                    if newId := hashish.get('id'):
                         tmpItem[ZEEK_INTEL_META_URL] = f'https://advantage.mandiant.com/indicator/{newId}'
                     if sources:
                         tmpItem[ZEEK_INTEL_META_SOURCE] = '\\x7c'.join([x.replace(',', '\\x2c') for x in sources])
@@ -311,6 +321,73 @@ def map_mandiant_indicator_to_zeek(
     else:
         if logger is not None:
             logger.warning(f"No matching Zeek type found for Mandiant indicator type '{indicator.__class__.__name__}'")
+
+    return results
+
+
+def map_google_indicator_to_zeek(
+    indicator,
+    indicator_type,
+    collection=None,
+    logger=None,
+) -> Union[Tuple[defaultdict], None]:
+    """
+    Maps a Google threat intelligence indicator to Zeek intel item(s)
+    @see https://gtidocs.virustotal.com/reference/export-threat-iocs
+    @param indicator The indicator to convert
+    @return a list containing the Zeek intel dict(s) from the indicator
+    """
+    results = []
+
+    # get matching Zeek intel type
+    if zeek_type := GOOGLE_ZEEK_INTEL_TYPE_MAP.get(indicator_type):
+
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+            logger.debug(f"{indicator_type}={indicator} from {collection.id if collection else "unknown collection"}")
+
+        zeekItem = defaultdict(lambda: '-')
+
+        zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
+        zeekItem[ZEEK_INTEL_INDICATOR] = indicator
+        zeekItem[ZEEK_INTEL_META_CATEGORY] = collection.collection_type
+        zeekItem[ZEEK_INTEL_META_SOURCE] = collection.get('origin', "Google Threat Intelligence")
+
+        names = []
+        if collection.get('name', []):
+            names.append(collection.get('name'))
+        if collection.get('alt_names', []):
+            names.extend(collection.get('alt_names'))
+        zeekItem[ZEEK_INTEL_META_DESC] = '\\x7c'.join([x.replace(',', '\\x2c') for x in list(set(names))])
+        zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
+
+        if first_time := collection.get('first_seen', collection.get('creation_date')):
+            zeekItem[ZEEK_INTEL_META_FIRSTSEEN] = f"{first_time}.0"
+            zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
+
+        if last_time := collection.get('last_seen', collection.get('last_modification_date')):
+            zeekItem[ZEEK_INTEL_META_LASTSEEN] = f"{last_time}.0"
+            zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
+
+        urls = [f"https://www.virustotal.com/gui/collection/{collection.id}"]
+        if collection.get('link'):
+            urls.append(collection.get('link'))
+        zeekItem[ZEEK_INTEL_META_URL] = '\\x7c'.join([x.replace(',', '\\x2c') for x in list(set(urls))])
+
+        tags = []
+        if collection.get('tags', []):
+            tags.extend(collection.get('tags'))
+        if collection.get('autogenerated_tags', []):
+            tags.extend(collection.get('autogenerated_tags'))
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in list(set(tags))])
+
+        results.append(zeekItem)
+        if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
+            logger.debug(zeekItem)
+
+    else:
+        if logger is not None:
+            logger.warning(f"No matching Zeek type found for Google indicator type '{indicator_type}'")
 
     return results
 
@@ -453,7 +530,7 @@ def map_stix_indicator_to_zeek(
     results = []
     for object_path, ioc_value in split_stix_object_path_and_value(type(indicator), indicator.pattern, logger):
         # get matching Zeek intel type
-        if not (zeek_type := STIX_ZEEK_INTEL_TYPE_MAP.get(object_path, None)):
+        if not (zeek_type := STIX_ZEEK_INTEL_TYPE_MAP.get(object_path)):
             if logger is not None:
                 logger.warning(f"No matching Zeek type found for STIX-2 indicator type '{object_path}'")
             continue
@@ -484,7 +561,7 @@ def map_stix_indicator_to_zeek(
         zeekItem[ZEEK_INTEL_INDICATOR_TYPE] = "Intel::" + zeek_type
         if ('name' in indicator) or ('description' in indicator):
             zeekItem[ZEEK_INTEL_META_DESC] = '. '.join(
-                [x for x in [indicator.get('name', None), indicator.get('description', None)] if x is not None]
+                [x for x in [indicator.get('name'), indicator.get('description')] if x is not None]
             )
             zeekItem[ZEEK_INTEL_CIF_DESCRIPTION] = zeekItem[ZEEK_INTEL_META_DESC]
             # some of these are from CFM, what the heck...
@@ -494,14 +571,10 @@ def map_stix_indicator_to_zeek(
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(indicator.modified.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
-        tags = []
-        tags.extend([x for x in indicator.get('labels', []) if x])
-        tags.extend([x for x in indicator.get('indicator_types', []) if x])
-        if len(tags) > 0:
+        if tags := [x for x in indicator.get('labels', []) if x]:
             zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
-
-        # TODO: revoked?
-        # TODO: confidence?
+        if indicatorTypes := [x for x in indicator.get('indicator_types', []) if x]:
+            zeekItem[ZEEK_INTEL_META_CATEGORY] = '\\x7c'.join([x.replace(',', '\\x2c') for x in indicatorTypes])
 
         results.append(zeekItem)
         if (logger is not None) and (LOGGING_DEBUG >= logger.root.level):
@@ -554,7 +627,7 @@ def map_misp_attribute_to_zeek(
     results = []
 
     # get matching Zeek intel type
-    if not (zeek_types := MISP_ZEEK_INTEL_TYPE_MAP.get(attribute.type, None)):
+    if not (zeek_types := MISP_ZEEK_INTEL_TYPE_MAP.get(attribute.type)):
         if logger is not None:
             logger.warning(f"No matching Zeek type found for MISP attribute type '{attribute.type}'")
         return None
@@ -598,10 +671,9 @@ def map_misp_attribute_to_zeek(
         zeekItem[ZEEK_INTEL_CIF_FIRSTSEEN] = zeekItem[ZEEK_INTEL_META_FIRSTSEEN]
         zeekItem[ZEEK_INTEL_META_LASTSEEN] = str(mktime(attribute.timestamp.timetuple()))
         zeekItem[ZEEK_INTEL_CIF_LASTSEEN] = zeekItem[ZEEK_INTEL_META_LASTSEEN]
-        if tags is not None and len(tags) > 0:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in [attribute.category] + tags])
-        else:
-            zeekItem[ZEEK_INTEL_CIF_TAGS] = attribute.category.replace(',', '\\x2c')
+        zeekItem[ZEEK_INTEL_META_CATEGORY] = attribute.category.replace(',', '\\x2c')
+        if tags:
+            zeekItem[ZEEK_INTEL_CIF_TAGS] = ','.join([x.replace(',', '\\x2c') for x in tags])
         if confidence is not None:
             zeekItem[ZEEK_INTEL_CIF_CONFIDENCE] = str(round(confidence / 10))
             zeekItem[ZEEK_INTEL_META_CONFIDENCE] = str(confidence)
@@ -695,6 +767,28 @@ class FeedParserZeekPrinter(object):
                 self.logger.warning(
                     f"{type(e).__name__} for {indicator.id if hasattr(indicator, 'id') else 'indicator'}: {e}"
                 )
+        return result
+
+    def ProcessGoogle(self, indicator, indicator_type, collection=None):
+        result = False
+        try:
+            # map indicator object to Zeek value(s)
+            if vals := map_google_indicator_to_zeek(
+                indicator=indicator,
+                indicator_type=indicator_type,
+                collection=collection,
+                logger=self.logger,
+            ):
+                for val in vals:
+                    self.PrintHeader()
+                    with self.lock:
+                        # print the intelligence item fields according to the columns in 'fields'
+                        print('\t'.join([val[key] for key in self.fields]), file=self.outFile)
+                    if not result:
+                        result = True
+        except Exception as e:
+            if self.logger is not None:
+                self.logger.warning(f"{type(e).__name__} for {indicator_type} from {collection.id}: {e}")
         return result
 
     def ProcessSTIX(
@@ -837,12 +931,15 @@ def UpdateFromMISP(
     successCount,
     workerId,
 ):
+    # allow an individual feed source to override the global "since" value passed in
+    since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
+
     with requests.Session() as mispSession:
         mispSession.headers.update({'Accept': 'application/json;q=1.0,text/plain;q=0.9,text/html;q=0.9'})
-        if mispAuthKey := connInfo.get('auth_key', None):
+        if mispAuthKey := connInfo.get('auth_key'):
             mispSession.headers.update({'Authorization': mispAuthKey})
 
-        mispUrl = connInfo.get('url', None)
+        mispUrl = connInfo.get('url')
 
         # download the URL and parse as JSON to figure out what it is. it could be:
         # - a manifest JSON (https://www.circl.lu/doc/misp/feed-osint/manifest.json)
@@ -963,7 +1060,7 @@ def UpdateFromMISP(
                     try:
                         newUrl = urljoin(mispUrl, f'{uri}.json')
                         eventTime = (
-                            datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(UTCTimeZone)
+                            datetime.utcfromtimestamp(int(mispJson[uri]['timestamp'])).astimezone(timezone.utc)
                             if 'timestamp' in mispJson[uri]
                             else defaultNow
                         )
@@ -1010,7 +1107,7 @@ def UpdateFromMISP(
                             try:
                                 eventTime = (
                                     datetime.utcfromtimestamp(int(mispManifest[uri]['timestamp'])).astimezone(
-                                        UTCTimeZone
+                                        timezone.utc
                                     )
                                     if 'timestamp' in mispManifest[uri]
                                     else defaultNow
@@ -1068,12 +1165,15 @@ def UpdateFromTAXII(
     successCount,
     workerId,
 ):
-    # connect to the server     with the appropriate API for the TAXII version
-    taxiiUrl = connInfo.get('url', None)
-    taxiiCollection = connInfo.get('collection', None)
-    taxiiUsername = connInfo.get('username', None)
-    taxiiPassword = connInfo.get('password', None)
-    taxiiVersion = str(connInfo.get('version', None))
+    # allow an individual feed source to override the global "since" value passed in
+    since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
+
+    # connect to the server with the appropriate API for the TAXII version
+    taxiiUrl = connInfo.get('url')
+    taxiiCollection = connInfo.get('collection')
+    taxiiUsername = connInfo.get('username')
+    taxiiPassword = connInfo.get('password')
+    taxiiVersion = str(connInfo.get('version'))
     if taxiiVersion == '2.0':
         TaxiiServerClass = TaxiiServer_v20
         TaxiiCollectionClass = TaxiiCollection_v20
@@ -1134,10 +1234,13 @@ def UpdateFromMandiant(
     successCount,
     workerId,
 ):
+    # allow an individual feed source to override the global "since" value passed in
+    since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
+
     if mati_client := mandiant_threatintel.ThreatIntelClient(
-        api_key=connInfo.get('api_key', None),
-        secret_key=connInfo.get('secret_key', None),
-        bearer_token=connInfo.get('bearer_token', None),
+        api_key=connInfo.get('api_key'),
+        secret_key=connInfo.get('secret_key'),
+        bearer_token=connInfo.get('bearer_token'),
         api_base_url=connInfo.get('api_base_url', mandiant_threatintel.API_BASE_URL),
         client_name=connInfo.get('client_name', mandiant_threatintel.CLIENT_APP_NAME),
     ):
@@ -1175,16 +1278,103 @@ def UpdateFromMandiant(
         raise Exception("Could not connect to Mandiant threat intelligence service")
 
 
+# uncomment for debugging the vt.Client's HTTP calls
+# _original_get_async = vt.Client.get_async
+# async def debug_get_async(self, path: str, *path_args, params=None, **kwargs):
+#     print(f"[VT DEBUG] GET {path} {path_args} params={params} kwargs={kwargs}", file=sys.stderr)
+#     return await _original_get_async(self, path, *path_args, params=params, **kwargs)
+# vt.Client.get_async = debug_get_async
+
+
+def iter_google_collections_since(
+    client,
+    ctypes=[
+        'threat-actor',
+        'malware-family',
+    ],
+    filters=None,
+    since=None,
+):
+    # https://gtidocs.virustotal.com/reference/list-threats
+    # https://gtidocs.virustotal.com/reference/ioc-collection-object
+    searchFilter = "(" + " OR ".join(f'collection_type:"{c}"' for c in ctypes) + ")"
+    if filters:
+        searchFilter += f" AND ({filters})"
+    for collection in client.iterator(
+        "/collections",
+        params={
+            "filter": searchFilter,
+            # sort by last modification date descending, so we can short-circuit based on "since"
+            "order": "last_modification_date-",
+        },
+    ):
+        created_ts = collection.get("creation_date")
+        created = datetime.fromtimestamp(created_ts).astimezone(timezone.utc) if created_ts else None
+        modified_ts = collection.get("last_modification_date")
+        modified = datetime.fromtimestamp(modified_ts).astimezone(timezone.utc) if modified_ts else None
+        created, modified = created or modified, modified or created
+
+        if since and created and modified and created < since and modified < since:
+            break
+
+        yield collection
+
+
+def UpdateFromGoogle(
+    connInfo,
+    since,
+    nowTime,
+    sslVerify,
+    zeekPrinter,
+    logger,
+    successCount,
+    workerId,
+):
+    # allow an individual feed source to override the global "since" value passed in
+    since = ParseDate(connInfo.get('since')).astimezone(timezone.utc) if connInfo.get('since') else since
+
+    ctypes = [
+        s.strip()
+        for s in connInfo.get('collection_type', 'threat-actor,malware-family').split(",")
+        if s.strip()
+    ]
+    filters = connInfo.get('filters')
+
+    try:
+        with vt.Client(
+            apikey=connInfo.get('api_key'),
+            agent=' '.join(filter(None, ['Malcolm', os.getenv('MALCOLM_VERSION')])),
+            verify_ssl=sslVerify,
+        ) as google_client:
+            for collection in iter_google_collections_since(
+                google_client,
+                ctypes=ctypes,
+                filters=filters,
+                since=since,
+            ):
+                try:
+                    # export a download of the collection's IoCs via the download endpoint
+                    #   https://gtidocs.virustotal.com/reference/export-threat-iocs
+                    if (
+                        iocDownload := google_client.get_json(f"/collections/{collection.id}/download/json")
+                    ) and isinstance(iocDownload, dict):
+                        for ioc_type in ["domains", "files", "ip_addresses", "urls"]:
+                            if (ioc_list := iocDownload.get(ioc_type, [])) and isinstance(ioc_list, list):
+                                for ioc in ioc_list:
+                                    if zeekPrinter.ProcessGoogle(ioc, ioc_type, collection):
+                                        successCount.increment()
+                except Exception as e:
+                    if logger is not None:
+                        logger.warning(f"[{workerId}]: {type(e).__name__} for Google collection {collection.id}: {e}")
+
+    except Exception as e:
+        if logger is not None:
+            logger.warning(f'Could not connect to Google threat intelligence service: {e}')
+
+
 def ProcessThreatInputWorker(threatInputWorkerArgs):
     inputQueue, zeekPrinter, since, sslVerify, defaultNow, workerThreadCount, successCount, logger = (
-        threatInputWorkerArgs[0],
-        threatInputWorkerArgs[1],
-        threatInputWorkerArgs[2],
-        threatInputWorkerArgs[3],
-        threatInputWorkerArgs[4],
-        threatInputWorkerArgs[5],
-        threatInputWorkerArgs[6],
-        threatInputWorkerArgs[7],
+        threatInputWorkerArgs
     )
 
     with workerThreadCount as workerId:
@@ -1260,6 +1450,17 @@ def ProcessThreatInputWorker(threatInputWorkerArgs):
                                     )
                                 elif threatFeedType.lower() == 'mandiant':
                                     UpdateFromMandiant(
+                                        inarg,
+                                        since,
+                                        defaultNow,
+                                        sslVerify,
+                                        zeekPrinter,
+                                        logger,
+                                        successCount,
+                                        workerId,
+                                    )
+                                elif threatFeedType.lower() == 'google':
+                                    UpdateFromGoogle(
                                         inarg,
                                         since,
                                         defaultNow,

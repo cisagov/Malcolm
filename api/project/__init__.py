@@ -268,9 +268,7 @@ def get_request_arguments(req):
 def translate_roles(req):
     roles_map = defaultdict(lambda: True)
     try:
-        client_roles = [
-            role for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(',')) if role
-        ]
+        client_roles = [role for role in map(str.strip, req.headers.get('X-Forwarded-Roles', '').split(',')) if role]
         roles_map['event'] = any(
             role in client_roles
             for role in (
@@ -378,9 +376,7 @@ def check_roles(req):
         result = translate_roles(req)[caller_name]
         if debugApi and (caller_name != "ping"):
             client_roles = [
-                role
-                for role in (x.strip() for x in str(dict(req.headers).get('X-Forwarded-Roles', '')).split(','))
-                if role
+                role for role in map(str.strip, req.headers.get('X-Forwarded-Roles', '').split(',')) if role
             ]
             print(f"Role(s) satisfied for \"{caller_name}\" with {client_roles}: {result}")
         return result
@@ -1229,7 +1225,8 @@ def dashboard_export(dashid):
     request : Request
         Uses 'replace' from requests arguments, true (default) or false; indicates whether or not to do
         MALCOLM_NETWORK_INDEX_PATTERN_REPLACER, MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER,
-        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_NAVIGATION_MARKDOWN_REPLACER
+        MALCOLM_OTHER_INDEX_PATTERN_REPLACER, MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER,
+        MALCOLM_NAVIGATION_MARKDOWN_REPLACER
 
     Returns
     -------
@@ -1262,6 +1259,7 @@ def dashboard_export(dashid):
                     app.config['MALCOLM_NETWORK_INDEX_PATTERN']: 'MALCOLM_NETWORK_INDEX_PATTERN_REPLACER',
                     app.config['MALCOLM_NETWORK_INDEX_TIME_FIELD']: 'MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER',
                     app.config['MALCOLM_OTHER_INDEX_PATTERN']: 'MALCOLM_OTHER_INDEX_PATTERN_REPLACER',
+                    app.config['MALCOLM_OTHER_INDEX_TIME_FIELD']: 'MALCOLM_OTHER_INDEX_TIME_FIELD_REPLACER',
                 }
                 pattern = re.compile('|'.join(re.escape(key) for key in replacements))
                 responseText = pattern.sub(lambda match: replacements[match.group(0)], response.text)
@@ -1299,6 +1297,7 @@ def dashboard_export(dashid):
                                         if doReplacers
                                         else app.config['MALCOLM_OTHER_INDEX_PATTERN']
                                     ),
+                                    app.config['ARKIME_STATS_INDEX_PATTERN'],
                                 ]
                             )
                         )

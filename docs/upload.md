@@ -21,7 +21,9 @@ The types of files supported are:
 
 Files uploaded via these methods are monitored and moved automatically to other directories for processing, generally within 1 minute of completion of the upload.
 
-The upload UI features a readiness indicator at the bottom of the form. Hovering over this text reveals more details about the individual Malcolm components' [readiness](api-ready.md). When the minimal set of components required for ingestion are running, this indicator will read **✅ Ready to ingest data.** Clicking on the indicator will cause it to refresh. It's recommended to wait until Malcolm is ready before uploading artifacts for processing.
+The upload UI features a readiness indicator at the bottom of the form. Hovering over this text reveals more details about the individual Malcolm components' [readiness](api-ready.md). When the minimal set of components required for ingestion are running, this indicator will read **✅ Ready for file uploads**. Clicking on the indicator will cause it to refresh. It's recommended to wait until Malcolm is ready before uploading artifacts for processing.
+
+The upload UI enforces a per-file maximum size limit which defaults to fifty gigabytes. This limit can be adjusted by changing the `PCAP_UPLOAD_MAX_FILE_GB` [environment variable](malcolm-config.md#MalcolmConfigEnvVars) in `./config/upload-common.env` and restarting Malcolm.
 
 ## <a name="Tagging"></a>Tagging
 

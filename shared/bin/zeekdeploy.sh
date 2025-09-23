@@ -156,7 +156,7 @@ fi
 # make sure "intel" directory exists, even if empty
 [[ -n "$ZEEK_INTEL_PATH" ]] && INTEL_DIR="$ZEEK_INTEL_PATH" || INTEL_DIR=/opt/sensor/sensor_ctl/zeek/intel
 export INTEL_DIR
-mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP "$INTEL_DIR"/Mandiant
+mkdir -p "$INTEL_DIR"/STIX "$INTEL_DIR"/MISP "$INTEL_DIR"/Google "$INTEL_DIR"/Mandiant
 [[ ! -f "$INTEL_DIR"/__load__.zeek ]] && ( touch "$INTEL_DIR"/__load__.zeek 2>/dev/null || true )
 # autoconfigure load directives for intel files
 [[ -x "$ZEEK_INSTALL_PATH"/bin/zeek_intel_setup.sh ]] && \

@@ -694,6 +694,9 @@
                 "sgid": {
                   "type": "keyword"
                 },
+                "subj": {
+                  "type": "keyword"
+                },
                 "success": {
                   "type": "keyword"
                 },
