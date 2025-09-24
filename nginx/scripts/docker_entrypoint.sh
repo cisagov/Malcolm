@@ -196,6 +196,8 @@ if [[ -f "${NGINX_CONF}" ]]; then
     fi
   done < "${NGINX_CONF}"
 fi
+# generate upload_max_body_size_incl since we can't use variables in client_max_body_size either
+echo "client_max_body_size ${PCAP_UPLOAD_MAX_FILE_GB:-50}G;" > /etc/nginx/nginx_upload_max_body_size_incl.conf
 
 # set logging level for error.log
 echo "error_log /var/log/nginx/error.log ${NGINX_ERROR_LOG_LEVEL:-error};" > "${NGINX_LOGGING_CONF}"

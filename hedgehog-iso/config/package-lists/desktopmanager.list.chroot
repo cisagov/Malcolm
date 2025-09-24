@@ -1,3 +1,4 @@
+adwaita-icon-theme
 arandr
 clamav
 clamav-daemon
@@ -7,6 +8,7 @@ file-roller
 firefox
 fonts-symbola
 galculator
+gnome-icon-theme
 gnome-themes-extra
 gvfs-backends
 libclamunrar12

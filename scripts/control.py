@@ -1518,8 +1518,11 @@ def authSetup():
     if (pyPlatform != PLATFORM_WINDOWS) and which("croc"):
         txRxScript = 'tx-rx-secure.sh' if which('tx-rx-secure.sh') else None
         if not txRxScript:
-            txRxScript = os.path.join(
-                GetMalcolmPath(), os.path.join('shared', os.path.join('bin', os.path.join('tx-rx-secure.sh')))
+            txRxScript = os.path.join(GetMalcolmPath(), os.path.join('shared', os.path.join('bin', 'tx-rx-secure.sh')))
+            txRxScript = (
+                txRxScript
+                if (txRxScript and os.path.isfile(txRxScript))
+                else os.path.join(GetMalcolmPath(), os.path.join('scripts', 'tx-rx-secure.sh'))
             )
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/local/bin/tx-rx-secure.sh'
             txRxScript = txRxScript if (txRxScript and os.path.isfile(txRxScript)) else '/usr/bin/tx-rx-secure.sh'
@@ -2949,7 +2952,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.08.1"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.09.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',

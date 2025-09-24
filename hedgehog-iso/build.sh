@@ -8,7 +8,7 @@ IMAGE_DISTRIBUTION=trixie
 BEATS_VER="8.19.2"
 BEATS_OSS="-oss"
 
-ARKIME_VER="5.7.1"
+ARKIME_VER="5.8.0"
 
 BUILD_ERROR_CODE=1
 
@@ -68,11 +68,23 @@ if [ -d "$WORKDIR" ]; then
 
   # configure installation options
   sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Hedgehog Linux $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
-  cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
-  sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
-  sed -i "s@\(/etc/capture_storage_format\)@\1.crypt@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
+  cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_base_crypto.cfg
+  cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
+  cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_nolvm.cfg
+  cp ./config/includes.binary/install/preseed_vmware.cfg ./config/includes.binary/install/preseed_vmware_nolvm.cfg
+  for CFGFILE in ./config/includes.binary/install/*_nolvm.cfg; do
+    sed -i -e 's|\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm|\1regular|' \
+           -e '/^d-i[[:space:]]\+partman-.*lvm/d' \
+           -e 's/[[:space:]]*\$defaultignore{ }//g' \
+           -e 's/[[:space:]]*\$lvmok{ }//g' \
+           -e 's/[[:space:]]*in_vg[^{]*{[^}]*}[[:space:]]*lv_name{[^}]*}//g' \
+      "$CFGFILE"
+  done
   sed -i "s@\(/etc/capture_storage_format\)@\1.none@g" ./config/includes.binary/install/preseed_minimal.cfg
+  sed -i "s@\(/etc/capture_storage_format\)@\1.crypt@g" ./config/includes.binary/install/preseed_base_crypto.cfg
+  sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
+  sed -i "s@preseed_base\.cfg@preseed_base_crypto.cfg@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
 
   # create hooks for installing Python packages
   HOOK_COUNTER=168

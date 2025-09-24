@@ -2907,8 +2907,45 @@
                 "quantity": {
                   "type": "integer"
                 },
-                "values": {
+                "request_values": {
                   "type": "keyword"
+                },
+                "response_values": {
+                  "type": "keyword"
+                },
+                "link_id": {
+                  "type": "keyword"
+                },
+                "matched": {
+                  "type": "keyword"
+                },
+                "request_subfunction_code": {
+                  "type": "keyword"
+                },
+                "response_subfunction_code": {
+                  "type": "keyword"
+                },
+                "request_data": {
+                  "type": "keyword",
+                  "doc_values": false,
+                  "ignore_above": 8,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
+                },
+                "response_data": {
+                  "type": "keyword",
+                  "doc_values": false,
+                  "ignore_above": 8,
+                  "fields": {
+                    "text": {
+                      "type": "text",
+                      "norms": false
+                    }
+                  }
                 }
               }
             },

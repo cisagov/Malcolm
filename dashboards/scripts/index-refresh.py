@@ -403,9 +403,9 @@ def main():
                         'urlTemplate'
                     ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.site&lookup=iexact'
 
-                # TODO: this doesn't actually work, because it has to be relative to the dashboards app...
-                # elif field['name'].endswith('.reference'):
-                #     fieldFormatInfo['params']['urlTemplate'] = '{{value}}'
+                elif field['name'].endswith('.reference'):
+                    # TODO: this doesn't actually work, because it has to be relative to the dashboards app...
+                    fieldFormatInfo['params']['urlTemplate'] = '/refred/{{value}}'
 
                 elif field['name'] == 'zeek.files.extracted_uri':
                     fieldFormatInfo['params']['urlTemplate'] = '/{{value}}'

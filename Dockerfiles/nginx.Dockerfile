@@ -124,8 +124,9 @@ ADD https://fonts.gstatic.com/s/lato/v24/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf /usr/share
 ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh7USSwiPHA.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6uyw4BMUTPHjx4wWw.ttf /usr/share/nginx/html/css/
 ADD https://fonts.gstatic.com/s/lato/v24/S6u9w4BMUTPHh6UVSwiPHA.ttf /usr/share/nginx/html/css/
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff2
-ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d' /usr/share/nginx/html/css/bootstrap-icons.woff
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff2' /usr/share/nginx/html/css/bootstrap-icons.woff2
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/fonts/bootstrap-icons.woff' /usr/share/nginx/html/css/bootstrap-icons.woff
+ADD 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css' /usr/share/nginx/html/css/bootstrap-icons.css
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.eot' /usr/share/nginx/html/css/
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff2' /usr/share/nginx/html/css/
 ADD 'https://use.fontawesome.com/releases/v4.7.0/fonts/fontawesome-webfont.woff' /usr/share/nginx/html/css/
@@ -276,7 +277,8 @@ RUN set -x ; \
   find /usr/share/nginx/html/ -type d -exec chmod 755 "{}" \; ; \
   find /usr/share/nginx/html/ -type f -exec chmod 644 "{}" \; ; \
   cd /usr/share/nginx/html/assets/img ; \
-  ln -s ./Malcolm_background.png ./bg-masthead.png
+  ln -s ./Malcolm_background.png ./bg-masthead.png ; \
+  sed -i '/bootstrap-icons\.woff/ { s|\./fonts/|./|g; s|[?][^")]*||g }' /usr/share/nginx/html/css/bootstrap-icons.css
 
 COPY --from=docbuild /site/_site /usr/share/nginx/html/readme
 

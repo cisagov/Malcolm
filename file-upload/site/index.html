@@ -276,7 +276,7 @@
             function populateMalcolmReadiness(data) {
                 const isEssentialReady = data.arkime && data.logstash_lumberjack && data.logstash_pipelines && data.opensearch && data.pcap_monitor;
 
-                readinessIndicator.textContent = isEssentialReady ? '✅ Ready to ingest data' : '❌ Not ready to ingest data 🔄';
+                readinessIndicator.textContent = isEssentialReady ? '✅ Ready for file uploads' : '❌ Not ready for file uploads 🔄';
 
                 const detailedList = Object.entries(data)
                     .map(([key, value]) => `<li>${key}</li><li>${value ? '✅' : '❌'}</li>`)

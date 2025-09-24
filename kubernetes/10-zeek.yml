@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: zeek-offline-container
-        image: ghcr.io/idaholab/malcolm/zeek:25.08.1
+        image: ghcr.io/idaholab/malcolm/zeek:25.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -66,7 +66,7 @@ spec:
             subPath: "zeek/intel"
       initContainers:
       - name: zeek-offline-dirinit-container
-        image: ghcr.io/idaholab/malcolm/dirinit:25.08.1
+        image: ghcr.io/idaholab/malcolm/dirinit:25.09.0
         imagePullPolicy: Always
         stdin: false
         tty: true
@@ -82,7 +82,7 @@ spec:
               name: process-env
         env:
           - name: PUSER_MKDIR
-            value: "/data/config:zeek/intel/Mandiant,zeek/intel/MISP,zeek/intel/STIX;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
+            value: "/data/config:zeek/intel/Google,zeek/intel/Mandiant,zeek/intel/MISP,zeek/intel/STIX;/data/pcap:processed;/data/zeek-logs:current,extract_files/preserved,extract_files/quarantine,live,processed,upload"
         volumeMounts:
           - name: zeek-offline-intel-volume
             mountPath: "/data/config"
