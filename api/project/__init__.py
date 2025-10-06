@@ -879,115 +879,151 @@ def fields():
         raise PermissionError("Not authorized to perform this action")
 
     args = get_request_arguments(request)
-
-    templateName = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
-    arkimeFields = (templateName == app.config["MALCOLM_TEMPLATE"]) and (doctype_from_args(args) == 'network')
+    template_name = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
+    doctype = doctype_from_args(args)
+    include_arkime = (template_name == app.config["MALCOLM_TEMPLATE"]) and (doctype == "network")
 
     fields = defaultdict(dict)
 
-    if arkimeFields:
-        try:
-            # get fields from Arkime's fields table
-            s = SearchClass(
-                using=databaseClient,
-                index=index_from_args(args),
-            ).extra(size=6000)
-            for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
-                if (fieldname := malcolm_utils.deep_get(hit, ['dbField2'])) and (fieldname not in fields):
-                    if debugApi:
-                        hit['source'] = 'arkime'
-                    fields[fieldname] = {
-                        'description': malcolm_utils.deep_get(hit, ['help']),
-                        'type': field_type_map[malcolm_utils.deep_get(hit, ['type'])],
-                    }
-                    if debugApi:
-                        fields[fieldname]['original'] = [hit]
-        except Exception as e:
-            if debugApi:
-                print(f"{type(e).__name__}: {str(e)} getting Arkime fields")
+    if include_arkime:
+        merge_fields(fields, get_arkime_fields(args))
 
-    # get fields from OpenSearch template (and descendant components)
+    merge_fields(fields, get_opensearch_template_fields(template_name))
+    merge_fields(fields, get_dashboards_fields(args))
+
+    clean_fields(fields)
+
+    return jsonify(fields=fields, total=len(fields))
+
+
+def merge_fields(base_fields, new_fields):
+    for name, data in new_fields.items():
+        if name not in base_fields:
+            base_fields[name] = data
+        else:
+            base_fields[name].update(data)
+
+
+def get_arkime_fields(args):
+    result = {}
     try:
-        getTemplateResponseJson = requests.get(
-            f'{opensearchUrl}/_index_template/{templateName}',
+        s = SearchClass(using=databaseClient, index=app.config["ARKIME_FIELDS_INDEX"]).extra(size=6000)
+        for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
+            fieldname = malcolm_utils.deep_get(hit, ['dbField2'])
+            if not fieldname:
+                continue
+            if debugApi:
+                hit['source'] = 'arkime'
+            info = {
+                'description': malcolm_utils.deep_get(hit, ['help']),
+                'type': field_type_map[malcolm_utils.deep_get(hit, ['type'])],
+            }
+            if debugApi:
+                info['original'] = [hit]
+            result[fieldname] = info
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: {e} getting Arkime fields")
+    return result
+
+
+def get_opensearch_template_fields(template_name):
+    result = {}
+    try:
+        response = requests.get(
+            f"{opensearchUrl}/_index_template/{template_name}",
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json()
 
-        for template in malcolm_utils.deep_get(getTemplateResponseJson, ["index_templates"]):
+        for template in malcolm_utils.deep_get(response, ["index_templates"], []):
             # top-level fields
-            for fieldname, fieldinfo in malcolm_utils.deep_get(
-                template,
-                ["index_template", "template", "mappings", "properties"],
-                {},
-            ).items():
-                if debugApi:
-                    fieldinfo['source'] = f'opensearch.{templateName}'
-                if 'type' in fieldinfo:
-                    fields[fieldname]['type'] = field_type_map[malcolm_utils.deep_get(fieldinfo, ['type'])]
-                if debugApi:
-                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
-
-            # descendant component fields
-            for componentName in malcolm_utils.get_iterable(
+            result.update(
+                extract_field_info(
+                    malcolm_utils.deep_get(template, ["index_template", "template", "mappings", "properties"], {}),
+                    source=f"opensearch.{template_name}",
+                )
+            )
+            # composed components
+            for comp_name in malcolm_utils.get_iterable(
                 malcolm_utils.deep_get(template, ["index_template", "composed_of"])
             ):
-                getComponentResponseJson = requests.get(
-                    f'{opensearchUrl}/_component_template/{componentName}',
+                comp_resp = requests.get(
+                    f"{opensearchUrl}/_component_template/{comp_name}",
                     auth=opensearchReqHttpAuth,
                     verify=opensearchSslVerify,
                 ).json()
-                for component in malcolm_utils.get_iterable(
-                    malcolm_utils.deep_get(getComponentResponseJson, ["component_templates"])
-                ):
-                    for fieldname, fieldinfo in malcolm_utils.deep_get(
-                        component,
-                        ["component_template", "template", "mappings", "properties"],
-                        {},
-                    ).items():
-                        if debugApi:
-                            fieldinfo['source'] = f'opensearch.{templateName}.{componentName}'
-                        if 'type' in fieldinfo:
-                            fields[fieldname]['type'] = field_type_map[malcolm_utils.deep_get(fieldinfo, ['type'])]
-                        if debugApi:
-                            fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
-
+                for component in malcolm_utils.get_iterable(malcolm_utils.deep_get(comp_resp, ["component_templates"])):
+                    result.update(
+                        extract_field_info(
+                            malcolm_utils.deep_get(
+                                component, ["component_template", "template", "mappings", "properties"], {}
+                            ),
+                            source=f"opensearch.{template_name}.{comp_name}",
+                        )
+                    )
     except Exception as e:
         if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting OpenSearch index template fields")
+            print(f"{type(e).__name__}: {e} getting OpenSearch index template fields")
+    return result
 
-    # get fields from OpenSearch dashboards
+
+def get_dashboards_fields(args):
+    result = {}
     try:
-        for field in (
-            requests.get(
-                f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
-                params={
-                    'pattern': index_from_args(args),
-                    'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
-                },
-                auth=opensearchReqHttpAuth,
-                verify=opensearchSslVerify,
-            )
-            .json()
-            .get('fields', [])
-        ):
-            if fieldname := malcolm_utils.deep_get(field, ['name']):
-                if debugApi:
-                    field['source'] = 'dashboards'
-                field_types = malcolm_utils.deep_get(field, ['esTypes'], [])
-                fields[fieldname]['type'] = field_type_map[
-                    field_types[0] if len(field_types) > 0 else malcolm_utils.deep_get(fields[fieldname], ['type'])
+        resp = requests.get(
+            f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
+            params={
+                'pattern': index_from_args(args),
+                'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+            },
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json()
+
+        for field in resp.get('fields', []):
+            fieldname = malcolm_utils.deep_get(field, ['name'])
+            if not fieldname:
+                continue
+            if debugApi:
+                field['source'] = 'dashboards'
+            types = malcolm_utils.deep_get(field, ['esTypes'], [])
+            info = {
+                'type': field_type_map[
+                    types[0] if types else malcolm_utils.deep_get(result.get(fieldname, {}), ['type'])
                 ]
-                if debugApi:
-                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [field]
+            }
+            if debugApi:
+                info['original'] = result.get(fieldname, {}).get('original', []) + [field]
+            result[fieldname] = info
     except Exception as e:
         if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting OpenSearch Dashboards index pattern fields")
+            print(f"{type(e).__name__}: {e} getting OpenSearch Dashboards fields")
+    return result
 
-    for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
-        fields.pop(fieldname, None)
 
-    return jsonify(fields=fields, total=len(fields))
+def extract_field_info(properties, source=None):
+    """Convert a mapping properties dict into the internal field format."""
+    fields = {}
+    for name, info in properties.items():
+        # Skip top-level objects that just contain subfields
+        if 'properties' in info and 'type' not in info:
+            continue
+        entry = {}
+        if debugApi:
+            info['source'] = source
+        if 'type' in info:
+            entry['type'] = field_type_map[malcolm_utils.deep_get(info, ['type'])]
+        if debugApi:
+            entry['original'] = entry.get('original', []) + [info]
+
+        fields[name] = entry
+    return fields
+
+
+def clean_fields(fields):
+    for name in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
+        fields.pop(name, None)
 
 
 @app.route(f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/", methods=['GET'])
