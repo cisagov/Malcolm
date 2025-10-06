@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":35,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":42,\"i\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\"},\"panelIndex\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"}]",
+        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":33,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":42,\"i\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\"},\"panelIndex\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"}]",
         "timeRestore": false,
         "title": "Trees",
         "version": 1
@@ -33,7 +33,7 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-10-06T16:59:43.658Z",
+      "updated_at": "2025-10-06T17:36:51.496Z",
       "version": "WzEyNzEsMV0="
     },
     {
@@ -56,8 +56,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-10-06T16:38:43.711Z",
-      "version": "WzEyNDcsMV0="
+      "updated_at": "2025-10-06T17:32:53.734Z",
+      "version": "WzEyNTAsMV0="
     },
     {
       "attributes": {
@@ -79,8 +79,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-10-06T16:45:52.755Z",
-      "version": "WzEyNjgsMV0="
+      "updated_at": "2025-10-06T17:32:15.522Z",
+      "version": "WzgxOCwxXQ=="
     }
   ],
   "version": "3.2.0"
