@@ -10,7 +10,7 @@
         "optionsJSON": "{\"useMargins\":true}",
         "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":8,\"h\":33,\"i\":\"1\"},\"panelIndex\":\"1\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":8,\"y\":0,\"w\":40,\"h\":42,\"i\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\"},\"panelIndex\":\"76ed91be-9cfa-4ab6-97ea-176dff62779a\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"}]",
         "timeRestore": false,
-        "title": "Trees",
+        "title": "Connections Tree",
         "version": 1
       },
       "id": "89714140-a2d5-11f0-b5ae-e139a66d2205",
