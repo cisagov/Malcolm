@@ -1,3 +1,6 @@
+# disable Black formatting (https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#ignoring-sections)
+# fmt: off
+
 ####
 ## This file contains extra configuration options that can't be configured
 ## directly through environment variables.
