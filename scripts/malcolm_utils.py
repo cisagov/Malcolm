@@ -519,18 +519,18 @@ def get_primary_ip():
 
 ###################################################################################################
 # attempt to decode a string as JSON, returning the object if it decodes and None otherwise
-def LoadStrIfJson(jsonStr):
+def LoadStrIfJson(jsonStr, default=None):
     try:
         return json.loads(jsonStr)
     except ValueError:
-        return None
+        return default
 
 
 ###################################################################################################
 # attempt to decode a file (given by handle) as JSON, returning the object if it decodes and
 # None otherwise. Also, if attemptLines=True, attempt to handle cases of a file containing
 # individual lines of valid JSON.
-def LoadFileIfJson(fileHandle, attemptLines=False):
+def LoadFileIfJson(fileHandle, attemptLines=False, default=None):
     if fileHandle is not None:
 
         try:
@@ -538,19 +538,22 @@ def LoadFileIfJson(fileHandle, attemptLines=False):
         except ValueError:
             result = None
 
-        if (result is None) and attemptLines:
-            fileHandle.seek(0)
-            result = []
-            for line in fileHandle:
-                try:
-                    result.append(json.loads(line))
-                except ValueError:
-                    pass
-            if not result:
-                result = None
+        if result is None:
+            if attemptLines:
+                fileHandle.seek(0)
+                result = []
+                for line in fileHandle:
+                    try:
+                        result.append(json.loads(line))
+                    except ValueError:
+                        pass
+                if not result:
+                    result = default
+            else:
+                result = default
 
     else:
-        result = None
+        result = default
 
     return result
 
