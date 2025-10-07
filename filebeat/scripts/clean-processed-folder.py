@@ -61,6 +61,7 @@ _ARCHIVE_MIME_TYPES = (
 # Helper functions
 # --------------------------------------------------------------------
 
+
 def silent_remove(filename: str) -> None:
     """Remove a file, link, or directory without raising exceptions."""
     try:
@@ -100,11 +101,7 @@ def check_file(
 
         # get the file type (treat zero-length files as log files)
         file_type = magic.from_file(filename, mime=True)
-        if (
-            check_logs
-            and clean_log_seconds > 0
-            and (file_stat.st_size == 0 or file_type in _LOG_MIME_TYPES)
-        ):
+        if check_logs and clean_log_seconds > 0 and (file_stat.st_size == 0 or file_type in _LOG_MIME_TYPES):
             clean_seconds = clean_log_seconds
         elif check_archives and clean_zip_seconds > 0 and file_type in _ARCHIVE_MIME_TYPES:
             clean_seconds = clean_zip_seconds
@@ -116,9 +113,7 @@ def check_file(
         if clean_seconds > 0 and last_use_time >= clean_seconds:
             # this is a closed file that is old, so delete it
             silent_remove(filename)
-            logging.info(
-                f'Removed old file "{filename}" ({file_type}, used {last_use_time:.0f} seconds ago)'
-            )
+            logging.info(f'Removed old file "{filename}" ({file_type}, used {last_use_time:.0f} seconds ago)')
 
     except FileNotFoundError:
         # file's already gone, oh well
@@ -208,6 +203,7 @@ def cleanup_empty_dirs(base_dirs: List[str], clean_dir_seconds: int) -> None:
                 logging.info(f'Removed empty directory "{dir_to_rm}" (used {dir_age} seconds ago)')
             except OSError:
                 pass
+
 
 def prune_files() -> None:
     """Main cleanup logic: prune Zeek and Suricata logs, remove old dirs and symlinks."""

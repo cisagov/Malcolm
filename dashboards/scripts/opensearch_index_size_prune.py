@@ -310,7 +310,9 @@ def main():
     )
 
     total_mb, total_indices = get_total_index_size(args, session)
-    logging.info(f'Total {args.index} size: {humanfriendly.format_size(humanfriendly.parse_size(f"{total_mb}mb"))} ({total_indices} indices)')
+    logging.info(
+        f'Total {args.index} size: {humanfriendly.format_size(humanfriendly.parse_size(f"{total_mb}mb"))} ({total_indices} indices)'
+    )
 
     if total_mb <= limit_mb:
         print(
