@@ -333,6 +333,44 @@ def dictsearch(d, target):
 
 
 ###################################################################################################
+# given a dict, return the first value sorted by value
+def min_hash_value_by_value(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the first value sorted by key
+def min_hash_value_by_key(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the last value sorted by value
+def max_hash_value_by_value(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+###################################################################################################
+# given a dict, return the last value sorted by key
+def max_hash_value_by_key(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
     filteredArgs = (
