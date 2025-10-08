@@ -7,7 +7,7 @@
 import os
 import sys
 
-from scripts.malcolm_common import ClearScreen as safe_clear
+from scripts.malcolm_common import get_malcolm_version, ClearScreen as safe_clear
 
 
 UNICODE_GLYPHS = {
@@ -102,7 +102,7 @@ def splash_screen():
         return lines
 
     header = HEADER_TEXT
-    footer = FOOTER_TEXT
+    footer = f"v{get_malcolm_version()}. {FOOTER_TEXT}"
 
     cols = get_term_width()
 
