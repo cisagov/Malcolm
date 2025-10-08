@@ -26,7 +26,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 )
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-    KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
     KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
@@ -420,7 +419,6 @@ class SettingsFileHandler:
         """
         return {
             KEY_INSTALLATION_ITEM_AUTO_TWEAKS: "auto_tweaks",
-            KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS: "apply_memory_settings",
             KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING: "install_docker_if_missing",
             KEY_INSTALLATION_ITEM_USE_HOMEBREW: "use_homebrew",
             KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW: "continue_without_homebrew",
@@ -441,10 +439,6 @@ class SettingsFileHandler:
             KEY_INSTALLATION_ITEM_AUTO_TWEAKS: (
                 default_context.auto_tweaks,
                 "Apply system tweaks automatically",
-            ),
-            KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS: (
-                default_context.apply_memory_settings,
-                "Apply memory optimization settings",
             ),
             KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING: (
                 default_context.install_docker_if_missing,

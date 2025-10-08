@@ -20,7 +20,6 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_INSTALLATION_PATH,
     KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
-    KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS,
 )
 
 CONFIG_ITEM_AUTO_TWEAKS = ConfigItem(
@@ -56,15 +55,6 @@ CONFIG_ITEM_PULL_MALCOLM_IMAGES = ConfigItem(
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question=f"Pull Malcolm container images from registry?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_APPLY_MEMORY_SETTINGS = ConfigItem(
-    key=KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS,
-    label="Apply Memory Settings For Opensearch and Logstash",
-    default_value=True,
-    validator=lambda x: isinstance(x, bool),
-    question=f"Apply calculated memory and worker settings for OpenSearch and Logstash?",
     widget_type=WidgetType.CHECKBOX,
 )
 

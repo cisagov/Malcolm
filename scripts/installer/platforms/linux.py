@@ -453,20 +453,16 @@ class LinuxInstaller(BaseInstaller):
                 InstallerLogger.info("Dry run/config-only: would install Docker if missing")
                 InstallerLogger.info("Dry run/config-only: would install Docker Compose")
 
-        # 4) Runtime config (shared)
-        if not _ok(shared_actions.apply_runtime_config(malcolm_config, config_dir, self, ctx, InstallerLogger)):
-            return False
-
-        # 5) Orchestration files (shared) [compose only]
+        # 4) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if not _ok(shared_actions.update_ancillary(malcolm_config, config_dir, self, ctx, InstallerLogger)):
                 return False
 
-        # 6) SSL env (shared)
+        # 5) SSL env (shared)
         if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx, InstallerLogger)):
             return False
 
-        # 7) Linux tweaks (only in install mode)
+        # 6) Linux tweaks (only in install mode)
         if self.should_run_install_steps():
             status, _ = linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx, InstallerLogger)
             if status == InstallerResult.FAILURE:
@@ -474,7 +470,7 @@ class LinuxInstaller(BaseInstaller):
         else:
             InstallerLogger.info("Dry run/config-only: would apply Linux system tweaks")
 
-        # 8) Docker operations (shared) [compose only and install mode]
+        # 7) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
                 if not _ok(

@@ -17,7 +17,6 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
-    KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS,
     KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
 )
@@ -325,11 +324,6 @@ class InstallContext(ObservableStoreMixin):
     def try_docker_convenience_script(self) -> bool:
         """Get try_docker_convenience_script value from items or default."""
         return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT, default=False)
-
-    @property
-    def apply_memory_settings(self) -> bool:
-        """Get apply_memory_settings value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS, default=True)
 
     @property
     def pull_malcolm_images(self) -> bool:

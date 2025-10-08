@@ -342,20 +342,16 @@ class MacInstaller(BaseInstaller):
             else:
                 InstallerLogger.info("Dry run/config-only: would install Docker Desktop / Compose")
 
-        # 3) Runtime config (shared)
-        if not _ok(shared_actions.apply_runtime_config(malcolm_config, config_dir, self, ctx, InstallerLogger)):
-            return False
-
-        # 4) Orchestration files (shared) [compose only]
+        # 3) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if not _ok(shared_actions.update_ancillary(malcolm_config, config_dir, self, ctx, InstallerLogger)):
                 return False
 
-        # 5) SSL env (shared)
+        # 4) SSL env (shared)
         if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx, InstallerLogger)):
             return False
 
-        # 6) Docker operations (shared) [compose only and install mode]
+        # 5) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE and self.should_run_install_steps():
             if not _ok(
                 shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx, InstallerLogger)
