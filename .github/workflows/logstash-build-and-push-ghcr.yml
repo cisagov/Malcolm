@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - installer-staging
     paths:
       - 'logstash/**'
       - 'Dockerfiles/logstash.Dockerfile'

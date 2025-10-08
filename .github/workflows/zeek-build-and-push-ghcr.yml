@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - installer-staging
     paths:
       - 'zeek/**'
       - 'Dockerfiles/zeek.Dockerfile'
