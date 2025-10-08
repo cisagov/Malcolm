@@ -37,11 +37,11 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     get_set_of_installation_item_keys,
 )
-from scripts.malcolm_utils import get_config_file_version
+from scripts.malcolm_common import get_malcolm_version
 from scripts.installer.utils.logger_utils import InstallerLogger
 from enum import Enum, Flag
 
-CONFIG_FILE_VERSION = get_config_file_version()
+CONFIG_FILE_VERSION = get_malcolm_version()
 
 # Sentinel value for None/empty values that maintains format consistency
 CONFIG_ITEM_NONE_SENTINEL = "<MALCOLM_CONFIG_NONE>"

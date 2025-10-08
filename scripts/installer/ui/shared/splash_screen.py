@@ -7,7 +7,7 @@
 import os
 import sys
 
-from scripts.malcolm_utils import clear_screen
+from scripts.malcolm_common import ClearScreen as safe_clear
 
 
 UNICODE_GLYPHS = {
@@ -172,13 +172,6 @@ def splash_screen():
             pass
 
     safe_clear()
-
-
-def safe_clear() -> None:
-    try:
-        clear_screen()
-    except Exception:
-        pass
 
 
 def init_color():

@@ -24,8 +24,8 @@ from scripts.malcolm_utils import (
     str2bool as str_to_bool,
     true_or_false_no_quotes,
     bool_to_str,
-    get_default_config_dir,
 )
+from scripts.malcolm_common import get_default_config_dir
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.config_env_files import *
@@ -769,7 +769,7 @@ class EnvMapper:
 #     import os
 #     from ..config_constants.config_env_var_keys import ALL_ENV_KEYS_DICT
 #     from ..config_constants.config_env_files import ALL_ENV_FILES_DICT
-#     from scripts.malcolm_utils import get_default_config_dir
+#     from scripts.malcolm_common import get_default_config_dir
 
 #     mapper = EnvMapper()
 #     config_dir = get_default_config_dir()

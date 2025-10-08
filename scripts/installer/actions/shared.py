@@ -351,7 +351,7 @@ def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> In
     """Ensure ssl.env exists in the configuration directory."""
     import os, shutil
     from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
-    from scripts.malcolm_utils import get_default_config_dir
+    from scripts.malcolm_common import get_default_config_dir
 
     try:
         if not config_dir:

@@ -1269,7 +1269,6 @@ def start():
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
         if not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore'))):
-            print ("here")
             keystore_op('opensearch', True, 'create')
 
         # make sure permissions are set correctly for the worker processes

@@ -10,10 +10,10 @@ including directories, data retention policies, and index management.
 """
 
 from scripts.malcolm_constants import WidgetType
+from scripts.malcolm_common import get_malcolm_dir
 from scripts.malcolm_utils import (
     str2bool as str_to_bool,
     str2percent as str_to_percent,
-    get_malcolm_dir,
 )
 
 from scripts.installer.core.config_item import ConfigItem

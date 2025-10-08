@@ -8,13 +8,13 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Any, Dict, List
 from scripts.malcolm_common import (
+    ClearScreen,
     InstallerYesOrNo,
     InstallerAskForString,
     UserInterfaceMode,
     DialogBackException,
     DialogCanceledException,
 )
-from scripts.malcolm_utils import clear_screen
 from ..shared.menu_builder import MenuBuilder
 from ..shared.prompt_utils import prompt_config_item_value
 
@@ -98,7 +98,7 @@ class BaseMenu(ABC):
         """
         try:
             while True:
-                clear_screen()
+                ClearScreen()
                 self.menu_builder.clear()
 
                 # Build the menu content

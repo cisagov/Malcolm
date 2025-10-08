@@ -8,6 +8,7 @@
 from typing import Optional, TYPE_CHECKING
 
 from scripts.malcolm_common import (
+    ClearScreen,
     InstallerYesOrNo,
     InstallerAskForString,
     InstallerAskForPassword,
@@ -16,7 +17,6 @@ from scripts.malcolm_common import (
     DialogBackException,
     DialogCanceledException,
 )
-from scripts.malcolm_utils import clear_screen
 from scripts.malcolm_utils import eprint
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.utils.debug_utils import debug_menu_structure
@@ -166,7 +166,7 @@ class TUIInstallerUI(InstallerUI):
         summary_items.append(("Dry Run", "Yes" if is_dry_run else "No"))
 
         # Clear screen and display the summary using TUI formatting
-        clear_screen()
+        ClearScreen()
 
         # Build the entire summary as one cohesive display
         summary_lines = []

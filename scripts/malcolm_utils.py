@@ -7,12 +7,14 @@ import contextlib
 import enum
 import fnmatch
 import hashlib
+import importlib
 import inspect
 import ipaddress
 import json
 import logging
 import mmap
 import os
+import platform
 import re
 import socket
 import string
@@ -20,8 +22,6 @@ import subprocess
 import sys
 import tempfile
 import time
-from ruamel.yaml import YAML as yaml
-import shutil
 
 from base64 import b64decode
 from datetime import datetime
@@ -36,15 +36,18 @@ except ImportError:
     from collections import Iterable
 from collections import defaultdict, namedtuple, OrderedDict
 
-from scripts.malcolm_constants import (
-    PGID_DEFAULT,
-    PUID_DEFAULT,
-    PLATFORM_LINUX,
-    PLATFORM_MAC,
-    PLATFORM_WINDOWS,
-    DATABASE_MODE_ENUMS,
-    DATABASE_MODE_LABELS,
-)
+try:
+    malcolm_constants = importlib.import_module("scripts.malcolm_constants")
+except ModuleNotFoundError:
+    malcolm_constants = importlib.import_module("malcolm_constants")
+if malcolm_constants:
+    PGID_DEFAULT = malcolm_constants.PGID_DEFAULT
+    PUID_DEFAULT = malcolm_constants.PUID_DEFAULT
+    PLATFORM_LINUX = malcolm_constants.PLATFORM_LINUX
+    PLATFORM_MAC = malcolm_constants.PLATFORM_MAC
+    PLATFORM_WINDOWS = malcolm_constants.PLATFORM_WINDOWS
+    DATABASE_MODE_ENUMS = malcolm_constants.DATABASE_MODE_ENUMS
+    DATABASE_MODE_LABELS = malcolm_constants.DATABASE_MODE_LABELS
 
 
 def DatabaseModeEnumToStr(val):
@@ -285,6 +288,7 @@ def deep_set(d, keys, value, deleteIfNone=False):
     if deleteIfNone and (value is None):
         d.pop(k[-1], None)
 
+
 ###################################################################################################
 # Recursively merges 'source' dict into 'destination' dict. Values from 'source' override those
 #    in 'destination' at the same path.
@@ -304,19 +308,13 @@ def deep_merge_in_place(source, destination):
         else:
             destination[key] = value
 
+
 ###################################################################################################
 # recursive dictionary key search
 def dictsearch(d, target):
     val = filter(
         None,
-        [
-            (
-                [b]
-                if a == target
-                else dictsearch(b, target) if isinstance(b, dict) else None
-            )
-            for a, b in d.items()
-        ],
+        [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()],
     )
     return [i for b in val for i in b]
 
@@ -325,9 +323,7 @@ def dictsearch(d, target):
 # print to stderr
 def eprint(*args, **kwargs):
     filteredArgs = (
-        {k: v for (k, v) in kwargs.items() if k not in ("timestamp", "flush")}
-        if isinstance(kwargs, dict)
-        else {}
+        {k: v for (k, v) in kwargs.items() if k not in ("timestamp", "flush")} if isinstance(kwargs, dict) else {}
     )
     if "timestamp" in kwargs and kwargs["timestamp"]:
         print(
@@ -353,7 +349,7 @@ def EscapeForCurl(s):
     return s.translate(
         str.maketrans(
             {
-                '"': r"\"",
+                '"': r'\"',
                 "\\": r"\\",
                 "\t": r"\t",
                 "\n": r"\n",
@@ -368,7 +364,7 @@ def UnescapeForCurl(s):
     return custom_make_translation(
         s,
         {
-            r"\"": '"',
+            r'\"': '"',
             r"\t": "\t",
             r"\n": "\n",
             r"\r": "\r",
@@ -388,15 +384,13 @@ OPENSSL_ENC_MAGIC = b"Salted__"
 PKCS5_SALT_LEN = 8
 
 
-def EVP_BytesToKey(
-    key_length: int, iv_length: int, md, salt: bytes, data: bytes, count: int = 1
-) -> (bytes, bytes):
+def EVP_BytesToKey(key_length: int, iv_length: int, md, salt: bytes, data: bytes, count: int = 1) -> (bytes, bytes):
     assert data
-    assert salt == b"" or len(salt) == PKCS5_SALT_LEN
+    assert salt == b'' or len(salt) == PKCS5_SALT_LEN
 
-    md_buf = b""
-    key = b""
-    iv = b""
+    md_buf = b''
+    key = b''
+    iv = b''
     addmd = 0
 
     while key_length > len(key) or iv_length > len(iv):
@@ -413,10 +407,7 @@ def EVP_BytesToKey(
         md_buf2 = md_buf
 
         if key_length > len(key):
-            key, md_buf2 = (
-                key + md_buf2[: key_length - len(key)],
-                md_buf2[key_length - len(key) :],
-            )
+            key, md_buf2 = key + md_buf2[: key_length - len(key)], md_buf2[key_length - len(key) :]
 
         if iv_length > len(iv):
             iv = iv + md_buf2[: iv_length - len(iv)]
@@ -444,6 +435,7 @@ def get_iterable(x):
     else:
         return (x,)
 
+
 # remove "empty" items from a collection
 def remove_falsy(obj):
     if isinstance(obj, dict):
@@ -452,6 +444,7 @@ def remove_falsy(obj):
         return [v for v in (remove_falsy(i) for i in obj) if v]
     else:
         return obj if obj else None
+
 
 ###################################################################################################
 # will it float?
@@ -468,11 +461,7 @@ def isfloat(value):
 def isipaddress(value):
     result = True
     try:
-        if (
-            isinstance(value, list)
-            or isinstance(value, tuple)
-            or isinstance(value, set)
-        ):
+        if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
             for v in value:
                 ipaddress.ip_address(v)
         else:
@@ -487,11 +476,7 @@ def isipaddress(value):
 def isprivateip(value):
     result = True
     try:
-        if (
-            isinstance(value, list)
-            or isinstance(value, tuple)
-            or isinstance(value, set)
-        ):
+        if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, set):
             for v in value:
                 result = result and ipaddress.ip_network(value).is_private
                 if not result:
@@ -517,6 +502,12 @@ def get_primary_ip():
     finally:
         s.close()
     return ip
+
+
+###################################################################################################
+# return the first part of the system's hostname
+def get_hostname_without_domain():
+    return os.getenv("HOSTNAME", os.getenv("COMPUTERNAME", platform.node())).split(".")[0]
 
 
 ###################################################################################################
@@ -579,9 +570,7 @@ def ParseCurlFile(curlCfgFileName):
     if os.path.isfile(curlCfgFileName):
         itemRegEx = re.compile(r"^([^\s:=]+)((\s*[:=]?\s*)(.*))?$")
         with open(curlCfgFileName, "r") as f:
-            allLines = [
-                x.strip().lstrip("-") for x in f.readlines() if not x.startswith("#")
-            ]
+            allLines = [x.strip().lstrip("-") for x in f.readlines() if not x.startswith("#")]
         for line in allLines:
             found = itemRegEx.match(line)
             if found is not None:
@@ -626,6 +615,7 @@ def ChownRecursive(path, uid, gid):
                     follow_symlinks=False,
                 )
 
+
 ###################################################################################################
 # recursively delete a directory tree while excluding specific files based on glob-style patterns
 def rmtree_except(path, exclude_patterns=None, ignore_errors=False):
@@ -659,6 +649,7 @@ def rmtree_except(path, exclude_patterns=None, ignore_errors=False):
     except Exception:
         if not ignore_errors:
             raise
+
 
 ###################################################################################################
 # recursively remove empty subfolders
@@ -754,10 +745,12 @@ def str2bool(v):
     elif isinstance(v, str):
         if v.lower() in ("yes", "true", "t", "y", "1"):
             return True
-        elif v.lower() in ("no", "false", "f", "n", "0"):
+        elif v.lower() in ("no", "false", "f", "n", "0", ""):
             return False
         else:
             raise ValueError("Boolean value expected")
+    elif not v:
+        return False
     else:
         raise ValueError("Boolean value expected")
 
@@ -982,145 +975,45 @@ def run_subprocess(command, stdout=True, stderr=False, stdin=None, timeout=60):
     return retcode, output
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def package_is_installed(self, package):
-    result = False
-    for cmd in self.checkPackageCmds:
-        ecode, out = self.run_process(cmd + [package])
-        if ecode == 0:
-            result = True
-            break
-    return result
+###################################################################################################
+# different methods for getting line counts of text files
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-def install_package(self, packages):
-    result = False
-    pkgs = []
-
-    for package in packages:
-        if not self.package_is_installed(package):
-            pkgs.append(package)
-
-    if len(pkgs) > 0:
-        for cmd in self.installPackageCmds:
-            ecode, out = self.run_process(cmd + pkgs, privileged=True)
-            if ecode == 0:
-                result = True
-                break
+# run "wc -l" in a subprocess on many files (fastest for large numbers of files)
+def count_lines_wc_batch(file_paths):
+    if file_paths:
+        try:
+            result = subprocess.run(["wc", "-l"] + file_paths, capture_output=True, text=True, check=True)
+            return [
+                (file, int(count))
+                for line in result.stdout.strip().split("\n")
+                if (count := line.split(maxsplit=1)[0]) and (file := line.split(maxsplit=1)[1].strip()) != "total"
+            ]
+        except Exception as e:
+            print(f"Error counting lines of {file_paths}: {e}", file=sys.stderr)
+            return [(file_path, 0) for file_path in file_paths]
     else:
-        result = True
-
-    return result
+        return []
 
 
-def get_malcolm_dir():
-    """
-    Get the absolute path to the Malcolm installation directory.
-
-    This function is designed to work robustly whether run:
-    - directly from the Malcolm directory
-    - from another directory
-    - with sudo or other elevated privileges
-
-    Returns:
-        str: The absolute path to the Malcolm directory
-    """
-    # First, try using the location of this script
+# run "wc -l" in a subprocess on a single file (not particularly efficient, but faster than pure python)
+def count_lines_wc(file_path):
     try:
-        # Start with the directory containing this script (malcolm_common.py)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+        result = subprocess.run(["wc", "-l", file_path], capture_output=True, text=True, check=True)
+        return file_path, int(result.stdout.split()[0])
+    except Exception as e:
+        print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
+        return file_path, 0
 
-        # Go up one level to the Malcolm root directory if in scripts/
-        if os.path.basename(current_dir) == "scripts":
-            malcolm_dir = os.path.dirname(current_dir)
+
+# use memory-mapped files and count "\n" (fastest for many small files as it avoids subprocess overhead)
+def count_lines_mmap(file_path):
+    try:
+        if os.path.getsize(file_path):
+            with open(file_path, "r") as f:
+                return file_path, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ).read().count(b"\n")
         else:
-            malcolm_dir = current_dir
-
-        # Verify this is indeed the Malcolm directory by checking for key files/directories
-        if (
-            os.path.isdir(os.path.join(malcolm_dir, "scripts"))
-            and os.path.isdir(os.path.join(malcolm_dir, "config"))
-            and os.path.isfile(os.path.join(malcolm_dir, "docker-compose.yml"))
-        ):
-            return malcolm_dir
-    except Exception:
-        pass
-
-    # If that didn't work, try using the current working directory
-    try:
-        cwd = os.getcwd()
-        if (
-            os.path.isdir(os.path.join(cwd, "scripts"))
-            and os.path.isdir(os.path.join(cwd, "config"))
-            and os.path.isfile(os.path.join(cwd, "docker-compose.yml"))
-        ):
-            return cwd
-    except Exception:
-        pass
-
-    # If we're running the script directly, try using its location
-    try:
-        script_path = os.path.abspath(sys.argv[0])
-        script_dir = os.path.dirname(script_path)
-
-        # Check if we're running from the scripts directory
-        if os.path.basename(script_dir) == "scripts":
-            possible_malcolm_dir = os.path.dirname(script_dir)
-            if os.path.isdir(
-                os.path.join(possible_malcolm_dir, "config")
-            ) and os.path.isfile(
-                os.path.join(possible_malcolm_dir, "docker-compose.yml")
-            ):
-                return possible_malcolm_dir
-    except Exception:
-        pass
-
-    # If all else fails, check if there's an environment variable set
-    if "MALCOLM_DIR" in os.environ:
-        malcolm_dir = os.environ["MALCOLM_DIR"]
-        if (
-            os.path.isdir(malcolm_dir)
-            and os.path.isdir(os.path.join(malcolm_dir, "scripts"))
-            and os.path.isdir(os.path.join(malcolm_dir, "config"))
-        ):
-            return malcolm_dir
-
-    # If we still can't find it, raise an exception
-    raise FileNotFoundError(
-        "Could not locate the Malcolm directory. Please run this script from within "
-        "the Malcolm directory or set the MALCOLM_DIR environment variable."
-    )
-
-
-def clear_screen() -> None:
-    """Clear the terminal screen in a cross-platform way."""
-    # Clear screen command for different operating systems
-    if os.name == "nt":  # Windows
-        os.system("cls")
-    else:  # Unix/Linux/MacOS
-        os.system("clear")
-
-
-def get_default_config_dir():
-    """Get the default config directory."""
-    return os.path.join(get_malcolm_dir(), "config")
-
-def get_config_file_version():
-    """Get the Malcolm version from _config.yml.
-
-    Returns:
-        str: The Malcolm version string, or "unknown" if not found
-    """
-    # config_file_path = os.path.join(get_malcolm_dir(), "_config.yml")
-    # with open(config_file_path, "r") as f:
-    #     tmpYaml = yaml(typ="safe")
-    #     config_data = tmpYaml.load(config_file_path)
-    # return config_data.get("malcolm", {}).get("version", "unknown")
-    return "unknown"
-
-import platform as _platform
-def get_hostname_without_domain():
-    return os.getenv("HOSTNAME", os.getenv("COMPUTERNAME", _platform.node())).split(
-        "."
-    )[0]
+            return file_path, 0
+    except Exception as e:
+        print(f"Error counting lines of {file_path}: {e}", file=sys.stderr)
+        return file_path, 0

@@ -30,6 +30,7 @@ from scripts.malcolm_utils import (
 
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
+from packaging import version
 
 from scripts.malcolm_constants import (
     PLATFORM_WINDOWS,
@@ -40,6 +41,7 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_FEDORA,
     PLATFORM_LINUX_UBUNTU,
     YAML_VERSION,
+    ImageArchitecture,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
 )
@@ -57,6 +59,7 @@ _DIALOG_MIN_WIDTH = 50
 _DIALOG_MAX_WIDTH = 140
 _DIALOG_MIN_HEIGHT = 7
 _DIALOG_MAX_HEIGHT = 30
+
 
 def _dialog_size_for(text: str) -> tuple[int, int]:
     """Compute a suitable (height, width) for a dialog widget.
@@ -102,6 +105,7 @@ def _dialog_menu_width_for(choices) -> int:
     except Exception:
         return _DIALOG_MIN_WIDTH
 
+
 try:
     from colorama import init as ColoramaInit, Fore, Back, Style
 
@@ -119,6 +123,7 @@ MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 # Utility helpers for referring to the root of the Malcolm repository from
 # other helper scripts.
 
+
 def GetMalcolmPath():
     """Return the absolute path to the root of the Malcolm repository."""
     return MalcolmPath
@@ -128,6 +133,7 @@ def SetMalcolmPath(val):
     global MalcolmPath
     MalcolmPath = val
     return MalcolmPath
+
 
 class NullRepresenter:
     def __call__(self, repr, data):
@@ -268,6 +274,7 @@ def GetMemMegabytesFromJavaOptsLine(val):
             resultMB = 0
     return resultMB
 
+
 ##################################################################################################
 def ParseK8sMemoryToMib(val):
     val = str(val).strip()
@@ -279,6 +286,7 @@ def ParseK8sMemoryToMib(val):
             return int(value * units[unit])
 
     return 0
+
 
 ##################################################################################################
 def GetUidGidFromEnv(configDir=None):
@@ -297,6 +305,7 @@ def GetUidGidFromEnv(configDir=None):
                 uidGidDict['PGID'] = envValues['PGID']
 
     return uidGidDict
+
 
 ##################################################################################################
 # takes an array of EnvValue namedtuple (see above) and updates the values in the specified .env files
@@ -342,6 +351,7 @@ def UpdateEnvFiles(envValues, chmodFlag=None):
                     pass
 
     return result
+
 
 ###################################################################################################
 # attempt to clear the screen
@@ -826,6 +836,7 @@ def posInt(value):
 
     return ivalue
 
+
 ###################################################################################################
 def ValidNetBoxSubnetFilter(value):
     if not value.strip():
@@ -859,6 +870,7 @@ def ValidNetBoxSubnetFilter(value):
 
     return True
 
+
 ###################################################################################################
 # attempt dynamic imports, prompting for install via pip if possible
 DynImports = defaultdict(lambda: None)
@@ -884,7 +896,9 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
         pyExec = sys.executable
         pipCmd = "pip3"
         if not which(pipCmd, debug=debug):
-            pipCmd = "pip"
+            err, out = run_process([sys.executable, '-m', 'pip', '--version'], debug=debug)
+            if out and (err == 0):
+                pipCmd = [sys.executable, '-m', 'pip']
 
         eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
@@ -907,6 +921,8 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
                     eprint(f"Installation of {pipPkgName} module apparently succeeded")
+                    importlib.reload(site)
+                    importlib.invalidate_caches()
                     try:
                         tmpImport = importlib.import_module(importName)
                         if tmpImport:
@@ -940,23 +956,153 @@ def DotEnvDynamic(debug=False, forceInteraction=False):
     return DoDynamicImport("dotenv", "python-dotenv", interactive=forceInteraction, debug=debug)
 
 
+def get_malcolm_dir():
+    """
+    Get the absolute path to the Malcolm installation directory.
+
+    This function is designed to work robustly whether run:
+    - directly from the Malcolm directory
+    - from another directory
+    - with sudo or other elevated privileges
+
+    Returns:
+        str: The absolute path to the Malcolm directory
+    """
+    # First, try using the location of this script
+    try:
+        # Start with the directory containing this script (malcolm_common.py)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Go up one level to the Malcolm root directory if in scripts/
+        if os.path.basename(current_dir) == "scripts":
+            malcolm_dir = os.path.dirname(current_dir)
+        else:
+            malcolm_dir = current_dir
+
+        # Verify this is indeed the Malcolm directory by checking for key files/directories
+        if (
+            os.path.isdir(os.path.join(malcolm_dir, "scripts"))
+            and os.path.isdir(os.path.join(malcolm_dir, "config"))
+            and os.path.isfile(os.path.join(malcolm_dir, "docker-compose.yml"))
+        ):
+            return malcolm_dir
+    except Exception:
+        pass
+
+    # If that didn't work, try using the current working directory
+    try:
+        cwd = os.getcwd()
+        if (
+            os.path.isdir(os.path.join(cwd, "scripts"))
+            and os.path.isdir(os.path.join(cwd, "config"))
+            and os.path.isfile(os.path.join(cwd, "docker-compose.yml"))
+        ):
+            return cwd
+    except Exception:
+        pass
+
+    # If we're running the script directly, try using its location
+    try:
+        script_path = os.path.abspath(sys.argv[0])
+        script_dir = os.path.dirname(script_path)
+
+        # Check if we're running from the scripts directory
+        if os.path.basename(script_dir) == "scripts":
+            possible_malcolm_dir = os.path.dirname(script_dir)
+            if os.path.isdir(os.path.join(possible_malcolm_dir, "config")) and os.path.isfile(
+                os.path.join(possible_malcolm_dir, "docker-compose.yml")
+            ):
+                return possible_malcolm_dir
+    except Exception:
+        pass
+
+    # If all else fails, check if there's an environment variable set
+    if "MALCOLM_DIR" in os.environ:
+        malcolm_dir = os.environ["MALCOLM_DIR"]
+        if (
+            os.path.isdir(malcolm_dir)
+            and os.path.isdir(os.path.join(malcolm_dir, "scripts"))
+            and os.path.isdir(os.path.join(malcolm_dir, "config"))
+        ):
+            return malcolm_dir
+
+    # If we still can't find it, raise an exception
+    raise FileNotFoundError(
+        "Could not locate the Malcolm directory. Please run this script from within "
+        "the Malcolm directory or set the MALCOLM_DIR environment variable."
+    )
+
+
+def get_default_config_dir():
+    """Get the default config directory."""
+    return os.path.join(get_malcolm_dir(), "config")
+
+
+def get_malcolm_version():
+    """Get the Malcolm version from docker-compose.yml
+
+    Returns:
+        str: The Malcolm version string, or "unknown" if not found
+    """
+
+    def get_highest_calver(tags):
+        valid_versions = []
+        for tag in tags:
+            try:
+                parsed = version.parse(tag)
+                if parsed.release and all(str(part).isdigit() for part in parsed.release[:2]):
+                    valid_versions.append(parsed)
+            except Exception:
+                pass
+        if not valid_versions:
+            return None
+        return str(max(valid_versions))
+
+    result = "unknown"
+
+    if yamlImported := YAMLDynamic():
+        try:
+            with open(os.path.join(get_malcolm_dir(), "docker-compose.yml"), 'r') as f:
+                compose_data = yamlImported.YAML(typ='safe', pure=True).load(f)
+                image_tags = []
+                for service_name, service_def in compose_data.get("services", {}).items():
+                    image = service_def.get("image")
+                    if image and ":" in image:
+                        image_tags.append(image.rsplit(":", 1)[1])
+                result = get_highest_calver(image_tags)
+        except Exception as e:
+            eprint(f'Error deciphering docker-compose.yml: {e}')
+
+    return result
+
+
 ###################################################################################################
 # do the required auth files for Malcolm exist?
+def AuthFileCheck(fileName, allowEmpty=False):
+    try:
+        return os.path.isfile(fileName) and (allowEmpty or (os.path.getsize(fileName) > 0))
+    except Exception as e:
+        return False
+
+
 def MalcolmAuthFilesExist(configDir=None):
     configDirToCheck = (
         configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     )
     return (
-        os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
-        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
-        and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
-        and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
+        AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
+        and AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
+        and AuthFileCheck(
+            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+        )
+        and AuthFileCheck(
+            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
+        )
+        and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
+        and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
+        and AuthFileCheck(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 
 
@@ -1040,9 +1186,7 @@ def DownloadToFile(url, local_filename, debug=False):
     fExists = os.path.isfile(local_filename)
     fSize = os.path.getsize(local_filename)
     if debug:
-        eprint(
-            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({sizeof_fmt(fSize)})"
-        )
+        eprint(f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({sizeof_fmt(fSize)})")
     return fExists and (fSize > 0)
 
 
@@ -1057,47 +1201,59 @@ LOG_IGNORE_REGEX = re.compile(
 .+(
     deprecated
   | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
-  | \bGET.+\b302\s+30\b
+  | "netbox"\s+application\s+started
   | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-  | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
   | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
+  | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
+  | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
+  | (relation|SELECT)\s+"django_content_type"
+  | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
   | /_ns_/nstest\.html
   | /proc/net/tcp6:\s+no\s+such\s+file\s+or\s+directory
   | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
+  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
   | \b(d|es)?stats\.json
   | \b1.+GET\s+/\s+.+401.+curl
+  | \bGET.+\b302\s+30\b
+  | \d+\s+changes\s+in\s+\d+\s+seconds\.\s+Saving
   | _cat/indices
+  | Background\s+saving\s+started
+  | Background\s+saving\s+terminated\s+with\s+success
   | branding.*config\s+is\s+not\s+found\s+or\s+invalid
   | but\s+there\s+are\s+no\s+living\s+connections
-  | Connecting\s+to\s+backoff
   | Cleaning\s+registries\s+for\s+queue:
+  | Closing\s+because\s+(close_renamed|close_eof|close_inactive)
+  | Connecting\s+to\s+backoff
+  | Could\s+not\s+assign\s+group.+to\s+remotely-authenticated\s+user.+Group\s+not\s+found
   | curl.+localhost.+GET\s+/api/status\s+200
+  | DB\s+saved\s+on\s+disk
   | DEPRECATION
   | descheduling\s+job\s*id
-  | (relation|SELECT)\s+"django_content_type"
+  | DON'T\s+DO\s+IT.*bad\s+idea
+  | Error\s+during\s+file\s+comparison:.*no\s+such\s+file
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
+  | Failure\s+no\s+such\s+index\s+\[\.opendistro_security\]
   | Falling\s+back\s+to\s+single\s+shard\s+assignment
+  | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
-  | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
-  | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
+  | i:\s+pcap:\s+read\s+\d+\s+file
   | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
-  | Info:\s+unix-socket:
   | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
-  | i:\s+pcap:\s+read\s+\d+\s+file
+  | Info:\s+unix-socket:
+  | kube-probe/
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
-  | "netbox"\s+application\s+started
-  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
-  | kube-probe/
+  | opensearch.*has\s+insecure\s+file\s+permissions
   | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
+  | POST\s+/wise/get.+\b200\b
   | POST\s+HTTP/[\d\.].+\b200\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
@@ -1110,12 +1266,13 @@ LOG_IGNORE_REGEX = re.compile(
   | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
   | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
   | throttling\s+index
+  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | update_mapping
   | updating\s+number_of_replicas
-  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | use_field_mapping
   | Using\s+geoip\s+database
   | Warning:\s+app-layer-
+  | you\s+may\s+need\s+to\s+run\s+securityadmin
 )
 """,
     re.VERBOSE | re.IGNORECASE,
@@ -1258,26 +1415,7 @@ def ProcessLogLine(line, debug=False):
 
     return None
 
-##################################################################################################
-def RunWithSudo(command):
-    """
-    Run a command with sudo if needed.
 
-    Args:
-        command (str): Command to run
-
-    Returns:
-        subprocess.CompletedProcess: Result of the command
-    """
-    import subprocess
-
-    if os.geteuid() == 0:  # Already running as root
-        return subprocess.run(command, shell=True, check=True)
-    else:
-        sudo_command = f"sudo {command}"
-        print(f"Running with elevated privileges: {command}")
-        return subprocess.run(sudo_command, shell=True, check=True)
-    
 ##################################################################################################
 def InstallerDisplayMessage(
     message,
@@ -1295,6 +1433,7 @@ def InstallerDisplayMessage(
         uiMode=uiMode,
         extraLabel=extraLabel,
     )
+
 
 # Add these installer wrapper functions near existing similar functions
 def InstallerYesOrNo(
@@ -1342,6 +1481,7 @@ def InstallerAskForString(
         extraLabel=extraLabel,
     )
 
+
 def InstallerAskForPassword(
     question,
     default=None,
@@ -1361,6 +1501,7 @@ def InstallerAskForPassword(
         uiMode=uiMode,
         extraLabel=extraLabel,
     )
+
 
 def InstallerChooseOne(
     prompt,
@@ -1402,6 +1543,7 @@ def InstallerChooseMultiple(
         uiMode=uiMode,
         extraLabel=extraLabel,
     )
+
 
 ###################################################################################################
 # System-information helpers (used by installer logic)
@@ -1449,44 +1591,12 @@ def disk_free_bytes(path: str = "/") -> int:
 # ------------------------------------------------------------------
 
 
-def determine_uid_gid(
-    scriptUser,
-    scriptPlatform,
-    referencePath,
-):
-    defaultUid = PUID_DEFAULT
-    defaultGid = PGID_DEFAULT
-    if ((scriptPlatform == PLATFORM_LINUX) or (scriptPlatform == PLATFORM_MAC)) and (
-        scriptUser == "root"
-    ):
-        if pathUid := os.stat(referencePath).st_uid:
-            defaultUid = str(pathUid)
-        if pathGid := os.stat(referencePath).st_gid:
-            defaultGid = str(pathGid)
-
-    uid = defaultUid
-    gid = defaultGid
-    try:
-        if scriptPlatform == PLATFORM_LINUX:
-            uid = str(os.getuid())
-            gid = str(os.getgid())
-            if (uid == "0") or (gid == "0"):
-                raise Exception(
-                    "it is preferrable not to run Malcolm as root, prompting for UID/GID instead"
-                )
-    except Exception:
-        uid = defaultUid
-        gid = defaultGid
-
-    return uid, gid
-
-
 def suggest_os_memory(total_gb: int | None = None) -> str:
     """Return OpenSearch heap suggestion (e.g., "24g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
-    # Legacy rule: half of RAM, capped at 24 GiB, min 2 GiB
-    heap_gb = max(2, min(24, total_gb // 2))
+    # Rough rule: half of RAM, capped at 32 GiB, min 4 GiB
+    heap_gb = max(4, min(32, total_gb // 2))
     return f"{heap_gb}g"
 
 
@@ -1514,13 +1624,9 @@ def suggest_ls_workers(cores: int | None = None) -> int:
 import platform as _platform
 
 
-
-
 # Detect system architecture for container images
 def get_system_image_architecture():
     """Detect system architecture and return appropriate ImageArchitecture enum."""
-    from scripts.malcolm_constants import ImageArchitecture
-
     raw_platform = _platform.machine().lower()
     if raw_platform in ("aarch64", "arm64"):
         return ImageArchitecture.ARM64
@@ -1576,7 +1682,7 @@ def get_platform_name() -> str:
         return "windows"
     else:
         return "unknown"
-    
+
 
 _rec_puid_pgid = GetUidGidFromEnv()
 

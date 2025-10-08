@@ -102,9 +102,7 @@ class OrchestrationFramework(Flag):
     KUBERNETES = auto()
 
 
-OrchestrationFrameworksSupported = (
-    OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
-)
+OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
 
 
 class WidgetType(Enum):

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
-from scripts.malcolm_utils import get_default_config_dir
+from scripts.malcolm_common import get_default_config_dir
 
 
 class TestConfigFileRoundtrip(unittest.TestCase):

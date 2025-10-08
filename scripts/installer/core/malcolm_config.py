@@ -376,7 +376,7 @@ class MalcolmConfig(ObservableStoreMixin):
 
         # default templates directory if not provided
         if templates_dir is None:
-            from scripts.malcolm_utils import get_default_config_dir
+            from scripts.malcolm_common import get_default_config_dir
 
             templates_dir = get_default_config_dir()
 

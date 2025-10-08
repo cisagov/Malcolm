@@ -22,16 +22,13 @@ from scripts.malcolm_constants import (
 )
 
 from scripts.malcolm_common import (
-    UserInterfaceMode,
+    ClearScreen,
     DetermineYamlFileFormat,
-    get_platform_name,
-    SYSTEM_INFO
-)
-
-from scripts.malcolm_utils import (
-    get_malcolm_dir,
     get_default_config_dir,
-    clear_screen,
+    get_malcolm_dir,
+    get_platform_name,
+    SYSTEM_INFO,
+    UserInterfaceMode,
 )
 
 from scripts.installer.args.basic_args import add_basic_args
@@ -64,7 +61,6 @@ from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
 
 
-
 ###################################################################################################
 SCRIPT_NAME = os.path.basename(__file__)
 ORIG_PATH = os.getcwd()
@@ -87,9 +83,7 @@ def build_arg_parser(parser: argparse.ArgumentParser) -> None:
     # add_test_args(parser)
 
 
-def create_ui_implementation(
-    presentation_mode: PresentationMode, ui_mode_flag: UserInterfaceMode
-):
+def create_ui_implementation(presentation_mode: PresentationMode, ui_mode_flag: UserInterfaceMode):
     """Create the appropriate UI implementation based on interface mode.
 
     Args:
@@ -155,9 +149,7 @@ def handle_config_directories_tui_mode(
             prompt = f"Provided output config directory:\n{dirs.output_dir} does not exist\nDo you want to create it?"
             if ui_impl and ui_impl.ask_yes_no(prompt, default=True):
                 if no_write:
-                    InstallerLogger.info(
-                        f"Dry run: would create output config directory: {dirs.output_dir}"
-                    )
+                    InstallerLogger.info(f"Dry run: would create output config directory: {dirs.output_dir}")
                 else:
                     try:
                         os.makedirs(dirs.output_dir, exist_ok=True)
@@ -174,13 +166,9 @@ def handle_config_directories_tui_mode(
         env_files = []
         try:
             if os.path.isdir(dirs.input_dir):
-                env_files = [
-                    f for f in os.listdir(dirs.input_dir) if f.endswith(".env")
-                ]
+                env_files = [f for f in os.listdir(dirs.input_dir) if f.endswith(".env")]
         except Exception as e:
-            InstallerLogger.warning(
-                f"Could not scan for .env files in {dirs.input_dir}: {e}"
-            )
+            InstallerLogger.warning(f"Could not scan for .env files in {dirs.input_dir}: {e}")
 
         if env_files:
             decision = load_existing_env
@@ -219,9 +207,7 @@ def handle_config_directories_tui_mode(
                     )
                     # Continue with the install - no need to prompt
                 else:
-                    InstallerLogger.warning(
-                        f"No .env files detected in provided input directory: {dirs.input_dir}"
-                    )
+                    InstallerLogger.warning(f"No .env files detected in provided input directory: {dirs.input_dir}")
                     if non_interactive:
                         InstallerLogger.error(
                             "Non-interactive mode: cannot prompt to use default config/. Re-run with a valid --environment-dir-input or omit it."
@@ -234,9 +220,7 @@ def handle_config_directories_tui_mode(
                     ):
                         dirs.input_dir = default_dir
                         try:
-                            fallback_env_files = [
-                                f for f in os.listdir(dirs.input_dir) if f.endswith(".env")
-                            ]
+                            fallback_env_files = [f for f in os.listdir(dirs.input_dir) if f.endswith(".env")]
                         except Exception:
                             fallback_env_files = []
 
@@ -250,13 +234,9 @@ def handle_config_directories_tui_mode(
                             if decision:
                                 try:
                                     malcolm_config.load_from_env_files(dirs.input_dir)
-                                    InstallerLogger.info(
-                                        f"Loaded existing .env files from: {dirs.input_dir}"
-                                    )
+                                    InstallerLogger.info(f"Loaded existing .env files from: {dirs.input_dir}")
                                 except Exception as e:
-                                    InstallerLogger.error(
-                                        f"Failed to load .env files from {dirs.input_dir}: {e}"
-                                    )
+                                    InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}")
                                     return False
                             else:
                                 InstallerLogger.info("Skipping load of existing .env files.")
@@ -315,22 +295,14 @@ def handle_config_export(parsed_args, malcolm_config, install_context):
             # determine output filename
             if parsed_args.exportMalcolmConfigFile == "":
                 # generate default filename with timestamp
-                export_filename = settings_handler.generate_default_export_filename(
-                    "json"
-                )
-                InstallerLogger.info(
-                    f"No filename specified, using default: {export_filename}"
-                )
+                export_filename = settings_handler.generate_default_export_filename("json")
+                InstallerLogger.info(f"No filename specified, using default: {export_filename}")
             else:
                 export_filename = parsed_args.exportMalcolmConfigFile
 
             # save settings to file
-            settings_handler.save_to_file(
-                export_filename, file_format="auto", include_installation_items=True
-            )
-            InstallerLogger.info(
-                f"Configuration exported successfully to: {export_filename}"
-            )
+            settings_handler.save_to_file(export_filename, file_format="auto", include_installation_items=True)
+            InstallerLogger.info(f"Configuration exported successfully to: {export_filename}")
 
         except Exception as e:
             InstallerLogger.error(
@@ -352,6 +324,7 @@ def determine_presentation_mode(parsed_args: argparse.Namespace) -> Presentation
     def check_for_python_dialog():
         try:
             import dialog  # type: ignore
+
             # Verify the dialog binary is usable by initializing MainDialog
             try:
                 from scripts.malcolm_common import DialogInit, MainDialog
@@ -384,9 +357,7 @@ def determine_presentation_mode(parsed_args: argparse.Namespace) -> Presentation
 
 
 def main():
-    dirs = InstallerDirs(
-        input_dir=get_default_config_dir(), output_dir=get_default_config_dir()
-    )
+    dirs = InstallerDirs(input_dir=get_default_config_dir(), output_dir=get_default_config_dir())
 
     try:
         if os.geteuid() != 0:
@@ -397,9 +368,7 @@ def main():
         sys.exit(1)
 
     try:
-        parser = argparse.ArgumentParser(
-            description="Malcolm Installer", conflict_handler="resolve"
-        )
+        parser = argparse.ArgumentParser(description="Malcolm Installer", conflict_handler="resolve")
         build_arg_parser(parser)
     except Exception as e:
         InstallerLogger.error(f"Failed to build installer specific argument parser: {e}")  # fmt: skip
@@ -504,9 +473,7 @@ def main():
                 OrchestrationFramework.DOCKER_COMPOSE,
                 OrchestrationFramework.KUBERNETES,
             ):
-                InstallerLogger.error(
-                    f"{cfg_path} must be a docker-compose or kubeconfig YAML file"
-                )
+                InstallerLogger.error(f"{cfg_path} must be a docker-compose or kubeconfig YAML file")
                 sys.exit(2)
 
             # if kubernetes, validate kubeconfig via python client (parity with legacy)
@@ -516,11 +483,7 @@ def main():
                     _saved_sys_path = list(sys.path)
                     _repo_root_abs = os.path.abspath(project_root)
                     _cwd_abs = os.path.abspath(os.getcwd())
-                    sys.path = [
-                        p
-                        for p in sys.path
-                        if os.path.abspath(p or ".") not in (_repo_root_abs, _cwd_abs)
-                    ]
+                    sys.path = [p for p in sys.path if os.path.abspath(p or ".") not in (_repo_root_abs, _cwd_abs)]
                     from kubernetes import config as _k8s_config  # type: ignore
 
                     _k8s_config.load_kube_config(cfg_path)
@@ -556,9 +519,7 @@ def main():
 
         # persist orchestration mode into config for downstream transforms
         try:
-            malcolm_config.set_value(
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, orchestration_mode
-            )
+            malcolm_config.set_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, orchestration_mode)
         except Exception:
             pass
 
@@ -617,9 +578,7 @@ def main():
     if parsed_args.importMalcolmConfigFile:
         try:
             settings_handler = SettingsFileHandler(malcolm_config, install_context)
-            missing_items = settings_handler.load_from_file(
-                parsed_args.importMalcolmConfigFile
-            )
+            missing_items = settings_handler.load_from_file(parsed_args.importMalcolmConfigFile)
 
             InstallerLogger.info(f"Successfully loaded settings from: {parsed_args.importMalcolmConfigFile}") # fmt: skip
 
@@ -629,9 +588,7 @@ def main():
                 if parsed_args.debug:
                     for item_key in missing_items["missing_configuration"]:
                         item = malcolm_config.get_item(item_key)
-                        InstallerLogger.info(
-                            f"  {item_key}: using default {item.current_value}"
-                        )
+                        InstallerLogger.info(f"  {item_key}: using default {item.current_value}")
 
             # report missing installation items that used defaults
             if missing_items["missing_installation"]:
@@ -660,9 +617,7 @@ def main():
     if presentation_mode == PresentationMode.MODE_GUI:
         # GUI mode: config directory handling will be done during GUI flow
         try:
-            success, input_dir, output_dir = handle_config_directories_gui_mode(
-                malcolm_config
-            )
+            success, input_dir, output_dir = handle_config_directories_gui_mode(malcolm_config)
             if not success:
                 InstallerLogger.error("Config directory setup cancelled by user.")
                 sys.exit(1)
@@ -689,9 +644,7 @@ def main():
 
     # set default docker-compose file path if not provided
     if not parsed_args.malcolmOrchestrationFile:
-        parsed_args.malcolmOrchestrationFile = os.path.join(
-            get_malcolm_dir(), "docker-compose.yml"
-        )
+        parsed_args.malcolmOrchestrationFile = os.path.join(get_malcolm_dir(), "docker-compose.yml")
 
     # Configuration gathering user input (conditional on presentation mode)
     config_success = True
@@ -721,9 +674,7 @@ def main():
                 if summary
                 else "Missing required settings. Return to configuration to fix these now?"
             )
-            fix_now = ui_impl.ask_yes_no(
-                combined_message, default=True, force_interaction=True
-            )
+            fix_now = ui_impl.ask_yes_no(combined_message, default=True, force_interaction=True)
             if not fix_now:
                 InstallerLogger.end(
                     "INSTALLER",
@@ -747,9 +698,7 @@ def main():
                 )
                 return
 
-        install_context = ui_impl.gather_install_options(
-            platform_installer, malcolm_config, install_context
-        )
+        install_context = ui_impl.gather_install_options(platform_installer, malcolm_config, install_context)
 
         if install_context is None:
             InstallerLogger.info("Installation cancelled by user.") # fmt: skip
@@ -782,10 +731,7 @@ def main():
             InstallerLogger.error(f"Failed to render final configuration summary: {e}")
             proceed = False
         # clear terminal after closing the confirmation to present a clean post-UI view
-        try:
-            clear_screen()
-        except Exception:
-            pass
+        ClearScreen()
 
         if not proceed:
             InstallerLogger.end(
@@ -830,15 +776,11 @@ def main():
             import os as _os
 
             if _os.getuid() == 0:
-                InstallerLogger.info(
-                    f"Setting ownership of {dirs.output_dir} directory to {puid}:{pgid}..."
-                )
+                InstallerLogger.info(f"Setting ownership of {dirs.output_dir} directory to {puid}:{pgid}...")
                 try:
                     ChownRecursive(dirs.output_dir, puid, pgid)
                 except Exception as e:
-                    InstallerLogger.warning(
-                        f"Could not change ownership of config directory: {e}"
-                    )
+                    InstallerLogger.warning(f"Could not change ownership of config directory: {e}")
         except Exception:
             pass
 
@@ -873,9 +815,8 @@ def main():
                 "Installation completed successfully",
             )
         else:
-            InstallerLogger.end(
-                "INSTALLER", InstallerResult.FAILURE, "Installation failed"
-            )
+            InstallerLogger.end("INSTALLER", InstallerResult.FAILURE, "Installation failed")
+
 
 if __name__ == "__main__":
     try:
@@ -885,6 +826,7 @@ if __name__ == "__main__":
         sys.exit(1)
     except Exception as e:
         import traceback
+
         tb = traceback.format_exc()
         # Include traceback in error log so failures are actionable without --debug
         InstallerLogger.error(f"Error executing main(): {e}\n{tb}")
