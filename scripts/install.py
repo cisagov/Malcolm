@@ -65,6 +65,7 @@ from scripts.installer.utils.settings_file_handler import SettingsFileHandler
 
 ###################################################################################################
 SCRIPT_NAME = os.path.basename(__file__)
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 ORIG_PATH = os.getcwd()
 
 
@@ -362,14 +363,6 @@ def main():
     dirs = InstallerDirs(input_dir=get_default_config_dir(), output_dir=get_default_config_dir())
 
     try:
-        if os.geteuid() != 0:
-            InstallerLogger.error("This installer must be run as root. Please run with sudo.") # fmt: skip
-            sys.exit(1)
-    except Exception as e:
-        InstallerLogger.error(f"Failed to check if running as root: {e}")
-        sys.exit(1)
-
-    try:
         parser = argparse.ArgumentParser(description="Malcolm Installer", conflict_handler="resolve")
         build_arg_parser(parser)
     except Exception as e:
@@ -378,8 +371,18 @@ def main():
 
     try:
         parsed_args = parser.parse_args()
+        if os.path.islink(os.path.join(SCRIPT_PATH, SCRIPT_NAME)) and SCRIPT_NAME.startswith('configure'):
+            parsed_args.configOnly = True
     except Exception as e:
         InstallerLogger.error(f"Failed to parse arguments: {e}")
+        sys.exit(1)
+
+    try:
+        if (not parsed_args.configOnly) and (os.geteuid() != 0):
+            InstallerLogger.error("This installer must be run as root. Please run with sudo.") # fmt: skip
+            sys.exit(1)
+    except Exception as e:
+        InstallerLogger.error(f"Failed to check if running as root: {e}")
         sys.exit(1)
 
     # Optional splash screen (interactive only)
