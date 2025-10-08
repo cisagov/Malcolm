@@ -25,12 +25,15 @@ from scripts.malcolm_constants import (
 from scripts.malcolm_common import (
     ClearScreen,
     DetermineYamlFileFormat,
+    DotEnvDynamic,
     get_default_config_dir,
     get_malcolm_dir,
     get_platform_name,
     KubernetesDynamic,
+    RequestsDynamic,
     SYSTEM_INFO,
     UserInterfaceMode,
+    YAMLDynamic,
 )
 
 from scripts.installer.args.basic_args import add_basic_args
@@ -464,6 +467,16 @@ def main():
     except Exception as e:
         InstallerLogger.error(f"Failed to create UI implementation: {e}") # fmt: skip
         sys.exit(1)
+
+    for pkgLoop in (1, 2):
+        requests_imported = RequestsDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
+        yaml_imported = YAMLDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
+        dotenv_imported = DotEnvDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
+        InstallerLogger.debug(f"Imported requests: {requests_imported}")
+        InstallerLogger.debug(f"Imported yaml: {yaml_imported}")
+        InstallerLogger.debug(f"Imported dotenv: {dotenv_imported}")
+        if (not all((requests_imported, yaml_imported, dotenv_imported))) and (pkgLoop != 1):
+            sys.exit(1)
 
     try:
         # detect orchestration mode from provided configuration file, if any
