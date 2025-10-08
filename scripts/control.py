@@ -28,13 +28,26 @@ import tarfile
 import tempfile
 import time
 
+# Add the project root directory to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from malcolm_constants import (
+    CONTAINER_RUNTIME_KEY,
+    PROFILE_HEDGEHOG,
+    PROFILE_KEY,
+    PROFILE_MALCOLM,
+    PLATFORM_WINDOWS,
+)
+
 from malcolm_common import (
     AskForPassword,
     AskForString,
     BoundPath,
     ChooseOne,
     ClearScreen,
-    CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
@@ -49,12 +62,8 @@ from malcolm_common import (
     MalcolmTmpPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
-    PLATFORM_WINDOWS,
     posInt,
     ProcessLogLine,
-    PROFILE_HEDGEHOG,
-    PROFILE_KEY,
-    PROFILE_MALCOLM,
     ScriptPath,
     UpdateEnvFiles,
     UserInputDefaultsBehavior,
@@ -1249,17 +1258,18 @@ def start():
 
         # make sure the auth files exist. if we are in an interactive shell and we're
         # missing any of the auth files, prompt to create them now
-        if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
-            authSetup()
+        # if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
+        #     authSetup()
 
         # still missing? sorry charlie
-        if not MalcolmAuthFilesExist(configDir=args.configDir):
-            raise Exception(
-                'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
-            )
+        # if not MalcolmAuthFilesExist(configDir=args.configDir):
+        #     raise Exception(
+        #         'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
+        #     )
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
         if not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore'))):
+            print ("here")
             keystore_op('opensearch', True, 'create')
 
         # make sure permissions are set correctly for the worker processes

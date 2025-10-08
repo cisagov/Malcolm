@@ -17,19 +17,32 @@ import string
 import sys
 import time
 
-import malcolm_utils
-from malcolm_utils import (
+from scripts.malcolm_utils import (
     deep_get,
     eprint,
     EscapeAnsi,
     LoadStrIfJson,
     remove_suffix,
     run_process,
-    touch,
+    sizeof_fmt,
+    which,
 )
 
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
+
+from scripts.malcolm_constants import (
+    PLATFORM_WINDOWS,
+    PLATFORM_MAC,
+    PLATFORM_LINUX,
+    PLATFORM_LINUX_CENTOS,
+    PLATFORM_LINUX_DEBIAN,
+    PLATFORM_LINUX_FEDORA,
+    PLATFORM_LINUX_UBUNTU,
+    YAML_VERSION,
+    OrchestrationFramework,
+    OrchestrationFrameworksSupported,
+)
 
 try:
     from pwd import getpwuid
@@ -38,6 +51,56 @@ except ImportError:
 
 Dialog = None
 MainDialog = None
+
+# Reasonable dialog bounds; used to reduce awkward wrapping in python-dialog
+_DIALOG_MIN_WIDTH = 50
+_DIALOG_MAX_WIDTH = 140
+_DIALOG_MIN_HEIGHT = 7
+_DIALOG_MAX_HEIGHT = 30
+
+def _dialog_size_for(text: str) -> tuple[int, int]:
+    """Compute a suitable (height, width) for a dialog widget.
+
+    - Width fits the longest line with a small padding.
+    - Height accounts for the number of text lines plus button area.
+    """
+    try:
+        if not isinstance(text, str):
+            text = str(text)
+        lines = text.splitlines() or [""]
+        max_line = max((len(line) for line in lines), default=_DIALOG_MIN_WIDTH)
+        width = max(_DIALOG_MIN_WIDTH, min(max_line + 4, _DIALOG_MAX_WIDTH))
+        # base height for buttons + borders; add per text line beyond the first
+        height = _DIALOG_MIN_HEIGHT + max(0, len(lines) - 1)
+        height = max(_DIALOG_MIN_HEIGHT, min(height, _DIALOG_MAX_HEIGHT))
+        return height, width
+    except Exception:
+        return (_DIALOG_MIN_HEIGHT, _DIALOG_MIN_WIDTH)
+
+
+def _dialog_menu_width_for(choices) -> int:
+    """Compute a suitable dialog width based on menu choices.
+
+    Looks at the lengths of tag and item columns to avoid overlap/truncation
+    in radiolist/checklist widgets.
+    """
+    try:
+        max_tag = 0
+        max_item = 0
+        for ch in choices or []:
+            if not (isinstance(ch, (list, tuple)) and len(ch) == 3):
+                continue
+            tag = str(ch[0])
+            item = str(ch[1]) if ch[1] is not None else ""
+            max_tag = max(max_tag, len(tag))
+            max_item = max(max_item, len(item))
+        # approximate spacing between tag and item columns used by dialog
+        # add an explicit buffer so value column doesn't butt against tag text
+        buffer_spaces = 6
+        width = max_tag + 2 + max_item + 8 + buffer_spaces
+        return max(_DIALOG_MIN_WIDTH, min(width, _DIALOG_MAX_WIDTH))
+    except Exception:
+        return _DIALOG_MIN_WIDTH
 
 try:
     from colorama import init as ColoramaInit, Fore, Back, Style
@@ -53,27 +116,18 @@ MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
 
-###################################################################################################
-PROFILE_KEY = 'MALCOLM_PROFILE'
-PROFILE_MALCOLM = 'malcolm'
-PROFILE_HEDGEHOG = 'hedgehog'
-CONTAINER_RUNTIME_KEY = 'MALCOLM_CONTAINER_RUNTIME'
+# Utility helpers for referring to the root of the Malcolm repository from
+# other helper scripts.
 
-###################################################################################################
-PLATFORM_WINDOWS = "Windows"
-PLATFORM_MAC = "Darwin"
-PLATFORM_LINUX = "Linux"
-PLATFORM_LINUX_CENTOS = 'centos'
-PLATFORM_LINUX_DEBIAN = 'debian'
-PLATFORM_LINUX_FEDORA = 'fedora'
-PLATFORM_LINUX_UBUNTU = 'ubuntu'
-PLATFORM_LINUX_ROCKY = 'rocky'
-PLATFORM_LINUX_ALMA = 'almalinux'
-PLATFORM_LINUX_AMAZON = 'amazon'
+def GetMalcolmPath():
+    """Return the absolute path to the root of the Malcolm repository."""
+    return MalcolmPath
 
-###################################################################################################
-YAML_VERSION = (1, 1)
 
+def SetMalcolmPath(val):
+    global MalcolmPath
+    MalcolmPath = val
+    return MalcolmPath
 
 class NullRepresenter:
     def __call__(self, repr, data):
@@ -157,33 +211,7 @@ DOCKER_INSTALL_URLS[PLATFORM_MAC] = [
 DOCKER_COMPOSE_INSTALL_URLS = defaultdict(lambda: 'https://docs.docker.com/compose/install/')
 HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
-
-class OrchestrationFramework(Flag):
-    UNKNOWN = auto()
-    DOCKER_COMPOSE = auto()
-    KUBERNETES = auto()
-
-
-OrchestrationFrameworksSupported = OrchestrationFramework.DOCKER_COMPOSE | OrchestrationFramework.KUBERNETES
-
-
 ##################################################################################################
-def GetMalcolmPath():
-    return MalcolmPath
-
-
-def SetMalcolmPath(val):
-    global MalcolmPath
-    MalcolmPath = val
-    return MalcolmPath
-
-
-##################################################################################################
-def GetPlatformOSRelease():
-    try:
-        return platform.freedesktop_os_release().get('VARIANT_ID', None)
-    except Exception:
-        return None
 
 
 ##################################################################################################
@@ -240,7 +268,6 @@ def GetMemMegabytesFromJavaOptsLine(val):
             resultMB = 0
     return resultMB
 
-
 ##################################################################################################
 def ParseK8sMemoryToMib(val):
     val = str(val).strip()
@@ -253,10 +280,9 @@ def ParseK8sMemoryToMib(val):
 
     return 0
 
-
 ##################################################################################################
 def GetUidGidFromEnv(configDir=None):
-    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(GetMalcolmPath(), 'config')
+    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = defaultdict(str)
     if dotEnvImported := DotEnvDynamic():
         pyPlatform = platform.system()
@@ -271,7 +297,6 @@ def GetUidGidFromEnv(configDir=None):
                 uidGidDict['PGID'] = envValues['PGID']
 
     return uidGidDict
-
 
 ##################################################################################################
 # takes an array of EnvValue namedtuple (see above) and updates the values in the specified .env files
@@ -317,7 +342,6 @@ def UpdateEnvFiles(envValues, chmodFlag=None):
                     pass
 
     return result
-
 
 ###################################################################################################
 # attempt to clear the screen
@@ -377,13 +401,16 @@ def YesOrNo(
         if hasExtraLabel := (extraLabel is not None):
             replyMap[Dialog.EXTRA] = Dialog.CANCEL
             replyMap[Dialog.CANCEL] = Dialog.EXTRA
-        reply = MainDialog.yesno(
-            str(question),
-            yes_label=str(yesLabelTmp),
-            no_label=str(extraLabel) if hasExtraLabel else str(noLabelTmp),
-            extra_button=hasExtraLabel,
-            extra_label=str(noLabelTmp) if hasExtraLabel else str(extraLabel),
-        )
+        _h, _w = _dialog_size_for(str(question))
+        kwargs = {
+            "yes_label": str(yesLabelTmp),
+            "no_label": (str(extraLabel) if hasExtraLabel else str(noLabelTmp)),
+            "extra_button": hasExtraLabel,
+            "extra_label": (str(noLabelTmp) if hasExtraLabel else ""),
+            "height": _h,
+            "width": _w,
+        }
+        reply = MainDialog.yesno(str(question), **kwargs)
         reply = replyMap.get(reply, reply)
         if defaultYes:
             reply = 'y' if (reply == Dialog.OK) else ('e' if (reply == Dialog.EXTRA) else 'n')
@@ -459,16 +486,19 @@ def AskForString(
         reply = default
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code, reply = MainDialog.inputbox(
-            str(question),
-            init=(
+        _h, _w = _dialog_size_for(str(question))
+        kwargs = {
+            "init": (
                 default
                 if (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
                 else ""
             ),
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": _h,
+            "width": _w,
+        }
+        code, reply = MainDialog.inputbox(str(question), **kwargs)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(question)
         elif code == Dialog.EXTRA:
@@ -514,12 +544,15 @@ def AskForPassword(
         reply = default
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code, reply = MainDialog.passwordbox(
-            str(prompt),
-            insecure=True,
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+        _h, _w = _dialog_size_for(str(prompt))
+        kwargs = {
+            "insecure": True,
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": _h,
+            "width": _w,
+        }
+        code, reply = MainDialog.passwordbox(str(prompt), **kwargs)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(prompt)
         elif code == Dialog.EXTRA:
@@ -563,12 +596,17 @@ def ChooseOne(
         reply = defaulted[0] if defaulted is not None else ""
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code, reply = MainDialog.radiolist(
-            str(prompt),
-            choices=validChoices,
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+        _h, _w = _dialog_size_for(str(prompt))
+        _menu_w = _dialog_menu_width_for(validChoices)
+        _w = max(_w, _menu_w)
+        kwargs = {
+            "choices": validChoices,
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": max(_h, 12),
+            "width": _w,
+        }
+        code, reply = MainDialog.radiolist(str(prompt), **kwargs)
         if code == Dialog.CANCEL or code == Dialog.ESC:
             raise DialogCanceledException(prompt)
         elif code == Dialog.EXTRA:
@@ -632,12 +670,17 @@ def ChooseMultiple(
         reply = defaulted
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code, reply = MainDialog.checklist(
-            str(prompt),
-            choices=validChoices,
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+        _h, _w = _dialog_size_for(str(prompt))
+        _menu_w = _dialog_menu_width_for(validChoices)
+        _w = max(_w, _menu_w)
+        kwargs = {
+            "choices": validChoices,
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": max(_h, 12),
+            "width": _w,
+        }
+        code, reply = MainDialog.checklist(str(prompt), **kwargs)
         if code == Dialog.CANCEL or code == Dialog.ESC:
             raise DialogCanceledException(prompt)
         elif code == Dialog.EXTRA:
@@ -705,11 +748,15 @@ def DisplayMessage(
         reply = True
 
     elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
-        code = MainDialog.msgbox(
-            str(message),
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+        _h, _w = _dialog_size_for(str(message))
+        kwargs = {
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": _h,
+            "width": _w,
+            "no_collapse": True,
+        }
+        code = MainDialog.msgbox(str(message), **kwargs)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException(message)
         elif code == Dialog.EXTRA:
@@ -718,7 +765,7 @@ def DisplayMessage(
             reply = True
 
     else:
-        print(f"\n{message}")
+        print(f"{message}")
         reply = True
 
     if clearScreen is True:
@@ -743,16 +790,17 @@ def DisplayProgramBox(
     reply = False
 
     if MainDialog is not None:
-        code = MainDialog.programbox(
-            file_path=filePath,
-            file_flags=fileFlags,
-            fd=fileDescriptor,
-            text=text,
-            width=78,
-            height=20,
-            extra_button=(extraLabel is not None),
-            extra_label=str(extraLabel),
-        )
+        kwargs = {
+            "file_path": filePath,
+            "file_flags": fileFlags,
+            "fd": fileDescriptor,
+            "text": text,
+            "width": 78,
+            "height": 20,
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+        }
+        code = MainDialog.programbox(**kwargs)
         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
             raise DialogCanceledException()
         elif code == Dialog.EXTRA:
@@ -777,7 +825,6 @@ def posInt(value):
         raise ValueError("{} is an invalid positive int value".format(value))
 
     return ivalue
-
 
 ###################################################################################################
 def ValidNetBoxSubnetFilter(value):
@@ -812,7 +859,6 @@ def ValidNetBoxSubnetFilter(value):
 
     return True
 
-
 ###################################################################################################
 # attempt dynamic imports, prompting for install via pip if possible
 DynImports = defaultdict(lambda: None)
@@ -837,14 +883,12 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
         pyPlatform = platform.system()
         pyExec = sys.executable
         pipCmd = "pip3"
-        if not malcolm_utils.which(pipCmd, debug=debug):
-            err, out = run_process([sys.executable, '-m', 'pip', '--version'], debug=debug)
-            if out and (err == 0):
-                pipCmd = [sys.executable, '-m', 'pip']
+        if not which(pipCmd, debug=debug):
+            pipCmd = "pip"
 
         eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
-        if interactive and malcolm_utils.which(pipCmd, debug=debug):
+        if interactive and which(pipCmd, debug=debug):
             if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
                 installCmd = None
 
@@ -863,8 +907,6 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
                     eprint(f"Installation of {pipPkgName} module apparently succeeded")
-                    importlib.reload(site)
-                    importlib.invalidate_caches()
                     try:
                         tmpImport = importlib.import_module(importName)
                         if tmpImport:
@@ -900,31 +942,21 @@ def DotEnvDynamic(debug=False, forceInteraction=False):
 
 ###################################################################################################
 # do the required auth files for Malcolm exist?
-def AuthFileCheck(fileName, allowEmpty=False):
-    try:
-        return os.path.isfile(fileName) and (allowEmpty or (os.path.getsize(fileName) > 0))
-    except Exception as e:
-        return False
-
-
 def MalcolmAuthFilesExist(configDir=None):
     configDirToCheck = (
-        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(GetMalcolmPath(), 'config')
+        configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     )
     return (
-        AuthFileCheck(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')))
-        and AuthFileCheck(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
-        and AuthFileCheck(
-            os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
-        )
-        and AuthFileCheck(
-            os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
-        )
-        and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
-        and AuthFileCheck(os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'))
+        os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
+        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')))
+        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))))
+        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))))
+        and os.path.isfile(os.path.join(MalcolmPath, os.path.join('htadmin', 'config.ini')))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-secret.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'netbox-postgres.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'redis.env'))
+        and os.path.isfile(os.path.join(configDirToCheck, 'auth.env'))
+        and os.path.isfile(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 
 
@@ -1009,7 +1041,7 @@ def DownloadToFile(url, local_filename, debug=False):
     fSize = os.path.getsize(local_filename)
     if debug:
         eprint(
-            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({malcolm_utils.sizeof_fmt(fSize)})"
+            f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({sizeof_fmt(fSize)})"
         )
     return fExists and (fSize > 0)
 
@@ -1025,60 +1057,48 @@ LOG_IGNORE_REGEX = re.compile(
 .+(
     deprecated
   | "GET\s+/\s+HTTP/1\.\d+"\s+200\s+-
-  | "netbox"\s+application\s+started
+  | \bGET.+\b302\s+30\b
   | (async|output)\.go.+(reset\s+by\s+peer|Connecting\s+to\s+backoff|backoff.+established$)
-  | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
-  | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
-  | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
-  | (relation|SELECT)\s+"django_content_type"
   | /(opensearch-dashboards|dashboards|kibana)/(api/ui_metric/report|internal/search/(es|opensearch))
+  | (Error\s+during\s+file\s+comparison|File\s+was\s+renamed):\s+/zeek/live/logs/
   | /_ns_/nstest\.html
   | /proc/net/tcp6:\s+no\s+such\s+file\s+or\s+directory
   | /usr/share/logstash/x-pack/lib/filters/geoip/database_manager
-  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
   | \b(d|es)?stats\.json
   | \b1.+GET\s+/\s+.+401.+curl
-  | \bGET.+\b302\s+30\b
   | _cat/indices
-  | Background\s+saving\s+started
-  | Background\s+saving\s+terminated\s+with\s+success
   | branding.*config\s+is\s+not\s+found\s+or\s+invalid
   | but\s+there\s+are\s+no\s+living\s+connections
-  | \d+\s+changes\s+in\s+\d+\s+seconds\.\s+Saving
-  | Cleaning\s+registries\s+for\s+queue:
-  | Closing\s+because\s+(close_renamed|close_eof|close_inactive)
   | Connecting\s+to\s+backoff
-  | Could\s+not\s+assign\s+group.+to\s+remotely-authenticated\s+user.+Group\s+not\s+found
+  | Cleaning\s+registries\s+for\s+queue:
   | curl.+localhost.+GET\s+/api/status\s+200
-  | DB\s+saved\s+on\s+disk
   | DEPRECATION
   | descheduling\s+job\s*id
-  | DON'T\s+DO\s+IT.*bad\s+idea
-  | Error\s+during\s+file\s+comparison:.*no\s+such\s+file
+  | (relation|SELECT)\s+"django_content_type"
   | eshealth
   | esindices/list
   | executing\s+attempt_(transition|set_replica_count)\s+for
   | failed\s+to\s+get\s+tcp6?\s+stats\s+from\s+/proc
-  | Failure\s+no\s+such\s+index\s+\[\.opendistro_security\]
   | Falling\s+back\s+to\s+single\s+shard\s+assignment
-  | Fork\s+CoW\s+for\s+RDB
   | GET\s+/(_cat/health|api/status|sessions2-|arkime_\w+).+HTTP/[\d\.].+\b200\b
   | GET\s+/\s+.+\b200\b.+ELB-HealthChecker
-  | opensearch.*has\s+insecure\s+file\s+permissions
-  | i:\s+pcap:\s+read\s+\d+\s+file
+  | (GET|POST|PATCH|DELETE)\s+/netbox/.+HTTP/[\d\.]+.+\b20[\d]\b
+  | (GET|POST)\s+/(fields|get|valueActions|views|fieldActions)\b.+bytes\s+[\d\.]+\s+ms
   | Info:\s+checksum:\s+No\s+packets\s+with\s+invalid\s+checksum,\s+assuming\s+checksum\s+offloading\s+is\s+NOT\s+used
   | Info:\s+logopenfile:\s+eve-log\s+output\s+device\s+\(regular\)\s+initialized:\s+eve\.json
-  | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
   | Info:\s+unix-socket:
-  | kube-probe/
+  | Info:\s+pcap:\s+(Starting\s+file\s+run|pcap\s+file)
+  | i:\s+pcap:\s+read\s+\d+\s+file
   | loaded\s+config\s+'/etc/netbox/config/
   | LOG:\s+checkpoint\s+(complete|starting)
+  | "netbox"\s+application\s+started
+  | \[notice\].+app\s+process\s+\d+\s+exited\s+with\s+code\s+0\b
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
+  | kube-probe/
   | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/_bulk\s+HTTP/[\d\.].+\b20[01]\b
   | POST\s+/server/php/\s+HTTP/\d+\.\d+"\s+\d+\s+\d+.*:8443/
   | POST\s+HTTP/[\d\.].+\b200\b
-  | POST\s+/wise/get.+\b200\b
   | reaped\s+unknown\s+pid
   | redis.*(changes.+seconds.+Saving|Background\s+saving\s+(started|terminated)|DB\s+saved\s+on\s+disk|Fork\s+CoW)
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
@@ -1090,13 +1110,12 @@ LOG_IGNORE_REGEX = re.compile(
   | Successfully\s+handled\s+GET\s+request\s+for\s+'/'
   | Test\s+run\s+complete.*:failed=>0,\s*:errored=>0\b
   | throttling\s+index
-  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | update_mapping
   | updating\s+number_of_replicas
+  | unix-socket:.*(pcap-file\.tenant-id\s+not\s+set|Marking\s+current\s+task\s+as\s+done|Resetting\s+engine\s+state)
   | use_field_mapping
   | Using\s+geoip\s+database
   | Warning:\s+app-layer-
-  | you\s+may\s+need\s+to\s+run\s+securityadmin
 )
 """,
     re.VERBOSE | re.IGNORECASE,
@@ -1238,3 +1257,148 @@ def ProcessLogLine(line, debug=False):
             return outputStr if coloramaImported else outputStrEscaped
 
     return None
+
+##################################################################################################
+def RunWithSudo(command):
+    """
+    Run a command with sudo if needed.
+
+    Args:
+        command (str): Command to run
+
+    Returns:
+        subprocess.CompletedProcess: Result of the command
+    """
+    import subprocess
+
+    if os.geteuid() == 0:  # Already running as root
+        return subprocess.run(command, shell=True, check=True)
+    else:
+        sudo_command = f"sudo {command}"
+        print(f"Running with elevated privileges: {command}")
+        return subprocess.run(sudo_command, shell=True, check=True)
+    
+##################################################################################################
+def InstallerDisplayMessage(
+    message,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    extraLabel=None,
+):
+    """
+    Wrapper around DisplayMessage for installation-specific use cases.
+    This provides consistent behavior across TUI and GUI installers.
+    """
+    return DisplayMessage(
+        message,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        extraLabel=extraLabel,
+    )
+
+# Add these installer wrapper functions near existing similar functions
+def InstallerYesOrNo(
+    question,
+    default=None,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    yesLabel='Yes',
+    noLabel='No',
+    extraLabel=None,
+):
+    """
+    Wrapper around YesOrNo for installation-specific use cases.
+    This provides consistent behavior across TUI and GUI installers.
+    """
+    return YesOrNo(
+        question,
+        default=default,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        yesLabel=yesLabel,
+        noLabel=noLabel,
+        extraLabel=extraLabel,
+    )
+
+
+def InstallerAskForString(
+    question,
+    default=None,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    extraLabel=None,
+):
+    """
+    Wrapper around AskForString for installation-specific use cases.
+    This provides consistent behavior across TUI and GUI installers.
+    """
+    return AskForString(
+        question,
+        default=default,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        extraLabel=extraLabel,
+    )
+
+def InstallerAskForPassword(
+    question,
+    default=None,
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    extraLabel=None,
+):
+    """
+    Wrapper for password input, ensuring masked entry.
+    Consistent behavior for TUI (passwordbox) and GUI (passwordbox).
+    """
+    return AskForPassword(
+        question,
+        default=default,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        extraLabel=extraLabel,
+    )
+
+def InstallerChooseOne(
+    prompt,
+    choices=[],
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    extraLabel=None,
+):
+    """
+    Wrapper around ChooseOne for installation-specific use cases.
+    This provides consistent behavior across TUI and GUI installers.
+    """
+    return ChooseOne(
+        prompt,
+        choices=choices,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        extraLabel=extraLabel,
+    )
+
+
+def InstallerChooseMultiple(
+    prompt,
+    choices=[],
+    forceInteraction=False,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept,
+    uiMode=UserInterfaceMode.InteractionInput | UserInterfaceMode.InteractionDialog,
+    extraLabel=None,
+):
+    """
+    Wrapper around ChooseMultiple for installation-specific use cases.
+    This provides consistent behavior across TUI and GUI installers.
+    """
+    return ChooseMultiple(
+        prompt,
+        choices=choices,
+        defaultBehavior=defaultBehavior,
+        uiMode=uiMode,
+        extraLabel=extraLabel,
+    )
