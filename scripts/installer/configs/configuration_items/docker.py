@@ -11,8 +11,8 @@ This module contains all configuration items related to container options,
 including restart policies, reverse proxy settings, and network configuration.
 """
 
-# from scripts.malcolm_common import
-from scripts.malcolm_utils import str2bool as str_to_bool, SYSTEM_INFO
+from scripts.malcolm_common import SYSTEM_INFO
+from scripts.malcolm_utils import str2bool as str_to_bool
 from scripts.malcolm_constants import (
     OrchestrationFramework,
     OrchestrationFrameworksSupported,

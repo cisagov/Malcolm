@@ -31,12 +31,7 @@ class MacInstaller(BaseInstaller):
         super().__init__(orchestration_mode, ui, debug, control_flow)
 
         self.sudo_cmd = []
-        self.use_brew = False
-        
-
-        # System resources are now provided by SYSTEM_INFO in base class
-
-    
+        self.use_brew = False    
 
     def _setup_homebrew(self, install_context: "InstallContext"):
         """Setup Homebrew package manager for macOS using InstallContext decisions."""

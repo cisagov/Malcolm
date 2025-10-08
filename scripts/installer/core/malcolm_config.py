@@ -16,8 +16,8 @@ from collections import defaultdict
 from enum import Enum, Flag
 from typing import Dict, Any, Callable, List, Tuple, Optional, Set
 
-from scripts.malcolm_common import DumpYaml
-from scripts.malcolm_utils import SYSTEM_INFO, deep_set, deep_get
+from scripts.malcolm_common import DumpYaml, SYSTEM_INFO
+from scripts.malcolm_utils import deep_set, deep_get
 
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *

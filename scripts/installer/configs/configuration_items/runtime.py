@@ -17,7 +17,7 @@ from scripts.malcolm_constants import (
     ImageArchitecture,
     WidgetType,
 )
-from scripts.malcolm_utils import SYSTEM_INFO
+from scripts.malcolm_common import SYSTEM_INFO
 
 from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.core.config_item import ConfigItem

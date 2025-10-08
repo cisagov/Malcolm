@@ -24,13 +24,13 @@ from scripts.malcolm_constants import (
 from scripts.malcolm_common import (
     UserInterfaceMode,
     DetermineYamlFileFormat,
+    get_platform_name,
+    SYSTEM_INFO
 )
 
 from scripts.malcolm_utils import (
     get_malcolm_dir,
     get_default_config_dir,
-    get_platform_name,
-    SYSTEM_INFO,
     clear_screen,
 )
 

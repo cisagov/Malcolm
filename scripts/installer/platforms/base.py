@@ -14,8 +14,8 @@ from enum import Enum
 from typing import Dict, Tuple, Optional, List, Callable
 
 from scripts.malcolm_constants import OrchestrationFramework
+from scripts.malcolm_common import SYSTEM_INFO
 from scripts.malcolm_utils import (
-    SYSTEM_INFO,
     flatten,
     get_iterable,
 )

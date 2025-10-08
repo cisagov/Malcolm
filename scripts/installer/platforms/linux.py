@@ -19,17 +19,6 @@ except ImportError:
 
 from scripts.malcolm_constants import OrchestrationFramework
 
-from scripts.malcolm_common import (
-    UserInterfaceMode,
-    PLATFORM_LINUX_UBUNTU,
-    PLATFORM_LINUX_DEBIAN,
-    PLATFORM_LINUX_FEDORA,
-    PLATFORM_LINUX_CENTOS,
-)
-from scripts.malcolm_utils import (
-    which,
-    SYSTEM_INFO,
-)
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.utils.logger_utils import InstallerLogger
 

@@ -17,7 +17,7 @@ from scripts.malcolm_constants import (
     DatabaseMode,
     WidgetType,
 )
-from scripts.malcolm_utils import SYSTEM_INFO
+from scripts.malcolm_common import SYSTEM_INFO
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (

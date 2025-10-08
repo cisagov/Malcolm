@@ -13,7 +13,7 @@ including memory allocation and worker configuration.
 from typing import Any, Tuple
 
 from scripts.malcolm_constants import OrchestrationFramework, WidgetType
-from scripts.malcolm_utils import SYSTEM_INFO
+from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.configuration_items.docker import (
     CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,

@@ -1402,3 +1402,209 @@ def InstallerChooseMultiple(
         uiMode=uiMode,
         extraLabel=extraLabel,
     )
+
+###################################################################################################
+# System-information helpers (used by installer logic)
+
+
+def _total_memory_bytes() -> int:
+    """Return total physical memory in bytes (Linux/BSD portable)."""
+    try:
+        if sys.platform == "linux" or sys.platform == "linux2":
+            with open("/proc/meminfo", "r", encoding="utf-8") as meminfo:
+                for line in meminfo:
+                    if line.startswith("MemTotal:"):
+                        # value is in kB
+                        return int(line.split()[1]) * 1024
+        # Fallback that works on many *nix via sysconf
+        if hasattr(os, "sysconf"):
+            pages = os.sysconf("SC_PHYS_PAGES")
+            page_size = os.sysconf("SC_PAGE_SIZE")
+            return pages * page_size
+    except (OSError, ValueError, FileNotFoundError):
+        pass
+    return 0  # Unknown
+
+
+def total_memory_gb() -> int:
+    """Return total memory in whole GiB (rounded down)."""
+    return max(1, _total_memory_bytes() // (1024**3))
+
+
+def cpu_cores() -> int:
+    """Return logical CPU count, falling back to 1."""
+    return max(1, os.cpu_count() or 1)
+
+
+def disk_free_bytes(path: str = "/") -> int:
+    """Return free bytes on the filesystem that contains *path*."""
+    try:
+        return shutil.disk_usage(path).free
+    except (OSError, FileNotFoundError):
+        return 0
+
+
+# ------------------------------------------------------------------
+# Heuristic defaults the legacy installer used
+# ------------------------------------------------------------------
+
+
+def determine_uid_gid(
+    scriptUser,
+    scriptPlatform,
+    referencePath,
+):
+    defaultUid = PUID_DEFAULT
+    defaultGid = PGID_DEFAULT
+    if ((scriptPlatform == PLATFORM_LINUX) or (scriptPlatform == PLATFORM_MAC)) and (
+        scriptUser == "root"
+    ):
+        if pathUid := os.stat(referencePath).st_uid:
+            defaultUid = str(pathUid)
+        if pathGid := os.stat(referencePath).st_gid:
+            defaultGid = str(pathGid)
+
+    uid = defaultUid
+    gid = defaultGid
+    try:
+        if scriptPlatform == PLATFORM_LINUX:
+            uid = str(os.getuid())
+            gid = str(os.getgid())
+            if (uid == "0") or (gid == "0"):
+                raise Exception(
+                    "it is preferrable not to run Malcolm as root, prompting for UID/GID instead"
+                )
+    except Exception:
+        uid = defaultUid
+        gid = defaultGid
+
+    return uid, gid
+
+
+def suggest_os_memory(total_gb: int | None = None) -> str:
+    """Return OpenSearch heap suggestion (e.g., "24g")."""
+    if total_gb is None:
+        total_gb = total_memory_gb()
+    # Legacy rule: half of RAM, capped at 24 GiB, min 2 GiB
+    heap_gb = max(2, min(24, total_gb // 2))
+    return f"{heap_gb}g"
+
+
+def suggest_ls_memory(total_gb: int | None = None) -> str:
+    """Return Logstash heap suggestion (e.g., "3g")."""
+    if total_gb is None:
+        total_gb = total_memory_gb()
+    # Rough rule: 1/8th of RAM, capped at 8 GiB, min 1 GiB, rounded.
+    heap_gb = max(1, min(8, max(1, total_gb // 8)))
+    return f"{heap_gb}g"
+
+
+def suggest_ls_workers(cores: int | None = None) -> int:
+    """Return recommended Logstash worker count."""
+    if cores is None:
+        cores = cpu_cores()
+    # Legacy rule: half the logical cores, capped at 6, min 1
+    return max(1, min(6, cores // 2))
+
+
+# ------------------------------------------------------------------
+# Snapshot the system facts at import-time so they're reusable anywhere.
+# ------------------------------------------------------------------
+
+import platform as _platform
+
+
+
+
+# Detect system architecture for container images
+def get_system_image_architecture():
+    """Detect system architecture and return appropriate ImageArchitecture enum."""
+    from scripts.malcolm_constants import ImageArchitecture
+
+    raw_platform = _platform.machine().lower()
+    if raw_platform in ("aarch64", "arm64"):
+        return ImageArchitecture.ARM64
+    else:
+        return ImageArchitecture.AMD64
+
+
+# Platform detection utilities
+def GetPlatformOSRelease():
+    try:
+        return _platform.freedesktop_os_release().get("VARIANT_ID", None)
+    except Exception:
+        return None
+
+
+def get_platform_name() -> str:
+    """Determine the current host platform name.
+
+    Returns:
+        Platform name string: 'linux', 'macos', 'windows', or 'unknown'
+    """
+    # first attempt: original logic (may return distro like "ubuntu" or None)
+    system = GetPlatformOSRelease()
+
+    # final fallback: use kernel platform
+    if not system:
+        system = _platform.system()
+
+    # map many distro strings to the generic categories
+    normalized = (system or "").lower()
+    linux_aliases = {
+        "linux",
+        "ubuntu",
+        "debian",
+        "centos",
+        "fedora",
+        "rhel",
+        "arch",
+        "manjaro",
+        "opensuse",
+        "alpine",
+        "linuxmint",
+        "mint",
+    }
+    mac_aliases = {"darwin", "mac", "macos", "osx"}
+    windows_aliases = {"windows", "win32", "cygwin", "msys"}
+
+    if normalized in linux_aliases:
+        return "linux"
+    elif normalized in mac_aliases:
+        return "macos"
+    elif normalized in windows_aliases:
+        return "windows"
+    else:
+        return "unknown"
+    
+
+_rec_puid_pgid = GetUidGidFromEnv()
+
+# Snapshot of system facts and derived recommendations
+SYSTEM_INFO: dict[str, object] = {
+    "total_mem_gb": total_memory_gb(),
+    "cpu_cores": cpu_cores(),
+    "uid": os.getuid(),
+    "gid": os.getgid(),
+    "recommended_nonroot_uid": int(_rec_puid_pgid['PUID']),
+    "recommended_nonroot_gid": int(_rec_puid_pgid['PGID']),
+    "platform": _platform.system(),
+    "platform_name": get_platform_name(),
+    "image_architecture": get_system_image_architecture(),
+}
+
+# Derived recommendations appended to dict
+SYSTEM_INFO["suggested_os_memory"] = suggest_os_memory(SYSTEM_INFO["total_mem_gb"])
+SYSTEM_INFO["suggested_ls_memory"] = suggest_ls_memory(SYSTEM_INFO["total_mem_gb"])
+SYSTEM_INFO["suggested_ls_workers"] = suggest_ls_workers(SYSTEM_INFO["cpu_cores"])
+
+__all__ = [
+    "SYSTEM_INFO",
+    "get_platform_name",
+    "total_memory_gb",
+    "cpu_cores",
+    "disk_free_bytes",
+    "suggest_os_memory",
+    "suggest_ls_memory",
+    "suggest_ls_workers",
+]

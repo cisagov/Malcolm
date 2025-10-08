@@ -8,8 +8,7 @@
 import platform
 
 from scripts.malcolm_constants import OrchestrationFramework
-from scripts.malcolm_utils import GetPlatformOSRelease
-from scripts.malcolm_utils import get_platform_name
+from scripts.malcolm_common import GetPlatformOSRelease, get_platform_name
 
 from .base import BaseInstaller
 from .linux import LinuxInstaller

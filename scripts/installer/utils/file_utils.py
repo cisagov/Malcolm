@@ -136,7 +136,8 @@ def extract_malcolm_tarball(
         return False, None
 
     # extract runtime files
-    from scripts.malcolm_utils import SYSTEM_INFO, ChownRecursive
+    from scripts.malcolm_common import SYSTEM_INFO
+    from scripts.malcolm_utils import ChownRecursive
 
     ext_uid = SYSTEM_INFO["recommended_nonroot_uid"]
     ext_gid = SYSTEM_INFO["recommended_nonroot_gid"]
