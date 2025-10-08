@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - installer-staging
     paths:
       - 'dashboards/**'
       - 'Dockerfiles/dashboards-helper.Dockerfile'
