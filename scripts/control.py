@@ -1258,14 +1258,14 @@ def start():
 
         # make sure the auth files exist. if we are in an interactive shell and we're
         # missing any of the auth files, prompt to create them now
-        # if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
-        #     authSetup()
+        if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
+            authSetup()
 
         # still missing? sorry charlie
-        # if not MalcolmAuthFilesExist(configDir=args.configDir):
-        #     raise Exception(
-        #         'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
-        #     )
+        if not MalcolmAuthFilesExist(configDir=args.configDir):
+            raise Exception(
+                'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
+            )
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
         if not os.path.isfile(os.path.join(GetMalcolmPath(), os.path.join('opensearch', 'opensearch.keystore'))):
