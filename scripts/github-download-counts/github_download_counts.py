@@ -139,9 +139,9 @@ def main():
             args.githubToken = f.readline().strip()
 
     args.verbose = mmguero.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.debug(os.path.join(script_path, script_name))
-    logging.debug(f"Arguments: {sys.argv[1:]}")
-    logging.debug(f"Arguments: {args}")
+    logging.info(os.path.join(script_path, script_name))
+    logging.info(f"Arguments: {sys.argv[1:]}")
+    logging.info(f"Arguments: {args}")
 
     # resolve the start and end times for searching
     dateFrom = ParseDate(args.dateFromStr)
@@ -231,7 +231,7 @@ def main():
                             allow_redirects=True,
                         )
                         pkgsResponse.raise_for_status()
-                        if (packagesJson := mmguero.LoadStrIfJson(pkgsResponse.content)) and isinstance(
+                        if (packagesJson := mmguero.load_str_if_json(pkgsResponse.content)) and isinstance(
                             packagesJson, list
                         ):
                             packages.extend(
@@ -257,12 +257,14 @@ def main():
                     'per_page': GITHUB_API_REQUESTS_PER_PAGE,
                 }
                 versionsResponse = ghSession.get(
-                    f"https://api.github.com/orgs/{mmguero.DeepGet(packageInfo, ['owner', 'login'])}/packages/container/{mmguero.AggressiveUrlEncode(packageInfo['name'])}/versions",
+                    f"https://api.github.com/orgs/{mmguero.deep_get(packageInfo, ['owner', 'login'])}/packages/container/{mmguero.aggressive_url_encode(packageInfo['name'])}/versions",
                     params=params,
                     allow_redirects=True,
                 )
                 versionsResponse.raise_for_status()
-                if (versionsJson := mmguero.LoadStrIfJson(versionsResponse.content)) and isinstance(versionsJson, list):
+                if (versionsJson := mmguero.load_str_if_json(versionsResponse.content)) and isinstance(
+                    versionsJson, list
+                ):
                     # only consider versions where the tag creation date is in our search time frame, and
                     #   the tag name(s) match the regex filter (if specified)
                     versions.extend(
@@ -276,7 +278,7 @@ def main():
                                     or any(
                                         [
                                             v.match(t)
-                                            for t in mmguero.DeepGet(x, ['metadata', 'container', 'tags'])
+                                            for t in mmguero.deep_get(x, ['metadata', 'container', 'tags'])
                                             for k, v in imageTagRegexes.items()
                                         ]
                                     )
@@ -305,13 +307,13 @@ def main():
                     soup = BeautifulSoup(tmpResponse.text, 'html.parser')
                     # look for the "Total downloads" <span>, then get the contents of its next sibling
                     if totalDownloadsLabel := soup.find('span', string="Total downloads"):
-                        if tags := mmguero.DeepGet(version, ['metadata', 'container', 'tags']):
+                        if tags := mmguero.deep_get(version, ['metadata', 'container', 'tags']):
                             tagsStr = f':{"(" if len(tags) > 1 else ""}{"|".join(tags)}{")" if len(tags) > 1 else ""}'
                         else:
                             tagsStr = '@' + version['name']
                         if pullCount := int(totalDownloadsLabel.find_next('span').text.replace(",", "")):
                             imagePulls[
-                                f"{mmguero.DeepGet(packageInfo, ['owner', 'login'])}/{packageInfo['name']}{tagsStr}"
+                                f"{mmguero.deep_get(packageInfo, ['owner', 'login'])}/{packageInfo['name']}{tagsStr}"
                             ] = int(pullCount)
             except Exception as e:
                 logging.error(f"Parsing HTML page for package: {e}")

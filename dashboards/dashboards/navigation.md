@@ -4,6 +4,7 @@
 [ICS/IoT Security Overview](#/dashboard/4a4bde20-4760-11ea-949c-bbb5a9feecbf)
 [Severity](#/dashboard/d2dd0180-06b1-11ec-8c6b-353266ade330)
 [Connections](#/dashboard/abdd7550-2c7c-40dc-947e-f6d186a158c4)
+[Connections Tree](#/dashboard/89714140-a2d5-11f0-b5ae-e139a66d2205)
 [Actions and Results](#/dashboard/a33e0a50-afcd-11ea-993f-b7d8522a8bed)
 [Files](#/dashboard/9ee51f94-3316-4fc5-bd89-93a52af69714)
 [Executables](#/dashboard/0a490422-0ce9-44bf-9a2d-19329ddde8c3)
@@ -15,7 +16,7 @@
 [Signatures](#/dashboard/665d1610-523d-11e9-a30e-e3576242f3ed)
 [Suricata Alerts](#/dashboard/5694ca60-cbdf-11ec-a50a-5fedd672f5c5)
 [Asset Interaction Analysis](#/dashboard/677ee170-809e-11ed-8d5b-07069f823b6f)
-[Validated Architecture Design Review](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)
+[Validated Architecture Design Review](#/dashboard/89714140-a2d5-11f0-b5ae-e139a66d2205)
 [↪ NetBox](/netbox/)
 [↪ Arkime](/arkime/)
 
