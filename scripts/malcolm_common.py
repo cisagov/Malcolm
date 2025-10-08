@@ -37,7 +37,6 @@ from scripts.malcolm_utils import (
 
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
-from packaging import version
 
 from scripts.malcolm_constants import (
     MALCOLM_VERSION,
@@ -1056,18 +1055,19 @@ def get_malcolm_version():
         str: The Malcolm version string, or MALCOLM_VERSION if not found
     """
 
-    def get_highest_calver(tags):
-        valid_versions = []
-        for tag in tags:
-            try:
-                parsed = version.parse(tag)
-                if parsed.release and all(str(part).isdigit() for part in parsed.release[:2]):
-                    valid_versions.append(parsed)
-            except Exception:
-                pass
-        if not valid_versions:
+    def parse_calver(tag):
+        try:
+            return tuple(int(p) for p in tag.split("-", 1)[0].split("+", 1)[0].split(".")[:3])
+        except ValueError:
             return None
-        return str(max(valid_versions))
+
+    def get_highest_calver(tags):
+        parsed = [parse_calver(tag) for tag in tags]
+        valid = [p for p in parsed if p is not None]
+        if not valid:
+            return None
+        highest = max(valid)
+        return ".".join(str(x) for x in highest)
 
     result = MALCOLM_VERSION
 

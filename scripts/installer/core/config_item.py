@@ -35,7 +35,7 @@ class ConfigItem:
         ui_depth: Depth of the item in the UI tree
         ui_parent: Parent of the item in the UI tree
         is_password: bool = False
-        question: Question attached to this ConfigItem to present to the user
+        question: Question attached to this ConfigItem to present to the user (either a str or "Callable")
         widget_type: GUI element associated with this ConfigItem
         metadata: dict = Contains information to perform inspection on
     """
