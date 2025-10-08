@@ -110,13 +110,9 @@ class TestEnvFileRoundtrip(unittest.TestCase):
 
     def test_roundtrip_enum_like_opensearch_mode(self):
         # set primary mode to a labeled value and ensure it persists
-        self.config.set_value(
-            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE, "opensearch-remote"
-        )
+        self.config.set_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE, "opensearch-remote")
         cfg2 = self._roundtrip_and_load(self.config)
-        self.assertEqual(
-            "opensearch-remote", cfg2.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
-        )
+        self.assertEqual("opensearch-remote", cfg2.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE))
 
     def test_env_sentinel_zero_values(self):
         # Seed a temp env with sentinel '0' values and verify proper import

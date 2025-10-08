@@ -35,9 +35,7 @@ if _REPO_ROOT not in sys.path:
 from scripts.installer.core import EnvMapper
 
 
-def _roles_for_env_var(
-    mapper, env_map_key: str, item_keys: List[str]
-) -> Tuple[str, Dict[str, str]]:
+def _roles_for_env_var(mapper, env_map_key: str, item_keys: List[str]) -> Tuple[str, Dict[str, str]]:
     """Return overall role and per-item roles for an env var based on explicit tags.
 
     Overall role is authoritative when all mapped items are authoritative,
@@ -53,22 +51,14 @@ def _roles_for_env_var(
         role = "authoritative" if ev.is_authoritative_for(ik) else "derived"
         per_item[ik] = role
         roles.add(role)
-    overall = (
-        "authoritative"
-        if roles == {"authoritative"}
-        else ("derived" if roles == {"derived"} else "mixed")
-    )
+    overall = "authoritative" if roles == {"authoritative"} else ("derived" if roles == {"derived"} else "mixed")
     return overall, per_item
 
 
 def _build_summary(mapper, verbose: bool = False) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
-    for env_map_key, env_var in sorted(
-        mapper.env_var_by_map_key.items(), key=lambda kv: kv[0]
-    ):
-        overall_role, roles_by_item = _roles_for_env_var(
-            mapper, env_map_key, env_var.config_items
-        )
+    for env_map_key, env_var in sorted(mapper.env_var_by_map_key.items(), key=lambda kv: kv[0]):
+        overall_role, roles_by_item = _roles_for_env_var(mapper, env_map_key, env_var.config_items)
         entry: Dict[str, Any] = {
             "map_key": env_map_key,
             "env_var": env_var.variable_name,
@@ -96,15 +86,11 @@ def _print_table(rows: List[Dict[str, Any]]):
     # legend / explanation
     print("Installer Env Mapping – Reverse Import Legend")
     print("- authoritative: wins conflicts for its target setting during env import.")
-    print(
-        "  Reasoning: represents direct user choice (e.g., container runtime, live capture, explicit NetBox mode)."
-    )
+    print("  Reasoning: represents direct user choice (e.g., container runtime, live capture, explicit NetBox mode).")
     print(
         "- derived: helper flags calculated from authoritative choices during forward generation; do not override them on import."
     )
-    print(
-        "  Examples: file watcher polling flags, rotated-PCAP flags, NetBox URL implying remote when mode absent."
-    )
+    print("  Examples: file watcher polling flags, rotated-PCAP flags, NetBox URL implying remote when mode absent.")
     print(
         "- reverse no-op: present in env for forward semantics, but intentionally skipped on reverse to avoid conflicts (e.g., syslog listen flags).\n"
     )
@@ -123,13 +109,10 @@ def _print_table(rows: List[Dict[str, Any]]):
         )
         # Build a compact targets string: item(A)/item(D)
         targets_str = ",".join(
-            f"{ik}({'A' if r.get('roles_by_item', {}).get(ik) == 'authoritative' else 'D'})"
-            for ik in r["config_items"]
+            f"{ik}({'A' if r.get('roles_by_item', {}).get(ik) == 'authoritative' else 'D'})" for ik in r["config_items"]
         )
         r["_targets_str"] = targets_str
-        col_widths["targets"] = max(
-            col_widths.get("targets", len("targets")), len(targets_str)
-        )
+        col_widths["targets"] = max(col_widths.get("targets", len("targets")), len(targets_str))
 
     def fmt(h: str, v: str) -> str:
         return v.ljust(col_widths[h])

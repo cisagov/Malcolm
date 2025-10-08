@@ -14,9 +14,7 @@ from typing import Dict, Any, Optional
 from enum import Enum
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -134,11 +132,7 @@ class MockPlatform(BaseInstaller):
 
         # Default behavior based on command patterns
         if "docker info" in cmd_str:
-            return (
-                (0, ["Server: Docker Engine"])
-                if self.docker_installed
-                else (1, ["Cannot connect to Docker"])
-            )
+            return (0, ["Server: Docker Engine"]) if self.docker_installed else (1, ["Cannot connect to Docker"])
         # handle compose version probes (v1 and v2 forms)
         elif (
             "docker-compose --version" in cmd_str
@@ -147,17 +141,11 @@ class MockPlatform(BaseInstaller):
             or "docker compose version" in cmd_str
         ):
             return (
-                (0, ["docker-compose version 2.0.0"])
-                if self.docker_compose_installed
-                else (1, ["Command not found"])
+                (0, ["docker-compose version 2.0.0"]) if self.docker_compose_installed else (1, ["Command not found"])
             )
         elif cmd_str.startswith("apt-get install") or cmd_str.startswith("yum install"):
             # Extract package names and mark as installed
-            packages = [
-                p
-                for p in cmd_str.split()
-                if not p.startswith("-") and p not in ["apt-get", "yum", "install"]
-            ]
+            packages = [p for p in cmd_str.split() if not p.startswith("-") and p not in ["apt-get", "yum", "install"]]
             self.packages_installed.update(packages)
             return (0, [f'Successfully installed {" ".join(packages)}'])
 
@@ -258,17 +246,13 @@ class BaseInstallerTest(unittest.TestCase):
         self.mock_logger = MagicMock()
 
         # Setup common mock files
-        self.mock_filesystem.add_file(
-            "/etc/sysctl.conf", "# System control configuration"
-        )
+        self.mock_filesystem.add_file("/etc/sysctl.conf", "# System control configuration")
         self.mock_filesystem.add_file("/etc/default/grub", 'GRUB_CMDLINE_LINUX=""')
         self.mock_filesystem.add_directory("/etc/security/limits.d")
         self.mock_filesystem.add_directory("/etc/systemd/system.conf.d")
 
         # Mock InstallerYesOrNo to avoid interactive prompts
-        self.installer_yes_or_no_patcher = patch(
-            "scripts.malcolm_common.InstallerYesOrNo", return_value=False
-        )
+        self.installer_yes_or_no_patcher = patch("scripts.malcolm_common.InstallerYesOrNo", return_value=False)
         self.installer_yes_or_no_patcher.start()
 
     def tearDown(self):
@@ -398,9 +382,7 @@ def create_test_flags():
         action="store_true",
         help="Force Docker installation to fail",
     )
-    parser.add_argument(
-        "--fail-system-tweaks", action="store_true", help="Force system tweaks to fail"
-    )
+    parser.add_argument("--fail-system-tweaks", action="store_true", help="Force system tweaks to fail")
 
     return parser
 

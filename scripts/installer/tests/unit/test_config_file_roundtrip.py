@@ -15,9 +15,7 @@ import json
 import sys
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
@@ -90,15 +88,12 @@ class TestConfigFileRoundtrip(unittest.TestCase):
         # check for validation errors in log output
         log_output = log_capture.getvalue()
         validation_errors = [
-            line
-            for line in log_output.split("\n")
-            if "Failed to set" in line and "Invalid value" in line
+            line for line in log_output.split("\n") if "Failed to set" in line and "Invalid value" in line
         ]
 
         if validation_errors:
             self.fail(
-                f"Roundtrip validation failed with {len(validation_errors)} errors:\n"
-                + "\n".join(validation_errors)
+                f"Roundtrip validation failed with {len(validation_errors)} errors:\n" + "\n".join(validation_errors)
             )
 
         # 4. Compare the MalcolmConfig items

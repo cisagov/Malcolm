@@ -31,6 +31,7 @@ def build_rows_from_items(
     try:
         from scripts.installer.core.transform_registry import apply_outbound
     except Exception:
+
         def apply_outbound(k: str, v: Any) -> Any:  # type: ignore
             return v
 

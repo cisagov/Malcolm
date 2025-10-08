@@ -90,9 +90,7 @@ class TestEnvMultiConditional(unittest.TestCase):
         ):
             env_path = self._env_path_for(env_key)
             env_map = _parse_env_file(env_path)
-            var_name = (
-                self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
-            )
+            var_name = self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
             self.assertEqual(env_map.get(var_name), "true", f"{env_key} should be true")
 
         # auto=true, live=true -> 'false'
@@ -107,12 +105,8 @@ class TestEnvMultiConditional(unittest.TestCase):
         ):
             env_path = self._env_path_for(env_key)
             env_map = _parse_env_file(env_path)
-            var_name = (
-                self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
-            )
-            self.assertEqual(
-                env_map.get(var_name), "false", f"{env_key} should be false"
-            )
+            var_name = self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
+            self.assertEqual(env_map.get(var_name), "false", f"{env_key} should be false")
 
         # auto=false, live=false -> 'false'
         self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_ARKIME, False)
@@ -129,12 +123,8 @@ class TestEnvMultiConditional(unittest.TestCase):
         ):
             env_path = self._env_path_for(env_key)
             env_map = _parse_env_file(env_path)
-            var_name = (
-                self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
-            )
-            self.assertEqual(
-                env_map.get(var_name), "false", f"{env_key} should be false"
-            )
+            var_name = self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
+            self.assertEqual(env_map.get(var_name), "false", f"{env_key} should be false")
 
     def test_rotated_pcap_flags_reverse_live_set(self):
         # Write rotated flag = true and ensure live=false after load
@@ -145,9 +135,7 @@ class TestEnvMultiConditional(unittest.TestCase):
         ]:
             env_path = self._env_path_for(env_key)
             os.makedirs(os.path.dirname(env_path), exist_ok=True)
-            var_name = (
-                self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
-            )
+            var_name = self.cfg.get_env_mapper().env_var_by_map_key[env_key].variable_name
             with open(env_path, "w") as f:
                 f.write(f"{var_name}=true\n")
 
@@ -165,11 +153,7 @@ class TestEnvMultiConditional(unittest.TestCase):
         self.cfg.generate_env_files(self.temp_dir)
         env_path = self._env_path_for(KEY_ENV_PCAP_ENABLE_TCPDUMP)
         env_map = _parse_env_file(env_path)
-        var_name = (
-            self.cfg.get_env_mapper()
-            .env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP]
-            .variable_name
-        )
+        var_name = self.cfg.get_env_mapper().env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].variable_name
         self.assertEqual(env_map.get(var_name), "true")
 
         # tcpdump=true, netsniff=true -> 'false'
@@ -187,18 +171,12 @@ class TestEnvMultiConditional(unittest.TestCase):
 
     def test_container_runtime_key_forward_and_reverse(self):
         # Orchestration: Kubernetes -> 'kubernetes'
-        self.cfg.set_value(
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES
-        )
+        self.cfg.set_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES)
         self.cfg.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "docker")
         self.cfg.generate_env_files(self.temp_dir)
         env_path = self._env_path_for(KEY_ENV_CONTAINER_RUNTIME_KEY)
         env_map = _parse_env_file(env_path)
-        var_name = (
-            self.cfg.get_env_mapper()
-            .env_var_by_map_key[KEY_ENV_CONTAINER_RUNTIME_KEY]
-            .variable_name
-        )
+        var_name = self.cfg.get_env_mapper().env_var_by_map_key[KEY_ENV_CONTAINER_RUNTIME_KEY].variable_name
         self.assertEqual(env_map.get(var_name), "kubernetes")
 
         # Reverse: 'podman' -> DOCKER_COMPOSE + runtimeBin='podman'

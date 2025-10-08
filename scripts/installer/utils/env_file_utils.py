@@ -85,9 +85,7 @@ def apply_extra_env_settings(
             # and resides in the same target .env file according to the mapper.
             item_keys = env_mapper.get_item_keys_by_env_var(variable_name)
             mapped_file = env_mapper.get_file_for_variable(variable_name)
-            return bool(item_keys) and (
-                os.path.basename(mapped_file or "") == target_file_basename
-            )
+            return bool(item_keys) and (os.path.basename(mapped_file or "") == target_file_basename)
         except Exception:
             return False
 
@@ -102,9 +100,7 @@ def apply_extra_env_settings(
         target_file = os.path.join(config_dir, file_basename)
 
         if not file_basename.endswith(".env"):
-            InstallerLogger.error(
-                f"Ignoring extra value ({var_name}={var_value}) in {file_basename} (not .env file)"
-            )
+            InstallerLogger.error(f"Ignoring extra value ({var_name}={var_value}) in {file_basename} (not .env file)")
             continue
 
         if _is_cli_managed(var_name, file_basename):

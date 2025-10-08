@@ -31,15 +31,11 @@ if TYPE_CHECKING:
 class DialogInstallerUI(InstallerUI):
     """Dialog-based User Interface aligned with the TUI hierarchy."""
 
-    def __init__(
-        self, ui_mode: UserInterfaceMode = UserInterfaceMode.InteractionDialog
-    ):
+    def __init__(self, ui_mode: UserInterfaceMode = UserInterfaceMode.InteractionDialog):
         super().__init__(ui_mode)
 
     # primitive prompts are thin wrappers around the shared helpers
-    def ask_yes_no(
-        self, message: str, default: bool = True, force_interaction: bool = False
-    ) -> bool:
+    def ask_yes_no(self, message: str, default: bool = True, force_interaction: bool = False) -> bool:
         return InstallerYesOrNo(
             message,
             default=default,
@@ -47,9 +43,7 @@ class DialogInstallerUI(InstallerUI):
             uiMode=self.ui_mode,
         )
 
-    def ask_string(
-        self, prompt: str, default: str = "", force_interaction: bool = False
-    ) -> Optional[str]:
+    def ask_string(self, prompt: str, default: str = "", force_interaction: bool = False) -> Optional[str]:
         return InstallerAskForString(
             prompt,
             default=default,
@@ -91,9 +85,7 @@ class DialogInstallerUI(InstallerUI):
         malcolm_config: "MalcolmConfig",
         install_context: "InstallContext",
     ) -> Optional["InstallContext"]:
-        menu = DialogInstallationMenu(
-            platform, malcolm_config, install_context, ui_mode=self.ui_mode
-        )
+        menu = DialogInstallationMenu(platform, malcolm_config, install_context, ui_mode=self.ui_mode)
         return menu.run()
 
     def show_final_configuration_summary(

@@ -18,22 +18,14 @@ class TestInstallContextExclusivity(unittest.TestCase):
 
     def test_defaults_both_false(self):
         # defaults mirror legacy: both false
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES)
-        )
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES)
-        )
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES))
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES))
         self.assertFalse(self.ctx.pull_malcolm_images)
 
     def test_set_load_true_forces_pull_false_and_source_archive(self):
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES, True)
-        self.assertTrue(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES)
-        )
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES)
-        )
+        self.assertTrue(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES))
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES))
         self.assertEqual(self.ctx.image_source, "archive")
         self.assertTrue(self.ctx.load_images_from_archive)
         self.assertFalse(self.ctx.pull_malcolm_images)
@@ -42,12 +34,8 @@ class TestInstallContextExclusivity(unittest.TestCase):
         # flip load on first to then ensure pull overrides it
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES, True)
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES, True)
-        self.assertTrue(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES)
-        )
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES)
-        )
+        self.assertTrue(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES))
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES))
         self.assertEqual(self.ctx.image_source, "registry")
         self.assertFalse(self.ctx.load_images_from_archive)
         self.assertTrue(self.ctx.pull_malcolm_images)
@@ -56,12 +44,8 @@ class TestInstallContextExclusivity(unittest.TestCase):
         # explicitly setting one to false keeps the other unchanged (and default false)
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES, False)
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES, False)
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES)
-        )
-        self.assertFalse(
-            self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES)
-        )
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES))
+        self.assertFalse(self.ctx.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES))
         self.assertFalse(self.ctx.pull_malcolm_images)
 
 

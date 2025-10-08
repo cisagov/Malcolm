@@ -85,9 +85,7 @@ KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT = "traefikEntrypoint"
 KEY_CONFIG_ITEM_TRAEFIK_RESOLVER = "traefikResolver"
 KEY_CONFIG_ITEM_TRAEFIK_LABELS = "traefikLabels"
 KEY_CONFIG_ITEM_OPEN_PORTS = "openPortsSelection"
-KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = (
-    "captureLiveNetworkTraffic"  # captureSelection in legacy installer
-)
+KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = "captureLiveNetworkTraffic"  # captureSelection in legacy installer
 
 # Open ports options
 KEY_CONFIG_ITEM_EXPOSE_LOGSTASH = "exposeLogstash"
@@ -130,22 +128,16 @@ KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR = "indexSnapshotDir"
 KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP = "arkimeManagePCAP"
 KEY_CONFIG_ITEM_ARKIME_FREESPACEG = "arkimeFreeSpaceG"
 KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD = "extractedFileMaxSizeThreshold"
-KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD = (
-    "extractedFileMaxPercentThreshold"
-)
+KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD = "extractedFileMaxPercentThreshold"
 KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT = "indexPruneSizeLimit"
 KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT = "indexPruneNameSort"
 KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY = "indexManagementPolicy"
 KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM = "indexManagementHotWarm"
-KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD = (
-    "indexManagementOptimizationTimePeriod"
-)
+KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD = "indexManagementOptimizationTimePeriod"
 KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION = "indexManagementSpiDataRetention"
 KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS = "indexManagementReplicas"
 KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS = "indexManagementHistoryInWeeks"
-KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS = (
-    "indexManagementOptimizeSessionSegments"
-)
+KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS = "indexManagementOptimizeSessionSegments"
 
 # Threat intelligence feed options
 KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS = "zeekPullIntelligenceFeeds"

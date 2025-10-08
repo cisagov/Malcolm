@@ -54,6 +54,7 @@ from scripts.installer.configs.constants.constants import (
 def filesystem_prepare(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
     """Ensure configuration directory exists (idempotent, respects dry-run)."""
     import os
+
     try:
         if not platform.should_write_files():
             logger.info(f"Dry run: would create configuration directory: {config_dir}")
@@ -109,8 +110,7 @@ def _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch: bool) -
     elif isinstance(os_primary_mode, str):
         try:
             is_local = (
-                DATABASE_MODE_ENUMS.get(os_primary_mode, DatabaseMode.DatabaseUnset)
-                == DatabaseMode.OpenSearchLocal
+                DATABASE_MODE_ENUMS.get(os_primary_mode, DatabaseMode.DatabaseUnset) == DatabaseMode.OpenSearchLocal
             )
         except Exception:
             is_local = False
@@ -137,15 +137,8 @@ def _resolve_restart_policy(malcolm_config):
         KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     )
 
-    restart_policy_value = (
-        malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY)
-        or DEFAULT_RESTART_POLICY
-    )
-    return (
-        restart_policy_value.value
-        if isinstance(restart_policy_value, Enum)
-        else str(restart_policy_value)
-    )
+    restart_policy_value = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY) or DEFAULT_RESTART_POLICY
+    return restart_policy_value.value if isinstance(restart_policy_value, Enum) else str(restart_policy_value)
 
 
 def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_policy: str, deep_set) -> None:
@@ -305,28 +298,21 @@ def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> 
             )
             return InstallerResult.SKIPPED
 
-        logger.info(
-            f"Updating orchestration (docker-compose) files in {malcolm_install_path}..."
-        )
-        logger.info(
-            f"Found {len(compose_files)} docker-compose files: {[os.path.basename(f) for f in compose_files]}"
-        )
+        logger.info(f"Updating orchestration (docker-compose) files in {malcolm_install_path}...")
+        logger.info(f"Found {len(compose_files)} docker-compose files: {[os.path.basename(f) for f in compose_files]}")
 
         # Load/write per file
         runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
         restart_policy = _resolve_restart_policy(malcolm_config)
         pcap_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_DIR) or DEFAULT_PCAP_DIR
         zeek_log_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR) or DEFAULT_ZEEK_LOG_DIR
-        suricata_log_dir = (
-            malcolm_config.get_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR) or DEFAULT_SURICATA_LOG_DIR
-        )
+        suricata_log_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR) or DEFAULT_SURICATA_LOG_DIR
         index_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_DIR) or DEFAULT_INDEX_DIR
-        index_snapshot_dir = (
-            malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR) or DEFAULT_INDEX_SNAPSHOT_DIR
-        )
+        index_snapshot_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR) or DEFAULT_INDEX_SNAPSHOT_DIR
         network_name = malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME)
 
         import copy
+
         for config_file in compose_files:
             data = LoadYaml(config_file)
             if data is None or "services" not in data:
@@ -366,6 +352,7 @@ def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> In
     import os, shutil
     from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
     from scripts.malcolm_utils import get_default_config_dir
+
     try:
         if not config_dir:
             logger.warning("SSL env step: configuration directory not provided; skipping.")
@@ -558,7 +545,9 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
                 return InstallerResult.SUCCESS, "Compose command unavailable; manual start required"
             if runtime_bin.startswith("podman"):
                 # best-effort socket activation; guidance only on failure
-                rc, _ = platform.run_process(["systemctl", "--user", "is-active", "podman.socket"], privileged=False, stderr=False)
+                rc, _ = platform.run_process(
+                    ["systemctl", "--user", "is-active", "podman.socket"], privileged=False, stderr=False
+                )
                 # Not enforcing strict failure, keep behavior pragmatic
             compose_base = compose_cmd + ["-f", compose_file]
             if profile:
@@ -566,7 +555,9 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
             if pull_requested:
                 ecode = -1
                 if runtime_bin.startswith("podman"):
-                    pull_cmd = _prepare_podman_rootless_command(compose_base + ["pull"], "pulling images rootless", platform, logger)
+                    pull_cmd = _prepare_podman_rootless_command(
+                        compose_base + ["pull"], "pulling images rootless", platform, logger
+                    )
                     ecode = platform.run_process_streaming(pull_cmd, privileged=False)
                 else:
                     for priv in (False, True):
@@ -606,6 +597,7 @@ def discover_compose_command(runtime_bin: str, platform) -> list | None:
     Mirrors the discovery behavior used by perform_docker_operations.
     """
     from typing import List
+
     if runtime_bin == "docker":
         candidates: List[List[str]] = [[runtime_bin, "compose"], ["docker-compose"]]
     elif runtime_bin == "podman":

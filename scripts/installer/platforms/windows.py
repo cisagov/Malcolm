@@ -44,7 +44,5 @@ class WindowsInstaller(BaseInstaller):
         """Windows is not supported: provide a clear message and return False."""
         from scripts.installer.utils.logger_utils import InstallerLogger
 
-        InstallerLogger.error(
-            "Windows is not supported by the Malcolm installer. Please use Linux or macOS."
-        )
+        InstallerLogger.error("Windows is not supported by the Malcolm installer. Please use Linux or macOS.")
         return False

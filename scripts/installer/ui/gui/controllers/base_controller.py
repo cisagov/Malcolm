@@ -199,11 +199,7 @@ class BaseController:
                 result = self.view.ask_choice(prompt, choices, default)
             else:
                 # Default behavior if no UI is available
-                result = (
-                    choices[default]
-                    if default is not None and default < len(choices)
-                    else None
-                )
+                result = choices[default] if default is not None and default < len(choices) else None
 
         # Store in model if requested
         if model_key is not None:

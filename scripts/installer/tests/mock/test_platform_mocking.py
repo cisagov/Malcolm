@@ -11,9 +11,7 @@ import unittest
 from unittest.mock import patch, MagicMock, mock_open, call
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.platforms.linux import LinuxInstaller
@@ -28,9 +26,7 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
 
     def setUp(self):
         super().setUp()
-        self.linux_installer = LinuxInstaller(
-            OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True
-        )
+        self.linux_installer = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True)
 
     def test_linux_docker_install_repository_method(self):
         """Test Linux Docker installation via repository."""
@@ -56,9 +52,9 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
                 (0, []),  # usermod succeeds
             ]
 
-            with patch.object(
-                self.linux_installer, "install_package", return_value=True
-            ), patch("requests.get") as mock_requests:
+            with patch.object(self.linux_installer, "install_package", return_value=True), patch(
+                "requests.get"
+            ) as mock_requests:
 
                 mock_requests.return_value.content = b"mock-gpg-key"
 
@@ -99,9 +95,7 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
                 (0, []),  # usermod succeeds
             ]
 
-            with patch.object(
-                self.linux_installer, "_install_docker_from_repo", return_value=False
-            ), patch.object(
+            with patch.object(self.linux_installer, "_install_docker_from_repo", return_value=False), patch.object(
                 self.linux_installer,
                 "_install_docker_convenience_script",
                 return_value=True,
@@ -199,9 +193,7 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
     def setUp(self):
         super().setUp()
         with patch.object(MacInstaller, "_setup_homebrew", return_value=None):
-            self.macos_installer = MacInstaller(
-                OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True
-            )
+            self.macos_installer = MacInstaller(OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True)
 
     def test_macos_homebrew_setup(self):
         """Test macOS Homebrew setup."""
@@ -241,15 +233,11 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
         self.assertTrue(result)
         mock_setup.assert_called_once_with(ctx)
         mock_install_package.assert_called_once_with(["docker", "docker-compose"])
-        mock_run_process.assert_called_once_with(
-            ["docker", "info"], retry=12, retry_sleep_sec=5
-        )
+        mock_run_process.assert_called_once_with(["docker", "info"], retry=12, retry_sleep_sec=5)
 
     def test_macos_docker_resource_configuration(self):
         """Test macOS Docker resource configuration."""
-        settings_file = (
-            "/Users/test/Library/Group Containers/group.com.docker/settings.json"
-        )
+        settings_file = "/Users/test/Library/Group Containers/group.com.docker/settings.json"
 
         # Mock Docker settings file
         mock_settings = {"cpus": 4, "memoryMiB": 8192, "other_setting": "value"}
@@ -259,9 +247,7 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
 
         with patch("os.path.isfile", return_value=True), patch(
             "builtins.open", mock_open(read_data='{"cpus": 4, "memoryMiB": 8192}')
-        ), patch("json.load", return_value=mock_settings), patch(
-            "json.dump"
-        ) as mock_dump:
+        ), patch("json.load", return_value=mock_settings), patch("json.dump") as mock_dump:
 
             self.macos_installer._configure_docker_resources(settings_file)
 
@@ -310,9 +296,7 @@ class TestWindowsPlatformMocking(BaseInstallerTest):
             def install_dependencies(self):
                 return False
 
-        self.windows_installer = _NoopWindowsInstaller(
-            OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True
-        )
+        self.windows_installer = _NoopWindowsInstaller(OrchestrationFramework.DOCKER_COMPOSE, self.mock_ui, debug=True)
 
     def test_windows_docker_install_not_implemented(self):
         """Test Windows Docker installation (not implemented)."""
@@ -373,9 +357,7 @@ class TestPlatformMockingIntegration(BaseInstallerTest):
         self.mock_platform.docker_installed = False
 
         # Mock the install_docker method to track calls
-        with patch.object(
-            self.mock_platform, "install_docker", return_value=True
-        ) as mock_install:
+        with patch.object(self.mock_platform, "install_docker", return_value=True) as mock_install:
             result = self.mock_platform.install_docker(ctx)
 
         self.assertTrue(result)

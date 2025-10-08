@@ -66,9 +66,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
-        self.cfg.set_value(
-            KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org"
-        )
+        self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT, "websecure")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER, "myresolver")
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
@@ -78,9 +76,7 @@ class TestTraefikLabels(unittest.TestCase):
         )
 
         # act
-        ok = update_docker_compose_files(
-            self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger
-        )
+        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -92,31 +88,19 @@ class TestTraefikLabels(unittest.TestCase):
             labels.get("traefik.http.routers.malcolm.rule"),
             "Host(`malcolm.example.org`)",
         )
-        self.assertEqual(
-            labels.get("traefik.http.routers.malcolm.entrypoints"), "websecure"
-        )
-        self.assertEqual(
-            labels.get("traefik.http.routers.malcolm.tls.certresolver"), "myresolver"
-        )
+        self.assertEqual(labels.get("traefik.http.routers.malcolm.entrypoints"), "websecure")
+        self.assertEqual(labels.get("traefik.http.routers.malcolm.tls.certresolver"), "myresolver")
         self.assertEqual(labels.get("traefik.http.routers.malcolm.service"), "malcolm")
-        self.assertEqual(
-            labels.get("traefik.http.services.malcolm.loadbalancer.server.port"), "443"
-        )
+        self.assertEqual(labels.get("traefik.http.services.malcolm.loadbalancer.server.port"), "443")
 
         # opensearch labels present when local and exposed
         self.assertEqual(
             labels.get("traefik.http.routers.osmalcolm.rule"),
             "Host(`os.malcolm.example.org`)",
         )
-        self.assertEqual(
-            labels.get("traefik.http.routers.osmalcolm.entrypoints"), "websecure"
-        )
-        self.assertEqual(
-            labels.get("traefik.http.routers.osmalcolm.tls.certresolver"), "myresolver"
-        )
-        self.assertEqual(
-            labels.get("traefik.http.routers.osmalcolm.service"), "osmalcolm"
-        )
+        self.assertEqual(labels.get("traefik.http.routers.osmalcolm.entrypoints"), "websecure")
+        self.assertEqual(labels.get("traefik.http.routers.osmalcolm.tls.certresolver"), "myresolver")
+        self.assertEqual(labels.get("traefik.http.routers.osmalcolm.service"), "osmalcolm")
         self.assertEqual(
             labels.get("traefik.http.services.osmalcolm.loadbalancer.server.port"),
             "9200",
@@ -137,9 +121,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, False)
 
         # act
-        ok = update_docker_compose_files(
-            self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger
-        )
+        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         updated = _read_compose(self.compose_path)
@@ -164,9 +146,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
 
         # act
-        ok = update_docker_compose_files(
-            self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger
-        )
+        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -182,9 +162,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
-        self.cfg.set_value(
-            KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org"
-        )
+        self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT, "websecure")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER, "myresolver")
         self.cfg.set_value(
@@ -194,9 +172,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, False)
 
         # act
-        ok = update_docker_compose_files(
-            self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger
-        )
+        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)

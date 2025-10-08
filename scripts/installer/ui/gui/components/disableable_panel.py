@@ -221,9 +221,7 @@ class DisableablePanel:
 
         # Store properties in the panel for later access
         panel._dp_child_panels = []  # Store child panels
-        panel._dp_is_enabled_func = (
-            lambda: radio_variable.get() == radio_value
-        )  # Store enabling function
+        panel._dp_is_enabled_func = lambda: radio_variable.get() == radio_value  # Store enabling function
         panel._dp_widgets = contained_widgets  # Store the widgets list
         panel._dp_is_nested = is_nested  # Track nesting level
         panel._dp_nesting_level = nesting_level  # Store nesting level
@@ -390,17 +388,13 @@ class DisableablePanel:
             bg_color = ("gray92", "gray17") if is_nested else ("gray95", "gray15")
             border_color = ("gray80", "gray30") if is_nested else ("gray85", "gray25")
 
-            panel.configure(
-                fg_color=bg_color, border_width=1, border_color=border_color
-            )
+            panel.configure(fg_color=bg_color, border_width=1, border_color=border_color)
         else:
             # Disabled appearance
             bg_color = ("gray88", "gray22") if is_nested else ("gray90", "gray20")
             border_color = ("gray75", "gray40") if is_nested else ("gray80", "gray35")
 
-            panel.configure(
-                fg_color=bg_color, border_width=1, border_color=border_color
-            )
+            panel.configure(fg_color=bg_color, border_width=1, border_color=border_color)
 
         # Process any child panels
         if hasattr(panel, "_dp_child_panels"):
@@ -409,6 +403,4 @@ class DisableablePanel:
                 child_widgets = getattr(child_panel, "_dp_widgets", [])
 
                 # Apply state to child panel recursively
-                DisableablePanel._set_panel_state(
-                    child_panel, child_widgets, enabled, parent_forced=True
-                )
+                DisableablePanel._set_panel_state(child_panel, child_widgets, enabled, parent_forced=True)

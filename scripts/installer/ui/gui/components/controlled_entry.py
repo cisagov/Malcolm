@@ -43,9 +43,7 @@ class ControlledEntry(customtkinter.CTkEntry):
             width: Width of the entry field
             **kwargs: Additional arguments to pass to CTkEntry
         """
-        super().__init__(
-            master, placeholder_text=placeholder_text, width=width, **kwargs
-        )
+        super().__init__(master, placeholder_text=placeholder_text, width=width, **kwargs)
 
         self._controller_set = controller_set_method
         self._controller_get = controller_get_method

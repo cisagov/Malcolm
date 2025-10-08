@@ -40,9 +40,7 @@ class InstallationView(BaseView):
 
         # Status message at the bottom of the screen
         self.status_label = customtkinter.CTkLabel(self.frame, text="")
-        self.status_label.grid(
-            row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w"
-        )
+        self.status_label.grid(row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w")
 
         # Register with controller AFTER UI elements are created
         self.controller.set_view(self)
@@ -63,9 +61,7 @@ class InstallationView(BaseView):
             text="Install Malcolm with your configured settings",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w"
-        )
+        description.grid(row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w")
 
         # Installation status section
         self._create_status_section(row=2)
@@ -92,21 +88,15 @@ class InstallationView(BaseView):
             text="Installation Status",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Status frame
         status_frame = customtkinter.CTkFrame(self.frame)
-        status_frame.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=10, sticky="ew"
-        )
+        status_frame.grid(row=row, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
 
         # Status label
-        status_label = customtkinter.CTkLabel(
-            status_frame, text="Status:", font=customtkinter.CTkFont(size=14)
-        )
+        status_label = customtkinter.CTkLabel(status_frame, text="Status:", font=customtkinter.CTkFont(size=14))
         status_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         # Status value
@@ -120,12 +110,8 @@ class InstallationView(BaseView):
         row += 1
 
         # Status message
-        self.status_message = customtkinter.CTkLabel(
-            self.frame, text="", font=customtkinter.CTkFont(size=12)
-        )
-        self.status_message.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        self.status_message = customtkinter.CTkLabel(self.frame, text="", font=customtkinter.CTkFont(size=12))
+        self.status_message.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
 
         row += 1
         return row
@@ -146,9 +132,7 @@ class InstallationView(BaseView):
             text="Installation Output",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Output text box
@@ -158,9 +142,7 @@ class InstallationView(BaseView):
             height=300,
             font=customtkinter.CTkFont(family="Courier", size=12),
         )
-        self.output_textbox.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=10, sticky="nsew"
-        )
+        self.output_textbox.grid(row=row, column=0, columnspan=3, padx=20, pady=10, sticky="nsew")
         self.output_textbox.configure(state="disabled")  # Read-only initially
 
         # Make the output section expand with the window

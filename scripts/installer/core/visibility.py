@@ -66,9 +66,7 @@ def install_item_is_visible(
 
     rt = meta.get("visible_when_runtime")
     if not rt:
-        base_visible = not (
-            key == _lazy_key_load_images() and not image_archive_path
-        )
+        base_visible = not (key == _lazy_key_load_images() and not image_archive_path)
     else:
         base_visible = (rt == "docker" and runtime_bin.startswith("docker")) or (
             rt == "podman" and runtime_bin.startswith("podman")
@@ -127,4 +125,3 @@ def _lazy_docker_keys():
         KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
         KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
     )
-

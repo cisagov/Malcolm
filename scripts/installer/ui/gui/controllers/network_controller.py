@@ -68,9 +68,7 @@ class NetworkController(BaseController):
         self.view.update_remote_access_enabled(self.network_model.remote_access_enabled)
         self.view.update_domain_name(self.network_model.domain_name)
         self.view.update_behind_reverse_proxy(self.network_model.behind_reverse_proxy)
-        self.view.update_configure_traefik_labels(
-            self.network_model.configure_traefik_labels
-        )
+        self.view.update_configure_traefik_labels(self.network_model.configure_traefik_labels)
         self.view.update_traefik_domain(self.network_model.traefik_domain)
 
     def set_web_port(self, port):

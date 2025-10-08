@@ -46,9 +46,7 @@ class TestTransformRegistryNormalization(unittest.TestCase):
 
     def test_file_preservation_modes_inbound(self):
         self.assertEqual(
-            apply_inbound(
-                KEY_CONFIG_ITEM_FILE_PRESERVE_MODE, FilePreservationMode.QUARANTINED
-            ),
+            apply_inbound(KEY_CONFIG_ITEM_FILE_PRESERVE_MODE, FilePreservationMode.QUARANTINED),
             FilePreservationMode.QUARANTINED.value,
         )
         self.assertEqual(

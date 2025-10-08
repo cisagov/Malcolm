@@ -30,9 +30,7 @@ def get_platform_installer(
     elif platform_name == "macos":
         return MacInstaller(orchestration_mode, ui, debug, control_flow=control_flow)
     elif platform_name == "windows":
-        raise NotImplementedError(
-            "Windows installation is not yet supported. Please use Linux or macOS."
-        )
+        raise NotImplementedError("Windows installation is not yet supported. Please use Linux or macOS.")
     else:
         raise NotImplementedError(f"Platform '{platform_name}' is not supported")
 

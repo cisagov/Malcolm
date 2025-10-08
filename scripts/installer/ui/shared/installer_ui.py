@@ -33,9 +33,7 @@ class InstallerUI(ABC):
         self.ui_mode = ui_mode
 
     @abstractmethod
-    def ask_yes_no(
-        self, message: str, default: bool = True, force_interaction: bool = False
-    ) -> bool:
+    def ask_yes_no(self, message: str, default: bool = True, force_interaction: bool = False) -> bool:
         """Ask the user a yes/no question.
 
         Args:
@@ -49,9 +47,7 @@ class InstallerUI(ABC):
         pass
 
     @abstractmethod
-    def ask_string(
-        self, prompt: str, default: str = "", force_interaction: bool = False
-    ) -> Optional[str]:
+    def ask_string(self, prompt: str, default: str = "", force_interaction: bool = False) -> Optional[str]:
         """Ask the user for a string input.
 
         Args:
@@ -96,9 +92,7 @@ class InstallerUI(ABC):
         pass
 
     @abstractmethod
-    def gather_install_options(
-        self, platform: "BaseInstaller"
-    ) -> Optional["InstallContext"]:
+    def gather_install_options(self, platform: "BaseInstaller") -> Optional["InstallContext"]:
         """Gather platform-specific installation options from the user.
 
         This method should interact with the user to fill out the installation-
@@ -179,9 +173,7 @@ class InstallerUI(ABC):
         while True:
             # Check if directory exists and is writable
             if not os.path.exists(current_dir) or not os.access(current_dir, os.W_OK):
-                self.display_message(
-                    f"Provided configuration directory {current_dir} does not exist."
-                )
+                self.display_message(f"Provided configuration directory {current_dir} does not exist.")
 
                 # Ask if user wants to create it
                 if self.ask_yes_no("Would you like to create it?", default=True):
@@ -189,21 +181,15 @@ class InstallerUI(ABC):
                         os.makedirs(current_dir)
                         return current_dir
                     except Exception as e:
-                        self.display_error(
-                            f"Failed to create configuration directory {current_dir}: {e}"
-                        )
+                        self.display_error(f"Failed to create configuration directory {current_dir}: {e}")
                         return None
                 else:
                     # Ask for new directory
-                    new_dir = self.ask_string(
-                        "Enter new config directory: ", default=current_dir
-                    )
+                    new_dir = self.ask_string("Enter new config directory: ", default=current_dir)
                     if new_dir:
                         current_dir = new_dir
                     else:
-                        self.display_message(
-                            "No config directory provided. Cancelling."
-                        )
+                        self.display_message("No config directory provided. Cancelling.")
                         return None
             else:
                 return current_dir
@@ -220,9 +206,7 @@ class InstallerUI(ABC):
         try:
             # Check if there are any .env files that are not .example files
             existing_env_files = [
-                f
-                for f in os.listdir(config_dir)
-                if f.endswith(".env") and not f.endswith(".example")
+                f for f in os.listdir(config_dir) if f.endswith(".env") and not f.endswith(".example")
             ]
 
             if existing_env_files:
@@ -230,15 +214,11 @@ class InstallerUI(ABC):
                     f"This will overwrite the existing configuration in {config_dir}. Are you sure you want to proceed?"
                 ):
                     # Ask for new directory
-                    new_dir = self.ask_string(
-                        "Enter new config directory: ", default=config_dir
-                    )
+                    new_dir = self.ask_string("Enter new config directory: ", default=config_dir)
                     if new_dir:
                         return self._confirm_overwrite_existing_config(new_dir)
                     else:
-                        self.display_message(
-                            "No new config directory provided. Cancelling."
-                        )
+                        self.display_message("No new config directory provided. Cancelling.")
                         return False
 
             return True

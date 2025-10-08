@@ -13,9 +13,7 @@ import tempfile
 import unittest
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
@@ -49,12 +47,8 @@ class TestInstallContextRoundtrip(unittest.TestCase):
         self.ctx.initialize_for_platform("linux")
 
         # Set a representative subset of install items (exercise enums and booleans)
-        self.ctx.set_item_value(
-            KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False
-        )  # flip default True -> False
-        self.ctx.set_item_value(
-            KEY_INSTALLATION_ITEM_INSTALLATION_PATH, os.path.join(self.temp_dir, "dest")
-        )
+        self.ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False)  # flip default True -> False
+        self.ctx.set_item_value(KEY_INSTALLATION_ITEM_INSTALLATION_PATH, os.path.join(self.temp_dir, "dest"))
         # Enums
         self.ctx.set_item_value(
             KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
@@ -124,9 +118,7 @@ class TestInstallContextRoundtrip(unittest.TestCase):
 
             # Type check for enums
             if expected_type in (DockerInstallMethod, DockerComposeInstallMethod):
-                self.assertIsInstance(
-                    loaded, expected_type, f"Loaded type mismatch for {key}"
-                )
+                self.assertIsInstance(loaded, expected_type, f"Loaded type mismatch for {key}")
 
             self.assertEqual(original, loaded, f"Roundtrip mismatch for {key}")
 
@@ -139,4 +131,3 @@ class TestInstallContextRoundtrip(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

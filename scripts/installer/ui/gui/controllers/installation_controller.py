@@ -98,9 +98,7 @@ class InstallationController(BaseController):
         """
         try:
             # First save the configuration to a file
-            config_file = os.path.join(
-                self.model.get("malcolm_install_path", ""), "malcolmgui.json"
-            )
+            config_file = os.path.join(self.model.get("malcolm_install_path", ""), "malcolmgui.json")
             if not self.model.save_to_file(config_file):
                 self.installation_message = "Failed to save configuration file"
                 self.installation_success = False
@@ -166,9 +164,7 @@ class InstallationController(BaseController):
                 self.installation_message = "Installation completed successfully"
             else:
                 self.installation_success = False
-                self.installation_message = (
-                    f"Installation failed with return code {process.returncode}"
-                )
+                self.installation_message = f"Installation failed with return code {process.returncode}"
 
         except Exception as e:
             self.installation_success = False

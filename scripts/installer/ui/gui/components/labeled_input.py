@@ -48,23 +48,17 @@ class LabeledInput:
             )
 
         # Create label
-        label = customtkinter.CTkLabel(
-            container, text=label_text, font=FontManager.bold_font()
-        )
+        label = customtkinter.CTkLabel(container, text=label_text, font=FontManager.bold_font())
         label.grid(row=0, column=0, padx=(0, 5), pady=0, sticky="w")
 
         # Create entry field
-        entry = customtkinter.CTkEntry(
-            container, placeholder_text=placeholder, width=width
-        )
+        entry = customtkinter.CTkEntry(container, placeholder_text=placeholder, width=width)
         entry.grid(row=0, column=1, padx=0, pady=0, sticky="w")
 
         return container, entry
 
     @staticmethod
-    def create_with_units(
-        parent, label_text, units_text, placeholder="", width=80, row=None, column=0
-    ):
+    def create_with_units(parent, label_text, units_text, placeholder="", width=80, row=None, column=0):
         """
         Create a label-input field pair with units label.
 
@@ -80,14 +74,10 @@ class LabeledInput:
         Returns:
             tuple: (frame, entry_widget) - The container frame and the entry widget
         """
-        container, entry = LabeledInput.create(
-            parent, label_text, placeholder, width, row, column
-        )
+        container, entry = LabeledInput.create(parent, label_text, placeholder, width, row, column)
 
         # Add units label
-        units_label = customtkinter.CTkLabel(
-            container, text=units_text, font=FontManager.regular_font()
-        )
+        units_label = customtkinter.CTkLabel(container, text=units_text, font=FontManager.regular_font())
         units_label.grid(row=0, column=2, padx=(5, 0), pady=0, sticky="w")
 
         return container, entry

@@ -68,12 +68,8 @@ class Label:
         Returns:
             customtkinter.CTkLabel: The section header label
         """
-        label = customtkinter.CTkLabel(
-            frame, text=text, font=FontManager.section_font()
-        )
-        label.grid(
-            row=row, column=0, padx=PADDING_LARGE, pady=SECTION_PADDING, sticky="w"
-        )
+        label = customtkinter.CTkLabel(frame, text=text, font=FontManager.section_font())
+        label.grid(row=row, column=0, padx=PADDING_LARGE, pady=SECTION_PADDING, sticky="w")
         return label
 
     @staticmethod
@@ -89,12 +85,8 @@ class Label:
         Returns:
             customtkinter.CTkLabel: The section description label
         """
-        label = customtkinter.CTkLabel(
-            frame, text=text, font=FontManager.normal_font(), justify="left"
-        )
-        label.grid(
-            row=row, column=0, padx=PADDING_LARGE, pady=SECTION_DESC_PADDING, sticky="w"
-        )
+        label = customtkinter.CTkLabel(frame, text=text, font=FontManager.normal_font(), justify="left")
+        label.grid(row=row, column=0, padx=PADDING_LARGE, pady=SECTION_DESC_PADDING, sticky="w")
         return label
 
     @staticmethod
@@ -178,9 +170,7 @@ class Label:
         Returns:
             customtkinter.CTkLabel: The bold label
         """
-        label = customtkinter.CTkLabel(
-            parent, text=text, font=FontManager.bold_font(), justify="left"
-        )
+        label = customtkinter.CTkLabel(parent, text=text, font=FontManager.bold_font(), justify="left")
 
         if row is not None:
             label.grid(row=row, column=column, padx=(0, 10), pady=5, sticky=sticky)
@@ -202,9 +192,7 @@ class Label:
         Returns:
             customtkinter.CTkLabel: The regular label
         """
-        label = customtkinter.CTkLabel(
-            parent, text=text, font=FontManager.regular_font(), justify="left"
-        )
+        label = customtkinter.CTkLabel(parent, text=text, font=FontManager.regular_font(), justify="left")
 
         if row is not None:
             label.grid(row=row, column=column, padx=(0, 5), pady=5, sticky=sticky)

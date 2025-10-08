@@ -34,9 +34,7 @@ def show_error_dialog(parent, message, title="Error", width=400, height=200):
     label.pack(padx=20, pady=20)
 
     # OK button
-    button = customtkinter.CTkButton(
-        error_window, text="OK", command=error_window.destroy
-    )
+    button = customtkinter.CTkButton(error_window, text="OK", command=error_window.destroy)
     button.pack(pady=10)
 
     return error_window
@@ -90,15 +88,11 @@ def show_confirmation_dialog(
         dialog.destroy()
 
     # OK button
-    ok_button = customtkinter.CTkButton(
-        button_frame, text=ok_text, command=on_ok, width=100
-    )
+    ok_button = customtkinter.CTkButton(button_frame, text=ok_text, command=on_ok, width=100)
     ok_button.pack(side="left", padx=(0, 10))
 
     # Cancel button
-    cancel_button = customtkinter.CTkButton(
-        button_frame, text=cancel_text, command=dialog.destroy, width=100
-    )
+    cancel_button = customtkinter.CTkButton(button_frame, text=cancel_text, command=dialog.destroy, width=100)
     cancel_button.pack(side="right")
 
     # Wait for the dialog to be closed

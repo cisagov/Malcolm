@@ -42,9 +42,7 @@ class TUIInstallerUI(InstallerUI):
         """
         super().__init__(ui_mode)
 
-    def ask_yes_no(
-        self, message: str, default: bool = True, force_interaction: bool = False
-    ) -> bool:
+    def ask_yes_no(self, message: str, default: bool = True, force_interaction: bool = False) -> bool:
         """Ask the user a yes/no question using the TUI interface.
 
         Args:
@@ -62,9 +60,7 @@ class TUIInstallerUI(InstallerUI):
             uiMode=self.ui_mode,
         )
 
-    def ask_string(
-        self, prompt: str, default: str = "", force_interaction: bool = False
-    ) -> Optional[str]:
+    def ask_string(self, prompt: str, default: str = "", force_interaction: bool = False) -> Optional[str]:
         """Ask the user for a string input using the TUI interface.
 
         Args:
@@ -125,9 +121,7 @@ class TUIInstallerUI(InstallerUI):
         Returns:
             Updated InstallContext with user's installation choices, or None if cancelled
         """
-        installation_menu = InstallationMenu(
-            platform, malcolm_config, install_context, ui_mode=self.ui_mode
-        )
+        installation_menu = InstallationMenu(platform, malcolm_config, install_context, ui_mode=self.ui_mode)
         return installation_menu.run_menu()
 
     # Tweaks are first-class install items; no special collection required
@@ -161,22 +155,14 @@ class TUIInstallerUI(InstallerUI):
         summary_items = build_configuration_summary_items(malcolm_config, config_dir)
 
         # Remove the MalcolmConfig "Auto System Tweaks" entry since we'll use InstallContext value
-        summary_items = [
-            item for item in summary_items if item[0] != "Auto System Tweaks"
-        ]
+        summary_items = [item for item in summary_items if item[0] != "Auto System Tweaks"]
 
         # Artifact handling (tarball/images) is outside the UI path; omit from summary
 
         # add installation options from the context (keep to simple, high-signal flags)
-        summary_items.append(
-            ("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No")
-        )
-        summary_items.append(
-            ("Offline Mode", "Yes" if install_context.offline_mode else "No")
-        )
-        summary_items.append(
-            ("Config Only", "Yes" if install_context.config_only else "No")
-        )
+        summary_items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
+        summary_items.append(("Offline Mode", "Yes" if install_context.offline_mode else "No"))
+        summary_items.append(("Config Only", "Yes" if install_context.config_only else "No"))
         summary_items.append(("Dry Run", "Yes" if is_dry_run else "No"))
 
         # Clear screen and display the summary using TUI formatting
@@ -185,9 +171,7 @@ class TUIInstallerUI(InstallerUI):
         # Build the entire summary as one cohesive display
         summary_lines = []
         summary_lines.append("=" * 60)
-        summary_lines.append(
-            "FINAL CONFIGURATION SUMMARY" + (" (DRY RUN)" if is_dry_run else "")
-        )
+        summary_lines.append("FINAL CONFIGURATION SUMMARY" + (" (DRY RUN)" if is_dry_run else ""))
         summary_lines.append("=" * 60)
 
         for label, value in summary_items:

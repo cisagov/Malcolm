@@ -21,7 +21,7 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
 )
 from scripts.installer.ui.shared.labels import installation_item_display_label
- 
+
 from scripts.installer.ui.shared.store_view_model import build_rows_from_items
 
 if TYPE_CHECKING:
@@ -34,11 +34,7 @@ class InstallationMenu(BaseMenu):
     """Installation options menu for Malcolm installer."""
 
     def __init__(
-        self,
-        platform: "BaseInstaller",
-        malcolm_config: "MalcolmConfig",
-        install_context: "InstallContext",
-        **kwargs
+        self, platform: "BaseInstaller", malcolm_config: "MalcolmConfig", install_context: "InstallContext", **kwargs
     ):
         """Initialize the installation menu.
 
@@ -59,9 +55,7 @@ class InstallationMenu(BaseMenu):
     def build_menu(self) -> None:
         """Build the installation options menu."""
         self.menu_builder.add_header("Malcolm Installation Options")
-        self.menu_builder.add_description(
-            "Select an item number to configure, or an action:"
-        )
+        self.menu_builder.add_description("Select an item number to configure, or an action:")
 
         # Build menu items with grouping via the view model
         all_items = list(self.install_context.items.items())

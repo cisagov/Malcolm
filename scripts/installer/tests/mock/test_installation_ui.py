@@ -10,9 +10,7 @@ import os
 import unittest
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.malcolm_common import UserInterfaceMode
 from scripts.installer.ui.tui.tui_installer_ui import TUIInstallerUI
@@ -31,9 +29,7 @@ class TestInstallationUI(BaseInstallerTest):
         """Set up test fixtures."""
         super().setUp()
         self.tui = TUIInstallerUI(UserInterfaceMode.InteractionInput)
-        self.linux_platform = LinuxInstaller(
-            OrchestrationFramework.DOCKER_COMPOSE, None, debug=True
-        )
+        self.linux_platform = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, None, debug=True)
 
     def test_installation_config_items_available(self):
         """Test that installation config items are properly loaded."""
@@ -70,9 +66,7 @@ class TestInstallationUI(BaseInstallerTest):
         visible_items = ALL_INSTALLATION_CONFIG_ITEMS_DICT
 
         # Visible items should be <= total items
-        self.assertLessEqual(
-            len(visible_items), len(ALL_INSTALLATION_CONFIG_ITEMS_DICT)
-        )
+        self.assertLessEqual(len(visible_items), len(ALL_INSTALLATION_CONFIG_ITEMS_DICT))
 
     def test_gather_install_options_method_exists(self):
         """Installer UI exposes gather_install_options for installation choices."""

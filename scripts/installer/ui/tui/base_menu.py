@@ -31,9 +31,7 @@ class BaseMenu(ABC):
         self.ui_mode = ui_mode
         self.menu_builder = MenuBuilder()
 
-    def ask_string(
-        self, prompt: str, default: str = "", force_interaction: bool = False
-    ) -> Optional[str]:
+    def ask_string(self, prompt: str, default: str = "", force_interaction: bool = False) -> Optional[str]:
         """Ask the user for a string input using InstallerAskForString.
 
         Args:
@@ -51,9 +49,7 @@ class BaseMenu(ABC):
             uiMode=self.ui_mode,
         )
 
-    def ask_yes_no(
-        self, message: str, default: bool = True, force_interaction: bool = False
-    ) -> bool:
+    def ask_yes_no(self, message: str, default: bool = True, force_interaction: bool = False) -> bool:
         """Ask the user a yes/no question using InstallerYesOrNo.
 
         Args:

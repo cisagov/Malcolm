@@ -50,11 +50,7 @@ class LinuxInstaller(BaseInstaller):
             self.release = ""
 
         if self.debug:
-            InstallerLogger.info(
-                f"Linux installer initialized for {self.distro} {self.codename} {self.release}"
-            )
-
-    
+            InstallerLogger.info(f"Linux installer initialized for {self.distro} {self.codename} {self.release}")
 
     def _uses_apt(self):
         """Check if this distribution uses apt package manager.
@@ -88,9 +84,7 @@ class LinuxInstaller(BaseInstaller):
         basic_deps = ["curl", "wget", "git", "ethtool"]
 
         if self._uses_apt():
-            basic_deps.extend(
-                ["apt-transport-https", "ca-certificates", "gnupg", "lsb-release"]
-            )
+            basic_deps.extend(["apt-transport-https", "ca-certificates", "gnupg", "lsb-release"])
         elif self._uses_dnf_yum():
             basic_deps.extend(["dnf-plugins-core"])
 
@@ -119,13 +113,9 @@ class LinuxInstaller(BaseInstaller):
         packages_to_install = [p for p in packages if not self.package_is_installed(p)]
         if self.config_only or self.dry_run:
             if packages_to_install:
-                InstallerLogger.info(
-                    f"Dry run: would install packages: {packages_to_install}"
-                )
+                InstallerLogger.info(f"Dry run: would install packages: {packages_to_install}")
             else:
-                InstallerLogger.info(
-                    f"Dry run: all packages already installed: {packages}"
-                )
+                InstallerLogger.info(f"Dry run: all packages already installed: {packages}")
             return True
         if not packages_to_install:
             if self.debug:
@@ -143,22 +133,16 @@ class LinuxInstaller(BaseInstaller):
         elif self._uses_dnf_yum():
             install_cmd = ["dnf", "install", "-y"]
         else:
-            InstallerLogger.error(
-                f"Unsupported Linux distribution for package installation: {self.distro}"
-            )
+            InstallerLogger.error(f"Unsupported Linux distribution for package installation: {self.distro}")
             return False
 
         err, out = self.run_process(install_cmd + packages_to_install, privileged=True)
         if err != 0:
-            InstallerLogger.error(
-                f"Failed to install packages {packages_to_install}: {out}"
-            )
+            InstallerLogger.error(f"Failed to install packages {packages_to_install}: {out}")
             return False
 
         if self.debug:
-            InstallerLogger.info(
-                f"Successfully installed packages: {packages_to_install}"
-            )
+            InstallerLogger.info(f"Successfully installed packages: {packages_to_install}")
         return True
 
     def install_docker(self, install_context: "InstallContext") -> bool:
@@ -179,9 +163,7 @@ class LinuxInstaller(BaseInstaller):
                 actions.append("install via convenience script")
             if not actions:
                 actions.append("no install (skipped by context)")
-            InstallerLogger.info(
-                f"Dry run: would attempt Docker installation: {', '.join(actions)}"
-            )
+            InstallerLogger.info(f"Dry run: would attempt Docker installation: {', '.join(actions)}")
             return True
 
         # Use InstallContext decisions for installation method
@@ -211,9 +193,7 @@ class LinuxInstaller(BaseInstaller):
         self._configure_docker_service()
 
         # Verify installation
-        err, out = self.run_process(
-            [runtime_bin, "info"], privileged=True, retry=6, retry_sleep_sec=5
-        )
+        err, out = self.run_process([runtime_bin, "info"], privileged=True, retry=6, retry_sleep_sec=5)
         if err == 0:
             self._add_users_to_docker_group(install_context.docker_extra_users)
             return True
@@ -237,9 +217,7 @@ class LinuxInstaller(BaseInstaller):
             required_repo_packages = ["dnf-plugins-core"]
 
         if required_repo_packages:
-            InstallerLogger.info(
-                f"Installing required packages: {required_repo_packages}"
-            )
+            InstallerLogger.info(f"Installing required packages: {required_repo_packages}")
             if not self.install_package(required_repo_packages):
                 return False
 
@@ -266,9 +244,7 @@ class LinuxInstaller(BaseInstaller):
             ]:
                 repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
 
-            err, out = self.run_process(
-                ["dnf", "config-manager", "-y", "--add-repo", repo_url], privileged=True
-            )
+            err, out = self.run_process(["dnf", "config-manager", "-y", "--add-repo", repo_url], privileged=True)
             if err == 0:
                 docker_packages = [
                     "docker-ce",
@@ -333,21 +309,15 @@ class LinuxInstaller(BaseInstaller):
                 repo_url = f"deb [arch=amd64] https://download.docker.com/linux/{repo_distro} {self.codename} stable"
 
                 # Remove existing repo first
-                self.run_process(
-                    ["add-apt-repository", "-y", "-r", repo_url], privileged=True
-                )
+                self.run_process(["add-apt-repository", "-y", "-r", repo_url], privileged=True)
 
                 # Add the repo
-                err, out = self.run_process(
-                    ["add-apt-repository", "-y", "-u", repo_url], privileged=True
-                )
+                err, out = self.run_process(["add-apt-repository", "-y", "-u", repo_url], privileged=True)
 
             return err == 0
 
         except ImportError:
-            InstallerLogger.warning(
-                "requests module not available for Docker repository setup"
-            )
+            InstallerLogger.warning("requests module not available for Docker repository setup")
             return False
         except Exception as e:
             InstallerLogger.error(f"Failed to setup Docker APT repository: {e}")
@@ -358,9 +328,7 @@ class LinuxInstaller(BaseInstaller):
         try:
             import requests
 
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".sh", delete=False
-            ) as temp_file:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as temp_file:
                 temp_filename = temp_file.name
 
                 # Download the convenience script
@@ -375,35 +343,25 @@ class LinuxInstaller(BaseInstaller):
             os.unlink(temp_filename)
 
             if err == 0:
-                InstallerLogger.info(
-                    "Docker installation via convenience script succeeded"
-                )
+                InstallerLogger.info("Docker installation via convenience script succeeded")
                 return True
             else:
-                InstallerLogger.error(
-                    f"Docker installation via convenience script failed: {out}"
-                )
+                InstallerLogger.error(f"Docker installation via convenience script failed: {out}")
                 return False
 
         except Exception as e:
-            InstallerLogger.error(
-                f"Failed to download or execute Docker convenience script: {e}"
-            )
+            InstallerLogger.error(f"Failed to download or execute Docker convenience script: {e}")
             return False
 
     def _configure_docker_service(self):
         """Configure Docker service on systemd systems (attempt on all distros)."""
         if self.config_only or self.dry_run:
-            InstallerLogger.info(
-                "Dry run: would start and enable Docker service where applicable"
-            )
+            InstallerLogger.info("Dry run: would start and enable Docker service where applicable")
             return
         # Attempt to start and enable the service regardless of distro to keep behaviour predictable
         err, out = self.run_process(["systemctl", "start", "docker"], privileged=True)
         if err == 0:
-            err, out = self.run_process(
-                ["systemctl", "enable", "docker"], privileged=True
-            )
+            err, out = self.run_process(["systemctl", "enable", "docker"], privileged=True)
             if err != 0:
                 InstallerLogger.error(f"Enabling Docker service failed: {out}")
         else:
@@ -420,9 +378,7 @@ class LinuxInstaller(BaseInstaller):
             if self.config_only or self.dry_run:
                 InstallerLogger.info(f"Dry run: would add {user} to docker group")
                 continue
-            err, out = self.run_process(
-                ["usermod", "-a", "-G", "docker", user], privileged=True
-            )
+            err, out = self.run_process(["usermod", "-a", "-G", "docker", user], privileged=True)
             if err == 0:
                 if self.debug:
                     InstallerLogger.info(f'Adding {user} to "docker" group succeeded')
@@ -461,7 +417,7 @@ class LinuxInstaller(BaseInstaller):
         from scripts.installer.actions import shared as shared_actions
         from scripts.installer.platforms.utils import linux_tweaks
         from scripts.installer.configs.constants.enums import InstallerResult
-        
+
         def _ok(result) -> bool:
             if isinstance(result, tuple):
                 result = result[0]
@@ -512,9 +468,7 @@ class LinuxInstaller(BaseInstaller):
 
         # 7) Linux tweaks (only in install mode)
         if self.should_run_install_steps():
-            status, _ = linux_tweaks.apply_all(
-                malcolm_config, config_dir, self, ctx, InstallerLogger
-            )
+            status, _ = linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx, InstallerLogger)
             if status == InstallerResult.FAILURE:
                 return False
         else:
@@ -523,7 +477,9 @@ class LinuxInstaller(BaseInstaller):
         # 8) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
-                if not _ok(shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+                if not _ok(
+                    shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx, InstallerLogger)
+                ):
                     return False
             else:
                 InstallerLogger.info("Dry run/config-only: would perform docker operations (start/load)")

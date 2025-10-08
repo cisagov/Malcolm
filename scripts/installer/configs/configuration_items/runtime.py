@@ -62,14 +62,9 @@ CONFIG_ITEM_IMAGE_ARCH = ConfigItem(
     key=KEY_CONFIG_ITEM_IMAGE_ARCH,
     label="Image Architecture",
     # normalize enum default to its label value for consistent validation/prompting
-    default_value=(
-        _arch_default.value
-        if isinstance(_arch_default, ImageArchitecture)
-        else _arch_default
-    ),
+    default_value=(_arch_default.value if isinstance(_arch_default, ImageArchitecture) else _arch_default),
     choices=[x.value for x in ImageArchitecture],
-    validator=lambda x: isinstance(x, str)
-    and x in [v.value for v in ImageArchitecture],
+    validator=lambda x: isinstance(x, str) and x in [v.value for v in ImageArchitecture],
     question=f"Architecture for container image (amd64 or arm64)",
     widget_type=WidgetType.SELECT,
 )

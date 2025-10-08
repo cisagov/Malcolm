@@ -13,9 +13,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.platforms.utils import linux_tweaks
@@ -42,9 +40,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, True)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_sysctl(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_sysctl_tweaks_manual_mode_all_disabled(self):
@@ -58,9 +54,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_sysctl(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_security_limits_auto_mode(self):
@@ -74,9 +68,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, True)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_security_limits(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+        status, _ = linux_tweaks.apply_security_limits(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_grub_cgroup_auto_mode(self):
@@ -92,9 +84,7 @@ class TestSystemTweaks(BaseInstallerTest):
         # Mock GRUB file doesn't exist
         with patch("os.path.exists", return_value=False):
             config = self.create_test_config()
-            status, _ = linux_tweaks.apply_grub_cgroup(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
+            status, _ = linux_tweaks.apply_grub_cgroup(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
             self.assertIn(status.name, ("SUCCESS", "SKIPPED"))  # Should succeed (skip)
 
     def test_sysctl_tweak_definitions(self):

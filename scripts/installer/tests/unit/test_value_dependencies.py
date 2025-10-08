@@ -3,9 +3,7 @@ import os
 import sys
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.configuration_item_keys import (
@@ -38,9 +36,7 @@ class TestLiveCaptureDependencies(unittest.TestCase):
     def _assert_live_capture_defaults(self, cfg, *, expect_arkime: bool):
         """Helper to assert post-conditions after live-capture is enabled."""
         self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME), expect_arkime)
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF), not expect_arkime
-        )
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF), not expect_arkime)
         # The following should always flip to True when live capture is enabled
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_LIVE_ZEEK))
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_LIVE_SURICATA))
@@ -84,15 +80,9 @@ class TestFilebeatJsonDefaults(unittest.TestCase):
         cfg = MalcolmConfig()
         # With default log format "json", the following should be auto-populated
         self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT), "json")
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD), "message"
-        )
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD), "miscbeat"
-        )
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD), "message"
-        )
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD), "message")
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD), "miscbeat")
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD), "message")
 
 
 class TestOpenPortsDependency(unittest.TestCase):

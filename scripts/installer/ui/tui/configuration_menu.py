@@ -65,9 +65,7 @@ class ConfigurationMenu(BaseMenu):
     def build_menu(self) -> None:
         """Build the hierarchical configuration menu."""
         self.menu_builder.add_header("Malcolm Configuration Menu")
-        self.menu_builder.add_description(
-            "Select an item number to configure, or an action:"
-        )
+        self.menu_builder.add_description("Select an item number to configure, or an action:")
 
         # Render via store view model for consistent ordering and connectors
         self.displayed_keys = []
@@ -189,9 +187,7 @@ class ConfigurationMenu(BaseMenu):
 
                 # Check if this item also affects InstallContext (explicit API)
                 if item_to_edit.metadata.get("affects_install_context", False):
-                    install_context_field = item_to_edit.metadata.get(
-                        "install_context_field"
-                    )
+                    install_context_field = item_to_edit.metadata.get("install_context_field")
                     if install_context_field == "docker_extra_users":
                         try:
                             self.install_context.set_docker_extra_users(new_value)

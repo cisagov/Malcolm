@@ -28,9 +28,6 @@ from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.utils.logger_utils import SkipReasons
 
 
- 
-
-
 class BaseInstaller(abc.ABC):
     """Abstract base class for platform-specific Malcolm installers."""
 
@@ -116,8 +113,6 @@ class BaseInstaller(abc.ABC):
         """
         pass
 
-    
-
     def run_installation(
         self,
         malcolm_config,
@@ -153,11 +148,7 @@ class BaseInstaller(abc.ABC):
             try:
                 process = subprocess.run(
                     flat_command,
-                    input=(
-                        (stdin.encode() if isinstance(stdin, str) else stdin)
-                        if stdin
-                        else None
-                    ),
+                    input=((stdin.encode() if isinstance(stdin, str) else stdin) if stdin else None),
                     capture_output=True,
                     check=False,
                     text=True,
@@ -170,9 +161,7 @@ class BaseInstaller(abc.ABC):
                     output.extend(process.stderr.splitlines())
                 break
             except FileNotFoundError:
-                output = [
-                    f"Command {' '.join(flat_command)} not found or unable to execute"
-                ]
+                output = [f"Command {' '.join(flat_command)} not found or unable to execute"]
                 retcode = 127
                 break
             except Exception as e:
@@ -186,15 +175,11 @@ class BaseInstaller(abc.ABC):
                 time.sleep(retry_sleep_sec)
 
         if self.debug:
-            InstallerLogger.debug(
-                f"Command {' '.join(flat_command)} returned {retcode}: {output}"
-            )
+            InstallerLogger.debug(f"Command {' '.join(flat_command)} returned {retcode}: {output}")
 
         return retcode, output
 
-    def run_process_streaming(
-        self, command: List[str], privileged: bool = False
-    ) -> int:
+    def run_process_streaming(self, command: List[str], privileged: bool = False) -> int:
         """Run a system process with live output streaming (for progress indicators)."""
         if privileged and os.geteuid() != 0:
             command = ["sudo"] + command
@@ -202,9 +187,7 @@ class BaseInstaller(abc.ABC):
         flat_command = list(flatten(get_iterable(command)))
 
         if self.debug:
-            InstallerLogger.debug(
-                f"Running streaming command: {' '.join(flat_command)}"
-            )
+            InstallerLogger.debug(f"Running streaming command: {' '.join(flat_command)}")
 
         try:
             result = subprocess.run(flat_command, check=False, text=True)
@@ -213,9 +196,7 @@ class BaseInstaller(abc.ABC):
             InstallerLogger.error(f"Command not found: {' '.join(flat_command)}")
             return 127
         except Exception as e:
-            InstallerLogger.error(
-                f"Error executing command {' '.join(flat_command)}: {e}"
-            )
+            InstallerLogger.error(f"Error executing command {' '.join(flat_command)}: {e}")
             return 1
 
     def package_is_installed(self, package_name: str) -> bool:
@@ -249,5 +230,3 @@ class BaseInstaller(abc.ABC):
 
     def is_docker_package_installed(self) -> bool:
         return False
-
-    

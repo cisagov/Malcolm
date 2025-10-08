@@ -17,6 +17,7 @@ from scripts.installer.core.dependencies import (
     VisibilityRule,
     ValueRule,
 )
+
 # Keep wildcard import for keys per standards
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.utils.logger_utils import InstallerLogger
@@ -81,9 +82,7 @@ class DependencyManager:
         """
         item = self.config.get_item(item_key)
         if not item:
-            InstallerLogger.warning(
-                f"Cannot register visibility rule for unknown item: {item_key}"
-            )
+            InstallerLogger.warning(f"Cannot register visibility rule for unknown item: {item_key}")
             return
 
         # Set UI parent if specified
@@ -107,10 +106,7 @@ class DependencyManager:
             try:
                 if isinstance(visibility_rule.depends_on, list):
                     # Multi-dependency: get values for all dependencies
-                    values = [
-                        self.config.get_value(dep_key)
-                        for dep_key in visibility_rule.depends_on
-                    ]
+                    values = [self.config.get_value(dep_key) for dep_key in visibility_rule.depends_on]
                     visible = visibility_rule.condition(*values)
                 else:
                     # Single dependency
@@ -123,9 +119,7 @@ class DependencyManager:
                 self.config._set_item_visible(item_key, visible)
 
             except Exception as e:
-                InstallerLogger.error(
-                    f"Error in visibility observer for {item_key}: {e}"
-                )
+                InstallerLogger.error(f"Error in visibility observer for {item_key}: {e}")
                 # Set visible by default on error to avoid hiding items
                 self.config._set_item_visible(item_key, True)
 
@@ -136,9 +130,7 @@ class DependencyManager:
                 self._registered_observers.append((dep_key, visibility_observer))
         else:
             self.config.observe(visibility_rule.depends_on, visibility_observer)
-            self._registered_observers.append(
-                (visibility_rule.depends_on, visibility_observer)
-            )
+            self._registered_observers.append((visibility_rule.depends_on, visibility_observer))
 
         self._visibility_observers[item_key] = visibility_observer
         # Trigger initial evaluation
@@ -169,9 +161,7 @@ class DependencyManager:
         """
         item = self.config.get_item(item_key)
         if not item:
-            InstallerLogger.warning(
-                f"Cannot register value rule for unknown item: {item_key}"
-            )
+            InstallerLogger.warning(f"Cannot register value rule for unknown item: {item_key}")
             return
 
         # Create observer function
@@ -185,10 +175,7 @@ class DependencyManager:
                 dep_values = None
                 if isinstance(value_rule.depends_on, list):
                     # Multi-dependency: get values for all dependencies
-                    dep_values = [
-                        self.config.get_value(dep_key)
-                        for dep_key in value_rule.depends_on
-                    ]
+                    dep_values = [self.config.get_value(dep_key) for dep_key in value_rule.depends_on]
                     should_set = value_rule.condition(*dep_values)
                 else:
                     # Single dependency
@@ -206,9 +193,7 @@ class DependencyManager:
                         else:
                             new_val = value_rule.default_value
                     except Exception as e:
-                        InstallerLogger.warning(
-                            f"Default value function for {item_key} raised: {e}"
-                        )
+                        InstallerLogger.warning(f"Default value function for {item_key} raised: {e}")
                         return
 
                     # Apply via MalcolmConfig API to avoid touching internals
@@ -216,9 +201,7 @@ class DependencyManager:
                         self.config.apply_default(item_key, new_val)
                     except Exception as e:
                         # Do not break dependency processing; surface the error
-                        InstallerLogger.warning(
-                            f"Failed to apply default for {item_key}: {e}"
-                        )
+                        InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
 
             except Exception as e:
                 InstallerLogger.error(f"Error in value observer for {item_key}: {e}")

@@ -260,9 +260,9 @@ def build_wheel_frames(size: int, on_char: str) -> list[list[str]]:
                 max_px = min(size - 1, int(fx + brush_radius))
                 for py in range(min_py, max_py + 1):
                     for px in range(min_px, max_px + 1):
-                        if math.hypot(px - fx, py - fy) <= brush_radius and math.hypot(
-                            px - center, py - center
-                        ) < (r_outer - 0.7):
+                        if math.hypot(px - fx, py - fy) <= brush_radius and math.hypot(px - center, py - center) < (
+                            r_outer - 0.7
+                        ):
                             grid[py][px] = on_char
 
     frames: list[list[str]] = []

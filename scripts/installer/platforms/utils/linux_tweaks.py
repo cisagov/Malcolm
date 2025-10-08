@@ -71,22 +71,14 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
     # Allow either granular sysctl_* toggles or a coarse "sysctl" group toggle
     group_selected = should_apply_tweak(ctx, "sysctl")
     any_selected = group_selected or any(
-        should_apply_tweak(
-            ctx, f"sysctl_{name.split('.')[-1].replace('-', '_')}"
-        )
-        for name, _, _ in SYSCTL_SETTINGS
+        should_apply_tweak(ctx, f"sysctl_{name.split('.')[-1].replace('-', '_')}") for name, _, _ in SYSCTL_SETTINGS
     )
     if not any_selected:
         return InstallerResult.SKIPPED, "No sysctl tweaks selected"
 
     successes = 0
     for setting_name, setting_value, method in SYSCTL_SETTINGS:
-        if not (
-            group_selected
-            or should_apply_tweak(
-                ctx, f"sysctl_{setting_name.split('.')[-1].replace('-', '_')}"
-            )
-        ):
+        if not (group_selected or should_apply_tweak(ctx, f"sysctl_{setting_name.split('.')[-1].replace('-', '_')}")):
             successes += 1
             continue
         if platform.is_dry_run():
@@ -108,7 +100,9 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
     if platform.is_dry_run():
         return InstallerResult.SKIPPED, "Dry run: would apply sysctl settings"
     return (
-        (InstallerResult.SUCCESS, "Applied sysctl settings") if successes == len(SYSCTL_SETTINGS) else (InstallerResult.FAILURE, "Some sysctl settings failed")
+        (InstallerResult.SUCCESS, "Applied sysctl settings")
+        if successes == len(SYSCTL_SETTINGS)
+        else (InstallerResult.FAILURE, "Some sysctl settings failed")
     )
 
 
@@ -116,6 +110,7 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
     if not should_apply_tweak(ctx, "security_limits"):
         return InstallerResult.SKIPPED, "Security limits not selected"
     import os, tempfile
+
     SECURITY_LIMITS_DIR = "/etc/security/limits.d"
     MALCOLM_LIMITS_FILE = "99-malcolm.conf"
     limits_file = os.path.join(SECURITY_LIMITS_DIR, MALCOLM_LIMITS_FILE)
@@ -165,6 +160,7 @@ def apply_systemd_limits(malcolm_config, config_dir: str, platform, ctx, logger)
     if not should_apply_tweak(ctx, "systemd_limits"):
         return InstallerResult.SKIPPED, "Systemd limits not selected"
     import os, tempfile
+
     SYSTEMD_LIMITS_DIR = "/etc/systemd/system.conf.d"
     MALCOLM_SYSTEMD_FILE = "99-malcolm.conf"
     distro = getattr(platform, "distro", "").lower()
@@ -213,6 +209,7 @@ def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) ->
         logger.info("GRUB cgroup tweak not selected, skipping.")
         return InstallerResult.SKIPPED, "GRUB cgroup not selected"
     import os
+
     GRUB_DEFAULT_PATH = "/etc/default/grub"
     try:
         if platform.is_dry_run():
@@ -228,11 +225,14 @@ def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) ->
             logger.info(f"GRUB cgroup parameters already configured in {GRUB_DEFAULT_PATH}.")
             return InstallerResult.SKIPPED, "Already configured"
         cgroup_params = "cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem"
-        err, out = platform.run_process([
-            "bash",
-            "-c",
-            f"sed -i 's/^GRUB_CMDLINE_LINUX=\\\"/{cgroup_params} /' {GRUB_DEFAULT_PATH}",
-        ], privileged=True)
+        err, out = platform.run_process(
+            [
+                "bash",
+                "-c",
+                f"sed -i 's/^GRUB_CMDLINE_LINUX=\\\"/{cgroup_params} /' {GRUB_DEFAULT_PATH}",
+            ],
+            privileged=True,
+        )
         if err != 0:
             logger.error(f"Failed to modify GRUB configuration: {' '.join(out)}")
             return InstallerResult.FAILURE, "GRUB update failed"
@@ -244,8 +244,10 @@ def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) ->
 
 def apply_network_interface(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_TWEAK_IFACE, KEY_CONFIG_ITEM_PCAP_IFACE,
+        KEY_CONFIG_ITEM_TWEAK_IFACE,
+        KEY_CONFIG_ITEM_PCAP_IFACE,
     )
+
     if not should_apply_tweak(ctx, "network_interface"):
         logger.info("Network interface tweak not selected, skipping.")
         return InstallerResult.SKIPPED, "Network interface not selected"
@@ -289,7 +291,11 @@ def apply_network_interface(malcolm_config, config_dir: str, platform, ctx, logg
             all_ok = False
     if platform.is_dry_run():
         return InstallerResult.SKIPPED, "Network interface tweaks skipped (dry run)"
-    return (InstallerResult.SUCCESS, "Network interface tweaks applied") if all_ok else (InstallerResult.FAILURE, "Network interface tweaks failed")
+    return (
+        (InstallerResult.SUCCESS, "Network interface tweaks applied")
+        if all_ok
+        else (InstallerResult.FAILURE, "Network interface tweaks failed")
+    )
 
 
 def apply_all(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
@@ -325,12 +331,14 @@ def get_sysctl_tweak_definitions() -> list[dict]:
     defs: list[dict] = []
     for name, desc in settings:
         tweak_id = f"sysctl_{name.split('.')[-1].replace('-', '_')}"
-        defs.append({
-            "id": tweak_id,
-            "description": f"Adjust {desc} ({name})",
-            "label": f"{_sentence_case(desc)} ({name})",
-            "value_display": "",
-        })
+        defs.append(
+            {
+                "id": tweak_id,
+                "description": f"Adjust {desc} ({name})",
+                "label": f"{_sentence_case(desc)} ({name})",
+                "value_display": "",
+            }
+        )
     return defs
 
 

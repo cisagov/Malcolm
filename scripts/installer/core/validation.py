@@ -129,10 +129,7 @@ def _validate_traefik_labels(malcolm_config, add_issue) -> None:
 
     try:
         primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
-        if (
-            isinstance(primary_mode, str)
-            and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value
-        ):
+        if isinstance(primary_mode, str) and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value:
             oshost = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST)
             host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_HOST)
             if not _is_non_empty_str(oshost) or (host and oshost == host):
@@ -145,9 +142,7 @@ def _validate_traefik_labels(malcolm_config, add_issue) -> None:
 
 
 def _validate_live_capture_iface(malcolm_config, add_issue) -> None:
-    capture_enabled = bool(
-        malcolm_config.get_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC)
-    )
+    capture_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC))
     if not capture_enabled:
         return
     any_method = any(
@@ -183,9 +178,7 @@ def _validate_netbox_remote(malcolm_config, add_issue) -> None:
 
 
 def _validate_non_default_storage(malcolm_config, add_issue) -> None:
-    use_defaults_item = malcolm_config.get_item(
-        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS
-    )
+    use_defaults_item = malcolm_config.get_item(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)
     use_defaults = bool(use_defaults_item.get_value()) if use_defaults_item else True
     if use_defaults_item and use_defaults_item.is_modified and not use_defaults:
         for key, label_hint in (

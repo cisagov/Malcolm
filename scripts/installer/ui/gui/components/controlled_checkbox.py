@@ -60,9 +60,7 @@ class ControlledCheckbox(customtkinter.CTkCheckBox):
             for handler in self._command_handlers:
                 handler()
 
-        super().__init__(
-            master, text=text, variable=self._var, command=internal_command, **kwargs
-        )
+        super().__init__(master, text=text, variable=self._var, command=internal_command, **kwargs)
 
         self._controller_set = controller_set_method
         self._controller_get = controller_get_method

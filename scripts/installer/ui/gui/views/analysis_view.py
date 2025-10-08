@@ -28,9 +28,7 @@ class AnalysisView(BaseView):
 
         # Status message at the bottom of the screen
         self.status_label = customtkinter.CTkLabel(self.frame, text="")
-        self.status_label.grid(
-            row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w"
-        )
+        self.status_label.grid(row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w")
 
         # Register with controller AFTER UI elements are created
         self.controller.set_view(self)
@@ -51,9 +49,7 @@ class AnalysisView(BaseView):
             text="Configure analysis settings for Malcolm",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w"
-        )
+        description.grid(row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w")
 
         # Create sections
         current_row = self._create_analyzer_section(row=2)
@@ -61,9 +57,7 @@ class AnalysisView(BaseView):
         current_row = self._create_additional_section(row=current_row)
 
         # Save button
-        self.save_button = customtkinter.CTkButton(
-            self.frame, text="Save Settings", command=self._on_save
-        )
+        self.save_button = customtkinter.CTkButton(self.frame, text="Save Settings", command=self._on_save)
         self.save_button.grid(row=current_row, column=2, padx=10, pady=20, sticky="e")
 
     def _create_analyzer_section(self, row: int) -> int:
@@ -82,9 +76,7 @@ class AnalysisView(BaseView):
             text="PCAP Analysis Tools",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Description
@@ -93,9 +85,7 @@ class AnalysisView(BaseView):
             text="Configure which tools Malcolm will use for PCAP analysis",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        description.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
         row += 1
 
         # Arkime checkbox
@@ -108,9 +98,7 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.analyze_with_arkime_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.analyze_with_arkime_checkbox.grid(row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         # Suricata checkbox
@@ -123,9 +111,7 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.analyze_with_suricata_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.analyze_with_suricata_checkbox.grid(row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         # Suricata signatures checkbox
@@ -138,9 +124,7 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.update_suricata_signatures_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(40, 5), pady=5, sticky="w"
-        )
+        self.update_suricata_signatures_checkbox.grid(row=row, column=0, columnspan=2, padx=(40, 5), pady=5, sticky="w")
         row += 1
 
         # Zeek checkbox
@@ -153,9 +137,7 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.analyze_with_zeek_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.analyze_with_zeek_checkbox.grid(row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         return row
@@ -176,9 +158,7 @@ class AnalysisView(BaseView):
             text="Network Settings",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Description
@@ -187,9 +167,7 @@ class AnalysisView(BaseView):
             text="Configure network monitoring settings",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        description.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
         row += 1
 
         # OT/ICS checkbox
@@ -202,16 +180,12 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.is_ot_ics_network_checkbox.grid(
-            row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.is_ot_ics_network_checkbox.grid(row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         # Accept logs checkbox options
         logs_frame = customtkinter.CTkFrame(self.frame, fg_color="transparent")
-        logs_frame.grid(
-            row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w"
-        )
+        logs_frame.grid(row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w")
 
         logs_label = customtkinter.CTkLabel(
             logs_frame,
@@ -230,9 +204,7 @@ class AnalysisView(BaseView):
             value="no",
             command=self._on_accept_logs_from_sensors_change,
         )
-        self.accept_logs_no_radio.grid(
-            row=1, column=0, padx=(0, 10), pady=5, sticky="w"
-        )
+        self.accept_logs_no_radio.grid(row=1, column=0, padx=(0, 10), pady=5, sticky="w")
 
         self.accept_logs_yes_radio = customtkinter.CTkRadioButton(
             logs_frame,
@@ -241,9 +213,7 @@ class AnalysisView(BaseView):
             value="yes",
             command=self._on_accept_logs_from_sensors_change,
         )
-        self.accept_logs_yes_radio.grid(
-            row=1, column=1, padx=(0, 10), pady=5, sticky="w"
-        )
+        self.accept_logs_yes_radio.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="w")
 
         self.accept_logs_customize_radio = customtkinter.CTkRadioButton(
             logs_frame,
@@ -252,9 +222,7 @@ class AnalysisView(BaseView):
             value="customize",
             command=self._on_accept_logs_from_sensors_change,
         )
-        self.accept_logs_customize_radio.grid(
-            row=1, column=2, padx=0, pady=5, sticky="w"
-        )
+        self.accept_logs_customize_radio.grid(row=1, column=2, padx=0, pady=5, sticky="w")
 
         row += 1
 
@@ -276,9 +244,7 @@ class AnalysisView(BaseView):
             text="Additional Analysis Features",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Description
@@ -287,9 +253,7 @@ class AnalysisView(BaseView):
             text="Configure additional analysis features",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        description.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
         row += 1
 
         # DNS lookups checkbox
@@ -302,9 +266,7 @@ class AnalysisView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.perform_local_dns_lookups_checkbox.grid(
-            row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.perform_local_dns_lookups_checkbox.grid(row=row, column=0, columnspan=3, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         # Hardware vendor lookup checkbox
@@ -323,9 +285,7 @@ class AnalysisView(BaseView):
         row += 1
 
         # String randomness scoring checkbox
-        self.perform_string_randomness_scoring_var = customtkinter.BooleanVar(
-            value=True
-        )
+        self.perform_string_randomness_scoring_var = customtkinter.BooleanVar(value=True)
         self.perform_string_randomness_scoring_checkbox = customtkinter.CTkCheckBox(
             self.frame,
             text="Perform string randomness scoring on some fields",

@@ -82,9 +82,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         """Test that docker-compose files are updated for Docker runtime."""
         malcolm_config = MalcolmConfig()
         malcolm_config.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "docker")
-        malcolm_config.set_value(
-            KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY, "unless-stopped"
-        )
+        malcolm_config.set_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY, "unless-stopped")
 
         result = update_docker_compose_files(
             malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger
@@ -98,13 +96,9 @@ class TestDockerComposeIntegration(BaseInstallerTest):
             # Docker doesn't use userns_mode
             self.assertNotIn("userns_mode", updated_data["services"][service])
             # Docker uses local logging driver
-            self.assertEqual(
-                updated_data["services"][service]["logging"]["driver"], "local"
-            )
+            self.assertEqual(updated_data["services"][service]["logging"]["driver"], "local")
             # Restart policy should be updated
-            self.assertEqual(
-                updated_data["services"][service]["restart"], "unless-stopped"
-            )
+            self.assertEqual(updated_data["services"][service]["restart"], "unless-stopped")
 
     def test_podman_runtime_updates(self):
         """Test that docker-compose files are updated for Podman runtime."""
@@ -122,13 +116,9 @@ class TestDockerComposeIntegration(BaseInstallerTest):
 
         for service in updated_data["services"]:
             # Podman uses userns_mode: keep-id
-            self.assertEqual(
-                updated_data["services"][service]["userns_mode"], "keep-id"
-            )
+            self.assertEqual(updated_data["services"][service]["userns_mode"], "keep-id")
             # Podman uses json-file logging driver
-            self.assertEqual(
-                updated_data["services"][service]["logging"]["driver"], "json-file"
-            )
+            self.assertEqual(updated_data["services"][service]["logging"]["driver"], "json-file")
             # Restart policy should be updated
             self.assertEqual(updated_data["services"][service]["restart"], "always")
 
@@ -184,9 +174,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
     def test_network_configuration_updates(self):
         """Test that network configuration is updated."""
         malcolm_config = MalcolmConfig()
-        malcolm_config.set_value(
-            KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME, "custom_network"
-        )
+        malcolm_config.set_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME, "custom_network")
 
         result = update_docker_compose_files(
             malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger
@@ -225,14 +213,10 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         malcolm_config.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "podman")
 
         # Create platform and context for the run function
-        platform = LinuxInstaller(
-            OrchestrationFramework.DOCKER_COMPOSE, None, debug=True
-        )
+        platform = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, None, debug=True)
         ctx = InstallContext()
 
-        result = update_docker_compose_files(
-            malcolm_config, self.config_dir, platform, ctx, InstallerLogger
-        )
+        result = update_docker_compose_files(malcolm_config, self.config_dir, platform, ctx, InstallerLogger)
         self.assertTrue(result)
 
         # Verify that docker-compose files were updated
@@ -240,9 +224,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
 
         # Should have podman-specific configurations
         for service in updated_data["services"]:
-            self.assertEqual(
-                updated_data["services"][service]["userns_mode"], "keep-id"
-            )
+            self.assertEqual(updated_data["services"][service]["userns_mode"], "keep-id")
 
 
 def run_standalone_test():
@@ -264,7 +246,9 @@ def run_standalone_test():
     print(f"Testing docker-compose updates in: {malcolm_install_path}")
 
     # Test the update function directly
-    result = update_docker_compose_files(malcolm_config, malcolm_install_path, MockPlatform(), InstallContext(), InstallerLogger)
+    result = update_docker_compose_files(
+        malcolm_config, malcolm_install_path, MockPlatform(), InstallContext(), InstallerLogger
+    )
 
     if result:
         print("✓ Docker-compose updates completed successfully")
@@ -284,9 +268,7 @@ def run_standalone_test():
     platform = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, None, debug=True)
     ctx = InstallContext()
 
-    result = update_docker_compose_files(
-        malcolm_config, config_dir, platform, ctx, InstallerLogger
-    )
+    result = update_docker_compose_files(malcolm_config, config_dir, platform, ctx, InstallerLogger)
 
     if result:
         print("✓ Ancillary config generation completed successfully")

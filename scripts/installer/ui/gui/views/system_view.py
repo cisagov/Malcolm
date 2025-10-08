@@ -160,12 +160,8 @@ class SystemView(BaseView):
         )
 
         # Store type selection
-        store_var = customtkinter.StringVar(
-            value=self.controller.model.remote_store_type
-        )
-        for i, (value, text) in enumerate(
-            self.controller.model.REMOTE_STORE_TYPES.items()
-        ):
+        store_var = customtkinter.StringVar(value=self.controller.model.remote_store_type)
+        for i, (value, text) in enumerate(self.controller.model.REMOTE_STORE_TYPES.items()):
             display_text = text.split(" - ")[1] if " - " in text else text
             radio = customtkinter.CTkRadioButton(
                 remote_container,
@@ -227,35 +223,27 @@ class SystemView(BaseView):
         remote_section_row += 1
 
         # Forward logs checkbox and panel
-        forward_checkbox, forward_panel, forward_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                container,
-                "Forward logs to remote store",
-                self.controller.set_forward_logs_to_remote,
-                lambda: self.controller.model.forward_logs_to_remote,
-                row=section_row + 2,
-                nesting_level=1,
-            )
+        forward_checkbox, forward_panel, forward_widgets = DisableablePanel.create_checkbox_panel(
+            container,
+            "Forward logs to remote store",
+            self.controller.set_forward_logs_to_remote,
+            lambda: self.controller.model.forward_logs_to_remote,
+            row=section_row + 2,
+            nesting_level=1,
         )
         self.register_component("forward_logs_checkbox", forward_checkbox)
         forward_section_row = 0
 
         # Secondary store type selection
-        secondary_store_var = customtkinter.StringVar(
-            value=self.controller.model.secondary_store_type
-        )
-        for i, (value, text) in enumerate(
-            self.controller.model.REMOTE_STORE_TYPES.items()
-        ):
+        secondary_store_var = customtkinter.StringVar(value=self.controller.model.secondary_store_type)
+        for i, (value, text) in enumerate(self.controller.model.REMOTE_STORE_TYPES.items()):
             display_text = text.split(" - ")[1] if " - " in text else text
             radio = customtkinter.CTkRadioButton(
                 forward_panel,
                 text=display_text,
                 value=value,
                 variable=secondary_store_var,
-                command=lambda: self.controller.set_secondary_store_type(
-                    secondary_store_var.get()
-                ),
+                command=lambda: self.controller.set_secondary_store_type(secondary_store_var.get()),
             )
             radio.grid(
                 row=forward_section_row + i,
@@ -294,9 +282,7 @@ class SystemView(BaseView):
             pady=(0, PADDING_SMALL),
             sticky="w",
         )
-        self.register_component(
-            "secondary_ssl_validation_checkbox", secondary_ssl_checkbox
-        )
+        self.register_component("secondary_ssl_validation_checkbox", secondary_ssl_checkbox)
         forward_section_row += 1
 
         # Logstash host:port
@@ -385,12 +371,8 @@ class SystemView(BaseView):
         self.register_component("auto_restart_checkbox", checkbox)
 
         # Restart behavior selection
-        restart_var = customtkinter.StringVar(
-            value=self.controller.model.restart_behavior
-        )
-        for i, (value, text) in enumerate(
-            self.controller.model.RESTART_BEHAVIORS.items()
-        ):
+        restart_var = customtkinter.StringVar(value=self.controller.model.restart_behavior)
+        for i, (value, text) in enumerate(self.controller.model.RESTART_BEHAVIORS.items()):
             display_text = text.split(" - ")[1] if " - " in text else text
             radio = customtkinter.CTkRadioButton(
                 panel,
@@ -484,15 +466,13 @@ class SystemView(BaseView):
         panel_row = 0
 
         # Hot/Warm architecture checkbox
-        hot_warm_checkbox, hot_warm_panel, hot_warm_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                panel,
-                "Use hot/warm architecture",
-                self.controller.set_use_hot_warm,
-                lambda: self.controller.model.use_hot_warm,
-                row=panel_row,
-                nesting_level=2,
-            )
+        hot_warm_checkbox, hot_warm_panel, hot_warm_widgets = DisableablePanel.create_checkbox_panel(
+            panel,
+            "Use hot/warm architecture",
+            self.controller.set_use_hot_warm,
+            lambda: self.controller.model.use_hot_warm,
+            row=panel_row,
+            nesting_level=2,
         )
         self.register_component("use_hot_warm_checkbox", hot_warm_checkbox)
         panel_row += 1
@@ -569,15 +549,13 @@ class SystemView(BaseView):
         )
 
         # Auto-delete indices checkbox and panel
-        indices_checkbox, indices_panel, indices_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                container,
-                "Auto-delete indices",
-                self.controller.set_auto_delete_indices,
-                lambda: self.controller.model.auto_delete_indices,
-                row=section_row,
-                nesting_level=1,
-            )
+        indices_checkbox, indices_panel, indices_widgets = DisableablePanel.create_checkbox_panel(
+            container,
+            "Auto-delete indices",
+            self.controller.set_auto_delete_indices,
+            lambda: self.controller.model.auto_delete_indices,
+            row=section_row,
+            nesting_level=1,
         )
         self.register_component("auto_delete_indices_checkbox", indices_checkbox)
         section_row += 1
@@ -610,15 +588,13 @@ class SystemView(BaseView):
         self.register_component("use_name_for_deletion_checkbox", name_checkbox)
 
         # Auto-delete PCAPs checkbox and panel
-        pcaps_checkbox, pcaps_panel, pcaps_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                container,
-                "Auto-delete PCAPs",
-                self.controller.set_auto_delete_pcaps,
-                lambda: self.controller.model.auto_delete_pcaps,
-                row=section_row,
-                nesting_level=1,
-            )
+        pcaps_checkbox, pcaps_panel, pcaps_widgets = DisableablePanel.create_checkbox_panel(
+            container,
+            "Auto-delete PCAPs",
+            self.controller.set_auto_delete_pcaps,
+            lambda: self.controller.model.auto_delete_pcaps,
+            row=section_row,
+            nesting_level=1,
         )
         self.register_component("auto_delete_pcaps_checkbox", pcaps_checkbox)
 
@@ -637,9 +613,7 @@ class SystemView(BaseView):
 
     def _create_save_section(self, row: int) -> int:
         """Create the save button section"""
-        save_container, next_row = self.create_save_button_section(
-            self._save_settings, row
-        )
+        save_container, next_row = self.create_save_button_section(self._save_settings, row)
         return next_row
 
     def _save_settings(self):

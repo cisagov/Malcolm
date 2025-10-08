@@ -19,9 +19,7 @@ ENV_VAR_ACTIONS = "env-var-actions.yml"  # yml file
 ENV_FILE_DASHBOARDS_HELPER = "dashboards-helper.env"
 ENV_FILE_FILEBEAT = "filebeat.env"
 ENV_FILE_KEYCLOAK = "keycloak.env"
-ENV_FILE_KUBERNETES_CONTAINER_RESOURCES = (
-    "kubernetes-container-resources.yml"  # yml file
-)
+ENV_FILE_KUBERNETES_CONTAINER_RESOURCES = "kubernetes-container-resources.yml"  # yml file
 ENV_FILE_LOGSTASH = "logstash.env"
 ENV_FILE_LOOKUP_COMMON = "lookup-common.env"
 ENV_FILE_NETBOX_COMMON = "netbox-common.env"

@@ -74,9 +74,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
 
         # 4. verify restart policy was applied to all services
         for service_name in ["test-service-1", "test-service-2"]:
-            restart_value = deep_get(
-                compose_data, ["services", service_name, "restart"]
-            )
+            restart_value = deep_get(compose_data, ["services", service_name, "restart"])
             self.assertEqual(
                 restart_value,
                 test_policy.value,
@@ -99,9 +97,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
 
         # 4. verify auto-restart resulted in 'unless-stopped' for all services
         for service_name in ["test-service-1", "test-service-2"]:
-            restart_value = deep_get(
-                compose_data, ["services", service_name, "restart"]
-            )
+            restart_value = deep_get(compose_data, ["services", service_name, "restart"])
             self.assertEqual(
                 restart_value,
                 "unless-stopped",
@@ -128,9 +124,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         network_name = deep_get(compose_data, ["networks", "default", "name"])
 
         self.assertTrue(network_external, "External network not set to True")
-        self.assertEqual(
-            network_name, test_network, "External network name not correctly set"
-        )
+        self.assertEqual(network_name, test_network, "External network name not correctly set")
 
     def test_default_network_roundtrip(self):
         """Test default network configuration roundtrip."""
@@ -171,9 +165,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
 
         # 4. verify explicit policy takes precedence (not 'unless-stopped')
         for service_name in ["test-service-1", "test-service-2"]:
-            restart_value = deep_get(
-                compose_data, ["services", service_name, "restart"]
-            )
+            restart_value = deep_get(compose_data, ["services", service_name, "restart"])
             self.assertEqual(
                 restart_value,
                 test_policy.value,
@@ -200,9 +192,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
 
         # 4. verify restart policy
         for service_name in ["test-service-1", "test-service-2"]:
-            restart_value = deep_get(
-                compose_data, ["services", service_name, "restart"]
-            )
+            restart_value = deep_get(compose_data, ["services", service_name, "restart"])
             self.assertEqual(
                 restart_value,
                 test_policy.value,
@@ -214,9 +204,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         network_name = deep_get(compose_data, ["networks", "default", "name"])
 
         self.assertTrue(network_external, "External network not set to True")
-        self.assertEqual(
-            network_name, test_network, "External network name not correctly set"
-        )
+        self.assertEqual(network_name, test_network, "External network name not correctly set")
 
 
 if __name__ == "__main__":

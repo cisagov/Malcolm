@@ -85,9 +85,7 @@ class BaseView:
         """
         return self.components.get(name, None)
 
-    def register_section(
-        self, name: str, section_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def register_section(self, name: str, section_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Register a UI section for tracking and management
 
@@ -146,9 +144,7 @@ class BaseView:
             # Remove from grid
             section["container"].grid_remove()
 
-    def create_section_container(
-        self, parent=None, section_name: str = None
-    ) -> customtkinter.CTkFrame:
+    def create_section_container(self, parent=None, section_name: str = None) -> customtkinter.CTkFrame:
         """
         Create a container frame for a UI section with optional registration
 
@@ -163,9 +159,7 @@ class BaseView:
         container = Frame.create(parent)
 
         if section_name:
-            self.register_section(
-                section_name, {"container": container, "components": {}}
-            )
+            self.register_section(section_name, {"container": container, "components": {}})
 
         return container
 
@@ -194,9 +188,7 @@ class BaseView:
                 ):
                     widget.configure(state=state)
                 # For labels and other widgets without a state property
-                elif isinstance(widget, customtkinter.CTkLabel) and hasattr(
-                    widget, "cget"
-                ):
+                elif isinstance(widget, customtkinter.CTkLabel) and hasattr(widget, "cget"):
                     try:
                         if enabled:
                             widget.configure(text_color=("gray10", "gray90"))
@@ -245,9 +237,7 @@ class BaseView:
                 )
             else:
                 # Fallback if row count not available
-                self.error_label.pack(
-                    padx=PADDING_LARGE, pady=PADDING_SMALL, anchor="w"
-                )
+                self.error_label.pack(padx=PADDING_LARGE, pady=PADDING_SMALL, anchor="w")
 
         self.error_label.configure(text=f"Error: {message}")
 
@@ -277,9 +267,7 @@ class BaseView:
                 )
             else:
                 # Fallback if row count not available
-                self.status_label.pack(
-                    padx=PADDING_LARGE, pady=PADDING_SMALL, anchor="w"
-                )
+                self.status_label.pack(padx=PADDING_LARGE, pady=PADDING_SMALL, anchor="w")
 
         self.status_label.configure(text=f"✓ {message}")
 
@@ -310,9 +298,7 @@ class BaseView:
 
         return row
 
-    def create_save_button_section(
-        self, callback: Callable, row: int
-    ) -> Tuple[customtkinter.CTkFrame, int]:
+    def create_save_button_section(self, callback: Callable, row: int) -> Tuple[customtkinter.CTkFrame, int]:
         """
         Create a save button section with status label
 
@@ -325,20 +311,14 @@ class BaseView:
         """
         # Create container for save button and status
         save_container = customtkinter.CTkFrame(self.frame, fg_color="transparent")
-        save_container.grid(
-            row=row, column=0, padx=PADDING_LARGE, pady=PADDING_LARGE, sticky="ew"
-        )
+        save_container.grid(row=row, column=0, padx=PADDING_LARGE, pady=PADDING_LARGE, sticky="ew")
 
         # Create save button
-        save_button = customtkinter.CTkButton(
-            save_container, text="Save Settings", command=callback, width=200
-        )
+        save_button = customtkinter.CTkButton(save_container, text="Save Settings", command=callback, width=200)
         save_button.grid(row=0, column=0, padx=0, pady=0)
 
         # Create status label
-        status_label = customtkinter.CTkLabel(
-            save_container, text="", text_color=("green", "green")
-        )
+        status_label = customtkinter.CTkLabel(save_container, text="", text_color=("green", "green"))
         status_label.grid(row=0, column=1, padx=PADDING_MEDIUM, pady=0, sticky="w")
 
         # Register components

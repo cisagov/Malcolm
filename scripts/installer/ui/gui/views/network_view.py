@@ -95,9 +95,7 @@ class NetworkView(BaseView):
         )
         self.save_button.grid(row=0, column=0, padx=0, pady=0)
 
-        self.status_label = customtkinter.CTkLabel(
-            save_container, text="", text_color=("green", "green")
-        )
+        self.status_label = customtkinter.CTkLabel(save_container, text="", text_color=("green", "green"))
         self.status_label.grid(row=0, column=1, padx=PADDING_MEDIUM, pady=0, sticky="w")
 
         self.save_button_frame = save_container
@@ -127,9 +125,7 @@ class NetworkView(BaseView):
 
         # Create a frame for the network mode options
         mode_frame = customtkinter.CTkFrame(self.frame)
-        mode_frame.grid(
-            row=row, column=0, padx=PADDING_LARGE, pady=PADDING_SMALL, sticky="ew"
-        )
+        mode_frame.grid(row=row, column=0, padx=PADDING_LARGE, pady=PADDING_SMALL, sticky="ew")
 
         # Create radio buttons for each network mode
         self.bridge_radio = customtkinter.CTkRadioButton(
@@ -161,21 +157,17 @@ class NetworkView(BaseView):
 
         # Create a nested panel for the external network name
         # Use DisableablePanel to create a dependent panel that's only enabled when "external" is selected
-        self.external_network_panel, self.external_network_widgets = (
-            DisableablePanel.create_radiobutton_panel(
-                parent=mode_frame,
-                radio_value="external",
-                radio_variable=self.network_mode_var,
-                row=3,
-                column=0,
-                indent=40,
-            )
+        self.external_network_panel, self.external_network_widgets = DisableablePanel.create_radiobutton_panel(
+            parent=mode_frame,
+            radio_value="external",
+            radio_variable=self.network_mode_var,
+            row=3,
+            column=0,
+            indent=40,
         )
 
         # Create network name input within the panel
-        name_label = customtkinter.CTkLabel(
-            self.external_network_panel, text="External Network Name:"
-        )
+        name_label = customtkinter.CTkLabel(self.external_network_panel, text="External Network Name:")
         name_label.grid(row=0, column=0, padx=(0, 10), pady=5, sticky="w")
         self.external_network_widgets.append(name_label)
 
@@ -208,9 +200,7 @@ class NetworkView(BaseView):
         row += 1
 
         # Description
-        Label.section_description(
-            self.frame, "Configure custom port mappings for Malcolm services.", row
-        )
+        Label.section_description(self.frame, "Configure custom port mappings for Malcolm services.", row)
         row += 1
 
         # Use DisableablePanel for custom ports
@@ -244,14 +234,10 @@ class NetworkView(BaseView):
         web_frame.grid(row=0, column=0, padx=10, pady=5, sticky="w")
         widgets_list.append(web_frame)
 
-        web_label = customtkinter.CTkLabel(
-            web_frame, text="Web Interface Port:", font=("", 12, "bold")
-        )
+        web_label = customtkinter.CTkLabel(web_frame, text="Web Interface Port:", font=("", 12, "bold"))
         web_label.grid(row=0, column=0, padx=0, pady=5, sticky="w")
 
-        self.web_port_entry = customtkinter.CTkEntry(
-            web_frame, placeholder_text="443", width=100
-        )
+        self.web_port_entry = customtkinter.CTkEntry(web_frame, placeholder_text="443", width=100)
         self.web_port_entry.grid(row=0, column=1, padx=(10, 0), pady=5, sticky="w")
         self.web_port_entry.bind("<FocusOut>", self._on_web_port_change)
         widgets_list.append(self.web_port_entry)
@@ -261,17 +247,11 @@ class NetworkView(BaseView):
         opensearch_frame.grid(row=1, column=0, padx=10, pady=5, sticky="w")
         widgets_list.append(opensearch_frame)
 
-        opensearch_label = customtkinter.CTkLabel(
-            opensearch_frame, text="OpenSearch Port:", font=("", 12, "bold")
-        )
+        opensearch_label = customtkinter.CTkLabel(opensearch_frame, text="OpenSearch Port:", font=("", 12, "bold"))
         opensearch_label.grid(row=0, column=0, padx=0, pady=5, sticky="w")
 
-        self.opensearch_port_entry = customtkinter.CTkEntry(
-            opensearch_frame, placeholder_text="9200", width=100
-        )
-        self.opensearch_port_entry.grid(
-            row=0, column=1, padx=(10, 0), pady=5, sticky="w"
-        )
+        self.opensearch_port_entry = customtkinter.CTkEntry(opensearch_frame, placeholder_text="9200", width=100)
+        self.opensearch_port_entry.grid(row=0, column=1, padx=(10, 0), pady=5, sticky="w")
         self.opensearch_port_entry.bind("<FocusOut>", self._on_opensearch_port_change)
         widgets_list.append(self.opensearch_port_entry)
 
@@ -280,14 +260,10 @@ class NetworkView(BaseView):
         logstash_frame.grid(row=2, column=0, padx=10, pady=5, sticky="w")
         widgets_list.append(logstash_frame)
 
-        logstash_label = customtkinter.CTkLabel(
-            logstash_frame, text="Logstash Port:", font=("", 12, "bold")
-        )
+        logstash_label = customtkinter.CTkLabel(logstash_frame, text="Logstash Port:", font=("", 12, "bold"))
         logstash_label.grid(row=0, column=0, padx=0, pady=5, sticky="w")
 
-        self.logstash_port_entry = customtkinter.CTkEntry(
-            logstash_frame, placeholder_text="5044", width=100
-        )
+        self.logstash_port_entry = customtkinter.CTkEntry(logstash_frame, placeholder_text="5044", width=100)
         self.logstash_port_entry.grid(row=0, column=1, padx=(10, 0), pady=5, sticky="w")
         self.logstash_port_entry.bind("<FocusOut>", self._on_logstash_port_change)
         widgets_list.append(self.logstash_port_entry)
@@ -307,16 +283,12 @@ class NetworkView(BaseView):
         row += 1
 
         # Description
-        Label.section_description(
-            self.frame, "Configure which services to expose externally.", row
-        )
+        Label.section_description(self.frame, "Configure which services to expose externally.", row)
         row += 1
 
         # Create a frame for the checkboxes
         services_frame = customtkinter.CTkFrame(self.frame)
-        services_frame.grid(
-            row=row, column=0, padx=PADDING_LARGE, pady=PADDING_SMALL, sticky="ew"
-        )
+        services_frame.grid(row=row, column=0, padx=PADDING_LARGE, pady=PADDING_SMALL, sticky="ew")
 
         # Expose OpenSearch checkbox
         self.expose_opensearch_var = customtkinter.BooleanVar(value=False)
@@ -326,9 +298,7 @@ class NetworkView(BaseView):
             variable=self.expose_opensearch_var,
             command=self._on_expose_opensearch_change,
         )
-        self.expose_opensearch_checkbox.grid(
-            row=0, column=0, padx=20, pady=10, sticky="w"
-        )
+        self.expose_opensearch_checkbox.grid(row=0, column=0, padx=20, pady=10, sticky="w")
 
         # Expose Logstash checkbox
         self.expose_logstash_var = customtkinter.BooleanVar(value=False)
@@ -338,9 +308,7 @@ class NetworkView(BaseView):
             variable=self.expose_logstash_var,
             command=self._on_expose_logstash_change,
         )
-        self.expose_logstash_checkbox.grid(
-            row=1, column=0, padx=20, pady=10, sticky="w"
-        )
+        self.expose_logstash_checkbox.grid(row=1, column=0, padx=20, pady=10, sticky="w")
 
         row += 1
         return row
@@ -360,25 +328,19 @@ class NetworkView(BaseView):
         row += 1
 
         # Description
-        Label.section_description(
-            self.frame, "Configure remote access settings for Malcolm.", row
-        )
+        Label.section_description(self.frame, "Configure remote access settings for Malcolm.", row)
         row += 1
 
         # Create main checkbox panel for remote access
         self.enable_remote_access_var = customtkinter.BooleanVar(value=False)
-        remote_access_checkbox, remote_access_panel, remote_access_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                self.frame,
-                "Enable Remote Access",
-                self.controller.set_remote_access_enabled,
-                lambda: self.controller.config_model.get(
-                    "remote_access_enabled", False
-                ),
-                row=row,
-                column=0,
-                indent=0,
-            )
+        remote_access_checkbox, remote_access_panel, remote_access_widgets = DisableablePanel.create_checkbox_panel(
+            self.frame,
+            "Enable Remote Access",
+            self.controller.set_remote_access_enabled,
+            lambda: self.controller.config_model.get("remote_access_enabled", False),
+            row=row,
+            column=0,
+            indent=0,
         )
         # Adjust the checkbox position to match section headers
         remote_access_checkbox.grid_configure(padx=20, pady=10)
@@ -390,15 +352,11 @@ class NetworkView(BaseView):
         row += 2
 
         # Domain Name Label and Entry - Make it clearly part of "Enable Remote Access"
-        domain_frame = customtkinter.CTkFrame(
-            remote_access_panel, fg_color="transparent"
-        )
+        domain_frame = customtkinter.CTkFrame(remote_access_panel, fg_color="transparent")
         domain_frame.grid(row=0, column=0, sticky="w", pady=10, padx=20)
         remote_access_widgets.append(domain_frame)
 
-        domain_label = customtkinter.CTkLabel(
-            domain_frame, text="Domain Name:", font=("", 12, "bold")
-        )
+        domain_label = customtkinter.CTkLabel(domain_frame, text="Domain Name:", font=("", 12, "bold"))
         domain_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
         remote_access_widgets.append(domain_label)
 
@@ -409,16 +367,14 @@ class NetworkView(BaseView):
 
         # Create a nested panel for reverse proxy options - Clearly indented under Remote Access
         self.behind_reverse_proxy_var = customtkinter.BooleanVar(value=False)
-        reverse_proxy_checkbox, reverse_proxy_panel, reverse_proxy_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                remote_access_panel,
-                "Behind Reverse Proxy",
-                self.controller.set_behind_reverse_proxy,
-                lambda: self.controller.config_model.get("behind_reverse_proxy", False),
-                row=1,
-                column=0,
-                indent=20,
-            )
+        reverse_proxy_checkbox, reverse_proxy_panel, reverse_proxy_widgets = DisableablePanel.create_checkbox_panel(
+            remote_access_panel,
+            "Behind Reverse Proxy",
+            self.controller.set_behind_reverse_proxy,
+            lambda: self.controller.config_model.get("behind_reverse_proxy", False),
+            row=1,
+            column=0,
+            indent=20,
         )
         # Adjust checkbox padding to appear indented
         reverse_proxy_checkbox.grid_configure(padx=(40, 0), pady=10)
@@ -434,18 +390,14 @@ class NetworkView(BaseView):
 
         # Create another nested panel for Traefik labels options - Clearly indented under Reverse Proxy
         self.configure_traefik_labels_var = customtkinter.BooleanVar(value=False)
-        traefik_checkbox, traefik_panel, traefik_widgets = (
-            DisableablePanel.create_checkbox_panel(
-                reverse_proxy_panel,
-                "Configure Traefik Labels",
-                self.controller.set_configure_traefik_labels,
-                lambda: self.controller.config_model.get(
-                    "configure_traefik_labels", False
-                ),
-                row=0,
-                column=0,
-                indent=20,
-            )
+        traefik_checkbox, traefik_panel, traefik_widgets = DisableablePanel.create_checkbox_panel(
+            reverse_proxy_panel,
+            "Configure Traefik Labels",
+            self.controller.set_configure_traefik_labels,
+            lambda: self.controller.config_model.get("configure_traefik_labels", False),
+            row=0,
+            column=0,
+            indent=20,
         )
         # Adjust checkbox padding to appear further indented
         traefik_checkbox.grid_configure(padx=(40, 0), pady=10)
@@ -460,9 +412,7 @@ class NetworkView(BaseView):
         DisableablePanel.register_child_panel(reverse_proxy_panel, traefik_panel)
 
         # Traefik Domain Label and Entry - Clearly indented under Configure Traefik Labels
-        traefik_domain_frame = customtkinter.CTkFrame(
-            traefik_panel, fg_color="transparent"
-        )
+        traefik_domain_frame = customtkinter.CTkFrame(traefik_panel, fg_color="transparent")
         traefik_domain_frame.grid(row=0, column=0, sticky="w", padx=40, pady=10)
         traefik_widgets.append(traefik_domain_frame)
 
@@ -472,9 +422,7 @@ class NetworkView(BaseView):
         traefik_domain_label.grid(row=0, column=0, sticky="w", padx=(20, 10))
         traefik_widgets.append(traefik_domain_label)
 
-        self.traefik_domain_entry = customtkinter.CTkEntry(
-            traefik_domain_frame, width=250
-        )
+        self.traefik_domain_entry = customtkinter.CTkEntry(traefik_domain_frame, width=250)
         self.traefik_domain_entry.grid(row=0, column=1, sticky="w")
         self.traefik_domain_entry.bind("<FocusOut>", self._on_traefik_domain_change)
         traefik_widgets.append(self.traefik_domain_entry)
@@ -506,9 +454,7 @@ class NetworkView(BaseView):
                 ):
                     widget.configure(state=state)
                 # For labels and other widgets without a state property
-                elif isinstance(widget, customtkinter.CTkLabel) and hasattr(
-                    widget, "cget"
-                ):
+                elif isinstance(widget, customtkinter.CTkLabel) and hasattr(widget, "cget"):
                     try:
                         if enabled:
                             widget.configure(text_color=("gray10", "gray90"))
@@ -611,9 +557,7 @@ class NetworkView(BaseView):
         else:
             self.enable_remote_access_checkbox.deselect()
 
-        DisableablePanel._set_panel_state(
-            self.remote_access_panel, self.remote_access_widgets, enabled
-        )
+        DisableablePanel._set_panel_state(self.remote_access_panel, self.remote_access_widgets, enabled)
 
         # Update domain name if provided
         if domain_name:
@@ -627,9 +571,7 @@ class NetworkView(BaseView):
         else:
             self.behind_reverse_proxy_checkbox.deselect()
 
-        DisableablePanel._set_panel_state(
-            self.reverse_proxy_panel, self.reverse_proxy_widgets, value
-        )
+        DisableablePanel._set_panel_state(self.reverse_proxy_panel, self.reverse_proxy_widgets, value)
 
     def update_configure_traefik_labels(self, value: bool):
         """Update UI with current configure traefik labels setting"""
@@ -638,9 +580,7 @@ class NetworkView(BaseView):
         else:
             self.configure_traefik_labels_checkbox.deselect()
 
-        DisableablePanel._set_panel_state(
-            self.traefik_panel, self.traefik_widgets, value
-        )
+        DisableablePanel._set_panel_state(self.traefik_panel, self.traefik_widgets, value)
 
     def update_traefik_domain(self, domain: str):
         """
@@ -748,9 +688,7 @@ class NetworkView(BaseView):
             # Create an error label at the bottom of the frame
             # Use a high row number to ensure it's at the bottom
             # This avoids relying on _grid_widgets which isn't available in CTkScrollableFrame
-            self.error_label = customtkinter.CTkLabel(
-                self.frame, text="", text_color=("red", "red")
-            )
+            self.error_label = customtkinter.CTkLabel(self.frame, text="", text_color=("red", "red"))
             self.error_label.grid(
                 row=1000,  # Use a high row number instead of relying on _grid_widgets
                 column=0,

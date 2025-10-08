@@ -15,9 +15,7 @@ import unittest
 import argparse
 
 # Add the project root to Python path
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..")
-)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -57,9 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run Malcolm installer tests")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--unit", action="store_true", help="Run unit tests only")
-    group.add_argument(
-        "--mock", action="store_true", help="Run mock/integration tests only"
-    )
+    group.add_argument("--mock", action="store_true", help="Run mock/integration tests only")
 
     args = parser.parse_args()
 
@@ -99,11 +95,7 @@ def main():
     print(f"Total failures: {total_failures}")
     print(f"Total errors: {total_errors}")
 
-    success_rate = (
-        ((total_tests - total_failures - total_errors) / total_tests * 100)
-        if total_tests > 0
-        else 0
-    )
+    success_rate = ((total_tests - total_failures - total_errors) / total_tests * 100) if total_tests > 0 else 0
     print(f"Success rate: {success_rate:.1f}%")
 
     if total_failures > 0:

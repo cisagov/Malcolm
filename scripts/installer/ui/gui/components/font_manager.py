@@ -37,9 +37,7 @@ class FontManager:
         """
         key = f"{size}-{weight}"
         if key not in cls._fonts:
-            cls._fonts[key] = customtkinter.CTkFont(
-                family=FONT_FAMILY, size=size, weight=weight
-            )
+            cls._fonts[key] = customtkinter.CTkFont(family=FONT_FAMILY, size=size, weight=weight)
         return cls._fonts[key]
 
     @classmethod

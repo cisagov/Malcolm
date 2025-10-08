@@ -48,8 +48,7 @@ CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT = ConfigItem(
     label="Filebeat TCP Log Format",
     default_value="json",
     choices=[x.value for x in FilebeatLogFormat],
-    validator=lambda x: isinstance(x, str)
-    and x in [v.value for v in FilebeatLogFormat],
+    validator=lambda x: isinstance(x, str) and x in [v.value for v in FilebeatLogFormat],
     question=f"Select log format for messages sent to Filebeat TCP listener",
     widget_type=WidgetType.SELECT,
 )

@@ -13,9 +13,7 @@ import unittest
 from unittest.mock import patch
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.utils.artifact_utils import decide_and_handle_artifacts
 from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -52,9 +50,7 @@ class TestFinalInstall(BaseInstallerTest):
         with patch("os.getuid", return_value=1000):
             with patch.object(config, "generate_env_files"):
                 with patch("os.chown") as mock_chown:
-                    with patch(
-                        "scripts.malcolm_utils.ChownRecursive"
-                    ) as mock_chown_recursive:
+                    with patch("scripts.malcolm_utils.ChownRecursive") as mock_chown_recursive:
                         # Test ownership handling through config generation
                         config.generate_env_files(self.temp_dir)
 
@@ -85,19 +81,15 @@ class TestFinalInstall(BaseInstallerTest):
                     "scripts.installer.utils.artifact_utils.extract_malcolm_tarball",
                     return_value=("/extracted/path", "/config/path"),
                 ):
-                    with patch(
-                        "scripts.installer.utils.artifact_utils.extract_image_files"
-                    ):
+                    with patch("scripts.installer.utils.artifact_utils.extract_image_files"):
                         # Pretend the provided files exist
                         with patch("os.path.isfile", return_value=True):
-                            handled, m_file, i_file, install_path, config_dir = (
-                                decide_and_handle_artifacts(
-                                    args,
-                                    self.mock_ui,
-                                    config,
-                                    control_flow,
-                                    self.temp_dir,
-                                )
+                            handled, m_file, i_file, install_path, config_dir = decide_and_handle_artifacts(
+                                args,
+                                self.mock_ui,
+                                config,
+                                control_flow,
+                                self.temp_dir,
                             )
 
         # Should have handled the artifacts
@@ -139,18 +131,14 @@ class TestFinalInstall(BaseInstallerTest):
                     "scripts.installer.utils.artifact_utils.extract_malcolm_tarball",
                     return_value=("/extracted/path", "/config/path"),
                 ):
-                    with patch(
-                        "scripts.installer.utils.artifact_utils.extract_image_files"
-                    ):
+                    with patch("scripts.installer.utils.artifact_utils.extract_image_files"):
                         with patch("os.getcwd", return_value=self.temp_dir):
-                            handled, m_file, i_file, install_path, config_dir = (
-                                decide_and_handle_artifacts(
-                                    args,
-                                    self.mock_ui,
-                                    config,
-                                    control_flow,
-                                    self.temp_dir,
-                                )
+                            handled, m_file, i_file, install_path, config_dir = decide_and_handle_artifacts(
+                                args,
+                                self.mock_ui,
+                                config,
+                                control_flow,
+                                self.temp_dir,
                             )
 
         # Should have found and handled the artifacts

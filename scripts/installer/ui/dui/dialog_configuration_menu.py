@@ -91,12 +91,8 @@ class DialogConfigurationMenu:
             item = self.mc.get_item(key)
             if not item:
                 continue
-            value_display = ValueFormatter.format_config_value(
-                item.label, item.get_value()
-            )
-            desc = (
-                value_display if isinstance(value_display, str) else str(value_display)
-            )
+            value_display = ValueFormatter.format_config_value(item.label, item.get_value())
+            desc = value_display if isinstance(value_display, str) else str(value_display)
             tag = item.label or key
             # map displayed tag back to real key
             tag_map[tag] = f"KEY:{key}"
@@ -104,9 +100,7 @@ class DialogConfigurationMenu:
 
             # if this item has visible children, offer a separate entry to navigate
             # into its submenu without conflating it with the parent value editor
-            visible_children = [
-                c for c in self.child_map.get(key, []) if self.mc.is_item_visible(c)
-            ]
+            visible_children = [c for c in self.child_map.get(key, []) if self.mc.is_item_visible(c)]
             if visible_children:
                 # visually indent group navigation entries to indicate dependency
                 nav_tag = f" ↳ {item.label} Settings"
@@ -143,11 +137,7 @@ class DialogConfigurationMenu:
                 return True if parent_key is None else True
 
             try:
-                label = (
-                    "Malcolm Configuration"
-                    if parent_key is None
-                    else self.mc.get_item(parent_key).label
-                )
+                label = "Malcolm Configuration" if parent_key is None else self.mc.get_item(parent_key).label
                 prompt = f"{label}: select an item to configure"
                 result = InstallerChooseOne(
                     prompt,
@@ -232,9 +222,7 @@ class DialogConfigurationMenu:
 
     def _handle_search(self) -> None:
         try:
-            term = InstallerAskForString(
-                "Enter search term:", default="", uiMode=self.ui_mode
-            )
+            term = InstallerAskForString("Enter search term:", default="", uiMode=self.ui_mode)
         except (DialogBackException, DialogCanceledException):
             return
         if not term:

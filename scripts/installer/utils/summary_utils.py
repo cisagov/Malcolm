@@ -57,14 +57,10 @@ def _get_restart_policy_display(malcolm_config) -> str:
             return _normalize_display_string(restart_policy.value)
         return _normalize_display_string(str(restart_policy))
 
-    return _normalize_display_string(
-        "unless-stopped"
-    )  # Default when auto-restart is enabled
+    return _normalize_display_string("unless-stopped")  # Default when auto-restart is enabled
 
 
-def build_configuration_summary_items(
-    malcolm_config, config_dir: str
-) -> List[Tuple[str, str]]:
+def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[Tuple[str, str]]:
     """Build a list of configuration summary items for display.
 
     Args:
@@ -112,16 +108,10 @@ def build_configuration_summary_items(
         summary_items.append(
             (
                 "Auto-Restart Malcolm",
-                (
-                    "Yes"
-                    if malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART)
-                    else "No"
-                ),
+                ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART) else "No"),
             )
         )
-        summary_items.append(
-            ("Restart Policy", _get_restart_policy_display(malcolm_config))
-        )
+        summary_items.append(("Restart Policy", _get_restart_policy_display(malcolm_config)))
 
     # remaining items are common to both orchestration modes
     summary_items.extend(
@@ -132,26 +122,15 @@ def build_configuration_summary_items(
             ),
             (
                 "Auto System Tweaks",
-                (
-                    "Yes"
-                    if malcolm_config.get_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS)
-                    else "No"
-                ),
+                ("Yes" if malcolm_config.get_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS) else "No"),
             ),
             (
                 "Default Storage Locations",
-                (
-                    "Yes"
-                    if malcolm_config.get_value(
-                        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS
-                    )
-                    else "No"
-                ),
+                ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS) else "No"),
             ),
             (
                 "Container Network",
-                malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME)
-                or "default",
+                malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME) or "default",
             ),
         ]
     )

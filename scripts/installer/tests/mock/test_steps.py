@@ -17,9 +17,7 @@ import unittest
 from unittest.mock import patch, MagicMock, mock_open
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -70,13 +68,11 @@ class TestFilesystemAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock successful filesystem operations
-        with patch("os.makedirs") as mock_makedirs, patch(
-            "os.path.exists", return_value=False
-        ), patch("scripts.malcolm_utils.ChownRecursive") as mock_chown:
+        with patch("os.makedirs") as mock_makedirs, patch("os.path.exists", return_value=False), patch(
+            "scripts.malcolm_utils.ChownRecursive"
+        ) as mock_chown:
 
-            result = shared_actions.filesystem_prepare(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
+            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
         self.assertTrue(result)
 
@@ -89,9 +85,7 @@ class TestFilesystemAction(BaseInstallerTest):
 
         # Mock directories already exist
         with patch("os.path.exists", return_value=True):
-            result = shared_actions.filesystem_prepare(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
+            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
         self.assertTrue(result)
 
@@ -106,9 +100,7 @@ class TestFilesystemAction(BaseInstallerTest):
 
         # Mock exception during directory creation
         with patch("os.makedirs", side_effect=Exception("Permission denied")):
-            result = shared_actions.filesystem_prepare(
-                config, missing_dir, self.mock_platform, ctx, self.mock_logger
-            )
+            result = shared_actions.filesystem_prepare(config, missing_dir, self.mock_platform, ctx, self.mock_logger)
         # Expect InstallerResult.FAILURE enum
         from scripts.installer.configs.constants.enums import InstallerResult as _IR
 
@@ -125,17 +117,15 @@ class TestDockerOpsAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock docker-compose file exists
-        compose_file = os.path.join(
-            os.path.dirname(self.temp_dir), "docker-compose.yml"
-        )
+        compose_file = os.path.join(os.path.dirname(self.temp_dir), "docker-compose.yml")
 
         with patch("os.path.isfile", return_value=True), patch(
             "scripts.installer.actions.shared.discover_compose_command",
             return_value=["docker", "compose"],
         ):
             result = shared_actions.perform_docker_operations(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+            )
 
         self.assertTrue(result)
 
@@ -149,8 +139,8 @@ class TestDockerOpsAction(BaseInstallerTest):
         # Mock no docker-compose file
         with patch("os.path.isfile", return_value=False):
             result = shared_actions.perform_docker_operations(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+            )
 
         self.assertEqual(
             result,
@@ -168,9 +158,7 @@ class TestDockerOpsAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock compose file exists but no compose command
-        compose_file = os.path.join(
-            os.path.dirname(self.temp_dir), "docker-compose.yml"
-        )
+        compose_file = os.path.join(os.path.dirname(self.temp_dir), "docker-compose.yml")
 
         with patch("os.path.isfile", return_value=True), patch(
             "scripts.installer.actions.shared.discover_compose_command",
@@ -198,9 +186,7 @@ class TestDockerOpsAction(BaseInstallerTest):
         # Mock image archive exists
         with patch("os.path.isfile", return_value=True), patch(
             "scripts.malcolm_common.InstallerYesOrNo", return_value=True
-        ), patch.object(
-            self.mock_platform, "run_process", return_value=(0, ["Images loaded"])
-        ):
+        ), patch.object(self.mock_platform, "run_process", return_value=(0, ["Images loaded"])):
 
             result = shared_actions.perform_docker_operations(
                 config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
@@ -247,9 +233,7 @@ class TestAncillaryStep(BaseInstallerTest):
         config = self.create_test_config()
         ctx = self.create_test_context()
 
-        result = shared_actions.update_ancillary(
-            config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-        )
+        result = shared_actions.update_ancillary(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
         self.assertTrue(result)
 
@@ -265,9 +249,7 @@ class TestAncillaryStep(BaseInstallerTest):
             "scripts.installer.actions.shared.update_ancillary",
             return_value=InstallerResult.SUCCESS,
         ):
-            result = shared_actions.update_ancillary(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
+            result = shared_actions.update_ancillary(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
         self.assertTrue(result)
 

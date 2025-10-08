@@ -86,9 +86,7 @@ CONFIG_ITEM_MALCOLM_AUTO_RESTART = ConfigItem(
     label="Auto-Restart Malcolm",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=(
-        "Automatically restart Malcolm after system or container daemon restarts?"
-    ),
+    question=("Automatically restart Malcolm after system or container daemon restarts?"),
     widget_type=WidgetType.CHECKBOX,
 )
 

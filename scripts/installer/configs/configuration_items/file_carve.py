@@ -80,8 +80,7 @@ CONFIG_ITEM_FILE_EXTRACTION_MODE = ConfigItem(
     label="File Extraction Mode",
     default_value="none",
     choices=[x.value for x in FileExtractionMode],
-    validator=lambda x: isinstance(x, str)
-    and x in [v.value for v in FileExtractionMode],
+    validator=lambda x: isinstance(x, str) and x in [v.value for v in FileExtractionMode],
     question=f"Choose how Zeek should extract files from network traffic. Depends on Zeek analysis. 'Interesting' is a common default.",
     widget_type=WidgetType.SELECT,
 )
@@ -91,8 +90,7 @@ CONFIG_ITEM_FILE_PRESERVATION = ConfigItem(
     label="File Preservation",
     default_value="quarantined",
     choices=[x.value for x in FilePreservationMode],
-    validator=lambda x: isinstance(x, str)
-    and x in [v.value for v in FilePreservationMode],
+    validator=lambda x: isinstance(x, str) and x in [v.value for v in FilePreservationMode],
     question=f"Determine which files extracted by Zeek should be preserved. Depends on Zeek analysis and file extraction. 'Quarantined' is common.",
     widget_type=WidgetType.SELECT,
 )

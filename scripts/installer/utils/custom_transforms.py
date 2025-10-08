@@ -40,11 +40,7 @@ def _orch_from_bool_str(value: str):
     """Map 'true' to KUBERNETES, everything else to DOCKER_COMPOSE."""
     from scripts.malcolm_constants import OrchestrationFramework
 
-    return (
-        OrchestrationFramework.KUBERNETES
-        if _env_str_to_bool(value)
-        else OrchestrationFramework.DOCKER_COMPOSE
-    )
+    return OrchestrationFramework.KUBERNETES if _env_str_to_bool(value) else OrchestrationFramework.DOCKER_COMPOSE
 
 
 def _db_mode_to_label(mode: Any) -> str:
@@ -90,9 +86,7 @@ def custom_reverse_transform_suricata_disable_ics_all(value: str) -> bool:
     return _env_str_to_bool(value)
 
 
-def custom_transform_suricata_rotated_pcap(
-    autoSuricata: bool, liveSuricata: bool
-) -> str:
+def custom_transform_suricata_rotated_pcap(autoSuricata: bool, liveSuricata: bool) -> str:
     return true_or_false_no_quotes(autoSuricata and (not liveSuricata))
 
 

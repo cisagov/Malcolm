@@ -49,9 +49,7 @@ class InstallerLogger:
 
     def __init__(self):
         """Constructor disabled - use static methods only."""
-        raise NotImplementedError(
-            "InstallerLogger is now entirely static. Use static methods directly."
-        )
+        raise NotImplementedError("InstallerLogger is now entirely static. Use static methods directly.")
 
     @classmethod
     def set_console_output(cls, enabled: bool):

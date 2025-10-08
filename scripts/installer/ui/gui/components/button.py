@@ -50,15 +50,11 @@ class Button:
         """
         button_frame = Frame.create_section(frame)
         if row is not None:
-            button_frame.grid(
-                row=row, column=0, padx=PADDING_LARGE, pady=PADDING_MEDIUM, sticky="ew"
-            )
+            button_frame.grid(row=row, column=0, padx=PADDING_LARGE, pady=PADDING_MEDIUM, sticky="ew")
 
         save_button = Button.create(button_frame, text=text, command=command)
         save_button.grid(row=0, column=0, padx=PADDING_LARGE, pady=PADDING_MEDIUM)
 
-        status_label = customtkinter.CTkLabel(
-            button_frame, text="", text_color=COLOR_SUCCESS
-        )
+        status_label = customtkinter.CTkLabel(button_frame, text="", text_color=COLOR_SUCCESS)
 
         return button_frame, save_button, status_label

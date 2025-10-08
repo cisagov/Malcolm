@@ -115,9 +115,7 @@ class TestEnvReversePrecedence(unittest.TestCase):
         cfg = MalcolmConfig()
         cfg.load_from_env_files(self.temp_dir)
         self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_NETBOX_MODE), "local")
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_NETBOX_URL), "https://example.invalid"
-        )
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_NETBOX_URL), "https://example.invalid")
 
         # Reset temp dir for a clean import
         for root, dirs, files in os.walk(self.temp_dir, topdown=False):
@@ -134,9 +132,7 @@ class TestEnvReversePrecedence(unittest.TestCase):
         cfg2 = MalcolmConfig()
         cfg2.load_from_env_files(self.temp_dir)
         self.assertEqual(cfg2.get_value(KEY_CONFIG_ITEM_NETBOX_MODE), "remote")
-        self.assertEqual(
-            cfg2.get_value(KEY_CONFIG_ITEM_NETBOX_URL), "https://remote.invalid"
-        )
+        self.assertEqual(cfg2.get_value(KEY_CONFIG_ITEM_NETBOX_URL), "https://remote.invalid")
 
 
 if __name__ == "__main__":

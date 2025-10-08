@@ -16,9 +16,7 @@ import unittest
 from scripts.installer.utils.logger_utils import InstallerLogger
 
 # Add the project root to Python path
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
@@ -53,9 +51,7 @@ def main():
         action="store_true",
         help="Enable debug logging to see detailed test execution",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Increase test runner verbosity"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Increase test runner verbosity")
     args = parser.parse_args()
 
     # Setup logging based on arguments

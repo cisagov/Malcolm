@@ -5,6 +5,7 @@
 
 """Custom exceptions for the Malcolm installer configuration."""
 
+
 class MalcolmConfigError(Exception):
     """Base class for configuration-related errors."""
 

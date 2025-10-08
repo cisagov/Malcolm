@@ -24,14 +24,10 @@ def create_scrollable_frame(parent, label_text="", fill_expand=True, padding=(10
     Returns:
         A CTkScrollableFrame object
     """
-    scrollable_frame = customtkinter.CTkScrollableFrame(
-        parent, label_text=label_text, label_fg_color="transparent"
-    )
+    scrollable_frame = customtkinter.CTkScrollableFrame(parent, label_text=label_text, label_fg_color="transparent")
 
     if fill_expand:
-        scrollable_frame.pack(
-            fill="both", expand=True, padx=padding[0], pady=padding[1]
-        )
+        scrollable_frame.pack(fill="both", expand=True, padx=padding[0], pady=padding[1])
     else:
         scrollable_frame.pack(padx=padding[0], pady=padding[1])
 

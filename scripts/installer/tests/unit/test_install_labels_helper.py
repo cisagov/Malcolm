@@ -31,9 +31,7 @@ class TestInstallLabelsHelper(unittest.TestCase):
 
     def test_non_podman_returns_base(self):
         base = "Docker Compose Installation Method"
-        out = installation_item_display_label(
-            KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD, base, "docker"
-        )
+        out = installation_item_display_label(KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD, base, "docker")
         self.assertEqual(base, out)
 
 

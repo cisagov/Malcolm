@@ -28,9 +28,7 @@ class AuthView(BaseView):
 
         # Status message at the bottom of the screen
         self.status_label = customtkinter.CTkLabel(self.frame, text="")
-        self.status_label.grid(
-            row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w"
-        )
+        self.status_label.grid(row=100, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="w")
 
         # Register with controller AFTER UI elements are created
         self.controller.set_view(self)
@@ -51,18 +49,14 @@ class AuthView(BaseView):
             text="Configure authentication settings for Malcolm",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w"
-        )
+        description.grid(row=1, column=0, columnspan=3, padx=20, pady=(0, 20), sticky="w")
 
         # Create sections
         current_row = self._create_auth_method_section(row=2)
         current_row = self._create_https_section(row=current_row)
 
         # Save button
-        self.save_button = customtkinter.CTkButton(
-            self.frame, text="Save Settings", command=self._on_save
-        )
+        self.save_button = customtkinter.CTkButton(self.frame, text="Save Settings", command=self._on_save)
         self.save_button.grid(row=current_row, column=2, padx=10, pady=20, sticky="e")
 
     def _create_auth_method_section(self, row: int) -> int:
@@ -81,9 +75,7 @@ class AuthView(BaseView):
             text="Authentication Method",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Description
@@ -92,22 +84,16 @@ class AuthView(BaseView):
             text="Select the authentication method for Malcolm",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        description.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
         row += 1
 
         # Auth method label
-        auth_method_label = customtkinter.CTkLabel(
-            self.frame, text="Authentication Method:"
-        )
+        auth_method_label = customtkinter.CTkLabel(self.frame, text="Authentication Method:")
         auth_method_label.grid(row=row, column=0, padx=(20, 5), pady=5, sticky="w")
 
         # Auth method dropdown
         auth_method_values = list(self.controller.model.AUTH_METHODS.values())
-        self.auth_method_var = customtkinter.StringVar(
-            value=auth_method_values[0]
-        )  # Default to first option
+        self.auth_method_var = customtkinter.StringVar(value=auth_method_values[0])  # Default to first option
         self.auth_method_dropdown = customtkinter.CTkOptionMenu(
             self.frame,
             values=auth_method_values,
@@ -136,9 +122,7 @@ class AuthView(BaseView):
             text="HTTPS Configuration",
             font=customtkinter.CTkFont(size=16, weight="bold"),
         )
-        section_label.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w"
-        )
+        section_label.grid(row=row, column=0, columnspan=3, padx=20, pady=(20, 5), sticky="w")
         row += 1
 
         # Description
@@ -147,9 +131,7 @@ class AuthView(BaseView):
             text="Configure HTTPS and reverse proxy settings",
             font=customtkinter.CTkFont(size=12),
         )
-        description.grid(
-            row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w"
-        )
+        description.grid(row=row, column=0, columnspan=3, padx=20, pady=(0, 10), sticky="w")
         row += 1
 
         # Use HTTPS checkbox
@@ -162,9 +144,7 @@ class AuthView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.use_https_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.use_https_checkbox.grid(row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         # Behind reverse proxy checkbox
@@ -177,9 +157,7 @@ class AuthView(BaseView):
             onvalue=True,
             offvalue=False,
         )
-        self.behind_reverse_proxy_checkbox.grid(
-            row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w"
-        )
+        self.behind_reverse_proxy_checkbox.grid(row=row, column=0, columnspan=2, padx=(20, 5), pady=5, sticky="w")
         row += 1
 
         return row

@@ -17,9 +17,7 @@ def add_environment_args(parser):
     Args:
         parser: ArgumentParser to add arguments to
     """
-    environment_arg_group = parser.add_argument_group(
-        title="Environment Config Options"
-    )
+    environment_arg_group = parser.add_argument_group(title="Environment Config Options")
 
     # environment directories
     environment_arg_group.add_argument(

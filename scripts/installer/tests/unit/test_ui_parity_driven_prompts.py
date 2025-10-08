@@ -103,9 +103,7 @@ class TestUIParityDrivenPrompts(unittest.TestCase):
         shutil.rmtree(self.tmpdir_tui, ignore_errors=True)
         shutil.rmtree(self.tmpdir_dui, ignore_errors=True)
 
-    def _scripted_prompt(
-        self, ui_mode, config_item, back_label=None, show_preamble=True
-    ):
+    def _scripted_prompt(self, ui_mode, config_item, back_label=None, show_preamble=True):
         # Return preselected answers by key when present; otherwise keep current value
         key = getattr(config_item, "key", None)
         if key in self.config_answers:
@@ -145,11 +143,7 @@ class TestUIParityDrivenPrompts(unittest.TestCase):
         )
         inst_menu.build_menu()
         # Try to set any answers that appear in the current display set
-        key_to_index = {
-            e.get("key"): i
-            for i, e in enumerate(inst_menu.displayed_entries)
-            if e.get("kind") == "config"
-        }
+        key_to_index = {e.get("key"): i for i, e in enumerate(inst_menu.displayed_entries) if e.get("kind") == "config"}
         for e in inst_menu.displayed_entries:
             k = e.get("key")
             if e.get("kind") == "config" and k in self.install_answers:
@@ -196,15 +190,11 @@ class TestUIParityDrivenPrompts(unittest.TestCase):
     def _compare_env_dirs(self, dir_a: str, dir_b: str):
         files_a = sorted([f for f in os.listdir(dir_a) if f.endswith(".env")])
         files_b = sorted([f for f in os.listdir(dir_b) if f.endswith(".env")])
-        self.assertListEqual(
-            files_a, files_b, "Generated env file names differ between UIs"
-        )
+        self.assertListEqual(files_a, files_b, "Generated env file names differ between UIs")
         for name in files_a:
             path_a = os.path.join(dir_a, name)
             path_b = os.path.join(dir_b, name)
-            with open(path_a, "r", encoding="utf-8") as fa, open(
-                path_b, "r", encoding="utf-8"
-            ) as fb:
+            with open(path_a, "r", encoding="utf-8") as fa, open(path_b, "r", encoding="utf-8") as fb:
                 la = [ln for ln in fa.read().splitlines() if not ln.startswith("#")]
                 lb = [ln for ln in fb.read().splitlines() if not ln.startswith("#")]
                 self.assertEqual(
@@ -318,12 +308,8 @@ class TestUIParityDrivenPrompts(unittest.TestCase):
 
         # Minimal Kubernetes answers: switch orchestration; keep runtime docker (irrelevant to env)
         # Set orchestration directly on both configs to avoid menu/reachability divergence
-        self.mc_tui.set_value(
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES
-        )
-        self.mc_dui.set_value(
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES
-        )
+        self.mc_tui.set_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES)
+        self.mc_dui.set_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, OrchestrationFramework.KUBERNETES)
         # Ensure prompt layer does not attempt to set this key asymmetrically
         self.config_answers.pop(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, None)
         # Keep runtime for completeness (has no effect under K8s for env generation)

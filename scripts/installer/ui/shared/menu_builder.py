@@ -41,9 +41,7 @@ class MenuBuilder:
         """Add a blank line to the menu."""
         self.menu_lines.append("")
 
-    def add_item(
-        self, number: int, label: str, current_value: Any, question: str = None
-    ) -> None:
+    def add_item(self, number: int, label: str, current_value: Any, question: str = None) -> None:
         """Add a menu item with current value display.
 
         Args:

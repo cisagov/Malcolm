@@ -15,9 +15,7 @@ import tempfile
 import unittest
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.configuration_item_keys import (

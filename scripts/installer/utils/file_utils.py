@@ -102,13 +102,10 @@ def detect_malcolm_and_image_files(
     return malcolm_files, image_files
 
 
- 
 # Selections and prompts are handled in higher-level logic (see artifact_utils).
 
 
-def extract_malcolm_tarball(
-    malcolm_install_file: str, install_path: str
-) -> Tuple[bool, Optional[str]]:
+def extract_malcolm_tarball(malcolm_install_file: str, install_path: str) -> Tuple[bool, Optional[str]]:
     """Extract the Malcolm tarball to a specified directory.
 
     Args:
@@ -122,17 +119,13 @@ def extract_malcolm_tarball(
     from scripts.installer.utils.logger_utils import InstallerLogger
 
     if os.path.isdir(install_path):
-        InstallerLogger.error(
-            f"{install_path} already exists, please specify a different installation path"
-        )
+        InstallerLogger.error(f"{install_path} already exists, please specify a different installation path")
         return False, None
 
     try:
         os.makedirs(install_path)
     except Exception as e:
-        InstallerLogger.error(
-            f"Failed to create {install_path}: {e}, please specify a different installation path"
-        )
+        InstallerLogger.error(f"Failed to create {install_path}: {e}, please specify a different installation path")
         return False, None
 
     # extract runtime files
@@ -154,9 +147,7 @@ def extract_malcolm_tarball(
                 shutil.move(os.path.join(child_dir[0], f), install_path)
             shutil.rmtree(child_dir[0], ignore_errors=True)
         except Exception as e:
-            InstallerLogger.error(
-                f"Failed to move files from {child_dir[0]} to {install_path}: {e}"
-            )
+            InstallerLogger.error(f"Failed to move files from {child_dir[0]} to {install_path}: {e}")
             return False, None
 
     # create the config directory for the .env files
@@ -172,15 +163,11 @@ def extract_malcolm_tarball(
         InstallerLogger.info(f"Malcolm runtime files extracted to {install_path}")
         return True, config_dir_path
     else:
-        InstallerLogger.error(
-            f"Malcolm install file extracted to {install_path}, but missing runtime files?"
-        )
+        InstallerLogger.error(f"Malcolm install file extracted to {install_path}, but missing runtime files?")
         return False, None
 
 
-def extract_image_files(
-    image_file: str, install_path: str, runtime_bin: str = "docker"
-) -> bool:
+def extract_image_files(image_file: str, install_path: str, runtime_bin: str = "docker") -> bool:
     """Load container images from archive file using docker/podman.
 
     Args:
@@ -201,9 +188,7 @@ def extract_image_files(
     # locate docker-compose.yml if present (not strictly required to load images)
     compose_file = os.path.join(install_path, "docker-compose.yml")
     if not os.path.isfile(compose_file):
-        InstallerLogger.warning(
-            f"No docker-compose.yml found under {install_path}; proceeding to load images anyway"
-        )
+        InstallerLogger.warning(f"No docker-compose.yml found under {install_path}; proceeding to load images anyway")
 
     InstallerLogger.info(f"Loading Malcolm images from {image_file}")
     # construct the docker/podman load command (omit -q to surface progress)
@@ -231,6 +216,8 @@ def extract_image_files(
     except Exception as e:
         InstallerLogger.error(f"Error loading Malcolm images: {e}")
         return False
+
+
 def _discover_files(
     patterns: List[str], roots: List[str], *, allow: Optional[Callable[[str], bool]] = None
 ) -> List[str]:

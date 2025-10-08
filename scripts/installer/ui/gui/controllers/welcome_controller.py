@@ -92,9 +92,7 @@ class WelcomeController:
             "meets_memory_req": meets_memory_req,
             "meets_disk_req": meets_disk_req,
             "meets_container_req": meets_container_req,
-            "meets_all_req": all(
-                [meets_cpu_req, meets_memory_req, meets_disk_req, meets_container_req]
-            ),
+            "meets_all_req": all([meets_cpu_req, meets_memory_req, meets_disk_req, meets_container_req]),
         }
 
         return info

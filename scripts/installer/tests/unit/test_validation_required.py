@@ -80,6 +80,7 @@ class TestValidationRequired(unittest.TestCase):
         from scripts.installer.configs.constants.configuration_item_keys import (
             KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
         )
+
         self.cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH, False)
         # Now set primary mode to Elasticsearch remote explicitly
         self.cfg.set_value(
@@ -254,9 +255,7 @@ class TestValidationRequired(unittest.TestCase):
         self.assertIn(KEY_CONFIG_ITEM_INDEX_DIR, keys)
         self.assertIn(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, keys)
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_INDEX_DIR))
-        self.assertTrue(
-            self.cfg.is_item_visible(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR)
-        )
+        self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR))
         # Setting values clears issues
         self.cfg.set_value(KEY_CONFIG_ITEM_INDEX_DIR, "/data/index")
         self.cfg.set_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, "/data/snapshot")

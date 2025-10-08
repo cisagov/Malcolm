@@ -55,9 +55,7 @@ class WelcomeView(BaseView):
             Malcolm_dir = GetMalcolmDir()
 
             # Use relative path from the project base
-            logo_path = os.path.join(
-                Malcolm_dir, "docs", "images", "logo", "Malcolm_banner.png"
-            )
+            logo_path = os.path.join(Malcolm_dir, "docs", "images", "logo", "Malcolm_banner.png")
 
             if os.path.exists(logo_path):
                 logo_image = customtkinter.CTkImage(
@@ -103,9 +101,7 @@ class WelcomeView(BaseView):
         installer_desc.pack(pady=(0, 20))
 
         # Configuration areas frame
-        config_frame = customtkinter.CTkFrame(
-            self.content_frame, fg_color="transparent"
-        )
+        config_frame = customtkinter.CTkFrame(self.content_frame, fg_color="transparent")
         config_frame.pack(pady=(10, 30))
 
         # Configuration bulletpoints

@@ -114,9 +114,7 @@ class InputField:
         label.grid(row=0, column=0, padx=(0, 10), pady=10, sticky="w")
 
         # Create entry field
-        entry = customtkinter.CTkEntry(
-            container, placeholder_text=placeholder, width=width
-        )
+        entry = customtkinter.CTkEntry(container, placeholder_text=placeholder, width=width)
         entry.grid(row=0, column=1, padx=5, pady=10, sticky="ew")
 
         # Set initial value if provided
@@ -138,9 +136,7 @@ class InputField:
                 elif browse_type == "save":
                     browse_callback = lambda: InputField._browse_save_file(entry)
 
-            browse_btn = Button.create(
-                container, text="Browse", command=browse_callback, width=80
-            )
+            browse_btn = Button.create(container, text="Browse", command=browse_callback, width=80)
             browse_btn.grid(row=0, column=next_col, padx=(10, 0), pady=10, sticky="e")
             next_col += 1
 
@@ -180,11 +176,7 @@ class InputField:
         """
         # Get the current path from the entry, if any
         current_path = entry_widget.get().strip()
-        initial_dir = (
-            current_path
-            if current_path and os.path.exists(current_path)
-            else os.path.expanduser("~")
-        )
+        initial_dir = current_path if current_path and os.path.exists(current_path) else os.path.expanduser("~")
 
         # Open directory browser
         path = filedialog.askdirectory(initialdir=initial_dir)
@@ -208,9 +200,7 @@ class InputField:
         """
         # Get the current path from the entry, if any
         current_path = entry_widget.get().strip()
-        initial_dir = (
-            os.path.dirname(current_path) if current_path else os.path.expanduser("~")
-        )
+        initial_dir = os.path.dirname(current_path) if current_path else os.path.expanduser("~")
 
         # Open file browser
         if not file_types:
@@ -238,9 +228,7 @@ class InputField:
         """
         # Get the current path from the entry, if any
         current_path = entry_widget.get().strip()
-        initial_dir = (
-            os.path.dirname(current_path) if current_path else os.path.expanduser("~")
-        )
+        initial_dir = os.path.dirname(current_path) if current_path else os.path.expanduser("~")
         initial_file = os.path.basename(current_path) if current_path else ""
 
         # Open save file dialog

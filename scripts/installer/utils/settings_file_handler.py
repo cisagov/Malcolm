@@ -95,25 +95,19 @@ class SettingsFileHandler:
         settings_data = self._parse_settings_file(settings_path)
 
         if not isinstance(settings_data, dict):
-            raise ConfigValueValidationError(
-                "Settings file must contain a dictionary/object at root level"
-            )
+            raise ConfigValueValidationError("Settings file must contain a dictionary/object at root level")
 
         missing_items = {"missing_configuration": [], "missing_installation": []}
 
         # process configuration section
         configuration_section = settings_data.get("configuration", {})
         if isinstance(configuration_section, dict):
-            missing_items["missing_configuration"] = self._load_configuration_section(
-                configuration_section
-            )
+            missing_items["missing_configuration"] = self._load_configuration_section(configuration_section)
 
         # process installation section
         installation_section = settings_data.get("installation", {})
         if isinstance(installation_section, dict):
-            missing_items["missing_installation"] = self._load_installation_section(
-                installation_section
-            )
+            missing_items["missing_installation"] = self._load_installation_section(installation_section)
 
         return missing_items
 
@@ -148,9 +142,7 @@ class SettingsFileHandler:
 
         # dry-run support: report intended action and return
         if dry_run:
-            InstallerLogger.info(
-                f"Dry run: would save settings to {settings_file_path} as {file_format}"
-            )
+            InstallerLogger.info(f"Dry run: would save settings to {settings_file_path} as {file_format}")
             return
 
         # write to file
@@ -169,9 +161,7 @@ class SettingsFileHandler:
 
             InstallerLogger.debug(f"Settings saved to {settings_file_path}")
         except Exception as e:
-            raise FileOperationError(
-                f"Failed to write settings file {settings_file_path}: {e}"
-            )
+            raise FileOperationError(f"Failed to write settings file {settings_file_path}: {e}")
 
     def generate_default_export_filename(self, file_format: str = "json") -> str:
         """Generate a default export filename with timestamp.
@@ -208,11 +198,7 @@ class SettingsFileHandler:
             template["configuration"][key] = {
                 "value": item.default_value,
                 "description": item.metadata.get("help", "No description available"),
-                "type": (
-                    type(item.default_value).__name__
-                    if item.default_value is not None
-                    else "any"
-                ),
+                "type": (type(item.default_value).__name__ if item.default_value is not None else "any"),
             }
 
         # add installation items with defaults
@@ -267,13 +253,9 @@ class SettingsFileHandler:
                         yaml = YAML(typ="safe", pure=True)
                         return yaml.load(content) or {}
         except Exception as e:
-            raise FileOperationError(
-                f"Failed to parse settings file {settings_path}: {e}"
-            )
+            raise FileOperationError(f"Failed to parse settings file {settings_path}: {e}")
 
-    def _load_configuration_section(
-        self, configuration_section: Dict[str, Any]
-    ) -> List[str]:
+    def _load_configuration_section(self, configuration_section: Dict[str, Any]) -> List[str]:
         """Load configuration section and apply to MalcolmConfig.
 
         Args:
@@ -290,21 +272,15 @@ class SettingsFileHandler:
                 try:
                     # Skip sentinel values (leave as default None/empty)
                     if value == CONFIG_ITEM_NONE_SENTINEL:
-                        InstallerLogger.debug(
-                            f"Skipping configuration item {key} (sentinel value)"
-                        )
+                        InstallerLogger.debug(f"Skipping configuration item {key} (sentinel value)")
                         continue
                     # delegate normalization and validation to MalcolmConfig
                     self.malcolm_config.set_value(key, value)
                     InstallerLogger.debug(f"Set configuration item {key} = {value}")
                 except Exception as e:
-                    InstallerLogger.warning(
-                        f"Failed to set configuration item {key}: {e}"
-                    )
+                    InstallerLogger.warning(f"Failed to set configuration item {key}: {e}")
             else:
-                InstallerLogger.warning(
-                    f"Unknown configuration item in settings file: {key}"
-                )
+                InstallerLogger.warning(f"Unknown configuration item in settings file: {key}")
 
         # identify configuration items that weren't set and use defaults
         for item_key, item in self.malcolm_config.get_all_config_items().items():
@@ -316,9 +292,7 @@ class SettingsFileHandler:
 
         return missing_configuration
 
-    def _load_installation_section(
-        self, installation_section: Dict[str, Any]
-    ) -> List[str]:
+    def _load_installation_section(self, installation_section: Dict[str, Any]) -> List[str]:
         """Load installation section and apply to InstallContext.
 
         Args:
@@ -335,29 +309,21 @@ class SettingsFileHandler:
                 try:
                     # Skip sentinel values (leave as default None/empty)
                     if value == CONFIG_ITEM_NONE_SENTINEL:
-                        InstallerLogger.debug(
-                            f"Skipping installation item {key} (sentinel value)"
-                        )
+                        InstallerLogger.debug(f"Skipping installation item {key} (sentinel value)")
                         continue
                     # delegate normalization/validation to InstallContext
                     self.install_context.set_item_value(key, value)
                     InstallerLogger.debug(f"Set installation item {key} = {value}")
                 except Exception as e:
-                    InstallerLogger.warning(
-                        f"Failed to set installation item {key}: {e}"
-                    )
+                    InstallerLogger.warning(f"Failed to set installation item {key}: {e}")
             else:
-                InstallerLogger.warning(
-                    f"Unknown installation item in settings file: {key}"
-                )
+                InstallerLogger.warning(f"Unknown installation item in settings file: {key}")
 
         # identify installation items that weren't set
         for key in self.install_context.items.keys():
             if key not in installation_section:
                 missing_installation.append(key)
-                InstallerLogger.debug(
-                    f"Installation item {key} not found in settings file, using default"
-                )
+                InstallerLogger.debug(f"Installation item {key} not found in settings file, using default")
 
         return missing_installation
 
@@ -386,9 +352,7 @@ class SettingsFileHandler:
             # if current value is None/empty but default_value is valid, use the default
             if (value is None or (isinstance(value, str) and value == "")) and (
                 item.default_value is not None
-                and not (
-                    isinstance(item.default_value, str) and item.default_value == ""
-                )
+                and not (isinstance(item.default_value, str) and item.default_value == "")
             ):
                 value = item.default_value
 
@@ -421,9 +385,7 @@ class SettingsFileHandler:
             # if current value is None/empty but default_value is valid, use the default
             if (value is None or (isinstance(value, str) and value == "")) and (
                 item.default_value is not None
-                and not (
-                    isinstance(item.default_value, str) and item.default_value == ""
-                )
+                and not (isinstance(item.default_value, str) and item.default_value == "")
             ):
                 value = item.default_value
 

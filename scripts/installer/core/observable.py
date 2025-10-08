@@ -21,4 +21,3 @@ class ObservableStoreMixin:
             self._observers[key].remove(callback)
             if not self._observers[key]:
                 del self._observers[key]
-

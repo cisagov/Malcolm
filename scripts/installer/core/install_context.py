@@ -164,9 +164,7 @@ class InstallContext(ObservableStoreMixin):
 
             # seed cached values
             self._runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN)
-            self._orchestration_mode = malcolm_config.get_value(
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-            )
+            self._orchestration_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
 
             def _on_runtime_bin(val: Any) -> None:
                 try:
@@ -181,9 +179,7 @@ class InstallContext(ObservableStoreMixin):
                     pass
 
             malcolm_config.observe(KEY_CONFIG_ITEM_RUNTIME_BIN, _on_runtime_bin)
-            malcolm_config.observe(
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, _on_orch_mode
-            )
+            malcolm_config.observe(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, _on_orch_mode)
         except Exception:
             # Best-effort attachment; safe to continue without observers
             pass
@@ -240,17 +236,13 @@ class InstallContext(ObservableStoreMixin):
             try:
                 if key == KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES and bool(value):
                     if KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES in self.items:
-                        self.items[KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES].set_value(
-                            False
-                        )
+                        self.items[KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES].set_value(False)
                     # reflect source hint fields
                     self.image_source = "archive"
                     self.load_images_from_archive = True
                 elif key == KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES and bool(value):
                     if KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES in self.items:
-                        self.items[KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES].set_value(
-                            False
-                        )
+                        self.items[KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES].set_value(False)
                     self.image_source = "registry"
                     self.load_images_from_archive = False
             except Exception:
@@ -291,8 +283,6 @@ class InstallContext(ObservableStoreMixin):
     def all_keys(self) -> List[str]:
         return list(self.items.keys())
 
-    
-
     def _notify_observers(self, key: str, value: Any) -> None:
         if key in self._observers:
             for cb in list(self._observers[key]):
@@ -311,9 +301,7 @@ class InstallContext(ObservableStoreMixin):
     @property
     def install_docker_if_missing(self) -> bool:
         """Get install_docker_if_missing value from items or default."""
-        return (
-            self.get_item_value(KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING) or True
-        )
+        return self.get_item_value(KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING) or True
 
     @property
     def use_homebrew(self) -> bool:
@@ -323,18 +311,12 @@ class InstallContext(ObservableStoreMixin):
     @property
     def continue_without_homebrew(self) -> bool:
         """Get continue_without_homebrew value from items or default."""
-        return (
-            self.get_item_value(KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW)
-            or False
-        )
+        return self.get_item_value(KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW) or False
 
     @property
     def configure_docker_resources(self) -> bool:
         """Get configure_docker_resources value from items or default."""
-        return (
-            self.get_item_value(KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES)
-            or True
-        )
+        return self.get_item_value(KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES) or True
 
     @property
     def try_docker_repository_install(self) -> bool:
@@ -344,10 +326,7 @@ class InstallContext(ObservableStoreMixin):
     @property
     def try_docker_convenience_script(self) -> bool:
         """Get try_docker_convenience_script value from items or default."""
-        return (
-            self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT)
-            or False
-        )
+        return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT) or False
 
     @property
     def apply_memory_settings(self) -> bool:

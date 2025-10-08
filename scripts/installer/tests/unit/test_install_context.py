@@ -15,9 +15,7 @@ import unittest
 from unittest.mock import MagicMock
 
 # Add the project root directory to the Python path
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.core.config_item import ConfigItem

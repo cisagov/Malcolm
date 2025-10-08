@@ -124,7 +124,11 @@ class DialogInstallationMenu:
             if not choices:
                 return True
             try:
-                label = "Malcolm Installation Options" if parent_key is None else (self.ctx.items.get(parent_key).label or parent_key)
+                label = (
+                    "Malcolm Installation Options"
+                    if parent_key is None
+                    else (self.ctx.items.get(parent_key).label or parent_key)
+                )
                 prompt = f"{label}: choose an item to configure"
                 result = InstallerChooseOne(
                     prompt,

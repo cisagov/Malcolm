@@ -82,8 +82,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
             condition=lambda profile, orch: (
-                profile == PROFILE_MALCOLM
-                and orch == OrchestrationFramework.DOCKER_COMPOSE
+                profile == PROFILE_MALCOLM and orch == OrchestrationFramework.DOCKER_COMPOSE
             ),
             is_top_level=True,
         )
@@ -103,8 +102,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
             condition=lambda profile, orch: (
-                profile == PROFILE_MALCOLM
-                and orch == OrchestrationFramework.DOCKER_COMPOSE
+                profile == PROFILE_MALCOLM and orch == OrchestrationFramework.DOCKER_COMPOSE
             ),
             is_top_level=True,
         ),
@@ -222,9 +220,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
             condition=lambda maintain: isinstance(maintain, bool),
             default_value=lambda maintain: (
-                SearchEngineMode.OPENSEARCH_LOCAL.value
-                if bool(maintain)
-                else SearchEngineMode.OPENSEARCH_REMOTE.value
+                SearchEngineMode.OPENSEARCH_LOCAL.value if bool(maintain) else SearchEngineMode.OPENSEARCH_REMOTE.value
             ),
             only_if_unmodified=False,
         ),
@@ -265,8 +261,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            condition=lambda orch_mode: orch_mode
-            != OrchestrationFramework.DOCKER_COMPOSE,
+            condition=lambda orch_mode: orch_mode != OrchestrationFramework.DOCKER_COMPOSE,
             default_value=LOGSTASH_WORKERS_KUBERNETES,
         ),
     ),
@@ -278,8 +273,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
-            condition=lambda enabled, orch: bool(enabled)
-            and orch == OrchestrationFramework.DOCKER_COMPOSE,
+            condition=lambda enabled, orch: bool(enabled) and orch == OrchestrationFramework.DOCKER_COMPOSE,
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
         ),
         value=ValueRule(
@@ -319,8 +313,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
             ],
-            condition=lambda profile, maintain: profile == PROFILE_MALCOLM
-            and bool(maintain),
+            condition=lambda profile, maintain: profile == PROFILE_MALCOLM and bool(maintain),
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         )
     ),
@@ -403,8 +396,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             ],
             condition=lambda profile, mode: (
-                profile == PROFILE_MALCOLM
-                and mode != SearchEngineMode.ELASTICSEARCH_REMOTE.value
+                profile == PROFILE_MALCOLM and mode != SearchEngineMode.ELASTICSEARCH_REMOTE.value
             ),
             is_top_level=True,
         )
@@ -657,8 +649,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             ],
             condition=lambda ports, mode: (
-                ports == OpenPortsChoices.CUSTOMIZE.value
-                and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+                ports == OpenPortsChoices.CUSTOMIZE.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
             ),
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
@@ -668,8 +659,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             ],
             condition=lambda ports, mode: (
-                ports == OpenPortsChoices.YES.value
-                and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+                ports == OpenPortsChoices.YES.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
             ),
             default_value=True,
         ),
@@ -682,8 +672,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
                 KEY_CONFIG_ITEM_TRAEFIK_LABELS,
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             ],
-            condition=lambda labels, mode: bool(labels)
-            and mode == SearchEngineMode.OPENSEARCH_LOCAL.value,
+            condition=lambda labels, mode: bool(labels) and mode == SearchEngineMode.OPENSEARCH_LOCAL.value,
             ui_parent=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
         )
     )
@@ -692,9 +681,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
     complex_deps[KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST] = DependencySpec(
         visibility=VisibilityRule(
             depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_LIVE_ARKIME],
-            condition=lambda profile, live_arkime: (
-                profile == PROFILE_MALCOLM and bool(live_arkime)
-            ),
+            condition=lambda profile, live_arkime: (profile == PROFILE_MALCOLM and bool(live_arkime)),
             ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
         )
     )
@@ -715,9 +702,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
 
     # Set default JSON parsing field values
     complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD] = DependencySpec(
-        visibility=complex_deps[
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD
-        ].visibility,
+        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD].visibility,
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
             condition=lambda format: format == FilebeatLogFormat.JSON.value,
@@ -726,9 +711,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
     )
 
     complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD] = DependencySpec(
-        visibility=complex_deps[
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD
-        ].visibility,
+        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD].visibility,
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
             condition=lambda format: format == FilebeatLogFormat.JSON.value,
@@ -737,9 +720,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
     )
 
     complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD] = DependencySpec(
-        visibility=complex_deps[
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD
-        ].visibility,
+        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD].visibility,
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
             condition=lambda format: format == FilebeatLogFormat.JSON.value,
@@ -760,8 +741,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
             ],
             condition=lambda enabled, _profile, _mode: bool(enabled),
             default_value=lambda _enabled, profile, mode: (
-                profile == PROFILE_HEDGEHOG
-                or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
+                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
             ),
         )
     )
@@ -776,8 +756,7 @@ def get_complex_dependencies() -> Dict[str, DependencySpec]:
             ],
             condition=lambda enabled, _profile, _mode: bool(enabled),
             default_value=lambda _enabled, profile, mode: not (
-                profile == PROFILE_HEDGEHOG
-                or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
+                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
             ),
         )
     )

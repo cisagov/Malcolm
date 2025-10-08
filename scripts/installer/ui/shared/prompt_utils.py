@@ -81,8 +81,7 @@ def prompt_config_item_value(
 
         # Build prompt text and optional preamble consistently across UIs
         preamble = (
-            f"{config_item.label} (current: "
-            f"{_format_current_value_for_preamble(current_value, config_item)})"
+            f"{config_item.label} (current: " f"{_format_current_value_for_preamble(current_value, config_item)})"
         )
         if ui_mode & UserInterfaceMode.InteractionInput:
             if show_preamble:
@@ -90,9 +89,7 @@ def prompt_config_item_value(
             prompt_text = "Enter choice number"
         else:
             # Dialog mode: prefer concise preamble instead of long question
-            prompt_text = (
-                preamble if show_preamble else (config_item.label or "Choose one")
-            )
+            prompt_text = preamble if show_preamble else (config_item.label or "Choose one")
 
         try:
             selected = InstallerChooseOne(
@@ -110,18 +107,14 @@ def prompt_config_item_value(
     # 2) Boolean
     if isinstance(default_value, bool):
         try:
-            return InstallerYesOrNo(
-                question, default=bool(current_value), uiMode=ui_mode
-            )
+            return InstallerYesOrNo(question, default=bool(current_value), uiMode=ui_mode)
         except (DialogBackException, DialogCanceledException):
             return None
 
     # 3) Password
     if config_item.is_password:
         try:
-            return InstallerAskForPassword(
-                question, default=str(current_value or ""), uiMode=ui_mode
-            )
+            return InstallerAskForPassword(question, default=str(current_value or ""), uiMode=ui_mode)
         except (DialogBackException, DialogCanceledException):
             return None
 
@@ -133,9 +126,7 @@ def prompt_config_item_value(
             default_str = str(current_value or "")
 
         try:
-            entry = InstallerAskForString(
-                question, default=default_str, uiMode=ui_mode, extraLabel=back_label
-            )
+            entry = InstallerAskForString(question, default=default_str, uiMode=ui_mode, extraLabel=back_label)
         except (DialogBackException, DialogCanceledException):
             return None
 
@@ -148,6 +139,7 @@ def prompt_config_item_value(
         # Determine numeric expectation from default/current value or widget hint
         try:
             from scripts.malcolm_constants import WidgetType
+
             is_number_widget = config_item.widget_type == WidgetType.NUMBER
         except Exception:
             is_number_widget = False
@@ -156,9 +148,7 @@ def prompt_config_item_value(
             try:
                 return int(entry)
             except Exception:
-                InstallerDisplayMessage(
-                    "Invalid integer. Please enter a valid number.", uiMode=ui_mode
-                )
+                InstallerDisplayMessage("Invalid integer. Please enter a valid number.", uiMode=ui_mode)
                 # loop again
                 continue
 

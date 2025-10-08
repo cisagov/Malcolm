@@ -30,9 +30,7 @@ def _dependency_label_string(malcolm_config, keys: List[str]) -> str:
     return " -> ".join(labels)
 
 
-def _resolve_depends_on(
-    malcolm_config, dep_chain: List[str], ui_parent: Optional[str]
-) -> str:
+def _resolve_depends_on(malcolm_config, dep_chain: List[str], ui_parent: Optional[str]) -> str:
     dep_text = _dependency_label_string(malcolm_config, dep_chain)
     if dep_text:
         return dep_text
@@ -79,12 +77,7 @@ def format_search_results_text(
     status_width = max(len("Status"), *(len(value) for value in status_values))
     item_width = max(len("Item"), 4)
 
-    header = (
-        f"{'Item':>{item_width}}  "
-        f"{'Name':<{name_width}}  "
-        f"{'Status':<{status_width}} "
-        "Depends On"
-    )
+    header = f"{'Item':>{item_width}}  " f"{'Name':<{name_width}}  " f"{'Status':<{status_width}} " "Depends On"
     rows.append(header)
 
     def format_status_cell(status: str) -> str:
@@ -133,12 +126,7 @@ def format_search_results_text(
             item_token = "-."
 
         status_cell = format_status_cell(status)
-        row = (
-            f"{item_token:>{item_width}}  "
-            f"{label:<{name_width}}  "
-            f"{status_cell} "
-            f"{depends_on}"
-        )
+        row = f"{item_token:>{item_width}}  " f"{label:<{name_width}}  " f"{status_cell} " f"{depends_on}"
         rows.append(row)
 
     lines.extend(rows)
@@ -155,8 +143,6 @@ def format_search_results_text(
         if visible_count:
             lines.append(f"Found {visible_count} items you can configure now.")
         if hidden_count:
-            lines.append(
-                f"Found {hidden_count} hidden items - enable their dependencies to access them."
-            )
+            lines.append(f"Found {hidden_count} hidden items - enable their dependencies to access them.")
 
     return "\n".join(lines)

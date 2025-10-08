@@ -70,9 +70,7 @@ def _validate_artifacts_or_exit(
                 InstallerLogger.error(f"Invalid images archive: {ipath}: {err}")
                 raise SystemExit(2)
             else:
-                InstallerLogger.warning(
-                    f"Ignoring invalid images archive: {ipath}: {err}"
-                )
+                InstallerLogger.warning(f"Ignoring invalid images archive: {ipath}: {err}")
                 ipath = None
     return mpath, ipath
 
@@ -87,22 +85,16 @@ def _perform_artifact_handling(
     orig_path: str,
 ) -> Tuple[bool, Optional[str]]:
     if control_flow.should_write_files():
-        ok, cfg_dir = (
-            extract_malcolm_tarball(mpath, install_path) if mpath else (True, None)
-        )
+        ok, cfg_dir = extract_malcolm_tarball(mpath, install_path) if mpath else (True, None)
         if not ok:
             InstallerLogger.error("Failed to process Malcolm tarball. Aborting.")
             raise SystemExit(1)
         if ipath:
             runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
-            InstallerLogger.info(
-                "Loading container images from archive... This may take several minutes."
-            )
+            InstallerLogger.info("Loading container images from archive... This may take several minutes.")
             try:
                 if ui_impl is not None and ui_impl.ui_mode == UserInterfaceMode.InteractionDialog:
-                    ui_impl.display_message(
-                        "Loading container images from archive... This may take several minutes."
-                    )
+                    ui_impl.display_message("Loading container images from archive... This may take several minutes.")
             except Exception:
                 pass
             extract_image_files(ipath, install_path if mpath else orig_path, runtime_bin)
@@ -110,13 +102,9 @@ def _perform_artifact_handling(
         return True, cfg_dir
     else:
         if mpath:
-            InstallerLogger.info(
-                f"Dry run: would extract Malcolm tarball {os.path.basename(mpath)} to {install_path}"
-            )
+            InstallerLogger.info(f"Dry run: would extract Malcolm tarball {os.path.basename(mpath)} to {install_path}")
         if ipath:
-            InstallerLogger.info(
-                f"Dry run: would extract image archive {os.path.basename(ipath)}"
-            )
+            InstallerLogger.info(f"Dry run: would extract image archive {os.path.basename(ipath)}")
         InstallerLogger.end(
             "INSTALLER",
             InstallerResult.SKIPPED,
@@ -129,9 +117,7 @@ def _detect_files_or_exit() -> Tuple[list, list]:
     try:
         return detect_malcolm_and_image_files()
     except Exception as e:
-        InstallerLogger.error(
-            f"Error while attempting to detect malcolm and image files: {e}"
-        )
+        InstallerLogger.error(f"Error while attempting to detect malcolm and image files: {e}")
         raise SystemExit(1)
 
 
@@ -164,13 +150,9 @@ def decide_and_handle_artifacts(
         return False, None, None, None, None
     # Split flows by whether CLI values were provided
     if cli_m or cli_i:
-        return _handle_cli_artifacts(
-            parsed_args, ui_impl, malcolm_config, control_flow, orig_path, cli_m, cli_i
-        )
+        return _handle_cli_artifacts(parsed_args, ui_impl, malcolm_config, control_flow, orig_path, cli_m, cli_i)
 
-    return _handle_detected_artifacts(
-        parsed_args, ui_impl, malcolm_config, control_flow, orig_path
-    )
+    return _handle_detected_artifacts(parsed_args, ui_impl, malcolm_config, control_flow, orig_path)
 
 
 def _validate_cli_paths(cli_m: Optional[str], cli_i: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
@@ -243,9 +225,7 @@ def _handle_cli_artifacts(
             install_path,
         )
 
-    mfile, ifile, install_path = _maybe_offer_complementary_artifacts(
-        mfile, ifile, parsed_args, ui_impl, install_path
-    )
+    mfile, ifile, install_path = _maybe_offer_complementary_artifacts(mfile, ifile, parsed_args, ui_impl, install_path)
 
     # validate and handle
     mfile, ifile = _validate_artifacts_or_exit(mfile, ifile, bool(cli_i))

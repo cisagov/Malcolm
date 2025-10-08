@@ -36,9 +36,7 @@ class _MiniPlatform:
 class TestComposeDiscovery(unittest.TestCase):
     def test_docker_primary_succeeds(self):
         # docker compose works
-        platform = _MiniPlatform(
-            {"docker compose --version": (0, ["Docker Compose version v2.24.0"])}
-        )
+        platform = _MiniPlatform({"docker compose --version": (0, ["Docker Compose version v2.24.0"])})
         cmd = _discover_compose_command("docker", platform)
         self.assertEqual(cmd, ["docker", "compose"])
 
@@ -55,9 +53,7 @@ class TestComposeDiscovery(unittest.TestCase):
 
     def test_podman_primary_succeeds(self):
         # podman compose works
-        platform = _MiniPlatform(
-            {"podman compose --version": (0, ["podman-compose version 1.0"])}
-        )
+        platform = _MiniPlatform({"podman compose --version": (0, ["podman-compose version 1.0"])})
         cmd = _discover_compose_command("podman", platform)
         self.assertEqual(cmd, ["podman", "compose"])
 
@@ -74,9 +70,7 @@ class TestComposeDiscovery(unittest.TestCase):
 
     def test_unknown_runtime_attempts_compose_only(self):
         # unknown runtime: try "<bin> compose" then give up
-        platform = _MiniPlatform(
-            {"nerdctl compose --version": (0, ["compose v2 shim"])}
-        )
+        platform = _MiniPlatform({"nerdctl compose --version": (0, ["compose v2 shim"])})
         cmd = _discover_compose_command("nerdctl", platform)
         self.assertEqual(cmd, ["nerdctl", "compose"])
 

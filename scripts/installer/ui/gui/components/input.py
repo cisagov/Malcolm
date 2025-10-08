@@ -30,17 +30,11 @@ class Input:
         Returns:
             customtkinter.CTkEntry: The entry field
         """
-        label = customtkinter.CTkLabel(
-            parent, text=label_text, font=FontManager.bold_font()
-        )
-        label.grid(
-            row=row, column=0, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="w"
-        )
+        label = customtkinter.CTkLabel(parent, text=label_text, font=FontManager.bold_font())
+        label.grid(row=row, column=0, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="w")
 
         entry = customtkinter.CTkEntry(parent, placeholder_text=placeholder_text)
-        entry.grid(
-            row=row, column=1, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="ew"
-        )
+        entry.grid(row=row, column=1, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="ew")
 
         return entry
 
@@ -58,19 +52,11 @@ class Input:
         Returns:
             customtkinter.CTkEntry: The password entry field
         """
-        label = customtkinter.CTkLabel(
-            parent, text=label_text, font=FontManager.bold_font()
-        )
-        label.grid(
-            row=row, column=0, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="w"
-        )
+        label = customtkinter.CTkLabel(parent, text=label_text, font=FontManager.bold_font())
+        label.grid(row=row, column=0, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="w")
 
-        entry = customtkinter.CTkEntry(
-            parent, placeholder_text=placeholder_text, show="*"
-        )  # Hide password characters
-        entry.grid(
-            row=row, column=1, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="ew"
-        )
+        entry = customtkinter.CTkEntry(parent, placeholder_text=placeholder_text, show="*")  # Hide password characters
+        entry.grid(row=row, column=1, padx=PADDING_SMALL, pady=PADDING_SMALL, sticky="ew")
 
         return entry
 
@@ -88,9 +74,7 @@ class Input:
         Returns:
             customtkinter.CTkCheckBox: The checkbox
         """
-        return customtkinter.CTkCheckBox(
-            parent, text=text, variable=variable, command=command
-        )
+        return customtkinter.CTkCheckBox(parent, text=text, variable=variable, command=command)
 
     @staticmethod
     def radio_group(parent, options, variable, command=None, row=0, column=0):
@@ -110,9 +94,7 @@ class Input:
         """
         radio_buttons = []
         for i, (value, text) in enumerate(options):
-            radio = customtkinter.CTkRadioButton(
-                parent, text=text, value=value, variable=variable, command=command
-            )
+            radio = customtkinter.CTkRadioButton(parent, text=text, value=value, variable=variable, command=command)
             radio.grid(
                 row=row + i,
                 column=column,

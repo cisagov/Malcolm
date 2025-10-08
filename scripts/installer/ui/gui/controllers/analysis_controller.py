@@ -59,18 +59,12 @@ class AnalysisController(BaseController):
         # Update view with current model values
         self.view.update_analyze_with_arkime(self.model.analyze_with_arkime)
         self.view.update_analyze_with_suricata(self.model.analyze_with_suricata)
-        self.view.update_update_suricata_signatures(
-            self.model.update_suricata_signatures
-        )
+        self.view.update_update_suricata_signatures(self.model.update_suricata_signatures)
         self.view.update_analyze_with_zeek(self.model.analyze_with_zeek)
         self.view.update_is_ot_ics_network(self.model.is_ot_ics_network)
         self.view.update_perform_local_dns_lookups(self.model.perform_local_dns_lookups)
-        self.view.update_perform_hardware_vendor_lookups(
-            self.model.perform_hardware_vendor_lookups
-        )
-        self.view.update_perform_string_randomness_scoring(
-            self.model.perform_string_randomness_scoring
-        )
+        self.view.update_perform_hardware_vendor_lookups(self.model.perform_hardware_vendor_lookups)
+        self.view.update_perform_string_randomness_scoring(self.model.perform_string_randomness_scoring)
         self.view.update_accept_logs_from_sensors(self.model.accept_logs_from_sensors)
 
     def set_analyze_with_arkime(self, value: bool) -> Tuple[bool, str]:

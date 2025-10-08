@@ -16,9 +16,7 @@ def _normalize_enum_by_value(enum_cls: Type, value: Any) -> Any:
                 return getattr(enum_cls(value), "value", value)
             except Exception:
                 # try by name for convenience
-                member = getattr(enum_cls, value, None) or getattr(
-                    enum_cls, value.upper(), None
-                )
+                member = getattr(enum_cls, value, None) or getattr(enum_cls, value.upper(), None)
                 if member is not None:
                     return getattr(member, "value", member)
         # attempt direct construction from raw
@@ -32,9 +30,7 @@ def _normalize_enum_keep_member(enum_cls: Type, value: Any) -> Any:
         if isinstance(value, enum_cls):
             return value
         if isinstance(value, str):
-            member = enum_cls.__members__.get(value) or enum_cls.__members__.get(
-                value.upper()
-            )
+            member = enum_cls.__members__.get(value) or enum_cls.__members__.get(value.upper())
             if member is not None:
                 return member
         return enum_cls(value)
