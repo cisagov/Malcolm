@@ -384,7 +384,7 @@ def custom_transform_opensearch_url(opensearchPrimaryMode: str, opensearchPrimar
     even if the user didn't provide one (since the field is hidden for local mode).
     For remote modes, return the user-provided URL or empty if None.
     """
-    from scripts.malcolm_constants import SearchEngineMode
+    from scripts.installer.configs.constants.enums import SearchEngineMode
 
     if opensearchPrimaryMode == SearchEngineMode.OPENSEARCH_LOCAL.value:
         # For local mode, use default if URL is None/empty
