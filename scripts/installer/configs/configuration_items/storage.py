@@ -52,7 +52,7 @@ CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS = ConfigItem(
     label="Use Default Storage Locations",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Store pcap, log, and index files in {get_malcolm_dir()}",
+    question=lambda: f"Store pcap, log, and index files in {get_malcolm_dir()}",
     widget_type=WidgetType.CHECKBOX,
 )
 

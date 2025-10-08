@@ -134,6 +134,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/suricata_socket.py /usr/local/bin/
 ADD --chmod=644 suricata/supervisord.conf /etc/supervisord.conf

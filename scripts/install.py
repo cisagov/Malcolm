@@ -7,12 +7,13 @@ import argparse
 from dataclasses import dataclass
 import os
 import sys
+import types
 
-# Add the project root directory to the Python path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(script_dir, ".."))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+# Dynamically create a module named "scripts" which points to this directory
+if "scripts" not in sys.modules:
+    scripts_module = types.ModuleType("scripts")
+    scripts_module.__path__ = [os.path.dirname(os.path.abspath(__file__))]
+    sys.modules["scripts"] = scripts_module
 
 sys.dont_write_bytecode = True
 
@@ -27,6 +28,7 @@ from scripts.malcolm_common import (
     get_default_config_dir,
     get_malcolm_dir,
     get_platform_name,
+    KubernetesDynamic,
     SYSTEM_INFO,
     UserInterfaceMode,
 )
@@ -478,28 +480,23 @@ def main():
 
             # if kubernetes, validate kubeconfig via python client (parity with legacy)
             if detected_orch_mode == OrchestrationFramework.KUBERNETES:
-                # Import the real kubernetes client, avoiding the repo's kubernetes/ directory shadowing
+                kube_success = False
                 try:
-                    _saved_sys_path = list(sys.path)
-                    _repo_root_abs = os.path.abspath(project_root)
-                    _cwd_abs = os.path.abspath(os.getcwd())
-                    sys.path = [p for p in sys.path if os.path.abspath(p or ".") not in (_repo_root_abs, _cwd_abs)]
-                    from kubernetes import config as _k8s_config  # type: ignore
-
-                    _k8s_config.load_kube_config(cfg_path)
-                except ImportError:
-                    InstallerLogger.error(
-                        "Kubernetes mode requires the 'kubernetes' Python client. Install it (e.g., pip install kubernetes)."
-                    )
-                    sys.exit(2)
+                    if kube_imported := KubernetesDynamic():
+                        InstallerLogger.info(f"Imported kubernetes: {kube_imported}")
+                        kube_imported.config.load_kube_config(cfg_path)
+                        kube_success = True
                 except Exception as e:
                     InstallerLogger.error(f"Failed loading kubeconfig {cfg_path}: {e}")
                     sys.exit(2)
-                finally:
-                    try:
-                        sys.path = _saved_sys_path
-                    except Exception:
-                        pass
+                if not kube_success:
+                    if kube_imported:
+                        InstallerLogger.error(f"Failed loading kubeconfig {cfg_path}")
+                    else:
+                        InstallerLogger.error(
+                            f"The official Python client library for kubernetes is required for for {orchMode} mode"
+                        )
+                    sys.exit(2)
 
         # prefer detected mode; otherwise use existing config default
         orchestration_mode = (

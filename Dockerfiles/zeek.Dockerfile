@@ -50,6 +50,7 @@ ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
@@ -180,7 +181,8 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
-    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
+    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py && \
+    ln -sfr /usr/local/bin/malcolm_constants.py "${ZEEK_DIR}"/bin/malcolm_constants.py
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh

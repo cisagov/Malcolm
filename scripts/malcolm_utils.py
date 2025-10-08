@@ -22,6 +22,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import types
 
 from base64 import b64decode
 from datetime import datetime
@@ -36,18 +37,21 @@ except ImportError:
     from collections import Iterable
 from collections import defaultdict, namedtuple, OrderedDict
 
-try:
-    malcolm_constants = importlib.import_module("scripts.malcolm_constants")
-except ModuleNotFoundError:
-    malcolm_constants = importlib.import_module("malcolm_constants")
-if malcolm_constants:
-    PGID_DEFAULT = malcolm_constants.PGID_DEFAULT
-    PUID_DEFAULT = malcolm_constants.PUID_DEFAULT
-    PLATFORM_LINUX = malcolm_constants.PLATFORM_LINUX
-    PLATFORM_MAC = malcolm_constants.PLATFORM_MAC
-    PLATFORM_WINDOWS = malcolm_constants.PLATFORM_WINDOWS
-    DATABASE_MODE_ENUMS = malcolm_constants.DATABASE_MODE_ENUMS
-    DATABASE_MODE_LABELS = malcolm_constants.DATABASE_MODE_LABELS
+# Dynamically create a module named "scripts" which points to this directory
+if "scripts" not in sys.modules:
+    scripts_module = types.ModuleType("scripts")
+    scripts_module.__path__ = [os.path.dirname(os.path.abspath(__file__))]
+    sys.modules["scripts"] = scripts_module
+
+from scripts.malcolm_constants import (
+    PGID_DEFAULT,
+    PUID_DEFAULT,
+    PLATFORM_LINUX,
+    PLATFORM_MAC,
+    PLATFORM_WINDOWS,
+    DATABASE_MODE_ENUMS,
+    DATABASE_MODE_LABELS,
+)
 
 
 def DatabaseModeEnumToStr(val):

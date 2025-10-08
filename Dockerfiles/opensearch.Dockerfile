@@ -80,6 +80,7 @@ ADD --chmod=755 opensearch-config/scripts/*.* /usr/local/bin/
 ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/
 ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"

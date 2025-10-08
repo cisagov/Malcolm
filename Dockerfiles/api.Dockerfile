@@ -13,6 +13,7 @@ RUN    apt-get update -q \
 
 ADD ./api /usr/src/app/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/src/app/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/src/app/
 WORKDIR /usr/src/app
 
 RUN python3 -m pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt \
@@ -61,6 +62,7 @@ COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 ADD ./api "${APP_HOME}"
 ADD --chmod=644 scripts/malcolm_utils.py "${APP_HOME}"/
+ADD --chmod=644 scripts/malcolm_constants.py "${APP_HOME}"/
 ADD --chmod=755 shared/bin/opensearch_status.sh "${APP_HOME}"/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/service_check_passthrough.sh /usr/local/bin/

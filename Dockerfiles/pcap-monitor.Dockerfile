@@ -81,6 +81,7 @@ RUN apt-get -q update && \
 
 ADD --chmod=644 pcap-monitor/supervisord.conf /etc/supervisord.conf
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/docker-uid-gid-setup.sh /usr/local/bin/

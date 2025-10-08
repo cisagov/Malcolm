@@ -226,6 +226,7 @@ ADD --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
 ADD --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 

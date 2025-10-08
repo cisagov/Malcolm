@@ -16,6 +16,13 @@ import site
 import string
 import sys
 import time
+import types
+
+# Dynamically create a module named "scripts" which points to this directory
+if "scripts" not in sys.modules:
+    scripts_module = types.ModuleType("scripts")
+    scripts_module.__path__ = [os.path.dirname(os.path.abspath(__file__))]
+    sys.modules["scripts"] = scripts_module
 
 from scripts.malcolm_utils import (
     deep_get,
@@ -33,6 +40,7 @@ from enum import IntEnum, Flag, IntFlag, auto
 from packaging import version
 
 from scripts.malcolm_constants import (
+    MALCOLM_VERSION,
     PLATFORM_WINDOWS,
     PLATFORM_MAC,
     PLATFORM_LINUX,
@@ -1035,14 +1043,17 @@ def get_malcolm_dir():
 
 def get_default_config_dir():
     """Get the default config directory."""
-    return os.path.join(get_malcolm_dir(), "config")
+    try:
+        return os.path.join(get_malcolm_dir(), "config")
+    except FileNotFoundError:
+        return os.path.join(os.getcwd(), "config")
 
 
 def get_malcolm_version():
-    """Get the Malcolm version from docker-compose.yml
+    """Get the Malcolm version from docker-compose.yml, fall back to MALCOLM_VERSION if not found
 
     Returns:
-        str: The Malcolm version string, or "unknown" if not found
+        str: The Malcolm version string, or MALCOLM_VERSION if not found
     """
 
     def get_highest_calver(tags):
@@ -1058,18 +1069,23 @@ def get_malcolm_version():
             return None
         return str(max(valid_versions))
 
-    result = "unknown"
+    result = MALCOLM_VERSION
 
     if yamlImported := YAMLDynamic():
         try:
-            with open(os.path.join(get_malcolm_dir(), "docker-compose.yml"), 'r') as f:
-                compose_data = yamlImported.YAML(typ='safe', pure=True).load(f)
-                image_tags = []
-                for service_name, service_def in compose_data.get("services", {}).items():
-                    image = service_def.get("image")
-                    if image and ":" in image:
-                        image_tags.append(image.rsplit(":", 1)[1])
-                result = get_highest_calver(image_tags)
+            try:
+                compose_file_name = os.path.join(get_malcolm_dir(), "docker-compose.yml")
+            except FileNotFoundError:
+                compose_file_name = os.path.join(os.getcwd(), "docker-compose.yml")
+            if os.path.isfile(compose_file_name):
+                with open(compose_file_name, 'r') as f:
+                    compose_data = yamlImported.YAML(typ='safe', pure=True).load(f)
+                    image_tags = []
+                    for service_name, service_def in compose_data.get("services", {}).items():
+                        image = service_def.get("image")
+                        if image and ":" in image:
+                            image_tags.append(image.rsplit(":", 1)[1])
+                    result = get_highest_calver(image_tags)
         except Exception as e:
             eprint(f'Error deciphering docker-compose.yml: {e}')
 

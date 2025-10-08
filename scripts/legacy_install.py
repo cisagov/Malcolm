@@ -115,7 +115,7 @@ from malcolm_utils import (
     str2bool,
     touch,
     which,
-    GetPlatformOSRelease
+    GetPlatformOSRelease,
 )
 
 ###################################################################################################

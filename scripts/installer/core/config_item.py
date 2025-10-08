@@ -11,7 +11,7 @@ for all Malcolm configuration items.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from scripts.malcolm_constants import WidgetType
 
@@ -51,7 +51,7 @@ class ConfigItem:
     ui_depth: int = 0
     ui_parent: Optional[str] = None
     is_password: bool = False
-    question: str = ""
+    question: Union[str, Callable[[], Any]] = ""
     widget_type: WidgetType = None
     metadata: dict = field(default_factory=dict)
 
@@ -60,6 +60,7 @@ class ConfigItem:
         self.ui_depth = 0
         self.ui_parent = None
         self.is_modified = False
+        self._question = self.__dict__.get('question', "")
 
         # if the UI metadata declares a password widget we treat the field as a password
         if not self.is_password and self.metadata.get("widget_type") == "password":
@@ -112,3 +113,12 @@ class ConfigItem:
         """Reset value to default."""
         self.value = self.default_value
         self.is_modified = False
+
+    @property
+    def question(self) -> str:
+        result = self._question() if callable(self._question) else self._question
+        return "" if result is None else str(result)
+
+    @question.setter
+    def question(self, value: Union[str, Callable[[], Any]]):
+        self._question = value

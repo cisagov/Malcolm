@@ -135,6 +135,7 @@ ADD --chmod=644 filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/
 ADD --chmod=644 filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 filebeat/supervisord.conf /etc/supervisord.conf

@@ -110,12 +110,6 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./docker-compose.yml "$DESTDIR/docker-compose.yml"
   cp $VERBOSE ./.justfile "$DESTDIR/.justfile"
   cp $VERBOSE ./.envrc.example "$DESTDIR/.envrc.example"
-  cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/malcolm_kubernetes.py "$DESTDIR/scripts/"
-  cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
-  cp $VERBOSE ./shared/bin/tx-rx-secure.sh "$DESTDIR/scripts/"
   git ls-files -z ./kubernetes/*.* | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/kubernetes/"
   cp $VERBOSE ./README.md "$DESTDIR/"
   cp $VERBOSE ./arkime/etc/wise.ini.example "$DESTDIR/arkime/etc/"
@@ -124,6 +118,25 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./logstash/maps/malcolm_severity.yaml "$DESTDIR/logstash/maps/"
   git ls-files ./netbox/config | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   git ls-files -z ./netbox/preload/*.yml | xargs -0 -I{} cp $VERBOSE "{}" "$DESTDIR/netbox/preload/"
+  cp $VERBOSE ./shared/bin/tx-rx-secure.sh "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/control.py "$DESTDIR/scripts/"
+
+  # these scripts go in both the tarball and the run path
+  cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/install.py "$RUN_PATH/"
+  git ls-files ./scripts/installer | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
+  pushd "./scripts" >/dev/null 2>&1
+  git ls-files ./installer | /usr/bin/rsync -R --files-from=- ./ "$RUN_PATH/"
+  popd  >/dev/null 2>&1
+  cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_common.py "$RUN_PATH/"
+  cp $VERBOSE ./scripts/malcolm_constants.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_constants.py "$RUN_PATH/"
+  cp $VERBOSE ./scripts/malcolm_kubernetes.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_kubernetes.py "$RUN_PATH/"
+  cp $VERBOSE ./scripts/malcolm_utils.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/malcolm_utils.py "$RUN_PATH/"
+
 
   pushd "$DESTDIR" >/dev/null 2>&1
   touch ./.opensearch.primary.curlrc ./.opensearch.secondary.curlrc
@@ -143,10 +156,6 @@ if mkdir "$DESTDIR"; then
   pushd .. >/dev/null 2>&1
   DESTNAME="$RUN_PATH/$(basename $DESTDIR).tar.gz"
   README="$RUN_PATH/$(basename $DESTDIR).README.txt"
-  cp $VERBOSE "$SCRIPT_PATH/install.py" "$RUN_PATH/"
-  cp $VERBOSE "$SCRIPT_PATH/malcolm_common.py" "$RUN_PATH/"
-  cp $VERBOSE "$SCRIPT_PATH/malcolm_kubernetes.py" "$RUN_PATH/"
-  cp $VERBOSE "$SCRIPT_PATH/malcolm_utils.py" "$RUN_PATH/"
 
   if [[ "$(uname -s)" == "Darwin" ]]; then
       tar $VERBOSE -czf "$DESTNAME" "./$(basename $DESTDIR)/"
