@@ -34,7 +34,8 @@ from scripts.malcolm_common import YAMLDynamic
 
 
 def _write_compose(path, data):
-    if yaml := YAMLDynamic():
+    if yamlImported := YAMLDynamic():
+        yaml = yamlImported.YAML(typ="safe", pure=True)
         yaml.default_flow_style = False
         with open(path, "w") as f:
             yaml.dump(data, f)
@@ -43,7 +44,8 @@ def _write_compose(path, data):
 
 
 def _read_compose(path):
-    if yaml := YAMLDynamic(typ="safe", pure=True):
+    if yamlImported := YAMLDynamic():
+        yaml = yamlImported.YAML(typ="safe", pure=True)
         with open(path, "r") as f:
             return yaml.load(f)
     else:

@@ -439,6 +439,9 @@ class MalcolmConfig(ObservableStoreMixin):
         output_filename: str = "docker-compose.yml",
     ):
         """Generate docker-compose.yml from configuration and template."""
+        yamlImported = YAMLDynamic()
+        if not yamlImported:
+            raise Exception(f'Could not dynamically import YAML library')
 
         # If a template_path is provided, we will read from and write to that same path (in-place edit).
         # If not, we fall back to creating a new file in the config_dir.
@@ -453,14 +456,12 @@ class MalcolmConfig(ObservableStoreMixin):
             raise FileOperationError(f"Docker compose file not found to read from: {target_path}")
 
         try:
-            if y := YAMLDynamic(typ="safe", pure=True):
-                with open(target_path, "r") as f:
-                    compose_data = y.load(f)
-                    if compose_data is None:
-                        raise FileOperationError(f"Docker compose file is empty or invalid: {target_path}")
-            else:
-                raise Exception(f'Could not dynamically import YAML library')
-        except (IOError, OSError, YAMLDynamic().YAMLError if YAMLDynamic() else Exception) as e:
+            y = yamlImported.YAML(typ="safe", pure=True)
+            with open(target_path, "r") as f:
+                compose_data = y.load(f)
+                if compose_data is None:
+                    raise FileOperationError(f"Docker compose file is empty or invalid: {target_path}")
+        except (IOError, OSError, yamlImported.YAMLError) as e:
             raise FileOperationError(f"Failed to read docker-compose file: {e}") from e
 
         # apply docker configuration items to compose structure
@@ -477,11 +478,9 @@ class MalcolmConfig(ObservableStoreMixin):
             # detect change by reading again after applying config
             # (compose_data is our updated content; we need original for comparison)
             # We already loaded original above; re-open to capture raw for safety
-            if y2 := YAMLDynamic(typ="safe", pure=True):
-                with open(target_path, "r") as _f2:
-                    before_data = y2.load(_f2) or {}
-            else:
-                raise Exception(f'Could not dynamically import YAML library')
+            y2 = yamlImported.YAML(typ="safe", pure=True)
+            with open(target_path, "r") as _f2:
+                before_data = y2.load(_f2) or {}
             changed = before_data != compose_data
             if changed:
                 DumpYaml(compose_data, target_path)
@@ -501,7 +500,7 @@ class MalcolmConfig(ObservableStoreMixin):
                 except Exception:
                     pass
 
-        except (IOError, OSError, YAMLDynamic().YAMLError if YAMLDynamic() else Exception) as e:
+        except (IOError, OSError, yamlImported.YAMLError) as e:
             raise FileOperationError(f"Failed to write docker-compose file: {e}") from e
 
     def _apply_docker_config_to_compose(self, compose_data: Dict[str, Any]):

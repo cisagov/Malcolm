@@ -147,7 +147,8 @@ class SettingsFileHandler:
         try:
             settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-            if (file_format == "yaml") and (yaml := YAMLDynamic()):
+            if (file_format == "yaml") and (yamlImported := YAMLDynamic()):
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 yaml.default_flow_style = False
                 yaml.width = 4096  # prevent line wrapping
                 with open(settings_path, "w") as f:
@@ -234,8 +235,9 @@ class SettingsFileHandler:
         """
         try:
             # determine file format and parse accordingly
-            if settings_path.suffix.lower() in [".yml", ".yaml"]:
-                yaml = YAML(typ="safe", pure=True)
+            yamlImported = YAMLDynamic()
+            if (settings_path.suffix.lower() in [".yml", ".yaml"]) and yamlImported:
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 with open(settings_path, "r") as f:
                     return yaml.load(f) or {}
             elif settings_path.suffix.lower() == ".json":
@@ -247,9 +249,11 @@ class SettingsFileHandler:
                     content = f.read().strip()
                     if content.startswith("{"):
                         return json.loads(content)
-                    else:
-                        yaml = YAML(typ="safe", pure=True)
+                    elif yamlImported:
+                        yaml = yamlImported.YAML(typ="safe", pure=True)
                         return yaml.load(content) or {}
+                    else:
+                        return {}
         except Exception as e:
             raise FileOperationError(f"Failed to parse settings file {settings_path}: {e}")
 

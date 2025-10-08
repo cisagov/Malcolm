@@ -44,7 +44,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # write template to temp directory
         self.template_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(self.template_path, "w") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 yaml.dump(self.compose_template, f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -71,7 +72,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -96,7 +98,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -122,7 +125,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -145,7 +149,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -170,7 +175,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
@@ -199,7 +205,8 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify all values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            if yaml := YAMLDynamic(typ="safe", pure=True):
+            if yamlImported := YAMLDynamic():
+                yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
                 raise Exception(f'Could not dynamically import YAML library')
