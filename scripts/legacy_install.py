@@ -22,7 +22,6 @@ import getpass
 import glob
 import json
 import logging
-import os
 import pathlib
 import platform
 import pprint
@@ -42,26 +41,26 @@ from collections import defaultdict, namedtuple
 from enum import IntEnum
 
 from malcolm_constants import (
-    PLATFORM_WINDOWS,
-    PLATFORM_MAC,
+    CONTAINER_RUNTIME_KEY,
+    DATABASE_MODE_ENUMS,
+    DATABASE_MODE_LABELS,
+    DatabaseMode,
+    MALCOLM_DB_DIR,
+    MALCOLM_LOGS_DIR,
+    MALCOLM_PCAP_DIR,
     PLATFORM_LINUX,
+    PLATFORM_LINUX_ALMA,
+    PLATFORM_LINUX_AMAZON,
     PLATFORM_LINUX_CENTOS,
     PLATFORM_LINUX_DEBIAN,
     PLATFORM_LINUX_FEDORA,
-    PLATFORM_LINUX_UBUNTU,
     PLATFORM_LINUX_ROCKY,
-    PLATFORM_LINUX_ALMA,
-    PLATFORM_LINUX_AMAZON,
-    PROFILE_MALCOLM,
+    PLATFORM_LINUX_UBUNTU,
+    PLATFORM_MAC,
+    PLATFORM_WINDOWS,
     PROFILE_HEDGEHOG,
     PROFILE_KEY,
-    CONTAINER_RUNTIME_KEY,
-    DatabaseMode,
-    DATABASE_MODE_LABELS,
-    DATABASE_MODE_ENUMS,
-    MALCOLM_DB_DIR,
-    MALCOLM_PCAP_DIR,
-    MALCOLM_LOGS_DIR,
+    PROFILE_MALCOLM,
 )
 
 from malcolm_common import (
@@ -1870,7 +1869,7 @@ class Installer(object):
                             )
 
                         InstallerDisplayMessage(
-                            f'Place feed definitions in\n\n  * TAXII - {os.path.join(malcolm_install_path, "zeek/intel/STIX/taxii.yaml")}\n  * MISP - {os.path.join(malcolm_install_path, "zeek/intel/MISP/misp.yaml")}\n  * Mandiant - {os.path.join(malcolm_install_path, "zeek/intel/Mandiant/mandiant.yaml")}\n\nSee Zeek Intelligence Framework in Malcolm documentation.',
+                            f'Place feed definitions in\n\n  * TAXII - {os.path.join(malcolm_install_path, "zeek/intel/STIX/taxii.yaml")}\n  * MISP - {os.path.join(malcolm_install_path, "zeek/intel/MISP/misp.yaml")}\n  * Google - {os.path.join(malcolm_install_path, "zeek/intel/Google/google.yaml")}\n  * Mandiant - {os.path.join(malcolm_install_path, "zeek/intel/Mandiant/mandiant.yaml")}\n\nSee Zeek Intelligence Framework in Malcolm documentation.',
                         )
 
                 ###################################################################################

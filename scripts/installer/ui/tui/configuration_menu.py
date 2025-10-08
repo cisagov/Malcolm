@@ -83,7 +83,9 @@ class ConfigurationMenu(BaseMenu):
             self.menu_builder.add_tree_item(row.prefix, item_number, item.label, value_display)
 
         self.menu_builder.add_action_section()
-        self.menu_builder.add_action("s", "Save and Continue Installation")
+        self.menu_builder.add_action(
+            "s", f"Save and Continue{'' if self.install_context.config_only else ' Installation'}"
+        )
         self.menu_builder.add_action("w", "Where Is...? (search for settings)")
 
         if self.debug_mode:

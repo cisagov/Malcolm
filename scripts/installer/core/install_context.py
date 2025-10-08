@@ -40,8 +40,6 @@ class InstallContext(ObservableStoreMixin):
     tarball_path: Optional[str] = None
 
     # Installation behavior
-    run_network_reachability_check: bool = True
-    offline_mode: bool = False
     config_only: bool = False
 
     # System tweaks decisions (collected during installation setup when auto_tweaks=False)
@@ -200,7 +198,7 @@ class InstallContext(ObservableStoreMixin):
         except Exception:
             self._compose_available = None
 
-    def get_item_value(self, key: str) -> Any:
+    def get_item_value(self, key: str, default=None) -> Any:
         """Get the value of an installation item.
 
         Args:
@@ -211,7 +209,7 @@ class InstallContext(ObservableStoreMixin):
         """
         if key in self.items:
             return self.items[key].get_value()
-        return None
+        return default
 
     def set_item_value(self, key: str, value: Any) -> bool:
         """Set the value of an installation item.
@@ -296,47 +294,47 @@ class InstallContext(ObservableStoreMixin):
     @property
     def auto_tweaks(self) -> bool:
         """Get auto_tweaks value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, default=True)
 
     @property
     def install_docker_if_missing(self) -> bool:
         """Get install_docker_if_missing value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING, default=True)
 
     @property
     def use_homebrew(self) -> bool:
         """Get use_homebrew value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_USE_HOMEBREW) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_USE_HOMEBREW, default=True)
 
     @property
     def continue_without_homebrew(self) -> bool:
         """Get continue_without_homebrew value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW) or False
+        return self.get_item_value(KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW, default=False)
 
     @property
     def configure_docker_resources(self) -> bool:
         """Get configure_docker_resources value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES, default=True)
 
     @property
     def try_docker_repository_install(self) -> bool:
         """Get try_docker_repository_install value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY, default=True)
 
     @property
     def try_docker_convenience_script(self) -> bool:
         """Get try_docker_convenience_script value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT) or False
+        return self.get_item_value(KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT, default=False)
 
     @property
     def apply_memory_settings(self) -> bool:
         """Get apply_memory_settings value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS) or True
+        return self.get_item_value(KEY_INSTALLATION_ITEM_APPLY_MEMORY_SETTINGS, default=True)
 
     @property
     def pull_malcolm_images(self) -> bool:
         """Get pull_malcolm_images value from items or default."""
-        return bool(self.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES))
+        return bool(self.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES, default=False))
 
     # ------------------------------------------------------------------
     # Serialization helpers for testing/session continuity

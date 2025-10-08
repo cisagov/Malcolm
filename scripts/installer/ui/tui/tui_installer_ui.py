@@ -161,7 +161,6 @@ class TUIInstallerUI(InstallerUI):
 
         # add installation options from the context (keep to simple, high-signal flags)
         summary_items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
-        summary_items.append(("Offline Mode", "Yes" if install_context.offline_mode else "No"))
         summary_items.append(("Config Only", "Yes" if install_context.config_only else "No"))
         summary_items.append(("Dry Run", "Yes" if is_dry_run else "No"))
 

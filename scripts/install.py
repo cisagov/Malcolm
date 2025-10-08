@@ -43,6 +43,7 @@ from scripts.installer.args.extras_args import add_extras_args
 from scripts.installer.args.install_files_args import add_install_files_args
 from scripts.installer.args.presentation_args import add_presentation_args
 
+from scripts.installer.configs.constants.installation_item_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.constants.enums import InstallerResult, ControlFlow
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
@@ -568,6 +569,8 @@ def main():
         # reflect CLI-driven control flow in context for UI summaries
         try:
             install_context.config_only = control_flow.is_config_only()
+            if install_context.config_only:
+                install_context.set_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False)
         except Exception:
             pass
     except Exception as e:
@@ -711,7 +714,8 @@ def main():
                 )
                 return
 
-        install_context = ui_impl.gather_install_options(platform_installer, malcolm_config, install_context)
+        if not install_context.config_only:
+            install_context = ui_impl.gather_install_options(platform_installer, malcolm_config, install_context)
 
         if install_context is None:
             InstallerLogger.info("Installation cancelled by user.") # fmt: skip

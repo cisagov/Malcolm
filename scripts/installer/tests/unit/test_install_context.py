@@ -34,8 +34,6 @@ class TestInstallContext(unittest.TestCase):
         self.assertEqual(self.context.image_source, "registry")
         self.assertIsNone(self.context.image_archive_path)
         self.assertFalse(self.context.load_images_from_archive)
-        self.assertTrue(self.context.run_network_reachability_check)
-        self.assertFalse(self.context.offline_mode)
         self.assertFalse(self.context.config_only)
         self.assertEqual(self.context.docker_extra_users, [])
         self.assertFalse(self.context.user_confirmed_install)
@@ -46,13 +44,11 @@ class TestInstallContext(unittest.TestCase):
         context = InstallContext(
             image_source="archive",
             image_archive_path="/path/to/archive",
-            offline_mode=True,
             docker_extra_users=["user1", "user2"],
         )
 
         self.assertEqual(context.image_source, "archive")
         self.assertEqual(context.image_archive_path, "/path/to/archive")
-        self.assertTrue(context.offline_mode)
         self.assertEqual(context.docker_extra_users, ["user1", "user2"])
 
     def test_item_operations_no_items(self):

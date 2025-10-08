@@ -11,6 +11,7 @@ from typing import Any, List
 
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.utils.tweak_utils import should_apply_tweak
+from scripts.malcolm_utils import file_contents
 
 
 def _normalize_status(result: Any) -> InstallerResult:
@@ -25,39 +26,39 @@ def _normalize_status(result: Any) -> InstallerResult:
 
 
 def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
-    """Apply sysctl tweaks (ported from steps/tweak_sysctl.py)."""
+    """Apply sysctl tweaks"""
     import os, tempfile
 
     SYSCTL_SETTINGS = [
-        ("fs.file-max", "2097152", "immediate"),
-        ("fs.inotify.max_user_watches", "131072", "immediate"),
-        ("fs.inotify.max_queued_events", "131072", "immediate"),
-        ("fs.inotify.max_user_instances", "512", "immediate"),
-        ("vm.max_map_count", "262144", "config_file"),
-        ("vm.swappiness", "1", "config_file"),
-        ("vm.dirty_background_ratio", "40", "config_file"),
-        ("vm.dirty_ratio", "80", "config_file"),
-        ("net.core.somaxconn", "65535", "immediate"),
-        ("net.ipv4.tcp_retries2", "5", "config_file"),
+        ("fs.file-max", "2097152"),
+        ("fs.inotify.max_user_watches", "131072"),
+        ("fs.inotify.max_queued_events", "131072"),
+        ("fs.inotify.max_user_instances", "512"),
+        ("vm.max_map_count", "262144"),
+        ("vm.swappiness", "1"),
+        ("vm.dirty_background_ratio", "40"),
+        ("vm.dirty_ratio", "80"),
+        ("net.core.somaxconn", "65535"),
+        ("net.ipv4.tcp_retries2", "5"),
     ]
 
     def _write_to_sysctl_conf(setting_name: str, setting_value: str) -> bool:
-        path = "/etc/sysctl.conf"
+        path = '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf'
         prefix = f"{setting_name}="
         try:
-            existing_lines = []
-            if os.path.exists(path):
-                err, out = platform.run_process(["cat", path], privileged=True)
-                if err == 0 and out:
-                    existing_lines = [line + ("\n" if not line.endswith("\n") else "") for line in out]
-            desired_line = f"{prefix}{setting_value}\n"
-            for line in existing_lines:
-                if line.strip().startswith(prefix) and line.strip() == desired_line.strip():
-                    return True
-            filtered = [ln for ln in existing_lines if not ln.strip().startswith(prefix)]
+            if os.path.exists(path) and (existing_contents := file_contents(path)):
+                existing_lines = [
+                    ln.strip() for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                ]
+            else:
+                existing_lines = []
+            desired_line = f"{prefix}{setting_value}"
+            if desired_line in existing_lines:
+                return True
+            filtered = [ln for ln in existing_lines if not ln.startswith(prefix)]
             filtered.append(desired_line)
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-                tmp.writelines(filtered)
+                f.writelines(f'{s}\n' for s in filtered)
                 tmp_path = tmp.name
             err, _ = platform.run_process(["cp", tmp_path, path], privileged=True)
             try:
@@ -85,13 +86,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
             logger.info(f"Dry run: would set {setting_name}={setting_value} ({method})")
             successes += 1
             continue
-        ok = False
-        if method == "immediate":
-            err, _ = platform.run_process(["sysctl", "-w", f"{setting_name}={setting_value}"], privileged=True)
-            ok = err == 0
-        else:
-            ok = _write_to_sysctl_conf(setting_name, setting_value)
-        if ok:
+        if ok := _write_to_sysctl_conf(setting_name, setting_value):
             logger.info(f"Applied {setting_name}={setting_value}")
             successes += 1
         else:
@@ -114,17 +109,15 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
     SECURITY_LIMITS_DIR = "/etc/security/limits.d"
     MALCOLM_LIMITS_FILE = "99-malcolm.conf"
     limits_file = os.path.join(SECURITY_LIMITS_DIR, MALCOLM_LIMITS_FILE)
-    lines = [
-        "# Malcolm security limits",
+    desired_content = [
+        "# Malcolm file and memory limits",
         "* soft nofile 65535",
         "* hard nofile 65535",
         "* soft memlock unlimited",
         "* hard memlock unlimited",
         "* soft nproc 262144",
         "* hard nproc 524288",
-        "",
     ]
-    content = "\n".join(lines) + "\n"
     try:
         if platform.is_dry_run():
             logger.info(f"Dry run: would write {limits_file} with security limits")
@@ -134,12 +127,19 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
             logger.error(f"Failed to create {SECURITY_LIMITS_DIR}: {' '.join(out)}")
             return InstallerResult.FAILURE, "Could not create limits dir"
         if os.path.exists(limits_file):
-            err, out = platform.run_process(["cat", limits_file], privileged=True)
-            if err == 0 and "\n".join(out).strip() == content.strip():
+            if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
+                existing_lines = [
+                    ln.strip()
+                    for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                    if ln.strip()
+                ]
+            else:
+                existing_lines = []
+            if existing_lines == desired_content:
                 logger.info(f"Security limits already configured in {limits_file}")
                 return InstallerResult.SUCCESS, "Already configured"
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-            tmp.write(content)
+            tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
         try:
@@ -169,25 +169,32 @@ def apply_systemd_limits(malcolm_config, config_dir: str, platform, ctx, logger)
         logger.info(f"Skipping systemd limits (not applicable for {distro} {codename})")
         return InstallerResult.SKIPPED, "Not applicable"
     limits_file = os.path.join(SYSTEMD_LIMITS_DIR, MALCOLM_SYSTEMD_FILE)
-    content = """[Manager]
-DefaultLimitNOFILE=65535:65535
-DefaultLimitMEMLOCK=infinity
-"""
+    desired_content = [
+        "[Manager]" "DefaultLimitNOFILE=65535:65535",
+        "DefaultLimitMEMLOCK=infinity",
+    ]
     try:
         if platform.is_dry_run():
             logger.info(f"Dry run: would write {limits_file} with systemd limits")
             return InstallerResult.SKIPPED, "Systemd limits skipped (dry run)"
-        if os.path.exists(limits_file):
-            err, out = platform.run_process(["cat", limits_file], privileged=True)
-            if err == 0 and "\n".join(out).strip() == content.strip():
-                logger.info(f"Systemd limits already configured in {limits_file}")
-                return InstallerResult.SUCCESS, "Already configured"
+
+        if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
+            existing_lines = [
+                ln.strip()
+                for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                if ln.strip()
+            ]
+        else:
+            existing_lines = []
+        if existing_lines == desired_content:
+            logger.info(f"Systemd limits already configured in {limits_file}")
+            return InstallerResult.SUCCESS, "Already configured"
         err, out = platform.run_process(["mkdir", "-p", SYSTEMD_LIMITS_DIR], privileged=True)
         if err != 0:
             logger.error(f"Failed to create {SYSTEMD_LIMITS_DIR}: {' '.join(out)}")
-            return InstallerResult.FAILURE, "Could not create dir"
+            return InstallerResult.FAILURE, "Could not create limits dir"
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-            tmp.write(content)
+            tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
         try:
@@ -224,7 +231,7 @@ def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) ->
         if has_cgroup:
             logger.info(f"GRUB cgroup parameters already configured in {GRUB_DEFAULT_PATH}.")
             return InstallerResult.SKIPPED, "Already configured"
-        cgroup_params = "cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem"
+        cgroup_params = "systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem"
         err, out = platform.run_process(
             [
                 "bash",

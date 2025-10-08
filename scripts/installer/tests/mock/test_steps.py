@@ -200,28 +200,6 @@ class TestDockerOpsAction(BaseInstallerTest):
             ),
         )
 
-    def test_docker_ops_step_network_check(self):
-        """Test Docker operations with network connectivity check."""
-        from scripts.installer.actions import shared as shared_actions
-
-        config = self.create_test_config()
-        ctx = self.create_test_context(run_network_reachability_check=True)
-
-        # Mock successful network check
-        with patch("os.path.isfile", return_value=False):
-
-            result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
-
-        self.assertEqual(
-            result,
-            (
-                InstallerResult.SUCCESS,
-                "Compose file missing; docker operations skipped",
-            ),
-        )
-
 
 class TestAncillaryStep(BaseInstallerTest):
     """Test the ancillary configuration step."""
