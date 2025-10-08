@@ -9,7 +9,6 @@ import json
 import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from ruamel.yaml import YAML
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
@@ -37,7 +36,7 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     get_set_of_installation_item_keys,
 )
-from scripts.malcolm_common import get_malcolm_version
+from scripts.malcolm_common import get_malcolm_version, YAMLDynamic
 from scripts.installer.utils.logger_utils import InstallerLogger
 from enum import Enum, Flag
 
@@ -149,13 +148,13 @@ class SettingsFileHandler:
         try:
             settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-            if file_format == "yaml":
-                yaml = YAML()
+            if (file_format == "yaml") and (yaml := YAMLDynamic()):
                 yaml.default_flow_style = False
                 yaml.width = 4096  # prevent line wrapping
                 with open(settings_path, "w") as f:
                     yaml.dump(settings_data, f)
             else:  # json
+                file_format = "json"
                 with open(settings_path, "w") as f:
                     json.dump(settings_data, f, indent=2, sort_keys=True)
 

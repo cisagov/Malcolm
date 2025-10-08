@@ -12,7 +12,6 @@ import os
 import shutil
 import tempfile
 import unittest
-from ruamel.yaml import YAML
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.actions.shared import update_ancillary as update_docker_compose_files
@@ -31,19 +30,24 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
 )
 from scripts.malcolm_constants import DatabaseMode, DATABASE_MODE_LABELS
+from scripts.malcolm_common import YAMLDynamic
 
 
 def _write_compose(path, data):
-    yaml = YAML()
-    yaml.default_flow_style = False
-    with open(path, "w") as f:
-        yaml.dump(data, f)
+    if yaml := YAMLDynamic():
+        yaml.default_flow_style = False
+        with open(path, "w") as f:
+            yaml.dump(data, f)
+    else:
+        raise Exception(f'Could not dynamically import YAML library')
 
 
 def _read_compose(path):
-    yaml = YAML(typ="safe", pure=True)
-    with open(path, "r") as f:
-        return yaml.load(f)
+    if yaml := YAMLDynamic(typ="safe", pure=True):
+        with open(path, "r") as f:
+            return yaml.load(f)
+    else:
+        raise Exception(f'Could not dynamically import YAML library')
 
 
 class TestTraefikLabels(unittest.TestCase):

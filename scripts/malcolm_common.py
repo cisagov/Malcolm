@@ -299,10 +299,12 @@ def ParseK8sMemoryToMib(val):
 def GetUidGidFromEnv(configDir=None):
     configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = defaultdict(str)
+    # default to the IDs for the calling user ...
+    pyPlatform = platform.system()
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
     if dotEnvImported := DotEnvDynamic():
-        pyPlatform = platform.system()
-        uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-        uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+        # ... but prefer the values in process.env
         envFileName = os.path.join(configDirToCheck, 'process.env')
         if os.path.isfile(envFileName):
             envValues = dotEnvImported.dotenv_values(envFileName)

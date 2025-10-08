@@ -11,7 +11,6 @@ file roundtrip test.
 import os
 import tempfile
 import unittest
-from ruamel.yaml import YAML as RuamelYAML
 
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
@@ -21,6 +20,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 from scripts.installer.configs.constants.enums import DockerRestartPolicy
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.malcolm_utils import deep_get
+from scripts.malcolm_common import YAMLDynamic
 
 
 class TestDockerComposeRoundtrip(unittest.TestCase):
@@ -44,8 +44,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # write template to temp directory
         self.template_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(self.template_path, "w") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            ryaml.dump(self.compose_template, f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                yaml.dump(self.compose_template, f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
     def tearDown(self):
         """Clean up temporary directory."""
@@ -69,8 +71,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify restart policy was applied to all services
         for service_name in ["test-service-1", "test-service-2"]:
@@ -92,8 +96,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify auto-restart resulted in 'unless-stopped' for all services
         for service_name in ["test-service-1", "test-service-2"]:
@@ -116,8 +122,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify external network configuration
         network_external = deep_get(compose_data, ["networks", "default", "external"])
@@ -137,8 +145,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify default network configuration
         network_external = deep_get(compose_data, ["networks", "default", "external"])
@@ -160,8 +170,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify explicit policy takes precedence (not 'unless-stopped')
         for service_name in ["test-service-1", "test-service-2"]:
@@ -187,8 +199,10 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
         # 3. read the generated file and verify all values
         output_path = os.path.join(self.temp_dir, "docker-compose.yml")
         with open(output_path, "r") as f:
-            ryaml = RuamelYAML(typ="safe", pure=True)
-            compose_data = ryaml.load(f)
+            if yaml := YAMLDynamic(typ="safe", pure=True):
+                compose_data = yaml.load(f)
+            else:
+                raise Exception(f'Could not dynamically import YAML library')
 
         # 4. verify restart policy
         for service_name in ["test-service-1", "test-service-2"]:
