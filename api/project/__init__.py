@@ -879,115 +879,151 @@ def fields():
         raise PermissionError("Not authorized to perform this action")
 
     args = get_request_arguments(request)
-
-    templateName = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
-    arkimeFields = (templateName == app.config["MALCOLM_TEMPLATE"]) and (doctype_from_args(args) == 'network')
+    template_name = malcolm_utils.deep_get(args, ["template"], app.config["MALCOLM_TEMPLATE"])
+    doctype = doctype_from_args(args)
+    include_arkime = (template_name == app.config["MALCOLM_TEMPLATE"]) and (doctype == "network")
 
     fields = defaultdict(dict)
 
-    if arkimeFields:
-        try:
-            # get fields from Arkime's fields table
-            s = SearchClass(
-                using=databaseClient,
-                index=index_from_args(args),
-            ).extra(size=6000)
-            for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
-                if (fieldname := malcolm_utils.deep_get(hit, ['dbField2'])) and (fieldname not in fields):
-                    if debugApi:
-                        hit['source'] = 'arkime'
-                    fields[fieldname] = {
-                        'description': malcolm_utils.deep_get(hit, ['help']),
-                        'type': field_type_map[malcolm_utils.deep_get(hit, ['type'])],
-                    }
-                    if debugApi:
-                        fields[fieldname]['original'] = [hit]
-        except Exception as e:
-            if debugApi:
-                print(f"{type(e).__name__}: {str(e)} getting Arkime fields")
+    if include_arkime:
+        merge_fields(fields, get_arkime_fields(args))
 
-    # get fields from OpenSearch template (and descendant components)
+    merge_fields(fields, get_opensearch_template_fields(template_name))
+    merge_fields(fields, get_dashboards_fields(args))
+
+    clean_fields(fields)
+
+    return jsonify(fields=fields, total=len(fields))
+
+
+def merge_fields(base_fields, new_fields):
+    for name, data in new_fields.items():
+        if name not in base_fields:
+            base_fields[name] = data
+        else:
+            base_fields[name].update(data)
+
+
+def get_arkime_fields(args):
+    result = {}
     try:
-        getTemplateResponseJson = requests.get(
-            f'{opensearchUrl}/_index_template/{templateName}',
+        s = SearchClass(using=databaseClient, index=app.config["ARKIME_FIELDS_INDEX"]).extra(size=6000)
+        for hit in [x['_source'] for x in s.execute().to_dict().get('hits', {}).get('hits', [])]:
+            fieldname = malcolm_utils.deep_get(hit, ['dbField2'])
+            if not fieldname:
+                continue
+            if debugApi:
+                hit['source'] = 'arkime'
+            info = {
+                'description': malcolm_utils.deep_get(hit, ['help']),
+                'type': field_type_map[malcolm_utils.deep_get(hit, ['type'])],
+            }
+            if debugApi:
+                info['original'] = [hit]
+            result[fieldname] = info
+    except Exception as e:
+        if debugApi:
+            print(f"{type(e).__name__}: {e} getting Arkime fields")
+    return result
+
+
+def get_opensearch_template_fields(template_name):
+    result = {}
+    try:
+        response = requests.get(
+            f"{opensearchUrl}/_index_template/{template_name}",
             auth=opensearchReqHttpAuth,
             verify=opensearchSslVerify,
         ).json()
 
-        for template in malcolm_utils.deep_get(getTemplateResponseJson, ["index_templates"]):
+        for template in malcolm_utils.deep_get(response, ["index_templates"], []):
             # top-level fields
-            for fieldname, fieldinfo in malcolm_utils.deep_get(
-                template,
-                ["index_template", "template", "mappings", "properties"],
-                {},
-            ).items():
-                if debugApi:
-                    fieldinfo['source'] = f'opensearch.{templateName}'
-                if 'type' in fieldinfo:
-                    fields[fieldname]['type'] = field_type_map[malcolm_utils.deep_get(fieldinfo, ['type'])]
-                if debugApi:
-                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
-
-            # descendant component fields
-            for componentName in malcolm_utils.get_iterable(
+            result.update(
+                extract_field_info(
+                    malcolm_utils.deep_get(template, ["index_template", "template", "mappings", "properties"], {}),
+                    source=f"opensearch.{template_name}",
+                )
+            )
+            # composed components
+            for comp_name in malcolm_utils.get_iterable(
                 malcolm_utils.deep_get(template, ["index_template", "composed_of"])
             ):
-                getComponentResponseJson = requests.get(
-                    f'{opensearchUrl}/_component_template/{componentName}',
+                comp_resp = requests.get(
+                    f"{opensearchUrl}/_component_template/{comp_name}",
                     auth=opensearchReqHttpAuth,
                     verify=opensearchSslVerify,
                 ).json()
-                for component in malcolm_utils.get_iterable(
-                    malcolm_utils.deep_get(getComponentResponseJson, ["component_templates"])
-                ):
-                    for fieldname, fieldinfo in malcolm_utils.deep_get(
-                        component,
-                        ["component_template", "template", "mappings", "properties"],
-                        {},
-                    ).items():
-                        if debugApi:
-                            fieldinfo['source'] = f'opensearch.{templateName}.{componentName}'
-                        if 'type' in fieldinfo:
-                            fields[fieldname]['type'] = field_type_map[malcolm_utils.deep_get(fieldinfo, ['type'])]
-                        if debugApi:
-                            fields[fieldname]['original'] = fields[fieldname].get('original', []) + [fieldinfo]
-
+                for component in malcolm_utils.get_iterable(malcolm_utils.deep_get(comp_resp, ["component_templates"])):
+                    result.update(
+                        extract_field_info(
+                            malcolm_utils.deep_get(
+                                component, ["component_template", "template", "mappings", "properties"], {}
+                            ),
+                            source=f"opensearch.{template_name}.{comp_name}",
+                        )
+                    )
     except Exception as e:
         if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting OpenSearch index template fields")
+            print(f"{type(e).__name__}: {e} getting OpenSearch index template fields")
+    return result
 
-    # get fields from OpenSearch dashboards
+
+def get_dashboards_fields(args):
+    result = {}
     try:
-        for field in (
-            requests.get(
-                f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
-                params={
-                    'pattern': index_from_args(args),
-                    'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
-                },
-                auth=opensearchReqHttpAuth,
-                verify=opensearchSslVerify,
-            )
-            .json()
-            .get('fields', [])
-        ):
-            if fieldname := malcolm_utils.deep_get(field, ['name']):
-                if debugApi:
-                    field['source'] = 'dashboards'
-                field_types = malcolm_utils.deep_get(field, ['esTypes'], [])
-                fields[fieldname]['type'] = field_type_map[
-                    field_types[0] if len(field_types) > 0 else malcolm_utils.deep_get(fields[fieldname], ['type'])
+        resp = requests.get(
+            f"{dashboardsUrl}/api/index_patterns/_fields_for_wildcard",
+            params={
+                'pattern': index_from_args(args),
+                'meta_fields': ["_source", "_id", "_type", "_index", "_score"],
+            },
+            auth=opensearchReqHttpAuth,
+            verify=opensearchSslVerify,
+        ).json()
+
+        for field in resp.get('fields', []):
+            fieldname = malcolm_utils.deep_get(field, ['name'])
+            if not fieldname:
+                continue
+            if debugApi:
+                field['source'] = 'dashboards'
+            types = malcolm_utils.deep_get(field, ['esTypes'], [])
+            info = {
+                'type': field_type_map[
+                    types[0] if types else malcolm_utils.deep_get(result.get(fieldname, {}), ['type'])
                 ]
-                if debugApi:
-                    fields[fieldname]['original'] = fields[fieldname].get('original', []) + [field]
+            }
+            if debugApi:
+                info['original'] = result.get(fieldname, {}).get('original', []) + [field]
+            result[fieldname] = info
     except Exception as e:
         if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting OpenSearch Dashboards index pattern fields")
+            print(f"{type(e).__name__}: {e} getting OpenSearch Dashboards fields")
+    return result
 
-    for fieldname in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
-        fields.pop(fieldname, None)
 
-    return jsonify(fields=fields, total=len(fields))
+def extract_field_info(properties, source=None):
+    """Convert a mapping properties dict into the internal field format."""
+    fields = {}
+    for name, info in properties.items():
+        # Skip top-level objects that just contain subfields
+        if 'properties' in info and 'type' not in info:
+            continue
+        entry = {}
+        if debugApi:
+            info['source'] = source
+        if 'type' in info:
+            entry['type'] = field_type_map[malcolm_utils.deep_get(info, ['type'])]
+        if debugApi:
+            entry['original'] = entry.get('original', []) + [info]
+
+        fields[name] = entry
+    return fields
+
+
+def clean_fields(fields):
+    for name in ("@version", "_source", "_id", "_type", "_index", "_score", "type"):
+        fields.pop(name, None)
 
 
 @app.route(f"{('/' + app.config['MALCOLM_API_PREFIX']) if app.config['MALCOLM_API_PREFIX'] else ''}/", methods=['GET'])
@@ -1078,114 +1114,58 @@ def ready():
     if not check_roles(request):
         raise PermissionError("Not authorized to perform this action")
 
-    try:
-        arkimeResponse = requests.get(
-            arkimeStatusUrl,
-            verify=False,
-        )
-        arkimeResponse.raise_for_status()
-        arkimeStatus = True
-    except Exception as e:
-        arkimeStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Arkime status")
+    def safe_check(name, func, default=False):
+        """Run a check safely, returning `default` if it fails."""
+        try:
+            return func()
+        except Exception as e:
+            if debugApi:
+                print(f"{type(e).__name__}: {e} getting {name} status")
+            return default
 
-    try:
-        dashboardsStatus = requests.get(
-            f'{dashboardsUrl}/api/status',
-            auth=opensearchReqHttpAuth,
-            verify=opensearchSslVerify,
-        ).json()
-    except Exception as e:
-        dashboardsStatus = {}
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Dashboards status")
+    # Each component’s check becomes a small lambda
+    checks = {
+        "arkime": (lambda: requests.get(arkimeStatusUrl, verify=False).raise_for_status() or True, False),
+        "dashboards": (
+            lambda: requests.get(
+                f"{dashboardsUrl}/api/status",
+                auth=opensearchReqHttpAuth,
+                verify=opensearchSslVerify,
+            ).json(),
+            {},
+        ),
+        "dashboards_maps": (lambda: malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort), False),
+        "filebeat_tcp": (lambda: malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort), False),
+        "freq": (lambda: requests.get(freqUrl).raise_for_status() or True, False),
+        "logstash_health": (lambda: requests.get(f"{logstashUrl}/_health_report").json(), {}),
+        "logstash_lumberjack": (lambda: malcolm_utils.check_socket(logstashHost, logstashLJPort), False),
+        "netbox": (
+            lambda: requests.get(
+                f"{netboxUrl}/api/?format=json",
+                headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
+                verify=False,
+            ).json(),
+            {},
+        ),
+        "opensearch": (lambda: dict(databaseClient.cluster.health()), {}),
+        "pcap_monitor": (lambda: malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort), False),
+        "zeek_extracted_file_monitor": (
+            lambda: malcolm_utils.check_socket(zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort),
+            False,
+        ),
+        "zeek_extracted_file_logger": (
+            lambda: malcolm_utils.check_socket(zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort),
+            False,
+        ),
+    }
 
-    try:
-        dashboardsMapsStatus = malcolm_utils.check_socket(dashboardsHelperHost, dashboardsMapsPort)
-    except Exception as e:
-        dashboardsMapsStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Logstash offline map server")
-
-    try:
-        filebeatTcpJsonStatus = malcolm_utils.check_socket(filebeatHost, filebeatTcpJsonPort)
-    except Exception as e:
-        filebeatTcpJsonStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting filebeat TCP JSON listener status")
-
-    try:
-        freqResponse = requests.get(freqUrl)
-        freqResponse.raise_for_status()
-        freqStatus = True
-    except Exception as e:
-        freqStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting freq status")
-
-    try:
-        logstashHealth = requests.get(f'{logstashUrl}/_health_report').json()
-    except Exception as e:
-        logstashHealth = {}
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Logstash node status")
-
-    try:
-        logstashLJStatus = malcolm_utils.check_socket(logstashHost, logstashLJPort)
-    except Exception as e:
-        logstashLJStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Logstash lumberjack listener status")
-
-    try:
-        netboxStatus = requests.get(
-            f'{netboxUrl}/api/?format=json',
-            headers={"Authorization": f"Token {netboxToken}"} if netboxToken else None,
-            verify=False,
-        ).json()
-    except Exception as e:
-        netboxStatus = {}
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting NetBox status")
-
-    try:
-        openSearchHealth = dict(databaseClient.cluster.health())
-    except Exception as e:
-        openSearchHealth = {}
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting OpenSearch health")
-
-    try:
-        pcapMonitorStatus = malcolm_utils.check_socket(pcapMonitorHost, pcapTopicPort)
-    except Exception as e:
-        pcapMonitorStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting PCAP monitor topic status")
-
-    try:
-        zeekExtractedFileMonitorStatus = malcolm_utils.check_socket(
-            zeekExtractedFileMonitorHost, zeekExtractedFileTopicPort
-        )
-    except Exception as e:
-        zeekExtractedFileMonitorStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Zeek extracted file monitor topic status")
-
-    try:
-        zeekExtractedFileLoggerStatus = malcolm_utils.check_socket(
-            zeekExtractedFileLoggerHost, zeekExtractedFileLoggerTopicPort
-        )
-    except Exception as e:
-        zeekExtractedFileLoggerStatus = False
-        if debugApi:
-            print(f"{type(e).__name__}: {str(e)} getting Zeek extracted file logger topic status")
+    results = {name: safe_check(name, func, default) for name, (func, default) in checks.items()}
 
     return jsonify(
-        arkime=arkimeStatus,
+        arkime=results["arkime"],
         dashboards=(
             malcolm_utils.deep_get(
-                dashboardsStatus,
+                results["dashboards"],
                 [
                     "status",
                     "overall",
@@ -1195,17 +1175,20 @@ def ready():
             )
             != "red"
         ),
-        dashboards_maps=dashboardsMapsStatus,
-        filebeat_tcp=filebeatTcpJsonStatus,
-        freq=freqStatus,
-        logstash_lumberjack=logstashLJStatus,
-        logstash_pipelines=(malcolm_utils.deep_get(logstashHealth, ["status"], "red") != "red")
-        and (malcolm_utils.deep_get(logstashHealth, ["indicators", "pipelines", "status"], "red") != "red"),
-        netbox=bool(isinstance(netboxStatus, dict) and netboxStatus.get('core')),
-        opensearch=(malcolm_utils.deep_get(openSearchHealth, ["status"], 'red') != "red"),
-        pcap_monitor=pcapMonitorStatus,
-        zeek_extracted_file_logger=zeekExtractedFileLoggerStatus,
-        zeek_extracted_file_monitor=zeekExtractedFileMonitorStatus,
+        dashboards_maps=results["dashboards_maps"],
+        filebeat_tcp=results["filebeat_tcp"],
+        freq=results["freq"],
+        logstash_lumberjack=results["logstash_lumberjack"],
+        logstash_pipelines=(
+            malcolm_utils.deep_get(results["logstash_health"], ["status"], "red") != "red"
+            and malcolm_utils.deep_get(results["logstash_health"], ["indicators", "pipelines", "status"], "red")
+            != "red"
+        ),
+        netbox=isinstance(results["netbox"], dict) and bool(results["netbox"].get("core")),
+        opensearch=malcolm_utils.deep_get(results["opensearch"], ["status"], "red") != "red",
+        pcap_monitor=results["pcap_monitor"],
+        zeek_extracted_file_logger=results["zeek_extracted_file_logger"],
+        zeek_extracted_file_monitor=results["zeek_extracted_file_monitor"],
     )
 
 

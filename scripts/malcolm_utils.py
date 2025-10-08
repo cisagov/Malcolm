@@ -333,6 +333,44 @@ def dictsearch(d, target):
 
 
 ###################################################################################################
+# given a dict, return the first value sorted by value
+def min_hash_value_by_value(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the first value sorted by key
+def min_hash_value_by_key(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the last value sorted by value
+def max_hash_value_by_value(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+###################################################################################################
+# given a dict, return the last value sorted by key
+def max_hash_value_by_key(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
     filteredArgs = (
@@ -519,18 +557,18 @@ def get_primary_ip():
 
 ###################################################################################################
 # attempt to decode a string as JSON, returning the object if it decodes and None otherwise
-def LoadStrIfJson(jsonStr):
+def LoadStrIfJson(jsonStr, default=None):
     try:
         return json.loads(jsonStr)
     except ValueError:
-        return None
+        return default
 
 
 ###################################################################################################
 # attempt to decode a file (given by handle) as JSON, returning the object if it decodes and
 # None otherwise. Also, if attemptLines=True, attempt to handle cases of a file containing
 # individual lines of valid JSON.
-def LoadFileIfJson(fileHandle, attemptLines=False):
+def LoadFileIfJson(fileHandle, attemptLines=False, default=None):
     if fileHandle is not None:
 
         try:
@@ -538,19 +576,22 @@ def LoadFileIfJson(fileHandle, attemptLines=False):
         except ValueError:
             result = None
 
-        if (result is None) and attemptLines:
-            fileHandle.seek(0)
-            result = []
-            for line in fileHandle:
-                try:
-                    result.append(json.loads(line))
-                except ValueError:
-                    pass
-            if not result:
-                result = None
+        if result is None:
+            if attemptLines:
+                fileHandle.seek(0)
+                result = []
+                for line in fileHandle:
+                    try:
+                        result.append(json.loads(line))
+                    except ValueError:
+                        pass
+                if not result:
+                    result = default
+            else:
+                result = default
 
     else:
-        result = None
+        result = default
 
     return result
 
