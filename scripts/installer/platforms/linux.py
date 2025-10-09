@@ -61,40 +61,40 @@ class LinuxInstaller(BaseInstaller):
 
     def _get_check_package_command(self) -> Optional[List[str]]:
         """Determine command to use to query if a package is installed."""
-        if which('dpkg', debug=self.debug):
+        if which('dpkg'):
             os.environ["DEBIAN_FRONTEND"] = "noninteractive"
             return ['dpkg', '-s']
-        elif which('rpm', debug=self.debug):
+        elif which('rpm'):
             return ['rpm', '-q']
-        elif which('dnf', debug=self.debug):
+        elif which('dnf'):
             return ['dnf', 'list', 'installed']
-        elif which('yum', debug=self.debug):
+        elif which('yum'):
             return ['yum', 'list', 'installed']
         else:
             return None
 
     def _get_install_package_command(self) -> Optional[List[str]]:
         """Determine command to use to query if a package is installed."""
-        if which('apt-get', debug=self.debug):
+        if which('apt-get'):
             return ['apt-get', 'install', '-y', '-qq']
-        elif which('apt', debug=self.debug):
+        elif which('apt'):
             return ['apt', 'install', '-y', '-qq']
-        elif which('dnf', debug=self.debug):
+        elif which('dnf'):
             return ['dnf', '-y', 'install', '--nobest']
-        elif which('yum', debug=self.debug):
+        elif which('yum'):
             return ['yum', '-y', 'install']
         else:
             return None
 
     def _get_update_repo_command(self) -> Optional[List[str]]:
         """Determine command to use to query if a package is installed."""
-        if which('apt-get', debug=self.debug):
+        if which('apt-get'):
             return ['apt-get', 'update', '-y', '-qq']
-        elif which('apt', debug=self.debug):
+        elif which('apt'):
             return ['apt', 'update', '-y', '-qq']
-        elif which('dnf', debug=self.debug):
+        elif which('dnf'):
             return ['dnf', '-y', 'check-update']
-        elif which('yum', debug=self.debug):
+        elif which('yum'):
             return ['yum', '-y', 'makecache']
         else:
             return None
@@ -198,8 +198,7 @@ class LinuxInstaller(BaseInstaller):
         if self.update_repo_cmd:
             err, out = self.run_process(self.update_repo_cmd, privileged=True)
             if err != 0:
-                InstallerLogger.error(f"Failed to update package lists: {out}")
-                return False
+                InstallerLogger.warning(f"Failed to update package lists: {out}")
 
         packages_to_install = [p for p in packages if not self.package_is_installed(p)]
         if self.config_only or self.dry_run:
@@ -400,7 +399,7 @@ class LinuxInstaller(BaseInstaller):
                     if DownloadToFile(
                         f"https://download.docker.com/linux/{repo_distro}/gpg", armored_gpg_filename, self.debug
                     ):
-                        if which('gpg', debug=self.debug):
+                        if which('gpg'):
                             err, out = self.run_process(
                                 ["gpg", "--dearmor", "--output", dearmored_gpg_filename, armored_gpg_filename],
                                 privileged=True,
@@ -423,26 +422,14 @@ class LinuxInstaller(BaseInstaller):
                                 f"deb [signed-by={dearmored_gpg_filename}] https://download.docker.com/linux/{repo_distro} {self.codename} stable\n"
                             )
                         if self.update_repo_cmd:
-                            err, out = self.run_process(self.update_repo_cmd, privileged=True)
-                            if err != 0:
-                                InstallerLogger.error(f"Failed to update package lists: {out}")
+                            up_err, out = self.run_process(self.update_repo_cmd, privileged=True)
+                            if up_err != 0:
+                                InstallerLogger.warning(f"Failed to update package lists: {out}")
 
         except Exception as e:
             InstallerLogger.error(f"Failed to setup Docker APT repository: {e}")
 
         return err == 0
-
-    def _setup_docker_fedora_repo(self) -> bool:
-        err, out = self.run_process(
-            [
-                'dnf',
-                'config-manager',
-                '-y',
-                '--add-repo',
-                'https://download.docker.com/linux/fedora/docker-ce.repo',
-            ],
-            privileged=True,
-        )
 
     def _install_docker_convenience_script(self) -> bool:
         """Install Docker using the convenience script from get.docker.com."""
