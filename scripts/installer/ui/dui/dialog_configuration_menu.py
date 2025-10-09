@@ -205,14 +205,6 @@ class DialogConfigurationMenu:
                 InstallerLogger.error(str(e))
                 return
 
-            # update install context if applicable (explicit API, no reflection)
-            if item.metadata.get("affects_install_context", False):
-                install_context_field = item.metadata.get("install_context_field")
-                if install_context_field == "docker_extra_users":
-                    try:
-                        self.ctx.set_docker_extra_users(new_value)
-                    except Exception:
-                        pass
             return
 
     def _flatten_visible_keys(self) -> List[str]:

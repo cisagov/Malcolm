@@ -48,6 +48,8 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_DEBIAN,
     PLATFORM_LINUX_FEDORA,
     PLATFORM_LINUX_UBUNTU,
+    PUID_DEFAULT,
+    PGID_DEFAULT,
     YAML_VERSION,
     ImageArchitecture,
     OrchestrationFramework,
@@ -299,11 +301,11 @@ def ParseK8sMemoryToMib(val):
 ##################################################################################################
 def GetUidGidFromEnv(configDir=None):
     configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
-    uidGidDict = defaultdict(str)
+    uidGidDict = {}
     # default to the IDs for the calling user ...
     pyPlatform = platform.system()
-    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
-    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else '1000'
+    uidGidDict['PUID'] = f'{os.getuid()}' if (pyPlatform != PLATFORM_WINDOWS) else str(PUID_DEFAULT)
+    uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else str(PGID_DEFAULT)
     if dotEnvImported := DotEnvDynamic():
         # ... but prefer the values in process.env
         envFileName = os.path.join(configDirToCheck, 'process.env')
@@ -315,6 +317,58 @@ def GetUidGidFromEnv(configDir=None):
                 uidGidDict['PGID'] = envValues['PGID']
 
     return uidGidDict
+
+
+##################################################################################################
+def GetNonRootUidGid(
+    reference_path=None,
+    script_user=getpass.getuser(),
+    script_platform=platform.system(),
+):
+    default_uid = str(PUID_DEFAULT)
+    default_gid = str(PGID_DEFAULT)
+
+    if (
+        ((script_platform == PLATFORM_LINUX) or (script_platform == PLATFORM_MAC))
+        and (script_user == "root")
+        and reference_path
+        and os.path.exists(reference_path)
+    ):
+        if path_uid := os.stat(reference_path).st_uid:
+            default_uid = str(path_uid)
+        if path_gid := os.stat(reference_path).st_gid:
+            default_gid = str(path_gid)
+
+    uid = default_uid
+    gid = default_gid
+    try:
+        if script_platform == PLATFORM_LINUX:
+            uid = str(os.getuid())
+            gid = str(os.getgid())
+            if (uid == "0") or (gid == "0"):
+                raise
+    except Exception:
+        uid = default_uid
+        gid = default_gid
+
+    return {
+        'PUID': uid,
+        'PGID': gid,
+    }
+
+
+##################################################################################################
+def GetNonRootMalcolmUserNames():
+    return [
+        user
+        for user in {
+            getpass.getuser(),
+            getpwuid(int(GetNonRootUidGid(reference_path=MalcolmPath).get('PUID'))).pw_name if getpwuid else None,
+            os.environ.get("USER"),
+            os.environ.get("LOGNAME"),
+        }
+        if user and user not in {"root", "0"}
+    ]
 
 
 ##################################################################################################
@@ -927,7 +981,7 @@ def DoDynamicImport(
 
                 if (pyPlatform == PLATFORM_LINUX) or (pyPlatform == PLATFORM_MAC):
                     # for linux/mac, we're going to try to figure out if this python is owned by root or the script user
-                    if getpass.getuser() == getpwuid(os.stat(pyExec).st_uid).pw_name:
+                    if getpwuid and (getpass.getuser() == getpwuid(os.stat(pyExec).st_uid).pw_name):
                         # we're running a user-owned python, regular pip should work
                         installCmd = [pipCmd, "install", pipPkgName]
                     else:

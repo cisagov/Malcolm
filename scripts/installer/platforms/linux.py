@@ -6,12 +6,10 @@
 """Linux-specific installer implementation for Malcolm."""
 
 import os
-import tempfile
-from collections import namedtuple
-from typing import List, Tuple, Optional
+from typing import List, Optional
 
 from scripts.malcolm_utils import which, temporary_filename
-from scripts.malcolm_common import get_distro_info, DownloadToFile
+from scripts.malcolm_common import get_distro_info, DownloadToFile, GetNonRootMalcolmUserNames
 from scripts.malcolm_constants import (
     OrchestrationFramework,
     PLATFORM_LINUX,
@@ -197,7 +195,7 @@ class LinuxInstaller(BaseInstaller):
         """Install packages using Linux package manager."""
         if self.update_repo_cmd:
             err, out = self.run_process(self.update_repo_cmd, privileged=True)
-            if err != 0:
+            if err != 0 and self.debug:
                 InstallerLogger.warning(f"Failed to update package lists: {out}")
 
         packages_to_install = [p for p in packages if not self.package_is_installed(p)]
@@ -423,7 +421,7 @@ class LinuxInstaller(BaseInstaller):
                             )
                         if self.update_repo_cmd:
                             up_err, out = self.run_process(self.update_repo_cmd, privileged=True)
-                            if up_err != 0:
+                            if up_err != 0 and self.debug:
                                 InstallerLogger.warning(f"Failed to update package lists: {out}")
 
         except Exception as e:
@@ -463,10 +461,8 @@ class LinuxInstaller(BaseInstaller):
 
     def _add_users_to_docker_group(self, users_to_add: List[str]):
         """Add users to the docker group for non-root access."""
-        script_user = os.environ.get("USER", os.environ.get("LOGNAME", ""))
-
-        if script_user != "root" and script_user not in users_to_add:
-            users_to_add.append(script_user)
+        if other_users := GetNonRootMalcolmUserNames():
+            users_to_add.extend(other_users)
 
         for user in users_to_add:
             if self.config_only or self.dry_run:

@@ -187,15 +187,6 @@ class ConfigurationMenu(BaseMenu):
                 # Attempt to set the new value
                 self.malcolm_config.set_value(selected_key, new_value)
 
-                # Check if this item also affects InstallContext (explicit API)
-                if item_to_edit.metadata.get("affects_install_context", False):
-                    install_context_field = item_to_edit.metadata.get("install_context_field")
-                    if install_context_field == "docker_extra_users":
-                        try:
-                            self.install_context.set_docker_extra_users(new_value)
-                        except Exception:
-                            pass
-
                 break  # Success - exit the edit loop
             except Exception as e:
                 # Show validation error and re-prompt

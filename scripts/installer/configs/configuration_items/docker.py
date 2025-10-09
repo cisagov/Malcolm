@@ -35,20 +35,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
     KEY_CONFIG_ITEM_PROCESS_USER_ID,
-    KEY_CONFIG_ITEM_DOCKER_EXTRA_USERS,
-)
-
-CONFIG_ITEM_DOCKER_EXTRA_USERS = ConfigItem(
-    key=KEY_CONFIG_ITEM_DOCKER_EXTRA_USERS,
-    label="Additional Docker Users",
-    default_value=[],
-    validator=lambda x: isinstance(x, list),
-    question=f"Enter a comma-separated list of non-root users to add to the 'docker' group",
-    widget_type=WidgetType.TEXT,
-    metadata={
-        "affects_install_context": True,  # Tag indicating this also updates InstallContext
-        "install_context_field": "docker_extra_users",  # The corresponding InstallContext field
-    },
 )
 
 CONFIG_ITEM_PROCESS_GROUP_ID = ConfigItem(

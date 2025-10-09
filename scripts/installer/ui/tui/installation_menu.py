@@ -19,9 +19,9 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
+    KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
 )
 from scripts.installer.ui.shared.labels import installation_item_display_label
-
 from scripts.installer.ui.shared.store_view_model import build_rows_from_items
 
 if TYPE_CHECKING:
@@ -122,6 +122,8 @@ class InstallationMenu(BaseMenu):
         new_value = self.prompt_config_item(config_item)
         if new_value is not None:
             self.install_context.set_item_value(key, new_value)
+            if key == KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS:
+                self.install_context.set_docker_extra_users(new_value)
 
     def handle_cancel(self) -> Optional["InstallContext"]:
         """Handle menu cancellation.

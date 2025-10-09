@@ -68,12 +68,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     # PROFILE AND RUNTIME DEPENDENCIES
     # -------------------------------------------------------------------------
-    KEY_CONFIG_ITEM_DOCKER_EXTRA_USERS: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_RUNTIME_BIN,
-            condition=lambda runtime: runtime == "docker",
-        )
-    ),
     # Malcolm profile top-level items
     KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART: DependencySpec(
         visibility=VisibilityRule(

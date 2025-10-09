@@ -526,7 +526,7 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
 
 
 # Expose compose discovery as a tiny shared helper for unit tests
-def discover_compose_command(runtime_bin: str, platform) -> Optional[List[str]]:
+def discover_compose_command(runtime_bin: str, platform) -> Optional[List]:
     """Return a working compose invocation list for the given runtime.
 
     Mirrors the discovery behavior used by perform_docker_operations.

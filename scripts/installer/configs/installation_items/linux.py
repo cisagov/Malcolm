@@ -28,6 +28,7 @@ from scripts.installer.configs.constants.enums import (
     DockerComposeInstallMethod,
 )
 from scripts.malcolm_constants import WidgetType
+from scripts.malcolm_common import GetNonRootMalcolmUserNames
 
 CONFIG_ITEM_DOCKER_INSTALL_METHOD = ConfigItem(
     key=KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
@@ -93,27 +94,18 @@ def _validate_docker_users_list(x):
     return isinstance(x, list) and all(isinstance(user, str) for user in x)
 
 
-# TODO: This is shown early in the original install.py but not used until much much later when we actually run the installer.
-# NOTE: maybe we should instantiate the install_context earlier and load user's choices into it instead of the malcolm_config?
-# CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
-#     key=KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
-#     label='Extra Docker Users (Linux)',
-#     default_value=[],
-#     validator=_validate_docker_users_list,
-#     metadata={
-#         'help': "Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
-#         'widget_type': 'text',
-#     },
-#     cli_metadata={
-#         'arg_name': "--docker-extra-users",
-#         'dest': KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
-#         'metavar': "List<string>",
-#         'type': lambda x: [s.strip() for s in x.split(',') if s.strip()] if x.strip() else [],
-#         'group': KEY_INSTALLATION
-#     }
-# )
-
 # Docker installation questions (exactly matching original installer prompts)
+CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
+    key=KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
+    label='Docker Users',
+    default_value=GetNonRootMalcolmUserNames(),
+    validator=_validate_docker_users_list,
+    metadata={
+        'help': "Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
+        'widget_type': 'text',
+    },
+)
+
 CONFIG_ITEM_INSTALL_DOCKER_IF_MISSING = ConfigItem(
     key=KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     label="Install Docker if Missing",
