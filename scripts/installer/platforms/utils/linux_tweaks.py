@@ -62,7 +62,6 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
                 tmp.writelines(f'{s}\n' for s in filtered)
                 tmp_path = tmp.name
             err, out = platform.run_process(["cp", tmp_path, path], privileged=True)
-            logger.error(f"f{err}: {out}")
             try:
                 os.unlink(tmp_path)
             except Exception:
