@@ -37,6 +37,7 @@ from scripts.malcolm_utils import (
 
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
+from typing import Optional
 
 from scripts.malcolm_constants import (
     MALCOLM_VERSION,
@@ -885,8 +886,16 @@ def ValidNetBoxSubnetFilter(value):
 DynImports = defaultdict(lambda: None)
 
 
-def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
+def DoDynamicImport(
+    importName,
+    pipPkgName,
+    interactive=False,
+    debug=False,
+    silent=True,
+):
     global DynImports
+
+    debug = debug and not silent
 
     # see if we've already imported it
     if not DynImports[importName]:
@@ -909,7 +918,8 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
             if out and (err == 0):
                 pipCmd = [sys.executable, '-m', 'pip']
 
-        eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
+        if not silent:
+            eprint(f"The {pipPkgName} module is required under Python {platform.python_version()} ({pyExec})")
 
         if interactive and which(pipCmd, debug=debug):
             if YesOrNo(f"Importing the {pipPkgName} module failed. Attempt to install via {pipCmd}?"):
@@ -929,7 +939,8 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
 
                 err, out = run_process(installCmd, debug=debug)
                 if err == 0:
-                    eprint(f"Installation of {pipPkgName} module apparently succeeded")
+                    if not silent:
+                        eprint(f"Installation of {pipPkgName} module apparently succeeded")
                     importlib.reload(site)
                     importlib.invalidate_caches()
                     try:
@@ -937,11 +948,12 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
                         if tmpImport:
                             DynImports[importName] = tmpImport
                     except ImportError as e:
-                        eprint(f"Importing the {importName} module still failed: {e}")
-                else:
+                        if not silent:
+                            eprint(f"Importing the {importName} module still failed: {e}")
+                elif not silent:
                     eprint(f"Installation of {importName} module failed: {out}")
 
-    if not DynImports[importName]:
+    if not DynImports[importName] and not silent:
         eprint(
             "System-wide installation varies by platform and Python configuration. Please consult platform-specific documentation for installing Python modules."
         )
@@ -949,20 +961,61 @@ def DoDynamicImport(importName, pipPkgName, interactive=False, debug=False):
     return DynImports[importName]
 
 
-def RequestsDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("requests", "requests", interactive=forceInteraction, debug=debug)
+def RequestsDynamic(
+    debug=False,
+    forceInteraction=False,
+    silent=True,
+):
+    return DoDynamicImport(
+        "requests",
+        "requests",
+        interactive=forceInteraction,
+        debug=debug,
+        silent=silent,
+    )
 
 
-def YAMLDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("ruamel.yaml", "ruamel.yaml", interactive=forceInteraction, debug=debug)
+def YAMLDynamic(
+    debug=False,
+    forceInteraction=False,
+    silent=True,
+):
+    return DoDynamicImport(
+        "ruamel.yaml",
+        "ruamel.yaml",
+        interactive=forceInteraction,
+        debug=debug,
+        silent=silent,
+    )
 
 
-def KubernetesDynamic(verifySsl=False, debug=False, forceInteraction=False):
-    return DoDynamicImport("kubernetes", "kubernetes", interactive=forceInteraction, debug=debug)
+def KubernetesDynamic(
+    verifySsl=False,
+    debug=False,
+    forceInteraction=False,
+    silent=True,
+):
+    return DoDynamicImport(
+        "kubernetes",
+        "kubernetes",
+        interactive=forceInteraction,
+        debug=debug,
+        silent=silent,
+    )
 
 
-def DotEnvDynamic(debug=False, forceInteraction=False):
-    return DoDynamicImport("dotenv", "python-dotenv", interactive=forceInteraction, debug=debug)
+def DotEnvDynamic(
+    debug=False,
+    forceInteraction=False,
+    silent=True,
+):
+    return DoDynamicImport(
+        "dotenv",
+        "python-dotenv",
+        interactive=forceInteraction,
+        debug=debug,
+        silent=silent,
+    )
 
 
 def get_malcolm_dir():
@@ -1639,13 +1692,11 @@ def suggest_ls_workers(cores: int | None = None) -> int:
 # Snapshot the system facts at import-time so they're reusable anywhere.
 # ------------------------------------------------------------------
 
-import platform as _platform
-
 
 # Detect system architecture for container images
 def get_system_image_architecture():
     """Detect system architecture and return appropriate ImageArchitecture enum."""
-    raw_platform = _platform.machine().lower()
+    raw_platform = platform.machine().lower()
     if raw_platform in ("aarch64", "arm64"):
         return ImageArchitecture.ARM64
     else:
@@ -1653,11 +1704,6 @@ def get_system_image_architecture():
 
 
 # Platform detection utilities
-def GetPlatformOSRelease():
-    try:
-        return _platform.freedesktop_os_release().get("VARIANT_ID", None)
-    except Exception:
-        return None
 
 
 def get_platform_name() -> str:
@@ -1666,40 +1712,91 @@ def get_platform_name() -> str:
     Returns:
         Platform name string: 'linux', 'macos', 'windows', or 'unknown'
     """
-    # first attempt: original logic (may return distro like "ubuntu" or None)
-    system = GetPlatformOSRelease()
-
-    # final fallback: use kernel platform
-    if not system:
-        system = _platform.system()
-
-    # map many distro strings to the generic categories
-    normalized = (system or "").lower()
-    linux_aliases = {
-        "linux",
-        "ubuntu",
-        "debian",
-        "centos",
-        "fedora",
-        "rhel",
-        "arch",
-        "manjaro",
-        "opensuse",
-        "alpine",
-        "linuxmint",
-        "mint",
-    }
-    mac_aliases = {"darwin", "mac", "macos", "osx"}
-    windows_aliases = {"windows", "win32", "cygwin", "msys"}
-
-    if normalized in linux_aliases:
+    plat = sys.platform
+    if plat.startswith("linux"):
         return "linux"
-    elif normalized in mac_aliases:
+    elif plat == "darwin":
         return "macos"
-    elif normalized in windows_aliases:
+    elif plat.startswith("win"):
         return "windows"
     else:
         return "unknown"
+
+
+def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str]]:
+    distro = None
+    codename = None
+    release = None
+
+    if get_platform_name() == "linux":
+        if distro_lib := DoDynamicImport("distro", "distro"):
+            distro = distro_lib.id()
+            codename = distro_lib.codename()
+            release = distro_lib.version()
+        else:
+            # check /etc/os-release values first
+            if os.path.isfile('/etc/os-release'):
+                os_info = {}
+                with open("/etc/os-release", 'r') as f:
+                    for line in f:
+                        try:
+                            k, v = line.rstrip().split("=")
+                            os_info[k] = v.strip('"')
+                        except Exception:
+                            pass
+
+                if os_info.get('NAME'):
+                    distro = os_info['NAME'].lower().split()[0]
+
+                if os_info.get('VERSION_CODENAME'):
+                    codename = os_info['VERSION_CODENAME'].lower().split()[0]
+
+                if os_info.get('VERSION_ID'):
+                    release = os_info['VERSION_ID'].lower().split()[0]
+
+            # try lsb_release next
+            if not distro:
+                err, out = run_process(['lsb_release', '-is'], stderr=False)
+                if (err == 0) and out:
+                    distro = out[0].lower()
+
+            if not codename:
+                err, out = run_process(['lsb_release', '-cs'], stderr=False)
+                if (err == 0) and out:
+                    codename = out[0].lower()
+
+            if not release:
+                err, out = run_process(['lsb_release', '-rs'], stderr=False)
+                if (err == 0) and out:
+                    release = out[0].lower()
+
+            # try release-specific files
+            if not distro:
+                if distro_file := next(
+                    (
+                        path
+                        for path in [
+                            '/etc/rocky-release',
+                            '/etc/almalinux-release',
+                            '/etc/centos-release',
+                            '/etc/redhat-release',
+                            '/etc/issue',
+                        ]
+                        if os.path.isfile(path)
+                    ),
+                    None,
+                ):
+                    with open(distro_file, 'r') as f:
+                        distro_vals = f.read().lower().split()
+                        distro_nums = [x for x in distro_vals if x[0].isdigit()]
+                        distro = distro_vals[0]
+                        if (not release) and (len(distro_nums) > 0):
+                            release = distro_nums[0]
+
+            if not distro:
+                distro = "linux"
+
+    return distro, codename, release
 
 
 _rec_puid_pgid = GetUidGidFromEnv()
@@ -1712,7 +1809,7 @@ SYSTEM_INFO: dict[str, object] = {
     "gid": os.getgid(),
     "recommended_nonroot_uid": int(_rec_puid_pgid['PUID']),
     "recommended_nonroot_gid": int(_rec_puid_pgid['PGID']),
-    "platform": _platform.system(),
+    "platform": platform.system(),
     "platform_name": get_platform_name(),
     "image_architecture": get_system_image_architecture(),
 }

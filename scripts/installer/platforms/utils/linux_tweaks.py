@@ -45,6 +45,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
     def _write_to_sysctl_conf(setting_name: str, setting_value: str) -> bool:
         path = '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf'
         prefix = f"{setting_name}="
+        err = 1
         try:
             if os.path.exists(path) and (existing_contents := file_contents(path)):
                 existing_lines = [
@@ -58,15 +59,17 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
             filtered = [ln for ln in existing_lines if not ln.startswith(prefix)]
             filtered.append(desired_line)
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
-                f.writelines(f'{s}\n' for s in filtered)
+                tmp.writelines(f'{s}\n' for s in filtered)
                 tmp_path = tmp.name
-            err, _ = platform.run_process(["cp", tmp_path, path], privileged=True)
+            err, out = platform.run_process(["cp", tmp_path, path], privileged=True)
+            logger.error(f"f{err}: {out}")
             try:
                 os.unlink(tmp_path)
             except Exception:
                 pass
             return err == 0
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error applying sysctl settings: {e}")
             return False
 
     # Allow either granular sysctl_* toggles or a coarse "sysctl" group toggle
@@ -78,12 +81,12 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
         return InstallerResult.SKIPPED, "No sysctl tweaks selected"
 
     successes = 0
-    for setting_name, setting_value, method in SYSCTL_SETTINGS:
+    for setting_name, setting_value in SYSCTL_SETTINGS:
         if not (group_selected or should_apply_tweak(ctx, f"sysctl_{setting_name.split('.')[-1].replace('-', '_')}")):
             successes += 1
             continue
         if platform.is_dry_run():
-            logger.info(f"Dry run: would set {setting_name}={setting_value} ({method})")
+            logger.info(f"Dry run: would set {setting_name}={setting_value}")
             successes += 1
             continue
         if ok := _write_to_sysctl_conf(setting_name, setting_value):
@@ -249,66 +252,10 @@ def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) ->
         return InstallerResult.FAILURE, "GRUB cgroup exception"
 
 
-def apply_network_interface(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
-    from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_TWEAK_IFACE,
-        KEY_CONFIG_ITEM_PCAP_IFACE,
-    )
-
-    if not should_apply_tweak(ctx, "network_interface"):
-        logger.info("Network interface tweak not selected, skipping.")
-        return InstallerResult.SKIPPED, "Network interface not selected"
-    tweak_iface = malcolm_config.get_value(KEY_CONFIG_ITEM_TWEAK_IFACE)
-    pcap_iface = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_IFACE)
-    if not tweak_iface or not pcap_iface:
-        logger.info("Network interface tweaks not configured, skipping.")
-        return InstallerResult.SKIPPED, "Network interface not configured"
-    ethtool_commands: List[List[str]] = [
-        ["ethtool", "-G", pcap_iface, "rx", "4096"],
-        ["ethtool", "-G", pcap_iface, "tx", "4096"],
-        ["ethtool", "-K", pcap_iface, "rx", "off"],
-        ["ethtool", "-K", pcap_iface, "tx", "off"],
-        ["ethtool", "-K", pcap_iface, "sg", "off"],
-        ["ethtool", "-K", pcap_iface, "tso", "off"],
-        ["ethtool", "-K", pcap_iface, "ufo", "off"],
-        ["ethtool", "-K", pcap_iface, "gso", "off"],
-        ["ethtool", "-K", pcap_iface, "gro", "off"],
-        ["ethtool", "-K", pcap_iface, "lro", "off"],
-        ["ethtool", "-K", pcap_iface, "rxvlan", "off"],
-        ["ethtool", "-K", pcap_iface, "txvlan", "off"],
-        ["ethtool", "-K", pcap_iface, "ntuple", "off"],
-        ["ethtool", "-K", pcap_iface, "rxhash", "off"],
-    ]
-    all_ok = True
-    for cmd in ethtool_commands:
-        if platform.is_dry_run():
-            logger.info(f"Dry run: would run: {' '.join(cmd)}")
-            continue
-        try:
-            err, out = platform.run_process(cmd, privileged=True)
-            if err == 0:
-                logger.info(f"Success: {' '.join(cmd)}")
-            else:
-                logger.error(f"Failed: {' '.join(cmd)} (exit code {err})")
-                if out:
-                    logger.error(f"    Output: {' '.join(out)}")
-                all_ok = False
-        except Exception as e:
-            logger.error(f"Error: {' '.join(cmd)} ({e})")
-            all_ok = False
-    if platform.is_dry_run():
-        return InstallerResult.SKIPPED, "Network interface tweaks skipped (dry run)"
-    return (
-        (InstallerResult.SUCCESS, "Network interface tweaks applied")
-        if all_ok
-        else (InstallerResult.FAILURE, "Network interface tweaks failed")
-    )
-
-
 def apply_all(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
     if not platform.should_run_install_steps():
         return InstallerResult.SKIPPED, "Tweaks skipped (non-install control flow)"
-    for func in (apply_sysctl, apply_security_limits, apply_systemd_limits, apply_grub_cgroup, apply_network_interface):
+    for func in (apply_sysctl, apply_security_limits, apply_systemd_limits, apply_grub_cgroup):
         status, _ = func(malcolm_config, config_dir, platform, ctx, logger)
         if status == InstallerResult.FAILURE:
             return status, "A Linux tweak failed"
@@ -377,13 +324,6 @@ def get_tweak_definitions() -> list[dict]:
             "id": "grub_cgroup",
             "label": "GRUB Cgroup Parameters",
             "description": "Enable memory cgroup and swapaccount in GRUB",
-        }
-    )
-    defs.append(
-        {
-            "id": "network_interface",
-            "label": "Optimize Capture Network Interface",
-            "description": "Apply ethtool queue and offload settings",
         }
     )
     # Coarse group switch for all sysctl values (optional UI shortcut)

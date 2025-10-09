@@ -470,9 +470,15 @@ def main():
         sys.exit(1)
 
     for pkgLoop in (1, 2):
-        requests_imported = RequestsDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
-        yaml_imported = YAMLDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
-        dotenv_imported = DotEnvDynamic(debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive))
+        requests_imported = RequestsDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
+        )
+        yaml_imported = YAMLDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
+        )
+        dotenv_imported = DotEnvDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
+        )
         InstallerLogger.debug(f"Imported requests: {requests_imported}")
         InstallerLogger.debug(f"Imported yaml: {yaml_imported}")
         InstallerLogger.debug(f"Imported dotenv: {dotenv_imported}")
@@ -499,7 +505,7 @@ def main():
             if detected_orch_mode == OrchestrationFramework.KUBERNETES:
                 kube_success = False
                 try:
-                    if kube_imported := KubernetesDynamic():
+                    if kube_imported := KubernetesDynamic(silent=False):
                         InstallerLogger.info(f"Imported kubernetes: {kube_imported}")
                         kube_imported.config.load_kube_config(cfg_path)
                         kube_success = True

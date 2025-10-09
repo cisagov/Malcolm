@@ -114,7 +114,6 @@ from malcolm_utils import (
     str2bool,
     touch,
     which,
-    GetPlatformOSRelease,
 )
 
 ###################################################################################################
@@ -5149,7 +5148,9 @@ def main():
         # installer = WindowsInstaller(orchMode, configOnly=args.configOnly)
 
     if orchMode == OrchestrationFramework.DOCKER_COMPOSE:
-        if GetPlatformOSRelease() == 'hedgehog-malcolm':
+        if (
+            platform.freedesktop_os_release().get("VARIANT_ID") if hasattr(platform, "freedesktop_os_release") else None
+        ) == 'hedgehog-malcolm':
             args.runtimeBin = 'docker'
         else:
             runtimeOptions = ('docker', 'podman')

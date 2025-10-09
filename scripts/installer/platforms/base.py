@@ -124,7 +124,10 @@ class BaseInstaller(abc.ABC):
         try:
             return self.install(malcolm_config, config_dir, ctx, logger)
         except Exception as e:
+            import traceback
+
             InstallerLogger.error(f"Installation failed: {e}")
+            InstallerLogger.debug(f"BaseInstaller.run_installation traceback: {e}\n{traceback.format_exc()}")
             return False
 
     def run_process(

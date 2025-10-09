@@ -8,16 +8,26 @@
 import os
 import tempfile
 from collections import namedtuple
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
-try:
-    import distro
-
-    DISTRO_AVAILABLE = True
-except ImportError:
-    DISTRO_AVAILABLE = False
-
-from scripts.malcolm_constants import OrchestrationFramework
+from scripts.malcolm_utils import which, temporary_filename
+from scripts.malcolm_common import get_distro_info, DownloadToFile
+from scripts.malcolm_constants import (
+    OrchestrationFramework,
+    PLATFORM_LINUX,
+    PLATFORM_LINUX_ALMA,
+    PLATFORM_LINUX_AMAZON,
+    PLATFORM_LINUX_CENTOS,
+    PLATFORM_LINUX_DEBIAN,
+    PLATFORM_LINUX_ELEMENTARY,
+    PLATFORM_LINUX_FEDORA,
+    PLATFORM_LINUX_MINT,
+    PLATFORM_LINUX_POP,
+    PLATFORM_LINUX_RHEL,
+    PLATFORM_LINUX_ROCKY,
+    PLATFORM_LINUX_UBUNTU,
+    PLATFORM_LINUX_ZORIN,
+)
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.utils.logger_utils import InstallerLogger
@@ -38,57 +48,137 @@ class LinuxInstaller(BaseInstaller):
         """Initialize the Linux installer."""
         super().__init__(orchestration_mode, ui, debug, control_flow)
 
-        # Detect specific Linux distribution information
-        if DISTRO_AVAILABLE:
-            self.distro = distro.id()
-            self.codename = distro.codename()
-            self.release = distro.version()
-        else:
-            # Fallback if distro package not available
-            self.distro = "linux"
-            self.codename = ""
-            self.release = ""
+        self.distro, self.codename, self.release = get_distro_info()
+        self.check_package_cmd = self._get_check_package_command()
+        self.install_package_cmd = self._get_install_package_command()
+        self.update_repo_cmd = self._get_update_repo_command()
+        self.add_repo_cmd = self._get_add_repo_command()
 
         if self.debug:
-            InstallerLogger.info(f"Linux installer initialized for {self.distro} {self.codename} {self.release}")
+            InstallerLogger.info(
+                f"{PLATFORM_LINUX} installer initialized for {self.distro} {self.codename} {self.release}"
+            )
 
-    def _uses_apt(self):
-        """Check if this distribution uses apt package manager.
+    def _get_check_package_command(self) -> Optional[List[str]]:
+        """Determine command to use to query if a package is installed."""
+        if which('dpkg', debug=self.debug):
+            os.environ["DEBIAN_FRONTEND"] = "noninteractive"
+            return ['dpkg', '-s']
+        elif which('rpm', debug=self.debug):
+            return ['rpm', '-q']
+        elif which('dnf', debug=self.debug):
+            return ['dnf', 'list', 'installed']
+        elif which('yum', debug=self.debug):
+            return ['yum', 'list', 'installed']
+        else:
+            return None
 
-        Default to apt for unknown generic Linux IDs used in tests.
-        """
-        if self.distro in [
-            "ubuntu",
-            "debian",
-            "linuxmint",
-            "pop",
-            "elementary",
-            "zorin",
-        ]:
-            return True
-        if self.distro.startswith("ubuntu") or self.distro.startswith("debian"):
-            return True
-        # Fallback: treat generic or empty identifiers as apt-based for test/mocked environments
-        return self.distro in ("linux", "")
+    def _get_install_package_command(self) -> Optional[List[str]]:
+        """Determine command to use to query if a package is installed."""
+        if which('apt-get', debug=self.debug):
+            return ['apt-get', 'install', '-y', '-qq']
+        elif which('apt', debug=self.debug):
+            return ['apt', 'install', '-y', '-qq']
+        elif which('dnf', debug=self.debug):
+            return ['dnf', '-y', 'install', '--nobest']
+        elif which('yum', debug=self.debug):
+            return ['yum', '-y', 'install']
+        else:
+            return None
 
-    def _uses_dnf_yum(self):
-        """Check if this distribution uses dnf/yum package manager."""
-        return (
-            self.distro in ["fedora", "centos", "rhel", "rocky", "alma"]
-            or self.distro.startswith("fedora")
-            or self.distro.startswith("centos")
-        )
+    def _get_update_repo_command(self) -> Optional[List[str]]:
+        """Determine command to use to query if a package is installed."""
+        if which('apt-get', debug=self.debug):
+            return ['apt-get', 'update', '-y', '-qq']
+        elif which('apt', debug=self.debug):
+            return ['apt', 'update', '-y', '-qq']
+        elif which('dnf', debug=self.debug):
+            return ['dnf', '-y', 'check-update']
+        elif which('yum', debug=self.debug):
+            return ['yum', '-y', 'makecache']
+        else:
+            return None
+
+    def _get_add_repo_command(self) -> Optional[List[str]]:
+        """Determine command to use to query if a package is installed."""
+        if self.distro in (
+            PLATFORM_LINUX_ALMA,
+            PLATFORM_LINUX_FEDORA,
+            PLATFORM_LINUX_ROCKY,
+        ):
+            return [
+                'dnf',
+                'config-manager',
+                '-y',
+                '--add-repo',
+            ]
+        elif self.distro in (PLATFORM_LINUX_CENTOS):
+            return [
+                'yum-config-manager',
+                '-y',
+                '--add-repo',
+            ]
+        else:
+            return None
 
     def _get_required_dependencies(self) -> List[str]:
-        """Get the list of required dependencies for this Linux platform."""
-        basic_deps = ["curl", "wget", "git", "ethtool"]
+        """Get the list of required dependencies for this Linux platform"""
 
-        if self._uses_apt():
-            basic_deps.extend(["apt-transport-https", "ca-certificates", "gnupg", "lsb-release"])
-        elif self._uses_dnf_yum():
-            basic_deps.extend(["dnf-plugins-core"])
+        result = []
+        if self.distro in (
+            PLATFORM_LINUX_DEBIAN,
+            PLATFORM_LINUX_ELEMENTARY,
+            PLATFORM_LINUX_MINT,
+            PLATFORM_LINUX_POP,
+            PLATFORM_LINUX_UBUNTU,
+            PLATFORM_LINUX_ZORIN,
+        ):
+            result.extend(
+                [
+                    'apache2-utils',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-ruamel.yaml',
+                    'xz-utils',
+                ]
+            )
+        elif self.distro in (
+            PLATFORM_LINUX_FEDORA,
+            PLATFORM_LINUX_CENTOS,
+            PLATFORM_LINUX_RHEL,
+        ):
+            result.extend(
+                [
+                    'httpd-tools',
+                    'make',
+                    'openssl',
+                    'python3-dialog',
+                    'python3-dotenv',
+                    'python3-requests',
+                    'python3-ruamel.yaml',
+                    'xz',
+                ]
+            )
+        elif self.distro in (
+            PLATFORM_LINUX_ALMA,
+            PLATFORM_LINUX_AMAZON,
+            PLATFORM_LINUX_ROCKY,
+        ):
+            result.extend(
+                [
+                    'httpd-tools',
+                    'make',
+                    'openssl',
+                    'python3-requests',
+                    'python3-ruamel-yaml',
+                    'xz',
+                ]
+            )
 
-        return basic_deps
+        return result
 
     def install_dependencies(self) -> bool:
         """Install Linux-specific dependencies."""
@@ -97,19 +187,20 @@ class LinuxInstaller(BaseInstaller):
 
     def package_is_installed(self, package_name: str) -> bool:
         """Check if a package is installed on Linux."""
-        if self._uses_apt():
-            check_cmd = ["dpkg", "-s"]
-        elif self._uses_dnf_yum():
-            check_cmd = ["rpm", "-q"]
+        if self.check_package_cmd:
+            err, _ = self.run_process(self.check_package_cmd + [package_name], stderr=False)
+            return err == 0
         else:
-            # Don't know how to check packages on this platform
             return False
-
-        err, _ = self.run_process(check_cmd + [package_name], stderr=False)
-        return err == 0
 
     def install_package(self, packages: List[str]) -> bool:
         """Install packages using Linux package manager."""
+        if self.update_repo_cmd:
+            err, out = self.run_process(self.update_repo_cmd, privileged=True)
+            if err != 0:
+                InstallerLogger.error(f"Failed to update package lists: {out}")
+                return False
+
         packages_to_install = [p for p in packages if not self.package_is_installed(p)]
         if self.config_only or self.dry_run:
             if packages_to_install:
@@ -122,21 +213,7 @@ class LinuxInstaller(BaseInstaller):
                 InstallerLogger.info(f"All packages already installed: {packages}")
             return True
 
-        if self._uses_apt():
-            install_cmd = ["apt-get", "update"]
-            err, out = self.run_process(install_cmd, privileged=True)
-            if err == 0:
-                install_cmd = ["apt-get", "install", "-y"]
-            else:
-                InstallerLogger.error(f"Failed to update package lists: {out}")
-                return False
-        elif self._uses_dnf_yum():
-            install_cmd = ["dnf", "install", "-y"]
-        else:
-            InstallerLogger.error(f"Unsupported Linux distribution for package installation: {self.distro}")
-            return False
-
-        err, out = self.run_process(install_cmd + packages_to_install, privileged=True)
+        err, out = self.run_process(self.install_package_cmd + packages_to_install, privileged=True)
         if err != 0:
             InstallerLogger.error(f"Failed to install packages {packages_to_install}: {out}")
             return False
@@ -205,16 +282,35 @@ class LinuxInstaller(BaseInstaller):
         # Install required packages for repo-based install
         required_repo_packages = []
 
-        if self._uses_apt():
+        if self.distro in (
+            PLATFORM_LINUX_DEBIAN,
+            PLATFORM_LINUX_ELEMENTARY,
+            PLATFORM_LINUX_MINT,
+            PLATFORM_LINUX_POP,
+            PLATFORM_LINUX_UBUNTU,
+            PLATFORM_LINUX_ZORIN,
+        ):
             required_repo_packages = [
-                "apt-transport-https",
-                "ca-certificates",
-                "curl",
-                "gnupg",
-                "software-properties-common",
+                'apt-transport-https',
+                'ca-certificates',
+                'curl',
+                'gpg-agent',
             ]
-        elif self._uses_dnf_yum():
-            required_repo_packages = ["dnf-plugins-core"]
+        elif self.distro == PLATFORM_LINUX_FEDORA:
+            required_repo_packages = ['dnf-plugins-core']
+        elif self.distro in (
+            PLATFORM_LINUX_CENTOS,
+            PLATFORM_LINUX_RHEL,
+        ):
+            required_repo_packages = ['yum-utils', 'device-mapper-persistent-data', 'lvm2']
+        elif self.distro in (
+            PLATFORM_LINUX_ALMA,
+            PLATFORM_LINUX_AMAZON,
+            PLATFORM_LINUX_ROCKY,
+        ):
+            required_repo_packages = ['dnf-utils']
+        else:
+            required_repo_packages = []
 
         if required_repo_packages:
             InstallerLogger.info(f"Installing required packages: {required_repo_packages}")
@@ -223,35 +319,46 @@ class LinuxInstaller(BaseInstaller):
 
         # Add Docker repository and install Docker packages
         docker_packages = []
-
-        if self._uses_apt():
-            # Add Docker GPG key and repository for apt-based distributions
-            if self._setup_docker_apt_repo():
-                docker_packages = [
-                    "docker-ce",
-                    "docker-ce-cli",
-                    "docker-compose-plugin",
-                    "containerd.io",
-                ]
-
-        elif self._uses_dnf_yum():
-            # Add Docker repository for dnf/yum-based distributions
+        repo_url = ""
+        if (
+            self.distro
+            in (
+                PLATFORM_LINUX_DEBIAN,
+                PLATFORM_LINUX_ELEMENTARY,
+                PLATFORM_LINUX_MINT,
+                PLATFORM_LINUX_POP,
+                PLATFORM_LINUX_UBUNTU,
+                PLATFORM_LINUX_ZORIN,
+            )
+            and self._setup_docker_apt_repo()
+        ):
+            docker_packages = [
+                "docker-ce",
+                "docker-ce-cli",
+                "docker-compose-plugin",
+                "containerd.io",
+            ]
+        elif self.distro == PLATFORM_LINUX_FEDORA:
             repo_url = "https://download.docker.com/linux/fedora/docker-ce.repo"
-            if self.distro.startswith("centos") or self.distro in [
-                "rhel",
-                "rocky",
-                "alma",
-            ]:
-                repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
+            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+        elif self.distro == PLATFORM_LINUX_CENTOS:
+            repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
+            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+        elif self.distro in (
+            PLATFORM_LINUX_ALMA,
+            PLATFORM_LINUX_ROCKY,
+        ):
+            repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
+            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+        elif self.distro == PLATFORM_LINUX_AMAZON:
+            docker_packages = ['docker']
 
-            err, out = self.run_process(["dnf", "config-manager", "-y", "--add-repo", repo_url], privileged=True)
-            if err == 0:
-                docker_packages = [
-                    "docker-ce",
-                    "docker-ce-cli",
-                    "docker-compose-plugin",
-                    "containerd.io",
-                ]
+        if self.add_repo_cmd and repo_url:
+            if self.debug and self.add_repo_cmd:
+                InstallerLogger.info(f"Adding Docker repository for {self.distro}")
+            err, out = self.run_process(self.add_repo_cmd + [repo_url], privileged=True)
+            if err != 0:
+                docker_packages = []
 
         if docker_packages:
             InstallerLogger.info(f"Installing Docker packages: {docker_packages}")
@@ -265,8 +372,8 @@ class LinuxInstaller(BaseInstaller):
 
     def _setup_docker_apt_repo(self) -> bool:
         """Setup Docker APT repository for apt-based distributions."""
+        err = 1
         try:
-            import requests
 
             # Download and add Docker GPG key
             if self.debug:
@@ -274,84 +381,84 @@ class LinuxInstaller(BaseInstaller):
 
             # Map distribution to Docker repository name
             repo_distro = self.distro
-            if self.distro in ["linuxmint", "pop", "elementary", "zorin"]:
-                repo_distro = "ubuntu"  # These are Ubuntu-based
-            elif self.distro.startswith("ubuntu"):
-                repo_distro = "ubuntu"
-            elif self.distro.startswith("debian"):
-                repo_distro = "debian"
+            if self.distro in (
+                PLATFORM_LINUX_ELEMENTARY,
+                PLATFORM_LINUX_MINT,
+                PLATFORM_LINUX_POP,
+                PLATFORM_LINUX_UBUNTU,
+                PLATFORM_LINUX_ZORIN,
+            ) or self.distro.startswith(PLATFORM_LINUX_UBUNTU):
+                repo_distro = PLATFORM_LINUX_UBUNTU
+            elif self.distro.startswith(PLATFORM_LINUX_DEBIAN):
+                repo_distro = PLATFORM_LINUX_DEBIAN
 
-            docker_gpg_key = requests.get(
-                f"https://download.docker.com/linux/{repo_distro}/gpg",
-                allow_redirects=True,
-            )
+            if repo_distro and self.codename:
+                # get GPG key and store in /usr/share/keyrings
+                dearmored_gpg_filename = "/usr/share/keyrings/docker-archive-keyring.gpg"
+                repo_list_filename = '/etc/apt/sources.list.d/docker.list'
+                with temporary_filename('.gpg') as armored_gpg_filename:
+                    if DownloadToFile(
+                        f"https://download.docker.com/linux/{repo_distro}/gpg", armored_gpg_filename, self.debug
+                    ):
+                        if which('gpg', debug=self.debug):
+                            err, out = self.run_process(
+                                ["gpg", "--dearmor", "--output", dearmored_gpg_filename, armored_gpg_filename],
+                                privileged=True,
+                                stderr=False,
+                            )
+                        else:
+                            err, out = platform.run_process(
+                                ["cp", armored_gpg_filename, dearmored_gpg_filename], privileged=True
+                            )
 
-            err, out = self.run_process(
-                ["apt-key", "add"],
-                stdin=docker_gpg_key.content.decode("utf-8"),
-                privileged=True,
-                stderr=False,
-            )
+                    # todo verify with 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 
-            if err == 0:
-                # Verify GPG key fingerprint
-                err, out = self.run_process(
-                    ["apt-key", "fingerprint", "0EBFCD88"],
-                    privileged=True,
-                    stderr=False,
-                )
+                if os.path.isfile(dearmored_gpg_filename):
+                    # Add Docker repository
+                    if err == 0:
+                        if self.debug:
+                            InstallerLogger.info(f"Adding Docker repository for {self.distro}")
+                        with open(repo_list_filename, 'w') as repo_list_file:
+                            repo_list_file.write(
+                                f"deb [signed-by={dearmored_gpg_filename}] https://download.docker.com/linux/{repo_distro} {self.codename} stable\n"
+                            )
+                        if self.update_repo_cmd:
+                            err, out = self.run_process(self.update_repo_cmd, privileged=True)
+                            if err != 0:
+                                InstallerLogger.error(f"Failed to update package lists: {out}")
 
-            # Add Docker repository
-            if err == 0:
-                if self.debug:
-                    InstallerLogger.info("Adding Docker repository")
-
-                repo_url = f"deb [arch=amd64] https://download.docker.com/linux/{repo_distro} {self.codename} stable"
-
-                # Remove existing repo first
-                self.run_process(["add-apt-repository", "-y", "-r", repo_url], privileged=True)
-
-                # Add the repo
-                err, out = self.run_process(["add-apt-repository", "-y", "-u", repo_url], privileged=True)
-
-            return err == 0
-
-        except ImportError:
-            InstallerLogger.warning("requests module not available for Docker repository setup")
-            return False
         except Exception as e:
             InstallerLogger.error(f"Failed to setup Docker APT repository: {e}")
-            return False
+
+        return err == 0
+
+    def _setup_docker_fedora_repo(self) -> bool:
+        err, out = self.run_process(
+            [
+                'dnf',
+                'config-manager',
+                '-y',
+                '--add-repo',
+                'https://download.docker.com/linux/fedora/docker-ce.repo',
+            ],
+            privileged=True,
+        )
 
     def _install_docker_convenience_script(self) -> bool:
         """Install Docker using the convenience script from get.docker.com."""
         try:
-            import requests
-
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as temp_file:
-                temp_filename = temp_file.name
-
-                # Download the convenience script
-                response = requests.get("https://get.docker.com/", allow_redirects=True)
-                temp_file.write(response.text)
-
-            # Make script executable and run it
-            os.chmod(temp_filename, 0o755)
-            err, out = self.run_process([temp_filename], privileged=True)
-
-            # Clean up
-            os.unlink(temp_filename)
-
-            if err == 0:
-                InstallerLogger.info("Docker installation via convenience script succeeded")
-                return True
-            else:
-                InstallerLogger.error(f"Docker installation via convenience script failed: {out}")
-                return False
-
+            with temporary_filename('.sh') as temp_filename:
+                if DownloadToFile("https://get.docker.com/", temp_filename, self.debug):
+                    os.chmod(temp_filename, 0o755)
+                    err, out = self.run_process([temp_filename], privileged=True)
+                    if err == 0:
+                        InstallerLogger.info("Docker installation via convenience script succeeded")
+                        return True
+                    else:
+                        InstallerLogger.error(f"Docker installation via convenience script failed: {out}")
         except Exception as e:
             InstallerLogger.error(f"Failed to download or execute Docker convenience script: {e}")
-            return False
+        return False
 
     def _configure_docker_service(self):
         """Configure Docker service on systemd systems (attempt on all distros)."""
@@ -468,7 +575,7 @@ class LinuxInstaller(BaseInstaller):
             if status == InstallerResult.FAILURE:
                 return False
         else:
-            InstallerLogger.info("Dry run/config-only: would apply Linux system tweaks")
+            InstallerLogger.info(f"Dry run/config-only: would apply {PLATFORM_LINUX} system tweaks")
 
         # 7) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
