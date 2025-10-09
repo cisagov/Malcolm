@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import os
 import sys
 import types
+from typing import Optional
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -101,17 +102,16 @@ def create_ui_implementation(presentation_mode: PresentationMode, ui_mode_flag: 
         Appropriate UI implementation instance
     """
 
-    match presentation_mode:
-        case PresentationMode.MODE_TUI:
-            return TUIInstallerUI(ui_mode_flag)
-        case PresentationMode.MODE_DUI:
-            return DialogInstallerUI(UserInterfaceMode.InteractionDialog)
-        case PresentationMode.MODE_GUI:
-            raise NotImplementedError("GUI is not implemented yet")
-        case PresentationMode.MODE_SILENT:
-            return None
-        case _:
-            raise Exception("Unsupported interface mode")
+    if presentation_mode == PresentationMode.MODE_TUI:
+        return TUIInstallerUI(ui_mode_flag)
+    elif presentation_mode == PresentationMode.MODE_DUI:
+        return DialogInstallerUI(UserInterfaceMode.InteractionDialog)
+    elif presentation_mode == PresentationMode.MODE_GUI:
+        raise NotImplementedError("GUI is not implemented yet")
+    elif presentation_mode == PresentationMode.MODE_SILENT:
+        return None
+    else:
+        raise Exception("Unsupported interface mode")
 
 
 def handle_config_directories_tui_mode(
@@ -119,7 +119,7 @@ def handle_config_directories_tui_mode(
     ui_impl,
     non_interactive,
     use_defaults,
-    load_existing_env: bool | None,
+    load_existing_env: Optional[bool],
     importing_configs: bool,
     dirs: InstallerDirs,
     no_write: bool = False,

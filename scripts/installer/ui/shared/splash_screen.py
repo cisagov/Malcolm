@@ -8,7 +8,7 @@ import os
 import sys
 
 from scripts.malcolm_common import get_malcolm_version, ClearScreen as safe_clear
-
+from typing import Optional
 
 UNICODE_GLYPHS = {
     "M": [
@@ -336,7 +336,7 @@ class KeyReader:
                 return None
             return None
 
-    def wait_for_key(self, prompt: str | None = None) -> None:
+    def wait_for_key(self, prompt: Optional[str] = None) -> None:
         if prompt:
             sys.stdout.write(prompt)
             sys.stdout.flush()

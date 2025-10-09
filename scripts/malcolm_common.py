@@ -1662,7 +1662,7 @@ def disk_free_bytes(path: str = "/") -> int:
 # ------------------------------------------------------------------
 
 
-def suggest_os_memory(total_gb: int | None = None) -> str:
+def suggest_os_memory(total_gb: Optional[int] = None) -> str:
     """Return OpenSearch heap suggestion (e.g., "24g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
@@ -1671,7 +1671,7 @@ def suggest_os_memory(total_gb: int | None = None) -> str:
     return f"{heap_gb}g"
 
 
-def suggest_ls_memory(total_gb: int | None = None) -> str:
+def suggest_ls_memory(total_gb: Optional[int] = None) -> str:
     """Return Logstash heap suggestion (e.g., "3g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
@@ -1680,7 +1680,7 @@ def suggest_ls_memory(total_gb: int | None = None) -> str:
     return f"{heap_gb}g"
 
 
-def suggest_ls_workers(cores: int | None = None) -> int:
+def suggest_ls_workers(cores: Optional[int] = None) -> int:
     """Return recommended Logstash worker count."""
     if cores is None:
         cores = cpu_cores()

@@ -12,9 +12,9 @@ class StoreRow:
     key: str
     label: str
     value_formatted: Any
-    choices: list
+    choices: List[Any]
     visible: bool
-    ui_parent: str | None
+    ui_parent: Optional[str]
     editable: bool = True
     depth: int = 0
     prefix: str = ""

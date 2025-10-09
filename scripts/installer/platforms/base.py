@@ -36,7 +36,7 @@ class BaseInstaller(abc.ABC):
         orchestration_mode: OrchestrationFramework,
         ui,
         debug: bool = False,
-        control_flow: ControlFlow | None = None,
+        control_flow: Optional[ControlFlow] = None,
     ):
         """Initialize the base installer.
 

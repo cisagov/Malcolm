@@ -526,13 +526,11 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
 
 
 # Expose compose discovery as a tiny shared helper for unit tests
-def discover_compose_command(runtime_bin: str, platform) -> list | None:
+def discover_compose_command(runtime_bin: str, platform) -> Optional[List[str]]:
     """Return a working compose invocation list for the given runtime.
 
     Mirrors the discovery behavior used by perform_docker_operations.
     """
-    from typing import List
-
     if runtime_bin == "docker":
         candidates: List[List[str]] = [[runtime_bin, "compose"], ["docker-compose"]]
     elif runtime_bin == "podman":
