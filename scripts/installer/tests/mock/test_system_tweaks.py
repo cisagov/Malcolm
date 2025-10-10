@@ -72,7 +72,7 @@ class TestSystemTweaks(BaseInstallerTest):
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_grub_cgroup_auto_mode(self):
-        """Test GRUB cgroup configuration in auto mode."""
+        """Test adding cgroup kernel parameters to grub in auto mode."""
         from scripts.installer.configs.constants.installation_item_keys import (
             KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
         )

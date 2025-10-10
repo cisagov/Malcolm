@@ -11,7 +11,7 @@ from typing import Any, List
 
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.utils.tweak_utils import should_apply_tweak
-from scripts.malcolm_utils import file_contents
+from scripts.malcolm_utils import file_contents, which
 
 
 def _normalize_status(result: Any) -> InstallerResult:
@@ -63,6 +63,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
                 tmp_path = tmp.name
             err, out = platform.run_process(["cp", tmp_path, path], privileged=True)
             try:
+                os.chmod(path, 0o644)
                 os.unlink(tmp_path)
             except Exception:
                 pass
@@ -106,7 +107,9 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
 def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "security_limits"):
         return InstallerResult.SKIPPED, "Security limits not selected"
-    import os, tempfile
+    import os
+    import tempfile
+    import pathlib
 
     SECURITY_LIMITS_DIR = "/etc/security/limits.d"
     MALCOLM_LIMITS_FILE = "99-malcolm.conf"
@@ -124,27 +127,24 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
         if platform.is_dry_run():
             logger.info(f"Dry run: would write {limits_file} with security limits")
             return InstallerResult.SKIPPED, "Security limits skipped (dry run)"
-        err, out = platform.run_process(["mkdir", "-p", SECURITY_LIMITS_DIR], privileged=True)
-        if err != 0:
-            logger.error(f"Failed to create {SECURITY_LIMITS_DIR}: {' '.join(out)}")
-            return InstallerResult.FAILURE, "Could not create limits dir"
-        if os.path.exists(limits_file):
-            if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
-                existing_lines = [
-                    ln.strip()
-                    for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
-                    if ln.strip()
-                ]
-            else:
-                existing_lines = []
-            if existing_lines == desired_content:
-                logger.info(f"Security limits already configured in {limits_file}")
-                return InstallerResult.SUCCESS, "Already configured"
+        pathlib.Path(SECURITY_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
+        if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
+            existing_lines = [
+                ln.strip()
+                for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                if ln.strip()
+            ]
+        else:
+            existing_lines = []
+        if existing_lines == desired_content:
+            logger.info(f"Security limits already configured in {limits_file}")
+            return InstallerResult.SUCCESS, "Already configured"
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
         try:
+            os.chmod(limits_file, 0o644)
             os.unlink(tmp_path)
         except Exception:
             pass
@@ -158,7 +158,13 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
         return InstallerResult.FAILURE, "Security limits exception"
 
 
-def apply_systemd_limits(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
+def apply_systemd_limits(
+    malcolm_config,
+    config_dir: str,
+    platform,
+    ctx,
+    logger,
+) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "systemd_limits"):
         return InstallerResult.SKIPPED, "Systemd limits not selected"
     import os, tempfile
@@ -191,15 +197,13 @@ def apply_systemd_limits(malcolm_config, config_dir: str, platform, ctx, logger)
         if existing_lines == desired_content:
             logger.info(f"Systemd limits already configured in {limits_file}")
             return InstallerResult.SUCCESS, "Already configured"
-        err, out = platform.run_process(["mkdir", "-p", SYSTEMD_LIMITS_DIR], privileged=True)
-        if err != 0:
-            logger.error(f"Failed to create {SYSTEMD_LIMITS_DIR}: {' '.join(out)}")
-            return InstallerResult.FAILURE, "Could not create limits dir"
+        pathlib.Path(SYSTEMD_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
         try:
+            os.chmod(limits_file, 0o644)
             os.unlink(tmp_path)
         except Exception:
             pass
@@ -213,42 +217,130 @@ def apply_systemd_limits(malcolm_config, config_dir: str, platform, ctx, logger)
         return InstallerResult.FAILURE, "Systemd limits exception"
 
 
-def apply_grub_cgroup(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
+def apply_grub_cgroup(
+    malcolm_config,
+    config_dir: str,
+    platform,
+    ctx,
+    logger,
+    grub_file="/etc/default/grub",
+    params=None,
+    backup=True,
+) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "grub_cgroup"):
-        logger.info("GRUB cgroup tweak not selected, skipping.")
-        return InstallerResult.SKIPPED, "GRUB cgroup not selected"
+        logger.info("cgroup kernel parameters tweak not selected, skipping.")
+        return InstallerResult.SKIPPED, "cgroup kernel parameters not selected"
     import os
+    import re
 
-    GRUB_DEFAULT_PATH = "/etc/default/grub"
+    if params is None:
+        params = [
+            "systemd.unified_cgroup_hierarchy=1",
+            "cgroup_enable=memory",
+            "swapaccount=1",
+            "cgroup.memory=nokmem",
+        ]
+
+    def system_uses_bls():
+        # BLS-enabled if both grubby and /boot/loader/entries exist, and not disabled in /etc/default/grub
+        if which("grubby") and os.path.isdir("/boot/loader/entries"):
+            try:
+                with open("/etc/default/grub", "r") as f:
+                    for line in f:
+                        if "GRUB_ENABLE_BLSCFG" in line and "false" in line.lower():
+                            return False
+                return True
+            except FileNotFoundError:
+                return True
+        return False
+
+    def modify_line(varname, content):
+        match = re.search(rf'^{varname}="(.*?)"', content, re.MULTILINE)
+        if match:
+            existing = match.group(1).split()
+            new_params = [p for p in params if p not in existing]
+            if not new_params:
+                return content, []
+            updated = " ".join(existing + new_params)
+            content = content[: match.start()] + f'{varname}="{updated}"' + content[match.end() :]
+            return content, new_params
+        else:
+            # variable not found, append at the end
+            line = f'\n{varname}="' + " ".join(params) + '"\n'
+            return content + line, params
+
     try:
         if platform.is_dry_run():
-            logger.info("Dry run: would update GRUB cgroup parameters in /etc/default/grub")
-            return InstallerResult.SKIPPED, "GRUB cgroup skipped (dry run)"
-        if not os.path.exists(GRUB_DEFAULT_PATH):
-            logger.info(f"GRUB config file {GRUB_DEFAULT_PATH} does not exist, skipping.")
-            return InstallerResult.SKIPPED, "GRUB file missing"
-        has_cgroup = False
-        with open(GRUB_DEFAULT_PATH, "r") as f:
-            has_cgroup = any("cgroup" in line.lower() for line in f.readlines())
-        if has_cgroup:
-            logger.info(f"GRUB cgroup parameters already configured in {GRUB_DEFAULT_PATH}.")
-            return InstallerResult.SKIPPED, "Already configured"
-        cgroup_params = "systemd.unified_cgroup_hierarchy=1 cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem"
-        err, out = platform.run_process(
-            [
-                "bash",
-                "-c",
-                f"sed -i 's/^GRUB_CMDLINE_LINUX=\\\"/{cgroup_params} /' {GRUB_DEFAULT_PATH}",
-            ],
-            privileged=True,
-        )
-        if err != 0:
-            logger.error(f"Failed to modify GRUB configuration: {' '.join(out)}")
-            return InstallerResult.FAILURE, "GRUB update failed"
-        return InstallerResult.SUCCESS, "GRUB cgroup applied"
+            logger.info(f"Dry run: would update cgroup kernel parameters parameters in {grub_file}")
+            return InstallerResult.SKIPPED, "cgroup kernel parameters skipped (dry run)"
+        if not os.path.exists(grub_file):
+            logger.info(f"GRUB config file {grub_file} does not exist, skipping")
+            return InstallerResult.SKIPPED, "GRUB config file missing"
+
+        if system_uses_bls():
+            err, out = platform.run_process(
+                ['grubby', '--update-kernel=ALL', f"--args={' '.join(params)}"], privileged=True
+            )
+            if err == 0:
+                logger.info(f"Applied new kernel parameters with grubby")
+                return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
+            logger.error(f"Failed to apply kernel parameters with grubby: {' '.join(out)}")
+            return InstallerResult.FAILURE, "cgroup kernel parameters failed"
+
+        else:
+            with open(grub_file, "r", encoding="utf-8") as f:
+                orig_content = f.read()
+
+            # prefer GRUB_CMDLINE_LINUX, fallback to DEFAULT
+            if re.search(r"^GRUB_CMDLINE_LINUX=", orig_content, re.MULTILINE):
+                varname = "GRUB_CMDLINE_LINUX"
+            elif re.search(r"^GRUB_CMDLINE_LINUX_DEFAULT=", orig_content, re.MULTILINE):
+                varname = "GRUB_CMDLINE_LINUX_DEFAULT"
+            else:
+                varname = "GRUB_CMDLINE_LINUX"
+            new_content, added = modify_line(varname, orig_content)
+
+            if added:
+                if backup:
+                    try:
+                        with open(f"{grub_file}.bak", "w", encoding="utf-8") as f:
+                            f.write(orig_content)
+                    except Exception:
+                        pass
+                with open(grub_file, "w", encoding="utf-8") as f:
+                    f.write(grub_file)
+                try:
+                    os.chmod(path, 0o644)
+                except Exception:
+                    pass
+
+                if err == 0:
+                    if which('update-grub'):
+                        err, out = platform.run_process(['update-grub'], privileged=True)
+                    elif which('update-grub2'):
+                        err, out = platform.run_process(['update-grub2'], privileged=True)
+                    elif which('grub2-mkconfig') and os.path.isfile('/boot/grub2/grub.cfg'):
+                        err, out = platform.run_process(
+                            ['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True
+                        )
+                    else:
+                        err = 0
+                        logger.warning(
+                            f"{grub_file} has been modified, consult your distribution's documentation generate new grub config file"
+                        )
+
+                if err == 0:
+                    logger.info(f"Applied new kernel parameters to {grub_file}")
+                    return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
+                logger.error(f"Failed to apply cgroup kernel parameters to {grub_file}: {' '.join(out)}")
+                return InstallerResult.FAILURE, "cgroup kernel parameters failed"
+            else:
+                logger.info(f"no changes needed in GRUB config file {grub_file}")
+                return InstallerResult.SKIPPED, "no changes needed in GRUB config file"
+
     except Exception as e:
-        logger.error(f"Error applying GRUB cgroup configuration: {e}")
-        return InstallerResult.FAILURE, "GRUB cgroup exception"
+        logger.error(f"Error applying cgroup kernel parameters: {e}")
+        return InstallerResult.FAILURE, "cgroup kernel parameters exception"
 
 
 def apply_all(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
@@ -321,8 +413,8 @@ def get_tweak_definitions() -> list[dict]:
     defs.append(
         {
             "id": "grub_cgroup",
-            "label": "GRUB Cgroup Parameters",
-            "description": "Enable memory cgroup and swapaccount in GRUB",
+            "label": "Enable cgroup kernel parameters",
+            "description": "Enable cgroup kernel parameters in GRUB",
         }
     )
     # Coarse group switch for all sysctl values (optional UI shortcut)
