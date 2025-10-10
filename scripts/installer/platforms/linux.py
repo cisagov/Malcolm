@@ -99,9 +99,15 @@ class LinuxInstaller(BaseInstaller):
 
     def _get_add_repo_command(self) -> Optional[List[str]]:
         """Determine command to use to query if a package is installed."""
-        if self.distro in (
+        if self.distro in (PLATFORM_LINUX_FEDORA,):
+            return [
+                'dnf',
+                'config-manager',
+                'addrepo',
+                '--from-repofile',
+            ]
+        elif self.distro in (
             PLATFORM_LINUX_ALMA,
-            PLATFORM_LINUX_FEDORA,
             PLATFORM_LINUX_ROCKY,
         ):
             return [
@@ -136,33 +142,15 @@ class LinuxInstaller(BaseInstaller):
                     'apache2-utils',
                     'make',
                     'openssl',
-                    'python3-dialog',
-                    'python3-dotenv',
-                    'python3-requests',
-                    'python3-ruamel.yaml',
                     'xz-utils',
-                ]
-            )
-        elif self.distro in (
-            PLATFORM_LINUX_FEDORA,
-            PLATFORM_LINUX_CENTOS,
-            PLATFORM_LINUX_RHEL,
-        ):
-            result.extend(
-                [
-                    'httpd-tools',
-                    'make',
-                    'openssl',
-                    'python3-dialog',
-                    'python3-dotenv',
-                    'python3-requests',
-                    'python3-ruamel.yaml',
-                    'xz',
                 ]
             )
         elif self.distro in (
             PLATFORM_LINUX_ALMA,
             PLATFORM_LINUX_AMAZON,
+            PLATFORM_LINUX_CENTOS,
+            PLATFORM_LINUX_FEDORA,
+            PLATFORM_LINUX_RHEL,
             PLATFORM_LINUX_ROCKY,
         ):
             result.extend(
@@ -170,12 +158,11 @@ class LinuxInstaller(BaseInstaller):
                     'httpd-tools',
                     'make',
                     'openssl',
-                    'python3-requests',
-                    'python3-ruamel-yaml',
                     'xz',
                 ]
             )
 
+        InstallerLogger.info(f"{self.distro=} {result=}")
         return result
 
     def install_dependencies(self) -> bool:

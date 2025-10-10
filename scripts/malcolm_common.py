@@ -1799,7 +1799,9 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str]]:
                         except Exception:
                             pass
 
-                if os_info.get('NAME'):
+                if os_info.get('ID'):
+                    distro = os_info['ID'].lower().split()[0]
+                elif os_info.get('NAME'):
                     distro = os_info['NAME'].lower().split()[0]
 
                 if os_info.get('VERSION_CODENAME'):
