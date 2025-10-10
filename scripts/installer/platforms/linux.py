@@ -9,8 +9,14 @@ import os
 from typing import List, Optional
 
 from scripts.malcolm_utils import which, temporary_filename
-from scripts.malcolm_common import get_distro_info, DownloadToFile, GetNonRootMalcolmUserNames
+from scripts.malcolm_common import (
+    DownloadToFile,
+    get_distro_info,
+    get_system_image_architecture,
+    GetNonRootMalcolmUserNames,
+)
 from scripts.malcolm_constants import (
+    ImageArchitecture,
     OrchestrationFramework,
     PLATFORM_LINUX,
     PLATFORM_LINUX_ALMA,
@@ -29,6 +35,7 @@ from scripts.malcolm_constants import (
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.utils.logger_utils import InstallerLogger
+from scripts.installer.actions.shared import discover_compose_command
 
 from .base import BaseInstaller
 
@@ -248,13 +255,12 @@ class LinuxInstaller(BaseInstaller):
 
     def _finalize_docker_installation(self, install_context: "InstallContext") -> bool:
         """Complete Docker installation with service setup and user configuration."""
-        runtime_bin = "docker"
 
         # Configure Docker service
         self._configure_docker_service()
 
         # Verify installation
-        err, out = self.run_process([runtime_bin, "info"], privileged=True, retry=6, retry_sleep_sec=5)
+        err, out = self.run_process(["docker", "info"], privileged=True, retry=6, retry_sleep_sec=5)
         if err == 0:
             self._add_users_to_docker_group(install_context.docker_extra_users)
             return True
@@ -324,16 +330,31 @@ class LinuxInstaller(BaseInstaller):
             ]
         elif self.distro == PLATFORM_LINUX_FEDORA:
             repo_url = "https://download.docker.com/linux/fedora/docker-ce.repo"
-            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+            docker_packages = [
+                'docker-ce',
+                'docker-ce-cli',
+                'docker-compose-plugin',
+                'containerd.io',
+            ]
         elif self.distro == PLATFORM_LINUX_CENTOS:
             repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
-            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+            docker_packages = [
+                'docker-ce',
+                'docker-ce-cli',
+                'docker-compose-plugin',
+                'containerd.io',
+            ]
         elif self.distro in (
             PLATFORM_LINUX_ALMA,
             PLATFORM_LINUX_ROCKY,
         ):
             repo_url = "https://download.docker.com/linux/centos/docker-ce.repo"
-            docker_packages = ['docker-ce', 'docker-ce-cli', 'docker-compose-plugin', 'containerd.io']
+            docker_packages = [
+                'docker-ce',
+                'docker-ce-cli',
+                'docker-compose-plugin',
+                'containerd.io',
+            ]
         elif self.distro == PLATFORM_LINUX_AMAZON:
             docker_packages = ['docker']
 
@@ -463,13 +484,46 @@ class LinuxInstaller(BaseInstaller):
             else:
                 InstallerLogger.error(f'Adding {user} to "docker" group failed')
 
-    def install_docker_compose(self) -> bool:
+    def install_docker_compose_from_github(self) -> bool:
         """Attempt to install the docker compose plugin on linux.
 
-        detection and verification are handled by the step; this method only
-        performs installation via the platform package manager.
+        With most platforms we're already installing Compose alongside Docker
+        with docker-compose-plugin. As such, this function is a fallback
+        to get it from GitHub instead.
         """
-        return self.install_package(["docker-compose-plugin"])
+        import pathlib
+
+        if compose_command := discover_compose_command("docker", self):
+            return True
+        else:
+            with temporary_filename() as tmp_compose_script:
+                if DownloadToFile(
+                    f"https://github.com/docker/compose/releases/latest/download/docker-compose-linux-{'aarch64' if get_system_image_architecture() == ImageArchitecture.ARM64 else 'x86_64'}",
+                    tmp_compose_script,
+                ):
+                    os.chmod(tmp_compose_script, 0o755)
+                    for final_compose_script in [
+                        "/usr/local/lib/docker/cli-plugins/docker-compose",
+                        "/usr/local/bin/docker-compose",
+                    ]:
+                        pathlib.Path(os.path.dirname(final_compose_script)).mkdir(parents=True, exist_ok=True)
+                        err, out = self.run_process(["cp", tmp_compose_script, final_compose_script], privileged=True)
+                        if err == 0:
+                            if compose_command := discover_compose_command("docker", self):
+                                InstallerLogger.info("Getting Docker Compose from GitHub succeeded")
+                                return True
+                            else:
+                                InstallerLogger.error(
+                                    f"Getting Docker Compose from GitHub succeeded, but it failed to run"
+                                )
+                                try:
+                                    os.unlink(final_compose_script)
+                                except Exception:
+                                    pass
+                        else:
+                            InstallerLogger.error(f"Getting Docker Compose from GitHub failed: {out}")
+
+            return False
 
     # new unified orchestration entry point
     def install(
@@ -524,7 +578,7 @@ class LinuxInstaller(BaseInstaller):
                     if not self.install_docker(ctx):
                         return False
                 # Compose
-                if not self.install_docker_compose():
+                if not self.install_docker_compose_from_github():
                     # non-fatal if compose already present; verify via docker_ops later
                     pass
             else:

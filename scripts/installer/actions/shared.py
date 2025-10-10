@@ -417,10 +417,7 @@ def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform,
 
 
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, logger) -> Tuple[InstallerResult, str]:
-    """Validate runtime and compose invocation; provide user guidance/do pulls/loads.
-
-    Ported from steps/docker_ops.py.
-    """
+    """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
     import os
     from typing import Optional
     from scripts.installer.configs.constants.configuration_item_keys import (
@@ -531,14 +528,11 @@ def discover_compose_command(runtime_bin: str, platform) -> Optional[List]:
 
     Mirrors the discovery behavior used by perform_docker_operations.
     """
-    if runtime_bin == "docker":
-        candidates: List[List[str]] = [[runtime_bin, "compose"], ["docker-compose"]]
-    elif runtime_bin == "podman":
-        candidates = [[runtime_bin, "compose"], ["podman-compose"]]
-    else:
-        candidates = [[runtime_bin, "compose"]]
+    candidates = [[runtime_bin, "compose"]]
+    if runtime_bin in {"docker", "podman"}:
+        candidates.append([f"{runtime_bin}-compose"])
     for cmd in candidates:
-        rc, _ = platform.run_process(cmd + ["--version"], stderr=False)
+        rc, _ = platform.run_process(cmd + ["version"], stderr=False)
         if rc == 0:
             return cmd
     return None
