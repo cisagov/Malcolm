@@ -308,26 +308,23 @@ def apply_grub_cgroup(
                     except Exception:
                         pass
                 with open(grub_file, "w", encoding="utf-8") as f:
-                    f.write(grub_file)
+                    f.write(new_content)
                 try:
                     os.chmod(path, 0o644)
                 except Exception:
                     pass
 
-                if err == 0:
-                    if which('update-grub'):
-                        err, out = platform.run_process(['update-grub'], privileged=True)
-                    elif which('update-grub2'):
-                        err, out = platform.run_process(['update-grub2'], privileged=True)
-                    elif which('grub2-mkconfig') and os.path.isfile('/boot/grub2/grub.cfg'):
-                        err, out = platform.run_process(
-                            ['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True
-                        )
-                    else:
-                        err = 0
-                        logger.warning(
-                            f"{grub_file} has been modified, consult your distribution's documentation generate new grub config file"
-                        )
+                if which('update-grub'):
+                    err, out = platform.run_process(['update-grub'], privileged=True)
+                elif which('update-grub2'):
+                    err, out = platform.run_process(['update-grub2'], privileged=True)
+                elif which('grub2-mkconfig') and os.path.isfile('/boot/grub2/grub.cfg'):
+                    err, out = platform.run_process(['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True)
+                else:
+                    err = 0
+                    logger.warning(
+                        f"{grub_file} has been modified, consult your distribution's documentation generate new grub config file"
+                    )
 
                 if err == 0:
                     logger.info(f"Applied new kernel parameters to {grub_file}")

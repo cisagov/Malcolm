@@ -395,7 +395,8 @@ class LinuxInstaller(BaseInstaller):
                 repo_list_filename = '/etc/apt/sources.list.d/docker.list'
                 with temporary_filename('.gpg') as armored_gpg_filename:
                     if DownloadToFile(
-                        f"https://download.docker.com/linux/{repo_distro}/gpg", armored_gpg_filename, self.debug
+                        f"https://download.docker.com/linux/{repo_distro}/gpg",
+                        armored_gpg_filename,
                     ):
                         if which('gpg'):
                             err, out = self.run_process(
