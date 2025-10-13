@@ -1777,40 +1777,60 @@ def get_platform_name() -> str:
         return "unknown"
 
 
-def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str]]:
+def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     distro = None
     codename = None
+    ubuntu_codename = None
     release = None
+    plat = get_platform_name()
 
-    if get_platform_name() == "linux":
+    if plat == "linux":
+        os_release_info = {}
+
+        # if the distro library can do it for us, prefer that
         if distro_lib := DoDynamicImport("distro", "distro"):
             distro = distro_lib.id()
             codename = distro_lib.codename()
             release = distro_lib.version()
-        else:
-            # check /etc/os-release values first
+            os_release_info = distro_lib.os_release_info()
+
+        # check /etc/os-release values
+        if not os_release_info:
             if os.path.isfile('/etc/os-release'):
-                os_info = {}
                 with open("/etc/os-release", 'r') as f:
                     for line in f:
                         try:
-                            k, v = line.rstrip().split("=")
-                            os_info[k] = v.strip('"')
+                            k, v = line.rstrip().split("=", 1)
+                            os_release_info[k.lower()] = v.strip('"')
                         except Exception:
                             pass
 
-                if os_info.get('ID'):
-                    distro = os_info['ID'].lower().split()[0]
-                elif os_info.get('NAME'):
-                    distro = os_info['NAME'].lower().split()[0]
+        if os_release_info:
+            if not distro:
+                if os_release_info.get('id'):
+                    distro = os_release_info['id'].lower().split()[0]
+                elif os_release_info.get('name'):
+                    distro = os_release_info['name'].lower().split()[0]
 
-                if os_info.get('VERSION_CODENAME'):
-                    codename = os_info['VERSION_CODENAME'].lower().split()[0]
+            if not codename:
+                if os_release_info.get('version_codename'):
+                    codename = os_release_info['version_codename'].lower().split()[0]
+                elif os_release_info.get('codename'):
+                    codename = os_release_info['codename'].lower().split()[0]
 
-                if os_info.get('VERSION_ID'):
-                    release = os_info['VERSION_ID'].lower().split()[0]
+            if (not release) and os_release_info.get('version_id'):
+                release = os_release_info['version_id'].lower().split()[0]
 
-            # try lsb_release next
+            if not ubuntu_codename:
+                if os_release_info.get('ubuntu_version_codename'):
+                    ubuntu_codename = os_release_info['ubuntu_version_codename'].lower().split()[0]
+                elif os_release_info.get('ubuntu_codename'):
+                    ubuntu_codename = os_release_info['ubuntu_codename'].lower().split()[0]
+                elif codename and (distro == PLATFORM_LINUX_UBUNTU):
+                    ubuntu_codename = codename
+
+        # try lsb_release
+        if (not all([distro, codename, release])) and which('lsb_release'):
             if not distro:
                 err, out = run_process(['lsb_release', '-is'], stderr=False)
                 if (err == 0) and out:
@@ -1826,33 +1846,33 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str]]:
                 if (err == 0) and out:
                     release = out[0].lower()
 
-            # try release-specific files
-            if not distro:
-                if distro_file := next(
-                    (
-                        path
-                        for path in [
-                            '/etc/rocky-release',
-                            '/etc/almalinux-release',
-                            '/etc/centos-release',
-                            '/etc/redhat-release',
-                            '/etc/issue',
-                        ]
-                        if os.path.isfile(path)
-                    ),
-                    None,
-                ):
-                    with open(distro_file, 'r') as f:
-                        distro_vals = f.read().lower().split()
-                        distro_nums = [x for x in distro_vals if x[0].isdigit()]
-                        distro = distro_vals[0]
-                        if (not release) and (len(distro_nums) > 0):
-                            release = distro_nums[0]
+        # try release-specific files
+        if not distro:
+            if distro_file := next(
+                (
+                    path
+                    for path in [
+                        '/etc/rocky-release',
+                        '/etc/almalinux-release',
+                        '/etc/centos-release',
+                        '/etc/redhat-release',
+                        '/etc/issue',
+                    ]
+                    if os.path.isfile(path)
+                ),
+                None,
+            ):
+                with open(distro_file, 'r') as f:
+                    distro_vals = f.read().lower().split()
+                    distro_nums = [x for x in distro_vals if x[0].isdigit()]
+                    distro = distro_vals[0]
+                    if (not release) and (len(distro_nums) > 0):
+                        release = distro_nums[0]
 
-            if not distro:
-                distro = "linux"
+    if not distro:
+        distro = plat
 
-    return distro, codename, release
+    return distro, codename, ubuntu_codename, release
 
 
 _rec_puid_pgid = GetUidGidFromEnv()
@@ -1885,3 +1905,6 @@ __all__ = [
     "suggest_ls_memory",
     "suggest_ls_workers",
 ]
+
+if __name__ == '__main__':
+    print(json.dumps(get_distro_info()))

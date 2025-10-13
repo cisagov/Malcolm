@@ -53,7 +53,7 @@ class LinuxInstaller(BaseInstaller):
         """Initialize the Linux installer."""
         super().__init__(orchestration_mode, ui, debug, control_flow)
 
-        self.distro, self.codename, self.release = get_distro_info()
+        self.distro, self.codename, self.ubuntu_codename, self.release = get_distro_info()
         self.check_package_cmd = self._get_check_package_command()
         self.install_package_cmd = self._get_install_package_command()
         self.update_repo_cmd = self._get_update_repo_command()
@@ -61,7 +61,7 @@ class LinuxInstaller(BaseInstaller):
 
         if self.debug:
             InstallerLogger.info(
-                f"{PLATFORM_LINUX} installer initialized for {self.distro} {self.codename} {self.release}"
+                f"{PLATFORM_LINUX} installer initialized for {self.distro} {self.codename} {self.release} ({self.ubuntu_codename})"
             )
 
     def _get_check_package_command(self) -> Optional[List[str]]:
@@ -386,18 +386,23 @@ class LinuxInstaller(BaseInstaller):
 
             # Map distribution to Docker repository name
             repo_distro = self.distro
-            if self.distro in (
-                PLATFORM_LINUX_ELEMENTARY,
-                PLATFORM_LINUX_MINT,
-                PLATFORM_LINUX_POP,
-                PLATFORM_LINUX_UBUNTU,
-                PLATFORM_LINUX_ZORIN,
-            ) or self.distro.startswith(PLATFORM_LINUX_UBUNTU):
+            if (
+                self.distro
+                in (
+                    PLATFORM_LINUX_ELEMENTARY,
+                    PLATFORM_LINUX_MINT,
+                    PLATFORM_LINUX_POP,
+                    PLATFORM_LINUX_UBUNTU,
+                    PLATFORM_LINUX_ZORIN,
+                )
+                or self.distro.startswith(PLATFORM_LINUX_UBUNTU)
+                or self.ubuntu_codename
+            ):
                 repo_distro = PLATFORM_LINUX_UBUNTU
             elif self.distro.startswith(PLATFORM_LINUX_DEBIAN):
                 repo_distro = PLATFORM_LINUX_DEBIAN
 
-            if repo_distro and self.codename:
+            if repo_distro and (self.codename or self.ubuntu_codename):
                 # get GPG key and store in /usr/share/keyrings
                 dearmored_gpg_filename = "/usr/share/keyrings/docker-archive-keyring.gpg"
                 repo_list_filename = '/etc/apt/sources.list.d/docker.list'
@@ -406,6 +411,10 @@ class LinuxInstaller(BaseInstaller):
                         f"https://download.docker.com/linux/{repo_distro}/gpg",
                         armored_gpg_filename,
                     ):
+                        try:
+                            os.unlink(dearmored_gpg_filename)
+                        except Exception:
+                            pass
                         if which('gpg'):
                             err, out = self.run_process(
                                 ["gpg", "--dearmor", "--output", dearmored_gpg_filename, armored_gpg_filename],
@@ -426,7 +435,7 @@ class LinuxInstaller(BaseInstaller):
                             InstallerLogger.info(f"Adding Docker repository for {self.distro}")
                         with open(repo_list_filename, 'w') as repo_list_file:
                             repo_list_file.write(
-                                f"deb [signed-by={dearmored_gpg_filename}] https://download.docker.com/linux/{repo_distro} {self.codename} stable\n"
+                                f"deb [signed-by={dearmored_gpg_filename}] https://download.docker.com/linux/{repo_distro} {self.ubuntu_codename if self.ubuntu_codename else self.codename} stable\n"
                             )
                         if self.update_repo_cmd:
                             up_err, out = self.run_process(self.update_repo_cmd, privileged=True)

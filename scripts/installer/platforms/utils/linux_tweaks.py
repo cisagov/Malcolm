@@ -173,7 +173,7 @@ def apply_systemd_limits(
     SYSTEMD_LIMITS_DIR = "/etc/systemd/system.conf.d"
     MALCOLM_SYSTEMD_FILE = "99-malcolm.conf"
 
-    distro, codename, _ = get_distro_info()
+    distro, codename, _, _ = get_distro_info()
     if distro not in ["centos"] and codename not in ["core"]:
         logger.info(f"Skipping systemd limits (not applicable for {distro} {codename})")
         return InstallerResult.SKIPPED, "Not applicable"
@@ -242,6 +242,12 @@ def apply_grub_cgroup(
             "cgroup.memory=nokmem",
         ]
 
+    def system_uses_systemd_boot():
+        # systemd-boot uses kernelstub, installs loader entries in /boot/loader/entries, and (usually) has /boot/loader/loader.conf
+        return (
+            which("kernelstub") and os.path.isdir("/boot/loader/entries") and os.path.isfile("/boot/loader/loader.conf")
+        )
+
     def system_uses_bls():
         # BLS-enabled if both grubby and /boot/loader/entries exist, and not disabled in /etc/default/grub
         if which("grubby") and os.path.isdir("/boot/loader/entries"):
@@ -274,11 +280,16 @@ def apply_grub_cgroup(
         if platform.is_dry_run():
             logger.info(f"Dry run: would update cgroup kernel parameters parameters in {grub_file}")
             return InstallerResult.SKIPPED, "cgroup kernel parameters skipped (dry run)"
-        if not os.path.exists(grub_file):
-            logger.info(f"GRUB config file {grub_file} does not exist, skipping")
-            return InstallerResult.SKIPPED, "GRUB config file missing"
 
-        if system_uses_bls():
+        if system_uses_systemd_boot():
+            err, out = platform.run_process(['kernelstub', '-a', ' '.join(params)], privileged=True)
+            if err == 0:
+                logger.info(f"Applied new kernel parameters with kernelstub")
+                return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
+            logger.error(f"Failed to apply kernel parameters with kernelstub: {' '.join(out)}")
+            return InstallerResult.FAILURE, "cgroup kernel parameters failed"
+
+        elif system_uses_bls():
             err, out = platform.run_process(
                 ['grubby', '--update-kernel=ALL', f"--args={' '.join(params)}"], privileged=True
             )
@@ -288,7 +299,7 @@ def apply_grub_cgroup(
             logger.error(f"Failed to apply kernel parameters with grubby: {' '.join(out)}")
             return InstallerResult.FAILURE, "cgroup kernel parameters failed"
 
-        else:
+        elif os.path.exists(grub_file):
             with open(grub_file, "r", encoding="utf-8") as f:
                 orig_content = f.read()
 
@@ -335,6 +346,10 @@ def apply_grub_cgroup(
             else:
                 logger.info(f"no changes needed in GRUB config file {grub_file}")
                 return InstallerResult.SKIPPED, "no changes needed in GRUB config file"
+
+        else:
+            logger.info(f"GRUB config file {grub_file} does not exist, skipping")
+            return InstallerResult.SKIPPED, "GRUB config file missing"
 
     except Exception as e:
         logger.error(f"Error applying cgroup kernel parameters: {e}")
