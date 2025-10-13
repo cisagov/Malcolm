@@ -11,7 +11,7 @@ from typing import List, Optional
 from scripts.malcolm_utils import which, temporary_filename
 from scripts.malcolm_common import (
     DownloadToFile,
-    get_distro_info,
+    SYSTEM_INFO,
     get_system_image_architecture,
     GetNonRootMalcolmUserNames,
 )
@@ -53,7 +53,12 @@ class LinuxInstaller(BaseInstaller):
         """Initialize the Linux installer."""
         super().__init__(orchestration_mode, ui, debug, control_flow)
 
-        self.distro, self.codename, self.ubuntu_codename, self.release = get_distro_info()
+        self.distro, self.codename, self.ubuntu_codename, self.release = (
+            SYSTEM_INFO["distro"],
+            SYSTEM_INFO["codename"],
+            SYSTEM_INFO["ubuntu_codename"],
+            SYSTEM_INFO["release"],
+        )
         self.check_package_cmd = self._get_check_package_command()
         self.install_package_cmd = self._get_install_package_command()
         self.update_repo_cmd = self._get_update_repo_command()

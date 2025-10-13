@@ -27,6 +27,7 @@ if "scripts" not in sys.modules:
 from scripts.malcolm_utils import (
     deep_get,
     eprint,
+    get_main_script_path,
     EscapeAnsi,
     LoadStrIfJson,
     remove_suffix,
@@ -300,7 +301,6 @@ def ParseK8sMemoryToMib(val):
 
 ##################################################################################################
 def GetUidGidFromEnv(configDir=None):
-    configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     uidGidDict = {}
     # default to the IDs for the calling user ...
     pyPlatform = platform.system()
@@ -308,6 +308,7 @@ def GetUidGidFromEnv(configDir=None):
     uidGidDict['PGID'] = f'{os.getgid()}' if (pyPlatform != PLATFORM_WINDOWS) else str(PGID_DEFAULT)
     if dotEnvImported := DotEnvDynamic():
         # ... but prefer the values in process.env
+        configDirToCheck = configDir if configDir and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
         envFileName = os.path.join(configDirToCheck, 'process.env')
         if os.path.isfile(envFileName):
             envValues = dotEnvImported.dotenv_values(envFileName)
@@ -324,9 +325,11 @@ def GetNonRootUidGid(
     reference_path=None,
     script_user=getpass.getuser(),
     script_platform=platform.system(),
+    fallback_uid=PUID_DEFAULT,
+    fallback_gid=PGID_DEFAULT,
 ):
-    default_uid = str(PUID_DEFAULT)
-    default_gid = str(PGID_DEFAULT)
+    default_uid = str(fallback_uid)
+    default_gid = str(fallback_gid)
 
     if (
         ((script_platform == PLATFORM_LINUX) or (script_platform == PLATFORM_MAC))
@@ -1677,18 +1680,22 @@ def InstallerChooseMultiple(
 def _total_memory_bytes() -> int:
     """Return total physical memory in bytes (Linux/BSD portable)."""
     try:
-        if sys.platform == "linux" or sys.platform == "linux2":
-            with open("/proc/meminfo", "r", encoding="utf-8") as meminfo:
-                for line in meminfo:
-                    if line.startswith("MemTotal:"):
-                        # value is in kB
-                        return int(line.split()[1]) * 1024
+        if plat := sys.platform:
+            if plat.startswith('linux'):
+                with open("/proc/meminfo", "r", encoding="utf-8") as meminfo:
+                    for line in meminfo:
+                        if line.startswith("MemTotal:"):
+                            # value is in kB
+                            return int(line.split()[1]) * 1024
+            elif plat.startswith('darwin') and which('sysctl'):
+                err, out = self.run_process(['sysctl', '-n', 'hw.memsize'], stderr=False)
+                if (err == 0) and (len(out) > 0):
+                    return int(out[0].strip())
+
         # Fallback that works on many *nix via sysconf
         if hasattr(os, "sysconf"):
-            pages = os.sysconf("SC_PHYS_PAGES")
-            page_size = os.sysconf("SC_PAGE_SIZE")
-            return pages * page_size
-    except (OSError, ValueError, FileNotFoundError):
+            return int(os.sysconf('SC_PAGE_SIZE')) * int(os.sysconf('SC_PHYS_PAGES'))
+    except:
         pass
     return 0  # Unknown
 
@@ -1700,7 +1707,28 @@ def total_memory_gb() -> int:
 
 def cpu_cores() -> int:
     """Return logical CPU count, falling back to 1."""
-    return max(1, os.cpu_count() or 1)
+    cpu_count = os.cpu_count() or 0
+
+    if (not cpu_count) and hasattr(os, "sysconf"):
+        try:
+            cpu_count = int(os.sysconf('SC_NPROCESSORS_ONLN'))
+        except:
+            cpu_count = 0
+
+    if (not cpu_count) and (plat := sys.platform):
+        try:
+            if plat.startswith('linux'):
+                with open('/proc/cpuinfo') as f:
+                    cpu_count = sum(1 for line in f if line.startswith('processor'))
+
+            elif plat.startswith('darwin') and which('sysctl'):
+                err, out = self.run_process(['sysctl', '-n', 'hw.ncpu'], stderr=False)
+                if (err == 0) and (len(out) > 0):
+                    cpu_count = int(out[0].strip())
+        except:
+            cpu_count = 0
+
+    return max(1, cpu_count or 1)
 
 
 def disk_free_bytes(path: str = "/") -> int:
@@ -1876,9 +1904,15 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str], Opti
 
 
 _rec_puid_pgid = GetUidGidFromEnv()
+if (int(_rec_puid_pgid['PUID']) == 0) or (int(_rec_puid_pgid['PGID']) == 0):
+    _rec_puid_pgid = GetNonRootUidGid(
+        reference_path=get_main_script_path(), fallback_uid=_rec_puid_pgid['PUID'], fallback_gid=_rec_puid_pgid['PGID']
+    )
+_distro_info = get_distro_info()
 
 # Snapshot of system facts and derived recommendations
 SYSTEM_INFO: dict[str, object] = {
+    "image_architecture": get_system_image_architecture(),
     "total_mem_gb": total_memory_gb(),
     "cpu_cores": cpu_cores(),
     "uid": os.getuid(),
@@ -1887,7 +1921,10 @@ SYSTEM_INFO: dict[str, object] = {
     "recommended_nonroot_gid": int(_rec_puid_pgid['PGID']),
     "platform": platform.system(),
     "platform_name": get_platform_name(),
-    "image_architecture": get_system_image_architecture(),
+    "distro": _distro_info[0],
+    "codename": _distro_info[1],
+    "ubuntu_codename": _distro_info[2],
+    "release": _distro_info[3],
 }
 
 # Derived recommendations appended to dict
@@ -1905,3 +1942,6 @@ __all__ = [
     "suggest_ls_memory",
     "suggest_ls_workers",
 ]
+
+if __name__ == "__main__":
+    print(SYSTEM_INFO)

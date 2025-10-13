@@ -12,7 +12,7 @@ from typing import Any, List
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.utils.tweak_utils import should_apply_tweak
 from scripts.malcolm_utils import file_contents, which
-from scripts.malcolm_common import get_distro_info
+from scripts.malcolm_common import SYSTEM_INFO
 
 
 def _normalize_status(result: Any) -> InstallerResult:
@@ -173,9 +173,8 @@ def apply_systemd_limits(
     SYSTEMD_LIMITS_DIR = "/etc/systemd/system.conf.d"
     MALCOLM_SYSTEMD_FILE = "99-malcolm.conf"
 
-    distro, codename, _, _ = get_distro_info()
-    if distro not in ["centos"] and codename not in ["core"]:
-        logger.info(f"Skipping systemd limits (not applicable for {distro} {codename})")
+    if SYSTEM_INFO["distro"] not in ["centos"] and SYSTEM_INFO["codename"] not in ["core"]:
+        logger.info(f"Skipping systemd limits (not applicable for {SYSTEM_INFO['distro']} {SYSTEM_INFO['distro']})")
         return InstallerResult.SKIPPED, "Not applicable"
     limits_file = os.path.join(SYSTEMD_LIMITS_DIR, MALCOLM_SYSTEMD_FILE)
     desired_content = [
