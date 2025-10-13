@@ -68,17 +68,18 @@ def detect_malcolm_and_image_files(
     Returns:
         Tuple of (list_of_malcolm_files, list_of_image_files)
     """
+    from scripts.malcolm_utils import get_main_script_dir
+
     malcolm_files = []
     image_files = []
+    script_dir = get_main_script_dir()
+    current_dir = os.getcwd()
 
     # Check if Malcolm file was provided via command line
     if malcolm_file_arg and os.path.isfile(malcolm_file_arg):
         malcolm_files.append(malcolm_file_arg)
     else:
         # Find all non-image tarballs, searching in pwd and then script path
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        current_dir = os.getcwd()
-
         # Support both hyphenated and underscored naming from packager
         malcolm_files = _discover_files(
             patterns=["malcolm[-_]*.tar.gz"],
@@ -91,9 +92,6 @@ def detect_malcolm_and_image_files(
         image_files.append(image_file_arg)
     else:
         # Find all image tarballs in pwd and script path
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        current_dir = os.getcwd()
-
         image_files = _discover_files(
             patterns=["malcolm[-_]*_images.tar.xz"],
             roots=[current_dir, script_dir],
@@ -243,4 +241,5 @@ def _discover_files(
     except Exception:
         # fall back to stable sort if mtimes not available
         unique.sort()
+
     return unique

@@ -30,6 +30,7 @@ from multiprocessing import RawValue
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
 from tempfile import NamedTemporaryFile
 from threading import Lock
+from typing import Optional
 
 try:
     from collections.abc import Iterable
@@ -1018,6 +1019,43 @@ def run_subprocess(command, stdout=True, stderr=False, stdin=None, timeout=60):
             output.extend(p.stdout.splitlines())
 
     return retcode, output
+
+
+def get_main_script_path() -> Optional[str]:
+    """
+    Return the absolute path to the original top-level Python script
+    that started execution (the "main" script), handling various
+    invocation methods and packaging scenarios.
+    Returns None if no script path can be determined (e.g. interactive shell).
+    """
+    import __main__
+    import shutil
+
+    # Case 1: Frozen app (PyInstaller, cx_Freeze, etc.)
+    if getattr(sys, 'frozen', False):
+        return os.path.abspath(sys.executable)
+
+    # Case 2: Normal script or module invocation
+    if hasattr(__main__, "__file__"):
+        return os.path.abspath(__main__.__file__)
+
+    # Case 3: sys.argv[0] fallback (covers direct + relative execution)
+    argv0 = sys.argv[0]
+    if argv0:
+        if not os.path.isabs(argv0):
+            resolved = shutil.which(argv0)
+            if resolved:
+                return os.path.abspath(resolved)
+        return os.path.abspath(argv0)
+
+    # Case 4: Interactive shell or embedded Python
+    return None
+
+
+def get_main_script_dir() -> Optional[str]:
+    if mpath := get_main_script_path():
+        return os.path.dirname(os.path.abspath(mpath))
+    return None
 
 
 ###################################################################################################

@@ -1905,6 +1905,3 @@ __all__ = [
     "suggest_ls_memory",
     "suggest_ls_workers",
 ]
-
-if __name__ == '__main__':
-    print(json.dumps(get_distro_info()))
