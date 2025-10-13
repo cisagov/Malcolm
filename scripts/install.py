@@ -588,7 +588,13 @@ def main():
         parsed_args, ui_impl, malcolm_config, control_flow, ORIG_PATH
     )
     if handled:
+        if sel_path and os.path.isdir(sel_path):
+            new_installer_py = os.path.join(sel_path, os.path.join('scripts', 'install.py'))
+            if os.path.isfile(new_installer_py):
+                # exec the new installer and abandon this one (replace the process)
+                os.execv(sys.executable, [sys.executable, new_installer_py, *sys.argv[1:]])
         return
+
     # capture any selections for downstream logic if needed (artifact handler performs work)
     # selections are no longer used downstream; configuration directory override is respected
     if cfg_override:

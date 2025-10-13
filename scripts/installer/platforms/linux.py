@@ -66,7 +66,7 @@ class LinuxInstaller(BaseInstaller):
 
         if self.debug:
             InstallerLogger.info(
-                f"{PLATFORM_LINUX} installer initialized for {self.distro} {self.codename} {self.release} ({self.ubuntu_codename})"
+                f"{PLATFORM_LINUX} installer initialized for {self.distro} {self.codename} {self.release} ({self.ubuntu_codename if self.ubuntu_codename else ''})"
             )
 
     def _get_check_package_command(self) -> Optional[List[str]]:
