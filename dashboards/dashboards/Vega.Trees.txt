@@ -8,7 +8,7 @@
       https://vega.github.io/vega/docs/
       https://vega.github.io/vega/examples/tree-layout/
     Commit:
-      Corresponds to 9c2c5e7 in SMILE-Analytics/trees
+      Corresponds to a1d271d in SMILE-Analytics/trees
   **/
   ##  Set up Vega specification definitions
   ##  Pay attention to Vega additions after V5
@@ -122,7 +122,7 @@
     // Takes User Input to define the initial root
     {
       "name": "userInputRoot",
-      "init": null,
+      "init": "''",
       "bind": {
         "input": "search",
         "placeholder": "  x.x.x.x ", // place holder to show syntax to user - spaces used to center placeholder in bind box
@@ -340,7 +340,6 @@
           "update": "device_data.device && device_data.device.name ? device_data.device.name[0] : null",
           "force": "true"
         },
-
       ]
     },
     {
@@ -370,7 +369,7 @@
       "on":[
         {
           "events": "@node:mouseover",
-          "update": "{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_data.as, 'Netbox Name': netbox_name,  'Nexbox Role': netbox_role }",
+          "update": "{'IP': device_data.ip, 'MAC': device_mac, 'OUI': device_oui, 'As': device_data.as, 'Netbox Name': netbox_name,  'Netbox Role': netbox_role }",
           "force": "true"
         },
         {
@@ -435,10 +434,10 @@
       "name": "bytes_extent",
       "update": "{'min': pluck(data('bytesExtent'), 'byteMin')[0], 'max': pluck(data('bytesExtent'), 'byteMax')[0]}"
     },
-  {
-    "name": "time_extent",
-    "update": "{'min': pluck(data('timeExtent'), 'timeMin'), 'max': pluck(data('timeExtent'), 'timeMax')}"
-  },
+    {
+      "name": "time_extent",
+      "update": "{'min': pluck(data('timeExtent'), 'timeMin'), 'max': pluck(data('timeExtent'), 'timeMax')}"
+    },
     {
       "name": "connection_time",
       "value": {},
@@ -609,12 +608,12 @@
       },
       {
         "type":"formula",
-        "expr": "isValid(datum.aggregated_objs[0].destination.segment) ? toString(pluck(datum.aggregated_objs, 'destination.segment.name')[0]) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+        "expr": "datum.aggregated_objs[0].destination.segment ? pluck(datum.aggregated_objs[0].destination.segment, toString('name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
         "as": "dst_segment"
       },
       {
         "type":"formula",
-        "expr": "isValid(datum.aggregated_objs[0].source.segment) ? toString(pluck(datum.aggregated_objs, 'source.segment.name')[0]) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
+        "expr": "datum.aggregated_objs[0].source.segment ? pluck(datum.aggregated_objs[0].source.segment, toString('name')) : null", //hardcoded to first index of objects because segment is enriched from netbox not network traffic
         "as": "src_segment"
       },
     ]
@@ -997,7 +996,6 @@
         "expr": "(datum.byteAvg - bytes_extent.min)/ (bytes_extent.max - bytes_extent.min)",
         "as": "byteAvg_normal"
       },
-
       ]
     },
   ],
@@ -1089,7 +1087,7 @@
                 "value": "#aaa"
               },
               "tooltip": {
-                "signal": "{'Time': toString(datum.target.date_obj),'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Byte Avg': datum.byteAvg}",
+                "signal": "{'Time': toString(datum.target.date_obj),'Src Segment': toString(pluck(datum.target.enrichment, 'src_segment')), 'Dst Segment': toString(pluck(datum.target.enrichment, 'dst_segment')), 'Byte Avg': datum.byteAvg}",
               }
             }
           }
@@ -1341,6 +1339,10 @@
     {
       "title": "Average Bytes",
       "orient": "none",
+      "titleColor": { "value": "#fff" },
+      "labelColor": { "value": "#fff" },
+      "fillColor": { "value": "#000" },
+      "padding": { "value": 10 }
 
       "strokeDash": "dash_scale",
       "symbolType": "stroke",
@@ -1352,7 +1354,7 @@
       "encode": {
         "symbols": {
           "update": {
-            "stroke": { "value": "#666" },
+            "stroke": { "value": "#aaa" },
             "fillOpacity": { "value": 0 }
           }
         },
