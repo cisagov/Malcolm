@@ -426,8 +426,6 @@ class LinuxInstaller(BaseInstaller):
                                 ["cp", armored_gpg_filename, dearmored_gpg_filename], privileged=True
                             )
 
-                    # todo verify with 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-
                 if os.path.isfile(dearmored_gpg_filename):
                     # Add Docker repository
                     if err == 0:
