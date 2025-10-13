@@ -103,6 +103,8 @@ class DialogInstallerUI(InstallerUI):
         items = build_configuration_summary_items(malcolm_config, config_dir)
 
         # include config-only and dry-run indicators
+        if not install_context.config_only:
+            items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
         items.append(("Config Only", "Yes" if install_context.config_only else "No"))
         items.append(("Dry Run", "Yes" if is_dry_run else "No"))
 

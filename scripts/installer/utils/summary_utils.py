@@ -83,18 +83,15 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
         KEY_CONFIG_ITEM_PROCESS_USER_ID,
         KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
     )
-    from scripts.installer.configs.constants.installation_item_keys import (
-        KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-    )
     from scripts.malcolm_constants import OrchestrationFramework
 
     # determine orchestration to match legacy display behavior
     orch_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
 
     summary_items = [
-        ("Installation Directory", config_dir),
+        ("Configuration Directory", config_dir),
         ("Container Runtime", malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN)),
-        ("Malcolm Profile", malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)),
+        ("Run Profile", malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)),
         ("Node Name", malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NODE_NAME)),
         ("Process User ID", malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID)),
         (
@@ -119,10 +116,6 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
             (
                 "HTTPS/SSL",
                 "Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_NGINX_SSL) else "No",
-            ),
-            (
-                "Auto System Tweaks",
-                ("Yes" if malcolm_config.get_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS) else "No"),
             ),
             (
                 "Default Storage Locations",

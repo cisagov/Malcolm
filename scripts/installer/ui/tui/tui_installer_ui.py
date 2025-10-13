@@ -154,13 +154,11 @@ class TUIInstallerUI(InstallerUI):
         # Build configuration summary items
         summary_items = build_configuration_summary_items(malcolm_config, config_dir)
 
-        # Remove the MalcolmConfig "Auto System Tweaks" entry since we'll use InstallContext value
-        summary_items = [item for item in summary_items if item[0] != "Auto System Tweaks"]
-
         # Artifact handling (tarball/images) is outside the UI path; omit from summary
 
         # add installation options from the context (keep to simple, high-signal flags)
-        summary_items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
+        if not install_context.config_only:
+            summary_items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
         summary_items.append(("Config Only", "Yes" if install_context.config_only else "No"))
         summary_items.append(("Dry Run", "Yes" if is_dry_run else "No"))
 
