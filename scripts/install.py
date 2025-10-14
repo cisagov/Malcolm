@@ -436,6 +436,9 @@ def main():
         InstallerLogger.error(f"Failed to determine interface mode: {e}") # fmt: skip
         sys.exit(1)
 
+    InstallerLogger.debug(f"Arguments: {sys.argv[1:]}")
+    InstallerLogger.debug(f"Arguments: {parsed_args}")
+
     # handle log file setup if --log-to-file was specified
     if parsed_args.logToFile is not None:
         if parsed_args.logToFile == "":
@@ -487,17 +490,18 @@ def main():
     try:
         # detect orchestration mode from provided configuration file, if any
         detected_orch_mode = None
-        cfg_path = parsed_args.malcolmOrchestrationFile
-        if cfg_path and (not os.path.isfile(cfg_path)):
-            InstallerLogger.error(f"Configuration file not found: {cfg_path}")
-            sys.exit(2)
-        if cfg_path and os.path.isfile(cfg_path):
-            detected_orch_mode = DetermineYamlFileFormat(cfg_path)
+        if parsed_args.malcolmOrchestrationFile:
+            if not os.path.isfile(parsed_args.malcolmOrchestrationFile):
+                InstallerLogger.error(f"Configuration file not found: {parsed_args.malcolmOrchestrationFile}")
+                sys.exit(2)
+            detected_orch_mode = DetermineYamlFileFormat(parsed_args.malcolmOrchestrationFile)
             if detected_orch_mode not in (
                 OrchestrationFramework.DOCKER_COMPOSE,
                 OrchestrationFramework.KUBERNETES,
             ):
-                InstallerLogger.error(f"{cfg_path} must be a docker-compose or kubeconfig YAML file")
+                InstallerLogger.error(
+                    f"{parsed_args.malcolmOrchestrationFile} must be a docker-compose or kubeconfig YAML file"
+                )
                 sys.exit(2)
 
             # if kubernetes, validate kubeconfig via python client (parity with legacy)
@@ -506,14 +510,14 @@ def main():
                 try:
                     if kube_imported := KubernetesDynamic(silent=False):
                         InstallerLogger.info(f"Imported kubernetes: {kube_imported}")
-                        kube_imported.config.load_kube_config(cfg_path)
+                        kube_imported.config.load_kube_config(parsed_args.malcolmOrchestrationFile)
                         kube_success = True
                 except Exception as e:
-                    InstallerLogger.error(f"Failed loading kubeconfig {cfg_path}: {e}")
+                    InstallerLogger.error(f"Failed loading kubeconfig {parsed_args.malcolmOrchestrationFile}: {e}")
                     sys.exit(2)
                 if not kube_success:
                     if kube_imported:
-                        InstallerLogger.error(f"Failed loading kubeconfig {cfg_path}")
+                        InstallerLogger.error(f"Failed loading kubeconfig {parsed_args.malcolmOrchestrationFile}")
                     else:
                         InstallerLogger.error(
                             f"The official Python client library for kubernetes is required for for {detected_orch_mode} mode"
@@ -528,13 +532,13 @@ def main():
         )
 
         # legacy parity: when Kubernetes is selected, a kubeconfig file is required via -f/--configure-file
-        if orchestration_mode == OrchestrationFramework.KUBERNETES:
-            cfg_path = parsed_args.malcolmOrchestrationFile
-            if not (cfg_path and os.path.isfile(cfg_path)):
-                InstallerLogger.error(
-                    f"{orchestration_mode} requires specifying a kubeconfig file via -f/--configure-file (also accepts --compose-file/--kube-file)"
-                )
-                sys.exit(2)
+        if (orchestration_mode == OrchestrationFramework.KUBERNETES) and (
+            (not parsed_args.malcolmOrchestrationFile) or (not os.path.isfile(parsed_args.malcolmOrchestrationFile))
+        ):
+            InstallerLogger.error(
+                f"{orchestration_mode} requires specifying a kubeconfig file via -f/--configure-file/--compose-file/--kube-file"
+            )
+            sys.exit(2)
 
         # persist orchestration mode into config for downstream transforms
         try:
@@ -669,10 +673,6 @@ def main():
             InstallerLogger.error("Failed to setup configuration directories.")
             sys.exit(1)
 
-    # set default docker-compose file path if not provided
-    if not parsed_args.malcolmOrchestrationFile:
-        parsed_args.malcolmOrchestrationFile = os.path.join(get_malcolm_dir(), "docker-compose.yml")
-
     # Configuration gathering user input (conditional on presentation mode)
     config_success = True
     if presentation_mode in [PresentationMode.MODE_TUI, PresentationMode.MODE_DUI]:
@@ -776,13 +776,7 @@ def main():
         else f"Configuration will be saved to {dirs.output_dir}"
     )
     if control_flow.should_write_files():
-        if orchestration_mode == OrchestrationFramework.KUBERNETES:
-            malcolm_config.generate_env_files(dirs.output_dir)
-        else:
-            malcolm_config.generate_all_config_files(
-                dirs.output_dir,
-                docker_compose_template_path=parsed_args.malcolmOrchestrationFile,
-            )
+        malcolm_config.generate_env_files(dirs.output_dir)
 
         # Apply any arbitrary extra .env settings requested via CLI (handle after file generation)
         try:
@@ -820,6 +814,7 @@ def main():
         malcolm_config,
         dirs.output_dir,
         install_context,
+        parsed_args.malcolmOrchestrationFile,
     )
 
     # report final status according to control flow

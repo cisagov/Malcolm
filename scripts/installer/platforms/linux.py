@@ -548,6 +548,7 @@ class LinuxInstaller(BaseInstaller):
         malcolm_config: "MalcolmConfig",
         config_dir: str,
         ctx,
+        orchestration_file=None,
         logger=None,
     ) -> bool:
         """Execute full Linux installation flow honoring ControlFlow and orchestration.
@@ -604,7 +605,11 @@ class LinuxInstaller(BaseInstaller):
 
         # 4) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
-            if not _ok(shared_actions.update_ancillary(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+            if not _ok(
+                shared_actions.update_compose_files(
+                    malcolm_config, config_dir, orchestration_file, self, ctx, InstallerLogger
+                )
+            ):
                 return False
 
         # 5) SSL env (shared)

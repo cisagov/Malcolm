@@ -198,7 +198,7 @@ class TestAncillaryStep(BaseInstallerTest):
         config = self.create_test_config()
         ctx = self.create_test_context()
 
-        result = shared_actions.update_ancillary(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+        result = shared_actions.update_compose_files(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
         self.assertTrue(result)
 
@@ -211,10 +211,12 @@ class TestAncillaryStep(BaseInstallerTest):
 
         # Mock docker-compose file update
         with patch(
-            "scripts.installer.actions.shared.update_ancillary",
+            "scripts.installer.actions.shared.update_compose_files",
             return_value=InstallerResult.SUCCESS,
         ):
-            result = shared_actions.update_ancillary(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+            result = shared_actions.update_compose_files(
+                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+            )
 
         self.assertTrue(result)
 

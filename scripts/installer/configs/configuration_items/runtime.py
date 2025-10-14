@@ -40,11 +40,11 @@ CONFIG_ITEM_RUNTIME_BIN = ConfigItem(
 
 CONFIG_ITEM_MALCOLM_PROFILE = ConfigItem(
     key=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-    label="Malcolm Profile",
+    label="Run Profile",
     default_value=PROFILE_MALCOLM,
     choices=[PROFILE_MALCOLM, PROFILE_HEDGEHOG],
     validator=lambda x: x in [PROFILE_MALCOLM, PROFILE_HEDGEHOG],
-    question="Select the installation profile: a full Malcolm suite or a capture-only sensor (Hedgehog).",
+    question='Select the run profile: a full Malcolm suite or capture-only ("Hedgehog mode")',
     widget_type=WidgetType.SELECT,
 )
 

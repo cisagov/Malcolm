@@ -303,6 +303,7 @@ class MacInstaller(BaseInstaller):
         malcolm_config,
         config_dir: str,
         ctx,
+        orchestration_file=None,
         logger=None,
     ) -> bool:
         """Execute full macOS installation flow honoring ControlFlow.
@@ -344,7 +345,11 @@ class MacInstaller(BaseInstaller):
 
         # 3) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
-            if not _ok(shared_actions.update_ancillary(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+            if not _ok(
+                shared_actions.update_compose_files(
+                    malcolm_config, config_dir, orchestration_file, self, ctx, InstallerLogger
+                )
+            ):
                 return False
 
         # 4) SSL env (shared)

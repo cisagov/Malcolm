@@ -78,6 +78,7 @@ class BaseInstaller(abc.ABC):
         malcolm_config,
         config_dir: str,
         ctx,
+        orchestration_file=None,
         logger=None,
     ) -> bool:
         """Execute the full installation flow for this platform.
@@ -114,11 +115,12 @@ class BaseInstaller(abc.ABC):
         malcolm_config,
         config_dir: str,
         ctx,
+        orchestration_file=None,
         logger=None,
     ) -> bool:
         """Run the installation process for this platform via install()."""
         try:
-            return self.install(malcolm_config, config_dir, ctx, logger)
+            return self.install(malcolm_config, config_dir, ctx, orchestration_file, logger)
         except Exception as e:
             import traceback
 

@@ -258,9 +258,10 @@ def _write_or_log_changes(original: dict, data: dict, config_file: str, platform
             logger.info(f"Dry run: no changes for compose file: {config_file}")
 
 
-def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
+def update_compose_files(
+    malcolm_config, config_dir: str, orchestration_file: Optional[str], platform, ctx, logger
+) -> InstallerResult:
     """Update docker-compose files with runtime-specific settings."""
-    # Ported from steps/ancillary.py (update_docker_compose_files + run wrapper)
     from scripts.malcolm_common import DumpYaml, LoadYaml
     from scripts.malcolm_utils import deep_set, deep_get
     from scripts.installer.configs.constants.configuration_item_keys import (
@@ -274,15 +275,18 @@ def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> 
     )
 
     try:
-        # Prefer the provided directory when it contains compose files; otherwise look at its parent
-        malcolm_install_path, compose_files = _select_install_path_and_compose_files(config_dir)
+        if orchestration_file and os.path.isfile(orchestration_file):
+            compose_files = [orchestration_file]
+        else:
+            _, compose_files = _select_install_path_and_compose_files(config_dir)
+
         if not compose_files:
-            logger.warning("Could not locate docker-compose files for orchestration updates")
+            logger.warning("Could not locate compose files for orchestration updates")
             return InstallerResult.SUCCESS
 
         if platform.is_dry_run():
             logger.info(
-                f"Dry run: would update orchestration (docker-compose) files in {malcolm_install_path}: "
+                f"Dry run: would update compose files for orchestration: "
                 + ", ".join(sorted(os.path.basename(f) for f in compose_files))
             )
             runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
@@ -292,8 +296,9 @@ def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> 
             )
             return InstallerResult.SKIPPED
 
-        logger.info(f"Updating orchestration (docker-compose) files in {malcolm_install_path}...")
-        logger.info(f"Found {len(compose_files)} docker-compose files: {[os.path.basename(f) for f in compose_files]}")
+        logger.info(
+            f"Updating {len(compose_files)} compose file(s) for orchestration ({', '.join(sorted(os.path.basename(f) for f in compose_files))})..."
+        )
 
         # Load/write per file
         runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
@@ -413,7 +418,6 @@ def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform,
 
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, logger) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
-    from typing import Optional
     from scripts.installer.configs.constants.configuration_item_keys import (
         KEY_CONFIG_ITEM_RUNTIME_BIN,
         KEY_CONFIG_ITEM_MALCOLM_PROFILE,

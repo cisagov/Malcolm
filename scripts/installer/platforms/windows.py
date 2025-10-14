@@ -39,6 +39,7 @@ class WindowsInstaller(BaseInstaller):
         malcolm_config,
         config_dir: str,
         ctx,
+        orchestration_file=None,
         logger=None,
     ) -> bool:
         """Windows is not supported: provide a clear message and return False."""

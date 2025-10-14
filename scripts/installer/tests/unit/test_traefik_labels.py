@@ -3,7 +3,7 @@
 
 """Unit tests for Traefik label injection into docker-compose files.
 
-Validates that ancillary.update_docker_compose_files applies or clears
+Validates that ancillary.update_compose_files applies or clears
 Traefik labels on the nginx-proxy service based on MalcolmConfig values,
 matching the original install.py behavior.
 """
@@ -14,7 +14,7 @@ import tempfile
 import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
-from scripts.installer.actions.shared import update_ancillary as update_docker_compose_files
+from scripts.installer.actions.shared import update_compose_files
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.tests.mock.test_framework import MockPlatform
 from scripts.installer.core.install_context import InstallContext
@@ -81,7 +81,7 @@ class TestTraefikLabels(unittest.TestCase):
         )
 
         # act
-        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -126,7 +126,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, False)
 
         # act
-        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         updated = _read_compose(self.compose_path)
@@ -151,7 +151,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
 
         # act
-        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -177,7 +177,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, False)
 
         # act
-        ok = update_docker_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
