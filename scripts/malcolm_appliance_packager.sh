@@ -166,21 +166,21 @@ if mkdir "$DESTDIR"; then
 
   unset CONFIRMATION
   echo ""
-  # read -p "Do you need to package container images also [y/N]? " CONFIRMATION
-  # CONFIRMATION=${CONFIRMATION:-N}
-  # if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
-  #   echo "This might take a few minutes..."
-  #   DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.xz"
-  #   IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
-  #   if [[ "$MALCOLM_CONTAINER_RUNTIME" == "podman" ]]; then
-  #     $MALCOLM_CONTAINER_RUNTIME save --multi-image-archive --format docker-archive "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
-  #   else
-  #     $MALCOLM_CONTAINER_RUNTIME save "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
-  #   fi
-  #   echo "Packaged Malcolm container images to \"$DESTNAMEIMAGES\""
-  #   echo ""
-  # fi
-  # echo ""
+  read -p "Do you need to package container images also [y/N]? " CONFIRMATION
+  CONFIRMATION=${CONFIRMATION:-N}
+  if [[ $CONFIRMATION =~ ^[Yy]$ ]]; then
+    echo "This might take a few minutes..."
+    DESTNAMEIMAGES="$RUN_PATH/$(basename $DESTDIR)_images.tar.xz"
+    IMAGES=( $(grep image: $DESTDIR/docker-compose.yml | awk '{print $2}' | sort -u) )
+    if [[ "$MALCOLM_CONTAINER_RUNTIME" == "podman" ]]; then
+      $MALCOLM_CONTAINER_RUNTIME save --multi-image-archive --format docker-archive "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
+    else
+      $MALCOLM_CONTAINER_RUNTIME save "${IMAGES[@]}" | xz -1 > "$DESTNAMEIMAGES"
+    fi
+    echo "Packaged Malcolm container images to \"$DESTNAMEIMAGES\""
+    echo ""
+  fi
+  echo ""
   echo "To install Malcolm:" | tee -a "$README"
   echo "  1. Run install.py" | tee -a "$README"
   echo "  2. Follow the prompts" | tee -a "$README"
