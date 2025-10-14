@@ -14,7 +14,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, Any, Callable, List, Tuple, Optional, Set
 
-from scripts.malcolm_common import DumpYaml, SYSTEM_INFO, YAMLDynamic
+from scripts.malcolm_common import DotEnvDynamic, DumpYaml, SYSTEM_INFO, YAMLDynamic
 from scripts.malcolm_utils import deep_set
 
 from scripts.installer.configs.constants.config_env_var_keys import *
@@ -446,22 +446,18 @@ class MalcolmConfig(ObservableStoreMixin):
 
     def _collect_env_values(self, config_dir: str) -> Dict[str, str]:
         env_values: Dict[str, str] = {}
-        for file_name in self._env_mapper.get_all_file_names():
-            filepath = os.path.join(config_dir, file_name)
-            if not os.path.exists(filepath):
-                continue
-            try:
-                with open(filepath, "r") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line or line.startswith("#"):
-                            continue
-                        parts = line.split("=", 1)
-                        if len(parts) == 2:
-                            env_values[parts[0].strip()] = parts[1].strip()
-            except (IOError, OSError) as e:
-                InstallerLogger.warning(f"Could not read {filepath}: {e}")
-                # Continue to try and load from other files
+
+        if dotenv_lib := DotEnvDynamic():
+            for file_name in self._env_mapper.get_all_file_names():
+                filepath = os.path.join(config_dir, file_name)
+                if not os.path.exists(filepath):
+                    continue
+                try:
+                    env_values.update(dotenv_lib.dotenv_values(filepath))
+                except Exception as e:
+                    InstallerLogger.warning(f"Could not read {filepath}: {e}")
+                    # Continue to try and load from other files
+
         return env_values
 
     def _build_candidates_from_env(self, env_values: Dict[str, str]):

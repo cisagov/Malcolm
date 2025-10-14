@@ -24,7 +24,7 @@ from scripts.malcolm_utils import (
     true_or_false_no_quotes,
     bool_to_str,
 )
-from scripts.malcolm_common import get_default_config_dir
+from scripts.malcolm_common import get_default_config_dir, DotEnvDynamic
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.config_env_files import *
@@ -326,68 +326,60 @@ class EnvMapper:
             InstallerLogger.warning(f"Configuration directory '{config_dir}' not found. EnvMapper will be empty.")
             return
 
-        # Scan .env.example files for environment variable mappings
-        for dirpath, _, filenames in os.walk(config_dir):
-            for example_filename in filenames:
-                if example_filename.endswith(".env.example"):
-                    current_env_file_name_str = example_filename.replace(".example", "")
-                    filepath = os.path.join(dirpath, example_filename)
+        if dotenv_lib := DotEnvDynamic():
+            # Scan .env.example files for environment variable mappings
+            for dirpath, _, filenames in os.walk(config_dir):
+                for example_filename in filenames:
+                    if example_filename.endswith(".env.example"):
+                        current_env_file_name_str = example_filename.replace(".example", "")
+                        filepath = os.path.join(dirpath, example_filename)
+                        if os.path.isfile(filepath):
+                            try:
+                                for env_var_name_from_file in dotenv_lib.dotenv_values(filepath).keys():
+                                    map_key_constant_value = None
 
-                    try:
-                        with open(filepath, "r") as f:
-                            for line in f:
-                                line = line.strip()
-                                if not line or line.startswith("#"):
-                                    continue
+                                    # Do an exact dictionary lookup
+                                    if env_var_name_from_file != ALL_ENV_KEYS_DICT.get(env_var_name_from_file):
+                                        continue
 
-                                # Split only on the first equals sign
-                                parts = line.split("=", 1)
-                                if len(parts) != 2:
-                                    continue
+                                    map_key_constant_value = ALL_ENV_KEYS_DICT.get(env_var_name_from_file)
 
-                                env_var_name_from_file = parts[0].strip()
-                                map_key_constant_value = None
+                                    # Create the EnvVariable instance
+                                    env_var_instance = EnvVariable(
+                                        key=map_key_constant_value,
+                                        file_name=current_env_file_name_str,
+                                        variable_name=env_var_name_from_file,
+                                        required=False,
+                                        transform=None,
+                                        reverse_transform=None,
+                                    )
 
-                                # Do an exact dictionary lookup
-                                if env_var_name_from_file != ALL_ENV_KEYS_DICT.get(env_var_name_from_file):
-                                    continue
+                                    if map_key_constant_value in _CUSTOM_VARS:
+                                        self._handle_custom_transform(env_var_instance, map_key_constant_value)
+                                    elif map_key_constant_value in _STRING_VARS:
+                                        env_var_instance.transform = _default_string_transform
+                                        env_var_instance.reverse_transform = _default_string_reverse_transform
+                                    elif map_key_constant_value in _BOOLEAN_VARS:
+                                        # Booleans should be written to .env files as lowercase strings ("true"/"false")
+                                        # and parsed back from strings to native Python bools when loading.
+                                        env_var_instance.transform = bool_to_str
+                                        env_var_instance.reverse_transform = str_to_bool
+                                    else:
+                                        InstallerLogger.error(f"Invalid env map key constant: {map_key_constant_value}")
+                                        raise ValueError(f"Invalid map key constant value: {map_key_constant_value}")
 
-                                map_key_constant_value = ALL_ENV_KEYS_DICT.get(env_var_name_from_file)
+                                    # populate maps
+                                    self.env_vars_by_file[current_env_file_name_str].append(env_var_instance)
+                                    self.env_var_by_map_key[map_key_constant_value] = env_var_instance
 
-                                # Create the EnvVariable instance
-                                env_var_instance = EnvVariable(
-                                    key=map_key_constant_value,
-                                    file_name=current_env_file_name_str,
-                                    variable_name=env_var_name_from_file,
-                                    required=False,
-                                    transform=None,
-                                    reverse_transform=None,
-                                )
+                                    # else:
+                                    # print(f"Debug: Variable '{env_var_name_from_file}' in '{filepath}' not a managed key in env_keys.")
 
-                                if map_key_constant_value in _CUSTOM_VARS:
-                                    self._handle_custom_transform(env_var_instance, map_key_constant_value)
-                                elif map_key_constant_value in _STRING_VARS:
-                                    env_var_instance.transform = _default_string_transform
-                                    env_var_instance.reverse_transform = _default_string_reverse_transform
-                                elif map_key_constant_value in _BOOLEAN_VARS:
-                                    # Booleans should be written to .env files as lowercase strings ("true"/"false")
-                                    # and parsed back from strings to native Python bools when loading.
-                                    env_var_instance.transform = bool_to_str
-                                    env_var_instance.reverse_transform = str_to_bool
-                                else:
-                                    InstallerLogger.error(f"Invalid env map key constant: {map_key_constant_value}")
-                                    raise ValueError(f"Invalid map key constant value: {map_key_constant_value}")
+                            except Exception as e:
+                                InstallerLogger.error(f"EnvMapper error processing '{filepath}': {e}")
 
-                                # populate maps
-                                self.env_vars_by_file[current_env_file_name_str].append(env_var_instance)
-                                self.env_var_by_map_key[map_key_constant_value] = env_var_instance
-
-                                # else:
-                                # print(f"Debug: Variable '{env_var_name_from_file}' in '{filepath}' not a managed key in env_keys.")
-                    except FileNotFoundError:
-                        InstallerLogger.warning(f"EnvMapper scan skipped missing file: {filepath}")
-                    except Exception as e:
-                        InstallerLogger.error(f"EnvMapper error processing '{filepath}': {e}")
+                        else:
+                            InstallerLogger.warning(f"EnvMapper scan skipped missing file: {filepath}")
 
         # Arkime
         self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP]
