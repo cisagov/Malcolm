@@ -382,7 +382,7 @@ def main():
 
     try:
         if (not parsed_args.configOnly) and (os.geteuid() != 0):
-            InstallerLogger.error("This installer must be run as root. Please run with sudo.") # fmt: skip
+            InstallerLogger.error("This installer must be run as root.") # fmt: skip
             sys.exit(1)
     except Exception as e:
         InstallerLogger.error(f"Failed to check if running as root: {e}")

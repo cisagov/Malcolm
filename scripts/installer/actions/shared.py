@@ -383,13 +383,16 @@ def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> In
         return InstallerResult.FAILURE
 
 
+# TODO: check these out, do we need this sudo stuff?
+
+
 def _resolve_podman_rootless_user(platform):
 
     user = os.environ.get("SUDO_USER") or os.environ.get("LOGNAME") or os.environ.get("USER")
     if not user or user == "root":
         return None, None, None
     uid = None
-    rc, out = platform.run_process(["id", "-u", user], privileged=False, stderr=False)
+    rc, out = platform.run_process(["id", "-u", user], stderr=False)
     if rc == 0 and out:
         uid = out[0].strip()
     socket_path = f"/run/user/{uid}/podman/podman.sock" if uid else None
@@ -448,9 +451,7 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
             load_cmd = [runtime_bin, "load", "-q", "-i", ctx.image_archive_path]
             if runtime_bin.startswith("podman") and os.geteuid() == 0:
                 load_cmd = _prepare_podman_rootless_command(load_cmd, "loading images rootless", platform, logger)
-                ecode, out = platform.run_process(load_cmd, privileged=False)
-            else:
-                ecode, out = platform.run_process(load_cmd, privileged=(not runtime_bin.startswith("podman")))
+            ecode, out = platform.run_process(load_cmd)
             if ecode == 0:
                 logger.info("Malcolm images loaded successfully.")
                 return InstallerResult.SUCCESS, "Malcolm images loaded from archive"
@@ -469,9 +470,7 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
                 return InstallerResult.SUCCESS, "Compose command unavailable; manual start required"
             if runtime_bin.startswith("podman"):
                 # best-effort socket activation; guidance only on failure
-                rc, _ = platform.run_process(
-                    ["systemctl", "--user", "is-active", "podman.socket"], privileged=False, stderr=False
-                )
+                rc, _ = platform.run_process(["systemctl", "--user", "is-active", "podman.socket"], stderr=False)
                 # Not enforcing strict failure, keep behavior pragmatic
             compose_base = compose_cmd + ["-f", compose_file]
             if profile:
@@ -482,11 +481,11 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
                     pull_cmd = _prepare_podman_rootless_command(
                         compose_base + ["pull"], "pulling images rootless", platform, logger
                     )
-                    ecode = platform.run_process_streaming(pull_cmd, privileged=False)
+                    ecode = platform.run_process_streaming(pull_cmd)
                 else:
                     for priv in (False, True):
                         pull_cmd = compose_base + ["pull"]
-                        ecode = platform.run_process_streaming(pull_cmd, privileged=priv)
+                        ecode = platform.run_process_streaming(pull_cmd)
                         if ecode == 0:
                             break
                 if ecode == 0:

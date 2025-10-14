@@ -31,7 +31,6 @@ class MacInstaller(BaseInstaller):
         """Initialize the macOS installer."""
         super().__init__(orchestration_mode, ui, debug, control_flow)
 
-        self.sudo_cmd = []
         self.use_brew = False
 
     def _setup_homebrew(self, install_context: InstallContext):

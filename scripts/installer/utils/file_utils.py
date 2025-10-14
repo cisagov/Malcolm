@@ -193,10 +193,6 @@ def extract_image_files(image_file: str, install_path: str, runtime_bin: str = "
     load_cmd = [runtime_bin, "load", "-i", image_file]
 
     try:
-        # run the command with elevated privileges when needed
-        if os.geteuid() != 0:
-            load_cmd = ["sudo"] + load_cmd
-
         result = subprocess.run(
             load_cmd,
             capture_output=True,

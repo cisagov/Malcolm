@@ -199,7 +199,7 @@ class LinuxInstaller(BaseInstaller):
     def install_package(self, packages: List[str]) -> bool:
         """Install packages using Linux package manager."""
         if self.update_repo_cmd:
-            err, out = self.run_process(self.update_repo_cmd, privileged=True)
+            err, out = self.run_process(self.update_repo_cmd)
             if err != 0 and self.debug:
                 InstallerLogger.warning(f"Failed to update package lists: {out}")
 
@@ -215,7 +215,7 @@ class LinuxInstaller(BaseInstaller):
                 InstallerLogger.info(f"All packages already installed: {packages}")
             return True
 
-        err, out = self.run_process(self.install_package_cmd + packages_to_install, privileged=True)
+        err, out = self.run_process(self.install_package_cmd + packages_to_install)
         if err != 0:
             InstallerLogger.error(f"Failed to install packages {packages_to_install}: {out}")
             return False
@@ -271,7 +271,7 @@ class LinuxInstaller(BaseInstaller):
         self._configure_docker_service()
 
         # Verify installation
-        err, out = self.run_process(["docker", "info"], privileged=True, retry=6, retry_sleep_sec=5)
+        err, out = self.run_process(["docker", "info"], retry=6, retry_sleep_sec=5)
         if err == 0:
             self._add_users_to_docker_group(install_context.docker_extra_users)
             return True
@@ -372,7 +372,7 @@ class LinuxInstaller(BaseInstaller):
         if self.add_repo_cmd and repo_url:
             if self.debug and self.add_repo_cmd:
                 InstallerLogger.info(f"Adding Docker repository for {self.distro}")
-            err, out = self.run_process(self.add_repo_cmd + [repo_url], privileged=True)
+            err, out = self.run_process(self.add_repo_cmd + [repo_url])
             if err != 0:
                 docker_packages = []
 
@@ -429,13 +429,10 @@ class LinuxInstaller(BaseInstaller):
                         if which('gpg'):
                             err, out = self.run_process(
                                 ["gpg", "--dearmor", "--output", dearmored_gpg_filename, armored_gpg_filename],
-                                privileged=True,
                                 stderr=False,
                             )
                         else:
-                            err, out = self.run_process(
-                                ["cp", armored_gpg_filename, dearmored_gpg_filename], privileged=True
-                            )
+                            err, out = self.run_process(["cp", armored_gpg_filename, dearmored_gpg_filename])
 
                 if os.path.isfile(dearmored_gpg_filename):
                     # Add Docker repository
@@ -447,7 +444,7 @@ class LinuxInstaller(BaseInstaller):
                                 f"deb [signed-by={dearmored_gpg_filename}] https://download.docker.com/linux/{repo_distro} {self.ubuntu_codename if self.ubuntu_codename else self.codename} stable\n"
                             )
                         if self.update_repo_cmd:
-                            up_err, out = self.run_process(self.update_repo_cmd, privileged=True)
+                            up_err, out = self.run_process(self.update_repo_cmd)
                             if up_err != 0 and self.debug:
                                 InstallerLogger.warning(f"Failed to update package lists: {out}")
 
@@ -462,7 +459,7 @@ class LinuxInstaller(BaseInstaller):
             with temporary_filename('.sh') as temp_filename:
                 if DownloadToFile("https://get.docker.com/", temp_filename, self.debug):
                     os.chmod(temp_filename, 0o755)
-                    err, out = self.run_process([temp_filename], privileged=True)
+                    err, out = self.run_process([temp_filename])
                     if err == 0:
                         InstallerLogger.info("Docker installation via convenience script succeeded")
                         return True
@@ -479,9 +476,9 @@ class LinuxInstaller(BaseInstaller):
             return
         if which('systemctl'):
             # Attempt to start and enable the service regardless of distro to keep behaviour predictable
-            err, out = self.run_process(["systemctl", "start", "docker"], privileged=True)
+            err, out = self.run_process(["systemctl", "start", "docker"])
             if err == 0:
-                err, out = self.run_process(["systemctl", "enable", "docker"], privileged=True)
+                err, out = self.run_process(["systemctl", "enable", "docker"])
                 if err != 0:
                     InstallerLogger.error(f"Enabling Docker service failed: {out}")
             else:
@@ -493,7 +490,7 @@ class LinuxInstaller(BaseInstaller):
             if self.config_only or self.dry_run:
                 InstallerLogger.info(f"Dry run: would add {user} to docker group")
                 continue
-            err, out = self.run_process(["usermod", "-a", "-G", "docker", user], privileged=True)
+            err, out = self.run_process(["usermod", "-a", "-G", "docker", user])
             if err == 0:
                 if self.debug:
                     InstallerLogger.info(f'Adding {user} to "docker" group succeeded')
@@ -527,7 +524,7 @@ class LinuxInstaller(BaseInstaller):
                         "/usr/local/bin/docker-compose",
                     ]:
                         pathlib.Path(os.path.dirname(final_compose_script)).mkdir(parents=True, exist_ok=True)
-                        err, out = self.run_process(["cp", tmp_compose_script, final_compose_script], privileged=True)
+                        err, out = self.run_process(["cp", tmp_compose_script, final_compose_script])
                         if err == 0:
                             if discover_compose_command("docker", self):
                                 InstallerLogger.info("Getting Docker Compose from GitHub succeeded")

@@ -63,7 +63,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
             with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
                 tmp.writelines(f'{s}\n' for s in filtered)
                 tmp_path = tmp.name
-            err, out = platform.run_process(["cp", tmp_path, path], privileged=True)
+            err, out = platform.run_process(["cp", tmp_path, path])
             try:
                 os.chmod(path, 0o644)
                 os.unlink(tmp_path)
@@ -144,7 +144,7 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
-        err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
+        err, out = platform.run_process(["cp", tmp_path, limits_file])
         try:
             os.chmod(limits_file, 0o644)
             os.unlink(tmp_path)
@@ -204,7 +204,7 @@ def apply_systemd_limits(
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
-        err, out = platform.run_process(["cp", tmp_path, limits_file], privileged=True)
+        err, out = platform.run_process(["cp", tmp_path, limits_file])
         try:
             os.chmod(limits_file, 0o644)
             os.unlink(tmp_path)
@@ -284,7 +284,7 @@ def apply_grub_cgroup(
             return InstallerResult.SKIPPED, "cgroup kernel parameters skipped (dry run)"
 
         if system_uses_systemd_boot():
-            err, out = platform.run_process(['kernelstub', '-a', ' '.join(params)], privileged=True)
+            err, out = platform.run_process(['kernelstub', '-a', ' '.join(params)])
             if err == 0:
                 logger.info("Applied new kernel parameters with kernelstub")
                 return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
@@ -292,9 +292,7 @@ def apply_grub_cgroup(
             return InstallerResult.FAILURE, "cgroup kernel parameters failed"
 
         elif system_uses_bls():
-            err, out = platform.run_process(
-                ['grubby', '--update-kernel=ALL', f"--args={' '.join(params)}"], privileged=True
-            )
+            err, out = platform.run_process(['grubby', '--update-kernel=ALL', f"--args={' '.join(params)}"])
             if err == 0:
                 logger.info("Applied new kernel parameters with grubby")
                 return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
@@ -329,11 +327,11 @@ def apply_grub_cgroup(
                     pass
 
                 if which('update-grub'):
-                    err, out = platform.run_process(['update-grub'], privileged=True)
+                    err, out = platform.run_process(['update-grub'])
                 elif which('update-grub2'):
-                    err, out = platform.run_process(['update-grub2'], privileged=True)
+                    err, out = platform.run_process(['update-grub2'])
                 elif which('grub2-mkconfig') and os.path.isfile('/boot/grub2/grub.cfg'):
-                    err, out = platform.run_process(['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'], privileged=True)
+                    err, out = platform.run_process(['grub2-mkconfig', '-o', '/boot/grub2/grub.cfg'])
                 else:
                     err = 0
                     logger.warning(
