@@ -280,7 +280,6 @@ class InstallContext(ObservableStoreMixin):
                     # Observers must not break installer flow
                     pass
 
-    # Compatibility properties for step functions that expect direct fields
     @property
     def auto_tweaks(self) -> bool:
         """Get auto_tweaks value from items or default."""

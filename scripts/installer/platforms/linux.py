@@ -31,6 +31,12 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_LINUX_ZORIN,
 )
+from scripts.installer.configs.constants.installation_item_keys import (
+    KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
+)
+from scripts.installer.configs.constants.enums import (
+    DockerComposeInstallMethod,
+)
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.core.install_context import InstallContext
@@ -494,7 +500,7 @@ class LinuxInstaller(BaseInstaller):
             else:
                 InstallerLogger.error(f'Adding {user} to "docker" group failed')
 
-    def install_docker_compose_from_github(self) -> bool:
+    def install_docker_compose(self, install_context: InstallContext) -> bool:
         """Attempt to install the docker compose plugin on linux.
 
         With most platforms we're already installing Compose alongside Docker
@@ -505,7 +511,11 @@ class LinuxInstaller(BaseInstaller):
 
         if discover_compose_command("docker", self):
             return True
-        else:
+
+        elif (
+            install_context.get_value(KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD)
+            == DockerComposeInstallMethod.GITHUB
+        ):
             with temporary_filename() as tmp_compose_script:
                 if DownloadToFile(
                     f"https://github.com/docker/compose/releases/latest/download/docker-compose-linux-{'aarch64' if get_system_image_architecture() == ImageArchitecture.ARM64 else 'x86_64'}",
@@ -533,7 +543,7 @@ class LinuxInstaller(BaseInstaller):
                         else:
                             InstallerLogger.error(f"Getting Docker Compose from GitHub failed: {out}")
 
-            return False
+        return False
 
     # new unified orchestration entry point
     def install(
@@ -588,7 +598,7 @@ class LinuxInstaller(BaseInstaller):
                     if not self.install_docker(ctx):
                         return False
                 # Compose
-                if not self.install_docker_compose_from_github():
+                if not self.install_docker_compose(ctx):
                     # non-fatal if compose already present; verify via docker_ops later
                     pass
             else:
