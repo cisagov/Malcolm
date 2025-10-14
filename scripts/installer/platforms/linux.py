@@ -471,20 +471,18 @@ class LinuxInstaller(BaseInstaller):
         if self.config_only or self.dry_run:
             InstallerLogger.info("Dry run: would start and enable Docker service where applicable")
             return
-        # Attempt to start and enable the service regardless of distro to keep behaviour predictable
-        err, out = self.run_process(["systemctl", "start", "docker"], privileged=True)
-        if err == 0:
-            err, out = self.run_process(["systemctl", "enable", "docker"], privileged=True)
-            if err != 0:
-                InstallerLogger.error(f"Enabling Docker service failed: {out}")
-        else:
-            InstallerLogger.error(f"Starting Docker service failed: {out}")
+        if which('systemctl'):
+            # Attempt to start and enable the service regardless of distro to keep behaviour predictable
+            err, out = self.run_process(["systemctl", "start", "docker"], privileged=True)
+            if err == 0:
+                err, out = self.run_process(["systemctl", "enable", "docker"], privileged=True)
+                if err != 0:
+                    InstallerLogger.error(f"Enabling Docker service failed: {out}")
+            else:
+                InstallerLogger.error(f"Starting Docker service failed: {out}")
 
     def _add_users_to_docker_group(self, users_to_add: List[str]):
         """Add users to the docker group for non-root access."""
-        if other_users := GetNonRootMalcolmUserNames():
-            users_to_add.extend(other_users)
-
         for user in users_to_add:
             if self.config_only or self.dry_run:
                 InstallerLogger.info(f"Dry run: would add {user} to docker group")

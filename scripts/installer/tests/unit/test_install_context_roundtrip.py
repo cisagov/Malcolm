@@ -56,7 +56,7 @@ class TestInstallContextRoundtrip(unittest.TestCase):
         )
         self.ctx.set_item_value(
             KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
-            DockerComposeInstallMethod.PIP_USER,
+            DockerComposeInstallMethod.GITHUB,
         )
         # Toggle booleans
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING, False)

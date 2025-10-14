@@ -517,7 +517,7 @@ def main():
                         InstallerLogger.error(f"Failed loading kubeconfig {cfg_path}")
                     else:
                         InstallerLogger.error(
-                            f"The official Python client library for kubernetes is required for for {orchMode} mode"
+                            f"The official Python client library for kubernetes is required for for {detected_orch_mode} mode"
                         )
                     sys.exit(2)
 

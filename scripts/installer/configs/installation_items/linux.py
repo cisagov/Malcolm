@@ -45,7 +45,7 @@ CONFIG_ITEM_DOCKER_INSTALL_METHOD = ConfigItem(
 
 CONFIG_ITEM_DOCKER_COMPOSE_INSTALL_METHOD = ConfigItem(
     key=KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
-    label="Docker Compose Installation Method",
+    label="Docker Compose Fallback Installation Method",
     default_value=DockerComposeInstallMethod.GITHUB,
     choices=[x.value for x in DockerComposeInstallMethod],
     validator=lambda x: x in DockerComposeInstallMethod,
@@ -103,6 +103,7 @@ CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
     metadata={
         'help': "Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
         'widget_type': 'text',
+        "visible_when_runtime": "docker",
     },
 )
 

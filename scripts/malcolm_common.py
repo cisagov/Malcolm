@@ -362,16 +362,24 @@ def GetNonRootUidGid(
 
 ##################################################################################################
 def GetNonRootMalcolmUserNames():
-    return [
-        user
-        for user in {
-            getpass.getuser(),
-            getpwuid(int(GetNonRootUidGid(reference_path=MalcolmPath).get('PUID'))).pw_name if getpwuid else None,
-            os.environ.get("USER"),
-            os.environ.get("LOGNAME"),
-        }
-        if user and user not in {"root", "0"}
-    ]
+    return list(
+        set(
+            [
+                user
+                for user in {
+                    getpass.getuser(),
+                    (
+                        getpwuid(int(GetNonRootUidGid(reference_path=MalcolmPath).get('PUID'))).pw_name
+                        if getpwuid
+                        else None
+                    ),
+                    os.environ.get("USER"),
+                    os.environ.get("LOGNAME"),
+                }
+                if user and user not in {"root", "0"}
+            ]
+        )
+    )
 
 
 ##################################################################################################

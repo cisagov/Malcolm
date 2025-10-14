@@ -17,12 +17,6 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
-    KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
-    KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
-)
-from scripts.installer.configs.constants.enums import (
-    DockerInstallMethod,
-    DockerComposeInstallMethod,
 )
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.core.observable import ObservableStoreMixin

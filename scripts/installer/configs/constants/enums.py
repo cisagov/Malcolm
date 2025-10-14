@@ -110,8 +110,6 @@ class DockerInstallMethod(Enum):
 # Docker Compose installation method constants
 class DockerComposeInstallMethod(Enum):
     GITHUB = "github"
-    PIP_PRIVILEGED = "pip_privileged"
-    PIP_USER = "pip_user"
     SKIP = "skip"
 
 
