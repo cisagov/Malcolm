@@ -32,7 +32,7 @@ ENV TERM xterm
 ENV TINI_VERSION v0.19.0
 ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION "4.47.2"
+ENV YQ_VERSION "4.48.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
@@ -80,6 +80,7 @@ ADD --chmod=755 opensearch-config/scripts/*.* /usr/local/bin/
 ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/
 ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"

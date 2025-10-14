@@ -18,15 +18,13 @@ import malcolm_utils
 from malcolm_utils import str2bool, ParseCurlFile, get_iterable, set_logging, get_verbosity_env_var_count
 
 ###################################################################################################
-scriptName = os.path.basename(__file__)
-scriptPath = os.path.dirname(os.path.realpath(__file__))
+script_name = os.path.basename(__file__)
+script_path = os.path.dirname(os.path.realpath(__file__))
 urllib3.disable_warnings()
 
 
-###################################################################################################
-# main
-def main():
-    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage='{} <arguments>'.format(scriptName))
+def parse_args():
+    parser = argparse.ArgumentParser(description=script_name, add_help=True, usage='{} <arguments>'.format(script_name))
     parser.add_argument(
         '--verbose',
         '-v',
@@ -50,7 +48,7 @@ def main():
     parser.add_argument(
         '-o',
         '--opensearch',
-        dest='opensearchUrl',
+        dest='opensearch_url',
         metavar='<protocol://host:port>',
         type=str,
         default=os.getenv('OPENSEARCH_URL', None),
@@ -59,7 +57,7 @@ def main():
     parser.add_argument(
         '-c',
         '--opensearch-curlrc',
-        dest='opensearchCurlRcFile',
+        dest='opensearch_curl_rc_file',
         metavar='<filename>',
         type=str,
         default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
@@ -67,7 +65,7 @@ def main():
     )
     parser.add_argument(
         '--opensearch-ssl-verify',
-        dest='opensearchSslVerify',
+        dest='opensearch_ssl_verify',
         type=str2bool,
         nargs='?',
         const=True,
@@ -76,7 +74,7 @@ def main():
     )
     parser.add_argument(
         '--opensearch-mode',
-        dest='opensearchMode',
+        dest='opensearch_mode',
         help="Malcolm data store mode ('opensearch-local', 'opensearch-remote', 'elasticsearch-remote')",
         type=malcolm_utils.DatabaseModeStrToEnum,
         metavar='<STR>',
@@ -118,7 +116,7 @@ def main():
     parser.add_argument(
         '-p',
         '--primary',
-        dest='primaryTotals',
+        dest='primary_totals',
         type=str2bool,
         nargs='?',
         const=True,
@@ -127,7 +125,7 @@ def main():
     )
     parser.add_argument(
         '--name-sort',
-        dest='nameSorted',
+        dest='name_sorted',
         type=str2bool,
         nargs='?',
         const=True,
@@ -140,202 +138,200 @@ def main():
         if e.code == 2:
             parser.print_help()
         sys.exit(e.code)
+    return args
 
+
+def make_session(verify_ssl=False, auth=None):
+    session = requests.Session()
+    session.auth = auth
+    session.verify = verify_ssl
+    session.headers.update({'Content-Type': 'application/json'})
+    return session
+
+
+def setup_environment(args):
     args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.debug(os.path.join(scriptPath, scriptName))
+    opensearch_creds = ParseCurlFile(args.opensearch_curl_rc_file)
+
+    opensearch_is_local = (args.opensearch_mode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+        args.opensearch_url == 'https://opensearch:9200'
+    )
+
+    if not args.opensearch_url:
+        if opensearch_is_local:
+            args.opensearch_url = 'https://opensearch:9200'
+        elif 'url' in opensearch_creds:
+            args.opensearch_url = opensearch_creds['url']
+
+    return args, make_session(
+        args.opensearch_ssl_verify,
+        HTTPBasicAuth(opensearch_creds['user'], opensearch_creds['password']) if opensearch_creds.get('user') else None,
+    )
+
+
+def get_version(args, session):
+    response = session.get(args.opensearch_url)
+    response.raise_for_status()
+    version = response.json()["version"]["number"]
+    logging.info(f"OpenSearch version is {version}")
+    return version
+
+
+def calculate_percent_limit(args, session, percent):
+    """Fetch node allocation data and compute limit as percentage of disk.total."""
+    url = f'{args.opensearch_url}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json'
+    response = session.get(url)
+    response.raise_for_status()
+    allocation = response.json()
+
+    stats = [
+        {
+            k: (humanfriendly.parse_size(v) if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', v, flags=re.IGNORECASE) else v)
+            for k, v in entry.items()
+        }
+        for entry in allocation
+        if entry.get('node') != 'UNASSIGNED'
+    ]
+
+    logging.debug(json.dumps(stats))
+    if len(stats) != 1 or 'disk.total' not in stats[0]:
+        raise RuntimeError("Unable to determine disk.total for node")
+
+    total_bytes = float(stats[0]['disk.total'])
+    return int(total_bytes * (percent / 100.0)) // 1_000_000
+
+
+def parse_limit_megabytes(args, session):
+    """Determine numeric limit in megabytes from args.limit (may be size, number, or percent)."""
+    if not args.limit:
+        raise ValueError("No limit provided")
+
+    if args.limit.isdigit():
+        return int(args.limit)
+
+    if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b?$', args.limit, flags=re.IGNORECASE):
+        return humanfriendly.parse_size(f"{args.limit}{'' if args.limit.lower().endswith('b') else 'b'}") // 1_000_000
+
+    if args.limit.endswith('%'):
+        percent = int(args.limit[:-1])
+        if percent <= 0 or percent >= 100:
+            raise ValueError(f"Invalid limit percentage {args.limit}")
+        return calculate_percent_limit(args, session, percent)
+
+    raise ValueError(f"Invalid limit format: {args.limit}")
+
+
+def get_total_index_size(args, session):
+    """Return (total_size_mb, total_index_count) for the given index patterns."""
+    total_mb = 0
+    total_indices = 0
+    for idx in get_iterable(args.index):
+        r = session.get(f'{args.opensearch_url}/{idx}/_stats/store')
+        if not r.ok:
+            logging.warning(f"Failed to fetch stats for {idx}: {r.status_code}")
+            continue
+        info = r.json()
+        try:
+            total_mb += (
+                info['_all']['primaries' if args.primary_totals else 'total']['store']['size_in_bytes'] // 1_000_000
+            )
+            total_indices += len(info["indices"])
+        except KeyError:
+            continue
+    return total_mb, total_indices
+
+
+def get_indices_for_deletion(args, session, total_size_mb, limit_mb):
+    """Return list of index info dicts to delete to reduce usage below limit."""
+    os_info = []
+    for idx in args.index:
+        r = session.get(
+            f'{args.opensearch_url}/_cat/indices/{idx}',
+            params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
+        )
+        r.raise_for_status()
+        os_info.extend(r.json())
+
+    os_info.sort(key=lambda k: k['i' if args.name_sorted else 'creation.date'])
+    needs_deleted = total_size_mb - limit_mb
+    to_delete = []
+    size_key = 'pri.store.size' if args.primary_totals else 'store.size'
+
+    for index in os_info:
+        idx_size_mb = humanfriendly.parse_size(index[size_key]) // 1_000_000
+        if needs_deleted <= 0:
+            break
+        to_delete.append(index)
+        needs_deleted -= idx_size_mb
+
+    return to_delete
+
+
+def delete_indices(args, session, indices):
+    """Delete the provided indices, or print what would be deleted in dry-run mode."""
+    logging.debug(f'{"Would delete" if args.dryrun else "Deleting"}: {indices}')
+    size_key = 'pri.store.size' if args.primary_totals else 'store.size'
+    total_free_mb = sum(humanfriendly.parse_size(i[size_key]) // 1_000_000 for i in indices)
+    print(
+        f'{"Would delete" if args.dryrun else "Deleting"} '
+        f'{humanfriendly.format_size(humanfriendly.parse_size(f"{total_free_mb}mb"))} '
+        f'in {len(indices)} indices ({indices[0]["i"]} to {indices[-1]["i"]} '
+        f'ordered by {"name" if args.name_sorted else "creation date"})'
+    )
+
+    if not args.dryrun:
+        for i in indices:
+            resp = session.delete(f'{args.opensearch_url}/{i["i"]}')
+            status = requests.status_codes._codes.get(resp.status_code, ['unknown'])[0]
+            print(f'DELETE {i["i"]} ({humanfriendly.format_size(humanfriendly.parse_size(i[size_key]))}): {status}')
+
+
+def main():
+    args = parse_args()
+    # short-circuit without printing anything else
+    if args.limit == '0' or not args.index:
+        return
+
+    args, session = setup_environment(args)
+
+    logging.debug(f"Running {script_name} from {script_path}")
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
 
-    # short-circuit without printing anything else
-    if (args.limit == '0') or (not args.index):
+    get_version(args, session)
+    args.index = list(set(get_iterable(args.index)))
+    logging.debug(f"Indices: {args.index}")
+
+    limit_mb = parse_limit_megabytes(args, session)
+    if limit_mb <= 0:
+        raise ValueError(f"Invalid or zero limit: {args.limit}")
+    logging.info(
+        f'Index limit for {args.index} is {humanfriendly.format_size(humanfriendly.parse_size(f"{limit_mb}mb"))}'
+    )
+
+    total_mb, total_indices = get_total_index_size(args, session)
+    logging.info(
+        f'Total {args.index} size: {humanfriendly.format_size(humanfriendly.parse_size(f"{total_mb}mb"))} ({total_indices} indices)'
+    )
+
+    if total_mb <= limit_mb:
+        print(
+            f'Nothing to do: {total_indices} {args.index} indices occupy '
+            f'{humanfriendly.format_size(humanfriendly.parse_size(f"{total_mb}mb"))} of '
+            f'{humanfriendly.format_size(humanfriendly.parse_size(f"{limit_mb}mb"))} allowed'
+        )
         return
 
-    opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
-        args.opensearchUrl == 'https://opensearch:9200'
-    )
-    opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile)
-    if not args.opensearchUrl:
-        if opensearchIsLocal:
-            args.opensearchUrl = 'https://opensearch:9200'
-        elif 'url' in opensearchCreds:
-            args.opensearchUrl = opensearchCreds['url']
-    opensearchReqHttpAuth = (
-        HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
-        if opensearchCreds['user'] is not None
-        else None
-    )
-
-    osInfoResponse = requests.get(
-        args.opensearchUrl,
-        auth=opensearchReqHttpAuth,
-        verify=args.opensearchSslVerify,
-    )
-    osInfo = osInfoResponse.json()
-    opensearchVersion = osInfo['version']['number']
-    logging.info(f'OpenSearch version is {opensearchVersion}')
-
-    # as mulitple index patterns may be specified, deduplicate
-    args.index = list(set(get_iterable(args.index)))
-
-    totalIndices = 0
-    limitMegabytes = None
-    limitPercent = None
-    if args.limit is not None:
-        if args.limit.isdigit():
-            # assume megabytes
-            limitMegabytes = int(args.limit)
-        elif re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b?$', args.limit, flags=re.IGNORECASE):
-            # parse human-friendly entered size
-            limitMegabytes = (
-                humanfriendly.parse_size(f"{args.limit}{'' if args.limit.lower().endswith('b') else 'b'}") // 1000000
-            )
-        elif args.limit.endswith('%'):
-            # percentage (must calculate megabytes based on /_cat/allocation below)
-            limitPercent = int(args.limit[:-1])
-            if (limitPercent <= 0) or (limitPercent >= 100):
-                raise Exception(f'Invalid limit percentage {args.limit}')
-
-    if limitPercent is not None:
-        # get allocation statistics for node(s) to do percentage calculation
-        esDiskUsageStats = []
-        osInfoResponse = requests.get(
-            f'{args.opensearchUrl}/_cat/allocation{f"/{args.node}" if args.node else ""}?format=json',
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        osInfo = osInfoResponse.json()
-
-        # normalize allocation statistics' sizes (eg., 100mb) into bytes
-        for stat in osInfo:
-            if ('node' in stat) and (stat['node'] != 'UNASSIGNED'):
-                esDiskUsageStats.append(
-                    {
-                        key: (
-                            humanfriendly.parse_size(value)
-                            if re.match(r'^\d+(\.\d+)?\s*[kmgtp]?b$', value, flags=re.IGNORECASE)
-                            else value
-                        )
-                        for (key, value) in stat.items()
-                    }
-                )
-
-        logging.debug(json.dumps(esDiskUsageStats))
-
-        # esDiskUsageStats should now look like:
-        # [
-        #     {
-        #         "shards": "17",
-        #         "disk.indices": 14500000,
-        #         "disk.used": 148400000000,
-        #         "disk.avail": 1600000000000,
-        #         "disk.total": 1800000000000,
-        #         "disk.percent": "7",
-        #         "host": "172.22.2.3",
-        #         "ip": "172.22.2.3",
-        #         "node": "opensearch"
-        #     },
-        #     ...
-        # ]
-        if len(esDiskUsageStats) != 1:
-            raise Exception('Unable to determine node, please specify --node if using a percentage limit')
-        elif 'disk.total' not in esDiskUsageStats[0]:
-            raise Exception(
-                f'Unable to determine disk.total for {esDiskUsageStats[0]["node"] if "node" in esDiskUsageStats[0] else "node"}'
-            )
-        limitMegabytes = int(float(esDiskUsageStats[0]['disk.total']) * (float(limitPercent) / 100.0)) // 1000000
-
-    if (limitMegabytes is None) or (limitMegabytes <= 0):
-        raise Exception(f'Invalid (or unable to calculate) limit megabytes from {args.limit}')
-
-    # now the limit has been calculated and stored (as megabytes) in limitMegabytes
-    logging.info(
-        f'Index limit for {args.index} is {humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))}'
-    )
-
-    # now determine the total size of the indices from the index pattern(s)
-    totalSizeInMegabytes = 0
-    totalIndices = 0
-    for idx in get_iterable(args.index):
-        osInfoResponse = requests.get(
-            f'{args.opensearchUrl}/{idx}/_stats/store',
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        osInfo = osInfoResponse.json()
-        try:
-            totalSizeInMegabytes = totalSizeInMegabytes + (
-                osInfo['_all']['primaries' if args.primaryTotals else 'total']['store']['size_in_bytes'] // 1000000
-            )
-            totalIndices = totalIndices + len(osInfo["indices"])
-        except KeyError:
-            # just means there aren't any indices of this type yet, ignore it
-            pass
-        except Exception as e:
-            raise Exception(f'Error getting {idx} size_in_bytes: {e}')
-    logging.info(
-        f'Total {args.index} megabytes: is {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))}'
-    )
-
-    if totalSizeInMegabytes > limitMegabytes:
-        # the indices have outgrown their bounds, we need to delete the oldest
-
-        logging.info(
-            f'{totalIndices} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} ({humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed)'
-        )
-
-        # get list of indexes in index pattern(s) and sort by creation date
-        osInfo = []
-        for idx in args.index:
-            osInfo.extend(
-                requests.get(
-                    f'{args.opensearchUrl}/_cat/indices/{idx}',
-                    params={'format': 'json', 'h': 'i,id,status,health,rep,creation.date,pri.store.size,store.size'},
-                    auth=opensearchReqHttpAuth,
-                    verify=args.opensearchSslVerify,
-                ).json()
-            )
-        osInfo = sorted(osInfo, key=lambda k: k['i' if args.nameSorted else 'creation.date'])
-
-        # determine how many megabytes need to be deleted and which of the oldest indices will cover that
-        indicesToDelete = []
-        needsDeletedMb = totalSizeInMegabytes - limitMegabytes
-        sizeKey = 'pri.store.size' if args.primaryTotals else 'store.size'
-        for index in osInfo:
-            indexSizeMb = humanfriendly.parse_size(index[sizeKey]) // 1000000
-            if needsDeletedMb > 0:
-                indicesToDelete.append(index)
-                needsDeletedMb = needsDeletedMb - indexSizeMb
-            else:
-                break
-
-        if len(indicesToDelete) > 0:
-            # we've determined we can free up space from the index pattern
-            print(
-                f'{"Would delete" if args.dryrun else "Deleting"} {humanfriendly.format_size(humanfriendly.parse_size(f"{sum([humanfriendly.parse_size(index[sizeKey]) // 1000000 for index in indicesToDelete])}mb"))} in {len(indicesToDelete)} indices ({indicesToDelete[0]["i"]} to {indicesToDelete[-1]["i"]} ordered by {"name" if args.nameSorted else "creation date"})'
-            )
-
-            if not args.dryrun:
-                # delete the indices to free up the space indicated
-                for index in indicesToDelete:
-                    esDeleteResponse = requests.delete(
-                        f'{args.opensearchUrl}/{index["i"]}',
-                        auth=opensearchReqHttpAuth,
-                        verify=args.opensearchSslVerify,
-                    )
-                    print(
-                        f'DELETE {index["i"]} ({humanfriendly.format_size(humanfriendly.parse_size(index[sizeKey]))}): {requests.status_codes._codes[esDeleteResponse.status_code][0]}'
-                    )
-
-        else:
-            # no indexes to delete
-            print(f'Nothing to do: could not determine list of {args.index} indices to delete')
-
+    to_delete = get_indices_for_deletion(args, session, total_mb, limit_mb)
+    if to_delete:
+        delete_indices(args, session, to_delete)
     else:
-        # we haven't hit the limit, nothing to do
-        print(
-            f'Nothing to do: {totalIndices} {args.index} indices occupy {humanfriendly.format_size(humanfriendly.parse_size(f"{totalSizeInMegabytes}mb"))} of {humanfriendly.format_size(humanfriendly.parse_size(f"{limitMegabytes}mb"))} allowed'
-        )
+        print(f'Nothing to do: could not determine list of {args.index} indices to delete')
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        logging.exception(f"Unexpected error: {e}")
+        sys.exit(1)

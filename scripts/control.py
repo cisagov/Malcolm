@@ -28,13 +28,26 @@ import tarfile
 import tempfile
 import time
 
+# Add the project root directory to the Python path
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(script_dir, ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from malcolm_constants import (
+    CONTAINER_RUNTIME_KEY,
+    PROFILE_HEDGEHOG,
+    PROFILE_KEY,
+    PROFILE_MALCOLM,
+    PLATFORM_WINDOWS,
+)
+
 from malcolm_common import (
     AskForPassword,
     AskForString,
     BoundPath,
     ChooseOne,
     ClearScreen,
-    CONTAINER_RUNTIME_KEY,
     DetermineYamlFileFormat,
     DisplayMessage,
     DisplayProgramBox,
@@ -49,12 +62,8 @@ from malcolm_common import (
     MalcolmTmpPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
-    PLATFORM_WINDOWS,
     posInt,
     ProcessLogLine,
-    PROFILE_HEDGEHOG,
-    PROFILE_KEY,
-    PROFILE_MALCOLM,
     ScriptPath,
     UpdateEnvFiles,
     UserInputDefaultsBehavior,
@@ -2952,7 +2961,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.09.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.10.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',

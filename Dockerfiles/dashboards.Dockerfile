@@ -61,6 +61,7 @@ ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD --chmod=644 dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \

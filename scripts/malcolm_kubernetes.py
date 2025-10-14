@@ -14,6 +14,11 @@ from itertools import chain
 from io import StringIO
 from pathlib import Path
 
+from malcolm_constants import (
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
+)
+
 from malcolm_common import (
     DotEnvDynamic,
     GetMemMegabytesFromJavaOptsLine,
@@ -21,8 +26,6 @@ from malcolm_common import (
     KubernetesDynamic,
     GetMalcolmPath,
     NullRepresenter,
-    PROFILE_HEDGEHOG,
-    PROFILE_MALCOLM,
     YAMLDynamic,
     YAML_VERSION,
 )

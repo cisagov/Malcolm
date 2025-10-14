@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - installer-staging
     paths:
       - 'Dockerfiles/opensearch.Dockerfile'
       - 'opensearch-config/**'

@@ -1,3 +1,6 @@
+# disable Black formatting (https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#ignoring-sections)
+# fmt: off
+
 ####
 ## We recommend to not edit this file.
 ## Create separate files to overwrite the settings.
@@ -16,7 +19,6 @@ from typing import Any, Callable, Tuple
 # NetBox-Docker Helper functions
 ###
 
-
 # Read secret from file
 def _read_secret(secret_name: str, default: str | None = None) -> str | None:
     try:
@@ -27,14 +29,11 @@ def _read_secret(secret_name: str, default: str | None = None) -> str | None:
         with f:
             return f.readline().strip()
 
-
 # If the `map_fn` isn't defined, then the value that is read from the environment (or the default value if not found) is returned.
 # If the `map_fn` is defined, then `map_fn` is invoked and the value (that was read from the environment or the default value if not found)
 # is passed to it as a parameter. The value returned from `map_fn` is then the return value of this function.
 # The `map_fn` is not invoked, if the value (that was read from the environment or the default value if not found) is None.
-def _environ_get_and_map(
-    variable_name: str, default: str | None = None, map_fn: Callable[[str], Any | None] = None
-) -> Any | None:
+def _environ_get_and_map(variable_name: str, default: str | None = None, map_fn: Callable[[str], Any | None] = None) -> Any | None:
     env_value = environ.get(variable_name, default)
 
     if env_value == None:
@@ -45,10 +44,9 @@ def _environ_get_and_map(
 
     return map_fn(env_value)
 
-
-_AS_BOOL = lambda value: value.lower() == 'true'
-_AS_INT = lambda value: int(value)
-_AS_LIST = lambda value: list(filter(None, value.split(' ')))
+_AS_BOOL = lambda value : value.lower() == 'true'
+_AS_INT = lambda value : int(value)
+_AS_LIST = lambda value : list(filter(None, value.split(' ')))
 
 _BASE_DIR = dirname(dirname(abspath(__file__)))
 
@@ -70,18 +68,18 @@ if '*' not in ALLOWED_HOSTS and 'localhost' not in ALLOWED_HOSTS:
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
 DATABASE = {
-    'NAME': environ.get('POSTGRES_NETBOX_DB', 'netbox'),  # Database name
-    'USER': environ.get('POSTGRES_NETBOX_USER', ''),  # PostgreSQL username
+    'NAME': environ.get('POSTGRES_NETBOX_DB', 'netbox'),       # Database name
+    'USER': environ.get('POSTGRES_NETBOX_USER', ''),           # PostgreSQL username
     'PASSWORD': _read_secret('db_password', environ.get('POSTGRES_NETBOX_PASSWORD', '')),
-    # PostgreSQL password
-    'HOST': environ.get('POSTGRES_HOST', 'localhost'),  # Database server
-    'PORT': environ.get('PGPORT', ''),  # Database port (leave blank for default)
+                                                               # PostgreSQL password
+    'HOST': environ.get('POSTGRES_HOST', 'localhost'),         # Database server
+    'PORT': environ.get('PGPORT', ''),                         # Database port (leave blank for default)
     'OPTIONS': {'sslmode': environ.get('DB_SSLMODE', 'prefer')},
-    # Database connection SSLMODE
+                                                    # Database connection SSLMODE
     'CONN_MAX_AGE': _environ_get_and_map('DB_CONN_MAX_AGE', '300', _AS_INT),
-    # Max database connection age
+                                                    # Max database connection age
     'DISABLE_SERVER_SIDE_CURSORS': _environ_get_and_map('DB_DISABLE_SERVER_SIDE_CURSORS', 'False', _AS_BOOL),
-    # Disable the use of server-side cursors transaction pooling
+                                                    # Disable the use of server-side cursors transaction pooling
 }
 
 # Redis database settings. Redis is used for caching and for queuing background tasks such as webhook events. A separate
@@ -91,9 +89,7 @@ REDIS = {
     'tasks': {
         'HOST': environ.get('REDIS_HOST', 'localhost'),
         'PORT': _environ_get_and_map('REDIS_PORT', 6379, _AS_INT),
-        'SENTINELS': [
-            tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_SENTINELS', '', _AS_LIST) if uri != ''
-        ],
+        'SENTINELS': [tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_SENTINELS', '', _AS_LIST) if uri != ''],
         'SENTINEL_SERVICE': environ.get('REDIS_SENTINEL_SERVICE', 'default'),
         'SENTINEL_TIMEOUT': _environ_get_and_map('REDIS_SENTINEL_TIMEOUT', 10, _AS_INT),
         'USERNAME': environ.get('REDIS_USERNAME', ''),
@@ -105,21 +101,13 @@ REDIS = {
     'caching': {
         'HOST': environ.get('REDIS_CACHE_HOST', environ.get('REDIS_HOST', 'localhost')),
         'PORT': _environ_get_and_map('REDIS_CACHE_PORT', environ.get('REDIS_PORT', '6379'), _AS_INT),
-        'SENTINELS': [
-            tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_CACHE_SENTINELS', '', _AS_LIST) if uri != ''
-        ],
-        'SENTINEL_SERVICE': environ.get(
-            'REDIS_CACHE_SENTINEL_SERVICE', environ.get('REDIS_SENTINEL_SERVICE', 'default')
-        ),
+        'SENTINELS': [tuple(uri.split(':')) for uri in _environ_get_and_map('REDIS_CACHE_SENTINELS', '', _AS_LIST) if uri != ''],
+        'SENTINEL_SERVICE': environ.get('REDIS_CACHE_SENTINEL_SERVICE', environ.get('REDIS_SENTINEL_SERVICE', 'default')),
         'USERNAME': environ.get('REDIS_CACHE_USERNAME', environ.get('REDIS_USERNAME', '')),
-        'PASSWORD': _read_secret(
-            'redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))
-        ),
+        'PASSWORD': _read_secret('redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))),
         'DATABASE': _environ_get_and_map('REDIS_CACHE_DATABASE', '1', _AS_INT),
         'SSL': _environ_get_and_map('REDIS_CACHE_SSL', environ.get('REDIS_SSL', 'False'), _AS_BOOL),
-        'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map(
-            'REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL
-        ),
+        'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL),
     },
 }
 
