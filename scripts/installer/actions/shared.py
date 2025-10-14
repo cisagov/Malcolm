@@ -415,6 +415,7 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
         KEY_CONFIG_ITEM_RUNTIME_BIN,
         KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     )
+    from scripts.malcolm_utils import get_main_script_dir
 
     try:
         runtime_bin: str = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
@@ -504,9 +505,10 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
         if profile:
             compose_base.extend(["--profile", profile])
         printable_cmd = " ".join(compose_base + [COMPOSE_UP_SUBCOMMAND, COMPOSE_DETACH_FLAG])
+        start_script = os.path.join(get_main_script_dir(), 'start')
         logger.info("Docker compose validated successfully.")
         logger.info("To start Malcolm run:")
-        logger.info(f"  {printable_cmd}")
+        logger.info(f"  {start_script if os.path.isfile(start_script) else printable_cmd}")
         return InstallerResult.SUCCESS, "Docker operations completed"
     except Exception as exc:
         logger.error(f"Docker operations failed: {exc}")
