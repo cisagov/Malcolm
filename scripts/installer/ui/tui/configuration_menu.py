@@ -46,21 +46,6 @@ class ConfigurationMenu(BaseMenu):
         self.displayed_keys: List[str] = []
         self.child_map: Dict[str, List[str]] = {}
 
-        # Build child map from ui_parent relationships
-        self._build_child_map()
-
-    def _build_child_map(self) -> None:
-        """Build the child map from the items' ui_parent attribute."""
-        self.child_map = {}
-        all_items = self.malcolm_config.get_all_config_items()
-
-        for key, item in all_items.items():
-            if item.ui_parent and item.ui_parent in all_items:
-                parent_key = item.ui_parent
-                if parent_key not in self.child_map:
-                    self.child_map[parent_key] = []
-                self.child_map[parent_key].append(key)
-
     def build_menu(self) -> None:
         """Build the hierarchical configuration menu."""
         self.menu_builder.add_header("Malcolm Configuration Menu")

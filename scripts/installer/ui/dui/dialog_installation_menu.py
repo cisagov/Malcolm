@@ -44,14 +44,6 @@ class DialogInstallationMenu:
         self.ui_mode = ui_mode
 
         self.child_map: Dict[str, List[str]] = {}
-        self._build_child_map()
-
-    def _build_child_map(self) -> None:
-        self.child_map = {}
-        for key, item in self.ctx.items.items():
-            parent = getattr(item, "ui_parent", None)
-            if parent and parent in self.ctx.items:
-                self.child_map.setdefault(parent, []).append(key)
 
     def run(self) -> Optional["InstallContext"]:
         try:

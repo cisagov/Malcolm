@@ -49,14 +49,6 @@ class DialogConfigurationMenu:
         self.debug_mode = debug_mode
         self.ui_mode = ui_mode
         self.child_map: Dict[str, List[str]] = {}
-        self._build_child_map()
-
-    def _build_child_map(self) -> None:
-        self.child_map = {}
-        all_items = self.mc.get_all_config_items()
-        for key, item in all_items.items():
-            if item.ui_parent and item.ui_parent in all_items:
-                self.child_map.setdefault(item.ui_parent, []).append(key)
 
     def run(self) -> bool:
         try:
