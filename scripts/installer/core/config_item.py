@@ -11,7 +11,7 @@ for all Malcolm configuration items.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Tuple, Union
 
 from scripts.malcolm_constants import WidgetType
 

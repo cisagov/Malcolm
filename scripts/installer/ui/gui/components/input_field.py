@@ -11,10 +11,9 @@ Provides enhanced input field components with various configurations.
 import os
 import customtkinter
 from tkinter import filedialog
-from typing import Callable, Optional, Union, Tuple, Any
+from typing import Callable, Optional, Tuple, Any
 
 from components.styles import *
-from .font_manager import FontManager
 from .frame import Frame
 from .button import Button
 from .label import Label

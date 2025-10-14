@@ -28,7 +28,7 @@ CONFIG_ITEM_NETBOX_MODE = ConfigItem(
     default_value="disabled",
     choices=[x.value for x in NetboxMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in NetboxMode],
-    question=f"Set NetBox mode",
+    question="Set NetBox mode",
     widget_type=WidgetType.SELECT,
 )
 
@@ -37,7 +37,7 @@ CONFIG_ITEM_NETBOX_URL = ConfigItem(
     label="NetBox URL",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f'NetBox URL (used only if NetBox mode is "remote")',
+    question='NetBox URL (used only if NetBox mode is "remote")',
     widget_type=WidgetType.TEXT,
 )
 
@@ -46,7 +46,7 @@ CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH = ConfigItem(
     label="NetBox Enrichment",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enrich network traffic using NetBox",
+    question="Enrich network traffic using NetBox",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -55,7 +55,7 @@ CONFIG_ITEM_NETBOX_AUTO_POPULATE = ConfigItem(
     label="Auto-Populate NetBox",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Automatically populate NetBox inventory based on observed network traffic",
+    question="Automatically populate NetBox inventory based on observed network traffic",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -64,7 +64,7 @@ CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS = ConfigItem(
     label="Auto-Create Prefixes",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Automatically create missing NetBox subnet prefixes based on observed network traffic",
+    question="Automatically create missing NetBox subnet prefixes based on observed network traffic",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -74,7 +74,7 @@ CONFIG_ITEM_NETBOX_SITE_NAME = ConfigItem(
     label="NetBox Site Name",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question=f"Default NetBox site name",
+    question="Default NetBox site name",
     widget_type=WidgetType.TEXT,
 )
 

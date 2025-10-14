@@ -10,19 +10,11 @@ Base Controller for Malcolm GUI Installer
 This module provides the base class for all controllers in the Malcolm GUI installer.
 """
 
-import sys
-import importlib.util
-import os
-from scripts.malcolm_common import GetMalcolmDir, GetScriptsDir
-
 from scripts.install import (
     InstallerYesOrNo,
     InstallerAskForString,
     InstallerChooseOne,
-    InstallerChooseMultiple,
-    InstallerDisplayMessage,
     UserInterfaceMode,
-    UserInputDefaultsBehavior,
 )
 
 

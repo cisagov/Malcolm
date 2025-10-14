@@ -18,7 +18,6 @@ from scripts.installer.actions.shared import update_ancillary as update_docker_c
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.tests.mock.test_framework import MockPlatform
 from scripts.installer.core.install_context import InstallContext
-from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
@@ -40,7 +39,7 @@ def _write_compose(path, data):
         with open(path, "w") as f:
             yaml.dump(data, f)
     else:
-        raise Exception(f'Could not dynamically import YAML library')
+        raise Exception('Could not dynamically import YAML library')
 
 
 def _read_compose(path):
@@ -49,7 +48,7 @@ def _read_compose(path):
         with open(path, "r") as f:
             return yaml.load(f)
     else:
-        raise Exception(f'Could not dynamically import YAML library')
+        raise Exception('Could not dynamically import YAML library')
 
 
 class TestTraefikLabels(unittest.TestCase):

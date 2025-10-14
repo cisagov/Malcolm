@@ -26,10 +26,10 @@ class TestConfigItemKeyCoverage(unittest.TestCase):
                 print(f"  - {key}")
             print("==============================\n")
 
-        self.assertFalse(missing_in_configitems, f"Missing ConfigItem for keys")
+        self.assertFalse(missing_in_configitems, "Missing ConfigItem for keys")
         self.assertFalse(
             extra_in_configitems,
-            f"ConfigItem(s) with keys not defined in configuration_item_keys.py",
+            "ConfigItem(s) with keys not defined in configuration_item_keys.py",
         )
 
 

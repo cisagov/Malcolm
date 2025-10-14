@@ -14,27 +14,19 @@ the new locations and contracts.
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch
 
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
-from scripts.installer.core.install_context import InstallContext
-from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.enums import InstallerResult
-from scripts.installer.tests.mock.test_framework import (
-    BaseInstallerTest,
-    MockPlatform,
-    MockUI,
-    TestPhase,
-)
+from scripts.installer.tests.mock.test_framework import BaseInstallerTest
 
 
 class TestPlatformDockerInstall(BaseInstallerTest):
     """Validate platform-level docker install orchestration handles success/failure."""
 
     def test_platform_docker_install_success(self):
-        config = self.create_test_config()
         ctx = self.create_test_context()
         with patch.object(self.mock_platform, "install_docker", return_value=True) as mock_install:
             result = self.mock_platform.install_docker(ctx)
@@ -42,7 +34,6 @@ class TestPlatformDockerInstall(BaseInstallerTest):
         mock_install.assert_called_once_with(ctx)
 
     def test_platform_docker_install_failure(self):
-        config = self.create_test_config()
         ctx = self.create_test_context()
         with patch.object(self.mock_platform, "install_docker", return_value=False) as mock_install:
             result = self.mock_platform.install_docker(ctx)
@@ -68,9 +59,9 @@ class TestFilesystemAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock successful filesystem operations
-        with patch("os.makedirs") as mock_makedirs, patch("os.path.exists", return_value=False), patch(
+        with patch("os.makedirs"), patch("os.path.exists", return_value=False), patch(
             "scripts.malcolm_utils.ChownRecursive"
-        ) as mock_chown:
+        ):
 
             result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
 
@@ -117,8 +108,6 @@ class TestDockerOpsAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock docker-compose file exists
-        compose_file = os.path.join(os.path.dirname(self.temp_dir), "docker-compose.yml")
-
         with patch("os.path.isfile", return_value=True), patch(
             "scripts.installer.actions.shared.discover_compose_command",
             return_value=["docker", "compose"],
@@ -158,8 +147,6 @@ class TestDockerOpsAction(BaseInstallerTest):
         ctx = self.create_test_context()
 
         # Mock compose file exists but no compose command
-        compose_file = os.path.join(os.path.dirname(self.temp_dir), "docker-compose.yml")
-
         with patch("os.path.isfile", return_value=True), patch(
             "scripts.installer.actions.shared.discover_compose_command",
             return_value=None,

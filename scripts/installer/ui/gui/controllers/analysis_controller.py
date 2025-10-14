@@ -10,13 +10,9 @@ Analysis Controller for Malcolm GUI Installer
 This module provides the controller for analysis settings in the Malcolm GUI installer.
 """
 
-import os
-import sys
-from typing import Optional, Tuple, Any
+from typing import Tuple
 
 from .base_controller import BaseController
-from scripts.malcolm_common import GetMalcolmDir
-
 from configs import MalcolmConfig
 
 

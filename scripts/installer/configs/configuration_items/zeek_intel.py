@@ -9,10 +9,7 @@ This module contains all configuration items related to threat intelligence feed
 including Zeek intelligence feed configuration and update settings.
 """
 
-from typing import Any, Tuple
-
 from scripts.malcolm_constants import WidgetType
-from scripts.malcolm_utils import str2bool as str_to_bool
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
@@ -28,7 +25,7 @@ CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS = ConfigItem(
     label="Zeek Pull Intelligence Feeds",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Pull from threat intelligence feeds on container startup",
+    question="Pull from threat intelligence feeds on container startup",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -37,7 +34,7 @@ CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP = ConfigItem(
     label="Pull Threat Intelligence Feeds on Startup",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Pull from threat intelligence feeds on container startup",
+    question="Pull from threat intelligence feeds on container startup",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -46,7 +43,7 @@ CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE = ConfigItem(
     label='Threat Indicator "Since" Period',
     default_value="7 days ago",
     validator=lambda x: isinstance(x, str),
-    question=f"When pulling from threat intelligence feeds, only process indicators created or modified since this time",
+    question="When pulling from threat intelligence feeds, only process indicators created or modified since this time",
     widget_type=WidgetType.TEXT,
 )
 
@@ -55,7 +52,7 @@ CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION = ConfigItem(
     label="Threat Intel Cron Expression",
     default_value="0 0 * * *",
     validator=lambda x: isinstance(x, str),
-    question=f"Cron expression for scheduled pulls from threat intelligence feeds",
+    question="Cron expression for scheduled pulls from threat intelligence feeds",
     widget_type=WidgetType.TEXT,
 )
 
@@ -64,7 +61,7 @@ CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION = ConfigItem(
     label="Zeek's Intel::item_expiration timeout",
     default_value="-1min",
     validator=lambda x: isinstance(x, str),
-    question=f"Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)",
+    question="Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)",
     widget_type=WidgetType.TEXT,
 )
 

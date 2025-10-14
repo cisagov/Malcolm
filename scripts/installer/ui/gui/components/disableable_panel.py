@@ -10,7 +10,6 @@ A panel that is enabled or disabled based on a condition.
 
 import customtkinter
 from components.styles import *
-from .frame import Frame
 
 
 class DisableablePanel:

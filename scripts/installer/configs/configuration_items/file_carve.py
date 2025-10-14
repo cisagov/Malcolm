@@ -9,10 +9,8 @@ This module contains all configuration items related to file carve settings,
 including file extraction and preservation configuration.
 """
 
-from typing import Any, Tuple
+from typing import Tuple
 
-
-from scripts.malcolm_utils import str2bool as str_to_bool
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import (
@@ -70,7 +68,7 @@ CONFIG_ITEM_FILE_CARVE_ENABLED = ConfigItem(
     label="Enable Zeek File Extraction",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enable file extraction with Zeek",
+    question="Enable file extraction with Zeek",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -81,7 +79,7 @@ CONFIG_ITEM_FILE_EXTRACTION_MODE = ConfigItem(
     default_value="none",
     choices=[x.value for x in FileExtractionMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in FileExtractionMode],
-    question=f"Choose how Zeek should extract files from network traffic. Depends on Zeek analysis. 'Interesting' is a common default.",
+    question="Choose how Zeek should extract files from network traffic. Depends on Zeek analysis. 'Interesting' is a common default.",
     widget_type=WidgetType.SELECT,
 )
 
@@ -91,7 +89,7 @@ CONFIG_ITEM_FILE_PRESERVATION = ConfigItem(
     default_value="quarantined",
     choices=[x.value for x in FilePreservationMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in FilePreservationMode],
-    question=f"Determine which files extracted by Zeek should be preserved. Depends on Zeek analysis and file extraction. 'Quarantined' is common.",
+    question="Determine which files extracted by Zeek should be preserved. Depends on Zeek analysis and file extraction. 'Quarantined' is common.",
     widget_type=WidgetType.SELECT,
 )
 
@@ -100,7 +98,7 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVER = ConfigItem(
     label="File Carve HTTP Server",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enable web interface for downloading preserved files",
+    question="Enable web interface for downloading preserved files",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -109,7 +107,7 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP = ConfigItem(
     label="Zip Downloads",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"ZIP downloaded preserved files",
+    question="ZIP downloaded preserved files",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -118,7 +116,7 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY = ConfigItem(
     label="Download Password",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)",
+    question="ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)",
     widget_type=WidgetType.PASSWORD,
 )
 
@@ -127,7 +125,7 @@ CONFIG_ITEM_CLAM_AV_SCAN = ConfigItem(
     label="ClamAV Scan",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Scan extracted files with ClamAV",
+    question="Scan extracted files with ClamAV",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -136,7 +134,7 @@ CONFIG_ITEM_YARA_SCAN = ConfigItem(
     label="Yara Scan",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Scan extracted files with Yara",
+    question="Scan extracted files with Yara",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -145,7 +143,7 @@ CONFIG_ITEM_CAPA_SCAN = ConfigItem(
     label="Capa Scan",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Scan extracted files with Capa",
+    question="Scan extracted files with Capa",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -154,7 +152,7 @@ CONFIG_ITEM_VTOT_API_KEY = ConfigItem(
     label="VirusTotal API Key",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"VirusTotal API key to scan extracted files with VirusTotal",
+    question="VirusTotal API key to scan extracted files with VirusTotal",
     widget_type=WidgetType.PASSWORD,
 )
 
@@ -163,7 +161,7 @@ CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(
     label="Update Scan Rules",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Periodically pull ClamAV/Yara/Capa signatures/rules updates",
+    question="Periodically pull ClamAV/Yara/Capa signatures/rules updates",
     widget_type=WidgetType.CHECKBOX,
 )
 

@@ -79,7 +79,7 @@ def main():
     runner = unittest.TextTestRunner(verbosity=verbosity)
     result = runner.run(suite)
 
-    print(f"\nUnit Tests Summary:")
+    print("\nUnit Tests Summary:")
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")

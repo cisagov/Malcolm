@@ -10,8 +10,7 @@ import os
 import platform
 import subprocess
 import time
-from enum import Enum
-from typing import Dict, Tuple, Optional, List, Callable
+from typing import Tuple, Optional, List
 
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.malcolm_common import SYSTEM_INFO
@@ -20,12 +19,9 @@ from scripts.malcolm_utils import (
     get_iterable,
 )
 
-from scripts.installer.configs.constants.enums import (
-    InstallerResult,
-    ControlFlow,
-)
+from scripts.installer.configs.constants.enums import ControlFlow
+from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.logger_utils import InstallerLogger
-from scripts.installer.utils.logger_utils import SkipReasons
 
 
 class BaseInstaller(abc.ABC):
@@ -96,7 +92,7 @@ class BaseInstaller(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def install_docker(self, install_context: "InstallContext") -> bool:
+    def install_docker(self, install_context: InstallContext) -> bool:
         """Install Docker/container runtime on this platform
 
         Returns:
@@ -173,7 +169,7 @@ class BaseInstaller(abc.ABC):
 
             if i < retry:
                 InstallerLogger.warning(
-                    f"Command failed (attempt {i+1}/{retry+1}). Retrying in {retry_sleep_sec} seconds..."
+                    f"Command failed (attempt {i + 1}/{retry + 1}). Retrying in {retry_sleep_sec} seconds..."
                 )
                 time.sleep(retry_sleep_sec)
 

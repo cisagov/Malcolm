@@ -17,7 +17,6 @@ import os
 
 from scripts.installer.utils.logger_utils import InstallerLogger
 
-from .config_item import ConfigItem
 from ..utils.custom_transforms import *
 
 from scripts.malcolm_utils import (

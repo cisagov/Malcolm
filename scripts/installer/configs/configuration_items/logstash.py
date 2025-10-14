@@ -10,14 +10,9 @@ This module contains all configuration items related to Logstash settings,
 including memory allocation and worker configuration.
 """
 
-from typing import Any, Tuple
-
-from scripts.malcolm_constants import OrchestrationFramework, WidgetType
+from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.core.config_item import ConfigItem
-from scripts.installer.configs.configuration_items.docker import (
-    CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-)
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_LS_MEMORY,
     KEY_CONFIG_ITEM_LS_WORKERS,
@@ -28,7 +23,7 @@ CONFIG_ITEM_LS_MEMORY = ConfigItem(
     key=KEY_CONFIG_ITEM_LS_MEMORY,
     label="Logstash Memory",
     default_value=SYSTEM_INFO["suggested_ls_memory"],
-    question=f"Memory allocation for Logstash (e.g., 4g, 2500m, etc.)",
+    question="Memory allocation for Logstash (e.g., 4g, 2500m, etc.)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -38,7 +33,7 @@ CONFIG_ITEM_LS_WORKERS = ConfigItem(
     label="Logstash Workers",
     default_value=SYSTEM_INFO["suggested_ls_workers"],
     validator=lambda x: isinstance(x, int),
-    question=f"Number of Logstash pipeline workers (e.g., 4, 8, etc.)",
+    question="Number of Logstash pipeline workers (e.g., 4, 8, etc.)",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -48,7 +43,7 @@ CONFIG_ITEM_LOGSTASH_HOST = ConfigItem(
     label="Logstash Host",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question=f'Logstash host and port (for when running "capture-only" profile; e.g., 192.168.1.123:5044)',
+    question='Logstash host and port (for when running "capture-only" profile; e.g., 192.168.1.123:5044)',
     widget_type=WidgetType.TEXT,
 )
 

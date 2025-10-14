@@ -7,7 +7,6 @@
 
 from typing import Optional, Dict, List, TYPE_CHECKING
 
-from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 from scripts.installer.utils.debug_utils import debug_menu_structure
 from scripts.installer.ui.tui.base_menu import BaseMenu
 from scripts.installer.ui.shared.menu_builder import ValueFormatter

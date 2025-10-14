@@ -19,7 +19,6 @@ from scripts.installer.core.dependencies import (
 )
 
 # Keep wildcard import for keys per standards
-from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.utils.logger_utils import InstallerLogger
 
 

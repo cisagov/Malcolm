@@ -11,7 +11,6 @@ results in the same configuration.
 import os
 import tempfile
 import unittest
-import json
 import sys
 
 # Add the project root directory to the Python path

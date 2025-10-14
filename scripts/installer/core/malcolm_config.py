@@ -9,14 +9,13 @@ import os
 import sys
 import datetime
 import copy
-import json
 
 from collections import defaultdict
-from enum import Enum, Flag
+from enum import Enum
 from typing import Dict, Any, Callable, List, Tuple, Optional, Set
 
 from scripts.malcolm_common import DumpYaml, SYSTEM_INFO, YAMLDynamic
-from scripts.malcolm_utils import deep_set, deep_get
+from scripts.malcolm_utils import deep_set
 
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
@@ -371,7 +370,7 @@ class MalcolmConfig(ObservableStoreMixin):
             FileOperationError: If there is an issue writing the files.
         """
         if not os.path.isdir(config_dir):
-            raise FileOperationError(f"Configuration directory '{config_dir}' not found.")
+            raise FileOperationError("Configuration directory '{config_dir}' not found.")
 
         # default templates directory if not provided
         if templates_dir is None:
@@ -441,7 +440,7 @@ class MalcolmConfig(ObservableStoreMixin):
         """Generate docker-compose.yml from configuration and template."""
         yamlImported = YAMLDynamic()
         if not yamlImported:
-            raise Exception(f'Could not dynamically import YAML library')
+            raise Exception('Could not dynamically import YAML library')
 
         # If a template_path is provided, we will read from and write to that same path (in-place edit).
         # If not, we fall back to creating a new file in the config_dir.
@@ -449,7 +448,7 @@ class MalcolmConfig(ObservableStoreMixin):
             target_path = template_path
         else:
             if not os.path.isdir(config_dir):
-                raise FileOperationError(f"Configuration directory '{config_dir}' not found.")
+                raise FileOperationError("Configuration directory '{config_dir}' not found.")
             target_path = os.path.join(config_dir, output_filename)
 
         if not os.path.exists(target_path):
@@ -469,8 +468,6 @@ class MalcolmConfig(ObservableStoreMixin):
 
         # write updated docker-compose.yml back to the target path
         try:
-            import copy as _copy
-
             orig_uid = orig_gid = None
             if os.path.exists(target_path):
                 stat_info = os.stat(target_path)
@@ -695,7 +692,7 @@ class MalcolmConfig(ObservableStoreMixin):
                 try:
                     callback(value)
                 except Exception as e:
-                    InstallerLogger.error(f"Error in observer for key '{key}': {e}")
+                    InstallerLogger.error("Error in observer for key '{key}': {e}")
                     raise DependencyError(f"Observer for {key} failed: {e}") from e
 
     def get_unmapped_env_variables(self) -> List[EnvVariable]:

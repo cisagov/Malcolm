@@ -16,14 +16,6 @@ from scripts.installer.utils.exceptions import (
     FileOperationError,
     ConfigValueValidationError,
 )
-from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
-    KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-    KEY_CONFIG_ITEM_NETBOX_MODE,
-    KEY_CONFIG_ITEM_IMAGE_ARCH,
-    KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-)
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
@@ -32,7 +24,6 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
-    KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     get_set_of_installation_item_keys,
 )
 from scripts.malcolm_common import get_malcolm_version, YAMLDynamic

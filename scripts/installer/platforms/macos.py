@@ -6,12 +6,13 @@
 """macOS-specific installer implementation for Malcolm."""
 
 import os
-from typing import List, Tuple
+from typing import List
 
 from scripts.malcolm_constants import OrchestrationFramework
 
 # no direct UI imports needed here
 
+from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.logger_utils import InstallerLogger
 
 from .base import BaseInstaller
@@ -33,7 +34,7 @@ class MacInstaller(BaseInstaller):
         self.sudo_cmd = []
         self.use_brew = False
 
-    def _setup_homebrew(self, install_context: "InstallContext"):
+    def _setup_homebrew(self, install_context: InstallContext):
         """Setup Homebrew package manager for macOS using InstallContext decisions."""
         # First see if brew is already installed and runnable
         err, out = self.run_process(["brew", "info"])
@@ -120,7 +121,7 @@ class MacInstaller(BaseInstaller):
 
         return success
 
-    def install_docker(self, install_context: "InstallContext") -> bool:
+    def install_docker(self, install_context: InstallContext) -> bool:
         """Install Docker on macOS using InstallContext decisions.
 
         Note: This method assumes Docker is NOT already installed - the caller

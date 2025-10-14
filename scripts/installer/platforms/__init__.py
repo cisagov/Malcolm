@@ -5,8 +5,6 @@
 
 """Platform-specific installer implementations for Malcolm."""
 
-import platform
-
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.malcolm_common import get_platform_name
 

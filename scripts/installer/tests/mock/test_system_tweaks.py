@@ -7,17 +7,14 @@
 
 import os
 import sys
-import tempfile
-import shutil
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.platforms.utils import linux_tweaks
-from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.tests.mock.test_framework import BaseInstallerTest
 
 

@@ -98,9 +98,6 @@ class InstallContext(ObservableStoreMixin):
         """Register Linux tweak items from the Tweak Registry as first-class items."""
         from scripts.installer.core.tweak_registry import get_linux_tweak_definitions
         from scripts.installer.core.config_item import ConfigItem
-        from scripts.installer.configs.constants.installation_item_keys import (
-            KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-        )
 
         tweak_defs = get_linux_tweak_definitions()
         sysctl_children_ids: list[str] = []

@@ -9,11 +9,7 @@ This module contains all configuration items related to exposing ports,
 including Logstash, OpenSearch, Filebeat, SFTP, and Syslog ports.
 """
 
-from typing import Any, Tuple
-
 from scripts.malcolm_constants import WidgetType
-from scripts.malcolm_utils import str2bool as str_to_bool
-
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import OpenPortsChoices
 from scripts.installer.configs.constants.configuration_item_keys import (
@@ -42,7 +38,7 @@ CONFIG_ITEM_EXPOSE_LOGSTASH = ConfigItem(
     label="Expose Logstash",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Expose Logstash port to external hosts",
+    question="Expose Logstash port to external hosts",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -51,7 +47,7 @@ CONFIG_ITEM_EXPOSE_OPENSEARCH = ConfigItem(
     label="Expose OpenSearch",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Expose OpenSearch port to external hosts",
+    question="Expose OpenSearch port to external hosts",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -60,7 +56,7 @@ CONFIG_ITEM_EXPOSE_FILEBEAT_TCP = ConfigItem(
     label="Expose Filebeat TCP",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Expose Filebeat TCP port to external hosts",
+    question="Expose Filebeat TCP port to external hosts",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -69,7 +65,7 @@ CONFIG_ITEM_EXPOSE_SFTP = ConfigItem(
     label="Expose SFTP",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Expose SFTP server (for PCAP upload) to external hosts",
+    question="Expose SFTP server (for PCAP upload) to external hosts",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -79,7 +75,7 @@ CONFIG_ITEM_SYSLOG_TCP_PORT = ConfigItem(
     label="Syslog TCP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question=f"Listen for Syslog (TCP) on this port",
+    question="Listen for Syslog (TCP) on this port",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -89,7 +85,7 @@ CONFIG_ITEM_SYSLOG_UDP_PORT = ConfigItem(
     label="Syslog UDP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question=f"Listen for Syslog (UDP) on this port",
+    question="Listen for Syslog (UDP) on this port",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -98,7 +94,7 @@ CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES = ConfigItem(
     label="Accept Standard Syslog Messages",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Accept standard Syslog messages",
+    question="Accept standard Syslog messages",
     widget_type=WidgetType.CHECKBOX,
 )
 

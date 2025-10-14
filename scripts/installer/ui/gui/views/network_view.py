@@ -11,7 +11,6 @@ Network view for the Malcolm installer, providing network configuration options.
 import customtkinter
 
 from components.styles import *
-from components.frame import Frame
 from components.label import Label
 from components.disableable_panel import DisableablePanel
 from controllers.network_controller import NetworkController

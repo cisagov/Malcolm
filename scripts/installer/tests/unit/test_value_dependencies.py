@@ -27,7 +27,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
 )
-from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
+from scripts.malcolm_constants import PROFILE_HEDGEHOG
 
 
 class TestLiveCaptureDependencies(unittest.TestCase):

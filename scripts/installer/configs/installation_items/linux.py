@@ -36,7 +36,7 @@ CONFIG_ITEM_DOCKER_INSTALL_METHOD = ConfigItem(
     default_value=DockerInstallMethod.REPOSITORY,
     choices=[x.value for x in DockerInstallMethod],
     validator=lambda x: x in DockerInstallMethod,
-    question=f"Method for installing Docker on Linux (if not already installed)",
+    question="Method for installing Docker on Linux (if not already installed)",
     widget_type=WidgetType.SELECT,
     metadata={
         "visible_when_runtime": "docker",
@@ -49,7 +49,7 @@ CONFIG_ITEM_DOCKER_COMPOSE_INSTALL_METHOD = ConfigItem(
     default_value=DockerComposeInstallMethod.GITHUB,
     choices=[x.value for x in DockerComposeInstallMethod],
     validator=lambda x: x in DockerComposeInstallMethod,
-    question=f"Method for installing Docker Compose on Linux (if not already installed)",
+    question="Method for installing Docker Compose on Linux (if not already installed)",
     widget_type=WidgetType.SELECT,
     metadata={
         "visible_when_runtime": "docker",
@@ -112,7 +112,7 @@ CONFIG_ITEM_INSTALL_DOCKER_IF_MISSING = ConfigItem(
     label="Install Docker if Missing",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"If Docker not detect on system should Malcolm attempt to install Docker?",
+    question="If Docker not detect on system should Malcolm attempt to install Docker?",
     widget_type=WidgetType.CHECKBOX,
     metadata={
         "visible_when_runtime": "docker",
@@ -124,7 +124,7 @@ CONFIG_ITEM_TRY_DOCKER_REPOSITORY = ConfigItem(
     label="Try Docker Repository Installation",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Attempt to install Docker using official repositories?",
+    question="Attempt to install Docker using official repositories?",
     widget_type=WidgetType.CHECKBOX,
     metadata={
         "visible_when_runtime": "docker",
@@ -136,7 +136,7 @@ CONFIG_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT = ConfigItem(
     label="Try Docker Convenience Script",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Docker not installed via official repositories. Attempt to install Docker via convenience script (please read https://github.com/docker/docker-install)?",
+    question="Docker not installed via official repositories. Attempt to install Docker via convenience script (please read https://github.com/docker/docker-install)?",
     widget_type=WidgetType.CHECKBOX,
     metadata={
         "visible_when_runtime": "docker",

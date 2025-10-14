@@ -9,7 +9,6 @@ from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from scripts.malcolm_common import (
     InstallerAskForString,
-    InstallerYesOrNo,
     InstallerChooseOne,
     InstallerDisplayMessage,
     UserInterfaceMode,

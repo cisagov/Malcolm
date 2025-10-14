@@ -5,7 +5,7 @@
 
 """Menu building utilities for TUI installer interface."""
 
-from typing import List, Optional, Any
+from typing import List, Any
 from enum import Enum
 
 

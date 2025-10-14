@@ -10,13 +10,9 @@ System Controller for Malcolm GUI Installer
 This module provides the controller for system settings in the Malcolm GUI installer.
 """
 
-import os
-import sys
-from pathlib import Path
-from typing import Optional, Tuple, Any
+from typing import Tuple
 
 from .base_controller import BaseController
-from scripts.malcolm_common import GetMalcolmDir
 
 from configs import MalcolmConfig
 

@@ -10,11 +10,7 @@ Network and Authentication configuration items for Malcolm installer.
 This module contains all configuration items related to network and authentication settings.
 """
 
-from typing import Any, Tuple
-
 from scripts.malcolm_constants import WidgetType
-from scripts.malcolm_utils import str2bool
-
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_NGINX_SSL,
@@ -28,7 +24,7 @@ CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = ConfigItem(
     label="Capture Live Network Traffic",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic",
+    question="Capture live network traffic",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -37,7 +33,7 @@ CONFIG_ITEM_NGINX_SSL = ConfigItem(
     label="Require HTTPS Connections",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Require encrypted HTTPS connections",
+    question="Require encrypted HTTPS connections",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -46,7 +42,7 @@ CONFIG_ITEM_NGINX_RESOLVER_IPV4 = ConfigItem(
     label="Enable IPv4 for nginx resolver directive",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enable IPv4 for nginx resolver directive",
+    question="Enable IPv4 for nginx resolver directive",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -55,7 +51,7 @@ CONFIG_ITEM_NGINX_RESOLVER_IPV6 = ConfigItem(
     label="Enable IPv6 for nginx resolver directive",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enable IPv6 for nginx resolver directive",
+    question="Enable IPv6 for nginx resolver directive",
     widget_type=WidgetType.CHECKBOX,
 )
 

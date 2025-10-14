@@ -10,7 +10,7 @@ Provides common functionality and structure for views.
 """
 
 import customtkinter
-from typing import Dict, Any, Optional, Callable, Union, List, Tuple
+from typing import Dict, Any, Callable, List, Tuple
 
 from components.styles import PADDING_LARGE, PADDING_MEDIUM, PADDING_SMALL
 from components.frame import Frame

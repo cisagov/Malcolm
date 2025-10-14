@@ -10,8 +10,6 @@ import unittest
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
-from enum import Enum
-
 from scripts.installer.utils.summary_utils import (
     _normalize_display_string,
     format_summary_value,

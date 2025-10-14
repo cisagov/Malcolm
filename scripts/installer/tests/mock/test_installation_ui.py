@@ -43,8 +43,6 @@ class TestInstallationUI(BaseInstallerTest):
 
     def test_visible_items_filtering_linux(self):
         """Test that visible items are properly filtered for Linux platform."""
-        malcolm_file = "/tmp/malcolm.tar.gz"  # Mock file
-        image_file = "/tmp/images.tar.xz"  # Mock file
 
         # Test visible items filtering
         # Use shared visibility helper via menu builder in production code; test simplified path
@@ -60,8 +58,6 @@ class TestInstallationUI(BaseInstallerTest):
 
     def test_visible_items_subset_of_all_items(self):
         """Test that visible items are always a subset of all items."""
-        malcolm_file = "/tmp/malcolm.tar.gz"
-        image_file = "/tmp/images.tar.xz"
 
         visible_items = ALL_INSTALLATION_CONFIG_ITEMS_DICT
 

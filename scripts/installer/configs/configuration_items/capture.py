@@ -33,7 +33,7 @@ CONFIG_ITEM_PCAP_IFACE = ConfigItem(
     label="Capture Interface(s)",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"Capture interface(s) (comma-separated)",
+    question="Capture interface(s) (comma-separated)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -42,7 +42,7 @@ CONFIG_ITEM_PCAP_FILTER = ConfigItem(
     label="Capture Filter",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)",
+    question="Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -51,7 +51,7 @@ CONFIG_ITEM_TWEAK_IFACE = ConfigItem(
     label="Optimize Interface",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Disable capture interface hardware offloading and adjust ring buffer sizes",
+    question="Disable capture interface hardware offloading and adjust ring buffer sizes",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -62,7 +62,7 @@ CONFIG_ITEM_CAPTURE_STATS = ConfigItem(
     label="Capture Live Traffic Statistics",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Enable live packet capture statistics for Zeek and/or Suricata",
+    question="Enable live packet capture statistics for Zeek and/or Suricata",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -81,7 +81,7 @@ CONFIG_ITEM_LIVE_ARKIME_NODE_HOST = ConfigItem(
     label="Arkime Node Host",
     default_value=get_hostname_without_domain(),
     validator=lambda x: isinstance(x, str),
-    question=f"The node hostname or IP address to associate with live network traffic observed by Arkime capture",
+    question="The node hostname or IP address to associate with live network traffic observed by Arkime capture",
     widget_type=WidgetType.TEXT,
 )
 
@@ -90,7 +90,7 @@ CONFIG_ITEM_PCAP_NET_SNIFF = ConfigItem(
     label="Netsniff-ng Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with netsniff-ng for Arkime",
+    question="Capture live network traffic with netsniff-ng for Arkime",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -99,7 +99,7 @@ CONFIG_ITEM_PCAP_TCP_DUMP = ConfigItem(
     label="Tcpdump Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with tcpdump for Arkime",
+    question="Capture live network traffic with tcpdump for Arkime",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -108,7 +108,7 @@ CONFIG_ITEM_LIVE_ZEEK = ConfigItem(
     label="Zeek Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with Zeek",
+    question="Capture live network traffic with Zeek",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -117,7 +117,7 @@ CONFIG_ITEM_LIVE_SURICATA = ConfigItem(
     label="Suricata Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with Suricata",
+    question="Capture live network traffic with Suricata",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -126,7 +126,7 @@ CONFIG_ITEM_PCAP_NODE_NAME = ConfigItem(
     label="Network Traffic Metadata Node Name",
     default_value=get_hostname_without_domain(),
     validator=lambda x: isinstance(x, str),
-    question=f"The node name to associate with network traffic metadata",
+    question="The node name to associate with network traffic metadata",
     widget_type=WidgetType.TEXT,
 )
 

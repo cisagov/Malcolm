@@ -9,7 +9,7 @@ An entry field that is directly tied to a controller for MVC pattern integration
 """
 
 import customtkinter
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
 
 class ControlledEntry(customtkinter.CTkEntry):

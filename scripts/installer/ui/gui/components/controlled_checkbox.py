@@ -9,7 +9,7 @@ A checkbox component that is directly tied to a controller for MVC pattern integ
 """
 
 import customtkinter
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
 
 class ControlledCheckbox(customtkinter.CTkCheckBox):

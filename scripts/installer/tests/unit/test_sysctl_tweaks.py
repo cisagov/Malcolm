@@ -38,7 +38,7 @@ class TestSysctlTweakBehavior(unittest.TestCase):
         children = self._sysctl_children()
         self.assertTrue(len(children) > 1)
 
-        a, b = children[0], children[1]
+        a, _ = children[0], children[1]
 
         # Enable all (sets unmodified children True and hides them)
         self.ctx.set_item_value("sysctl", True)

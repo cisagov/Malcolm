@@ -5,20 +5,10 @@
 
 """Installation menu for TUI installer interface."""
 
-import os
-from typing import Optional, Dict, Any, TYPE_CHECKING
-from scripts.installer.ui.tui.base_menu import BaseMenu, MenuItem
-from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
-    KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-)
-from scripts.malcolm_constants import OrchestrationFramework
+from typing import Optional, TYPE_CHECKING
+from scripts.installer.ui.tui.base_menu import BaseMenu
+from scripts.installer.configs.constants.configuration_item_keys import KEY_CONFIG_ITEM_RUNTIME_BIN
 from scripts.installer.configs.constants.installation_item_keys import (
-    KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
-    KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
-    KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
-    KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
-    KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
     KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
 )
 from scripts.installer.ui.shared.labels import installation_item_display_label

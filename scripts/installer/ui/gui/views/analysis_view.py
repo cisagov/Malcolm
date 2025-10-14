@@ -1,6 +1,4 @@
-import os
 import customtkinter
-from typing import Callable, Optional, Dict
 
 from controllers.analysis_controller import AnalysisController
 from views.base_view import BaseView

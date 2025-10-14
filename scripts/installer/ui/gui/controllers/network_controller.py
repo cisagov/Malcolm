@@ -11,7 +11,7 @@ This module provides the controller for network settings in the Malcolm GUI inst
 """
 
 import logging
-from typing import Optional, Tuple, Any
+from typing import Tuple
 from tkinter import messagebox
 
 from .base_controller import BaseController

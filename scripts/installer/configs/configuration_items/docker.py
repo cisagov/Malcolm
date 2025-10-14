@@ -12,10 +12,8 @@ including restart policies, reverse proxy settings, and network configuration.
 """
 
 from scripts.malcolm_common import SYSTEM_INFO
-from scripts.malcolm_utils import str2bool as str_to_bool
 from scripts.malcolm_constants import (
     OrchestrationFramework,
-    OrchestrationFrameworksSupported,
     WidgetType,
 )
 
@@ -42,7 +40,7 @@ CONFIG_ITEM_PROCESS_GROUP_ID = ConfigItem(
     label="Process Group ID",
     default_value=SYSTEM_INFO["recommended_nonroot_gid"],
     validator=lambda x: isinstance(x, int) and x >= 0,
-    question=f"Enter group ID (GID) for running non-root Malcolm processes",
+    question="Enter group ID (GID) for running non-root Malcolm processes",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -51,7 +49,7 @@ CONFIG_ITEM_PROCESS_USER_ID = ConfigItem(
     label="Process User ID",
     default_value=SYSTEM_INFO["recommended_nonroot_uid"],
     validator=lambda x: isinstance(x, int) and x >= 0,
-    question=f"Enter user ID (UID) for running non-root Malcolm processes",
+    question="Enter user ID (UID) for running non-root Malcolm processes",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -91,7 +89,7 @@ CONFIG_ITEM_BEHIND_REVERSE_PROXY = ConfigItem(
     label="Behind Reverse Proxy",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?",
+    question="Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -100,7 +98,7 @@ CONFIG_ITEM_TRAEFIK_HOST = ConfigItem(
     label="Traefik Host",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"Request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)",
+    question="Request domain (host header value) for Malcolm interface Traefik router (e.g., malcolm.example.org)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -109,7 +107,7 @@ CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST = ConfigItem(
     label="Traefik OpenSearch Host",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"Request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.malcolm.example.org)",
+    question="Request domain (host header value) for OpenSearch Traefik router (e.g., opensearch.malcolm.example.org)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -118,7 +116,7 @@ CONFIG_ITEM_TRAEFIK_ENTRYPOINT = ConfigItem(
     label="Traefik Entrypoint",
     default_value="websecure",
     validator=lambda x: isinstance(x, str),
-    question=f"Traefik router entrypoint (e.g., websecure)",
+    question="Traefik router entrypoint (e.g., websecure)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -127,7 +125,7 @@ CONFIG_ITEM_TRAEFIK_RESOLVER = ConfigItem(
     label="Traefik Resolver",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"Traefik router resolver (e.g., myresolver)",
+    question="Traefik router resolver (e.g., myresolver)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -136,7 +134,7 @@ CONFIG_ITEM_TRAEFIK_LABELS = ConfigItem(
     label="Traefik Labels",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Configure labels for Traefik?",
+    question="Configure labels for Traefik?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -145,7 +143,7 @@ CONFIG_ITEM_CONTAINER_NETWORK_NAME = ConfigItem(
     label="Container Network Name",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question=f"External container network name (or leave blank for default networking)",
+    question="External container network name (or leave blank for default networking)",
     widget_type=WidgetType.TEXT,
 )
 

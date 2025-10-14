@@ -10,9 +10,7 @@ Installation View
 View for Malcolm installation process, showing status and output of the installation.
 """
 
-import os
 import customtkinter
-from typing import Callable, Optional, Dict
 
 from controllers.installation_controller import InstallationController
 from views.base_view import BaseView

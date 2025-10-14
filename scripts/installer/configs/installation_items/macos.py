@@ -28,7 +28,7 @@ CONFIG_ITEM_HOMEBREW_USAGE = ConfigItem(
     default_value=HomebrewUsage.USE,
     choices=[x.value for x in HomebrewUsage],
     validator=lambda x: x in HomebrewUsage,
-    question=f"Whether to use Homebrew for package installation on macOS",
+    question="Whether to use Homebrew for package installation on macOS",
     widget_type=WidgetType.SELECT,
 )
 
@@ -38,7 +38,7 @@ CONFIG_ITEM_USE_HOMEBREW = ConfigItem(
     label="Use Homebrew",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Homebrew is installed: continue with Homebrew?",
+    question="Homebrew is installed: continue with Homebrew?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -47,7 +47,7 @@ CONFIG_ITEM_CONTINUE_WITHOUT_HOMEBREW = ConfigItem(
     label="Continue Without Homebrew",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Homebrew is not installed: continue with manual installation?",
+    question="Homebrew is not installed: continue with manual installation?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -56,7 +56,7 @@ CONFIG_ITEM_INSTALL_DOCKER_IF_MISSING_MACOS = ConfigItem(
     label="Install Docker if Missing (macOS)",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f'"docker info" failed, attempt to install Docker?',
+    question='"docker info" failed, attempt to install Docker?',
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -65,7 +65,7 @@ CONFIG_ITEM_CONFIGURE_DOCKER_RESOURCES = ConfigItem(
     label="Configure Docker Resources",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Configure Docker resource usage in settings file?",
+    question="Configure Docker resource usage in settings file?",
     widget_type=WidgetType.CHECKBOX,
 )
 

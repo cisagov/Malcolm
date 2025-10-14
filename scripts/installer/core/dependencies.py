@@ -16,7 +16,6 @@ from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.configs.constants.constants import (
     SYSLOG_DEFAULT_PORT,
-    LOGSTASH_WORKERS_DOCKER_COMPOSE,
     LOGSTASH_WORKERS_KUBERNETES,
 )
 

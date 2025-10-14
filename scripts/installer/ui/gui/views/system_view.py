@@ -2,12 +2,9 @@ import customtkinter
 import os
 
 from components.styles import *
-from components.frame import Frame
-from components.label import Label
 from components.input_field import InputField, InputGroup
 from components.controlled_checkbox import ControlledCheckbox
 from components.disableable_panel import DisableablePanel
-from components.button import Button
 from controllers.system_controller import SystemController
 from views.base_view import BaseView
 

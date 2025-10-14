@@ -9,8 +9,6 @@ from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
 
 from scripts.malcolm_common import (
     InstallerChooseOne,
-    InstallerAskForString,
-    InstallerDisplayMessage,
     UserInterfaceMode,
     DialogBackException,
     DialogCanceledException,

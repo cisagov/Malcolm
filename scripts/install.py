@@ -26,6 +26,7 @@ from scripts.malcolm_constants import (
 from scripts.malcolm_common import (
     ClearScreen,
     DetermineYamlFileFormat,
+    DoDynamicImport,
     DotEnvDynamic,
     get_default_config_dir,
     get_malcolm_dir,
@@ -329,20 +330,18 @@ def determine_presentation_mode(parsed_args: argparse.Namespace) -> Presentation
     #     return
 
     def check_for_python_dialog():
+        if not DoDynamicImport("dialog", "pythondialog"):
+            return None
         try:
-            import dialog  # type: ignore
-
             # Verify the dialog binary is usable by initializing MainDialog
-            try:
-                from scripts.malcolm_common import DialogInit, MainDialog
+            from scripts.malcolm_common import DialogInit, MainDialog
 
-                DialogInit()
-                if MainDialog is None:
-                    return None
-            except Exception:
+            DialogInit()
+            if MainDialog is None:
                 return None
+
             return PresentationMode.MODE_DUI
-        except ImportError:
+        except Exception:
             return None  # DUI library not available
 
     # Check for explicit mode selection first

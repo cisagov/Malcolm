@@ -7,8 +7,6 @@
 
 import os
 import sys
-import tempfile
-import shutil
 import unittest
 from unittest.mock import patch
 
@@ -16,7 +14,6 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")))
 
 from scripts.installer.utils.artifact_utils import decide_and_handle_artifacts
-from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.tests.mock.test_framework import BaseInstallerTest
 from argparse import Namespace
 

@@ -6,7 +6,7 @@
 """Base menu class for TUI installer interface."""
 
 from abc import ABC, abstractmethod
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any
 from scripts.malcolm_common import (
     ClearScreen,
     InstallerYesOrNo,

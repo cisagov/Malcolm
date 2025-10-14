@@ -8,7 +8,7 @@
 import os
 import sys
 import unittest
-from unittest.mock import patch, MagicMock, mock_open, call
+from unittest.mock import patch, mock_open
 
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
@@ -18,7 +18,7 @@ from scripts.installer.platforms.linux import LinuxInstaller
 from scripts.installer.platforms.macos import MacInstaller
 from scripts.installer.platforms.windows import WindowsInstaller
 from scripts.malcolm_constants import OrchestrationFramework
-from scripts.installer.tests.mock.test_framework import BaseInstallerTest, MockUI
+from scripts.installer.tests.mock.test_framework import BaseInstallerTest
 
 
 class TestLinuxPlatformMocking(BaseInstallerTest):
@@ -206,8 +206,6 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
             ]
 
             # Re-initialize to trigger Homebrew setup
-            from scripts.installer.core.install_context import InstallContext
-
             self.macos_installer._setup_homebrew(InstallContext())
 
         self.assertTrue(self.macos_installer.use_brew)
@@ -317,7 +315,7 @@ class TestWindowsPlatformMocking(BaseInstallerTest):
 
     def test_windows_docker_already_installed(self):
         """Test Windows Docker when already installed."""
-        ctx = self.create_test_context()
+        # ctx = self.create_test_context()
 
         # Mock Docker already available
         with patch.object(self.windows_installer, "run_process") as mock_run:
@@ -350,7 +348,6 @@ class TestPlatformMockingIntegration(BaseInstallerTest):
         """Test mock platform integration with Docker install step."""
         # steps were removed; validate that platform.install_docker is invoked directly
 
-        config = self.create_test_config()
         ctx = self.create_test_context()
 
         # Configure mock platform to simulate successful Docker installation

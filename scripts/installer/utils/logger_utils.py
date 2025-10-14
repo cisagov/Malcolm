@@ -3,7 +3,6 @@
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-import os
 import sys
 from datetime import datetime
 from typing import Optional

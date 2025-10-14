@@ -13,7 +13,6 @@ from scripts.malcolm_common import (
     DownloadToFile,
     SYSTEM_INFO,
     get_system_image_architecture,
-    GetNonRootMalcolmUserNames,
 )
 from scripts.malcolm_constants import (
     ImageArchitecture,
@@ -34,6 +33,7 @@ from scripts.malcolm_constants import (
 )
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
+from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.actions.shared import discover_compose_command
 
@@ -218,7 +218,7 @@ class LinuxInstaller(BaseInstaller):
             InstallerLogger.info(f"Successfully installed packages: {packages_to_install}")
         return True
 
-    def install_docker(self, install_context: "InstallContext") -> bool:
+    def install_docker(self, install_context: InstallContext) -> bool:
         """Install Docker on Linux using platform-appropriate methods."""
         # Quick check: if Docker is already available and responsive, nothing to do.
         try:
@@ -258,7 +258,7 @@ class LinuxInstaller(BaseInstaller):
 
         return False
 
-    def _finalize_docker_installation(self, install_context: "InstallContext") -> bool:
+    def _finalize_docker_installation(self, install_context: InstallContext) -> bool:
         """Complete Docker installation with service setup and user configuration."""
 
         # Configure Docker service
@@ -427,7 +427,7 @@ class LinuxInstaller(BaseInstaller):
                                 stderr=False,
                             )
                         else:
-                            err, out = platform.run_process(
+                            err, out = self.run_process(
                                 ["cp", armored_gpg_filename, dearmored_gpg_filename], privileged=True
                             )
 
@@ -503,7 +503,7 @@ class LinuxInstaller(BaseInstaller):
         """
         import pathlib
 
-        if compose_command := discover_compose_command("docker", self):
+        if discover_compose_command("docker", self):
             return True
         else:
             with temporary_filename() as tmp_compose_script:
@@ -519,12 +519,12 @@ class LinuxInstaller(BaseInstaller):
                         pathlib.Path(os.path.dirname(final_compose_script)).mkdir(parents=True, exist_ok=True)
                         err, out = self.run_process(["cp", tmp_compose_script, final_compose_script], privileged=True)
                         if err == 0:
-                            if compose_command := discover_compose_command("docker", self):
+                            if discover_compose_command("docker", self):
                                 InstallerLogger.info("Getting Docker Compose from GitHub succeeded")
                                 return True
                             else:
                                 InstallerLogger.error(
-                                    f"Getting Docker Compose from GitHub succeeded, but it failed to run"
+                                    "Getting Docker Compose from GitHub succeeded, but it failed to run"
                                 )
                                 try:
                                     os.unlink(final_compose_script)

@@ -8,15 +8,14 @@ former steps/ modules. They keep behavior intact while removing the
 platform-to-step indirection.
 """
 
+import glob
+import os
 from typing import Tuple, List, Optional
 
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.configs.constants.constants import (
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
-    COMPOSE_SUBCOMMAND,
-    DOCKER_COMPOSE_STANDALONE,
-    PODMAN_COMPOSE_STANDALONE,
     COMPOSE_UP_SUBCOMMAND,
     COMPOSE_DETACH_FLAG,
     USERNS_MODE_KEEP_ID,
@@ -47,13 +46,11 @@ from scripts.installer.configs.constants.constants import (
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
-    SSL_CA_TRUST_DIR,
 )
 
 
 def filesystem_prepare(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
     """Ensure configuration directory exists (idempotent, respects dry-run)."""
-    import os
 
     try:
         if not platform.should_write_files():
@@ -118,8 +115,6 @@ def _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch: bool) -
 
 
 def _select_install_path_and_compose_files(config_dir: str):
-    import os, glob
-
     if any(glob.glob(os.path.join(config_dir, COMPOSE_FILE_GLOB))):
         malcolm_install_path = config_dir
     else:
@@ -266,7 +261,6 @@ def _write_or_log_changes(original: dict, data: dict, config_file: str, platform
 def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
     """Update docker-compose files with runtime-specific settings."""
     # Ported from steps/ancillary.py (update_docker_compose_files + run wrapper)
-    import os, glob
     from scripts.malcolm_common import DumpYaml, LoadYaml
     from scripts.malcolm_utils import deep_set, deep_get
     from scripts.installer.configs.constants.configuration_item_keys import (
@@ -349,7 +343,7 @@ def update_ancillary(malcolm_config, config_dir: str, platform, ctx, logger) -> 
 
 def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
     """Ensure ssl.env exists in the configuration directory."""
-    import os, shutil
+    import shutil
     from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
     from scripts.malcolm_common import get_default_config_dir
 
@@ -390,7 +384,6 @@ def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> In
 
 
 def _resolve_podman_rootless_user(platform):
-    import os
 
     user = os.environ.get("SUDO_USER") or os.environ.get("LOGNAME") or os.environ.get("USER")
     if not user or user == "root":
@@ -404,7 +397,6 @@ def _resolve_podman_rootless_user(platform):
 
 
 def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform, logger) -> List[str]:
-    import os
 
     user, uid, socket_path = _resolve_podman_rootless_user(platform)
     if os.geteuid() == 0 and user:
@@ -418,7 +410,6 @@ def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform,
 
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, logger) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
-    import os
     from typing import Optional
     from scripts.installer.configs.constants.configuration_item_keys import (
         KEY_CONFIG_ITEM_RUNTIME_BIN,

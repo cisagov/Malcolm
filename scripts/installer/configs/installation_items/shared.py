@@ -12,8 +12,6 @@ that are shared across all platforms (Linux, macOS, Windows).
 
 import os
 from scripts.malcolm_constants import WidgetType
-from scripts.malcolm_utils import str2bool
-
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
@@ -27,7 +25,7 @@ CONFIG_ITEM_AUTO_TWEAKS = ConfigItem(
     label="Automatically Apply System Tweaks",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=f"Apply recommended system tweaks automatically without asking for confirmation?",
+    question="Apply recommended system tweaks automatically without asking for confirmation?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -36,7 +34,7 @@ CONFIG_ITEM_INSTALLATION_PATH = ConfigItem(
     label="Malcolm Installation Path",
     default_value=os.path.join(os.getcwd(), "malcolm"),
     validator=lambda x: isinstance(x, str) and len(x.strip()) > 0,
-    question=f"Directory path where Malcolm will be installed?",
+    question="Directory path where Malcolm will be installed?",
     widget_type=WidgetType.TEXT,
 )
 
@@ -45,7 +43,7 @@ CONFIG_ITEM_LOAD_MALCOLM_IMAGES = ConfigItem(
     label="Load Malcolm Images From Provided Image File",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Load Malcolm container images from provided image file?",
+    question="Load Malcolm container images from provided image file?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -54,7 +52,7 @@ CONFIG_ITEM_PULL_MALCOLM_IMAGES = ConfigItem(
     label="Pull Malcolm Images From Registry",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Pull Malcolm container images from registry?",
+    question="Pull Malcolm container images from registry?",
     widget_type=WidgetType.CHECKBOX,
 )
 

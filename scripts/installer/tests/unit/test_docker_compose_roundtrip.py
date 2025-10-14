@@ -48,7 +48,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 yaml.dump(self.compose_template, f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
     def tearDown(self):
         """Clean up temporary directory."""
@@ -76,7 +76,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify restart policy was applied to all services
         for service_name in ["test-service-1", "test-service-2"]:
@@ -102,7 +102,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify auto-restart resulted in 'unless-stopped' for all services
         for service_name in ["test-service-1", "test-service-2"]:
@@ -129,7 +129,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify external network configuration
         network_external = deep_get(compose_data, ["networks", "default", "external"])
@@ -153,7 +153,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify default network configuration
         network_external = deep_get(compose_data, ["networks", "default", "external"])
@@ -179,7 +179,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify explicit policy takes precedence (not 'unless-stopped')
         for service_name in ["test-service-1", "test-service-2"]:
@@ -209,7 +209,7 @@ class TestDockerComposeRoundtrip(unittest.TestCase):
                 yaml = yamlImported.YAML(typ="safe", pure=True)
                 compose_data = yaml.load(f)
             else:
-                raise Exception(f'Could not dynamically import YAML library')
+                raise Exception('Could not dynamically import YAML library')
 
         # 4. verify restart policy
         for service_name in ["test-service-1", "test-service-2"]:

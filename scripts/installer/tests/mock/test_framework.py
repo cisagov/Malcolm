@@ -9,8 +9,8 @@ import os
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch, MagicMock, mock_open
-from typing import Dict, Any, Optional
+from unittest.mock import patch, MagicMock
+from typing import Dict, Any
 from enum import Enum
 
 # Add the project root directory to the Python path
@@ -281,7 +281,7 @@ class BaseInstallerTest(unittest.TestCase):
         for key, value in test_values.items():
             try:
                 config.set_value(key, value)
-            except:
+            except Exception:
                 pass  # Skip if key doesn't exist
 
         return config

@@ -33,7 +33,7 @@ def main():
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
 
-    print(f"\nMock/Integration Tests Summary:")
+    print("\nMock/Integration Tests Summary:")
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")

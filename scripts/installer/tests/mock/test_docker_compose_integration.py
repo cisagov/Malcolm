@@ -10,7 +10,6 @@ import sys
 import tempfile
 import shutil
 import unittest
-from unittest.mock import patch
 
 # Add the project root directory to the Python path
 script_dir = os.path.dirname(os.path.abspath(__file__))

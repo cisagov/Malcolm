@@ -14,13 +14,8 @@ from scripts.malcolm_common import (
     InstallerAskForPassword,
     InstallerDisplayMessage,
     UserInterfaceMode,
-    DialogBackException,
-    DialogCanceledException,
 )
-from scripts.malcolm_utils import eprint
 from scripts.installer.utils.logger_utils import InstallerLogger
-from scripts.installer.utils.debug_utils import debug_menu_structure
-
 from scripts.installer.ui.shared.installer_ui import InstallerUI
 from scripts.installer.ui.tui.configuration_menu import ConfigurationMenu
 from scripts.installer.ui.tui.installation_menu import InstallationMenu

@@ -7,7 +7,7 @@ This module provides Linux-specific tweak implementations and a single
 apply_all() entry point used by LinuxInstaller.
 """
 
-from typing import Any, List
+from typing import Any
 
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.utils.tweak_utils import should_apply_tweak
@@ -28,7 +28,8 @@ def _normalize_status(result: Any) -> InstallerResult:
 
 def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
     """Apply sysctl tweaks"""
-    import os, tempfile
+    import os
+    import tempfile
 
     SYSCTL_SETTINGS = [
         ("fs.file-max", "2097152"),
@@ -90,7 +91,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
             logger.info(f"Dry run: would set {setting_name}={setting_value}")
             successes += 1
             continue
-        if ok := _write_to_sysctl_conf(setting_name, setting_value):
+        if _write_to_sysctl_conf(setting_name, setting_value):
             logger.info(f"Applied {setting_name}={setting_value}")
             successes += 1
         else:
@@ -168,7 +169,9 @@ def apply_systemd_limits(
 ) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "systemd_limits"):
         return InstallerResult.SKIPPED, "Systemd limits not selected"
-    import os, tempfile, pathlib
+    import os
+    import tempfile
+    import pathlib
 
     SYSTEMD_LIMITS_DIR = "/etc/systemd/system.conf.d"
     MALCOLM_SYSTEMD_FILE = "99-malcolm.conf"
@@ -283,7 +286,7 @@ def apply_grub_cgroup(
         if system_uses_systemd_boot():
             err, out = platform.run_process(['kernelstub', '-a', ' '.join(params)], privileged=True)
             if err == 0:
-                logger.info(f"Applied new kernel parameters with kernelstub")
+                logger.info("Applied new kernel parameters with kernelstub")
                 return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
             logger.error(f"Failed to apply kernel parameters with kernelstub: {' '.join(out)}")
             return InstallerResult.FAILURE, "cgroup kernel parameters failed"
@@ -293,7 +296,7 @@ def apply_grub_cgroup(
                 ['grubby', '--update-kernel=ALL', f"--args={' '.join(params)}"], privileged=True
             )
             if err == 0:
-                logger.info(f"Applied new kernel parameters with grubby")
+                logger.info("Applied new kernel parameters with grubby")
                 return InstallerResult.SUCCESS, "cgroup kernel parameters applied"
             logger.error(f"Failed to apply kernel parameters with grubby: {' '.join(out)}")
             return InstallerResult.FAILURE, "cgroup kernel parameters failed"
@@ -321,7 +324,7 @@ def apply_grub_cgroup(
                 with open(grub_file, "w", encoding="utf-8") as f:
                     f.write(new_content)
                 try:
-                    os.chmod(path, 0o644)
+                    os.chmod(grub_file, 0o644)
                 except Exception:
                     pass
 

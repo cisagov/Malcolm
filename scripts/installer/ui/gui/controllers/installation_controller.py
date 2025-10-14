@@ -14,7 +14,6 @@ import os
 import sys
 import subprocess
 import threading
-import time
 
 from .base_controller import BaseController
 from scripts.malcolm_common import GetMalcolmDir
