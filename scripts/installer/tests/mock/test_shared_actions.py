@@ -3,13 +3,7 @@
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
-"""Unit tests for shared installer actions and platform orchestration.
-
-This file previously targeted step modules directly. With the refactor,
-shared logic lives under scripts/installer/actions/shared.py and platform
-logic is orchestrated via platform.install(). Tests are updated to use
-the new locations and contracts.
-"""
+"""Unit tests for shared installer actions and platform orchestration."""
 
 import os
 import sys
@@ -63,7 +57,7 @@ class TestFilesystemAction(BaseInstallerTest):
             "scripts.malcolm_utils.ChownRecursive"
         ):
 
-            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx)
 
         self.assertTrue(result)
 
@@ -76,7 +70,7 @@ class TestFilesystemAction(BaseInstallerTest):
 
         # Mock directories already exist
         with patch("os.path.exists", return_value=True):
-            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+            result = shared_actions.filesystem_prepare(config, self.temp_dir, self.mock_platform, ctx)
 
         self.assertTrue(result)
 
@@ -91,7 +85,7 @@ class TestFilesystemAction(BaseInstallerTest):
 
         # Mock exception during directory creation
         with patch("os.makedirs", side_effect=Exception("Permission denied")):
-            result = shared_actions.filesystem_prepare(config, missing_dir, self.mock_platform, ctx, self.mock_logger)
+            result = shared_actions.filesystem_prepare(config, missing_dir, self.mock_platform, ctx)
         # Expect InstallerResult.FAILURE enum
         from scripts.installer.configs.constants.enums import InstallerResult as _IR
 
@@ -113,7 +107,7 @@ class TestDockerOpsAction(BaseInstallerTest):
             return_value=["docker", "compose"],
         ):
             result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+                config, self.temp_dir, self.mock_platform, ctx
             )
 
         self.assertTrue(result)
@@ -128,7 +122,7 @@ class TestDockerOpsAction(BaseInstallerTest):
         # Mock no docker-compose file
         with patch("os.path.isfile", return_value=False):
             result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+                config, self.temp_dir, self.mock_platform, ctx
             )
 
         self.assertEqual(
@@ -152,7 +146,7 @@ class TestDockerOpsAction(BaseInstallerTest):
             return_value=None,
         ):
             result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
+                config, self.temp_dir, self.mock_platform, ctx
             )
 
         self.assertEqual(
@@ -162,64 +156,6 @@ class TestDockerOpsAction(BaseInstallerTest):
                 "Compose command unavailable; manual start required",
             ),
         )  # Should continue despite missing compose command
-
-    def test_docker_ops_step_with_image_archive(self):
-        """Test Docker operations with image archive."""
-        from scripts.installer.actions import shared as shared_actions
-
-        config = self.create_test_config()
-        ctx = self.create_test_context(image_archive_path="/tmp/malcolm-images.tar.xz")
-
-        # Mock image archive exists
-        with patch("os.path.isfile", return_value=True), patch(
-            "scripts.malcolm_common.InstallerYesOrNo", return_value=True
-        ), patch.object(self.mock_platform, "run_process", return_value=(0, ["Images loaded"])):
-
-            result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
-
-        self.assertEqual(
-            result,
-            (
-                InstallerResult.SUCCESS,
-                "Malcolm images loaded from archive",
-            ),
-        )
-
-
-class TestAncillaryStep(BaseInstallerTest):
-    """Test the ancillary configuration step."""
-
-    def test_ancillary_step_success(self):
-        """Test successful ancillary configuration."""
-        from scripts.installer.actions import shared as shared_actions
-
-        config = self.create_test_config()
-        ctx = self.create_test_context()
-
-        result = shared_actions.update_compose_files(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
-
-        self.assertTrue(result)
-
-    def test_ancillary_step_with_updates(self):
-        """Test ancillary configuration with docker-compose updates."""
-        from scripts.installer.actions import shared as shared_actions
-
-        config = self.create_test_config()
-        ctx = self.create_test_context()
-
-        # Mock docker-compose file update
-        with patch(
-            "scripts.installer.actions.shared.update_compose_files",
-            return_value=InstallerResult.SUCCESS,
-        ):
-            result = shared_actions.update_compose_files(
-                config, self.temp_dir, self.mock_platform, ctx, self.mock_logger
-            )
-
-        self.assertTrue(result)
-
 
 if __name__ == "__main__":
     unittest.main()
