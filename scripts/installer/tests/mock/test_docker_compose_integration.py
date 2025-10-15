@@ -81,7 +81,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         malcolm_config.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "docker")
         malcolm_config.set_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY, "unless-stopped")
 
-        result = update_compose_files(malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger)
+        result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
 
         # Verify changes
@@ -101,7 +101,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         malcolm_config.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "podman")
         malcolm_config.set_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY, "always")
 
-        result = update_compose_files(malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger)
+        result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
 
         # Verify changes
@@ -121,7 +121,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
 
         malcolm_config = MalcolmConfig()
 
-        result = update_compose_files(malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger)
+        result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
 
         # Verify image tags remain unchanged (no architecture suffix)
@@ -146,7 +146,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         malcolm_config.set_value(KEY_CONFIG_ITEM_PCAP_DIR, "/custom/pcap")
         malcolm_config.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "/custom/zeek")
 
-        result = update_compose_files(malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger)
+        result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
 
         # Verify volume mount updates
@@ -165,7 +165,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         malcolm_config = MalcolmConfig()
         malcolm_config.set_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME, "custom_network")
 
-        result = update_compose_files(malcolm_config, self.test_dir, MockPlatform(), InstallContext(), InstallerLogger)
+        result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
 
         # Verify network configuration
@@ -182,7 +182,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         empty_dir = tempfile.mkdtemp()
         try:
             malcolm_config = MalcolmConfig()
-            result = update_compose_files(malcolm_config, empty_dir, MockPlatform(), InstallContext(), InstallerLogger)
+            result = update_compose_files(malcolm_config, empty_dir, None, MockPlatform(), InstallContext())
             # Should return True (not an error) when no files found
             self.assertTrue(result)
         finally:
@@ -201,7 +201,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         platform = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, None, debug=True)
         ctx = InstallContext()
 
-        result = update_compose_files(malcolm_config, self.config_dir, platform, ctx, InstallerLogger)
+        result = update_compose_files(malcolm_config, self.config_dir, None, platform, ctx)
         self.assertTrue(result)
 
         # Verify that docker-compose files were updated
@@ -232,7 +232,7 @@ def run_standalone_test():
 
     # Test the update function directly
     result = update_compose_files(
-        malcolm_config, malcolm_install_path, MockPlatform(), InstallContext(), InstallerLogger
+        malcolm_config, malcolm_install_path, None, MockPlatform(), InstallContext()
     )
 
     if result:
@@ -253,7 +253,7 @@ def run_standalone_test():
     platform = LinuxInstaller(OrchestrationFramework.DOCKER_COMPOSE, None, debug=True)
     ctx = InstallContext()
 
-    result = update_compose_files(malcolm_config, config_dir, platform, ctx, InstallerLogger)
+    result = update_compose_files(malcolm_config, config_dir, None, platform, ctx)
 
     if result:
         print("✓ Ancillary config generation completed successfully")

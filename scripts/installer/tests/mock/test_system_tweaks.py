@@ -37,7 +37,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, True)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_sysctl_tweaks_manual_mode_all_disabled(self):
@@ -51,7 +51,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+        status, _ = linux_tweaks.apply_sysctl(config, self.temp_dir, self.mock_platform, ctx)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_security_limits_auto_mode(self):
@@ -65,7 +65,7 @@ class TestSystemTweaks(BaseInstallerTest):
         ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, True)
 
         config = self.create_test_config()
-        status, _ = linux_tweaks.apply_security_limits(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+        status, _ = linux_tweaks.apply_security_limits(config, self.temp_dir, self.mock_platform, ctx)
         self.assertIn(status.name, ("SUCCESS", "SKIPPED"))
 
     def test_grub_cgroup_auto_mode(self):
@@ -81,20 +81,8 @@ class TestSystemTweaks(BaseInstallerTest):
         # Mock GRUB file doesn't exist
         with patch("os.path.exists", return_value=False):
             config = self.create_test_config()
-            status, _ = linux_tweaks.apply_grub_cgroup(config, self.temp_dir, self.mock_platform, ctx, self.mock_logger)
+            status, _ = linux_tweaks.apply_grub_cgroup(config, self.temp_dir, self.mock_platform, ctx)
             self.assertIn(status.name, ("SUCCESS", "SKIPPED"))  # Should succeed (skip)
-
-    def test_sysctl_tweak_definitions(self):
-        """Test that sysctl tweak definitions are properly defined."""
-        definitions = linux_tweaks.get_sysctl_tweak_definitions()
-        self.assertIsInstance(definitions, list)
-        self.assertGreater(len(definitions), 0)
-
-        # Check structure of definitions
-        for definition in definitions:
-            self.assertIn("id", definition)
-            self.assertIn("description", definition)
-            self.assertIn("value_display", definition)
 
 
 if __name__ == "__main__":
