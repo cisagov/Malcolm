@@ -4,12 +4,30 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List, Dict, Any
 from enum import Enum
 
+from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
+    KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+)
+
+from scripts.malcolm_constants import PLATFORM_LINUX, PLATFORM_MAC, PLATFORM_WINDOWS
+
+from scripts.installer.configs.installation_items.shared import (
+    get_shared_installation_config_item_dict,
+)
+from scripts.installer.configs.installation_items.linux import (
+    get_linux_installation_config_item_dict,
+)
+from scripts.installer.configs.installation_items.macos import (
+    get_macos_installation_config_item_dict,
+)
+from scripts.installer.configs.installation_items.windows import (
+    get_windows_installation_config_item_dict,
+)
+
 from scripts.installer.configs.constants.installation_item_keys import (
-    KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES,
-    KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
@@ -17,43 +35,36 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
+    KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
 )
 from scripts.malcolm_constants import OrchestrationFramework
-from scripts.installer.core.observable import ObservableStoreMixin
+from scripts.installer.core.visibility import install_item_is_visible
+from scripts.installer.core.transform_registry import apply_inbound
+from scripts.installer.utils.logger_utils import InstallerLogger
+from scripts.installer.actions.shared import discover_compose_command  # type: ignore
 
 
 @dataclass
-class InstallContext(ObservableStoreMixin):
+class InstallContext:
     """Installation store for user choices and platform options."""
-
-    # Source control
-    image_source: str = "registry"  # "archive" | "registry" | "skip"
-    image_archive_path: Optional[str] = None
-    load_images_from_archive: bool = False
-    tarball_path: Optional[str] = None
 
     # Installation behavior
     config_only: bool = False
 
-    # System tweaks decisions (collected during installation setup when auto_tweaks=False)
-    # Key: tweak identifier, Value: whether to apply this tweak
-    system_tweaks_decisions: dict = field(default_factory=dict)
-
     # Basic fields for compatibility
     docker_extra_users: List[str] = field(default_factory=list)
-    package_manager_choice: Optional[str] = None  # For Windows/macOS
 
     # User confirmation
     user_confirmed_install: bool = False
 
     # Installation ConfigItems - populated based on platform
     items: Dict[str, Any] = field(default_factory=dict)
-    _observers: Dict[str, List[Callable[[Any], None]]] = field(default_factory=dict, init=False)
-    # Cached cross-store runtime inputs (kept in sync via observers)
+    # Cached cross-store runtime inputs
     _runtime_bin: Optional[str] = field(default=None, init=False)
     _orchestration_mode: Optional[OrchestrationFramework] = field(default=None, init=False)
     _docker_installed: Optional[bool] = field(default=None, init=False)
     _compose_available: Optional[bool] = field(default=None, init=False)
+    _sysctl_children_ids: List[str] = field(default_factory=list, init=False)
 
     def initialize_for_platform(self, platform_name: str) -> None:
         """Initialize installation items for the specified platform.
@@ -61,38 +72,15 @@ class InstallContext(ObservableStoreMixin):
         Args:
             platform_name: Platform name ('linux', 'macos', 'windows', 'shared')
         """
-        if platform_name.lower() == "linux":
-            from scripts.installer.configs.installation_items.linux import (
-                get_linux_installation_config_item_dict,
-            )
-
-            self.items = get_linux_installation_config_item_dict()
-        elif platform_name.lower() == "macos":
-            from scripts.installer.configs.installation_items.macos import (
-                get_macos_installation_config_item_dict,
-            )
-
-            self.items = get_macos_installation_config_item_dict()
-        elif platform_name.lower() == "windows":
-            from scripts.installer.configs.installation_items.windows import (
-                ALL_WINDOWS_INSTALLATION_CONFIG_ITEMS_DICT,
-            )
-
-            self.items = ALL_WINDOWS_INSTALLATION_CONFIG_ITEMS_DICT
-        else:
-            # Default to shared items
-            from scripts.installer.configs.installation_items.shared import (
-                ALL_SHARED_INSTALLATION_CONFIG_ITEMS_DICT,
-            )
-
-            self.items = ALL_SHARED_INSTALLATION_CONFIG_ITEMS_DICT
+        if platform_name.lower() == PLATFORM_LINUX.lower() or platform_name.lower() == "linux":
+            self.items = {**get_linux_installation_config_item_dict(), **get_shared_installation_config_item_dict()}
+        elif platform_name.lower() == PLATFORM_MAC.lower() or platform_name.lower() == "macos":
+            self.items = {**get_macos_installation_config_item_dict(), **get_shared_installation_config_item_dict()}
+        elif platform_name.lower() == PLATFORM_WINDOWS.lower() or platform_name.lower() == "windows":
+            self.items = {**get_windows_installation_config_item_dict(), **get_shared_installation_config_item_dict()}
         # Register platform-specific tweak items
-        try:
-            if platform_name.lower() == "linux":
-                self._register_linux_tweak_items()
-        except Exception:
-            # Non-fatal; tweaks remain optional
-            pass
+        if platform_name.lower() == PLATFORM_LINUX.lower() or platform_name.lower() == "linux":
+            self._register_linux_tweak_items()
 
     def _register_linux_tweak_items(self) -> None:
         """Register Linux tweak items from the Tweak Registry as first-class items."""
@@ -101,11 +89,11 @@ class InstallContext(ObservableStoreMixin):
 
         tweak_defs = get_linux_tweak_definitions()
         sysctl_children_ids: list[str] = []
-        for tdef in tweak_defs:
-            tid = tdef.get("id")
+        for tweak_def in tweak_defs:
+            tid = tweak_def.get("id")
             if not tid:
                 continue
-            label = tdef.get("label", tid)
+            label = tweak_def.get("label", tid)
             item = ConfigItem(
                 key=tid,
                 label=label,
@@ -113,80 +101,30 @@ class InstallContext(ObservableStoreMixin):
                 choices=[True, False],
             )
             # parent relationships
-            ui_parent = tdef.get("ui_parent")
+            ui_parent = tweak_def.get("ui_parent")
             if ui_parent:
                 item.ui_parent = ui_parent
             if ui_parent == "sysctl":
                 sysctl_children_ids.append(tid)
             # metadata flags
-            meta = tdef.get("metadata") or {}
+            meta = tweak_def.get("metadata") or {}
             if meta:
                 item.metadata.update(meta)
             self.items[tid] = item
 
-        # when "Enable All Sysctl Settings" is enabled, set all sysctl children to True (unless user-modified)
-        def _on_sysctl_toggle(enabled: Any) -> None:
-            try:
-                if bool(enabled):
-                    for cid in sysctl_children_ids:
-                        it = self.items.get(cid)
-                        if it and not it.is_modified:
-                            it.set_value(True)
-            except Exception:
-                pass
-
-        # attach observer to sysctl parent if present
-        if "sysctl" in self.items:
-            self.observe("sysctl", _on_sysctl_toggle)
+        self._sysctl_children_ids = sysctl_children_ids
 
     def attach_runtime_source(self, malcolm_config: Any) -> None:
-        """Attach MalcolmConfig to observe runtime values for visibility rules.
-
-        This avoids UI code having to pass runtime values for visibility checks.
-        """
-        try:
-            from scripts.installer.configs.constants.configuration_item_keys import (
-                KEY_CONFIG_ITEM_RUNTIME_BIN,
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            )
-
-            # seed cached values
-            self._runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN)
-            self._orchestration_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
-
-            def _on_runtime_bin(val: Any) -> None:
-                try:
-                    self._runtime_bin = val
-                except Exception:
-                    pass
-
-            def _on_orch_mode(val: Any) -> None:
-                try:
-                    self._orchestration_mode = val
-                except Exception:
-                    pass
-
-            malcolm_config.observe(KEY_CONFIG_ITEM_RUNTIME_BIN, _on_runtime_bin)
-            malcolm_config.observe(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, _on_orch_mode)
-        except Exception:
-            # Best-effort attachment; safe to continue without observers
-            pass
+        """Cache runtime values from MalcolmConfig for visibility checks."""
+        self._runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN)
+        self._orchestration_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
 
     def attach_platform_probe(self, platform: Any) -> None:
         """Probe platform for container tooling availability for visibility rules."""
-        try:
-            self._docker_installed = bool(platform.is_docker_installed())
-        except Exception:
-            self._docker_installed = None
-        # Discover compose availability using shared helper if possible
-        try:
-            from scripts.installer.actions.shared import discover_compose_command  # type: ignore
-
-            rb = (self._runtime_bin or "").lower()
-            cmd = discover_compose_command(rb, platform)
-            self._compose_available = bool(cmd)
-        except Exception:
-            self._compose_available = None
+        self._docker_installed = bool(platform.is_docker_installed())
+        rb = (self._runtime_bin or "").lower()
+        cmd = discover_compose_command(rb, platform)
+        self._compose_available = bool(cmd)
 
     def get_item_value(self, key: str, default=None) -> Any:
         """Get the value of an installation item.
@@ -212,42 +150,29 @@ class InstallContext(ObservableStoreMixin):
             True if value was set, False if key not found
         """
         if key in self.items:
-            # Delegate to Transform Registry for normalization
             try:
-                from scripts.installer.core.transform_registry import apply_inbound
-
                 value = apply_inbound(key, value)
             except Exception:
-                pass
-            self.items[key].set_value(value)
-            # enforce simple mutual exclusivity between image source toggles
+                InstallerLogger.warning(f"Failed to normalize value for {key}: {value}")
+                return False
             try:
-                if key == KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES and bool(value):
-                    if KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES in self.items:
-                        self.items[KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES].set_value(False)
-                    # reflect source hint fields
-                    self.image_source = "archive"
-                    self.load_images_from_archive = True
-                elif key == KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES and bool(value):
-                    if KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES in self.items:
-                        self.items[KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES].set_value(False)
-                    self.image_source = "registry"
-                    self.load_images_from_archive = False
+                self.items[key].set_value(value)
             except Exception:
-                pass
-            # notify observers
-            self._notify_observers(key, self.items[key].get_value())
+                InstallerLogger.warning(f"Failed to set value for {key}: {value}")
+                return False
+            
+            if key == "sysctl" and bool(value):
+                for cid in self._sysctl_children_ids:
+                    it = self.items.get(cid)
+                    if it and not it.is_modified:
+                        it.set_value(True)
+            
             return True
-        # Unknown key when items not initialized: signal failure
         return False
 
-    # Explicit API for known config side effects (avoid reflection)
     def set_docker_extra_users(self, users: List[str]) -> None:
         self.docker_extra_users = users or []
 
-    # per-item normalization is centralized in the Transform Registry
-
-    # ItemStore Protocol conformance methods
     def get_item(self, key: str):
         return self.items.get(key)
 
@@ -261,24 +186,7 @@ class InstallContext(ObservableStoreMixin):
         item = self.items.get(key)
         if item is None:
             return False
-        try:
-            from scripts.installer.core.visibility import install_item_is_visible
-
-            return install_item_is_visible(self, key, item)
-        except Exception:
-            return bool(item.is_visible)
-
-    def all_keys(self) -> List[str]:
-        return list(self.items.keys())
-
-    def _notify_observers(self, key: str, value: Any) -> None:
-        if key in self._observers:
-            for cb in list(self._observers[key]):
-                try:
-                    cb(value)
-                except Exception:
-                    # Observers must not break installer flow
-                    pass
+        return install_item_is_visible(self, key, item)
 
     @property
     def auto_tweaks(self) -> bool:
@@ -321,7 +229,7 @@ class InstallContext(ObservableStoreMixin):
         return bool(self.get_item_value(KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES, default=False))
 
     # ------------------------------------------------------------------
-    # Serialization helpers for testing/session continuity
+    # Serialization helpers for testing
     # ------------------------------------------------------------------
     def to_dict_values_only(self) -> Dict[str, Any]:
         """Return a simple dict of installation item values.
