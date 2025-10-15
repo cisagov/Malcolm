@@ -103,8 +103,8 @@ Although the configuration script automates many of the following configuration 
     - `NGINX_X_FORWARDED_PROTO_OVERRIDE`
     - The following variables control nginx's [resolver directive](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver). Note that these settings do not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: they are only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides.
         + `NGINX_RESOLVER_OVERRIDE` - if set, overrides automatic detection of the resolver address used (default is unset)
-        + `NGINX_RESOLVER_IPV4_OFF` - if `true`, sets the `ipv4=off` parameter in the resolver directive (default is `false`)
-        + `NGINX_RESOLVER_IPV6_OFF` - if `true`, sets the `ipv6=off` parameter in the resolver directive; it is recommended to set this to `true` if your network does not support IPv6 (default is `false`)
+        + `NGINX_RESOLVER_IPV4` - if `false`, sets the `ipv4=off` parameter in the resolver directive (default is `true`)
+        + `NGINX_RESOLVER_IPV6` - if `false`, sets the `ipv6=off` parameter in the resolver directive; it is recommended to set this to `false` if your network does not support IPv6 (default is `true`)
 * **`opensearch.env`** - settings specific to [OpenSearch](https://opensearch.org/)
     - `OPENSEARCH_JAVA_OPTS` - one of OpenSearch's most [important settings](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/#important-settings), the `-Xmx` and `-Xms` values set the size of OpenSearch's Java heap (we recommend setting this value to half of system RAM, up to 32 gigabytes)
     - `OPENSEARCH_PRIMARY` - one of `opensearch-local`, `opensearch-remote`, or `elasticsearch-remote`, to determine the [OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance) Malcolm will use  (default `opensearch-local`)

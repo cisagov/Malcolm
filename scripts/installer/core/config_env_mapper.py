@@ -68,8 +68,8 @@ _BOOLEAN_VARS = [
     KEY_ENV_NETBOX_AUTO_CREATE_PREFIX,
     KEY_ENV_NETBOX_AUTO_POPULATE,
     KEY_ENV_NGINX_SSL,
-    KEY_ENV_NGINX_RESOLVER_IPV4_OFF,
-    KEY_ENV_NGINX_RESOLVER_IPV6_OFF,
+    KEY_ENV_NGINX_RESOLVER_IPV4,
+    KEY_ENV_NGINX_RESOLVER_IPV6,
     KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_PCAP_ENABLE_NETSNIFF,
@@ -474,12 +474,8 @@ class EnvMapper:
 
         # Nginx
         self.env_var_by_map_key[KEY_ENV_NGINX_SSL].config_items = [KEY_CONFIG_ITEM_NGINX_SSL]
-        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV4_OFF].config_items = [
-            KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF
-        ]
-        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV6_OFF].config_items = [
-            KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF
-        ]
+        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV4].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4]
+        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV6].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6]
 
         # OpenSearch
         self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].config_items = [
@@ -511,17 +507,17 @@ class EnvMapper:
 
         # PCAP capture
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].config_items = [
-            KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].config_items = [
-            KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
-            KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+            KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
         # Only authoritative for tcpdump; derived (non-authoritative) for netsniff
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCP_DUMP]
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [KEY_CONFIG_ITEM_PCAP_NET_SNIFF]
+        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCPDUMP]
+        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [KEY_CONFIG_ITEM_PCAP_NETSNIFF]
         self.env_var_by_map_key[KEY_ENV_PCAP_IFACE_TWEAK].config_items = [KEY_CONFIG_ITEM_TWEAK_IFACE]
         self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
         self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]

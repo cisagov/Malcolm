@@ -30,8 +30,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_AUTO_ZEEK,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
-    KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
-    KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
 )
@@ -148,8 +148,8 @@ class TestEnvMultiConditional(unittest.TestCase):
 
     def test_pcap_enable_tcpdump(self):
         # tcpdump=true, netsniff=false -> 'true'
-        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_TCP_DUMP, True)
-        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF, False)
+        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, True)
+        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, False)
         self.cfg.generate_env_files(self.temp_dir)
         env_path = self._env_path_for(KEY_ENV_PCAP_ENABLE_TCPDUMP)
         env_map = _parse_env_file(env_path)
@@ -157,14 +157,14 @@ class TestEnvMultiConditional(unittest.TestCase):
         self.assertEqual(env_map.get(var_name), "true")
 
         # tcpdump=true, netsniff=true -> 'false'
-        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF, True)
+        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, True)
         self.cfg.generate_env_files(self.temp_dir)
         env_map = _parse_env_file(env_path)
         self.assertEqual(env_map.get(var_name), "false")
 
         # tcpdump=false, netsniff=false -> 'false'
-        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_TCP_DUMP, False)
-        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF, False)
+        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, False)
+        self.cfg.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, False)
         self.cfg.generate_env_files(self.temp_dir)
         env_map = _parse_env_file(env_path)
         self.assertEqual(env_map.get(var_name), "false")

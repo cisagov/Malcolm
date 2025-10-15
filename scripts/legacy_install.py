@@ -656,8 +656,8 @@ class Installer(object):
         zeekIntelFeedSince = '7 days ago'
         zeekIntelItemExipration = '-1min'
         zeekIntelOnStartup = True
-        nginxResolverIpv4Off = False
-        nginxResolverIpv6Off = False
+        nginxResolverIpv4 = False
+        nginxResolverIpv6 = False
 
         prevStep = None
         currentStep = ConfigOptions.Preconfig
@@ -954,8 +954,8 @@ class Installer(object):
                                 ],
                                 extraLabel=BACK_LABEL,
                             )
-                        nginxResolverIpv4Off = 'ipv4' not in nginxResolverChoices
-                        nginxResolverIpv6Off = 'ipv6' not in nginxResolverChoices
+                        nginxResolverIpv4 = 'ipv4' in nginxResolverChoices
+                        nginxResolverIpv6 = 'ipv6' in nginxResolverChoices
                     else:
                         nginxSSL = True
 
@@ -2415,14 +2415,14 @@ class Installer(object):
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'nginx.env'),
-                'NGINX_RESOLVER_IPV4_OFF',
-                TrueOrFalseNoQuote(nginxResolverIpv4Off),
+                'NGINX_RESOLVER_IPV4',
+                TrueOrFalseNoQuote(nginxResolverIpv4),
             ),
             EnvValue(
                 True,
                 os.path.join(args.configDir, 'nginx.env'),
-                'NGINX_RESOLVER_IPV6_OFF',
-                TrueOrFalseNoQuote(nginxResolverIpv6Off),
+                'NGINX_RESOLVER_IPV6',
+                TrueOrFalseNoQuote(nginxResolverIpv6),
             ),
             # OpenSearch primary instance is local vs. remote
             EnvValue(

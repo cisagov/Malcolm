@@ -103,14 +103,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
-    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF: DependencySpec(
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
             is_top_level=True,
         )
     ),
-    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF: DependencySpec(
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
@@ -473,31 +473,39 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         )
     ),
-    KEY_CONFIG_ITEM_PCAP_NET_SNIFF: DependencySpec(
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ),
-        # pcap_net_sniff default is the opposite of live_arkime default when enabled
         value=ValueRule(
             depends_on=[
                 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
             ],
-            condition=lambda enabled, _profile, _mode: bool(enabled),
-            default_value=lambda _enabled, profile, mode: not (
-                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
-            ),
+            condition=lambda live_traffic, tcpdump, arkime: (not bool(live_traffic)) or bool(tcpdump) or bool(arkime),
+            default_value=False,
+            only_if_unmodified=False,
         ),
     ),
-    KEY_CONFIG_ITEM_PCAP_TCP_DUMP: DependencySpec(
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+            ],
+            condition=lambda live_traffic, netsniff, arkime: (not bool(live_traffic)) or bool(netsniff) or bool(arkime),
+            default_value=False,
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
         visibility=VisibilityRule(
@@ -505,9 +513,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
             ],
-            condition=lambda enabled, profile, mode: bool(enabled)
-            and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value)),
+            condition=lambda live_traffic, profile, mode, _netsniff, _tcpdump: (
+                bool(live_traffic)
+                and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value))
+            ),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ),
         value=ValueRule(
@@ -515,11 +527,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
             ],
-            condition=lambda enabled, _profile, _mode: bool(enabled),
-            default_value=lambda _enabled, profile, mode: (
-                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
+            condition=lambda live_traffic, profile, mode, netsniff, tcpdump: (
+                (not bool(live_traffic))
+                or (not ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value)))
+                or bool(netsniff)
+                or bool(tcpdump)
             ),
+            default_value=False,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
@@ -580,8 +598,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # Live Arkime node host (Malcolm profile + live arkime enabled)
     KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_LIVE_ARKIME],
-            condition=lambda profile, live_arkime: (profile == PROFILE_MALCOLM and bool(live_arkime)),
+            depends_on=KEY_CONFIG_ITEM_LIVE_ARKIME,
+            condition=lambda live_arkime: bool(live_arkime),
             ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
         )
     ),
@@ -715,7 +733,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
             condition=lambda mode: mode != "none",
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            default_value=False,
+        ),
     ),
     # -------------------------------------------------------------------------
     # OPEN PORTS DEPENDENCIES
@@ -853,8 +876,11 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-            condition=lambda enabled: bool(enabled),
+            depends_on=[
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+                KEY_CONFIG_ITEM_AUTO_ARKIME,
+            ],
+            condition=lambda cleanup, auto_arkime: bool(cleanup) and bool(auto_arkime),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
         )
     ),
@@ -946,7 +972,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_SURICATA,
-        )
+        ),
+        value=ValueRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            default_value=False,
+        ),
     ),
     KEY_CONFIG_ITEM_MALCOLM_ICS: DependencySpec(
         visibility=VisibilityRule(
@@ -970,7 +1001,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
-        )
+        ),
+        value=ValueRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            default_value=False,
+        ),
     ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP: DependencySpec(
         visibility=VisibilityRule(

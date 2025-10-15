@@ -14,8 +14,8 @@ from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF,
-    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF,
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4,
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6,
     KEY_CONFIG_ITEM_NGINX_SSL,
 )
 
@@ -38,7 +38,7 @@ CONFIG_ITEM_NGINX_SSL = ConfigItem(
 )
 
 CONFIG_ITEM_NGINX_RESOLVER_IPV4 = ConfigItem(
-    key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF,
+    key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4,
     label="Enable IPv4 for nginx resolver directive",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
@@ -47,7 +47,7 @@ CONFIG_ITEM_NGINX_RESOLVER_IPV4 = ConfigItem(
 )
 
 CONFIG_ITEM_NGINX_RESOLVER_IPV6 = ConfigItem(
-    key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF,
+    key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6,
     label="Enable IPv6 for nginx resolver directive",
     default_value=False,
     validator=lambda x: isinstance(x, bool),

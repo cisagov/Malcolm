@@ -61,6 +61,15 @@ copied_environment_variables:
         NGINX_LDAP_TLS_STUNNEL_CHECK_IP
       NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL:
         NGINX_LDAP_TLS_STUNNEL_VERIFY_LEVEL
+    nginx:
+      NGINX_RESOLVER_IPV4:
+        NGINX_RESOLVER_IPV4_OFF:
+          "true": "false"
+          "false": "true"
+      NGINX_RESOLVER_IPV6:
+        NGINX_RESOLVER_IPV6_OFF:
+          "true": "false"
+          "false": "true"
   opensearch:
     opensearch:
       OPENSEARCH_URL:
@@ -141,6 +150,9 @@ removed_environment_variables:
     - REDIS_HOST
     - REDIS_CACHE_HOST
     - REDIS_PASSWORD
+  nginx:
+    - NGINX_RESOLVER_IPV4_OFF
+    - NGINX_RESOLVER_IPV6_OFF
   postgres:
     - DB_NAME
     - DB_HOST

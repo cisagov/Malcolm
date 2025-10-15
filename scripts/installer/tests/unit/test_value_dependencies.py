@@ -9,7 +9,7 @@ from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
-    KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_TWEAK_IFACE,
@@ -36,7 +36,7 @@ class TestLiveCaptureDependencies(unittest.TestCase):
     def _assert_live_capture_defaults(self, cfg, *, expect_arkime: bool):
         """Helper to assert post-conditions after live-capture is enabled."""
         self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME), expect_arkime)
-        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_PCAP_NET_SNIFF), not expect_arkime)
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF), not expect_arkime)
         # The following should always flip to True when live capture is enabled
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_LIVE_ZEEK))
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_LIVE_SURICATA))

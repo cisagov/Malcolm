@@ -22,9 +22,9 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_LIVE_ZEEK,
     KEY_CONFIG_ITEM_PCAP_FILTER,
     KEY_CONFIG_ITEM_PCAP_IFACE,
-    KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_PCAP_NODE_NAME,
-    KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
     KEY_CONFIG_ITEM_TWEAK_IFACE,
 )
 
@@ -85,8 +85,8 @@ CONFIG_ITEM_LIVE_ARKIME_NODE_HOST = ConfigItem(
     widget_type=WidgetType.TEXT,
 )
 
-CONFIG_ITEM_PCAP_NET_SNIFF = ConfigItem(
-    key=KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+CONFIG_ITEM_PCAP_NETSNIFF = ConfigItem(
+    key=KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     label="Netsniff-ng Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
@@ -94,8 +94,8 @@ CONFIG_ITEM_PCAP_NET_SNIFF = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
-CONFIG_ITEM_PCAP_TCP_DUMP = ConfigItem(
-    key=KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
+CONFIG_ITEM_PCAP_TCPDUMP = ConfigItem(
+    key=KEY_CONFIG_ITEM_PCAP_TCPDUMP,
     label="Tcpdump Live Traffic Capture",
     default_value=False,
     validator=lambda x: isinstance(x, bool),

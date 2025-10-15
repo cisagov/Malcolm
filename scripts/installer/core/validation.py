@@ -38,8 +38,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_PCAP_IFACE,
-    KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
-    KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
@@ -149,8 +149,8 @@ def _validate_live_capture_iface(malcolm_config, add_issue) -> None:
         bool(malcolm_config.get_value(k))
         for k in (
             KEY_CONFIG_ITEM_LIVE_ARKIME,
-            KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
-            KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
+            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+            KEY_CONFIG_ITEM_PCAP_TCPDUMP,
             KEY_CONFIG_ITEM_LIVE_ZEEK,
             KEY_CONFIG_ITEM_LIVE_SURICATA,
         )

@@ -503,8 +503,8 @@ fi
 [[ -z "${DNS_SERVER:-}" ]] && DNS_SERVER="127.0.0.11"
 export DNS_SERVER
 echo -n "resolver ${DNS_SERVER}" > "${NGINX_RESOLVER_CONF}"
-[[ "${NGINX_RESOLVER_IPV4_OFF:-false}" == "true" ]] && echo -n " ipv4=off" >> "${NGINX_RESOLVER_CONF}"
-[[ "${NGINX_RESOLVER_IPV6_OFF:-false}" == "true" ]] && echo -n " ipv6=off" >> "${NGINX_RESOLVER_CONF}"
+[[ "${NGINX_RESOLVER_IPV4:-true}" == "false" ]] && echo -n " ipv4=off" >> "${NGINX_RESOLVER_CONF}"
+[[ "${NGINX_RESOLVER_IPV6:-true}" == "false" ]] && echo -n " ipv6=off" >> "${NGINX_RESOLVER_CONF}"
 echo ";" >> "${NGINX_RESOLVER_CONF}"
 
 set -e
