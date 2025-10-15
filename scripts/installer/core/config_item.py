@@ -10,7 +10,7 @@ This module provides the ConfigItem class that serves as the foundation
 for all Malcolm configuration items.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Any, Callable, Optional, Tuple, Union
 
 from scripts.malcolm_constants import WidgetType
@@ -35,7 +35,7 @@ class ConfigItem:
         ui_depth: Depth of the item in the UI tree
         ui_parent: Parent of the item in the UI tree
         is_password: bool = False
-        question: Question attached to this ConfigItem to present to the user (either a str or "Callable")
+        _question: Question attached to this ConfigItem to present to the user (either a str or "Callable")
         widget_type: GUI element associated with this ConfigItem
         metadata: dict = Contains information to perform inspection on
     """
@@ -51,16 +51,19 @@ class ConfigItem:
     ui_depth: int = 0
     ui_parent: Optional[str] = None
     is_password: bool = False
-    question: Union[str, Callable[[], Any]] = ""
     widget_type: WidgetType = None
     metadata: dict = field(default_factory=dict)
 
-    def __post_init__(self):
+    # Use InitVar to accept `question` in __init__ but store internally as _question
+    question: InitVar[Union[str, Callable[[], Any]]] = ""
+    _question: Union[str, Callable[[], Any]] = field(init=False)
+
+    def __post_init__(self, question):
         self.value = self.default_value
         self.ui_depth = 0
         self.ui_parent = None
         self.is_modified = False
-        self._question = self.__dict__.get('question', "")
+        self._question = question
 
         # if the UI metadata declares a password widget we treat the field as a password
         if not self.is_password and self.metadata.get("widget_type") == "password":
