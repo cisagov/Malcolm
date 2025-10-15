@@ -15,7 +15,6 @@ import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.actions.shared import update_compose_files
-from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.tests.mock.test_framework import MockPlatform
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.configs.constants.configuration_item_keys import (
@@ -80,8 +79,7 @@ class TestTraefikLabels(unittest.TestCase):
             DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal],
         )
 
-        # act
-        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, None, MockPlatform(), InstallContext())
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -126,7 +124,7 @@ class TestTraefikLabels(unittest.TestCase):
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, False)
 
         # act
-        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, None, MockPlatform(), InstallContext())
         self.assertTrue(ok)
 
         updated = _read_compose(self.compose_path)
@@ -150,8 +148,7 @@ class TestTraefikLabels(unittest.TestCase):
         )
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
 
-        # act
-        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, None, MockPlatform(), InstallContext())
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
@@ -176,8 +173,7 @@ class TestTraefikLabels(unittest.TestCase):
         )
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, False)
 
-        # act
-        ok = update_compose_files(self.cfg, self.tmpdir, MockPlatform(), InstallContext(), InstallerLogger)
+        ok = update_compose_files(self.cfg, self.tmpdir, None, MockPlatform(), InstallContext())
         self.assertTrue(ok)
 
         data = _read_compose(self.compose_path)
