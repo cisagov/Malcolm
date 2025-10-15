@@ -330,7 +330,7 @@ class MacInstaller(BaseInstaller):
             return True
 
         # 1) Filesystem (shared)
-        if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+        if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx)):
             return False
 
         # 2) Docker + Compose (platform) for docker-compose orchestration
@@ -347,19 +347,19 @@ class MacInstaller(BaseInstaller):
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if not _ok(
                 shared_actions.update_compose_files(
-                    malcolm_config, config_dir, orchestration_file, self, ctx, InstallerLogger
+                    malcolm_config, config_dir, orchestration_file, self, ctx
                 )
             ):
                 return False
 
         # 4) SSL env (shared)
-        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx)):
             return False
 
         # 5) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE and self.should_run_install_steps():
             if not _ok(
-                shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx, InstallerLogger)
+                shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)
             ):
                 return False
 

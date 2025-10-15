@@ -48,21 +48,23 @@ from scripts.installer.configs.constants.constants import (
     DEFAULT_INDEX_SNAPSHOT_DIR,
 )
 
+from scripts.installer.utils import InstallerLogger
 
-def filesystem_prepare(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
+
+def filesystem_prepare(malcolm_config, config_dir: str, platform, ctx) -> InstallerResult:
     """Ensure configuration directory exists (idempotent, respects dry-run)."""
 
     try:
         if not platform.should_write_files():
-            logger.info(f"Dry run: would create configuration directory: {config_dir}")
+            InstallerLogger.info(f"Dry run: would create configuration directory: {config_dir}")
             return InstallerResult.SKIPPED
         if os.path.isdir(config_dir):
             return InstallerResult.SUCCESS
         os.makedirs(config_dir, exist_ok=True)
-        logger.info(f"Created configuration directory: {config_dir}")
+        InstallerLogger.info(f"Created configuration directory: {config_dir}")
         return InstallerResult.SUCCESS
     except Exception as e:
-        logger.error(f"Filesystem preparation failed: {e}")
+        InstallerLogger.error(f"Filesystem preparation failed: {e}")
         return InstallerResult.FAILURE
 
 
@@ -243,23 +245,23 @@ def _apply_network_overrides(data: dict, network_name: Optional[str], deep_get, 
         deep_set(data, ["networks", network, "name"], network_name)
 
 
-def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, logger, dump_yaml) -> None:
+def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> None:
     changed = data != original
     if platform.should_write_files():
         if changed:
             dump_yaml(data, config_file)
-            logger.info(f"Updated compose file: {config_file}")
+            InstallerLogger.info(f"Updated compose file: {config_file}")
         else:
-            logger.info(f"No changes needed for compose file: {config_file}")
+            InstallerLogger.info(f"No changes needed for compose file: {config_file}")
     else:
         if changed:
-            logger.info(f"Dry run: would update compose file: {config_file}")
+            InstallerLogger.info(f"Dry run: would update compose file: {config_file}")
         else:
-            logger.info(f"Dry run: no changes for compose file: {config_file}")
+            InstallerLogger.info(f"Dry run: no changes for compose file: {config_file}")
 
 
 def update_compose_files(
-    malcolm_config, config_dir: str, orchestration_file: Optional[str], platform, ctx, logger
+    malcolm_config, config_dir: str, orchestration_file: Optional[str], platform, ctx
 ) -> InstallerResult:
     """Update docker-compose files with runtime-specific settings."""
     from scripts.malcolm_common import DumpYaml, LoadYaml
@@ -281,22 +283,22 @@ def update_compose_files(
             _, compose_files = _select_install_path_and_compose_files(config_dir)
 
         if not compose_files:
-            logger.warning("Could not locate compose files for orchestration updates")
+            InstallerLogger.warning("Could not locate compose files for orchestration updates")
             return InstallerResult.SUCCESS
 
         if platform.is_dry_run():
-            logger.info(
+            InstallerLogger.info(
                 f"Dry run: would update compose files for orchestration: "
                 + ", ".join(sorted(os.path.basename(f) for f in compose_files))
             )
             runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
             restart_policy = _resolve_restart_policy(malcolm_config)
-            logger.info(
+            InstallerLogger.info(
                 f"Dry run: would set container runtime adjustments for {runtime_bin} and restart policy {restart_policy}"
             )
             return InstallerResult.SKIPPED
 
-        logger.info(
+        InstallerLogger.info(
             f"Updating {len(compose_files)} compose file(s) for orchestration ({', '.join(sorted(os.path.basename(f) for f in compose_files))})..."
         )
 
@@ -338,15 +340,15 @@ def update_compose_files(
 
             _apply_network_overrides(data, network_name, deep_get, deep_set)
 
-            _write_or_log_changes(original, data, config_file, platform, logger, DumpYaml)
+            _write_or_log_changes(original, data, config_file, platform, DumpYaml)
 
         return InstallerResult.SUCCESS
     except Exception as e:
-        logger.error(f"Error updating docker-compose files: {e}")
+        InstallerLogger.error(f"Error updating docker-compose files: {e}")
         return InstallerResult.FAILURE
 
 
-def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> InstallerResult:
+def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx) -> InstallerResult:
     """Ensure ssl.env exists in the configuration directory."""
     import shutil
     from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
@@ -354,37 +356,37 @@ def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx, logger) -> In
 
     try:
         if not config_dir:
-            logger.warning("SSL env step: configuration directory not provided; skipping.")
+            InstallerLogger.warning("SSL env step: configuration directory not provided; skipping.")
             return InstallerResult.SKIPPED
         ssl_env_path = os.path.join(config_dir, ENV_FILE_SSL)
         if not os.path.isdir(config_dir):
             if platform.is_dry_run():
-                logger.info(f"Dry run: would create configuration directory: {config_dir}")
-                logger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
+                InstallerLogger.info(f"Dry run: would create configuration directory: {config_dir}")
+                InstallerLogger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
                 return InstallerResult.SKIPPED
             os.makedirs(config_dir, exist_ok=True)
         if os.path.isfile(ssl_env_path):
-            logger.info("ssl.env already present; leaving unchanged.")
+            InstallerLogger.info("ssl.env already present; leaving unchanged.")
             return InstallerResult.SKIPPED
         if platform.is_dry_run():
-            logger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
+            InstallerLogger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
             return InstallerResult.SKIPPED
         try:
             templates_dir = get_default_config_dir()
             template_ssl = os.path.join(templates_dir, ENV_FILE_SSL)
             if os.path.isfile(template_ssl):
                 shutil.copyfile(template_ssl, ssl_env_path)
-                logger.info("Created ssl.env from template.")
+                InstallerLogger.info("Created ssl.env from template.")
                 return InstallerResult.SUCCESS
         except Exception:
             pass
         with open(ssl_env_path, "w") as f:
             f.write("# Shared TLS-related environment variables used by multiple services\n")
             f.write("PUSER_CA_TRUST=/var/local/ca-trust\n")
-        logger.info("Created ssl.env in configuration directory.")
+        InstallerLogger.info("Created ssl.env in configuration directory.")
         return InstallerResult.SUCCESS
     except Exception as e:
-        logger.error(f"Failed to ensure ssl.env: {e}")
+        InstallerLogger.error(f"Failed to ensure ssl.env: {e}")
         return InstallerResult.FAILURE
 
 
@@ -404,19 +406,19 @@ def _resolve_podman_rootless_user(platform):
     return user, uid, socket_path
 
 
-def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform, logger) -> List[str]:
+def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform) -> List[str]:
 
     user, uid, socket_path = _resolve_podman_rootless_user(platform)
     if os.geteuid() == 0 and user:
-        logger.info(f"Podman: {action} as {user} (socket {socket_path})")
+        InstallerLogger.info(f"Podman: {action} as {user} (socket {socket_path})")
         return ["sudo", "-u", user] + base_cmd
     actor = user or os.environ.get("USER") or "current user"
     suffix = f" (socket {socket_path})" if socket_path else ""
-    logger.info(f"Podman: {action} as {actor}{suffix}")
+    InstallerLogger.info(f"Podman: {action} as {actor}{suffix}")
     return base_cmd
 
 
-def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, logger) -> Tuple[InstallerResult, str]:
+def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
     from scripts.installer.configs.constants.configuration_item_keys import (
         KEY_CONFIG_ITEM_RUNTIME_BIN,
@@ -431,46 +433,31 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
 
         compose_file = os.path.join(os.path.dirname(config_dir), COMPOSE_FILENAME)
         if not os.path.isfile(compose_file):
-            logger.warning(f"No docker-compose.yml found near {config_dir}")
-            logger.info("Malcolm container operations will need to be managed manually.")
+            InstallerLogger.warning(f"No docker-compose.yml found near {config_dir}")
+            InstallerLogger.info("Malcolm container operations will need to be managed manually.")
             return InstallerResult.SUCCESS, "Compose file missing; docker operations skipped"
 
-        logger.info(f"Using compose file: {compose_file}")
-        logger.info(f"Container runtime: {runtime_bin}")
+        InstallerLogger.info(f"Using compose file: {compose_file}")
+        InstallerLogger.info(f"Container runtime: {runtime_bin}")
         if profile:
-            logger.info(f"Malcolm profile: {profile}")
+            InstallerLogger.info(f"Malcolm profile: {profile}")
 
         if platform.is_dry_run():
-            logger.info("Dry run: would perform Docker image operations and compose actions")
-            if ctx.load_images_from_archive and ctx.image_archive_path:
-                logger.info(f"Dry run: would load images from archive {ctx.image_archive_path}")
-            else:
-                logger.info("Dry run: would pull images using compose")
-            logger.info("Dry run: would start Malcolm with 'compose up -d'")
+            InstallerLogger.info("Dry run: would perform Docker image operations and compose actions")
+            InstallerLogger.info("Dry run: would pull images using compose")
+            InstallerLogger.info("Dry run: would start Malcolm with 'compose up -d'")
             return InstallerResult.SKIPPED, "Docker operations skipped (dry run)"
 
         compose_cmd: Optional[List[str]] = None
-        if ctx.load_images_from_archive and ctx.image_archive_path and os.path.isfile(ctx.image_archive_path):
-            logger.info(f"Loading Malcolm images from {os.path.basename(ctx.image_archive_path)}...")
-            load_cmd = [runtime_bin, "load", "-q", "-i", ctx.image_archive_path]
-            if runtime_bin.startswith("podman") and os.geteuid() == 0:
-                load_cmd = _prepare_podman_rootless_command(load_cmd, "loading images rootless", platform, logger)
-            ecode, out = platform.run_process(load_cmd)
-            if ecode == 0:
-                logger.info("Malcolm images loaded successfully.")
-                return InstallerResult.SUCCESS, "Malcolm images loaded from archive"
-            else:
-                logger.error(f"Loading Malcolm images failed: {out}")
-
-        elif os.path.isfile(compose_file):
+        if os.path.isfile(compose_file):
             pull_requested = bool(ctx.pull_malcolm_images)
             if not pull_requested:
-                logger.info("Skipping image pull from registry per installer selection.")
+                InstallerLogger.info("Skipping image pull from registry per installer selection.")
             else:
-                logger.info("Pulling Malcolm images from registry...")
+                InstallerLogger.info("Pulling Malcolm images from registry...")
             compose_cmd = compose_cmd or discover_compose_command(runtime_bin, platform)
             if compose_cmd is None:
-                logger.warning("Could not find a working compose command for image pull")
+                InstallerLogger.warning("Could not find a working compose command for image pull")
                 return InstallerResult.SUCCESS, "Compose command unavailable; manual start required"
             if runtime_bin.startswith("podman"):
                 # best-effort socket activation; guidance only on failure
@@ -483,7 +470,7 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
                 ecode = -1
                 if runtime_bin.startswith("podman"):
                     pull_cmd = _prepare_podman_rootless_command(
-                        compose_base + ["pull"], "pulling images rootless", platform, logger
+                        compose_base + ["pull"], "pulling images rootless", platform, InstallerLogger
                     )
                     ecode = platform.run_process_streaming(pull_cmd)
                 else:
@@ -493,36 +480,35 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx, lo
                         if ecode == 0:
                             break
                 if ecode == 0:
-                    logger.info("Malcolm images pulled successfully.")
+                    InstallerLogger.info("Malcolm images pulled successfully.")
                 else:
-                    logger.error("Pulling Malcolm images failed")
+                    InstallerLogger.error("Pulling Malcolm images failed")
                     return InstallerResult.FAILURE, "Docker image pull failed"
 
         # discover compose command & print guidance
         compose_cmd = compose_cmd or discover_compose_command(runtime_bin, platform)
         if compose_cmd is None:
-            logger.warning("Could not find a working compose command on PATH.")
-            logger.info("Please ensure Docker / Podman is installed and available.")
+            InstallerLogger.warning("Could not find a working compose command on PATH.")
+            InstallerLogger.info("Please ensure Docker / Podman is installed and available.")
             return InstallerResult.SUCCESS, "Compose command unavailable; manual start required"
         compose_base = compose_cmd + ["-f", compose_file]
         if profile:
             compose_base.extend(["--profile", profile])
         printable_cmd = " ".join(compose_base + [COMPOSE_UP_SUBCOMMAND, COMPOSE_DETACH_FLAG])
         start_script = os.path.join(get_main_script_dir(), 'start')
-        logger.info("Docker compose validated successfully.")
-        logger.info("To start Malcolm run:")
-        logger.info(f"  {start_script if os.path.isfile(start_script) else printable_cmd}")
+        InstallerLogger.info("Docker compose validated successfully.")
+        InstallerLogger.info("To start Malcolm run:")
+        InstallerLogger.info(f"  {start_script if os.path.isfile(start_script) else printable_cmd}")
         return InstallerResult.SUCCESS, "Docker operations completed"
     except Exception as exc:
-        logger.error(f"Docker operations failed: {exc}")
+        InstallerLogger.error(f"Docker operations failed: {exc}")
         return InstallerResult.FAILURE, "Docker operations failed"
 
 
 # Expose compose discovery as a tiny shared helper for unit tests
 def discover_compose_command(runtime_bin: str, platform) -> Optional[List]:
-    """Return a working compose invocation list for the given runtime.
-
-    Mirrors the discovery behavior used by perform_docker_operations.
+    """
+    Return a working compose invocation list for the given runtime.
     """
     candidates = [[runtime_bin, "compose"]]
     if runtime_bin in {"docker", "podman"}:

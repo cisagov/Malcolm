@@ -535,8 +535,8 @@ class LinuxInstaller(BaseInstaller):
                                 )
                                 try:
                                     os.unlink(final_compose_script)
-                                except Exception:
-                                    pass
+                                except OSError as e:
+                                    InstallerLogger.warning(f"Failed to cleanup failed compose script: {e}")
                         else:
                             InstallerLogger.error(f"Getting Docker Compose from GitHub failed: {out}")
 
@@ -578,7 +578,7 @@ class LinuxInstaller(BaseInstaller):
             return True
 
         # 1) Filesystem (shared)
-        if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+        if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx)):
             return False
 
         # 2) Dependencies (platform)
@@ -607,18 +607,18 @@ class LinuxInstaller(BaseInstaller):
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if not _ok(
                 shared_actions.update_compose_files(
-                    malcolm_config, config_dir, orchestration_file, self, ctx, InstallerLogger
+                    malcolm_config, config_dir, orchestration_file, self, ctx
                 )
             ):
                 return False
 
         # 5) SSL env (shared)
-        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx, InstallerLogger)):
+        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx)):
             return False
 
         # 6) Linux tweaks (only in install mode)
         if self.should_run_install_steps():
-            status, _ = linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx, InstallerLogger)
+            status, _ = linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx)
             if status == InstallerResult.FAILURE:
                 return False
         else:
@@ -628,7 +628,7 @@ class LinuxInstaller(BaseInstaller):
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
                 if not _ok(
-                    shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx, InstallerLogger)
+                    shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)
                 ):
                     return False
             else:
