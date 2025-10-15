@@ -300,14 +300,6 @@ class BaseInstallerTest(unittest.TestCase):
         for key, value in defaults.items():
             if ctx.set_item_value(key, value):
                 continue
-            if hasattr(ctx, key):
-                setattr(ctx, key, value)
-
-        # Helper: if an archive path is provided, ensure corresponding toggle is set
-        if ctx.image_archive_path and hasattr(ctx, "image_archive_path"):
-            ctx.image_source = "archive"
-            ctx.load_images_from_archive = True
-            ctx.set_item_value(KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES, True)
 
         return ctx
 
@@ -385,8 +377,3 @@ def create_test_flags():
     parser.add_argument("--fail-system-tweaks", action="store_true", help="Force system tweaks to fail")
 
     return parser
-
-
-if __name__ == "__main__":
-    # Run basic framework tests
-    unittest.main()
