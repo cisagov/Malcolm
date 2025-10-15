@@ -68,7 +68,7 @@ CONFIG_ITEM_FILE_CARVE_ENABLED = ConfigItem(
     label="Enable Zeek File Extraction",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Enable file extraction with Zeek",
+    question="Enable file extraction with Zeek?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -79,7 +79,7 @@ CONFIG_ITEM_FILE_EXTRACTION_MODE = ConfigItem(
     default_value="none",
     choices=[x.value for x in FileExtractionMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in FileExtractionMode],
-    question="Choose how Zeek should extract files from network traffic. Depends on Zeek analysis. 'Interesting' is a common default.",
+    question="Select which files Zeek should extract from network traffic",
     widget_type=WidgetType.SELECT,
 )
 
@@ -89,16 +89,16 @@ CONFIG_ITEM_FILE_PRESERVATION = ConfigItem(
     default_value="quarantined",
     choices=[x.value for x in FilePreservationMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in FilePreservationMode],
-    question="Determine which files extracted by Zeek should be preserved. Depends on Zeek analysis and file extraction. 'Quarantined' is common.",
+    question="Determine which files extracted by Zeek should be preserved",
     widget_type=WidgetType.SELECT,
 )
 
 CONFIG_ITEM_FILE_CARVE_HTTP_SERVER = ConfigItem(
     key=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
-    label="File Carve HTTP Server",
+    label="Preserved Files HTTP Server",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Enable web interface for downloading preserved files",
+    question="Enable web interface for downloading preserved files?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -107,13 +107,13 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP = ConfigItem(
     label="Zip Downloads",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="ZIP downloaded preserved files",
+    question="Zip preserved files on download?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY = ConfigItem(
     key=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY,
-    label="Download Password",
+    label="Downloaded Preserved File Password",
     default_value="",
     validator=lambda x: isinstance(x, str),
     question="ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)",
@@ -122,28 +122,28 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY = ConfigItem(
 
 CONFIG_ITEM_CLAM_AV_SCAN = ConfigItem(
     key=KEY_CONFIG_ITEM_CLAM_AV_SCAN,
-    label="ClamAV Scan",
+    label="Scan with ClamAV",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with ClamAV",
+    question="Scan extracted files with ClamAV?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_YARA_SCAN = ConfigItem(
     key=KEY_CONFIG_ITEM_YARA_SCAN,
-    label="Yara Scan",
+    label="Scan with YARA",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with Yara",
+    question="Scan extracted files with YARA?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_CAPA_SCAN = ConfigItem(
     key=KEY_CONFIG_ITEM_CAPA_SCAN,
-    label="Capa Scan",
+    label="Scan with capa",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Scan extracted files with Capa",
+    question="Scan extracted files with capa?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -152,7 +152,7 @@ CONFIG_ITEM_VTOT_API_KEY = ConfigItem(
     label="VirusTotal API Key",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="VirusTotal API key to scan extracted files with VirusTotal",
+    question="API key to scan extracted files with VirusTotal",
     widget_type=WidgetType.PASSWORD,
 )
 
@@ -161,7 +161,7 @@ CONFIG_ITEM_FILE_SCAN_RULE_UPDATE = ConfigItem(
     label="Update Scan Rules",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Periodically pull ClamAV/Yara/Capa signatures/rules updates",
+    question="Periodically pull ClamAV/YARA/capa signature/rule updates?",
     widget_type=WidgetType.CHECKBOX,
 )
 

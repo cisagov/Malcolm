@@ -35,16 +35,16 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 
 CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH = ConfigItem(
     key=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
-    label="Malcolm: Maintain OpenSearch Instance?",
+    label="Local OpenSearch Instance",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Should Malcolm maintain its own opensearch instance?",
+    question="Should Malcolm maintain its own OpenSearch instance?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-    label="Primary Malcolm Document Store",
+    label="Primary Document Store",
     default_value=DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal],
     choices=list(DATABASE_MODE_ENUMS.keys()),
     validator=lambda x: x in DATABASE_MODE_ENUMS.keys(),
@@ -75,68 +75,68 @@ CONFIG_ITEM_INDEX_SNAPSHOT_DIR = ConfigItem(
     label="OpenSearch Snapshot Directory",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="Store OpenSearch index snapshots in ./opensearch-backup?",
+    question="OpenSearch index snapshots directory",
     widget_type=WidgetType.DIRECTORY,
 )
 
 CONFIG_ITEM_OPENSEARCH_PRIMARY_URL = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
-    label="OpenSearch URL",
+    label="Primary OpenSearch/Elasticsearch URL",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Primary remote OpenSearch connection URL",
+    question="Primary remote OpenSearch/Elasticsearch connection URL",
     widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY,
-    label="Verify SSL for Primary",
+    label="Verify SSL for Primary Document Store",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Require SSL certificate validation for communication with primary OpenSearch instance",
+    question="Require SSL certificate validation for communication with primary document store?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
-    label="Secondary OpenSearch Mode",
+    label="Secondary Document Store",
     default_value="",
     choices=list(DATABASE_MODE_ENUMS.keys()),
     validator=lambda x: x in DATABASE_MODE_ENUMS.keys(),
-    question="Secondary OpenSearch mode to forward Logstash logs to a remote OpenSearch instance",
+    question="Secondary mode to forward Logstash logs to a remote document store",
     widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_OPENSEARCH_SECONDARY_URL = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
-    label="Secondary OpenSearch URL",
+    label="Secondary OpenSearch/Elasticsearch URL",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Secondary remote OpenSearch connection URL",
+    question="Secondary remote OpenSearch/Elasticsearch connection URL",
     widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY,
-    label="Verify SSL for Secondary",
+    label="Verify SSL for Secondary Document Store",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Require SSL certificate validation for communication with secondary OpenSearch instance",
+    question="Require SSL certificate validation for communication with secondary document store?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_DASHBOARDS_URL = ConfigItem(
     key=KEY_CONFIG_ITEM_DASHBOARDS_URL,
-    label="Dashboards URL",
+    label="Dashboards/Kibana URL",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Remote OpenSearch Dashboards connection URL",
+    question="Remote OpenSearch Dashboards/Kibana connection URL",
     widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_SECONDARY_DOCUMENT_STORE = ConfigItem(
     key=KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
-    label="Forward Logstash Logs to Secondary",
+    label="Forward Logs from Logstash",
     default_value=False,
     question="Forward Logstash logs to a secondary remote document store?",
     widget_type=WidgetType.CHECKBOX,

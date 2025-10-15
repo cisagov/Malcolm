@@ -28,7 +28,7 @@ CONFIG_ITEM_NETBOX_MODE = ConfigItem(
     default_value="disabled",
     choices=[x.value for x in NetboxMode],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in NetboxMode],
-    question="Set NetBox mode",
+    question="Select NetBox mode",
     widget_type=WidgetType.SELECT,
 )
 
@@ -37,7 +37,7 @@ CONFIG_ITEM_NETBOX_URL = ConfigItem(
     label="NetBox URL",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question='NetBox URL (used only if NetBox mode is "remote")',
+    question='Remote NetBox URL',
     widget_type=WidgetType.TEXT,
 )
 
@@ -46,25 +46,25 @@ CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH = ConfigItem(
     label="NetBox Enrichment",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Enrich network traffic using NetBox",
+    question="Enrich network traffic using NetBox?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_NETBOX_AUTO_POPULATE = ConfigItem(
     key=KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE,
-    label="Auto-Populate NetBox",
+    label="Auto-Populate NetBox Inventory",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Automatically populate NetBox inventory based on observed network traffic",
+    question="Automatically populate NetBox inventory based on observed network traffic?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS = ConfigItem(
     key=KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS,
-    label="Auto-Create Prefixes",
+    label="Auto-Create Subnet Prefixes",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Automatically create missing NetBox subnet prefixes based on observed network traffic",
+    question="Automatically create missing NetBox subnet prefixes based on observed network traffic?",
     widget_type=WidgetType.CHECKBOX,
 )
 

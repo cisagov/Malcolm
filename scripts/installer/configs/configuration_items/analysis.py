@@ -63,7 +63,7 @@ CONFIG_ITEM_SURICATA_UPDATE_RULES = ConfigItem(
 
 CONFIG_ITEM_ZEEK_DISABLE_ICS_ALL = ConfigItem(
     key=KEY_CONFIG_ITEM_MALCOLM_ICS,
-    label="Enable Zeek ICS/OT Monitoring",
+    label="Enable Zeek ICS/OT Analyzers",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?",
@@ -72,7 +72,7 @@ CONFIG_ITEM_ZEEK_DISABLE_ICS_ALL = ConfigItem(
 
 CONFIG_ITEM_ZEEK_DISABLE_BEST_GUESS_ICS = ConfigItem(
     key=KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS,
-    label="Enable Zeek ICS Best Guess Mode",
+    label='Enable Zeek ICS "Best Guess"',
     default_value=True,
     validator=lambda x: isinstance(x, bool),
     question='Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?',
@@ -81,7 +81,7 @@ CONFIG_ITEM_ZEEK_DISABLE_BEST_GUESS_ICS = ConfigItem(
 
 CONFIG_ITEM_LOGSTASH_REVERSE_DNS = ConfigItem(
     key=KEY_CONFIG_ITEM_REVERSE_DNS,
-    label="Enable Reverse DNS Lookups",
+    label="Enrich with Reverse DNS Lookups",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Perform reverse DNS lookup locally for source and destination IP addresses in logs?",
@@ -90,16 +90,16 @@ CONFIG_ITEM_LOGSTASH_REVERSE_DNS = ConfigItem(
 
 CONFIG_ITEM_LOGSTASH_OUI_LOOKUP = ConfigItem(
     key=KEY_CONFIG_ITEM_AUTO_OUI,
-    label="Enable OUI Lookups",
+    label="Enrich with Manufacturer (OUI) Lookups",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Perform hardware vendor OUI lookups for MAC addresses",
+    question="Perform hardware vendor OUI lookups for MAC addresses?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_FREQ_LOOKUP = ConfigItem(
     key=KEY_CONFIG_ITEM_AUTO_FREQ,
-    label="Enable Frequency Scoring",
+    label="Enrich with Frequency Scoring",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
     question="Perform string randomness scoring on some fields?",

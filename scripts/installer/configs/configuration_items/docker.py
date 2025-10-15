@@ -40,7 +40,7 @@ CONFIG_ITEM_PROCESS_GROUP_ID = ConfigItem(
     label="Process Group ID",
     default_value=SYSTEM_INFO["recommended_nonroot_gid"],
     validator=lambda x: isinstance(x, int) and x >= 0,
-    question="Enter group ID (GID) for running non-root Malcolm processes",
+    question="Group ID (GID) for running non-root Malcolm processes",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -49,19 +49,19 @@ CONFIG_ITEM_PROCESS_USER_ID = ConfigItem(
     label="Process User ID",
     default_value=SYSTEM_INFO["recommended_nonroot_uid"],
     validator=lambda x: isinstance(x, int) and x >= 0,
-    question="Enter user ID (UID) for running non-root Malcolm processes",
+    question="User ID (UID) for running non-root Malcolm processes",
     widget_type=WidgetType.NUMBER,
 )
 
 
 CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-    label="Docker Orchestration Mode",
+    label="Container Orchestration Mode",
     default_value=OrchestrationFramework.DOCKER_COMPOSE,
     # Present clear names to users; tags are normalized by MalcolmConfig
     choices=ORCHESTRATION_MODE_CHOICES,
     validator=lambda x: isinstance(x, OrchestrationFramework),
-    question="Select docker orchestration mode",
+    question="Select container orchestration mode",
     widget_type=WidgetType.SELECT,
 )
 
@@ -90,6 +90,15 @@ CONFIG_ITEM_BEHIND_REVERSE_PROXY = ConfigItem(
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_TRAEFIK_LABELS = ConfigItem(
+    key=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+    label="Traefik Labels",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Configure labels for Traefik?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -129,21 +138,12 @@ CONFIG_ITEM_TRAEFIK_RESOLVER = ConfigItem(
     widget_type=WidgetType.TEXT,
 )
 
-CONFIG_ITEM_TRAEFIK_LABELS = ConfigItem(
-    key=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-    label="Traefik Labels",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question="Configure labels for Traefik?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
 CONFIG_ITEM_CONTAINER_NETWORK_NAME = ConfigItem(
     key=KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     label="Container Network Name",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="External container network name (or leave blank for default networking)",
+    question="External container network name (leave blank for default networking)",
     widget_type=WidgetType.TEXT,
 )
 

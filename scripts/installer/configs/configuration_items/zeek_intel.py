@@ -22,10 +22,10 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 
 CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS = ConfigItem(
     key=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
-    label="Zeek Pull Intelligence Feeds",
+    label="Use Threat Feeds for Zeek Intelligence",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Pull from threat intelligence feeds on container startup",
+    question="Pull threat indicators from intelligence feeds for the Zeek intelligence framework?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -34,7 +34,7 @@ CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP = ConfigItem(
     label="Pull Threat Intelligence Feeds on Startup",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Pull from threat intelligence feeds on container startup",
+    question="Pull from threat feeds on container startup?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -49,7 +49,7 @@ CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE = ConfigItem(
 
 CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION = ConfigItem(
     key=KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION,
-    label="Threat Intel Cron Expression",
+    label="Cron Expression for Threat Feed Updates",
     default_value="0 0 * * *",
     validator=lambda x: isinstance(x, str),
     question="Cron expression for scheduled pulls from threat intelligence feeds",
@@ -58,10 +58,10 @@ CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION = ConfigItem(
 
 CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION = ConfigItem(
     key=KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION,
-    label="Zeek's Intel::item_expiration timeout",
+    label="Intel::item_expiration Timeout",
     default_value="-1min",
     validator=lambda x: isinstance(x, str),
-    question="Specifies the value for Zeek's Intel::item_expiration timeout (-1min to disable)",
+    question="Enter the value for Zeek's Intel::item_expiration timeout (-1min to disable)",
     widget_type=WidgetType.TEXT,
 )
 

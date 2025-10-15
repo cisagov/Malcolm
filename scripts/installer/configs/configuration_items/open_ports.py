@@ -25,11 +25,11 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 
 CONFIG_ITEM_OPEN_PORTS = ConfigItem(
     key=KEY_CONFIG_ITEM_OPEN_PORTS,
-    label="Open Ports Selection",
+    label="Expose Malcolm Service Ports",
     default_value=OpenPortsChoices.NO.value,
     choices=[x.value for x in OpenPortsChoices],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in OpenPortsChoices],
-    question=f"Should Malcolm accept logs and metrics from a Hedgehog sensor or other forwarder? ({OpenPortsChoices.NO.value}/{OpenPortsChoices.YES.value}/{OpenPortsChoices.CUSTOMIZE.value})",
+    question=f"Should Malcolm accept logs and metrics from a Hedgehog sensor or other forwarder?",
     widget_type=WidgetType.SELECT,
 )
 
@@ -38,7 +38,7 @@ CONFIG_ITEM_EXPOSE_LOGSTASH = ConfigItem(
     label="Expose Logstash",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Expose Logstash port to external hosts",
+    question="Expose Logstash service to external hosts?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -47,7 +47,7 @@ CONFIG_ITEM_EXPOSE_OPENSEARCH = ConfigItem(
     label="Expose OpenSearch",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Expose OpenSearch port to external hosts",
+    question="Expose OpenSearch service to external hosts?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -56,7 +56,7 @@ CONFIG_ITEM_EXPOSE_FILEBEAT_TCP = ConfigItem(
     label="Expose Filebeat TCP",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Expose Filebeat TCP port to external hosts",
+    question="Expose Filebeat TCP service to external hosts?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -65,7 +65,7 @@ CONFIG_ITEM_EXPOSE_SFTP = ConfigItem(
     label="Expose SFTP",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Expose SFTP server (for PCAP upload) to external hosts",
+    question="Expose SFTP server (for PCAP upload) to external hosts?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -94,7 +94,7 @@ CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES = ConfigItem(
     label="Accept Standard Syslog Messages",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Accept standard Syslog messages",
+    question="Accept standard Syslog messages?",
     widget_type=WidgetType.CHECKBOX,
 )
 

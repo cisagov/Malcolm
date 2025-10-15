@@ -25,7 +25,7 @@ CONFIG_ITEM_AUTO_TWEAKS = ConfigItem(
     label="Automatically Apply System Tweaks",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Apply recommended system tweaks automatically without asking for confirmation?",
+    question="Apply recommended system tweaks automatically without confirmation?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -34,7 +34,7 @@ CONFIG_ITEM_INSTALLATION_PATH = ConfigItem(
     label="Malcolm Installation Path",
     default_value=os.path.join(os.getcwd(), "malcolm"),
     validator=lambda x: isinstance(x, str) and len(x.strip()) > 0,
-    question="Directory path where Malcolm will be installed?",
+    question="Enter directory where Malcolm will be installed",
     widget_type=WidgetType.TEXT,
 )
 
@@ -49,10 +49,10 @@ CONFIG_ITEM_LOAD_MALCOLM_IMAGES = ConfigItem(
 
 CONFIG_ITEM_PULL_MALCOLM_IMAGES = ConfigItem(
     key=KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
-    label="Pull Malcolm Images From Registry",
+    label="Pull Malcolm Images",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Pull Malcolm container images from registry?",
+    question="Pull Malcolm images from container registry?",
     widget_type=WidgetType.CHECKBOX,
 )
 

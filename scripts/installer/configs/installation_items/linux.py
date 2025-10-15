@@ -36,7 +36,7 @@ CONFIG_ITEM_DOCKER_INSTALL_METHOD = ConfigItem(
     default_value=DockerInstallMethod.REPOSITORY,
     choices=[x.value for x in DockerInstallMethod],
     validator=lambda x: x in DockerInstallMethod,
-    question="Method for installing Docker on Linux (if not already installed)",
+    question="Select method for Docker installation (if not already installed)",
     widget_type=WidgetType.SELECT,
     metadata={
         "visible_when_runtime": "docker",
@@ -45,11 +45,11 @@ CONFIG_ITEM_DOCKER_INSTALL_METHOD = ConfigItem(
 
 CONFIG_ITEM_DOCKER_COMPOSE_INSTALL_METHOD = ConfigItem(
     key=KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
-    label="Docker Compose Fallback Installation Method",
+    label="Docker Compose Installation Method",
     default_value=DockerComposeInstallMethod.GITHUB,
     choices=[x.value for x in DockerComposeInstallMethod],
     validator=lambda x: x in DockerComposeInstallMethod,
-    question="Method for installing Docker Compose on Linux (if not already installed)",
+    question="Select method for Docker Compose installation (if not already installed)",
     widget_type=WidgetType.SELECT,
     metadata={
         "visible_when_runtime": "docker",

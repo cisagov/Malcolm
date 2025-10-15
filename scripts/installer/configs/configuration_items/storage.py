@@ -36,7 +36,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 
 CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = ConfigItem(
     key=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-    label="Clean Up Old Artifacts",
+    label="Clean Up Artifacts",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Should Malcolm delete the oldest database indices and capture artifacts based on available storage?",
@@ -54,10 +54,10 @@ KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES = ConfigItem(
 
 CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS = ConfigItem(
     key=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
-    label="Use Default Storage Locations",
+    label="Use Default Storage Location",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question=lambda: f"Store pcap, log, and index files in {get_malcolm_dir()}",
+    question=lambda: f"Store pcap, log, and index files in {get_malcolm_dir()}?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -93,7 +93,7 @@ CONFIG_ITEM_ARKIME_MANAGE_PCAP = ConfigItem(
     label="Delete Old PCAP",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Arkime should delete PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)",
+    question="Should Arkime delete PCAP files based on available storage? (see https://arkime.com/faq#pcap-deletion)",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -111,7 +111,7 @@ CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD = ConfigItem(
     label="Extracted File Size Threshold",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="Delete zeek-extracted files when they consume this much disk space (e.g., 250GB, 1TB, etc.)",
+    question="Delete Zeek-extracted files when they consume this much disk space (e.g., 250GB, 1TB, etc.)",
     widget_type=WidgetType.TEXT,
 )
 
@@ -120,7 +120,7 @@ CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD = ConfigItem(
     label="Extracted File Percent Threshold",
     default_value=0,
     validator=lambda x: isinstance(x, int),
-    question="Delete zeek-extracted files when the file system exceeds this percentage full (e.g., 90%, etc.)",
+    question="Delete Zeek-extracted files when the file system exceeds this percentage full (e.g., 90%, etc.)",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -135,7 +135,7 @@ CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT = ConfigItem(
 
 CONFIG_ITEM_INDEX_PRUNE_NAME_SORT = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT,
-    label="Prune by Name",
+    label="Prune Indices by Name",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Determine oldest indices by name (instead of creation time)?",
@@ -144,7 +144,7 @@ CONFIG_ITEM_INDEX_PRUNE_NAME_SORT = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_POLICY = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
-    label="Arkime: Enable Index Management",
+    label="Enable Arkime Index Management",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Enable index management policies (ILM/ISM) in Arkime? (see https://https://arkime.com/faq#ilm)",
@@ -153,7 +153,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_POLICY = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM,
-    label="Arkime: Use Hot/Warm Indexing",
+    label="Use Hot/Warm Indexing",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Should Arkime use a hot/warm design in which non-session data is stored in a warm index?",
@@ -162,7 +162,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD,
-    label="Arkime: Hot Node Time Period",
+    label="Hot Node Time Period",
     default_value="30d",
     validator=lambda x: isinstance(x, str),
     question="How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)",
@@ -171,7 +171,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION,
-    label="Arkime: SPI Data Retention",
+    label="SPI Data Retention",
     default_value="90d",
     validator=lambda x: isinstance(x, str),
     question="How long should Arkime retain SPI data before deleting it? (e.g. 25h, 90d, etc.)",
@@ -180,7 +180,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS,
-    label="Arkime: Replica Count (Warm)",
+    label="Replica Count (Warm)",
     default_value=0,
     validator=lambda x: isinstance(x, int),
     question="How many replicas should Arkime maintain for older session indices?",
@@ -189,7 +189,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS,
-    label="Arkime: History Retention (Weeks)",
+    label="History Retention (Weeks)",
     default_value=13,
     validator=lambda x: isinstance(x, int),
     question="How many weeks of history should Arkime keep?",
@@ -198,7 +198,7 @@ CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS = ConfigItem(
 
 CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS = ConfigItem(
     key=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS,
-    label="Arkime: Optimize Segments",
+    label="Optimize Segments",
     default_value=1,
     validator=lambda x: isinstance(x, int),
     question="How many segments should Arkime use to optimize?",

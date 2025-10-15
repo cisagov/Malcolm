@@ -34,7 +34,7 @@ CONFIG_ITEM_RUNTIME_BIN = ConfigItem(
     default_value=os.getenv("MALCOLM_CONTAINER_RUNTIME", "docker"),
     choices=[x.value for x in ContainerRuntime],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in ContainerRuntime],
-    question="Select container runtime binary:",
+    question="Select container runtime",
     widget_type=WidgetType.SELECT,
 )
 
@@ -44,7 +44,7 @@ CONFIG_ITEM_MALCOLM_PROFILE = ConfigItem(
     default_value=PROFILE_MALCOLM,
     choices=[PROFILE_MALCOLM, PROFILE_HEDGEHOG],
     validator=lambda x: x in [PROFILE_MALCOLM, PROFILE_HEDGEHOG],
-    question='Select the run profile: a full Malcolm suite or capture-only ("Hedgehog mode")',
+    question='Select the run profile: full Malcolm suite or capture-only ("Hedgehog mode")',
     widget_type=WidgetType.SELECT,
 )
 
@@ -53,7 +53,7 @@ CONFIG_ITEM_DASHBOARDS_DARK_MODE = ConfigItem(
     label="Dark Mode for Dashboards",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Enable dark mode for OpenSearch Dashboards",
+    question="Enable dark mode for OpenSearch Dashboards?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -65,7 +65,7 @@ CONFIG_ITEM_IMAGE_ARCH = ConfigItem(
     default_value=(_arch_default.value if isinstance(_arch_default, ImageArchitecture) else _arch_default),
     choices=[x.value for x in ImageArchitecture],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in ImageArchitecture],
-    question="Architecture for container image (amd64 or arm64)",
+    question="Select architecture for container images (amd64 or arm64)",
     widget_type=WidgetType.SELECT,
 )
 

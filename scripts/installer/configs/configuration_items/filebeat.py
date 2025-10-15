@@ -22,22 +22,21 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_FILEBEAT_TCP_TAG,
 )
 
-
-CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS = ConfigItem(
-    key=KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS,
-    label="Use Default Filebeat TCP Listener Settings",
-    default_value=True,
-    validator=lambda x: isinstance(x, bool),
-    question="Use default field values for Filebeat TCP listener?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
 CONFIG_ITEM_EXPOSE_FILEBEAT_TCP = ConfigItem(
     key=KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     label="Expose Filebeat TCP Listener",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Expose a Filebeat TCP input listener for log ingestion.",
+    question="Expose Filebeat TCP service for log ingestion?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS = ConfigItem(
+    key=KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS,
+    label="Use Filebeat TCP Listener Defaults",
+    default_value=True,
+    validator=lambda x: isinstance(x, bool),
+    question="Use default field values for Filebeat TCP listener?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -58,7 +57,7 @@ CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD = ConfigItem(
     label="Filebeat TCP Source Field",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Source field name to parse for events sent to the Filebeat TCP input listener:",
+    question="Source field name to parse for events sent to the Filebeat TCP input listener",
     widget_type=WidgetType.TEXT,
 )
 
@@ -68,7 +67,7 @@ CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD = ConfigItem(
     label="Filebeat TCP Target Field",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Target field name to store decoded JSON fields for events sent to the Filebeat TCP input listener:",
+    question="Target field name to store decoded JSON fields for events sent to the Filebeat TCP input listener",
     widget_type=WidgetType.TEXT,
 )
 
@@ -78,7 +77,7 @@ CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD = ConfigItem(
     label="Filebeat TCP Drop Field",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question="Field to drop in events sent to the Filebeat TCP input listener.",
+    question="Field to drop in events sent to the Filebeat TCP input listener",
     widget_type=WidgetType.TEXT,
 )
 
@@ -87,7 +86,7 @@ CONFIG_ITEM_FILEBEAT_TCP_TAG = ConfigItem(
     label="Filebeat TCP Tag",
     default_value="_malcolm_beats",
     validator=lambda x: isinstance(x, str),
-    question="Tag to append to events sent to the Filebeat TCP input listener.",
+    question="Tag to append to events sent to the Filebeat TCP input listener",
     widget_type=WidgetType.TEXT,
 )
 

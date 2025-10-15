@@ -48,10 +48,10 @@ CONFIG_ITEM_PCAP_FILTER = ConfigItem(
 
 CONFIG_ITEM_TWEAK_IFACE = ConfigItem(
     key=KEY_CONFIG_ITEM_TWEAK_IFACE,
-    label="Optimize Interface",
+    label="Optimize Interface Settings for Capture",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Disable capture interface hardware offloading and adjust ring buffer sizes",
+    question="Disable capture interface hardware offloading and adjust ring buffer sizes?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -59,19 +59,19 @@ CONFIG_ITEM_TWEAK_IFACE = ConfigItem(
 # This also writes to another env var SURICATA_STATS_EVE_ENABLED
 CONFIG_ITEM_CAPTURE_STATS = ConfigItem(
     key=KEY_CONFIG_ITEM_CAPTURE_STATS,
-    label="Capture Live Traffic Statistics",
+    label="Gather Traffic Capture Statistics",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Enable live packet capture statistics for Zeek and/or Suricata",
+    question="Enable live packet capture statistics for Zeek and/or Suricata?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_LIVE_ARKIME = ConfigItem(
     key=KEY_CONFIG_ITEM_LIVE_ARKIME,
-    label="Arkime Live Traffic Capture",
+    label="Capture Live Traffic with Arkime",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with Arkime capture (not available with --opensearch {DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]})",
+    question=f"Capture live network traffic with Arkime capture?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -81,52 +81,52 @@ CONFIG_ITEM_LIVE_ARKIME_NODE_HOST = ConfigItem(
     label="Arkime Node Host",
     default_value=get_hostname_without_domain(),
     validator=lambda x: isinstance(x, str),
-    question="The node hostname or IP address to associate with live network traffic observed by Arkime capture",
+    question="Node hostname or IP address to associate with live network traffic observed by Arkime capture",
     widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_PCAP_NETSNIFF = ConfigItem(
     key=KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-    label="Netsniff-ng Live Traffic Capture",
+    label="Capture Live Traffic with netsniff-ng",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Capture live network traffic with netsniff-ng for Arkime",
+    question="Capture live network traffic to PCAP with netsniff-ng?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_PCAP_TCPDUMP = ConfigItem(
     key=KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-    label="Tcpdump Live Traffic Capture",
+    label="Capture Live Traffic with tcpdump",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Capture live network traffic with tcpdump for Arkime",
+    question="Capture live network traffic to PCAP with tcpdump?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_LIVE_ZEEK = ConfigItem(
     key=KEY_CONFIG_ITEM_LIVE_ZEEK,
-    label="Zeek Live Traffic Capture",
+    label="Analyze Live Traffic with Zeek",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Capture live network traffic with Zeek",
+    question="Analyze live network traffic with Zeek?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_LIVE_SURICATA = ConfigItem(
     key=KEY_CONFIG_ITEM_LIVE_SURICATA,
-    label="Suricata Live Traffic Capture",
+    label="Analyze Live Traffic with Suricata",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Capture live network traffic with Suricata",
+    question="Analyze live network traffic with Suricata?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_PCAP_NODE_NAME = ConfigItem(
     key=KEY_CONFIG_ITEM_PCAP_NODE_NAME,
-    label="Network Traffic Metadata Node Name",
+    label="Network Traffic Node Name",
     default_value=get_hostname_without_domain(),
     validator=lambda x: isinstance(x, str),
-    question="The node name to associate with network traffic metadata",
+    question="Node name to associate with network traffic metadata",
     widget_type=WidgetType.TEXT,
 )
 

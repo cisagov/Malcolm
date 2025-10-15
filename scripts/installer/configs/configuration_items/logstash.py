@@ -43,7 +43,7 @@ CONFIG_ITEM_LOGSTASH_HOST = ConfigItem(
     label="Logstash Host",
     default_value=None,
     validator=lambda x: isinstance(x, str),
-    question='Logstash host and port (for when running "capture-only" profile; e.g., 192.168.1.123:5044)',
+    question='Logstash host and port (for capture-only "Hedgehog" run profile; e.g., 192.168.1.123:5044)',
     widget_type=WidgetType.TEXT,
 )
 

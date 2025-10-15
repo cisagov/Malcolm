@@ -24,7 +24,7 @@ CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = ConfigItem(
     label="Capture Live Network Traffic",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Capture live network traffic",
+    question="Capture and analyze live network traffic?",
     widget_type=WidgetType.CHECKBOX,
 )
 
@@ -33,25 +33,25 @@ CONFIG_ITEM_NGINX_SSL = ConfigItem(
     label="Require HTTPS Connections",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Require encrypted HTTPS connections",
+    question="Require encrypted HTTPS connections?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_NGINX_RESOLVER_IPV4 = ConfigItem(
     key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4,
-    label="Enable IPv4 for nginx resolver directive",
+    label="IPv4 for nginx Resolver Directive",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Enable IPv4 for nginx resolver directive",
+    question="Enable IPv4 for nginx Resolver Directive?",
     widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_NGINX_RESOLVER_IPV6 = ConfigItem(
     key=KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6,
-    label="Enable IPv6 for nginx resolver directive",
+    label="IPv6 for nginx Resolver Directive",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Enable IPv6 for nginx resolver directive",
+    question="Enable IPv6 for nginx Resolver Directive?",
     widget_type=WidgetType.CHECKBOX,
 )
 
