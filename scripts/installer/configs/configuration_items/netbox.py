@@ -13,12 +13,12 @@ including NetBox instance management and network traffic enrichment options.
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import NetboxMode
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_NETBOX_MODE,
-    KEY_CONFIG_ITEM_NETBOX_URL,
-    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
     KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE,
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS,
+    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
+    KEY_CONFIG_ITEM_NETBOX_MODE,
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME,
+    KEY_CONFIG_ITEM_NETBOX_URL,
 )
 from scripts.malcolm_constants import WidgetType
 

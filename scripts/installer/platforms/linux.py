@@ -605,11 +605,7 @@ class LinuxInstaller(BaseInstaller):
 
         # 4) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
-            if not _ok(
-                shared_actions.update_compose_files(
-                    malcolm_config, config_dir, orchestration_file, self, ctx
-                )
-            ):
+            if not _ok(shared_actions.update_compose_files(malcolm_config, config_dir, orchestration_file, self, ctx)):
                 return False
 
         # 5) SSL env (shared)
@@ -627,9 +623,7 @@ class LinuxInstaller(BaseInstaller):
         # 7) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
-                if not _ok(
-                    shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)
-                ):
+                if not _ok(shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)):
                     return False
             else:
                 InstallerLogger.info("Dry run/config-only: would perform docker operations (start/load)")

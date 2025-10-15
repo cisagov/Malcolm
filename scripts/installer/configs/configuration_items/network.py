@@ -13,10 +13,10 @@ This module contains all configuration items related to network and authenticati
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_NGINX_SSL,
+    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF,
     KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF,
-    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+    KEY_CONFIG_ITEM_NGINX_SSL,
 )
 
 CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = ConfigItem(

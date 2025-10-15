@@ -13,11 +13,11 @@ from scripts.malcolm_constants import WidgetType
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
-    KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP,
-    KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE,
     KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION,
+    KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE,
     KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION,
+    KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP,
+    KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
 )
 
 CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS = ConfigItem(

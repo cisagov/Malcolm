@@ -48,17 +48,17 @@ def apply_inbound(key: str, value: Any) -> Any:
     """
     try:
         from scripts.installer.configs.constants.configuration_item_keys import (
-            KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
-            KEY_CONFIG_ITEM_RUNTIME_BIN,
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-            KEY_CONFIG_ITEM_NETBOX_MODE,
-            KEY_CONFIG_ITEM_IMAGE_ARCH,
             KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
-            KEY_CONFIG_ITEM_OPEN_PORTS,
             KEY_CONFIG_ITEM_FILE_CARVE_MODE,
             KEY_CONFIG_ITEM_FILE_PRESERVE_MODE,
+            KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            KEY_CONFIG_ITEM_IMAGE_ARCH,
+            KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+            KEY_CONFIG_ITEM_NETBOX_MODE,
+            KEY_CONFIG_ITEM_OPEN_PORTS,
+            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
+            KEY_CONFIG_ITEM_RUNTIME_BIN,
         )
         from scripts.installer.configs.constants.enums import (
             DockerRestartPolicy,
@@ -76,8 +76,8 @@ def apply_inbound(key: str, value: Any) -> Any:
             DatabaseMode,
         )
         from scripts.installer.configs.constants.installation_item_keys import (
-            KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
             KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
+            KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
         )
         from scripts.installer.configs.constants.enums import (
             DockerInstallMethod,

@@ -22,10 +22,10 @@ from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
-    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE,
     KEY_CONFIG_ITEM_IMAGE_ARCH,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
 )
 
 CONFIG_ITEM_RUNTIME_BIN = ConfigItem(

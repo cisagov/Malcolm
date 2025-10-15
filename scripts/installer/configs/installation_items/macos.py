@@ -13,11 +13,11 @@ system configuration options.
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
-    KEY_INSTALLATION_ITEM_HOMEBREW_USAGE,
-    KEY_INSTALLATION_ITEM_USE_HOMEBREW,
-    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
-    KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
+    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
+    KEY_INSTALLATION_ITEM_HOMEBREW_USAGE,
+    KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
+    KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
 from scripts.installer.configs.constants.enums import HomebrewUsage
 from scripts.malcolm_constants import WidgetType

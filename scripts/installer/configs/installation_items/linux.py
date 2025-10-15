@@ -16,12 +16,12 @@ from typing import Any, Tuple
 
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
-    KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
     KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
+    KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
-    KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
+    KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
 )
 from scripts.installer.configs.constants.enums import (
     DockerInstallMethod,

@@ -13,14 +13,14 @@ from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import OpenPortsChoices
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+    KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
-    KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_SFTP,
-    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+    KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
-    KEY_CONFIG_ITEM_OPEN_PORTS,
 )
 
 CONFIG_ITEM_OPEN_PORTS = ConfigItem(

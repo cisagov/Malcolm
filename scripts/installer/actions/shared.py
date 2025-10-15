@@ -14,38 +14,38 @@ from typing import Tuple, List, Optional
 
 from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.configs.constants.constants import (
+    COMPOSE_DETACH_FLAG,
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
     COMPOSE_UP_SUBCOMMAND,
-    COMPOSE_DETACH_FLAG,
-    USERNS_MODE_KEEP_ID,
-    PODMAN_LOG_DRIVER,
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_RESTART_POLICY,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
     DOCKER_LOG_DRIVER,
-    LABEL_MALCOLM_RULE,
-    LABEL_MALCOLM_ENTRYPOINTS,
     LABEL_MALCOLM_CERTRESOLVER,
+    LABEL_MALCOLM_ENTRYPOINTS,
+    LABEL_MALCOLM_RULE,
     LABEL_MALCOLM_SERVICE,
     LABEL_MALCOLM_SERVICE_PORT,
-    LABEL_OS_RULE,
-    LABEL_OS_ENTRYPOINTS,
     LABEL_OS_CERTRESOLVER,
+    LABEL_OS_ENTRYPOINTS,
+    LABEL_OS_RULE,
     LABEL_OS_SERVICE,
     LABEL_OS_SERVICE_PORT,
-    TRAEFIK_ENABLE,
+    OPENSEARCH_DATA_CONTAINER_PATH,
+    PCAP_CONTAINER_PATH,
+    PODMAN_LOG_DRIVER,
     SERVICE_NAME_MALCOLM,
     SERVICE_NAME_OSMALCOLM,
     SERVICE_PORT_MALCOLM,
     SERVICE_PORT_OSMALCOLM,
-    DEFAULT_RESTART_POLICY,
-    PCAP_CONTAINER_PATH,
-    ZEEK_LOG_CONTAINER_PATH,
     SURICATA_LOG_CONTAINER_PATH,
-    OPENSEARCH_DATA_CONTAINER_PATH,
-    DEFAULT_PCAP_DIR,
-    DEFAULT_ZEEK_LOG_DIR,
-    DEFAULT_SURICATA_LOG_DIR,
-    DEFAULT_INDEX_DIR,
-    DEFAULT_INDEX_SNAPSHOT_DIR,
+    TRAEFIK_ENABLE,
+    USERNS_MODE_KEEP_ID,
+    ZEEK_LOG_CONTAINER_PATH,
 )
 
 from scripts.installer.utils import InstallerLogger
@@ -153,13 +153,13 @@ def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_poli
 def _get_traefik_config(malcolm_config):
     from scripts.installer.configs.constants.configuration_item_keys import (
         KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
-        KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-        KEY_CONFIG_ITEM_TRAEFIK_HOST,
-        KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
-        KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
-        KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
         KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
         KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+        KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
+        KEY_CONFIG_ITEM_TRAEFIK_HOST,
+        KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+        KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
+        KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
     )
 
     try:
@@ -267,13 +267,13 @@ def update_compose_files(
     from scripts.malcolm_common import DumpYaml, LoadYaml
     from scripts.malcolm_utils import deep_set, deep_get
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_RUNTIME_BIN,
-        KEY_CONFIG_ITEM_PCAP_DIR,
-        KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
-        KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+        KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
         KEY_CONFIG_ITEM_INDEX_DIR,
         KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-        KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+        KEY_CONFIG_ITEM_PCAP_DIR,
+        KEY_CONFIG_ITEM_RUNTIME_BIN,
+        KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+        KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
     )
 
     try:
@@ -421,8 +421,8 @@ def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform)
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_RUNTIME_BIN,
         KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        KEY_CONFIG_ITEM_RUNTIME_BIN,
     )
     from scripts.malcolm_utils import get_main_script_dir
 

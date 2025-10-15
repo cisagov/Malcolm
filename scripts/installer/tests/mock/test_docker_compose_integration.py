@@ -231,9 +231,7 @@ def run_standalone_test():
     print(f"Testing docker-compose updates in: {malcolm_install_path}")
 
     # Test the update function directly
-    result = update_compose_files(
-        malcolm_config, malcolm_install_path, None, MockPlatform(), InstallContext()
-    )
+    result = update_compose_files(malcolm_config, malcolm_install_path, None, MockPlatform(), InstallContext())
 
     if result:
         print("✓ Docker-compose updates completed successfully")

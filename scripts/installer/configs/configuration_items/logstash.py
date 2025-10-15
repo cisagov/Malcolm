@@ -14,9 +14,9 @@ from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_LOGSTASH_HOST,
     KEY_CONFIG_ITEM_LS_MEMORY,
     KEY_CONFIG_ITEM_LS_WORKERS,
-    KEY_CONFIG_ITEM_LOGSTASH_HOST,
 )
 
 CONFIG_ITEM_LS_MEMORY = ConfigItem(

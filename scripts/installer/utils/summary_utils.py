@@ -71,16 +71,16 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
         List of (label, value) tuples representing configuration items
     """
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_RUNTIME_BIN,
-        KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-        KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
-        KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-        KEY_CONFIG_ITEM_PCAP_NODE_NAME,
-        KEY_CONFIG_ITEM_NGINX_SSL,
-        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
         KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
-        KEY_CONFIG_ITEM_PROCESS_USER_ID,
+        KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+        KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
+        KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        KEY_CONFIG_ITEM_NGINX_SSL,
+        KEY_CONFIG_ITEM_PCAP_NODE_NAME,
         KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
+        KEY_CONFIG_ITEM_PROCESS_USER_ID,
+        KEY_CONFIG_ITEM_RUNTIME_BIN,
+        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     )
     from scripts.malcolm_constants import OrchestrationFramework
 

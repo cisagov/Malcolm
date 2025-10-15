@@ -8,8 +8,8 @@ from typing import Optional, List, Dict, Any
 from enum import Enum
 
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
 )
 
 from scripts.malcolm_constants import PLATFORM_LINUX, PLATFORM_MAC, PLATFORM_WINDOWS
@@ -29,13 +29,13 @@ from scripts.installer.configs.installation_items.windows import (
 
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-    KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
-    KEY_INSTALLATION_ITEM_USE_HOMEBREW,
-    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
-    KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
-    KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
+    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
+    KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
+    KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
+    KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
+    KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.core.visibility import install_item_is_visible
@@ -160,13 +160,13 @@ class InstallContext:
             except Exception:
                 InstallerLogger.warning(f"Failed to set value for {key}: {value}")
                 return False
-            
+
             if key == "sysctl" and bool(value):
                 for cid in self._sysctl_children_ids:
                     it = self.items.get(cid)
                     if it and not it.is_modified:
                         it.set_value(True)
-            
+
             return True
         return False
 

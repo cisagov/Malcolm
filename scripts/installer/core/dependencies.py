@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.configs.constants.constants import (
-    SYSLOG_DEFAULT_PORT,
     LOGSTASH_WORKERS_KUBERNETES,
+    SYSLOG_DEFAULT_PORT,
 )
 
 from scripts.installer.configs.constants.enums import (
