@@ -14,6 +14,8 @@ from scripts.installer.utils.tweak_utils import should_apply_tweak
 from scripts.malcolm_utils import file_contents, which
 from scripts.malcolm_common import SYSTEM_INFO
 
+from scripts.installer.utils import InstallerLogger as logger
+
 
 def _normalize_status(result: Any) -> InstallerResult:
     status = result
@@ -26,7 +28,7 @@ def _normalize_status(result: Any) -> InstallerResult:
     return InstallerResult.SUCCESS
 
 
-def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
+def apply_sysctl(malcolm_config, config_dir: str, platform, ctx) -> tuple[InstallerResult, str]:
     """Apply sysctl tweaks"""
     import os
     import tempfile
@@ -64,11 +66,15 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
                 tmp.writelines(f'{s}\n' for s in filtered)
                 tmp_path = tmp.name
             err, out = platform.run_process(["cp", tmp_path, path])
+            if err == 0 and os.path.exists(path):
+                try:
+                    os.chmod(path, 0o644)
+                except (PermissionError, OSError) as e:
+                    logger.warning(f"Could not chmod {path}: {e}")
             try:
-                os.chmod(path, 0o644)
                 os.unlink(tmp_path)
-            except Exception:
-                pass
+            except OSError as e:
+                logger.warning(f"Failed to cleanup temp file {tmp_path}: {e}")
             return err == 0
         except Exception as e:
             logger.error(f"Error applying sysctl settings: {e}")
@@ -77,7 +83,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
     # Allow either granular sysctl_* toggles or a coarse "sysctl" group toggle
     group_selected = should_apply_tweak(ctx, "sysctl")
     any_selected = group_selected or any(
-        should_apply_tweak(ctx, f"sysctl_{name.split('.')[-1].replace('-', '_')}") for name, _, _ in SYSCTL_SETTINGS
+        should_apply_tweak(ctx, f"sysctl_{name.split('.')[-1].replace('-', '_')}") for name, _ in SYSCTL_SETTINGS
     )
     if not any_selected:
         return InstallerResult.SKIPPED, "No sysctl tweaks selected"
@@ -106,7 +112,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx, logger) -> tupl
     )
 
 
-def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
+def apply_security_limits(malcolm_config, config_dir: str, platform, ctx) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "security_limits"):
         return InstallerResult.SKIPPED, "Security limits not selected"
     import os
@@ -129,14 +135,22 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
         if platform.is_dry_run():
             logger.info(f"Dry run: would write {limits_file} with security limits")
             return InstallerResult.SKIPPED, "Security limits skipped (dry run)"
-        pathlib.Path(SECURITY_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
-        if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
-            existing_lines = [
-                ln.strip()
-                for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
-                if ln.strip()
-            ]
-        else:
+        try:
+            pathlib.Path(SECURITY_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            logger.warning(f"No permission to create {SECURITY_LIMITS_DIR}, skipping security limits")
+            return InstallerResult.SKIPPED, "Security limits skipped (no permissions)"
+        try:
+            if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
+                existing_lines = [
+                    ln.strip()
+                    for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                    if ln.strip()
+                ]
+            else:
+                existing_lines = []
+        except (PermissionError, OSError):
+            logger.warning(f"Cannot read {limits_file}, assuming it needs to be written")
             existing_lines = []
         if existing_lines == desired_content:
             logger.info(f"Security limits already configured in {limits_file}")
@@ -145,14 +159,22 @@ def apply_security_limits(malcolm_config, config_dir: str, platform, ctx, logger
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file])
-        try:
-            os.chmod(limits_file, 0o644)
-            os.unlink(tmp_path)
-        except Exception:
-            pass
         if err == 0:
+            if os.path.exists(limits_file):
+                try:
+                    os.chmod(limits_file, 0o644)
+                except (PermissionError, OSError) as e:
+                    logger.warning(f"Could not chmod {limits_file}: {e}")
+            try:
+                os.unlink(tmp_path)
+            except OSError as e:
+                logger.warning(f"Failed to cleanup temp file {tmp_path}: {e}")
             logger.info(f"Applied security limits to {limits_file}")
             return InstallerResult.SUCCESS, "Security limits applied"
+        try:
+            os.unlink(tmp_path)
+        except OSError as e:
+            logger.warning(f"Failed to cleanup temp file {tmp_path}: {e}")
         logger.error(f"Failed to apply security limits: {' '.join(out)}")
         return InstallerResult.FAILURE, "Security limits failed"
     except Exception as e:
@@ -165,7 +187,6 @@ def apply_systemd_limits(
     config_dir: str,
     platform,
     ctx,
-    logger,
 ) -> tuple[InstallerResult, str]:
     if not should_apply_tweak(ctx, "systemd_limits"):
         return InstallerResult.SKIPPED, "Systemd limits not selected"
@@ -189,30 +210,46 @@ def apply_systemd_limits(
             logger.info(f"Dry run: would write {limits_file} with systemd limits")
             return InstallerResult.SKIPPED, "Systemd limits skipped (dry run)"
 
-        if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
-            existing_lines = [
-                ln.strip()
-                for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
-                if ln.strip()
-            ]
-        else:
+        try:
+            if os.path.exists(limits_file) and (existing_contents := file_contents(limits_file)):
+                existing_lines = [
+                    ln.strip()
+                    for ln in (existing_contents.splitlines() if isinstance(existing_contents, str) else [])
+                    if ln.strip()
+                ]
+            else:
+                existing_lines = []
+        except (PermissionError, OSError):
+            logger.warning(f"Cannot read {limits_file}, assuming it needs to be written")
             existing_lines = []
         if existing_lines == desired_content:
             logger.info(f"Systemd limits already configured in {limits_file}")
             return InstallerResult.SUCCESS, "Already configured"
-        pathlib.Path(SYSTEMD_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
+        try:
+            pathlib.Path(SYSTEMD_LIMITS_DIR).mkdir(parents=True, exist_ok=True)
+        except PermissionError:
+            logger.warning(f"No permission to create {SYSTEMD_LIMITS_DIR}, skipping systemd limits")
+            return InstallerResult.SKIPPED, "Systemd limits skipped (no permissions)"
         with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmp:
             tmp.writelines(f'{s}\n' for s in desired_content)
             tmp_path = tmp.name
         err, out = platform.run_process(["cp", tmp_path, limits_file])
-        try:
-            os.chmod(limits_file, 0o644)
-            os.unlink(tmp_path)
-        except Exception:
-            pass
         if err == 0:
+            if os.path.exists(limits_file):
+                try:
+                    os.chmod(limits_file, 0o644)
+                except (PermissionError, OSError) as e:
+                    logger.warning(f"Could not chmod {limits_file}: {e}")
+            try:
+                os.unlink(tmp_path)
+            except OSError as e:
+                logger.warning(f"Failed to cleanup temp file {tmp_path}: {e}")
             logger.info(f"Applied systemd limits to {limits_file}")
             return InstallerResult.SUCCESS, "Systemd limits applied"
+        try:
+            os.unlink(tmp_path)
+        except OSError as e:
+            logger.warning(f"Failed to cleanup temp file {tmp_path}: {e}")
         logger.error(f"Failed to apply systemd limits: {' '.join(out)}")
         return InstallerResult.FAILURE, "Systemd limits failed"
     except Exception as e:
@@ -225,7 +262,6 @@ def apply_grub_cgroup(
     config_dir: str,
     platform,
     ctx,
-    logger,
     grub_file="/etc/default/grub",
     params=None,
     backup=True,
@@ -317,8 +353,8 @@ def apply_grub_cgroup(
                     try:
                         with open(f"{grub_file}.bak", "w", encoding="utf-8") as f:
                             f.write(orig_content)
-                    except Exception:
-                        pass
+                    except OSError as e:
+                        logger.warning(f"Failed to create backup of {grub_file}: {e}")
                 with open(grub_file, "w", encoding="utf-8") as f:
                     f.write(new_content)
                 try:
@@ -356,86 +392,11 @@ def apply_grub_cgroup(
         return InstallerResult.FAILURE, "cgroup kernel parameters exception"
 
 
-def apply_all(malcolm_config, config_dir: str, platform, ctx, logger) -> tuple[InstallerResult, str]:
+def apply_all(malcolm_config, config_dir: str, platform, ctx) -> tuple[InstallerResult, str]:
     if not platform.should_run_install_steps():
         return InstallerResult.SKIPPED, "Tweaks skipped (non-install control flow)"
     for func in (apply_sysctl, apply_security_limits, apply_systemd_limits, apply_grub_cgroup):
-        status, _ = func(malcolm_config, config_dir, platform, ctx, logger)
+        status, _ = func(malcolm_config, config_dir, platform, ctx)
         if status == InstallerResult.FAILURE:
             return status, "A Linux tweak failed"
     return InstallerResult.SUCCESS, "All Linux tweaks applied"
-
-
-def _sentence_case(s: str) -> str:
-    if not s:
-        return s
-    return s[0].upper() + s[1:]
-
-
-def get_sysctl_tweak_definitions() -> list[dict]:
-    """Return metadata for sysctl tweaks for UI/tests."""
-    settings = [
-        ("fs.file-max", "maximum file handles"),
-        ("fs.inotify.max_user_watches", "file monitoring limits"),
-        ("fs.inotify.max_queued_events", "inotify event queue size"),
-        ("fs.inotify.max_user_instances", "inotify user instances"),
-        ("vm.max_map_count", "memory map count"),
-        ("vm.swappiness", "swappiness (prefer memory over swap)"),
-        ("vm.dirty_background_ratio", "dirty background ratio"),
-        ("vm.dirty_ratio", "dirty ratio"),
-        ("net.core.somaxconn", "socket connection limits"),
-        ("net.ipv4.tcp_retries2", "TCP retries"),
-    ]
-    defs: list[dict] = []
-    for name, desc in settings:
-        tweak_id = f"sysctl_{name.split('.')[-1].replace('-', '_')}"
-        defs.append(
-            {
-                "id": tweak_id,
-                "description": f"Adjust {desc} ({name})",
-                "label": f"{_sentence_case(desc)} ({name})",
-                "value_display": "",
-            }
-        )
-    return defs
-
-
-def get_tweak_definitions() -> list[dict]:
-    """Return all Linux tweak definitions for UI selection.
-
-    Includes granular sysctl settings and top-level toggles for other tweaks.
-    """
-    defs = []
-    # Granular sysctl toggles
-    defs.extend(get_sysctl_tweak_definitions())
-    # Other coarse-grained tweaks
-    defs.append(
-        {
-            "id": "security_limits",
-            "label": "Security Limits (/etc/security/limits.d)",
-            "description": "Apply recommended process/file descriptor limits",
-        }
-    )
-    defs.append(
-        {
-            "id": "systemd_limits",
-            "label": "Systemd Limits (/etc/systemd/system.conf.d)",
-            "description": "Apply recommended systemd Manager limits",
-        }
-    )
-    defs.append(
-        {
-            "id": "grub_cgroup",
-            "label": "Enable cgroup kernel parameters",
-            "description": "Enable cgroup kernel parameters in GRUB",
-        }
-    )
-    # Coarse group switch for all sysctl values (optional UI shortcut)
-    defs.append(
-        {
-            "id": "sysctl",
-            "label": "Enable All Sysctl Settings",
-            "description": "Toggle all kernel sysctl tweaks at once",
-        }
-    )
-    return defs
