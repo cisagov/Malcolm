@@ -29,9 +29,6 @@ class TestInstallContext(unittest.TestCase):
     def test_initialization_defaults(self):
         """Test InstallContext initialization with defaults."""
         # Test default values
-        self.assertEqual(self.context.image_source, "registry")
-        self.assertIsNone(self.context.image_archive_path)
-        self.assertFalse(self.context.load_images_from_archive)
         self.assertFalse(self.context.config_only)
         self.assertEqual(self.context.docker_extra_users, [])
         self.assertFalse(self.context.user_confirmed_install)
@@ -40,13 +37,9 @@ class TestInstallContext(unittest.TestCase):
     def test_initialization_with_parameters(self):
         """Test InstallContext initialization with parameters."""
         context = InstallContext(
-            image_source="archive",
-            image_archive_path="/path/to/archive",
             docker_extra_users=["user1", "user2"],
         )
 
-        self.assertEqual(context.image_source, "archive")
-        self.assertEqual(context.image_archive_path, "/path/to/archive")
         self.assertEqual(context.docker_extra_users, ["user1", "user2"])
 
     def test_item_operations_no_items(self):
