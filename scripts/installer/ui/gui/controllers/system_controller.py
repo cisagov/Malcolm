@@ -205,22 +205,6 @@ class SystemController(BaseController):
 
         return True, ""
 
-    def set_compress_opensearch_snapshots(self, value):
-        """
-        Set whether to compress OpenSearch snapshots.
-
-        Args:
-            value: Boolean value
-
-        Returns:
-            tuple: (success, error_message)
-        """
-        # Update the model
-        if not self.model.set("compress_opensearch_snapshots", value):
-            return False, "Failed to set compress_opensearch_snapshots in model"
-
-        return True, ""
-
     def set_forward_logs_to_remote(self, value):
         """
         Set whether to forward logs to a remote store.

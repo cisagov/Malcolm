@@ -15,6 +15,7 @@ from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_ARKIME_FREESPACEG,
     KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
+    KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD,
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD,
@@ -33,12 +34,21 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
 
-CONFIG_ITEM_CLEAN_UP_OLD_INDICES = ConfigItem(
-    key=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = ConfigItem(
+    key=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
     label="Clean Up Old Artifacts",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Should Malcolm delete the oldest database indices and capture artifacts based on available storage?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES = ConfigItem(
+    key=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+    label="Delete Old Indices",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Delete the oldest indices when the database exceeds a certain size?",
     widget_type=WidgetType.CHECKBOX,
 )
 

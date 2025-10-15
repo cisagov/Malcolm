@@ -67,20 +67,50 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     # PROFILE AND RUNTIME DEPENDENCIES
     # -------------------------------------------------------------------------
-    # Malcolm profile top-level items
+    KEY_CONFIG_ITEM_PROCESS_USER_ID: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_RUNTIME_BIN,
+            condition=lambda runtime: bool(runtime),
+            ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
+        )
+    ),
+    KEY_CONFIG_ITEM_PROCESS_GROUP_ID: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_RUNTIME_BIN,
+            condition=lambda runtime: bool(runtime),
+            ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
+        )
+    ),
+    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch: orch != OrchestrationFramework.KUBERNETES,
+            ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
+        )
+    ),
     KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            ],
-            condition=lambda profile, orch: (
-                profile == PROFILE_MALCOLM and orch == OrchestrationFramework.DOCKER_COMPOSE
-            ),
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch: orch != OrchestrationFramework.KUBERNETES,
+            ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
+        )
+    ),
+    # Malcolm profile top-level items
+    KEY_CONFIG_ITEM_NGINX_SSL: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile == PROFILE_MALCOLM,
             is_top_level=True,
         )
     ),
-    KEY_CONFIG_ITEM_NGINX_SSL: DependencySpec(
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4_OFF: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile == PROFILE_MALCOLM,
+            is_top_level=True,
+        )
+    ),
+    KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6_OFF: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
@@ -148,14 +178,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
-    KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=lambda profile: profile == PROFILE_MALCOLM,
-            is_top_level=True,
-        )
-    ),
-    KEY_CONFIG_ITEM_FILE_CARVE_ENABLED: DependencySpec(
+    KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
@@ -196,6 +219,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
             condition=lambda labels: bool(labels),
+            ui_parent=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+        )
+    ),
+    # Traefik OpenSearch host: only relevant when labels are enabled and primary store is local OpenSearch
+    KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda labels, mode: bool(labels) and mode == SearchEngineMode.OPENSEARCH_LOCAL.value,
             ui_parent=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
         )
     ),
@@ -354,6 +388,41 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
         )
     ),
+    KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY,
+        )
+    ),
     # -------------------------------------------------------------------------
     # NETWORK AND SYSLOG DEPENDENCIES
     # -------------------------------------------------------------------------
@@ -409,7 +478,19 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        # pcap_net_sniff default is the opposite of live_arkime default when enabled
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda enabled, _profile, _mode: bool(enabled),
+            default_value=lambda _enabled, profile, mode: not (
+                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
+            ),
+        ),
     ),
     KEY_CONFIG_ITEM_PCAP_TCP_DUMP: DependencySpec(
         visibility=VisibilityRule(
@@ -420,24 +501,50 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            condition=lambda enabled: bool(enabled),
+            depends_on=[
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda enabled, profile, mode: bool(enabled)
+            and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value)),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda enabled, _profile, _mode: bool(enabled),
+            default_value=lambda _enabled, profile, mode: (
+                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
+            ),
+        ),
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            condition=lambda enabled: bool(enabled),
+            default_value=True,
+        ),
     ),
     KEY_CONFIG_ITEM_LIVE_SURICATA: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            condition=lambda enabled: bool(enabled),
+            default_value=True,
+        ),
     ),
     KEY_CONFIG_ITEM_PCAP_FILTER: DependencySpec(
         visibility=VisibilityRule(
@@ -451,13 +558,31 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            condition=lambda enabled: bool(enabled),
+            default_value=True,
+        ),
     ),
     KEY_CONFIG_ITEM_CAPTURE_STATS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            condition=lambda enabled: bool(enabled),
+            default_value=True,
+        ),
+    ),
+    # Live Arkime node host (Malcolm profile + live arkime enabled)
+    KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_LIVE_ARKIME],
+            condition=lambda profile, live_arkime: (profile == PROFILE_MALCOLM and bool(live_arkime)),
+            ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
         )
     ),
     # -------------------------------------------------------------------------
@@ -501,6 +626,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     # FILE CARVING DEPENDENCIES
     # -------------------------------------------------------------------------
+    KEY_CONFIG_ITEM_FILE_CARVE_ENABLED: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
+        )
+    ),
     KEY_CONFIG_ITEM_FILE_CARVE_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
@@ -515,9 +647,102 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
+    KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
+        )
+    ),
+    KEY_CONFIG_ITEM_CAPA_SCAN: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_CLAM_AV_SCAN: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_YARA_SCAN: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_VTOT_API_KEY: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda mode: mode != "none",
+            ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+        )
+    ),
     # -------------------------------------------------------------------------
     # OPEN PORTS DEPENDENCIES
     # -------------------------------------------------------------------------
+    # OpenSearch exposure (depends on both open ports and primary mode)
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda ports, mode: (
+                ports == OpenPortsChoices.CUSTOMIZE.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+            ),
+            ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
+        ),
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda ports, mode: (
+                ports == OpenPortsChoices.YES.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+            ),
+            default_value=True,
+        ),
+    ),
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
@@ -565,6 +790,101 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda selection: selection == OpenPortsChoices.YES.value,
             default_value=True,
         ),
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP, KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS],
+            condition=lambda exposed, defaults: bool(exposed) and not bool(defaults),
+            ui_parent=KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+        )
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            ui_parent=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            default_value=FilebeatFieldNames.MESSAGE.value,
+        ),
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            ui_parent=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            default_value=FilebeatFieldNames.MISCBEAT.value,
+        ),
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            ui_parent=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
+            condition=lambda format: format == FilebeatLogFormat.JSON.value,
+            default_value=FilebeatFieldNames.MESSAGE.value,
+        ),
+    ),
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_TAG: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP, KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS],
+            condition=lambda exposed, defaults: bool(exposed) and not bool(defaults),
+            ui_parent=KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+        )
+    ),
+    # -------------------------------------------------------------------------
+    # ARTIFACT CLEANUP DEPENDENCIES
+    # -------------------------------------------------------------------------
+    KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        )
+    ),
+    KEY_CONFIG_ITEM_ARKIME_FREESPACEG: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
+        )
+    ),
+    KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+        )
+    ),
+    KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+        )
     ),
     # -------------------------------------------------------------------------
     # STORAGE LOCATION DEPENDENCIES
@@ -618,6 +938,68 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
         )
     ),
+    # -------------------------------------------------------------------------
+    # ANALYSIS DEPENDENCIES
+    # -------------------------------------------------------------------------
+    KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_SURICATA,
+        )
+    ),
+    KEY_CONFIG_ITEM_MALCOLM_ICS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
+        )
+    ),
+    KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_ICS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_ICS,
+        )
+    ),
+    # -------------------------------------------------------------------------
+    # ZEEK INTELLIGENCE DEPENDENCIES
+    # -------------------------------------------------------------------------
+    KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
+            condition=lambda auto, live: bool(auto) or bool(live),
+            ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
+        )
+    ),
+    KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+        )
+    ),
+    KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+        )
+    ),
+    KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+        )
+    ),
+    KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda enabled: bool(enabled),
+            ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+        )
+    ),
 }
 
 
@@ -630,143 +1012,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
 
 
 def get_complex_dependencies() -> Dict[str, DependencySpec]:
-    """Return complex dependency rules that require custom logic."""
+    """Return complex dependency rules that are more conveniently defined with logic"""
 
     complex_deps = {}
-
-    # OpenSearch exposure (depends on both open ports and primary mode)
-    complex_deps[KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH] = DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_OPEN_PORTS,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda ports, mode: (
-                ports == OpenPortsChoices.CUSTOMIZE.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
-            ),
-            ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
-        ),
-        value=ValueRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_OPEN_PORTS,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda ports, mode: (
-                ports == OpenPortsChoices.YES.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
-            ),
-            default_value=True,
-        ),
-    )
-
-    # Traefik OpenSearch host: only relevant when labels are enabled and primary store is local OpenSearch
-    complex_deps[KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST] = DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda labels, mode: bool(labels) and mode == SearchEngineMode.OPENSEARCH_LOCAL.value,
-            ui_parent=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-        )
-    )
-
-    # Live Arkime node host (Malcolm profile + live arkime enabled)
-    complex_deps[KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST] = DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_LIVE_ARKIME],
-            condition=lambda profile, live_arkime: (profile == PROFILE_MALCOLM and bool(live_arkime)),
-            ui_parent=KEY_CONFIG_ITEM_LIVE_ARKIME,
-        )
-    )
-
-    # Filebeat TCP parsing options (JSON format only)
-    for field_key in [
-        KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD,
-        KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD,
-        KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD,
-    ]:
-        complex_deps[field_key] = DependencySpec(
-            visibility=VisibilityRule(
-                depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-                condition=lambda format: format == FilebeatLogFormat.JSON.value,
-                ui_parent=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-            )
-        )
-
-    # Set default JSON parsing field values
-    complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD] = DependencySpec(
-        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD].visibility,
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-            condition=lambda format: format == FilebeatLogFormat.JSON.value,
-            default_value=FilebeatFieldNames.MESSAGE.value,
-        ),
-    )
-
-    complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD] = DependencySpec(
-        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD].visibility,
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-            condition=lambda format: format == FilebeatLogFormat.JSON.value,
-            default_value=FilebeatFieldNames.MISCBEAT.value,
-        ),
-    )
-
-    complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD] = DependencySpec(
-        visibility=complex_deps[KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD].visibility,
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-            condition=lambda format: format == FilebeatLogFormat.JSON.value,
-            default_value=FilebeatFieldNames.MESSAGE.value,
-        ),
-    )
-
-    # ------------------------------------------------------------------
-    # Live capture defaults (explicit declarative rules, no bulk handler)
-    # ------------------------------------------------------------------
-    # live_arkime default: True for hedgehog or when primary store is not local
-    complex_deps[KEY_CONFIG_ITEM_LIVE_ARKIME] = DependencySpec(
-        value=ValueRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda enabled, _profile, _mode: bool(enabled),
-            default_value=lambda _enabled, profile, mode: (
-                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
-            ),
-        )
-    )
-
-    # pcap_net_sniff default is the opposite of live_arkime default when enabled
-    complex_deps[KEY_CONFIG_ITEM_PCAP_NET_SNIFF] = DependencySpec(
-        value=ValueRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda enabled, _profile, _mode: bool(enabled),
-            default_value=lambda _enabled, profile, mode: not (
-                profile == PROFILE_HEDGEHOG or mode != SearchEngineMode.OPENSEARCH_LOCAL.value
-            ),
-        )
-    )
-
-    # Additional live capture related defaults when enabled
-    for key in [
-        KEY_CONFIG_ITEM_LIVE_ZEEK,
-        KEY_CONFIG_ITEM_LIVE_SURICATA,
-        KEY_CONFIG_ITEM_TWEAK_IFACE,
-        KEY_CONFIG_ITEM_CAPTURE_STATS,
-    ]:
-        complex_deps[key] = DependencySpec(
-            value=ValueRule(
-                depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-                condition=lambda enabled: bool(enabled),
-                default_value=True,
-            )
-        )
 
     return complex_deps

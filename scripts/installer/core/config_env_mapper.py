@@ -384,7 +384,10 @@ class EnvMapper:
         # Arkime
         self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP]
         self.env_var_by_map_key[KEY_ENV_ARKIME_FREESPACEG].config_items = [KEY_CONFIG_ITEM_ARKIME_FREESPACEG]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].config_items = [KEY_CONFIG_ITEM_LIVE_ARKIME]
+        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].config_items = [
+            KEY_CONFIG_ITEM_LIVE_ARKIME,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ]
         self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST]
         self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
             KEY_CONFIG_ITEM_AUTO_ARKIME,
@@ -427,7 +430,7 @@ class EnvMapper:
         self.env_var_by_map_key[KEY_ENV_FREQ_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_FREQ]
 
         # Filebeat
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_FILEBEAT_TCP_OPEN]
+        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP]
         self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LOG_FORMAT].config_items = [
             KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT
         ]
@@ -507,10 +510,14 @@ class EnvMapper:
         ]
 
         # PCAP capture
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].config_items = [KEY_CONFIG_ITEM_PCAP_NET_SNIFF]
+        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].config_items = [
+            KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ]
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].config_items = [
             KEY_CONFIG_ITEM_PCAP_TCP_DUMP,
             KEY_CONFIG_ITEM_PCAP_NET_SNIFF,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
         # Only authoritative for tcpdump; derived (non-authoritative) for netsniff
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCP_DUMP]
@@ -535,7 +542,10 @@ class EnvMapper:
         # Suricata
         self.env_var_by_map_key[KEY_ENV_SURICATA_UPDATE_RULES].config_items = [KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE]
         self.env_var_by_map_key[KEY_ENV_SURICATA_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].config_items = [KEY_CONFIG_ITEM_LIVE_SURICATA]
+        self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].config_items = [
+            KEY_CONFIG_ITEM_LIVE_SURICATA,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ]
         self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_EVE_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_SURICATA_ROTATED_PCAP].config_items = [
@@ -554,7 +564,10 @@ class EnvMapper:
         self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_BEST_GUESS_ICS].config_items = [
             KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS
         ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].config_items = [KEY_CONFIG_ITEM_LIVE_ZEEK]
+        self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].config_items = [
+            KEY_CONFIG_ITEM_LIVE_ZEEK,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ]
         self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_STATS].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].config_items = [
             KEY_CONFIG_ITEM_AUTO_ZEEK,
@@ -749,44 +762,3 @@ class EnvMapper:
         Highest priority first. Empty when no explicit precedence is defined.
         """
         return list(self._reverse_precedence_by_item.get(item_key, []))
-
-
-# def main():
-#     """
-#     Test function to validate environment variable mappings.
-#     Checks if all ENV_FILE keys have corresponding files and if all KEY_ENV variables
-#     have corresponding environment variables.
-#     """
-#     import os
-#     from ..config_constants.config_env_var_keys import ALL_ENV_KEYS_DICT
-#     from ..config_constants.config_env_files import ALL_ENV_FILES_DICT
-#     from scripts.malcolm_common import get_default_config_dir
-
-#     mapper = EnvMapper()
-#     config_dir = get_default_config_dir()
-
-#     # Check if all ENV_FILE keys have corresponding files
-#     print("\nChecking ENV_FILE mappings:")
-#     if (len(ALL_ENV_FILES_DICT) == 0):
-#         print("ALL_ENV_FILES_DICT is empty")
-#         return
-
-#     # for file_key in ALL_ENV_FILES_DICT:
-#     #     file_path = os.path.join(config_dir, ALL_ENV_FILES_DICT[file_key])
-#     #     print(f"Checking {file_key}: {file_path}")
-#     #     if os.path.exists(file_path + ".example"):
-#     #         print(f"✓ {file_key}: {ALL_ENV_FILES_DICT[file_key]} exists")
-#     #     else:
-#     #         print(f"✗ {file_key}: {ALL_ENV_FILES_DICT[file_key]} missing")
-
-#     # Check if all KEY_ENV variables have corresponding environment variables
-#     print("\nChecking KEY_ENV mappings:")
-#     for key in ALL_ENV_KEYS_DICT:
-#         var_name = ALL_ENV_KEYS_DICT[key]
-#         if mapper.get_file_for_variable(var_name):
-#             print(f"✓ {key}: {mapper.get_file_for_variable(var_name)}")
-#         else:
-#             print(f"✗ {key}: not mapped")
-
-# if __name__ == "__main__":
-#     main()

@@ -15,7 +15,7 @@ from scripts.installer.configs.constants.enums import FilebeatLogFormat
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT,
-    KEY_CONFIG_ITEM_FILEBEAT_TCP_OPEN,
+    KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS,
     KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD,
     KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD,
     KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD,
@@ -23,8 +23,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
 )
 
 
-CONFIG_ITEM_FILEBEAT_TCP_LISTEN = ConfigItem(
-    key=KEY_CONFIG_ITEM_FILEBEAT_TCP_OPEN,
+CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS = ConfigItem(
+    key=KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS,
     label="Use Default Filebeat TCP Listener Settings",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
