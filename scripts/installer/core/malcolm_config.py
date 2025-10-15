@@ -35,6 +35,7 @@ from scripts.installer.utils.exceptions import (
     FileOperationError,
 )
 from scripts.installer.core.observable import ObservableStoreMixin
+from scripts.installer.core.transform_registry import apply_inbound
 
 
 class MalcolmConfig(ObservableStoreMixin):
@@ -49,9 +50,6 @@ class MalcolmConfig(ObservableStoreMixin):
         self._modified_keys: Set[str] = set()
         self._parent_map: Dict[str, List[str]] = {}
 
-        # determine dynamic defaults that rely on system inspection (UID/GID)
-        self._initialize_dynamic_defaults()
-
         # all items default to visible unless overridden
         for item in self._items.values():
             item._visible = True
@@ -61,22 +59,6 @@ class MalcolmConfig(ObservableStoreMixin):
 
         self._dependency_manager = DependencyManager(self)
         self._dependency_manager.register_all_dependencies()
-
-    def _initialize_dynamic_defaults(self):
-        """Set dynamic default values based on the system environment."""
-        try:
-            uid_val = SYSTEM_INFO.get("recommended_nonroot_uid")
-            gid_val = SYSTEM_INFO.get("recommended_nonroot_gid")
-
-            uid_item = self.get_item(KEY_CONFIG_ITEM_PROCESS_USER_ID)
-            gid_item = self.get_item(KEY_CONFIG_ITEM_PROCESS_GROUP_ID)
-
-            if uid_item and not uid_item.is_modified and uid_val is not None:
-                uid_item.default_value = uid_val
-            if gid_item and not gid_item.is_modified and gid_val is not None:
-                gid_item.default_value = gid_val
-        except (KeyError, TypeError) as e:
-            InstallerLogger.warning(f"Could not set dynamic UID/GID defaults: {e}")
 
     def _set_item_visible(self, key: str, visible: bool) -> None:
         """Set item visibility and propagate changes to dependents."""
@@ -98,30 +80,6 @@ class MalcolmConfig(ObservableStoreMixin):
 
         if hasattr(self, "_dependency_manager") and self._dependency_manager is not None:
             self._dependency_manager.handle_parent_visibility_change(key, visible)
-
-    def _calculate_ui_depths(self):
-        """Calculate the UI depth for each config item based on the dependency graph."""
-        memo = {}
-
-        def get_depth(key: str) -> int:
-            if key in memo:
-                return memo[key]
-
-            parents = self._parent_map.get(key)
-            if not parents:
-                return 0
-
-            max_parent_depth = max(get_depth(parent) for parent in parents)
-            depth = 1 + max_parent_depth
-            memo[key] = depth
-            return depth
-
-        for key, item in self._items.items():
-            item.ui_depth = get_depth(key)
-
-    def get_parent_map(self) -> Dict[str, List[str]]:
-        """Get the parent map for UI rendering."""
-        return self._parent_map
 
     def is_item_visible(self, key: str) -> bool:
         """Check if a configuration item should be visible based on observer-driven state."""
@@ -235,16 +193,8 @@ class MalcolmConfig(ObservableStoreMixin):
         if not item:
             raise ConfigItemNotFoundError(key)
 
-        # First, delegate to the Transform Registry for inbound normalization
-        try:
-            from scripts.installer.core.transform_registry import apply_inbound
-
-            value = apply_inbound(key, value)
-        except Exception:
-            # Safe fallback if registry is unavailable
-            pass
-
-        # normalization logic is centralized in the Transform Registry
+        # Transform Registry for inbound normalization
+        value = apply_inbound(key, value)
 
         success, error_message = item.set_value(value)
 
@@ -269,13 +219,8 @@ class MalcolmConfig(ObservableStoreMixin):
             InstallerLogger.warning(f"Cannot apply default for unknown item: {key}")
             return
 
-        # Normalize first for consistent comparison/validation
-        try:
-            from scripts.installer.core.transform_registry import apply_inbound
-
-            value = apply_inbound(key, value)
-        except Exception:
-            pass
+        # Transform Registry for inbound normalization
+        value = apply_inbound(key, value)
 
         # Validate before applying, mirroring set_value semantics but without marking modified
         if item.validator:
@@ -296,68 +241,6 @@ class MalcolmConfig(ObservableStoreMixin):
         except Exception as e:
             # Avoid breaking dependency processing; surface the error
             InstallerLogger.error(f"Observer error after applying default for '{key}': {e}")
-
-    def validate_all(self) -> List[str]:
-        """Validate all configuration items.
-
-        Returns:
-            List of error messages (empty if all valid)
-        """
-        errors = []
-        for key, item in self._items.items():
-            if item.validator:
-                valid, error = item.validator(item.get_value())
-                if not valid:
-                    errors.append(f"{item.label} ({key}): {error}")
-        return errors
-
-    def get_modified_items(self) -> List[ConfigItem]:
-        """Get all configuration items that differ from their defaults.
-
-        Returns:
-            List of modified ConfigItem instances
-        """
-        return [item for item in self._items.values() if item.is_modified]
-
-    def reset_all(self):
-        """Reset all configuration items to their default values."""
-        keys_to_notify = list(self._items.keys())
-        for item in self._items.values():
-            item.reset()
-        self._modified_keys.clear()
-        for key in keys_to_notify:
-            item = self.get_item(key)
-            if item:
-                self._notify_observers(key, item.get_value())
-
-    def _validate_directory(self, path: str) -> Tuple[bool, str]:
-        """Validate directory path.
-
-        Args:
-            path: Directory path to validate
-
-        Returns:
-            Tuple of (is_valid, error_message)
-        """
-        if not path:
-            return False, "Path cannot be empty"
-
-        path = os.path.expanduser(path)
-        path = os.path.abspath(path)
-
-        if os.path.exists(path):
-            if not os.path.isdir(path):
-                return False, "Path exists but is not a directory"
-            if not os.access(path, os.W_OK):
-                return False, "Directory exists but is not writable"
-        else:
-            parent = os.path.dirname(path)
-            if not os.path.exists(parent):
-                return False, f"Parent directory {parent} does not exist"
-            if not os.access(parent, os.W_OK):
-                return False, f"Parent directory {parent} is not writable"
-
-        return True, ""
 
     def generate_env_files(self, config_dir: str, templates_dir: Optional[str] = None):
         """Generate environment files from current configuration.
@@ -422,10 +305,9 @@ class MalcolmConfig(ObservableStoreMixin):
                     )
                     for key, value in sorted(values.items()):
                         f.write(f"{key}={value}\n")
-                from scripts.installer.utils.logger_utils import InstallerLogger as _IL
 
                 try:
-                    _IL.info(f"Wrote environment file: {filepath}")
+                    InstallerLogger.info(f"Wrote environment file: {filepath}")
                 except Exception:
                     pass
         except (IOError, OSError) as e:
@@ -461,9 +343,7 @@ class MalcolmConfig(ObservableStoreMixin):
         return env_values
 
     def _build_candidates_from_env(self, env_values: Dict[str, str]):
-        from collections import defaultdict as _dd
-
-        candidates = _dd(list)
+        candidates = defaultdict(list)
         for env_var_obj in self._env_mapper.env_var_by_map_key.values():
             if env_var_obj.variable_name not in env_values:
                 continue
@@ -549,18 +429,6 @@ class MalcolmConfig(ObservableStoreMixin):
                     InstallerLogger.error("Error in observer for key '{key}': {e}")
                     raise DependencyError(f"Observer for {key} failed: {e}") from e
 
-    def get_unmapped_env_variables(self) -> List[EnvVariable]:
-        """Get environment variables that don't have a mapping to any configuration item.
-
-        Returns:
-            List of EnvVariable instances that don't have a corresponding ConfigItem.
-        """
-        unmapped = []
-        for env_var in self._env_mapper.env_var_by_map_key.values():
-            if not env_var.config_items:
-                unmapped.append(env_var)
-        return unmapped
-
     def search_items(self, search_term: str) -> List[Dict[str, Any]]:
         """Search for configuration items across key, label, question, and definition name.
 
@@ -638,14 +506,6 @@ class MalcolmConfig(ObservableStoreMixin):
 
         return chain
 
-    def get_docker_config_items(self) -> Dict[str, ConfigItem]:
-        """Get all docker-related configuration items.
-
-        Returns:
-            Dictionary of docker configuration items
-        """
-        return {key: item for key, item in self._items.items() if key in ALL_DOCKER_CONFIG_ITEMS_DICT}
-
     def to_dict_values_only(self) -> Dict[str, Any]:
         """Convert configuration to a nested dictionary of keys and their current values."""
         output: Dict[str, Any] = {}
@@ -670,21 +530,3 @@ class MalcolmConfig(ObservableStoreMixin):
                         current_level[part] = {}
                     current_level = current_level[part]
         return output
-
-
-# if __name__ == "__main__":
-#     config = MalcolmConfig()
-
-#     # List of ConfigItems with no ENV_VAR match
-#     unmapped_config_items = [key for key in config._items if not config.has_env_mapping(key)]
-
-#     # List of ENV_VARs with no ConfigItem match
-#     unmapped_env_vars = config.get_unmapped_env_variables()
-
-#     print("ConfigItems with no ENV_VAR match:")
-#     for key in sorted(unmapped_config_items):
-#         print(f"  {key}")
-
-#     print("\nENV_VARs with no ConfigItem match:")
-#     for env_var in sorted(unmapped_env_vars, key=lambda x: x.variable_name):
-#         print(f"  {env_var.variable_name} (key: {env_var.key})")
