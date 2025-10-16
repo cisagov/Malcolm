@@ -20,6 +20,20 @@ class StoreRow:
     prefix: str = ""
 
 
+def build_child_map(items: Iterable[Tuple[str, ConfigItem]]) -> Dict[str, List[str]]:
+    """Build parent → children mapping from items."""
+    children: Dict[str, List[str]] = {}
+    material = list(items)
+    item_by_key = {k: it for k, it in material}
+
+    for key, item in material:
+        parent = item.ui_parent
+        if parent and parent in item_by_key:
+            children.setdefault(parent, []).append(key)
+
+    return children
+
+
 def build_rows_from_items(
     items: Iterable[Tuple[str, ConfigItem]],
     store,
@@ -39,15 +53,13 @@ def build_rows_from_items(
     material: List[Tuple[str, ConfigItem]] = list(items)
     item_by_key: Dict[str, ConfigItem] = {k: it for k, it in material}
 
-    # Build parent → children map preserving input order; fall back to label sort within siblings
-    children: Dict[str, List[str]] = {}
+    # Build parent → children map using shared logic
+    children = build_child_map(material)
     top_level: List[str] = []
 
     for key, item in material:
         parent = item.ui_parent
-        if parent and parent in item_by_key:
-            children.setdefault(parent, []).append(key)
-        else:
+        if not parent or parent not in item_by_key:
             top_level.append(key)
 
     def _sorted_keys(keys: List[str]) -> List[str]:

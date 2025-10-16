@@ -14,7 +14,7 @@ from scripts.malcolm_common import (
     DialogCanceledException,
 )
 from scripts.installer.ui.shared.menu_builder import ValueFormatter
-from scripts.installer.ui.shared.store_view_model import build_rows_from_items
+from scripts.installer.ui.shared.store_view_model import build_rows_from_items, build_child_map
 from scripts.installer.ui.shared.prompt_utils import prompt_config_item_value
 from scripts.installer.ui.shared.labels import installation_item_display_label
 from scripts.installer.configs.constants.configuration_item_keys import (
@@ -43,7 +43,7 @@ class DialogInstallationMenu:
         self.ctx = install_context
         self.ui_mode = ui_mode
 
-        self.child_map: Dict[str, List[str]] = {}
+        self.child_map: Dict[str, List[str]] = build_child_map(self.ctx.items.items())
 
     def run(self) -> Optional["InstallContext"]:
         try:

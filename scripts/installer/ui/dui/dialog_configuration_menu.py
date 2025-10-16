@@ -18,7 +18,7 @@ from scripts.malcolm_common import (
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 from scripts.installer.ui.shared.menu_builder import ValueFormatter
-from scripts.installer.ui.shared.store_view_model import build_rows_from_items
+from scripts.installer.ui.shared.store_view_model import build_rows_from_items, build_child_map
 from scripts.installer.ui.shared.search_utils import format_search_results_text
 from scripts.installer.ui.shared.prompt_utils import prompt_config_item_value
 from scripts.installer.utils.exceptions import (
@@ -48,7 +48,7 @@ class DialogConfigurationMenu:
         self.main_menu_keys = main_menu_keys or MAIN_MENU_KEYS
         self.debug_mode = debug_mode
         self.ui_mode = ui_mode
-        self.child_map: Dict[str, List[str]] = {}
+        self.child_map: Dict[str, List[str]] = build_child_map(self.mc.get_all_config_items().items())
 
     def run(self) -> bool:
         try:
