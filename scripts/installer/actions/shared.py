@@ -23,6 +23,8 @@ from scripts.malcolm_constants import (
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
     ImageArchitecture,
 )
 from scripts.malcolm_common import (
@@ -81,8 +83,6 @@ from scripts.installer.configs.constants.constants import (
     LABEL_OS_SERVICE,
     LABEL_OS_SERVICE_PORT,
     PODMAN_LOG_DRIVER,
-    PROFILE_HEDGEHOG,
-    PROFILE_MALCOLM,
     SERVICE_IP_EXPOSED,
     SERVICE_IP_LOCAL,
     SERVICE_NAME_MALCOLM,

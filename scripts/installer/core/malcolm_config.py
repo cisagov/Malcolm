@@ -44,10 +44,19 @@ from scripts.installer.configs.constants.constants import (
     LABEL_MALCOLM_ENTRYPOINTS,
     LABEL_MALCOLM_RULE,
     LABEL_OS_RULE,
+    SERVICE_IP_EXPOSED,
+    SERVICE_PORT_LOGSTASH,
+    SERVICE_PORT_MALCOLM,
+    SERVICE_PORT_MALCOLM_NO_SSL,
+    SERVICE_PORT_OSMALCOLM,
+    SERVICE_PORT_OSMALCOLM_NO_SSL,
+    SERVICE_PORT_SFTP_EXTERNAL,
+    SERVICE_PORT_SFTP_INTERNAL,
+    SERVICE_PORT_TCP_JSON,
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
 )
-from scripts.installer.configs.constants.enums import ContainerRuntime
+from scripts.installer.configs.constants.enums import ContainerRuntime, OpenPortsChoices
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.core.config_env_mapper import EnvMapper, EnvVariable
@@ -229,8 +238,10 @@ class MalcolmConfig(ObservableStoreMixin):
 
             self._modified_keys.add(key)
             self._notify_observers(key, item.get_value())
-        except Exception:
-            if not ignore_errors:
+        except Exception as e:
+            if ignore_errors:
+                InstallerLogger.debug(f'Ignored exception setting "{key}"="{value}": "{e}"')
+            else:
                 raise
 
     def apply_default(self, key: str, value: Any) -> None:
@@ -518,6 +529,9 @@ class MalcolmConfig(ObservableStoreMixin):
                                 ignore_errors=True,
                             )
 
+                        # exposed services
+                        self._load_exposed_services_from_orchestration_file(compose_data)
+
                         # traefik/reverse proxy stuff
                         self._load_traefik_settings_from_orchestration_file(compose_data)
 
@@ -529,6 +543,29 @@ class MalcolmConfig(ObservableStoreMixin):
                 InstallerLogger.error(f"Error deciphering '{compose_file_name}': {e}")
 
         return None
+
+    def _load_exposed_services_from_orchestration_file(self, compose_data: Dict[Any, Any]):
+        items_exposed = False
+
+        service_ports_to_check = {
+            KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: ("filebeat", SERVICE_PORT_TCP_JSON),
+            KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: ("logstash", SERVICE_PORT_LOGSTASH),
+            KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: ("nginx-proxy", SERVICE_PORT_LOGSTASH),
+            KEY_CONFIG_ITEM_EXPOSE_SFTP: ("upload", SERVICE_PORT_SFTP_INTERNAL),
+        }
+        for config_key, service_tuple in service_ports_to_check.items():
+            for port in deep_get(compose_data, ["services", service_tuple[0], "ports"], []):
+                port_parts = port.split(':')
+                if (
+                    (len(port_parts) == 3)
+                    and (port_parts[0] == SERVICE_IP_EXPOSED)
+                    and (port_parts[2].split('/')[0] == service_tuple[1])
+                ):
+                    self.set_value(config_key, True, ignore_errors=True)
+                    items_exposed = True
+
+        if items_exposed:
+            self.set_value(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff
