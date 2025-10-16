@@ -13,7 +13,6 @@ from unittest.mock import patch, mock_open
 # Add the project root directory to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
-from scripts.installer.core.install_context import InstallContext
 from scripts.installer.platforms.linux import LinuxInstaller
 from scripts.installer.platforms.macos import MacInstaller
 from scripts.malcolm_constants import OrchestrationFramework
@@ -43,8 +42,9 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
             '"docker info" failed, attempt to install Docker?': True,
             "Attempt to install Docker using official repositories?": True,
         }
-        with patch.object(self.linux_installer, "_install_docker_from_repo", return_value=True), \
-             patch.object(self.linux_installer, "_finalize_docker_installation", return_value=True):
+        with patch.object(self.linux_installer, "_install_docker_from_repo", return_value=True), patch.object(
+            self.linux_installer, "_finalize_docker_installation", return_value=True
+        ):
             with patch.object(self.linux_installer, "run_process", return_value=(1, ["Docker not found"])):
                 result = self.linux_installer.install_docker(ctx)
         self.assertTrue(result)
@@ -56,7 +56,9 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
 
         def fake_run_process(command, privileged=False, **kwargs):
             if command[:2] == ["dpkg", "-s"]:
-                return (1, ["package not installed"]) if command[-1] != "docker" else (0, ["Status: install ok installed"])
+                return (
+                    (1, ["package not installed"]) if command[-1] != "docker" else (0, ["Status: install ok installed"])
+                )
             if command[:2] == ["apt-get", "update"]:
                 return (0, ["update successful"])
             if command[:4] == ["apt-get", "install", "-y", "-qq"]:
@@ -75,6 +77,7 @@ class TestLinuxPlatformMocking(BaseInstallerTest):
 
         # Test dependency installation
         recorded_installs = []
+
         def fake_run_with_tracking(command, privileged=False, **kwargs):
             result = fake_run_process(command, privileged, **kwargs)
             if command[:4] == ["apt-get", "install", "-y", "-qq"]:
@@ -104,10 +107,13 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
         def enable_homebrew(install_context):
             self.macos_installer.use_brew = True
 
-        with patch.object(self.macos_installer, "_setup_homebrew", side_effect=enable_homebrew), \
-             patch.object(self.macos_installer, "is_docker_package_installed", return_value=False), \
-             patch.object(self.macos_installer, "install_package", return_value=True) as mock_install_package, \
-             patch.object(self.macos_installer, "run_process", return_value=(0, ["Docker running"])):
+        with patch.object(self.macos_installer, "_setup_homebrew", side_effect=enable_homebrew), patch.object(
+            self.macos_installer, "is_docker_package_installed", return_value=False
+        ), patch.object(
+            self.macos_installer, "install_package", return_value=True
+        ) as mock_install_package, patch.object(
+            self.macos_installer, "run_process", return_value=(0, ["Docker running"])
+        ):
             result = self.macos_installer.install_docker(ctx)
         self.assertTrue(result)
         mock_install_package.assert_called_once_with(["docker", "docker-compose"])
@@ -126,10 +132,9 @@ class TestMacOSPlatformMocking(BaseInstallerTest):
         mock_settings = {"cpus": 4, "memoryMiB": 8192}
 
         m = mock_open(read_data='{"cpus": 4, "memoryMiB": 8192}')
-        with patch("os.path.isfile", return_value=True), \
-             patch("builtins.open", m), \
-             patch("json.load", return_value=mock_settings), \
-             patch("json.dump") as mock_dump:
+        with patch("os.path.isfile", return_value=True), patch("builtins.open", m), patch(
+            "json.load", return_value=mock_settings
+        ), patch("json.dump") as mock_dump:
             self.macos_installer._configure_docker_resources("/test/settings.json")
 
         mock_dump.assert_called_once()

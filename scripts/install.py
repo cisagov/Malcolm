@@ -29,7 +29,6 @@ from scripts.malcolm_common import (
     DoDynamicImport,
     DotEnvDynamic,
     get_default_config_dir,
-    get_malcolm_dir,
     get_platform_name,
     KubernetesDynamic,
     RequestsDynamic,

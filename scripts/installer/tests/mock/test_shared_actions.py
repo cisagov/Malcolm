@@ -106,9 +106,7 @@ class TestDockerOpsAction(BaseInstallerTest):
             "scripts.installer.actions.shared.discover_compose_command",
             return_value=["docker", "compose"],
         ):
-            result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx
-            )
+            result = shared_actions.perform_docker_operations(config, self.temp_dir, self.mock_platform, ctx)
 
         self.assertTrue(result)
 
@@ -121,9 +119,7 @@ class TestDockerOpsAction(BaseInstallerTest):
 
         # Mock no docker-compose file
         with patch("os.path.isfile", return_value=False):
-            result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx
-            )
+            result = shared_actions.perform_docker_operations(config, self.temp_dir, self.mock_platform, ctx)
 
         self.assertEqual(
             result,
@@ -145,9 +141,7 @@ class TestDockerOpsAction(BaseInstallerTest):
             "scripts.installer.actions.shared.discover_compose_command",
             return_value=None,
         ):
-            result = shared_actions.perform_docker_operations(
-                config, self.temp_dir, self.mock_platform, ctx
-            )
+            result = shared_actions.perform_docker_operations(config, self.temp_dir, self.mock_platform, ctx)
 
         self.assertEqual(
             result,
@@ -156,6 +150,7 @@ class TestDockerOpsAction(BaseInstallerTest):
                 "Compose command unavailable; manual start required",
             ),
         )  # Should continue despite missing compose command
+
 
 if __name__ == "__main__":
     unittest.main()

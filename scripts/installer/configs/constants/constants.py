@@ -67,12 +67,21 @@ LABEL_OS_CERTRESOLVER = "traefik.http.routers.osmalcolm.tls.certresolver"
 LABEL_OS_SERVICE = "traefik.http.routers.osmalcolm.service"
 LABEL_OS_SERVICE_PORT = "traefik.http.services.osmalcolm.loadbalancer.server.port"
 
-# Traefik static values
-TRAEFIK_ENABLE = "traefik.enable"
+# Traefik and service exposure static values
+SERVICE_IP_EXPOSED = "0.0.0.0"
+SERVICE_IP_LOCAL = "127.0.0.1"
 SERVICE_NAME_MALCOLM = "malcolm"
 SERVICE_NAME_OSMALCOLM = "osmalcolm"
+SERVICE_PORT_LOGSTASH = "5044"
 SERVICE_PORT_MALCOLM = "443"
+SERVICE_PORT_MALCOLM_NO_SSL = "80"
 SERVICE_PORT_OSMALCOLM = "9200"
+SERVICE_PORT_OSMALCOLM_NO_SSL = "9201"
+SERVICE_PORT_SFTP_EXTERNAL = "8022"
+SERVICE_PORT_SFTP_INTERNAL = "22"
+SERVICE_PORT_TCP_JSON = "5045"
+TRAEFIK_ENABLE = "traefik.enable"
+UFW_MANAGER_SCRIPT = 'ufw_manager.sh'
 
 # Default restart policy string (used for display/logging fallbacks)
 DEFAULT_RESTART_POLICY = "unless-stopped"

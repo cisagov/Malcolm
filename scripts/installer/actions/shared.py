@@ -11,7 +11,6 @@ platform-to-step indirection.
 import copy
 import glob
 import os
-import re
 import shutil
 from enum import Enum
 from typing import Tuple, List, Optional
@@ -24,42 +23,39 @@ from scripts.malcolm_constants import (
     DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
-    FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH,
-    FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
-    FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
-    OPENSEARCH_BACKUP_CONTAINER_PATH,
-    OPENSEARCH_DATA_CONTAINER_PATH,
-    PCAP_CAPTURE_CONTAINER_PATH,
-    PCAP_DATA_CONTAINER_PATH,
-    SURICATA_LOG_CONTAINER_PATH,
-    UPLOAD_ARTIFACT_CONTAINER_PATH,
-    ZEEK_EXTRACT_FILES_CONTAINER_PATH,
-    ZEEK_LIVE_LOG_CONTAINER_PATH,
-    ZEEK_LOG_UPLOAD_CONTAINER_PATH,
+    ImageArchitecture,
 )
 from scripts.malcolm_common import (
-    BoundPathReplacer,
     BuildBoundPathReplacers,
     DumpYaml,
     get_default_config_dir,
     LoadYaml,
     RemapBoundPaths,
 )
-from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir
+from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
 
 from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+    KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+    KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
+    KEY_CONFIG_ITEM_EXPOSE_SFTP,
+    KEY_CONFIG_ITEM_IMAGE_ARCH,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+    KEY_CONFIG_ITEM_NGINX_SSL,
+    KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+    KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
+    KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
     KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
@@ -72,6 +68,7 @@ from scripts.installer.configs.constants.constants import (
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
     COMPOSE_UP_SUBCOMMAND,
+    DEFAULT_RESTART_POLICY,
     DOCKER_LOG_DRIVER,
     LABEL_MALCOLM_CERTRESOLVER,
     LABEL_MALCOLM_ENTRYPOINTS,
@@ -84,11 +81,22 @@ from scripts.installer.configs.constants.constants import (
     LABEL_OS_SERVICE,
     LABEL_OS_SERVICE_PORT,
     PODMAN_LOG_DRIVER,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
+    SERVICE_IP_EXPOSED,
+    SERVICE_IP_LOCAL,
     SERVICE_NAME_MALCOLM,
     SERVICE_NAME_OSMALCOLM,
+    SERVICE_PORT_LOGSTASH,
     SERVICE_PORT_MALCOLM,
+    SERVICE_PORT_MALCOLM_NO_SSL,
     SERVICE_PORT_OSMALCOLM,
+    SERVICE_PORT_OSMALCOLM_NO_SSL,
+    SERVICE_PORT_SFTP_EXTERNAL,
+    SERVICE_PORT_SFTP_INTERNAL,
+    SERVICE_PORT_TCP_JSON,
     TRAEFIK_ENABLE,
+    UFW_MANAGER_SCRIPT,
     USERNS_MODE_KEEP_ID,
 )
 from scripts.installer.configs.constants.enums import InstallerResult
@@ -175,9 +183,8 @@ def _resolve_restart_policy(malcolm_config):
     return restart_policy_value.value if isinstance(restart_policy_value, Enum) else str(restart_policy_value)
 
 
-def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_policy: str) -> None:
-    services = data.get("services", {})
-    for service in services:
+def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_policy: str, image_arch: str) -> None:
+    for service in data.get("services", {}):
         if runtime_bin.startswith("podman"):
             deep_set(data, ["services", service, "userns_mode"], USERNS_MODE_KEEP_ID)
             deep_set(data, ["services", service, "logging", "driver"], PODMAN_LOG_DRIVER)
@@ -185,23 +192,36 @@ def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_poli
             deep_set(data, ["services", service, "userns_mode"], None, deleteIfNone=True)
             deep_set(data, ["services", service, "logging", "driver"], DOCKER_LOG_DRIVER)
         deep_set(data, ["services", service, "restart"], restart_policy)
+        if image := deep_get(
+            data,
+            ['services', service, 'image'],
+        ):
+            image_parts = image.rstrip().split(":")
+            image_parts[-1] = image_parts[-1].split("-", 1)[0] + (
+                "" if image_arch == ImageArchitecture.AMD64 else '-' + str(image_arch)
+            )
+            deep_set(data, ['services', service, 'image'], ":".join(image_parts))
 
 
 def _get_traefik_config(malcolm_config):
     try:
         behind_reverse_proxy = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY))
-        traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
+        traefik_labels_enabled = behind_reverse_proxy and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
         traefik_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_HOST) or ""
         traefik_os_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST) or ""
         traefik_entrypoint = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT) or ""
         traefik_resolver = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER) or ""
-        expose_opensearch = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH))
-        os_primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
+        expose_opensearch = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS)) and bool(
+            malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH)
+        )
+        os_primary_mode = (
+            malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
+        )
     except Exception:
         behind_reverse_proxy = traefik_labels_enabled = False
         traefik_host = traefik_os_host = traefik_entrypoint = traefik_resolver = ""
         expose_opensearch = False
-        os_primary_mode = None
+        os_primary_mode = DatabaseMode.OpenSearchLocal
     return (
         behind_reverse_proxy,
         traefik_labels_enabled,
@@ -241,17 +261,166 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
 
 
 def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
-    if not network_name:
-        return
-    networks_config = deep_get(data, ["networks"], {})
-    if not networks_config:
-        return
-    for network in networks_config:
-        deep_set(data, ["networks", network, "external"], True)
-        deep_set(data, ["networks", network, "name"], network_name)
+    if network_name:
+        for network in deep_get(data, ["networks"], {}):
+            deep_set(data, ["networks", network, "external"], True)
+            deep_set(data, ["networks", network, "name"], network_name)
 
 
-def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> None:
+def _get_exposed_services_config(malcolm_config):
+    try:
+        behind_reverse_proxy = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY) or False)
+        traefik_labels_enabled = behind_reverse_proxy and bool(
+            malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS) or False
+        )
+        open_ports = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) or False)
+        profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
+        os_primary_mode = (
+            malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
+        )
+        nginx_ssl = malcolm_config.get_value(KEY_CONFIG_ITEM_NGINX_SSL) or True
+        accept_standard_syslog_messages = bool(
+            open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES) or False)
+        )
+        expose_filebeat_tcp = open_ports and bool(
+            malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP) or False
+        )
+        expose_logstash = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_LOGSTASH) or False)
+        expose_opensearch = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH) or False)
+        expose_sftp = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_SFTP) or False)
+        syslog_tcp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0
+        syslog_udp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0
+    except Exception:
+        behind_reverse_proxy = False
+        traefik_labels_enabled = False
+        open_ports = False
+        profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
+        nginx_ssl = True
+        os_primary_mode = DatabaseMode.OpenSearchLocal
+        expose_filebeat_tcp = False
+        expose_logstash = False
+        expose_opensearch = False
+        expose_sftp = False
+        accept_standard_syslog_messages = False
+        syslog_tcp_port = 0
+        syslog_udp_port = 0
+
+    return (
+        behind_reverse_proxy,
+        traefik_labels_enabled,
+        open_ports,
+        profile,
+        nginx_ssl,
+        os_primary_mode,
+        expose_filebeat_tcp,
+        expose_logstash,
+        expose_opensearch,
+        expose_sftp,
+        accept_standard_syslog_messages,
+        syslog_tcp_port,
+        syslog_udp_port,
+    )
+
+
+def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> None:
+    (
+        behind_reverse_proxy,
+        traefik_labels_enabled,
+        open_ports,
+        profile,
+        nginx_ssl,
+        os_primary_mode,
+        expose_filebeat_tcp,
+        expose_logstash,
+        expose_opensearch,
+        expose_sftp,
+        accept_standard_syslog_messages,
+        syslog_tcp_port,
+        syslog_udp_port,
+    ) = exposed_services_tuple
+
+    ###################################
+    # set bind IPs based on whether services should be externally exposed or not
+
+    ufw_manager_cmd = UFW_MANAGER_SCRIPT
+    if not which(ufw_manager_cmd):
+        if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
+            ufw_manager_cmd = os.path.join('/usr/local/bin/', ufw_manager_cmd)
+        else:
+            ufw_manager_cmd = None
+
+    if ufw_manager_cmd:
+        err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'])
+        if err != 0:
+            InstallerLogger.error(f"Resetting UFW firewall failed: {out}")
+
+    for service, port_infos in {
+        'filebeat': [
+            [expose_filebeat_tcp, int(SERVICE_PORT_TCP_JSON), int(SERVICE_PORT_TCP_JSON), 'tcp'],
+            [accept_standard_syslog_messages and (syslog_tcp_port > 0), syslog_tcp_port, syslog_tcp_port, 'tcp'],
+            [accept_standard_syslog_messages and (syslog_udp_port > 0), syslog_udp_port, syslog_udp_port, 'udp'],
+        ],
+        'logstash': [
+            [expose_logstash, int(SERVICE_PORT_LOGSTASH), int(SERVICE_PORT_LOGSTASH), 'tcp'],
+        ],
+        'upload': [
+            [expose_sftp, int(SERVICE_PORT_SFTP_EXTERNAL), int(SERVICE_PORT_SFTP_INTERNAL), 'tcp'],
+        ],
+    }.items():
+        if service in data['services']:
+            if profile == PROFILE_HEDGEHOG:
+                data['services'][service].pop('ports', None)
+            else:
+                data['services'][service]['ports'] = []
+                for port_info in port_infos:
+                    if all(x for x in port_info):
+                        data['services'][service]['ports'].append(
+                            f"{SERVICE_IP_EXPOSED}:{port_info[1]}:{port_info[2]}/{port_info[3]}"
+                        )
+                        if ufw_manager_cmd:
+                            err, out = platform.run_process(
+                                [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}']
+                            )
+                            if err != 0:
+                                InstallerLogger.error(
+                                    f"Setting UFW 'allow {port_info[1]}/{port_info[3]}' failed: {out}"
+                                )
+                if not data['services'][service]['ports']:
+                    data['services'][service].pop('ports', None)
+    ###################################
+
+    ###################################
+    # nginx-proxy has got a lot going on
+    if 'nginx-proxy' in data['services']:
+
+        # set bind IPs and ports based on whether it should be externally exposed or not
+        if (profile == PROFILE_HEDGEHOG) or (behind_reverse_proxy and traefik_labels_enabled):
+            data['services']['nginx-proxy'].pop('ports', None)
+        else:
+            data['services']['nginx-proxy']['ports'] = [
+                f"{':'.join(SERVICE_IP_EXPOSED, SERVICE_PORT_MALCOLM) if nginx_ssl else ':'.join(SERVICE_IP_LOCAL, SERVICE_PORT_MALCOLM_NO_SSL)}:{SERVICE_PORT_MALCOLM}/tcp",
+            ]
+            if (os_primary_mode == DatabaseMode.OpenSearchLocal) and expose_opensearch:
+                data['services']['nginx-proxy']['ports'].append(
+                    f"{SERVICE_IP_EXPOSED}:{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}:{SERVICE_PORT_OSMALCOLM}/tcp"
+                )
+
+                if ufw_manager_cmd:
+                    err, out = platform.run_process(
+                        [
+                            ufw_manager_cmd,
+                            '-a',
+                            'allow',
+                            f"{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp",
+                        ]
+                    )
+                    if err != 0:
+                        InstallerLogger.error(
+                            f"Setting UFW 'allow {SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp' failed: {out}"
+                        )
+
+
+def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> bool:
     changed = data != original
     if platform.should_write_files():
         if changed:
@@ -264,6 +433,8 @@ def _write_or_log_changes(original: dict, data: dict, config_file: str, platform
             InstallerLogger.info(f"Dry run: would update compose file: {config_file}")
         else:
             InstallerLogger.info(f"Dry run: no changes for compose file: {config_file}")
+
+    return platform.should_write_files() and changed
 
 
 def update_compose_files(
@@ -282,8 +453,7 @@ def update_compose_files(
 
         if platform.is_dry_run():
             InstallerLogger.info(
-                f"Dry run: would update compose files for orchestration: "
-                + ", ".join(sorted(os.path.basename(f) for f in compose_files))
+                f"Dry run: would update compose files for orchestration: {', '.join(sorted(os.path.basename(f) for f in compose_files))}"
             )
             runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
             restart_policy = _resolve_restart_policy(malcolm_config)
@@ -305,35 +475,59 @@ def update_compose_files(
         index_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_DIR) or DEFAULT_INDEX_DIR
         index_snapshot_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR) or DEFAULT_INDEX_SNAPSHOT_DIR
         network_name = malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME)
+        image_arch = malcolm_config.get_value(KEY_CONFIG_ITEM_IMAGE_ARCH)
+
+        result = InstallerResult.SUCCESS
 
         for config_file in compose_files:
-            data = LoadYaml(config_file)
-            if not data or "services" not in data:
-                continue
-            original = copy.deepcopy(data)
-            _update_services_runtime_settings(data, runtime_bin, restart_policy)
+            try:
+                data = LoadYaml(config_file)
+                if not data or "services" not in data:
+                    continue
 
-            # Traefik label handling
-            traefik_cfg = _get_traefik_config(malcolm_config)
-            _apply_traefik_labels_if_present(data, traefik_cfg)
+                original = copy.deepcopy(data)
 
-            # Volume remaps
-            RemapBoundPaths(
-                data,
-                BuildBoundPathReplacers(
-                    pcap_dir,
-                    suricata_log_dir,
-                    zeek_log_dir,
-                    index_dir,
-                    index_snapshot_dir,
-                ),
-            )
+                # logging, userns_mode, restart policy, and image architecture
+                _update_services_runtime_settings(data, runtime_bin, restart_policy, image_arch)
 
-            _apply_network_overrides(data, network_name)
+                # for "large' storage locations (pcap, logs, opensearch, etc.) replace
+                #   bind mount sources with user-specified locations
+                RemapBoundPaths(
+                    data,
+                    BuildBoundPathReplacers(
+                        pcap_dir,
+                        suricata_log_dir,
+                        zeek_log_dir,
+                        index_dir,
+                        index_snapshot_dir,
+                    ),
+                )
 
-            _write_or_log_changes(original, data, config_file, platform, DumpYaml)
+                # open ports for exposed services
+                _apply_exposed_services(data, _get_exposed_services_config(malcolm_config))
 
-        return InstallerResult.SUCCESS
+                # Traefik label handling
+                _apply_traefik_labels_if_present(data, _get_traefik_config(malcolm_config))
+
+                # custom container networking
+                _apply_network_overrides(data, network_name)
+
+                written = False
+                config_file_stat = os.stat(config_file)
+                orig_uid, orig_gid = config_file_stat[4], config_file_stat[5]
+                try:
+                    written = _write_or_log_changes(original, data, config_file, platform, DumpYaml)
+                finally:
+                    # restore ownership
+                    if written:
+                        os.chown(config_file_stat, orig_uid, orig_gid)
+
+            except Exception as e:
+                InstallerLogger.error(f"Error updating docker-compose files: {e}")
+                result = InstallerResult.FAILURE
+
+        return result
+
     except Exception as e:
         InstallerLogger.error(f"Error updating docker-compose files: {e}")
         return InstallerResult.FAILURE

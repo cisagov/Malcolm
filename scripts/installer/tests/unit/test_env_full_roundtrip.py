@@ -6,7 +6,6 @@ import tempfile
 import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
-from scripts.installer.utils.exceptions import ConfigValueValidationError
 
 
 class TestEnvFullRoundtripPerItem(unittest.TestCase):
@@ -34,7 +33,7 @@ class TestEnvFullRoundtripPerItem(unittest.TestCase):
         covered_items = set()
         envs = list(self.mapper.env_var_by_map_key.values())
         self.assertGreater(len(envs), 0)
-        
+
         # Reusable reload config - create once, reuse for all loads
         cfg_write = MalcolmConfig()
         cfg_read = MalcolmConfig()

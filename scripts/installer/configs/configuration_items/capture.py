@@ -10,7 +10,7 @@ This module contains all configuration items related to live traffic capture set
 including network interface configuration, capture filters, and capture methods.
 """
 
-from scripts.malcolm_constants import DATABASE_MODE_LABELS, DatabaseMode, WidgetType
+from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_utils import get_hostname_without_domain
 
 from scripts.installer.core.config_item import ConfigItem
@@ -72,7 +72,7 @@ CONFIG_ITEM_LIVE_ARKIME = ConfigItem(
     label="Capture Live Traffic with Arkime",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question=f"Capture live network traffic with Arkime capture?",
+    question="Capture live network traffic with Arkime capture?",
     widget_type=WidgetType.CHECKBOX,
 )
 

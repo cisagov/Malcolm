@@ -22,14 +22,12 @@ from scripts.malcolm_common import (
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
     DotEnvDynamic,
-    DumpYaml,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
     LocalPathForContainerBindMount,
     OPENSEARCH_BACKUP_CONTAINER_PATH,
     OPENSEARCH_DATA_CONTAINER_PATH,
     PCAP_DATA_CONTAINER_PATH,
     SURICATA_LOG_CONTAINER_PATH,
-    SYSTEM_INFO,
     YAMLDynamic,
 )
 from scripts.malcolm_utils import deep_get, get_main_script_path, same_file_or_dir
@@ -38,7 +36,6 @@ from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.configuration_items import (
     ALL_CONFIG_ITEMS_DICT,
-    ALL_DOCKER_CONFIG_ITEMS_DICT,
     CONFIG_ITEM_DEFINITION_NAME_BY_KEY,
 )
 from scripts.installer.configs.constants.constants import (
@@ -46,8 +43,6 @@ from scripts.installer.configs.constants.constants import (
     LABEL_MALCOLM_CERTRESOLVER,
     LABEL_MALCOLM_ENTRYPOINTS,
     LABEL_MALCOLM_RULE,
-    LABEL_OS_CERTRESOLVER,
-    LABEL_OS_ENTRYPOINTS,
     LABEL_OS_RULE,
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
@@ -234,7 +229,7 @@ class MalcolmConfig(ObservableStoreMixin):
 
             self._modified_keys.add(key)
             self._notify_observers(key, item.get_value())
-        except Exception as e:
+        except Exception:
             if not ignore_errors:
                 raise
 
@@ -511,9 +506,17 @@ class MalcolmConfig(ObservableStoreMixin):
                                     }
                                 ),
                                 None,
-                            )
+                            ),
                             ignore_errors=True,
                         )
+
+                        # network settings
+                        if deep_get(compose_data, ["networks", "default", "external"], False):
+                            self.set_value(
+                                KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+                                deep_get(compose_data, ["networks", "default", "name"]),
+                                ignore_errors=True,
+                            )
 
                         # traefik/reverse proxy stuff
                         self._load_traefik_settings_from_orchestration_file(compose_data)
@@ -534,7 +537,7 @@ class MalcolmConfig(ObservableStoreMixin):
             for k, v in deep_get(compose_data, ["services", "nginx-proxy", "labels"], {}).items()
             if k.startswith("traefik")
         }
-        if traefik_labels.get(TRAEFIK_ENABLE, False) == True:
+        if traefik_labels.get(TRAEFIK_ENABLE, False) is True:
             self.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True, ignore_errors=True)
             self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True)
             self.set_value(

@@ -120,7 +120,7 @@ class ConfigItem:
         self.is_modified = False
 
     @property
-    def question(self) -> str:
+    def question(self) -> str:  # noqa: F811
         result = self._question() if callable(self._question) else self._question
         return "" if result is None else str(result)
 
