@@ -18,6 +18,7 @@ from scripts.malcolm_common import (
     UserInterfaceMode,
     DialogBackException,
     DialogCanceledException,
+    UserInputDefaultsBehavior,
 )
 
 
@@ -120,15 +121,27 @@ def prompt_config_item_value(
 
     # 4) String/Numeric/List with validation loop for ints
     while True:
-        if config_item.accept_blank:
-            default_str = None
-        elif isinstance(default_value, list) or isinstance(current_value, list):
+        if isinstance(default_value, list) or isinstance(current_value, list):
             default_str = ",".join([str(x) for x in (current_value or [])])
         else:
             default_str = str(current_value or "")
 
         try:
-            entry = InstallerAskForString(question, default=default_str, uiMode=ui_mode, extraLabel=back_label)
+            entry = InstallerAskForString(
+                question,
+                default=(
+                    None
+                    if (config_item.accept_blank and (ui_mode & UserInterfaceMode.InteractionInput))
+                    else default_str
+                ),
+                defaultBehavior=(
+                    UserInputDefaultsBehavior.DefaultsPrompt
+                    if (config_item.accept_blank and (ui_mode & UserInterfaceMode.InteractionInput))
+                    else UserInputDefaultsBehavior.DefaultsPrompt | UserInputDefaultsBehavior.DefaultsAccept
+                ),
+                uiMode=ui_mode,
+                extraLabel=back_label,
+            )
         except (DialogBackException, DialogCanceledException):
             return None
 
