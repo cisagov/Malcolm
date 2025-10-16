@@ -249,33 +249,37 @@ HOMEBREW_INSTALL_URLS = defaultdict(lambda: 'https://brew.sh/')
 
 
 ##################################################################################################
-def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath, localBasePath=None):
-    localPath = None
-    if service and dockerComposeContents and containerPath:
-        vols = deep_get(dockerComposeContents, ['services', service, 'volumes'])
+def LocalPathForContainerBindMount(
+    service,
+    docker_compose_contents,
+    container_path,
+    local_base_path=None,
+):
+    local_path = None
+    if service and docker_compose_contents and container_path:
+        vols = deep_get(docker_compose_contents, ['services', service, 'volumes'])
         if (vols is not None) and (len(vols) > 0):
             for vol in vols:
                 if (
                     isinstance(vol, dict)
                     and ('source' in vol)
                     and ('target' in vol)
-                    and (vol['target'] == containerPath)
+                    and (vol['target'] == container_path)
                 ):
-                    if localBasePath and not os.path.isabs(vol['source']):
-                        localPath = os.path.realpath(os.path.join(localBasePath, vol['source']))
+                    if local_base_path and not os.path.isabs(vol['source']):
+                        local_path = os.path.realpath(os.path.join(local_base_path, vol['source']))
                     else:
-                        localPath = vol['source']
+                        local_path = vol['source']
                     break
                 elif isinstance(vol, str):
                     volSplit = vol.split(':')
-                    if (len(volSplit) >= 2) and (volSplit[1] == containerPath):
-                        if localBasePath and not os.path.isabs(volSplit[0]):
-                            localPath = os.path.realpath(os.path.join(localBasePath, volSplit[0]))
+                    if (len(volSplit) >= 2) and (volSplit[1] == container_path):
+                        if local_base_path and not os.path.isabs(volSplit[0]):
+                            local_path = os.path.realpath(os.path.join(local_base_path, volSplit[0]))
                         else:
-                            localPath = volSplit[0]
+                            local_path = volSplit[0]
                         break
-
-    return localPath
+    return local_path
 
 
 def BuildBoundPathReplacers(
@@ -311,27 +315,29 @@ def BuildBoundPathReplacers(
     )
 
 
-def RemapBoundPaths(data: dict, replacements: Tuple[BoundPathReplacer]) -> int:
+def RemapBoundPaths(docker_compose_contents: dict, replacements: Tuple[BoundPathReplacer]) -> int:
     remap_count = 0
     for replacer in replacements:
         if (
-            (replacer.service in data['services'])
-            and ('volumes' in data['services'][replacer.service])
+            (replacer.service in docker_compose_contents['services'])
+            and ('volumes' in docker_compose_contents['services'][replacer.service])
             and os.path.isdir(replacer.source)
         ):
-            for vol_idx, vol_val in enumerate(data['services'][replacer.service]['volumes']):
+            for vol_idx, vol_val in enumerate(docker_compose_contents['services'][replacer.service]['volumes']):
                 if (
                     isinstance(vol_val, dict)
                     and ('source' in vol_val)
                     and ('target' in vol_val)
                     and (vol_val['target'] == replacer.target)
                 ):
-                    data['services'][replacer.service]['volumes'][vol_idx]['source'] = replacer.source
+                    docker_compose_contents['services'][replacer.service]['volumes'][vol_idx][
+                        'source'
+                    ] = replacer.source
                     remap_count += 1
                 elif isinstance(vol_val, str) and re.match(fr'^.+:{replacer.target}(:.+)?\s*$', vol_val):
                     volume_parts = vol_val.strip().split(':')
                     volume_parts[0] = replacer.source
-                    data['services'][replacer.service]['volumes'][vol_idx] = ':'.join(volume_parts)
+                    docker_compose_contents['services'][replacer.service]['volumes'][vol_idx] = ':'.join(volume_parts)
                     remap_count += 1
 
     return remap_count

@@ -15,8 +15,24 @@ from collections import defaultdict
 from enum import Enum
 from typing import Dict, Any, Callable, List, Tuple, Optional, Set
 
-from scripts.malcolm_common import DotEnvDynamic, DumpYaml, SYSTEM_INFO, YAMLDynamic
-from scripts.malcolm_utils import deep_get, get_main_script_path
+from scripts.malcolm_common import (
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
+    DotEnvDynamic,
+    DumpYaml,
+    FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+    LocalPathForContainerBindMount,
+    OPENSEARCH_BACKUP_CONTAINER_PATH,
+    OPENSEARCH_DATA_CONTAINER_PATH,
+    PCAP_DATA_CONTAINER_PATH,
+    SURICATA_LOG_CONTAINER_PATH,
+    SYSTEM_INFO,
+    YAMLDynamic,
+)
+from scripts.malcolm_utils import deep_get, get_main_script_path, same_file_or_dir
 
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
@@ -484,11 +500,26 @@ class MalcolmConfig(ObservableStoreMixin):
                             ignore_errors=True,
                         )
 
+                        # restart policy
+                        self.set_value(
+                            KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+                            next(
+                                iter(
+                                    {
+                                        deep_get(config, ["restart"])
+                                        for config in deep_get(compose_data, ["services"], {}).values()
+                                    }
+                                ),
+                                None,
+                            )
+                            ignore_errors=True,
+                        )
+
                         # traefik/reverse proxy stuff
                         self._load_traefik_settings_from_orchestration_file(compose_data)
 
                         # custom storage paths
-                        self._load_custom_storage_paths_from_orchestration_file(compose_data)
+                        self._load_custom_storage_paths_from_orchestration_file(compose_data, compose_file_name)
 
                 return compose_file_name
             except Exception as e:
@@ -539,8 +570,57 @@ class MalcolmConfig(ObservableStoreMixin):
                 ignore_errors=True,
             )
 
-    def _load_custom_storage_paths_from_orchestration_file(self, compose_data: Dict[Any, Any]):
-        return
+    def _load_custom_storage_paths_from_orchestration_file(
+        self,
+        compose_data: Dict[Any, Any],
+        compose_file_name: str,
+    ):
+        custom_path = False
+        for config_key, service_tuple in {
+            KEY_CONFIG_ITEM_PCAP_DIR: (
+                "arkime",
+                PCAP_DATA_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_PCAP_DIR)),
+            ),
+            KEY_CONFIG_ITEM_ZEEK_LOG_DIR: (
+                "filebeat",
+                FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_ZEEK_LOG_DIR)),
+            ),
+            KEY_CONFIG_ITEM_SURICATA_LOG_DIR: (
+                "suricata",
+                SURICATA_LOG_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_SURICATA_LOG_DIR)),
+            ),
+            KEY_CONFIG_ITEM_INDEX_DIR: (
+                "opensearch",
+                OPENSEARCH_DATA_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_INDEX_DIR)),
+            ),
+            KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR: (
+                "opensearch",
+                OPENSEARCH_BACKUP_CONTAINER_PATH,
+                os.path.realpath(os.path.join(os.path.dirname(compose_file_name), DEFAULT_INDEX_SNAPSHOT_DIR)),
+            ),
+        }.items():
+            if local_path := LocalPathForContainerBindMount(
+                service_tuple[0],
+                compose_data,
+                service_tuple[1],
+                os.path.dirname(compose_file_name),
+            ):
+                try:
+                    if not same_file_or_dir(local_path, service_tuple[2]):
+                        self.set_value(
+                            config_key,
+                            local_path,
+                        )
+                        custom_path = True
+                except Exception as e:
+                    InstallerLogger.warning(f"Could not read {service_tuple[1]} for service {service_tuple[0]}: {e}")
+                    continue
+            if custom_path:
+                self.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True)
 
     def _notify_observers(self, key: str, value: Any):
         """Notify all registered observers for a given key."""

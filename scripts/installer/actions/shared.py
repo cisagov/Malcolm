@@ -308,7 +308,7 @@ def update_compose_files(
 
         for config_file in compose_files:
             data = LoadYaml(config_file)
-            if data is None or "services" not in data:
+            if not data or "services" not in data:
                 continue
             original = copy.deepcopy(data)
             _update_services_runtime_settings(data, runtime_bin, restart_policy)
