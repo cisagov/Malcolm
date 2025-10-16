@@ -77,19 +77,6 @@ SERVICE_PORT_OSMALCOLM = "9200"
 # Default restart policy string (used for display/logging fallbacks)
 DEFAULT_RESTART_POLICY = "unless-stopped"
 
-# Container paths (inside containers) used for volume mappings
-PCAP_CONTAINER_PATH = "/data/pcap"
-ZEEK_LOG_CONTAINER_PATH = "/opt/zeek/logs"
-SURICATA_LOG_CONTAINER_PATH = "/opt/suricata/logs"
-OPENSEARCH_DATA_CONTAINER_PATH = "/usr/share/opensearch/data"
-
-# Default host directories when config values are not set
-DEFAULT_PCAP_DIR = "./pcap"
-DEFAULT_ZEEK_LOG_DIR = "./zeek-logs"
-DEFAULT_SURICATA_LOG_DIR = "./suricata-logs"
-DEFAULT_INDEX_DIR = "./opensearch"
-DEFAULT_INDEX_SNAPSHOT_DIR = "./opensearch-backup"
-
 # SSL env defaults
 SSL_CA_TRUST_DIR = "/var/local/ca-trust"
 

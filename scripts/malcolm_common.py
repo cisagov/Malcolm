@@ -38,23 +38,40 @@ from scripts.malcolm_utils import (
 
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
-from typing import Optional
+from typing import Tuple, List, Optional
 
 from scripts.malcolm_constants import (
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
+    FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH,
+    FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
+    FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+    ImageArchitecture,
     MALCOLM_VERSION,
-    PLATFORM_WINDOWS,
-    PLATFORM_MAC,
+    OPENSEARCH_BACKUP_CONTAINER_PATH,
+    OPENSEARCH_DATA_CONTAINER_PATH,
+    OrchestrationFramework,
+    OrchestrationFrameworksSupported,
+    PCAP_CAPTURE_CONTAINER_PATH,
+    PCAP_DATA_CONTAINER_PATH,
+    PGID_DEFAULT,
     PLATFORM_LINUX,
     PLATFORM_LINUX_CENTOS,
     PLATFORM_LINUX_DEBIAN,
     PLATFORM_LINUX_FEDORA,
     PLATFORM_LINUX_UBUNTU,
+    PLATFORM_MAC,
+    PLATFORM_WINDOWS,
     PUID_DEFAULT,
-    PGID_DEFAULT,
+    SURICATA_LOG_CONTAINER_PATH,
+    UPLOAD_ARTIFACT_CONTAINER_PATH,
     YAML_VERSION,
-    ImageArchitecture,
-    OrchestrationFramework,
-    OrchestrationFrameworksSupported,
+    ZEEK_EXTRACT_FILES_CONTAINER_PATH,
+    ZEEK_LIVE_LOG_CONTAINER_PATH,
+    ZEEK_LOG_UPLOAD_CONTAINER_PATH,
 )
 
 try:
@@ -259,6 +276,65 @@ def LocalPathForContainerBindMount(service, dockerComposeContents, containerPath
                         break
 
     return localPath
+
+
+def BuildBoundPathReplacers(
+    pcap_dir=DEFAULT_PCAP_DIR,
+    suricata_log_dir=DEFAULT_SURICATA_LOG_DIR,
+    zeek_log_dir=DEFAULT_ZEEK_LOG_DIR,
+    index_dir=DEFAULT_INDEX_DIR,
+    index_snapshot_dir=DEFAULT_INDEX_SNAPSHOT_DIR,
+):
+    return (
+        BoundPathReplacer("arkime", PCAP_DATA_CONTAINER_PATH, pcap_dir),
+        BoundPathReplacer("arkime-live", PCAP_DATA_CONTAINER_PATH, pcap_dir),
+        BoundPathReplacer("filebeat", FILEBEAT_SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
+        BoundPathReplacer("filebeat", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
+        BoundPathReplacer(
+            "file-monitor", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')
+        ),
+        BoundPathReplacer("file-monitor", FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH, os.path.join(zeek_log_dir, 'current')),
+        BoundPathReplacer("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
+        BoundPathReplacer("opensearch", OPENSEARCH_BACKUP_CONTAINER_PATH, index_snapshot_dir),
+        BoundPathReplacer("pcap-capture", PCAP_CAPTURE_CONTAINER_PATH, os.path.join(pcap_dir, 'upload')),
+        BoundPathReplacer("pcap-monitor", PCAP_CAPTURE_CONTAINER_PATH, pcap_dir),
+        BoundPathReplacer("pcap-monitor", FILEBEAT_ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
+        BoundPathReplacer("suricata", PCAP_DATA_CONTAINER_PATH, pcap_dir),
+        BoundPathReplacer("suricata", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
+        BoundPathReplacer("suricata-live", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
+        BoundPathReplacer("upload", UPLOAD_ARTIFACT_CONTAINER_PATH, os.path.join(pcap_dir, 'upload')),
+        BoundPathReplacer("zeek", PCAP_CAPTURE_CONTAINER_PATH, pcap_dir),
+        BoundPathReplacer("zeek", ZEEK_LOG_UPLOAD_CONTAINER_PATH, os.path.join(zeek_log_dir, 'upload')),
+        BoundPathReplacer("zeek", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
+        BoundPathReplacer("zeek-live", ZEEK_LIVE_LOG_CONTAINER_PATH, os.path.join(zeek_log_dir, 'live')),
+        BoundPathReplacer("zeek-live", ZEEK_EXTRACT_FILES_CONTAINER_PATH, os.path.join(zeek_log_dir, 'extract_files')),
+    )
+
+
+def RemapBoundPaths(data: dict, replacements: Tuple[BoundPathReplacer]) -> int:
+    remap_count = 0
+    for replacer in replacements:
+        if (
+            (replacer.service in data['services'])
+            and ('volumes' in data['services'][replacer.service])
+            and os.path.isdir(replacer.source)
+        ):
+            for vol_idx, vol_val in enumerate(data['services'][replacer.service]['volumes']):
+                if (
+                    isinstance(vol_val, dict)
+                    and ('source' in vol_val)
+                    and ('target' in vol_val)
+                    and (vol_val['target'] == replacer.target)
+                ):
+                    data['services'][replacer.service]['volumes'][vol_idx]['source'] = replacer.source
+                    remap_count += 1
+                elif isinstance(vol_val, str) and re.match(fr'^.+:{replacer.target}(:.+)?\s*$', vol_val):
+                    volume_parts = vol_val.strip().split(':')
+                    volume_parts[0] = replacer.source
+                    data['services'][replacer.service]['volumes'][vol_idx] = ':'.join(volume_parts)
+                    remap_count += 1
+
+    return remap_count
 
 
 ##################################################################################################

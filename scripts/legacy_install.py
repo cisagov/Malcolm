@@ -66,6 +66,7 @@ from malcolm_constants import (
 from malcolm_common import (
     AskForString,
     BoundPathReplacer,
+    BuildBoundPathReplacers,
     ChooseMultiple,
     ChooseOne,
     DetermineYamlFileFormat,
@@ -87,6 +88,7 @@ from malcolm_common import (
     SetMalcolmPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
+    RemapBoundPaths,
     RequestsDynamic,
     ScriptPath,
     UpdateEnvFiles,
@@ -2896,56 +2898,17 @@ class Installer(object):
                         ###################################
                         # for "large' storage locations (pcap, logs, opensearch, etc.) replace
                         #   bind mount sources with user-specified locations
-                        boundPathsToAdjust = (
-                            BoundPathReplacer("arkime", "/data/pcap", pcapDir),
-                            BoundPathReplacer("arkime-live", "/data/pcap", pcapDir),
-                            BoundPathReplacer("filebeat", "/suricata", suricataLogDir),
-                            BoundPathReplacer("filebeat", "/zeek", zeekLogDir),
-                            BoundPathReplacer(
-                                "file-monitor", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
-                            ),
-                            BoundPathReplacer("file-monitor", "/zeek/logs", os.path.join(zeekLogDir, 'current')),
-                            BoundPathReplacer("opensearch", "/usr/share/opensearch/data", indexDir),
-                            BoundPathReplacer("opensearch", "/opt/opensearch/backup", indexSnapshotDir),
-                            BoundPathReplacer("pcap-capture", "/pcap", os.path.join(pcapDir, 'upload')),
-                            BoundPathReplacer("pcap-monitor", "/pcap", pcapDir),
-                            BoundPathReplacer("pcap-monitor", "/zeek", zeekLogDir),
-                            BoundPathReplacer("suricata", "/data/pcap", pcapDir),
-                            BoundPathReplacer("suricata", "/var/log/suricata", suricataLogDir),
-                            BoundPathReplacer("suricata-live", "/var/log/suricata", suricataLogDir),
-                            BoundPathReplacer(
-                                "upload", "/var/www/upload/server/php/chroot/files", os.path.join(pcapDir, 'upload')
-                            ),
-                            BoundPathReplacer("zeek", "/pcap", pcapDir),
-                            BoundPathReplacer("zeek", "/zeek/upload", os.path.join(zeekLogDir, 'upload')),
-                            BoundPathReplacer("zeek", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')),
-                            BoundPathReplacer("zeek-live", "/zeek/live", os.path.join(zeekLogDir, 'live')),
-                            BoundPathReplacer(
-                                "zeek-live", "/zeek/extract_files", os.path.join(zeekLogDir, 'extract_files')
+                        RemapBoundPaths(
+                            data,
+                            BuildBoundPathReplacers(
+                                pcapDir,
+                                suricataLogDir,
+                                zeekLogDir,
+                                indexDir,
+                                indexSnapshotDir,
                             ),
                         )
-                        for boundPath in boundPathsToAdjust:
-                            if (
-                                (boundPath.service in data['services'])
-                                and ('volumes' in data['services'][boundPath.service])
-                                and os.path.isdir(boundPath.source)
-                            ):
-                                for volIdx, volVal in enumerate(data['services'][boundPath.service]['volumes']):
-                                    if (
-                                        isinstance(volVal, dict)
-                                        and ('source' in volVal)
-                                        and ('target' in volVal)
-                                        and (volVal['target'] == boundPath.target)
-                                    ):
-                                        data['services'][boundPath.service]['volumes'][volIdx][
-                                            'source'
-                                        ] = boundPath.source
-                                    elif isinstance(volVal, str) and re.match(
-                                        fr'^.+:{boundPath.target}(:.+)?\s*$', volVal
-                                    ):
-                                        volumeParts = volVal.strip().split(':')
-                                        volumeParts[0] = boundPath.source
-                                        data['services'][boundPath.service]['volumes'][volIdx] = ':'.join(volumeParts)
+
                         ###################################
 
                         ###################################

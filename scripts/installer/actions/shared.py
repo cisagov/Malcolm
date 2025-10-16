@@ -8,22 +8,70 @@ former steps/ modules. They keep behavior intact while removing the
 platform-to-step indirection.
 """
 
+import copy
 import glob
 import os
+import re
+import shutil
+from enum import Enum
 from typing import Tuple, List, Optional
 
-from scripts.installer.configs.constants.enums import InstallerResult
+from scripts.malcolm_constants import (
+    DATABASE_MODE_ENUMS,
+    DatabaseMode,
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
+    FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH,
+    FILEBEAT_SURICATA_LOG_CONTAINER_PATH,
+    FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+    OPENSEARCH_BACKUP_CONTAINER_PATH,
+    OPENSEARCH_DATA_CONTAINER_PATH,
+    PCAP_CAPTURE_CONTAINER_PATH,
+    PCAP_DATA_CONTAINER_PATH,
+    SURICATA_LOG_CONTAINER_PATH,
+    UPLOAD_ARTIFACT_CONTAINER_PATH,
+    ZEEK_EXTRACT_FILES_CONTAINER_PATH,
+    ZEEK_LIVE_LOG_CONTAINER_PATH,
+    ZEEK_LOG_UPLOAD_CONTAINER_PATH,
+)
+from scripts.malcolm_common import (
+    BoundPathReplacer,
+    BuildBoundPathReplacers,
+    DumpYaml,
+    get_default_config_dir,
+    LoadYaml,
+    RemapBoundPaths,
+)
+from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir
+
+from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
+from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
+    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
+    KEY_CONFIG_ITEM_INDEX_DIR,
+    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+    KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
+    KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
+    KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
+    KEY_CONFIG_ITEM_TRAEFIK_HOST,
+    KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+    KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
+    KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
+    KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
+)
 from scripts.installer.configs.constants.constants import (
     COMPOSE_DETACH_FLAG,
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
     COMPOSE_UP_SUBCOMMAND,
-    DEFAULT_INDEX_DIR,
-    DEFAULT_INDEX_SNAPSHOT_DIR,
-    DEFAULT_PCAP_DIR,
-    DEFAULT_RESTART_POLICY,
-    DEFAULT_SURICATA_LOG_DIR,
-    DEFAULT_ZEEK_LOG_DIR,
     DOCKER_LOG_DRIVER,
     LABEL_MALCOLM_CERTRESOLVER,
     LABEL_MALCOLM_ENTRYPOINTS,
@@ -35,19 +83,15 @@ from scripts.installer.configs.constants.constants import (
     LABEL_OS_RULE,
     LABEL_OS_SERVICE,
     LABEL_OS_SERVICE_PORT,
-    OPENSEARCH_DATA_CONTAINER_PATH,
-    PCAP_CONTAINER_PATH,
     PODMAN_LOG_DRIVER,
     SERVICE_NAME_MALCOLM,
     SERVICE_NAME_OSMALCOLM,
     SERVICE_PORT_MALCOLM,
     SERVICE_PORT_OSMALCOLM,
-    SURICATA_LOG_CONTAINER_PATH,
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
-    ZEEK_LOG_CONTAINER_PATH,
 )
-
+from scripts.installer.configs.constants.enums import InstallerResult
 from scripts.installer.utils import InstallerLogger
 
 
@@ -101,8 +145,6 @@ def _apply_osmalcolm_labels(labels: dict, host: str, entrypoint: str, resolver: 
 
 
 def _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch: bool) -> bool:
-    from scripts.malcolm_constants import DatabaseMode, DATABASE_MODE_ENUMS
-
     is_local = False
     if isinstance(os_primary_mode, DatabaseMode):
         is_local = os_primary_mode == DatabaseMode.OpenSearchLocal
@@ -129,16 +171,11 @@ def _select_install_path_and_compose_files(config_dir: str):
 
 
 def _resolve_restart_policy(malcolm_config):
-    from enum import Enum
-    from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
-    )
-
     restart_policy_value = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY) or DEFAULT_RESTART_POLICY
     return restart_policy_value.value if isinstance(restart_policy_value, Enum) else str(restart_policy_value)
 
 
-def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_policy: str, deep_set) -> None:
+def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_policy: str) -> None:
     services = data.get("services", {})
     for service in services:
         if runtime_bin.startswith("podman"):
@@ -151,17 +188,6 @@ def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_poli
 
 
 def _get_traefik_config(malcolm_config):
-    from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
-        KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
-        KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-        KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
-        KEY_CONFIG_ITEM_TRAEFIK_HOST,
-        KEY_CONFIG_ITEM_TRAEFIK_LABELS,
-        KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
-        KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
-    )
-
     try:
         behind_reverse_proxy = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY))
         traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
@@ -188,7 +214,7 @@ def _get_traefik_config(malcolm_config):
     )
 
 
-def _apply_traefik_labels_if_present(data: dict, traefik_tuple, deep_get, deep_set) -> None:
+def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
     (
         behind_reverse_proxy,
         traefik_labels_enabled,
@@ -214,27 +240,7 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple, deep_get, deep_s
         deep_set(data, labels_path, labels_dict)
 
 
-def _remap_volumes(data: dict, replacements: List[tuple], deep_get, deep_set) -> None:
-    for service_name, container_path, host_path in replacements:
-        if service_name in data.get("services", {}):
-            volumes = deep_get(data, ["services", service_name, "volumes"], [])
-            if not volumes:
-                continue
-            updated = []
-            for volume in volumes:
-                if isinstance(volume, str) and container_path in volume:
-                    parts = volume.split(":")
-                    if len(parts) >= 2 and parts[1] == container_path:
-                        parts[0] = host_path
-                        updated.append(":".join(parts))
-                    else:
-                        updated.append(volume)
-                else:
-                    updated.append(volume)
-            deep_set(data, ["services", service_name, "volumes"], updated)
-
-
-def _apply_network_overrides(data: dict, network_name: Optional[str], deep_get, deep_set) -> None:
+def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
     if not network_name:
         return
     networks_config = deep_get(data, ["networks"], {})
@@ -264,18 +270,6 @@ def update_compose_files(
     malcolm_config, config_dir: str, orchestration_file: Optional[str], platform, ctx
 ) -> InstallerResult:
     """Update docker-compose files with runtime-specific settings."""
-    from scripts.malcolm_common import DumpYaml, LoadYaml
-    from scripts.malcolm_utils import deep_set, deep_get
-    from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
-        KEY_CONFIG_ITEM_INDEX_DIR,
-        KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-        KEY_CONFIG_ITEM_PCAP_DIR,
-        KEY_CONFIG_ITEM_RUNTIME_BIN,
-        KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
-        KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
-    )
-
     try:
         if orchestration_file and os.path.isfile(orchestration_file):
             compose_files = [orchestration_file]
@@ -312,33 +306,30 @@ def update_compose_files(
         index_snapshot_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR) or DEFAULT_INDEX_SNAPSHOT_DIR
         network_name = malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME)
 
-        import copy
-
         for config_file in compose_files:
             data = LoadYaml(config_file)
             if data is None or "services" not in data:
                 continue
             original = copy.deepcopy(data)
-            _update_services_runtime_settings(data, runtime_bin, restart_policy, deep_set)
+            _update_services_runtime_settings(data, runtime_bin, restart_policy)
 
             # Traefik label handling
             traefik_cfg = _get_traefik_config(malcolm_config)
-            _apply_traefik_labels_if_present(data, traefik_cfg, deep_get, deep_set)
+            _apply_traefik_labels_if_present(data, traefik_cfg)
 
             # Volume remaps
-            volume_replacements = [
-                ("arkime", PCAP_CONTAINER_PATH, pcap_dir),
-                ("arkime-live", PCAP_CONTAINER_PATH, pcap_dir),
-                ("zeek", ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
-                ("zeek-live", ZEEK_LOG_CONTAINER_PATH, zeek_log_dir),
-                ("suricata", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
-                ("suricata-live", SURICATA_LOG_CONTAINER_PATH, suricata_log_dir),
-                ("opensearch", OPENSEARCH_DATA_CONTAINER_PATH, index_dir),
-                ("opensearch-backup", OPENSEARCH_DATA_CONTAINER_PATH, index_snapshot_dir),
-            ]
-            _remap_volumes(data, volume_replacements, deep_get, deep_set)
+            RemapBoundPaths(
+                data,
+                BuildBoundPathReplacers(
+                    pcap_dir,
+                    suricata_log_dir,
+                    zeek_log_dir,
+                    index_dir,
+                    index_snapshot_dir,
+                ),
+            )
 
-            _apply_network_overrides(data, network_name, deep_get, deep_set)
+            _apply_network_overrides(data, network_name)
 
             _write_or_log_changes(original, data, config_file, platform, DumpYaml)
 
@@ -350,9 +341,6 @@ def update_compose_files(
 
 def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx) -> InstallerResult:
     """Ensure ssl.env exists in the configuration directory."""
-    import shutil
-    from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
-    from scripts.malcolm_common import get_default_config_dir
 
     try:
         if not config_dir:
@@ -420,11 +408,6 @@ def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform)
 
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
-    from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-        KEY_CONFIG_ITEM_RUNTIME_BIN,
-    )
-    from scripts.malcolm_utils import get_main_script_dir
 
     try:
         runtime_bin: str = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"

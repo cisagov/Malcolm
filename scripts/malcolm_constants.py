@@ -76,6 +76,30 @@ MALCOLM_DB_DIR = "datastore"
 MALCOLM_PCAP_DIR = "pcap"
 MALCOLM_LOGS_DIR = "logs"
 
+###################################################################################################
+# Directory path constants for volume mapping
+
+# Container paths (inside containers) used for volume mappings
+FILE_MONITOR_ZEEK_LOGS_CONTAINER_PATH = "/zeek/logs"
+FILEBEAT_SURICATA_LOG_CONTAINER_PATH = "/suricata"
+FILEBEAT_ZEEK_LOG_CONTAINER_PATH = "/zeek"
+OPENSEARCH_BACKUP_CONTAINER_PATH = "/opt/opensearch/backup"
+OPENSEARCH_DATA_CONTAINER_PATH = "/usr/share/opensearch/data"
+PCAP_CAPTURE_CONTAINER_PATH = "/pcap"
+PCAP_DATA_CONTAINER_PATH = "/data/pcap"
+SURICATA_LOG_CONTAINER_PATH = "/var/log/suricata"
+UPLOAD_ARTIFACT_CONTAINER_PATH = "/var/www/upload/server/php/chroot/files"
+ZEEK_EXTRACT_FILES_CONTAINER_PATH = "/zeek/extract_files"
+ZEEK_LIVE_LOG_CONTAINER_PATH = "/zeek/live"
+ZEEK_LOG_UPLOAD_CONTAINER_PATH = "/zeek/upload"
+
+# Default host directories when config values are not set
+DEFAULT_PCAP_DIR = "./pcap"
+DEFAULT_ZEEK_LOG_DIR = "./zeek-logs"
+DEFAULT_SURICATA_LOG_DIR = "./suricata-logs"
+DEFAULT_INDEX_DIR = "./opensearch"
+DEFAULT_INDEX_SNAPSHOT_DIR = "./opensearch-backup"
+
 
 ###################################################################################################
 # methods for Malcolm's connection to a data store

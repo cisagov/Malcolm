@@ -121,6 +121,7 @@ def handle_config_directories_tui_mode(
     non_interactive,
     use_defaults,
     load_existing_env: Optional[bool],
+    malcolm_orchestration_file: Optional[bool],
     importing_configs: bool,
     dirs: InstallerDirs,
     no_write: bool = False,
@@ -195,6 +196,15 @@ def handle_config_directories_tui_mode(
                 except Exception as e:
                     InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}") # fmt: skip
                     return False
+                try:
+                    loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
+                        dirs.input_dir, malcolm_orchestration_file
+                    )
+                    InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
+                except Exception as e:
+                    InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
+                    return False
+
             else:
                 InstallerLogger.info("Skipping load of existing .env files.") # fmt: skip
         else:
@@ -245,6 +255,14 @@ def handle_config_directories_tui_mode(
                                     InstallerLogger.info(f"Loaded existing .env files from: {dirs.input_dir}")
                                 except Exception as e:
                                     InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}")
+                                    return False
+                                try:
+                                    loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
+                                        dirs.input_dir, malcolm_orchestration_file
+                                    )
+                                    InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
+                                except Exception as e:
+                                    InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
                                     return False
                             else:
                                 InstallerLogger.info("Skipping load of existing .env files.")
@@ -659,13 +677,13 @@ def main():
             sys.exit(1)
     else:
         # TUI/DUI/Silent modes: use traditional flow
-        use_defaults = parsed_args.use_defaults
         if not handle_config_directories_tui_mode(
             malcolm_config,
             ui_impl,
             parsed_args.non_interactive,
-            use_defaults,
+            parsed_args.use_defaults,
             parsed_args.loadExistingEnv,
+            parsed_args.malcolmOrchestrationFile,
             parsed_args.importMalcolmConfigFile is not None,
             dirs,
             no_write=control_flow.is_dry_run(),

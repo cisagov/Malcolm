@@ -6,6 +6,7 @@
 """Configuration store for Malcolm installer settings."""
 
 import os
+import re
 import sys
 import datetime
 import copy
@@ -15,7 +16,7 @@ from enum import Enum
 from typing import Dict, Any, Callable, List, Tuple, Optional, Set
 
 from scripts.malcolm_common import DotEnvDynamic, DumpYaml, SYSTEM_INFO, YAMLDynamic
-from scripts.malcolm_utils import deep_set
+from scripts.malcolm_utils import deep_get, get_main_script_path
 
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
@@ -24,7 +25,18 @@ from scripts.installer.configs.configuration_items import (
     ALL_DOCKER_CONFIG_ITEMS_DICT,
     CONFIG_ITEM_DEFINITION_NAME_BY_KEY,
 )
-
+from scripts.installer.configs.constants.constants import (
+    COMPOSE_FILENAME,
+    LABEL_MALCOLM_CERTRESOLVER,
+    LABEL_MALCOLM_ENTRYPOINTS,
+    LABEL_MALCOLM_RULE,
+    LABEL_OS_CERTRESOLVER,
+    LABEL_OS_ENTRYPOINTS,
+    LABEL_OS_RULE,
+    TRAEFIK_ENABLE,
+    USERNS_MODE_KEEP_ID,
+)
+from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.core.config_env_mapper import EnvMapper, EnvVariable
@@ -178,31 +190,37 @@ class MalcolmConfig(ObservableStoreMixin):
         """Get a list of all configuration item keys."""
         return list(self._items.keys())
 
-    def set_value(self, key: str, value: Any):
+    def set_value(self, key: str, value: Any, ignore_errors: Optional[bool] = False):
         """Set the value of a configuration item.
 
         Args:
             key: Configuration item key
             value: New value to set
+            ignore_errors: silently ignore errors rather than raising (meaning the
+                           value may *not* have been set)
 
         Raises:
             ConfigItemNotFoundError: If the key does not exist.
             ConfigValueValidationError: If the value is invalid for the item.
         """
-        item = self.get_item(key)
-        if not item:
-            raise ConfigItemNotFoundError(key)
+        try:
+            item = self.get_item(key)
+            if not item:
+                raise ConfigItemNotFoundError(key)
 
-        # Transform Registry for inbound normalization
-        value = apply_inbound(key, value)
+            # Transform Registry for inbound normalization
+            value = apply_inbound(key, value)
 
-        success, error_message = item.set_value(value)
+            success, error_message = item.set_value(value)
 
-        if not success:
-            raise ConfigValueValidationError(key, value, error_message)
+            if not success:
+                raise ConfigValueValidationError(key, value, error_message)
 
-        self._modified_keys.add(key)
-        self._notify_observers(key, item.get_value())
+            self._modified_keys.add(key)
+            self._notify_observers(key, item.get_value())
+        except Exception as e:
+            if not ignore_errors:
+                raise
 
     def apply_default(self, key: str, value: Any) -> None:
         """Apply a default value without marking the item as modified and notify observers.
@@ -419,6 +437,111 @@ class MalcolmConfig(ObservableStoreMixin):
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")
 
+    def load_from_orchestration_file(
+        self,
+        config_dir: Optional[str] = None,
+        orchestration_file: Optional[str] = None,
+    ) -> Optional[str]:
+        """Load configuration from docker-compose file.
+
+        Args:
+            orchestration_file: Path to docker-compose file, or will autodiscover if None
+        """
+        compose_file_name = next(
+            (
+                p
+                for p in [
+                    orchestration_file if orchestration_file and os.path.isfile(orchestration_file) else None,
+                    os.path.join(os.path.dirname(config_dir), COMPOSE_FILENAME),
+                    os.path.join(os.path.dirname(get_main_script_path()), COMPOSE_FILENAME),
+                ]
+                if p and os.path.isfile(p)
+            ),
+            None,
+        )
+
+        if not compose_file_name or not os.path.isfile(compose_file_name):
+            return None  # Nothing to load
+
+        if yamlImported := YAMLDynamic():
+            try:
+                with open(compose_file_name, 'r') as f:
+                    if compose_data := yamlImported.YAML(typ='safe', pure=True).load(f):
+                        # set settings from compose file, gracefully ignoring validation errors
+                        #   (meaning we'll just end up with the defaults)
+
+                        # container runtime docker vs. podman
+                        self.set_value(
+                            KEY_CONFIG_ITEM_RUNTIME_BIN,
+                            (
+                                ContainerRuntime.PODMAN
+                                if any(
+                                    deep_get(config, ["userns_mode"]) == USERNS_MODE_KEEP_ID
+                                    for config in deep_get(compose_data, ["services"], {}).values()
+                                )
+                                else ContainerRuntime.DOCKER
+                            ),
+                            ignore_errors=True,
+                        )
+
+                        # traefik/reverse proxy stuff
+                        self._load_traefik_settings_from_orchestration_file(compose_data)
+
+                        # custom storage paths
+                        self._load_custom_storage_paths_from_orchestration_file(compose_data)
+
+                return compose_file_name
+            except Exception as e:
+                InstallerLogger.error(f"Error deciphering '{compose_file_name}': {e}")
+
+        return None
+
+    def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
+        # traefik/reverse proxy stuff
+        traefik_labels = {
+            k: v
+            for k, v in deep_get(compose_data, ["services", "nginx-proxy", "labels"], {}).items()
+            if k.startswith("traefik")
+        }
+        if traefik_labels.get(TRAEFIK_ENABLE, False) == True:
+            self.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True, ignore_errors=True)
+            self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True)
+            self.set_value(
+                KEY_CONFIG_ITEM_TRAEFIK_HOST,
+                (
+                    re.findall(
+                        r'Host\s*\(\s*[`"\']([^`"\']+)[`"\']',
+                        traefik_labels.get(LABEL_MALCOLM_RULE, ""),
+                    )
+                    or [""]
+                )[0],
+                ignore_errors=True,
+            )
+            self.set_value(
+                KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
+                traefik_labels.get(LABEL_MALCOLM_ENTRYPOINTS),
+                ignore_errors=True,
+            )
+            self.set_value(
+                KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
+                traefik_labels.get(LABEL_MALCOLM_CERTRESOLVER),
+                ignore_errors=True,
+            )
+            self.set_value(
+                KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
+                (
+                    re.findall(
+                        r'Host\s*\(\s*[`"\']([^`"\']+)[`"\']',
+                        traefik_labels.get(LABEL_OS_RULE, ""),
+                    )
+                    or [""]
+                )[0],
+                ignore_errors=True,
+            )
+
+    def _load_custom_storage_paths_from_orchestration_file(self, compose_data: Dict[Any, Any]):
+        return
+
     def _notify_observers(self, key: str, value: Any):
         """Notify all registered observers for a given key."""
         if key in self._observers:
@@ -426,7 +549,7 @@ class MalcolmConfig(ObservableStoreMixin):
                 try:
                     callback(value)
                 except Exception as e:
-                    InstallerLogger.error("Error in observer for key '{key}': {e}")
+                    InstallerLogger.error(f"Error in observer for key '{key}': {e}")
                     raise DependencyError(f"Observer for {key} failed: {e}") from e
 
     def search_items(self, search_term: str) -> List[Dict[str, Any]]:
