@@ -629,9 +629,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     ),
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
-            condition=lambda enabled: bool(enabled),
-            ui_parent=KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
+            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
+            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME: DependencySpec(

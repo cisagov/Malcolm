@@ -120,7 +120,9 @@ def prompt_config_item_value(
 
     # 4) String/Numeric/List with validation loop for ints
     while True:
-        if isinstance(default_value, list) or isinstance(current_value, list):
+        if config_item.accept_blank:
+            default_str = None
+        elif isinstance(default_value, list) or isinstance(current_value, list):
             default_str = ",".join([str(x) for x in (current_value or [])])
         else:
             default_str = str(current_value or "")
@@ -131,7 +133,7 @@ def prompt_config_item_value(
             return None
 
         if entry in (None, ""):
-            return None
+            return entry if config_item.accept_blank else None
 
         if isinstance(default_value, list) or isinstance(current_value, list):
             parts = [p.strip() for p in entry.split(",")] if entry else []

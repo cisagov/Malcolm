@@ -34,7 +34,8 @@ class ConfigItem:
         choices: List of choices for the item (used for UI widgets)
         ui_depth: Depth of the item in the UI tree
         ui_parent: Parent of the item in the UI tree
-        is_password: bool = False
+        is_password: Whether the field should be displayed as sensitive
+        accept_blank: Whether the field should accept a blank/empty value
         _question: Question attached to this ConfigItem to present to the user (either a str or "Callable")
         widget_type: GUI element associated with this ConfigItem
         metadata: dict = Contains information to perform inspection on
@@ -51,6 +52,7 @@ class ConfigItem:
     ui_depth: int = 0
     ui_parent: Optional[str] = None
     is_password: bool = False
+    accept_blank: bool = False
     widget_type: WidgetType = None
     metadata: dict = field(default_factory=dict)
 

@@ -99,6 +99,7 @@ CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
     key=KEY_INSTALLATION_ITEM_DOCKER_EXTRA_USERS,
     label='Docker Users',
     default_value=GetNonRootMalcolmUserNames(),
+    accept_blank=True,
     validator=_validate_docker_users_list,
     metadata={
         'help': "Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",

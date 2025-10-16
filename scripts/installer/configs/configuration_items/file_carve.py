@@ -117,6 +117,7 @@ CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY = ConfigItem(
     default_value="",
     validator=lambda x: isinstance(x, str),
     question="ZIP archive or AES-256-CBC encryption password for downloaded preserved files (blank for unencrypted)",
+    accept_blank=True,
     widget_type=WidgetType.PASSWORD,
 )
 

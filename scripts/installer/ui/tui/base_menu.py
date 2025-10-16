@@ -149,7 +149,7 @@ class BaseMenu(ABC):
         Returns:
             The user's input choice as a string
         """
-        choice = self.ask_string("Enter item number or action: ", default="")
+        choice = self.ask_string("Enter item number or action", default=None)
         return choice.strip() if choice else ""
 
     def handle_cancel(self) -> Any:

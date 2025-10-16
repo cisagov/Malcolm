@@ -42,7 +42,8 @@ CONFIG_ITEM_PCAP_FILTER = ConfigItem(
     label="Capture Filter",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)",
+    question="Capture filter (tcpdump-like filter expression; blank to capture all traffic)",
+    accept_blank=True,
     widget_type=WidgetType.TEXT,
 )
 

@@ -143,7 +143,8 @@ CONFIG_ITEM_CONTAINER_NETWORK_NAME = ConfigItem(
     label="Container Network Name",
     default_value="",
     validator=lambda x: isinstance(x, str),
-    question="External container network name (leave blank for default networking)",
+    question="External container network name (blank for default networking)",
+    accept_blank=True,
     widget_type=WidgetType.TEXT,
 )
 
