@@ -105,7 +105,7 @@ class BaseController:
         Returns:
             bool: The user's response
         """
-        if INSTALL_FUNCTIONS_AVAILABLE:
+        if INSTALL_FUNCTIONS_AVAILABLE:  # noqa: F821
             # Use the installer's function
             result = InstallerYesOrNo(
                 question,
@@ -141,7 +141,7 @@ class BaseController:
         Returns:
             str: The user's response
         """
-        if INSTALL_FUNCTIONS_AVAILABLE:
+        if INSTALL_FUNCTIONS_AVAILABLE:  # noqa: F821
             # Use the installer's function
             result = InstallerAskForString(
                 question,
@@ -178,7 +178,7 @@ class BaseController:
         Returns:
             The selected choice value
         """
-        if INSTALL_FUNCTIONS_AVAILABLE:
+        if INSTALL_FUNCTIONS_AVAILABLE:  # noqa: F821
             # Use the installer's function
             result = InstallerChooseOne(
                 prompt,

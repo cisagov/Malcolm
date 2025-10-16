@@ -32,7 +32,7 @@ class AnalysisController(BaseController):
             config: The central MalcolmConfig instance
         """
         super().__init__(config)
-        self.model = AnalysisModel(config)
+        self.model = AnalysisModel(config)  # noqa: F821
         self.view = None
 
     def set_view(self, view):

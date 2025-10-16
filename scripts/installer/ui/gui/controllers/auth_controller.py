@@ -33,7 +33,7 @@ class AuthController(BaseController):
             config: The central MalcolmConfig instance
         """
         super().__init__(config)
-        self.model = AuthModel(config)
+        self.model = AuthModel(config)  # noqa: F821
         self.view = None
 
     def set_view(self, view):
