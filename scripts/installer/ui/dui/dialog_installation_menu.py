@@ -7,6 +7,7 @@
 
 from typing import Optional, TYPE_CHECKING, List, Tuple, Dict
 
+from scripts.malcolm_utils import remove_prefix
 from scripts.malcolm_common import (
     InstallerChooseOne,
     UserInterfaceMode,
@@ -94,7 +95,7 @@ class DialogInstallationMenu:
 
             visible_children = [c for c in self._ordered_visible_children(key)]
             if visible_children:
-                nav_tag = f" ↳ {item.label} Settings"
+                nav_tag = f" ↳ {remove_prefix(item.label, 'Enable ')} Settings"
                 tag_map[nav_tag] = f"GROUP:{key}"
                 choices.append((nav_tag, "", False))
 
@@ -119,7 +120,7 @@ class DialogInstallationMenu:
                     if parent_key is None
                     else (self.ctx.items.get(parent_key).label or parent_key)
                 )
-                prompt = f"{label}: choose an item to configure"
+                prompt = f"{remove_prefix(label, 'Enable ')}: choose an item to configure"
                 result = InstallerChooseOne(
                     prompt,
                     choices=choices,
