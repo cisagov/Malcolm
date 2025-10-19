@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Shared installer actions used by multiple platforms.
-
-These helpers contain cross-platform logic that used to live under the
-former steps/ modules. They keep behavior intact while removing the
-platform-to-step indirection.
+"""
+Shared installer actions used by multiple platforms.
 """
 
 import copy
 import glob
 import os
 import shutil
+import sys
 from enum import Enum
 from typing import Tuple, List, Optional
 
@@ -249,14 +247,20 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
     if "services" in data and "nginx-proxy" in data["services"]:
         labels_path = ["services", "nginx-proxy", "labels"]
         labels_dict = deep_get(data, labels_path, {}) or {}
+
         _clear_known_traefik_labels(labels_dict)
-        labels_dict[TRAEFIK_ENABLE] = bool(behind_reverse_proxy and traefik_labels_enabled)
-        if labels_dict[TRAEFIK_ENABLE]:
+
+        # Always write a boolean traefik.enable label
+        enable_bool = bool(behind_reverse_proxy and traefik_labels_enabled)
+        labels_dict[TRAEFIK_ENABLE] = enable_bool
+
+        if enable_bool:
             if len(traefik_host) > 1 and len(traefik_entrypoint) > 1 and len(traefik_resolver) > 1:
                 _apply_malcolm_labels(labels_dict, traefik_host, traefik_entrypoint, traefik_resolver)
             if _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch):
                 if len(traefik_os_host) > 1 and len(traefik_entrypoint) > 1 and len(traefik_resolver) > 1:
                     _apply_osmalcolm_labels(labels_dict, traefik_os_host, traefik_entrypoint, traefik_resolver)
+
         deep_set(data, labels_path, labels_dict)
 
 
@@ -398,7 +402,9 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
             data['services']['nginx-proxy'].pop('ports', None)
         else:
             data['services']['nginx-proxy']['ports'] = [
-                f"{':'.join(SERVICE_IP_EXPOSED, SERVICE_PORT_MALCOLM) if nginx_ssl else ':'.join(SERVICE_IP_LOCAL, SERVICE_PORT_MALCOLM_NO_SSL)}:{SERVICE_PORT_MALCOLM}/tcp",
+                f"{(SERVICE_IP_EXPOSED if nginx_ssl else SERVICE_IP_LOCAL)}:"
+                f"{(SERVICE_PORT_MALCOLM if nginx_ssl else SERVICE_PORT_MALCOLM_NO_SSL)}:"
+                f"{SERVICE_PORT_MALCOLM}/tcp",
             ]
             if (os_primary_mode == DatabaseMode.OpenSearchLocal) and expose_opensearch:
                 data['services']['nginx-proxy']['ports'].append(
@@ -504,7 +510,7 @@ def update_compose_files(
                 )
 
                 # open ports for exposed services
-                _apply_exposed_services(data, _get_exposed_services_config(malcolm_config))
+                _apply_exposed_services(data, _get_exposed_services_config(malcolm_config), platform)
 
                 # Traefik label handling
                 _apply_traefik_labels_if_present(data, _get_traefik_config(malcolm_config))
@@ -520,7 +526,7 @@ def update_compose_files(
                 finally:
                     # restore ownership
                     if written:
-                        os.chown(config_file_stat, orig_uid, orig_gid)
+                        os.chown(config_file, orig_uid, orig_gid)
 
             except Exception as e:
                 InstallerLogger.error(f"Error updating docker-compose files: {e}")
