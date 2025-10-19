@@ -482,12 +482,24 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         value=ValueRule(
             depends_on=[
                 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
                 KEY_CONFIG_ITEM_PCAP_TCPDUMP,
                 KEY_CONFIG_ITEM_LIVE_ARKIME,
             ],
-            condition=lambda live_traffic, tcpdump, arkime: (not bool(live_traffic)) or bool(tcpdump) or bool(arkime),
-            default_value=False,
-            only_if_unmodified=False,
+            # Compute the default based on current dependencies. This makes
+            # netsniff the default capture engine for Malcolm profile when
+            # using local OpenSearch and live capture is enabled, unless the
+            # user has explicitly enabled tcpdump or Arkime.
+            condition=lambda live_traffic, profile, mode, tcpdump, arkime: True,
+            default_value=lambda live_traffic, profile, mode, tcpdump, arkime: (
+                bool(live_traffic)
+                and (profile == PROFILE_MALCOLM)
+                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+                and (not bool(tcpdump))
+                and (not bool(arkime))
+            ),
+            only_if_unmodified=True,
         ),
     ),
     KEY_CONFIG_ITEM_PCAP_TCPDUMP: DependencySpec(
@@ -504,7 +516,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ],
             condition=lambda live_traffic, netsniff, arkime: (not bool(live_traffic)) or bool(netsniff) or bool(arkime),
             default_value=False,
-            only_if_unmodified=False,
+            only_if_unmodified=True,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
@@ -530,14 +542,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_PCAP_NETSNIFF,
                 KEY_CONFIG_ITEM_PCAP_TCPDUMP,
             ],
-            condition=lambda live_traffic, profile, mode, netsniff, tcpdump: (
-                (not bool(live_traffic))
-                or (not ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value)))
-                or bool(netsniff)
-                or bool(tcpdump)
+            # Always compute the default from current dependency values, but
+            # only apply it if the user hasn't modified the item yet.
+            condition=lambda live_traffic, profile, mode, netsniff, tcpdump: True,
+            default_value=lambda live_traffic, profile, mode, netsniff, tcpdump: (
+                bool(live_traffic)
+                and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value))
+                and (not bool(netsniff))
+                and (not bool(tcpdump))
             ),
-            default_value=False,
-            only_if_unmodified=False,
+            only_if_unmodified=True,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
@@ -1037,19 +1051,3 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
 }
-
-
-# =============================================================================
-# COMPLEX MULTI-DEPENDENCY RULES
-# =============================================================================
-
-# Some dependencies are too complex for the simple declarative format above.
-# These are defined as functions that return dependency specifications.
-
-
-def get_complex_dependencies() -> Dict[str, DependencySpec]:
-    """Return complex dependency rules that are more conveniently defined with logic"""
-
-    complex_deps = {}
-
-    return complex_deps

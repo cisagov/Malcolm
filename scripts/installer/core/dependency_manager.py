@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 from scripts.installer.core.dependencies import (
     DEPENDENCY_CONFIG,
-    get_complex_dependencies,
     DependencySpec,
     VisibilityRule,
     ValueRule,
@@ -47,12 +46,6 @@ class DependencyManager:
         # Register standard dependencies
         dependency_count = 0
         for item_key, dep_spec in DEPENDENCY_CONFIG.items():
-            self._register_dependency(item_key, dep_spec)
-            dependency_count += 1
-
-        # Register complex dependencies
-        complex_deps = get_complex_dependencies()
-        for item_key, dep_spec in complex_deps.items():
             self._register_dependency(item_key, dep_spec)
             dependency_count += 1
 
@@ -242,22 +235,9 @@ class DependencyManager:
             "is_top_level": False,
         }
 
-        # Check standard dependencies
+        # Check dependencies
         if item_key in DEPENDENCY_CONFIG:
             dep_spec = DEPENDENCY_CONFIG[item_key]
-            if dep_spec.visibility:
-                info["has_visibility_rule"] = True
-                info["visibility_depends_on"] = dep_spec.visibility.depends_on
-                info["ui_parent"] = dep_spec.visibility.ui_parent
-                info["is_top_level"] = dep_spec.visibility.is_top_level
-            if dep_spec.value:
-                info["has_value_rule"] = True
-                info["value_depends_on"] = dep_spec.value.depends_on
-
-        # Check complex dependencies
-        complex_deps = get_complex_dependencies()
-        if item_key in complex_deps:
-            dep_spec = complex_deps[item_key]
             if dep_spec.visibility:
                 info["has_visibility_rule"] = True
                 info["visibility_depends_on"] = dep_spec.visibility.depends_on
