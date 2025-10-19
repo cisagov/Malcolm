@@ -251,10 +251,8 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
         _clear_known_traefik_labels(labels_dict)
 
         # Always write a boolean traefik.enable label
-        enable_bool = bool(behind_reverse_proxy and traefik_labels_enabled)
-        labels_dict[TRAEFIK_ENABLE] = enable_bool
-
-        if enable_bool:
+        labels_dict[TRAEFIK_ENABLE] = bool(behind_reverse_proxy and traefik_labels_enabled)
+        if labels_dict[TRAEFIK_ENABLE]:
             if len(traefik_host) > 1 and len(traefik_entrypoint) > 1 and len(traefik_resolver) > 1:
                 _apply_malcolm_labels(labels_dict, traefik_host, traefik_entrypoint, traefik_resolver)
             if _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch):
