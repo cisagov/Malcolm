@@ -61,7 +61,9 @@ class TestDockerComposeIntegration(BaseInstallerTest):
                     "image": "ghcr.io/idaholab/malcolm/zeek:latest",
                     "restart": "no",
                     "logging": {"driver": "local"},
-                    "volumes": ["./zeek-logs:/opt/zeek/logs"],
+                    # Use a container path that our remapper supports for the zeek service
+                    # (upload directory under the zeek logs root)
+                    "volumes": ["./zeek-logs:/zeek/upload"],
                 },
             },
             "networks": {"default": {"name": "malcolm_default"}},
@@ -142,8 +144,14 @@ class TestDockerComposeIntegration(BaseInstallerTest):
     def test_volume_mount_updates(self):
         """Test that volume mounts are updated with custom paths."""
         malcolm_config = MalcolmConfig()
-        malcolm_config.set_value(KEY_CONFIG_ITEM_PCAP_DIR, "/custom/pcap")
-        malcolm_config.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "/custom/zeek")
+        # Create real temporary directories so RemapBoundPaths will remap
+        custom_pcap = os.path.join(self.test_dir, "pcap-custom")
+        custom_zeek = os.path.join(self.test_dir, "zeek-custom")
+        os.makedirs(custom_pcap, exist_ok=True)
+        os.makedirs(os.path.join(custom_zeek, "upload"), exist_ok=True)
+
+        malcolm_config.set_value(KEY_CONFIG_ITEM_PCAP_DIR, custom_pcap)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, custom_zeek)
 
         result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
         self.assertTrue(result)
@@ -153,11 +161,12 @@ class TestDockerComposeIntegration(BaseInstallerTest):
 
         # Check arkime pcap volume mount
         arkime_volumes = updated_data["services"]["arkime"]["volumes"]
-        self.assertIn("/custom/pcap:/data/pcap", arkime_volumes)
+        self.assertIn(f"{custom_pcap}:/data/pcap", arkime_volumes)
 
         # Check zeek log volume mount
         zeek_volumes = updated_data["services"]["zeek"]["volumes"]
-        self.assertIn("/custom/zeek:/opt/zeek/logs", zeek_volumes)
+        # For zeek, upload directory is remapped to <zeek_dir>/upload
+        self.assertIn(f"{os.path.join(custom_zeek, 'upload')}:/zeek/upload", zeek_volumes)
 
     def test_network_configuration_updates(self):
         """Test that network configuration is updated."""
