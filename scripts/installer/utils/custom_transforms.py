@@ -205,28 +205,54 @@ def custom_reverse_transform_filebeat_syslog_udp_listen(value: str) -> None:
     return None
 
 
-def custom_transform_filebeat_syslog_tcp_port(tcp_port: int) -> str:
+def custom_transform_filebeat_syslog_tcp_port(tcp_port: int, accept_syslog: bool) -> str:
+    """Forward transform for FILEBEAT_SYSLOG_TCP_PORT.
+
+    Takes both the port and accept_syslog flag, but only the port is written.
+    The accept_syslog flag determines whether the port should be written (it's
+    derived from whether the port is non-zero).
+    """
     return str(tcp_port) if tcp_port is not None else "0"
 
 
-def custom_reverse_transform_filebeat_syslog_tcp_port(value: str) -> Optional[int]:
+def custom_reverse_transform_filebeat_syslog_tcp_port(value: str):
+    """Return tuple (port, accept_syslog_enabled).
+
+    If a non-zero port is configured, we infer that syslog should be accepted.
+    """
     try:
         port = int(str(value).strip())
     except Exception:
-        return None
-    return None if port == 0 else port
+        return (None, False)
+
+    port_value = None if port == 0 else port
+    accept_syslog = port is not None and port > 0
+    return (port_value, accept_syslog)
 
 
-def custom_transform_filebeat_syslog_udp_port(udp_port: int) -> str:
+def custom_transform_filebeat_syslog_udp_port(udp_port: int, accept_syslog: bool) -> str:
+    """Forward transform for FILEBEAT_SYSLOG_UDP_PORT.
+
+    Takes both the port and accept_syslog flag, but only the port is written.
+    The accept_syslog flag determines whether the port should be written (it's
+    derived from whether the port is non-zero).
+    """
     return str(udp_port) if udp_port is not None else "0"
 
 
-def custom_reverse_transform_filebeat_syslog_udp_port(value: str) -> Optional[int]:
+def custom_reverse_transform_filebeat_syslog_udp_port(value: str):
+    """Return tuple (port, accept_syslog_enabled).
+
+    If a non-zero port is configured, we infer that syslog should be accepted.
+    """
     try:
         port = int(str(value).strip())
     except Exception:
-        return None
-    return None if port == 0 else port
+        return (None, False)
+
+    port_value = None if port == 0 else port
+    accept_syslog = port is not None and port > 0
+    return (port_value, accept_syslog)
 
 
 def custom_reverse_transform_opensearch_index_size_prune_limit(value: str) -> str:
@@ -299,12 +325,22 @@ def custom_reverse_transform_opensearch_java_opts(value: str) -> str:
     return mem
 
 
-def custom_transform_pcap_enable_tcpdump(pcapTcpDump: bool, pcapNetSniff: bool) -> str:
+def custom_transform_pcap_enable_tcpdump(pcapTcpDump: bool, pcapNetSniff: bool, captureLive: bool) -> str:
+    """Forward transform for PCAP_ENABLE_TCPDUMP.
+
+    Maps 3 config items but only uses the first two for the transform logic.
+    """
     return true_or_false_no_quotes(pcapTcpDump and (not pcapNetSniff))
 
 
-def custom_reverse_transform_pcap_enable_tcpdump(value: str) -> bool:
-    return _env_str_to_bool(value)
+def custom_reverse_transform_pcap_enable_tcpdump(value: str):
+    """Reverse transform for PCAP_ENABLE_TCPDUMP.
+
+    Returns tuple (tcpdump, netsniff, captureLive).
+    Only tcpdump is authoritative; netsniff and captureLive are derived/ignored.
+    """
+    tcpdump_enabled = _env_str_to_bool(value)
+    return (tcpdump_enabled, "", "")
 
 
 def custom_transform_container_runtime_key(orchMode, runtimeBin: str) -> str:
@@ -400,3 +436,80 @@ def custom_reverse_transform_opensearch_url(value: str):
         return ("", "")
     # Non-default URL - preserve it but don't infer mode
     return ("", value if value else "")
+
+
+# Live capture transforms
+def custom_transform_arkime_live_capture(liveArkime: bool, captureLive: bool) -> str:
+    """Forward transform for ARKIME_LIVE_CAPTURE.
+    
+    Write true only if live Arkime is enabled.
+    captureLive is a derived/shared flag.
+    """
+    return true_or_false_no_quotes(liveArkime)
+
+
+def custom_reverse_transform_arkime_live_capture(value: str):
+    """Reverse transform for ARKIME_LIVE_CAPTURE.
+    
+    Returns tuple (liveArkime, captureLive).
+    """
+    live_arkime = _env_str_to_bool(value)
+    # Don't set captureLive from this env var (it's set by dependency system)
+    return (live_arkime, "")
+
+
+def custom_transform_zeek_live_capture(liveZeek: bool, captureLive: bool) -> str:
+    """Forward transform for ZEEK_LIVE_CAPTURE.
+    
+    Write true only if live Zeek is enabled.
+    captureLive is a derived/shared flag.
+    """
+    return true_or_false_no_quotes(liveZeek)
+
+
+def custom_reverse_transform_zeek_live_capture(value: str):
+    """Reverse transform for ZEEK_LIVE_CAPTURE.
+    
+    Returns tuple (liveZeek, captureLive).
+    """
+    live_zeek = _env_str_to_bool(value)
+    # Don't set captureLive from this env var (it's set by dependency system)
+    return (live_zeek, "")
+
+
+def custom_transform_suricata_live_capture(liveSuricata: bool, captureLive: bool) -> str:
+    """Forward transform for SURICATA_LIVE_CAPTURE.
+    
+    Write true only if live Suricata is enabled.
+    captureLive is a derived/shared flag.
+    """
+    return true_or_false_no_quotes(liveSuricata)
+
+
+def custom_reverse_transform_suricata_live_capture(value: str):
+    """Reverse transform for SURICATA_LIVE_CAPTURE.
+    
+    Returns tuple (liveSuricata, captureLive).
+    """
+    live_suricata = _env_str_to_bool(value)
+    # Don't set captureLive from this env var (it's set by dependency system)
+    return (live_suricata, "")
+
+
+def custom_transform_pcap_enable_netsniff(pcapNetSniff: bool, captureLive: bool) -> str:
+    """Forward transform for PCAP_ENABLE_NETSNIFF.
+    
+    Write true only if netsniff is enabled.
+    captureLive is a derived/shared flag.
+    """
+    return true_or_false_no_quotes(pcapNetSniff)
+
+
+def custom_reverse_transform_pcap_enable_netsniff(value: str):
+    """Reverse transform for PCAP_ENABLE_NETSNIFF.
+    
+    Returns tuple (pcapNetSniff, captureLive).
+    """
+    netsniff = _env_str_to_bool(value)
+    # Don't set captureLive from this env var (it's set by dependency system)
+    return (netsniff, "")

@@ -52,10 +52,9 @@ def _default_string_reverse_transform(value: str):
     return value
 
 
-# 1. Boolean transform logic
+# 1. Boolean transform logic (single config item only)
 _BOOLEAN_VARS = [
     KEY_ENV_ARKIME_MANAGE_PCAP_FILES,
-    KEY_ENV_ARKIME_LIVE_CAPTURE,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_ENABLED,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_HOT_WARM_ENABLED,
     KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE,
@@ -72,7 +71,6 @@ _BOOLEAN_VARS = [
     KEY_ENV_NGINX_RESOLVER_IPV6,
     KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION,
     KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION,
-    KEY_ENV_PCAP_ENABLE_NETSNIFF,
     KEY_ENV_PCAP_IFACE_TWEAK,
     KEY_ENV_SURICATA_UPDATE_RULES,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE,
@@ -81,10 +79,8 @@ _BOOLEAN_VARS = [
     KEY_ENV_ZEEK_FILE_ENABLE_CAPA,
     KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV,
     KEY_ENV_ZEEK_FILE_UPDATE_RULES,
-    KEY_ENV_ZEEK_LIVE_CAPTURE,
     KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP,
     KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES,
-    KEY_ENV_SURICATA_LIVE_CAPTURE,
     KEY_ENV_SURICATA_STATS_ENABLED,
     KEY_ENV_SURICATA_STATS_EVE_ENABLED,
     KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES,
@@ -242,6 +238,23 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         forward=custom_transform_filebeat_syslog_udp_port,
         reverse=custom_reverse_transform_filebeat_syslog_udp_port,
     ),
+    # Live capture transforms
+    KEY_ENV_ARKIME_LIVE_CAPTURE: TransformHook(
+        forward=custom_transform_arkime_live_capture,
+        reverse=custom_reverse_transform_arkime_live_capture,
+    ),
+    KEY_ENV_ZEEK_LIVE_CAPTURE: TransformHook(
+        forward=custom_transform_zeek_live_capture,
+        reverse=custom_reverse_transform_zeek_live_capture,
+    ),
+    KEY_ENV_SURICATA_LIVE_CAPTURE: TransformHook(
+        forward=custom_transform_suricata_live_capture,
+        reverse=custom_reverse_transform_suricata_live_capture,
+    ),
+    KEY_ENV_PCAP_ENABLE_NETSNIFF: TransformHook(
+        forward=custom_transform_pcap_enable_netsniff,
+        reverse=custom_reverse_transform_pcap_enable_netsniff,
+    ),
     # Keep human-readable size/percent strings; write '0' when unset
     KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT: TransformHook(
         forward=custom_transform_opensearch_index_size_prune_limit,
@@ -388,6 +401,8 @@ class EnvMapper:
             KEY_CONFIG_ITEM_LIVE_ARKIME,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
+        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
         self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST]
         self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
             KEY_CONFIG_ITEM_AUTO_ARKIME,
@@ -450,11 +465,25 @@ class EnvMapper:
         self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
         # Derived: listen is implied by port; do not set port from listen
         self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].derived_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].config_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
+        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].config_items = [
+            KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
+            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+        ]
+        # Port is authoritative; accept-syslog is derived from whether port is non-zero
+        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].derived_items = [
+            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
+        ]
         self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
         # Derived: listen is implied by port; do not set port from listen
         self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].derived_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].config_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
+        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].config_items = [
+            KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
+            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+        ]
+        # Port is authoritative; accept-syslog is derived from whether port is non-zero
+        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].derived_items = [
+            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
+        ]
 
         # NetBox
         self.env_var_by_map_key[KEY_ENV_NETBOX_ENRICHMENT].config_items = [KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH]
@@ -510,14 +539,19 @@ class EnvMapper:
             KEY_CONFIG_ITEM_PCAP_NETSNIFF,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
+        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].config_items = [
             KEY_CONFIG_ITEM_PCAP_TCPDUMP,
             KEY_CONFIG_ITEM_PCAP_NETSNIFF,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
-        # Only authoritative for tcpdump; derived (non-authoritative) for netsniff
+        # Only authoritative for tcpdump; derived (non-authoritative) for netsniff and live capture
         self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCPDUMP]
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [KEY_CONFIG_ITEM_PCAP_NETSNIFF]
+        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [
+            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+        ]
         self.env_var_by_map_key[KEY_ENV_PCAP_IFACE_TWEAK].config_items = [KEY_CONFIG_ITEM_TWEAK_IFACE]
         self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
         self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]
@@ -542,6 +576,8 @@ class EnvMapper:
             KEY_CONFIG_ITEM_LIVE_SURICATA,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
+        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+        self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
         self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_EVE_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_SURICATA_ROTATED_PCAP].config_items = [
@@ -564,6 +600,8 @@ class EnvMapper:
             KEY_CONFIG_ITEM_LIVE_ZEEK,
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
         ]
+        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+        self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
         self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_STATS].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
         self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].config_items = [
             KEY_CONFIG_ITEM_AUTO_ZEEK,
