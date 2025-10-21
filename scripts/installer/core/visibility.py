@@ -21,6 +21,7 @@ def install_item_is_visible(
     get_value: Optional[Callable[[str], object]] = None,
     docker_installed: Optional[bool] = None,
     compose_available: Optional[bool] = None,
+    has_system_tweaks: Optional[bool] = None,
 ) -> bool:
     """Return True if an installation item should be visible.
 
@@ -29,6 +30,7 @@ def install_item_is_visible(
     # Resolve inputs from context when not provided
     orchestration_mode = orchestration_mode or getattr(ctx, "_orchestration_mode", None)
     runtime_bin = (runtime_bin or getattr(ctx, "_runtime_bin", None) or "").lower()
+    has_system_tweaks = has_system_tweaks if has_system_tweaks is not None else getattr(ctx, "has_system_tweaks", True)
     image_archive_path = image_archive_path or getattr(ctx, "image_archive_path", None)
     if get_value is None:
         get_value = getattr(ctx, "get_item_value", None)
@@ -100,6 +102,9 @@ def install_item_is_visible(
         if compose_available is True and key == KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD:
             return False
 
+    if (key == _lazy_key_auto_system_tweaks()) and (not has_system_tweaks):
+        return False
+
     return True
 
 
@@ -109,6 +114,14 @@ def _lazy_key_load_images():
     )
 
     return KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES
+
+
+def _lazy_key_auto_system_tweaks():
+    from scripts.installer.configs.constants.installation_item_keys import (
+        KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
+    )
+
+    return KEY_INSTALLATION_ITEM_AUTO_TWEAKS
 
 
 def _lazy_docker_keys():

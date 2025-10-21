@@ -30,7 +30,6 @@ from scripts.installer.configs.installation_items.windows import (
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
-    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
@@ -42,6 +41,7 @@ from scripts.installer.core.visibility import install_item_is_visible
 from scripts.installer.core.transform_registry import apply_inbound
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.installer.actions.shared import discover_compose_command  # type: ignore
+from scripts.malcolm_common import GetNonRootMalcolmUserNames
 
 
 @dataclass
@@ -52,6 +52,7 @@ class InstallContext:
     config_only: bool = False
 
     # Basic fields for compatibility
+    has_system_tweaks: Optional[bool] = field(default=False, init=False)
     docker_extra_users: List[str] = field(default_factory=list)
 
     # User confirmation
@@ -81,6 +82,8 @@ class InstallContext:
         # Register platform-specific tweak items
         if platform_name.lower() == PLATFORM_LINUX.lower() or platform_name.lower() == "linux":
             self._register_linux_tweak_items()
+            self.has_system_tweaks = True
+            self.set_docker_extra_users(GetNonRootMalcolmUserNames())
 
     def _register_linux_tweak_items(self) -> None:
         """Register Linux tweak items from the Tweak Registry as first-class items."""
@@ -121,8 +124,8 @@ class InstallContext:
 
     def attach_platform_probe(self, platform: Any) -> None:
         """Probe platform for container tooling availability for visibility rules."""
-        self._docker_installed = bool(platform.is_docker_installed())
         rb = (self._runtime_bin or "").lower()
+        self._docker_installed = bool(platform.is_docker_installed(runtime_bin=rb))
         cmd = discover_compose_command(rb, platform)
         self._compose_available = bool(cmd)
 
@@ -202,11 +205,6 @@ class InstallContext:
     def use_homebrew(self) -> bool:
         """Get use_homebrew value from items or default."""
         return self.get_item_value(KEY_INSTALLATION_ITEM_USE_HOMEBREW, default=True)
-
-    @property
-    def continue_without_homebrew(self) -> bool:
-        """Get continue_without_homebrew value from items or default."""
-        return self.get_item_value(KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW, default=False)
 
     @property
     def configure_docker_resources(self) -> bool:

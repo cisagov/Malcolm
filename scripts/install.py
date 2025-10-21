@@ -582,16 +582,6 @@ def main():
     try:
         install_context = InstallContext()
         install_context.initialize_for_platform(get_platform_name())
-        # attach runtime source so InstallContext can compute visibility without UI logic
-        try:
-            install_context.attach_runtime_source(malcolm_config)
-        except Exception:
-            pass
-        # attach platform probes for docker/compose availability
-        try:
-            install_context.attach_platform_probe(platform_installer)
-        except Exception:
-            pass
         # reflect CLI-driven control flow in context for UI summaries
         try:
             install_context.config_only = control_flow.is_config_only()
@@ -743,6 +733,16 @@ def main():
                 return
 
         if not install_context.config_only:
+            # attach runtime source so InstallContext can compute visibility without UI logic
+            try:
+                install_context.attach_runtime_source(malcolm_config)
+            except Exception:
+                pass
+            # attach platform probes for docker/compose availability
+            try:
+                install_context.attach_platform_probe(platform_installer)
+            except Exception:
+                pass
             install_context = ui_impl.gather_install_options(platform_installer, malcolm_config, install_context)
 
         if install_context is None:

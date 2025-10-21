@@ -19,7 +19,7 @@ from scripts.malcolm_utils import (
     get_iterable,
 )
 
-from scripts.installer.configs.constants.enums import ControlFlow
+from scripts.installer.configs.constants.enums import ControlFlow, InstallerResult
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.logger_utils import InstallerLogger
 
@@ -79,7 +79,6 @@ class BaseInstaller(abc.ABC):
         config_dir: str,
         ctx,
         orchestration_file=None,
-        logger=None,
     ) -> bool:
         """Execute the full installation flow for this platform.
 
@@ -110,17 +109,37 @@ class BaseInstaller(abc.ABC):
         """
         pass
 
+    def apply_tweaks(
+        self,
+        malcolm_config,
+        config_dir: str,
+        ctx: InstallContext,
+    ) -> tuple[InstallerResult, str]:
+        """Install platform-specific system tweaks
+
+        Returns:
+            Installer result and status string
+        """
+        return InstallerResult.SKIPPED, ''
+
+    def has_tweaks(self) -> bool:
+        """Check if subclass has platform-specific system tweaks to apply
+
+        Returns:
+            True if a subclass overrides apply_tweaks
+        """
+        return type(self).apply_tweaks is not BaseInstaller.apply_tweaks
+
     def run_installation(
         self,
         malcolm_config,
         config_dir: str,
         ctx,
         orchestration_file=None,
-        logger=None,
     ) -> bool:
         """Run the installation process for this platform via install()."""
         try:
-            return self.install(malcolm_config, config_dir, ctx, orchestration_file, logger)
+            return self.install(malcolm_config, config_dir, ctx, orchestration_file)
         except Exception as e:
             import traceback
 
@@ -208,7 +227,12 @@ class BaseInstaller(abc.ABC):
         """Install packages using platform package manager."""
         return False
 
-    def is_docker_installed(self) -> bool:
+    def is_docker_installed(
+        self,
+        retry: int = 1,
+        retry_sleep_sec: int = 5,
+        runtime_bin: Optional[str] = "docker",
+    ) -> bool:
         """Return True if Docker CLI and daemon are accessible.
 
         Default implementation attempts "docker info" and treats a zero
@@ -216,7 +240,12 @@ class BaseInstaller(abc.ABC):
         more nuanced checks.
         """
         try:
-            err, _ = self.run_process(["docker", "info"], stderr=False)
+            err, _ = self.run_process(
+                [runtime_bin if runtime_bin else "docker", "info"],
+                retry=retry,
+                retry_sleep_sec=retry_sleep_sec,
+                stderr=False,
+            )
             return err == 0
         except Exception:
             return False

@@ -101,9 +101,9 @@ CONFIG_ITEM_DOCKER_EXTRA_USERS = DockerUsersConfigItem(
     default_value=GetNonRootMalcolmUserNames(),
     accept_blank=True,
     validator=_validate_docker_users_list,
+    widget_type=WidgetType.TEXT,
+    question="Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
     metadata={
-        'help': "Add non-root users to the 'docker' group during installation (comma separated list, blank for none)",
-        'widget_type': 'text',
         "visible_when_runtime": "docker",
     },
 )

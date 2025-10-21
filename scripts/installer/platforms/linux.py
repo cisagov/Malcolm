@@ -34,8 +34,10 @@ from scripts.malcolm_constants import (
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
 )
+from scripts.installer.configs.constants.configuration_item_keys import KEY_CONFIG_ITEM_RUNTIME_BIN
 from scripts.installer.configs.constants.enums import (
     DockerComposeInstallMethod,
+    InstallerResult,
 )
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -224,15 +226,14 @@ class LinuxInstaller(BaseInstaller):
             InstallerLogger.info(f"Successfully installed packages: {packages_to_install}")
         return True
 
-    def install_docker(self, install_context: InstallContext) -> bool:
+    def install_docker(self, install_context: InstallContext, runtime_bin: Optional[str] = "docker") -> bool:
         """Install Docker on Linux using platform-appropriate methods."""
         # Quick check: if Docker is already available and responsive, nothing to do.
-        try:
-            err, _ = self.run_process(["docker", "info"], stderr=False)
-            if err == 0:
-                return True
-        except Exception:
-            pass
+        if self.is_docker_installed(runtime_bin=runtime_bin):
+            return True
+        elif runtime_bin != "docker":
+            return False
+
         # Dry run: report intended actions, skip changes
         if self.config_only or self.dry_run:
             actions = []
@@ -252,7 +253,7 @@ class LinuxInstaller(BaseInstaller):
         # Try repository installation first
         if install_context.try_docker_repository_install:
             if self._install_docker_from_repo():
-                return self._finalize_docker_installation(install_context)
+                return self._finalize_docker_installation(install_context, runtime_bin)
 
         # Fall back to convenience script
         if install_context.try_docker_convenience_script:
@@ -260,20 +261,23 @@ class LinuxInstaller(BaseInstaller):
                 "Docker not installed via official repositories. Attempting to install Docker via convenience script (see https://github.com/docker/docker-install)"
             )
             if self._install_docker_convenience_script():
-                return self._finalize_docker_installation(install_context)
+                return self._finalize_docker_installation(install_context, runtime_bin)
 
         return False
 
-    def _finalize_docker_installation(self, install_context: InstallContext) -> bool:
+    def _finalize_docker_installation(
+        self, install_context: InstallContext, runtime_bin: Optional[str] = "docker"
+    ) -> bool:
         """Complete Docker installation with service setup and user configuration."""
 
         # Configure Docker service
-        self._configure_docker_service()
+        if runtime_bin == "docker":
+            self._configure_docker_service()
 
         # Verify installation
-        err, out = self.run_process(["docker", "info"], retry=6, retry_sleep_sec=5)
-        if err == 0:
-            self._add_users_to_docker_group(install_context.docker_extra_users)
+        if self.is_docker_installed(retry=6, retry_sleep_sec=5, runtime_bin=runtime_bin):
+            if runtime_bin == "docker":
+                self._add_users_to_docker_group(install_context.docker_extra_users)
             return True
         else:
             raise Exception(f"Docker installation verification failed: {out}")
@@ -497,7 +501,7 @@ class LinuxInstaller(BaseInstaller):
             else:
                 InstallerLogger.error(f'Adding {user} to "docker" group failed')
 
-    def install_docker_compose(self, install_context: InstallContext) -> bool:
+    def install_docker_compose(self, install_context: InstallContext, runtime_bin: Optional[str] = "docker") -> bool:
         """Attempt to install the docker compose plugin on linux.
 
         With most platforms we're already installing Compose alongside Docker
@@ -506,7 +510,7 @@ class LinuxInstaller(BaseInstaller):
         """
         import pathlib
 
-        if discover_compose_command("docker", self):
+        if discover_compose_command(runtime_bin, self):
             return True
 
         elif (
@@ -542,6 +546,21 @@ class LinuxInstaller(BaseInstaller):
 
         return False
 
+    def apply_tweaks(
+        self,
+        malcolm_config: "MalcolmConfig",
+        config_dir: str,
+        ctx,
+    ) -> tuple[InstallerResult, str]:
+        """Install Linux-specific system tweaks
+
+        Returns:
+            Installer result and status string
+        """
+        from scripts.installer.platforms.utils import linux_tweaks
+
+        return linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx)
+
     # new unified orchestration entry point
     def install(
         self,
@@ -565,8 +584,6 @@ class LinuxInstaller(BaseInstaller):
         """
         from scripts.malcolm_constants import OrchestrationFramework
         from scripts.installer.actions import shared as shared_actions
-        from scripts.installer.platforms.utils import linux_tweaks
-        from scripts.installer.configs.constants.enums import InstallerResult
 
         def _ok(result) -> bool:
             if isinstance(result, tuple):
@@ -576,6 +593,8 @@ class LinuxInstaller(BaseInstaller):
             if isinstance(result, InstallerResult):
                 return result in (InstallerResult.SUCCESS, InstallerResult.SKIPPED)
             return True
+
+        runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
 
         # 1) Filesystem (shared)
         if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx)):
@@ -592,11 +611,11 @@ class LinuxInstaller(BaseInstaller):
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
                 # Docker
-                if not self.is_docker_installed():
-                    if not self.install_docker(ctx):
+                if not self.is_docker_installed(runtime_bin=runtime_bin):
+                    if not self.install_docker(ctx, runtime_bin):
                         return False
                 # Compose
-                if not self.install_docker_compose(ctx):
+                if not self.install_docker_compose(ctx, runtime_bin):
                     # non-fatal if compose already present; verify via docker_ops later
                     pass
             else:
@@ -614,7 +633,7 @@ class LinuxInstaller(BaseInstaller):
 
         # 6) Linux tweaks (only in install mode)
         if self.should_run_install_steps():
-            status, _ = linux_tweaks.apply_all(malcolm_config, config_dir, self, ctx)
+            status, _ = self.apply_tweaks(malcolm_config, config_dir, ctx)
             if status == InstallerResult.FAILURE:
                 return False
         else:

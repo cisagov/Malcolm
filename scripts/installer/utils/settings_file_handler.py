@@ -20,7 +20,6 @@ from scripts.installer.configs.constants.installation_item_keys import (
     get_set_of_installation_item_keys,
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
-    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT,
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
@@ -416,7 +415,6 @@ class SettingsFileHandler:
             KEY_INSTALLATION_ITEM_AUTO_TWEAKS: "auto_tweaks",
             KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING: "install_docker_if_missing",
             KEY_INSTALLATION_ITEM_USE_HOMEBREW: "use_homebrew",
-            KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW: "continue_without_homebrew",
             KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES: "configure_docker_resources",
             KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY: "try_docker_repository_install",
             KEY_INSTALLATION_ITEM_TRY_DOCKER_CONVENIENCE_SCRIPT: "try_docker_convenience_script",
@@ -442,10 +440,6 @@ class SettingsFileHandler:
             KEY_INSTALLATION_ITEM_USE_HOMEBREW: (
                 default_context.use_homebrew,
                 "Use Homebrew package manager (macOS)",
-            ),
-            KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW: (
-                default_context.continue_without_homebrew,
-                "Continue without Homebrew if unavailable",
             ),
             KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES: (
                 default_context.configure_docker_resources,

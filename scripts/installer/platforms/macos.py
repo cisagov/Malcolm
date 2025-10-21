@@ -6,7 +6,7 @@
 """macOS-specific installer implementation for Malcolm."""
 
 import os
-from typing import List
+from typing import List, Optional
 
 from scripts.malcolm_constants import OrchestrationFramework
 
@@ -14,6 +14,7 @@ from scripts.malcolm_constants import OrchestrationFramework
 
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.logger_utils import InstallerLogger
+from scripts.installer.configs.constants.configuration_item_keys import KEY_CONFIG_ITEM_RUNTIME_BIN
 
 from .base import BaseInstaller
 
@@ -33,33 +34,19 @@ class MacInstaller(BaseInstaller):
 
         self.use_brew = False
 
-    def _setup_homebrew(self, install_context: InstallContext):
+    def setup_homebrew(self, install_context: InstallContext):
         """Setup Homebrew package manager for macOS using InstallContext decisions."""
         # First see if brew is already installed and runnable
-        err, out = self.run_process(["brew", "info"])
-        brew_installed = err == 0
-
-        if brew_installed and install_context.use_homebrew:
-            self.use_brew = True
+        if install_context.use_homebrew:
+            err, out = self.run_process(["brew", "info"])
+            self.use_brew = err == 0
         else:
             self.use_brew = False
-            if (not brew_installed) and (not install_context.continue_without_homebrew):
-                # User decided not to continue without Homebrew
-                # In test/mocked environments we avoid raising hard exceptions
-                return
-
-        if self.use_brew:
-            # Modern Homebrew integrates casks; ensure tap for alternate versions exists
-            err, out = self.run_process(["brew", "tap", "homebrew/cask-versions"])
-            if err == 0:
-                if self.debug:
-                    InstallerLogger.info('"brew tap homebrew/cask-versions" succeeded')
-            else:
-                InstallerLogger.warning(f'"brew tap homebrew/cask-versions" failed with {err}, {out}')
 
     def _get_required_dependencies(self) -> List[str]:
         """Get the list of required dependencies for macOS."""
-        return ["curl", "wget", "git"]
+        # afaik, htpassd, make, openssl, and xz are all included on MacOS
+        return []
 
     def install_dependencies(self) -> bool:
         """Install macOS-specific dependencies."""
@@ -67,8 +54,7 @@ class MacInstaller(BaseInstaller):
             InstallerLogger.warning("Homebrew not available, cannot install dependencies automatically")
             return False
 
-        required_deps = self._get_required_dependencies()
-        return self.install_package(required_deps)
+        return self.install_package(self._get_required_dependencies())
 
     def package_is_installed(self, package_name: str) -> bool:
         """Check if a package is installed on macOS."""
@@ -84,11 +70,17 @@ class MacInstaller(BaseInstaller):
         err, out = self.run_process(["brew", "list", "--cask", package_name])
         return err == 0
 
-    def is_docker_package_installed(self) -> bool:
+    def is_docker_package_installed(self, runtime_bin: Optional[str] = "docker") -> bool:
         """Check if Docker package is installed via Homebrew."""
         if not self.use_brew:
             return False
-        return self.package_is_installed("docker")
+        return self.package_is_installed(runtime_bin)
+
+    def is_docker_compose_package_installed(self, runtime_bin: Optional[str] = "docker") -> bool:
+        """Check if compose package is installed via Homebrew."""
+        if not self.use_brew:
+            return False
+        return self.package_is_installed(f"{runtime_bin}-compose")
 
     def install_package(self, packages: List[str]) -> bool:
         """Install packages using Homebrew.
@@ -97,9 +89,13 @@ class MacInstaller(BaseInstaller):
         installs using brew commands directly. This supports test mocks and environments
         where brew is available without a prior setup stage.
         """
-        if self.config_only:
-            InstallerLogger.info(f"Dry run: would install packages via brew: {packages}")
+        if self.config_only or self.dry_run:
+            if self.dry_run:
+                InstallerLogger.info(f"Dry run: would install packages via brew: {packages}")
             return True
+
+        if not self.use_brew:
+            return False
 
         success = True
         for package in packages:
@@ -120,7 +116,7 @@ class MacInstaller(BaseInstaller):
 
         return success
 
-    def install_docker(self, install_context: InstallContext) -> bool:
+    def install_docker(self, install_context: InstallContext, runtime_bin: Optional[str] = "docker") -> bool:
         """Install Docker on macOS using InstallContext decisions.
 
         Note: This method assumes Docker is NOT already installed - the caller
@@ -129,54 +125,49 @@ class MacInstaller(BaseInstaller):
         import requests
         import tempfile
 
-        # Setup Homebrew first using InstallContext decisions
-        self._setup_homebrew(install_context)
-
         # macOS Docker constants from original installer
-        MAC_BREW_DOCKER_PACKAGE = "docker"
-        MAC_BREW_DOCKER_COMPOSE_PACKAGE = "docker-compose"
-        MAC_BREW_DOCKER_SETTINGS = "/Users/{}/Library/Group Containers/group.com.docker/settings.json"
+        MAC_BREW_DOCKER_PACKAGE = runtime_bin
+        MAC_BREW_DOCKER_COMPOSE_PACKAGE = f"{runtime_bin}-compose"
+        MAC_BREW_DOCKER_SETTINGS = (
+            "/Users/{}/Library/Group Containers/group.com.docker/settings.json" if runtime_bin == "docker" else None
+        )
 
         result = False
-        runtime_bin = "docker"  # Could be made configurable
         script_user = os.environ.get("USER", os.environ.get("LOGNAME", ""))
 
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.config_only:
                 InstallerLogger.info(
-                    "Dry run: would install/start Docker Desktop if missing and configure resources if enabled"
+                    f"Dry run: would install/start {runtime_bin} if missing and configure resources if enabled"
                 )
                 return True
+
+            # see if docker is running
+            result = self.is_docker_installed(runtime_bin=runtime_bin)
+
             # Check if Docker is installed via brew but not running
-            if self.is_docker_package_installed():
-                # Docker is installed via brew, but may not be running - give user instructions
-                InstallerLogger.warning(
-                    f"{MAC_BREW_DOCKER_PACKAGE} appears to be installed via Homebrew, but may not be running"
-                )
-                InstallerLogger.info(
-                    "Please find and start Docker in the Applications folder, then wait for it to start..."
-                )
-                err, out = self.run_process(["docker", "info"], retry=12, retry_sleep_sec=5)
-                if err == 0:
-                    result = True
+            if self.is_docker_package_installed(runtime_bin):
+                if not result:
+                    InstallerLogger.warning(
+                        f"{runtime_bin} is installed but not running. Please start {runtime_bin}... "
+                    )
 
             elif install_context.install_docker_if_missing:
                 if self.use_brew:
-                    # Install docker via brew cask
+                    # Install docker via brew
                     docker_packages = [
                         MAC_BREW_DOCKER_PACKAGE,
                         MAC_BREW_DOCKER_COMPOSE_PACKAGE,
                     ]
-                    InstallerLogger.info(f"Installing docker packages: {docker_packages}")
+                    InstallerLogger.info(f"Installing {runtime_bin} packages: {docker_packages}")
                     if self.install_package(docker_packages):
-                        InstallerLogger.info("Installation of docker packages apparently succeeded")
                         InstallerLogger.info(
-                            "Please find and start Docker in the Applications folder, then wait for it to start..."
+                            f"Installation of {runtime_bin} apparently succeeded. Please start {runtime_bin}..."
                         )
                     else:
-                        InstallerLogger.error("Installation of docker packages failed")
+                        InstallerLogger.error(f"Installation of {runtime_bin} packages failed")
 
-                else:
+                elif runtime_bin == "docker":
                     # Install docker via downloaded dmg file
                     dl_dir_name = f"/Users/{script_user}/Downloads"
                     if os.path.isdir(dl_dir_name):
@@ -185,37 +176,18 @@ class MacInstaller(BaseInstaller):
                         with tempfile.NamedTemporaryFile(suffix=".dmg", delete=False) as temp_file:
                             temp_filename = temp_file.name
 
-                    download_success = True
-                    try:
-                        response = requests.get(
-                            "https://desktop.docker.com/mac/main/amd64/Docker.dmg",
-                            stream=True,
-                            allow_redirects=True,
-                        )
-                        response.raise_for_status()  # Raise an exception for HTTP errors
-                        with open(temp_filename, "wb") as f:
-                            for chunk in response.iter_content(chunk_size=8192):
-                                f.write(chunk)
-                        if self.debug:
-                            InstallerLogger.info(f"Downloaded Docker.dmg to {temp_filename}")
-                    except Exception as e:
-                        InstallerLogger.error(f"Failed to download Docker.dmg: {e}")
-                        download_success = False
-
-                    if download_success and os.path.isfile(temp_filename) and os.path.getsize(temp_filename) > 0:
-                        InstallerLogger.info(
-                            f"Please open Finder and install {temp_filename}, start Docker from the Applications folder, then wait for it to start..."
-                        )
+                    docker_dmg_url = f"https://desktop.docker.com/mac/main/{image_architecture}/Docker.dmg"
+                    if (
+                        DownloadToFile(docker_dmg_url, temp_filename)
+                        and os.path.isfile(temp_filename)
+                        and os.path.getsize(temp_filename) > 0
+                    ):
+                        InstallerLogger.info(f"Install {temp_filename} and start {runtime_bin}...")
+                    else:
+                        InstallerLogger.error(f"Failed to download {docker_dmg_url} to {temp_filename}")
 
                 # At this point we either have installed docker successfully or we have to give up
-                err, out = self.run_process([runtime_bin, "info"], retry=12, retry_sleep_sec=5)
-                if err == 0:
-                    result = True
-                    if self.debug:
-                        InstallerLogger.info(f'"{runtime_bin} info" succeeded')
-                else:
-                    # In test context, avoid raising; return False to indicate not installed
-                    return False
+                result = self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
 
             else:
                 # No Docker found and user chose not to install
@@ -226,10 +198,11 @@ class MacInstaller(BaseInstaller):
                 else:
                     raise Exception(f"install.py requires {runtime_bin}, please consult your platform's documentation")
 
-            # Tweak CPU/RAM usage for Docker in Mac based on InstallContext decision
-            settings_file = MAC_BREW_DOCKER_SETTINGS.format(script_user)
-            if result and os.path.isfile(settings_file) and install_context.configure_docker_resources:
-                self._configure_docker_resources(settings_file)
+            if result and MAC_BREW_DOCKER_SETTINGS:
+                settings_file = MAC_BREW_DOCKER_SETTINGS.format(script_user)
+                if os.path.isfile(settings_file) and install_context.configure_docker_resources:
+                    # Tweak CPU/RAM usage for Docker in Mac based on InstallContext decision
+                    self._configure_docker_resources(settings_file)
 
         return result
 
@@ -280,23 +253,21 @@ class MacInstaller(BaseInstaller):
         except Exception as e:
             InstallerLogger.error(f"Failed to configure Docker resources: {e}")
 
-    def install_docker_compose(self) -> bool:
+    def install_docker_compose(self, runtime_bin: Optional[str] = "docker") -> bool:
         """attempt to install Docker Compose on macOS using Homebrew.
 
         detection and verification are handled by the step; this method only
         performs installation using brew (Docker Desktop + docker-compose formula).
         """
-        brew_ok, _ = self.run_process(["brew", "info"])
-        if brew_ok != 0:
-            return False
-
-        # enable brew usage for install_package()
-        self.use_brew = True
         if self.config_only:
-            InstallerLogger.info("Dry run: would install Docker Desktop (docker) and docker-compose via brew")
+            InstallerLogger.info(f"Dry run: would install {runtime_bin} and Compose via brew")
             return True
-        # install Docker Desktop which provides compose v2 and legacy formula for v1 fallback
-        return self.install_package(["docker", "docker-compose"])
+
+        return self.is_docker_compose_package_installed(runtime_bin) or self.install_package(
+            [runtime_bin, f"{runtime_bin}-compose"]
+            if not self.is_docker_installed(runtime_bin=runtime_bin)
+            else [f"{runtime_bin}-compose"]
+        )
 
     def install(
         self,
@@ -329,6 +300,8 @@ class MacInstaller(BaseInstaller):
                 return result in (InstallerResult.SUCCESS, InstallerResult.SKIPPED)
             return True
 
+        runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
+
         # 1) Filesystem (shared)
         if not _ok(shared_actions.filesystem_prepare(malcolm_config, config_dir, self, ctx)):
             return False
@@ -336,20 +309,18 @@ class MacInstaller(BaseInstaller):
         # 2) Docker + Compose (platform) for docker-compose orchestration
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
-                if not self.is_docker_installed():
+                self.setup_homebrew(ctx)
+                if not self.is_docker_installed(runtime_bin=runtime_bin):
                     if not self.install_docker(ctx):
                         return False
-                self.install_docker_compose()  # best effort; verify later
+                if not self.is_docker_compose_package_installed(runtime_bin):
+                    self.install_docker_compose(runtime_bin)  # best effort; verify later
             else:
-                InstallerLogger.info("Dry run/config-only: would install Docker Desktop / Compose")
+                InstallerLogger.info(f"Dry run/config-only: would install {runtime_bin} and Compose")
 
         # 3) Orchestration files (shared) [compose only]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
-            if not _ok(
-                shared_actions.update_compose_files(
-                    malcolm_config, config_dir, orchestration_file, self, ctx
-                )
-            ):
+            if not _ok(shared_actions.update_compose_files(malcolm_config, config_dir, orchestration_file, self, ctx)):
                 return False
 
         # 4) SSL env (shared)
@@ -358,9 +329,7 @@ class MacInstaller(BaseInstaller):
 
         # 5) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE and self.should_run_install_steps():
-            if not _ok(
-                shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)
-            ):
+            if not _ok(shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)):
                 return False
 
         return True

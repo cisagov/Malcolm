@@ -14,40 +14,17 @@ system configuration options.
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_CONFIGURE_DOCKER_RESOURCES,
-    KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
-    KEY_INSTALLATION_ITEM_HOMEBREW_USAGE,
     KEY_INSTALLATION_ITEM_INSTALL_DOCKER_IF_MISSING,
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
-from scripts.installer.configs.constants.enums import HomebrewUsage
 from scripts.malcolm_constants import WidgetType
 
-CONFIG_ITEM_HOMEBREW_USAGE = ConfigItem(
-    key=KEY_INSTALLATION_ITEM_HOMEBREW_USAGE,
-    label="Homebrew Usage (macOS)",
-    default_value=HomebrewUsage.USE,
-    choices=[x.value for x in HomebrewUsage],
-    validator=lambda x: x in HomebrewUsage,
-    question="Use Homebrew for package installation on macOS?",
-    widget_type=WidgetType.SELECT,
-)
-
-# macOS installation questions (exactly matching original installer prompts)
 CONFIG_ITEM_USE_HOMEBREW = ConfigItem(
     key=KEY_INSTALLATION_ITEM_USE_HOMEBREW,
     label="Use Homebrew",
     default_value=True,
     validator=lambda x: isinstance(x, bool),
-    question="Homebrew is installed: continue with Homebrew?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_CONTINUE_WITHOUT_HOMEBREW = ConfigItem(
-    key=KEY_INSTALLATION_ITEM_CONTINUE_WITHOUT_HOMEBREW,
-    label="Continue Without Homebrew",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question="Homebrew is not installed: continue with manual installation?",
+    question="Use Homebrew for package installation on macOS?",
     widget_type=WidgetType.CHECKBOX,
 )
 

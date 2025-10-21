@@ -113,12 +113,6 @@ class DockerComposeInstallMethod(Enum):
     SKIP = "skip"
 
 
-# Homebrew usage constants (macOS)
-class HomebrewUsage(Enum):
-    USE = "use"
-    MANUAL = "manual"
-
-
 # Image/Runtime handling constants
 class ImageHandlingMethod(Enum):
     LOAD = "load"
