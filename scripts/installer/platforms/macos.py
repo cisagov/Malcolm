@@ -8,7 +8,8 @@
 import os
 from typing import List, Optional
 
-from scripts.malcolm_constants import OrchestrationFramework
+from scripts.malcolm_constants import OrchestrationFramework, ImageArchitecture
+from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO
 
 # no direct UI imports needed here
 
@@ -176,7 +177,7 @@ class MacInstaller(BaseInstaller):
                         with tempfile.NamedTemporaryFile(suffix=".dmg", delete=False) as temp_file:
                             temp_filename = temp_file.name
 
-                    docker_dmg_url = f"https://desktop.docker.com/mac/main/{image_architecture}/Docker.dmg"
+                    docker_dmg_url = f"https://desktop.docker.com/mac/main/{SYSTEM_INFO.get('image_architecture', ImageArchitecture.ARM64).value}/Docker.dmg"
                     if (
                         DownloadToFile(docker_dmg_url, temp_filename)
                         and os.path.isfile(temp_filename)
