@@ -15,7 +15,6 @@ from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-    KEY_INSTALLATION_ITEM_INSTALLATION_PATH,
     KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
 )
@@ -27,15 +26,6 @@ CONFIG_ITEM_AUTO_TWEAKS = ConfigItem(
     validator=lambda x: isinstance(x, bool),
     question="Apply recommended system tweaks automatically without confirmation?",
     widget_type=WidgetType.CHECKBOX,
-)
-
-CONFIG_ITEM_INSTALLATION_PATH = ConfigItem(
-    key=KEY_INSTALLATION_ITEM_INSTALLATION_PATH,
-    label="Malcolm Installation Path",
-    default_value=os.path.join(os.getcwd(), "malcolm"),
-    validator=lambda x: isinstance(x, str) and len(x.strip()) > 0,
-    question="Enter directory where Malcolm will be installed",
-    widget_type=WidgetType.TEXT,
 )
 
 CONFIG_ITEM_LOAD_MALCOLM_IMAGES = ConfigItem(

@@ -20,7 +20,6 @@ from scripts.installer.core.install_context import InstallContext
 from scripts.installer.utils.settings_file_handler import SettingsFileHandler
 from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_AUTO_TWEAKS,
-    KEY_INSTALLATION_ITEM_INSTALLATION_PATH,
     KEY_INSTALLATION_ITEM_LOAD_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_PULL_MALCOLM_IMAGES,
     KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
@@ -48,7 +47,6 @@ class TestInstallContextRoundtrip(unittest.TestCase):
 
         # Set a representative subset of install items (exercise enums and booleans)
         self.ctx.set_item_value(KEY_INSTALLATION_ITEM_AUTO_TWEAKS, False)  # flip default True -> False
-        self.ctx.set_item_value(KEY_INSTALLATION_ITEM_INSTALLATION_PATH, os.path.join(self.temp_dir, "dest"))
         # Enums
         self.ctx.set_item_value(
             KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD,
@@ -99,7 +97,6 @@ class TestInstallContextRoundtrip(unittest.TestCase):
         # Compare a curated set of keys
         checks = [
             (KEY_INSTALLATION_ITEM_AUTO_TWEAKS, bool),
-            (KEY_INSTALLATION_ITEM_INSTALLATION_PATH, str),
             (KEY_INSTALLATION_ITEM_DOCKER_INSTALL_METHOD, DockerInstallMethod),
             (
                 KEY_INSTALLATION_ITEM_DOCKER_COMPOSE_INSTALL_METHOD,
