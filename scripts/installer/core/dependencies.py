@@ -499,7 +499,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 and (not bool(tcpdump))
                 and (not bool(arkime))
             ),
-            only_if_unmodified=True,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_PCAP_TCPDUMP: DependencySpec(
@@ -516,7 +516,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ],
             condition=lambda live_traffic, netsniff, arkime: (not bool(live_traffic)) or bool(netsniff) or bool(arkime),
             default_value=False,
-            only_if_unmodified=True,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
@@ -551,7 +551,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 and (not bool(netsniff))
                 and (not bool(tcpdump))
             ),
-            only_if_unmodified=True,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
