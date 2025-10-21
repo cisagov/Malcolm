@@ -427,7 +427,7 @@ def GetNonRootUidGid(
     uid = default_uid
     gid = default_gid
     try:
-        if script_platform == PLATFORM_LINUX:
+        if (script_platform == PLATFORM_LINUX) or (script_platform == PLATFORM_MAC):
             uid = str(os.getuid())
             gid = str(os.getgid())
             if (uid == "0") or (gid == "0"):
@@ -444,17 +444,20 @@ def GetNonRootUidGid(
 
 ##################################################################################################
 def GetNonRootMalcolmUserNames():
+
+    def safe_getpwuid_name(val):
+        try:
+            return getpwuid(val).pw_name if getpwuid else None
+        except Exception:
+            return None
+
     return list(
         set(
             [
                 user
                 for user in {
                     getpass.getuser(),
-                    (
-                        getpwuid(int(GetNonRootUidGid(reference_path=MalcolmPath).get('PUID'))).pw_name
-                        if getpwuid
-                        else None
-                    ),
+                    safe_getpwuid_name(int(GetNonRootUidGid(reference_path=MalcolmPath).get('PUID'))),
                     os.environ.get("USER"),
                     os.environ.get("LOGNAME"),
                 }
