@@ -275,7 +275,6 @@ class MacInstaller(BaseInstaller):
         config_dir: str,
         ctx,
         orchestration_file=None,
-        logger=None,
     ) -> bool:
         """Execute full macOS installation flow honoring ControlFlow.
 

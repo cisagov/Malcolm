@@ -568,7 +568,6 @@ class LinuxInstaller(BaseInstaller):
         config_dir: str,
         ctx,
         orchestration_file=None,
-        logger=None,
     ) -> bool:
         """Execute full Linux installation flow honoring ControlFlow and orchestration.
 

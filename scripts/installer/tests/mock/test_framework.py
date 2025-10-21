@@ -184,7 +184,7 @@ class MockPlatform(BaseInstaller):
         return True
 
     # new abstract method requirement
-    def install(self, malcolm_config, config_dir: str, ctx, orchestration_file=None, logger=None) -> bool:
+    def install(self, malcolm_config, config_dir: str, ctx, orchestration_file=None) -> bool:
         """No-op install for tests."""
         return True
 
