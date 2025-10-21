@@ -183,7 +183,19 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
             is_top_level=True,
-        )
+        ),
+        # Parent item: automatically enabled when either of the children is enabled
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+            ],
+            condition=lambda _arkime_manage_pcap, _clean_old_indices: True,
+            default_value=lambda arkime_manage_pcap, clean_old_indices: (
+                bool(arkime_manage_pcap) or bool(clean_old_indices)
+            ),
+            only_if_unmodified=False,
+        ),
     ),
     # Hedgehog profile top-level items
     KEY_CONFIG_ITEM_LOGSTASH_HOST: DependencySpec(
@@ -680,7 +692,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
-        )
+        ),
+        # Parent item: automatically enabled when either of the children is enabled
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda _mode: True,
+            default_value=lambda mode: mode != "none",
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_FILE_CARVE_MODE: DependencySpec(
         visibility=VisibilityRule(
