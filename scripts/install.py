@@ -398,7 +398,7 @@ def main():
         sys.exit(1)
 
     try:
-        if (not parsed_args.configOnly) and (os.geteuid() != 0):
+        if (not parsed_args.configOnly) and (SYSTEM_INFO.get('platform_name') == "linux") and (os.geteuid() != 0):
             InstallerLogger.error("This installer must be run as root.") # fmt: skip
             sys.exit(1)
     except Exception as e:
