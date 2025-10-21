@@ -466,6 +466,23 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     # LIVE CAPTURE DEPENDENCIES
     # -------------------------------------------------------------------------
+    # Parent item: automatically enabled when any capture/analysis method is enabled
+    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC: DependencySpec(
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+                KEY_CONFIG_ITEM_LIVE_ZEEK,
+                KEY_CONFIG_ITEM_LIVE_SURICATA,
+            ],
+            condition=lambda netsniff, tcpdump, arkime, zeek, suricata: True,
+            default_value=lambda netsniff, tcpdump, arkime, zeek, suricata: (
+                bool(netsniff) or bool(tcpdump) or bool(arkime) or bool(zeek) or bool(suricata)
+            ),
+            only_if_unmodified=False,
+        ),
+    ),
     KEY_CONFIG_ITEM_PCAP_IFACE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
