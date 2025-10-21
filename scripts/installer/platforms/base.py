@@ -152,8 +152,8 @@ class BaseInstaller(abc.ABC):
         command: List[str],
         privileged: bool = False,
         stdin: str = None,
-        retry: int = 1,
-        retry_sleep_sec: int = 5,
+        retry: int = 0,
+        retry_sleep_sec: int = 1,
         stderr: bool = True,
     ) -> Tuple[int, List[str]]:
         """Run a system process with optional privilege escalation."""
@@ -179,7 +179,8 @@ class BaseInstaller(abc.ABC):
                     output.extend(process.stdout.splitlines())
                 if stderr and process.stderr:
                     output.extend(process.stderr.splitlines())
-                break
+                if retcode == 0:
+                    break
             except FileNotFoundError:
                 output = [f"Command {' '.join(flat_command)} not found or unable to execute"]
                 retcode = 127
@@ -190,8 +191,9 @@ class BaseInstaller(abc.ABC):
 
             if i < retry:
                 InstallerLogger.warning(
-                    f"Command failed (attempt {i + 1}/{retry + 1}). Retrying in {retry_sleep_sec} seconds..."
+                    f"Command failed (attempt {i + 1}/{retry+1}). Retrying in {retry_sleep_sec} seconds..."
                 )
+                output = []
                 time.sleep(retry_sleep_sec)
 
         if self.debug:
@@ -229,8 +231,8 @@ class BaseInstaller(abc.ABC):
 
     def is_docker_installed(
         self,
-        retry: int = 1,
-        retry_sleep_sec: int = 5,
+        retry: int = 0,
+        retry_sleep_sec: int = 1,
         runtime_bin: Optional[str] = "docker",
     ) -> bool:
         """Return True if Docker CLI and daemon are accessible.

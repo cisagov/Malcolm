@@ -186,9 +186,6 @@ class MacInstaller(BaseInstaller):
                     else:
                         InstallerLogger.error(f"Failed to download {docker_dmg_url} to {temp_filename}")
 
-                # At this point we either have installed docker successfully or we have to give up
-                result = self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
-
             else:
                 # No Docker found and user chose not to install
                 if runtime_bin.startswith("docker"):
@@ -197,6 +194,9 @@ class MacInstaller(BaseInstaller):
                     )
                 else:
                     raise Exception(f"install.py requires {runtime_bin}, please consult your platform's documentation")
+
+            # At this point we either have installed docker successfully or we have to give up
+            result = result or self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
 
             if result and MAC_BREW_DOCKER_SETTINGS:
                 settings_file = MAC_BREW_DOCKER_SETTINGS.format(script_user)
