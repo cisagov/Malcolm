@@ -636,6 +636,13 @@ if [[ "${CREATE_OS_ARKIME_SESSION_INDEX:-true}" = "true" ]] ; then
               -H "$XSRF_HEADER:true" -H 'Content-type:application/json' \
               -d '{"value":true}' || ( cat "$CURL_OUT" && echo )
 
+            echo "Enabling Calcite..." && \
+            CURL_OUT=$(get_tmp_output_filename)
+            curl "${CURL_CONFIG_PARAMS[@]}" -H "Content-type: application/json" \
+              -XPUT --location --fail-with-body --output "$CURL_OUT" --silent "$OPENSEARCH_URL_TO_USE/_plugins/_query/settings" \
+              -d "{ \"transient\": { \"plugins.calcite.enabled\": true } }" \
+              || ( cat "$CURL_OUT" && echo )
+
             # end OpenSearch Tweaks
             #############################################################################################################################
             

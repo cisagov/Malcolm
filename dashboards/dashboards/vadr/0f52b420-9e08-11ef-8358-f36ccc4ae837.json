@@ -5,10 +5,10 @@
         "description": "",
         "hits": 0,
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
-        "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
-        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":5,\"h\":44,\"i\":\"03ecca95-8f77-4db6-98dc-71ed215e558e\"},\"panelIndex\":\"03ecca95-8f77-4db6-98dc-71ed215e558e\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":5,\"y\":0,\"w\":10,\"h\":10,\"i\":\"95235a34-9b09-4c14-afab-053d39e9e913\"},\"panelIndex\":\"95235a34-9b09-4c14-afab-053d39e9e913\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":15,\"y\":0,\"w\":5,\"h\":10,\"i\":\"541ed271-a9f8-44e7-8a1b-d9e9e7ad034b\"},\"panelIndex\":\"541ed271-a9f8-44e7-8a1b-d9e9e7ad034b\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"title\":\"Vendorless Devices (Source)\",\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":20,\"y\":0,\"w\":28,\"h\":12,\"i\":\"5215fe3d-d0ea-4ffd-a822-844b9c680558\"},\"panelIndex\":\"5215fe3d-d0ea-4ffd-a822-844b9c680558\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":5,\"y\":10,\"w\":15,\"h\":15,\"i\":\"d8f26adc-c492-43dc-8b3c-326a32ec3301\"},\"panelIndex\":\"d8f26adc-c492-43dc-8b3c-326a32ec3301\",\"embeddableConfig\":{\"hidePanelTitles\":false},\"title\":\"Vendor Pie (Source)\",\"panelRefName\":\"panel_4\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":20,\"y\":12,\"w\":15,\"h\":32,\"i\":\"0d4c4c71-f867-4c8f-8138-11f2350094a4\"},\"panelIndex\":\"0d4c4c71-f867-4c8f-8138-11f2350094a4\",\"embeddableConfig\":{},\"panelRefName\":\"panel_5\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":35,\"y\":12,\"w\":13,\"h\":32,\"i\":\"66d5bf84-8cc1-4628-9a91-1b15a5c1c2c5\"},\"panelIndex\":\"66d5bf84-8cc1-4628-9a91-1b15a5c1c2c5\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}},\"columnsWidth\":[{\"colIndex\":2,\"width\":123.75},{\"colIndex\":1,\"width\":106.08333333333331},{\"colIndex\":0,\"width\":338},{\"colIndex\":3,\"width\":71}],\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}},\"table\":null},\"panelRefName\":\"panel_6\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":5,\"y\":25,\"w\":9,\"h\":19,\"i\":\"2158029a-ac5b-4e1e-81d3-32684f79aa6a\"},\"panelIndex\":\"2158029a-ac5b-4e1e-81d3-32684f79aa6a\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}},\"columnsWidth\":[{\"colIndex\":0,\"width\":351.5},{\"colIndex\":1,\"width\":71.5}]},\"table\":null},\"panelRefName\":\"panel_7\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":14,\"y\":25,\"w\":6,\"h\":19,\"i\":\"ae06ce6f-7de2-457d-9ca1-0cfacfc1e3e2\"},\"panelIndex\":\"ae06ce6f-7de2-457d-9ca1-0cfacfc1e3e2\",\"embeddableConfig\":{},\"panelRefName\":\"panel_8\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":44,\"w\":14,\"h\":15,\"i\":\"ceeee4cc-aae8-4c5b-886f-d262080bb261\"},\"panelIndex\":\"ceeee4cc-aae8-4c5b-886f-d262080bb261\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}},\"columnsWidth\":[{\"colIndex\":1,\"width\":81},{\"colIndex\":0,\"width\":612}]},\"table\":null},\"panelRefName\":\"panel_9\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":14,\"y\":44,\"w\":14,\"h\":15,\"i\":\"c6b180db-9757-4bec-b71a-187bc5b9f7da\"},\"panelIndex\":\"c6b180db-9757-4bec-b71a-187bc5b9f7da\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"columnsWidth\":[{\"colIndex\":1,\"width\":75},{\"colIndex\":2,\"width\":161.5}]}},\"panelRefName\":\"panel_10\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":28,\"y\":44,\"w\":10,\"h\":15,\"i\":\"78ba977a-9cc7-4bca-a1ec-ba4b5aa167c2\"},\"panelIndex\":\"78ba977a-9cc7-4bca-a1ec-ba4b5aa167c2\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"columnsWidth\":[{\"colIndex\":2,\"width\":72.66666666666666}]}},\"panelRefName\":\"panel_11\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":38,\"y\":44,\"w\":10,\"h\":15,\"i\":\"eb5dcc26-2198-4df2-ba63-cbd3e55af271\"},\"panelIndex\":\"eb5dcc26-2198-4df2-ba63-cbd3e55af271\",\"embeddableConfig\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}},\"columnsWidth\":[{\"colIndex\":2,\"width\":72}]}},\"panelRefName\":\"panel_12\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":59,\"w\":48,\"h\":19,\"i\":\"bf31aaad-9b94-4b2d-9dc3-d9e7478de026\"},\"panelIndex\":\"bf31aaad-9b94-4b2d-9dc3-d9e7478de026\",\"embeddableConfig\":{\"sort\":[[\"MALCOLM_NETWORK_INDEX_TIME_FIELD_REPLACER\",\"desc\"]]},\"panelRefName\":\"panel_13\"}]",
+        "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":44,\"i\":\"03ecca95-8f77-4db6-98dc-71ed215e558e\",\"w\":5,\"x\":0,\"y\":0},\"panelIndex\":\"03ecca95-8f77-4db6-98dc-71ed215e558e\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":10,\"i\":\"95235a34-9b09-4c14-afab-053d39e9e913\",\"w\":10,\"x\":5,\"y\":0},\"panelIndex\":\"95235a34-9b09-4c14-afab-053d39e9e913\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"hidePanelTitles\":false},\"gridData\":{\"h\":10,\"i\":\"541ed271-a9f8-44e7-8a1b-d9e9e7ad034b\",\"w\":5,\"x\":15,\"y\":0},\"panelIndex\":\"541ed271-a9f8-44e7-8a1b-d9e9e7ad034b\",\"title\":\"Vendorless Devices (Source)\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"5215fe3d-d0ea-4ffd-a822-844b9c680558\",\"w\":28,\"x\":20,\"y\":0},\"panelIndex\":\"5215fe3d-d0ea-4ffd-a822-844b9c680558\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{\"hidePanelTitles\":false},\"gridData\":{\"h\":16,\"i\":\"d8f26adc-c492-43dc-8b3c-326a32ec3301\",\"w\":15,\"x\":5,\"y\":10},\"panelIndex\":\"d8f26adc-c492-43dc-8b3c-326a32ec3301\",\"title\":\"Vendor Pie (Source)\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_4\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":32,\"i\":\"0d4c4c71-f867-4c8f-8138-11f2350094a4\",\"w\":15,\"x\":20,\"y\":12},\"panelIndex\":\"0d4c4c71-f867-4c8f-8138-11f2350094a4\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_5\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":123.75},{\"colIndex\":1,\"width\":106.08333333333331},{\"colIndex\":0,\"width\":338},{\"colIndex\":3,\"width\":71}],\"params\":{\"sort\":{\"columnIndex\":3,\"direction\":\"desc\"}},\"sortColumn\":{\"colIndex\":2,\"direction\":\"desc\"}}},\"gridData\":{\"h\":32,\"i\":\"66d5bf84-8cc1-4628-9a91-1b15a5c1c2c5\",\"w\":13,\"x\":35,\"y\":12},\"panelIndex\":\"66d5bf84-8cc1-4628-9a91-1b15a5c1c2c5\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_6\"},{\"embeddableConfig\":{\"vis\":{\"colors\":{\"ntp\":\"#e295af\"}}},\"gridData\":{\"h\":18,\"i\":\"55258084-4bfd-465c-a95a-608ff26b3024\",\"w\":15,\"x\":5,\"y\":26},\"panelIndex\":\"55258084-4bfd-465c-a95a-608ff26b3024\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_7\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":0,\"width\":794.5},{\"colIndex\":1,\"width\":103.5}],\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}},\"gridData\":{\"h\":15,\"i\":\"2158029a-ac5b-4e1e-81d3-32684f79aa6a\",\"w\":16,\"x\":0,\"y\":44},\"panelIndex\":\"2158029a-ac5b-4e1e-81d3-32684f79aa6a\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_8\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":94.66666666666666},{\"colIndex\":0,\"width\":219.66666666666669},{\"colIndex\":1,\"width\":582.6666666666666}],\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":15,\"i\":\"78ba977a-9cc7-4bca-a1ec-ba4b5aa167c2\",\"w\":16,\"x\":16,\"y\":44},\"panelIndex\":\"78ba977a-9cc7-4bca-a1ec-ba4b5aa167c2\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_9\"},{\"embeddableConfig\":{\"table\":null,\"vis\":{\"columnsWidth\":[{\"colIndex\":2,\"width\":91},{\"colIndex\":0,\"width\":228},{\"colIndex\":1,\"width\":579}],\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}},\"gridData\":{\"h\":15,\"i\":\"eb5dcc26-2198-4df2-ba63-cbd3e55af271\",\"w\":16,\"x\":32,\"y\":44},\"panelIndex\":\"eb5dcc26-2198-4df2-ba63-cbd3e55af271\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_10\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":19,\"i\":\"25e29ba2-4094-4baa-b259-6a90e1698104\",\"w\":48,\"x\":0,\"y\":59},\"panelIndex\":\"25e29ba2-4094-4baa-b259-6a90e1698104\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_11\"}]",
         "timeRestore": false,
         "title": "VADR - Segment Examiner",
         "version": 1
@@ -57,44 +57,34 @@
           "type": "visualization"
         },
         {
-          "id": "bda3ad0a-aa00-40b6-b0ed-a42b96f3343e",
+          "id": "448dbb50-a873-11f0-a177-b7d294a41520",
           "name": "panel_7",
           "type": "visualization"
         },
         {
-          "id": "3e2280e0-9e22-11ef-8358-f36ccc4ae837",
+          "id": "bda3ad0a-aa00-40b6-b0ed-a42b96f3343e",
           "name": "panel_8",
           "type": "visualization"
         },
         {
-          "id": "74e7d2c0-cbe2-11ec-a50a-5fedd672f5c5",
+          "id": "77bd1870-46ce-11ea-91c3-61991161aaaf",
           "name": "panel_9",
           "type": "visualization"
         },
         {
-          "id": "bcfa8900-06ac-11ec-8c6b-353266ade330",
+          "id": "767e3d90-afce-11ea-993f-b7d8522a8bed",
           "name": "panel_10",
           "type": "visualization"
         },
         {
-          "id": "77bd1870-46ce-11ea-91c3-61991161aaaf",
+          "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
           "name": "panel_11",
           "type": "visualization"
-        },
-        {
-          "id": "767e3d90-afce-11ea-993f-b7d8522a8bed",
-          "name": "panel_12",
-          "type": "visualization"
-        },
-        {
-          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
-          "name": "panel_13",
-          "type": "search"
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T23:06:22.880Z",
-      "version": "WzEyNzYsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDYsMV0="
     },
     {
       "attributes": {
@@ -105,7 +95,7 @@
         "title": "VADR Network Logs",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\nMALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
+        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Network Time Protocol](#/dashboard/444a06e0-adea-11f0-96f4-a1d36a85a6ea)     \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\nMALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
       },
       "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
       "migrationVersion": {
@@ -116,8 +106,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:14.045Z",
-      "version": "WzI0MiwxXQ=="
+      "updated_at": "2025-10-20T19:25:34.461Z",
+      "version": "WzE2MTEsMV0="
     },
     {
       "attributes": {
@@ -150,8 +140,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:02.624Z",
-      "version": "WzEyNSwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzQsMV0="
     },
     {
       "attributes": {
@@ -180,8 +170,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:02.624Z",
-      "version": "WzEyOCwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzYsMV0="
     },
     {
       "attributes": {
@@ -210,8 +200,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:20.324Z",
-      "version": "WzMxNiwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzgsMV0="
     },
     {
       "attributes": {
@@ -223,7 +213,7 @@
         "title": "VADR - Vendor Pie",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"VADR - Vendor Pie\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"source.mac\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.device.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":15,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"top\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
+        "visState": "{\"title\":\"VADR - Vendor Pie\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"cardinality\",\"params\":{\"field\":\"source.mac\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.device.manufacturer\",\"orderBy\":\"_key\",\"order\":\"desc\",\"size\":15,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Unknown\",\"customLabel\":\"Vendor\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"top\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}}}"
       },
       "id": "c5b7e390-9e06-11ef-8358-f36ccc4ae837",
       "migrationVersion": {
@@ -240,8 +230,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:55:00.890Z",
-      "version": "WzEyNjcsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzksMV0="
     },
     {
       "attributes": {
@@ -263,8 +253,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:52.331Z",
-      "version": "WzcwNCwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDAsMV0="
     },
     {
       "attributes": {
@@ -293,8 +283,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:52:03.625Z",
-      "version": "Wzg1NSwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDEsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "VADR - Conn Services",
+        "uiStateJSON": "{}",
+        "version": 1,
+        "visState": "{\"title\":\"VADR - Conn Services\",\"type\":\"pie\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":20,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"include\":\"\",\"customLabel\":\"Service\"},\"schema\":\"segment\"}],\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"bottom\",\"isDonut\":true,\"labels\":{\"show\":true,\"values\":true,\"last_level\":false,\"truncate\":100}}}"
+      },
+      "id": "448dbb50-a873-11f0-a177-b7d294a41520",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-10-20T19:16:09.416Z",
+      "version": "WzE2MDgsMV0="
     },
     {
       "attributes": {
@@ -323,98 +343,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:52:08.851Z",
-      "version": "WzkwOSwxXQ=="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "Conn Services Cloud",
-        "uiStateJSON": "{}",
-        "version": 1,
-        "visState": "{\"title\":\"Conn Services Cloud\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"customLabel\":\"\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":25,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"No Service\",\"customLabel\":\"\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"log\",\"orientation\":\"single\",\"minFontSize\":10,\"maxFontSize\":30,\"showLabel\":false}}"
-      },
-      "id": "3e2280e0-9e22-11ef-8358-f36ccc4ae837",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2025-09-22T22:51:02.624Z",
-      "version": "WzEzMiwxXQ=="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "Alerts - Name",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":1,\"direction\":\"desc\"}}}}",
-        "version": 1,
-        "visState": "{\"title\":\"Alerts - Name\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"rule.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Name\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
-      },
-      "id": "74e7d2c0-cbe2-11ec-a50a-5fedd672f5c5",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "c25e2640-cbd7-11ec-a50a-5fedd672f5c5",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2025-09-22T22:51:49.255Z",
-      "version": "WzY3OSwxXQ=="
-    },
-    {
-      "attributes": {
-        "description": "",
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
-        },
-        "savedSearchRefName": "search_0",
-        "title": "Severity Tags",
-        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":2,\"direction\":\"desc\"}}}}",
-        "version": 1,
-        "visState": "{\"title\":\"Severity Tags\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"params\":{\"field\":\"event.risk_score\",\"customLabel\":\"High Raw Severity\"},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"event.severity_tags\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":true,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Severity Tag\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\"}}"
-      },
-      "id": "bcfa8900-06ac-11ec-8c6b-353266ade330",
-      "migrationVersion": {
-        "visualization": "7.10.0"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "abd55c60-06a5-11ec-8c6b-353266ade330",
-          "name": "search_0",
-          "type": "search"
-        }
-      ],
-      "type": "visualization",
-      "updated_at": "2025-09-22T22:52:23.248Z",
-      "version": "WzEwNzIsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDIsMV0="
     },
     {
       "attributes": {
@@ -442,8 +372,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:52:06.699Z",
-      "version": "Wzg4NSwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDMsMV0="
     },
     {
       "attributes": {
@@ -471,8 +401,38 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:52:06.699Z",
-      "version": "Wzg4NiwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDQsMV0="
+    },
+    {
+      "attributes": {
+        "description": "",
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "savedSearchRefName": "search_0",
+        "title": "NAVV_1.0",
+        "uiStateJSON": "{\"vis\":{\"sortColumn\":{\"colIndex\":10,\"direction\":\"desc\"}}}",
+        "version": 1,
+        "visState": "{\"title\":\"NAVV_1.0\",\"type\":\"table\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Source IP\"},\"schema\":\"bucket\"},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source MAC\"},\"schema\":\"bucket\"},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"source.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Source Network\"},\"schema\":\"bucket\"},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.segment.name\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination Network\"},\"schema\":\"bucket\"},{\"id\":\"6\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.ip\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Destination IP\"},\"schema\":\"bucket\"},{\"id\":\"7\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.oui\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"-\",\"customLabel\":\"Destination MAC\"},\"schema\":\"bucket\"},{\"id\":\"8\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"destination.port\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Port\"},\"schema\":\"bucket\"},{\"id\":\"9\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"network.protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"Unmapped\",\"customLabel\":\"Service\"},\"schema\":\"bucket\"},{\"id\":\"10\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"protocol\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":true,\"missingBucketLabel\":\"No Protocol\",\"customLabel\":\"Protocol\"},\"schema\":\"bucket\"},{\"id\":\"11\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"zeek.conn.conn_state_description\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":100,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"customLabel\":\"Conn State\"},\"schema\":\"bucket\"}],\"params\":{\"perPage\":100,\"showPartialRows\":false,\"showMetricsAtAllLevels\":false,\"showTotal\":false,\"totalFunc\":\"sum\",\"percentageCol\":\"\",\"row\":true}}"
+      },
+      "id": "eeb31a60-fc37-11ee-a696-1ddfa039ab2d",
+      "migrationVersion": {
+        "visualization": "7.10.0"
+      },
+      "namespaces": [
+        "default"
+      ],
+      "references": [
+        {
+          "id": "52570870-e9d4-444f-a3df-e44c6757ed9f",
+          "name": "search_0",
+          "type": "search"
+        }
+      ],
+      "type": "visualization",
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDUsMV0="
     },
     {
       "attributes": {
@@ -515,8 +475,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T22:52:35.597Z",
-      "version": "WzEyMjIsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzUsMV0="
     },
     {
       "attributes": {
@@ -560,8 +520,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T22:52:38.777Z",
-      "version": "WzEyNjAsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzcsMV0="
     },
     {
       "attributes": {
@@ -601,88 +561,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T22:52:03.625Z",
-      "version": "Wzg1OSwxXQ=="
-    },
-    {
-      "attributes": {
-        "columns": [
-          "rule.category",
-          "rule.name",
-          "rule.id",
-          "vulnerability.category",
-          "source.ip",
-          "destination.ip",
-          "event.id"
-        ],
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.provider:suricata AND event.dataset:alert\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "sort": [],
-        "title": "Suricata Alerts - Logs",
-        "version": 1
-      },
-      "id": "c25e2640-cbd7-11ec-a50a-5fedd672f5c5",
-      "migrationVersion": {
-        "search": "7.9.3"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern"
-        }
-      ],
-      "type": "search",
-      "updated_at": "2025-09-22T22:51:49.255Z",
-      "version": "WzY4NCwxXQ=="
-    },
-    {
-      "attributes": {
-        "columns": [
-          "event.dataset",
-          "network.transport",
-          "network.protocol",
-          "source.ip",
-          "destination.ip",
-          "destination.port",
-          "event.action",
-          "event.result",
-          "event.severity",
-          "event.severity_tags",
-          "event.id"
-        ],
-        "description": "",
-        "hits": 0,
-        "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"highlightAll\":false,\"version\":true,\"query\":{\"query\":\"event.severity:*\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-        },
-        "sort": [],
-        "title": "Severity-Scored Logs",
-        "version": 1
-      },
-      "id": "abd55c60-06a5-11ec-8c6b-353266ade330",
-      "migrationVersion": {
-        "search": "7.9.3"
-      },
-      "namespaces": [
-        "default"
-      ],
-      "references": [
-        {
-          "id": "MALCOLM_NETWORK_INDEX_PATTERN_REPLACER",
-          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-          "type": "index-pattern"
-        }
-      ],
-      "type": "search",
-      "updated_at": "2025-09-22T22:52:23.248Z",
-      "version": "WzEwODUsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzEsMV0="
     }
   ],
   "version": "3.2.0"
