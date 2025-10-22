@@ -12,6 +12,7 @@ from scripts.installer.ui.tui.base_menu import BaseMenu
 from scripts.installer.ui.shared.menu_builder import ValueFormatter
 from scripts.installer.ui.shared.store_view_model import build_rows_from_items
 from scripts.installer.ui.shared.search_utils import format_search_results_text
+from scripts.malcolm_common import DialogCanceledException
 
 if TYPE_CHECKING:
     from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -92,7 +93,7 @@ class ConfigurationMenu(BaseMenu):
         choice_lower = choice.lower()
 
         if choice_lower == "x":
-            return False  # Exit installer
+            raise DialogCanceledException()
         elif choice_lower == "s":
             return True  # Save and continue
         elif choice_lower == "w":
@@ -103,14 +104,14 @@ class ConfigurationMenu(BaseMenu):
             if search_term:
                 self._handle_search(search_term)
             else:
-                print("Please provide a search term after 'where'")
+                print(f"Please provide a search term after '{choice}'")
             return None
         elif choice_lower.startswith("w "):
             search_term = choice[2:].strip()
             if search_term:
                 self._handle_search(search_term)
             else:
-                print("Please provide a search term after 'w'")
+                print(f"Please provide a search term after '{choice}'")
             return None
         elif choice_lower == "d" and self.debug_mode:
             debug_menu_structure(self.malcolm_config, self.main_menu_keys)

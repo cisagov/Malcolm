@@ -13,6 +13,7 @@ from scripts.installer.configs.constants.installation_item_keys import (
 )
 from scripts.installer.ui.shared.labels import installation_item_display_label
 from scripts.installer.ui.shared.store_view_model import build_rows_from_items
+from scripts.malcolm_common import DialogCanceledException
 
 if TYPE_CHECKING:
     from scripts.installer.platforms.base import BaseInstaller
@@ -73,7 +74,7 @@ class InstallationMenu(BaseMenu):
 
         self.menu_builder.add_action_section()
         self.menu_builder.add_action("s", "Save and Continue")
-        self.menu_builder.add_action("q", "Quit")
+        self.menu_builder.add_action("x", "Exit Installer")
 
     def process_choice(self, choice: str) -> Optional["InstallContext"]:
         """Process the user's menu choice.
@@ -84,11 +85,11 @@ class InstallationMenu(BaseMenu):
         Returns:
             InstallContext if user saves and continues, None if cancelled
         """
-        choice_upper = choice.upper()
+        choice_lower = choice.lower()
 
-        if choice_upper == "Q":
-            return None  # User cancelled
-        elif choice_upper == "S":
+        if choice_lower == "x":
+            raise DialogCanceledException()
+        elif choice_lower == "s":
             # Save choices and continue - InstallContext already populated
             return self.install_context
         else:
