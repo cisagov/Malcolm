@@ -20,6 +20,7 @@ from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_SURICATA_ROTATED_PCAP,
     KEY_ENV_NETBOX_MODE,
     KEY_ENV_NETBOX_URL,
+    KEY_ENV_PROFILE_KEY,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
@@ -92,6 +93,7 @@ class TestEnvReversePrecedence(unittest.TestCase):
         mapper = self.ref_cfg.get_env_mapper()
 
         # Arkime: live=true, rotated=true => live should remain true
+        _write_env(mapper, self.temp_dir, KEY_ENV_PROFILE_KEY, "hedgehog")
         _write_env(mapper, self.temp_dir, KEY_ENV_ARKIME_LIVE_CAPTURE, "true")
         _write_env(mapper, self.temp_dir, KEY_ENV_ARKIME_ROTATED_PCAP, "true")
 

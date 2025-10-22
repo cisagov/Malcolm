@@ -14,7 +14,6 @@ import unittest
 
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.configs.constants.config_env_var_keys import (
-    KEY_ENV_ARKIME_ROTATED_PCAP,
     KEY_ENV_SURICATA_ROTATED_PCAP,
     KEY_ENV_ZEEK_ROTATED_PCAP,
     KEY_ENV_PCAP_ENABLE_TCPDUMP,
@@ -24,8 +23,6 @@ from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_FILEBEAT_WATCHER_POLLING,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_AUTO_ARKIME,
-    KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_AUTO_SURICATA,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_AUTO_ZEEK,
@@ -74,8 +71,6 @@ class TestEnvMultiConditional(unittest.TestCase):
 
     def test_rotated_pcap_flags_forward(self):
         # auto=true, live=false -> 'true'
-        self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_ARKIME, True)
-        self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_SURICATA, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_SURICATA, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_ZEEK, True)
@@ -84,7 +79,6 @@ class TestEnvMultiConditional(unittest.TestCase):
         self.cfg.generate_env_files(self.temp_dir)
 
         for env_key in (
-            KEY_ENV_ARKIME_ROTATED_PCAP,
             KEY_ENV_SURICATA_ROTATED_PCAP,
             KEY_ENV_ZEEK_ROTATED_PCAP,
         ):
@@ -94,12 +88,10 @@ class TestEnvMultiConditional(unittest.TestCase):
             self.assertEqual(env_map.get(var_name), "true", f"{env_key} should be true")
 
         # auto=true, live=true -> 'false'
-        self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_SURICATA, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_ZEEK, True)
         self.cfg.generate_env_files(self.temp_dir)
         for env_key in (
-            KEY_ENV_ARKIME_ROTATED_PCAP,
             KEY_ENV_SURICATA_ROTATED_PCAP,
             KEY_ENV_ZEEK_ROTATED_PCAP,
         ):
@@ -109,15 +101,12 @@ class TestEnvMultiConditional(unittest.TestCase):
             self.assertEqual(env_map.get(var_name), "false", f"{env_key} should be false")
 
         # auto=false, live=false -> 'false'
-        self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_ARKIME, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_SURICATA, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_AUTO_ZEEK, False)
-        self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_SURICATA, False)
         self.cfg.set_value(KEY_CONFIG_ITEM_LIVE_ZEEK, False)
         self.cfg.generate_env_files(self.temp_dir)
         for env_key in (
-            KEY_ENV_ARKIME_ROTATED_PCAP,
             KEY_ENV_SURICATA_ROTATED_PCAP,
             KEY_ENV_ZEEK_ROTATED_PCAP,
         ):
@@ -129,7 +118,6 @@ class TestEnvMultiConditional(unittest.TestCase):
     def test_rotated_pcap_flags_reverse_live_set(self):
         # Write rotated flag = true and ensure live=false after load
         for env_key, live_key in [
-            (KEY_ENV_ARKIME_ROTATED_PCAP, KEY_CONFIG_ITEM_LIVE_ARKIME),
             (KEY_ENV_SURICATA_ROTATED_PCAP, KEY_CONFIG_ITEM_LIVE_SURICATA),
             (KEY_ENV_ZEEK_ROTATED_PCAP, KEY_CONFIG_ITEM_LIVE_ZEEK),
         ]:
@@ -142,7 +130,6 @@ class TestEnvMultiConditional(unittest.TestCase):
         new_cfg = MalcolmConfig()
         new_cfg.load_from_env_files(self.temp_dir)
 
-        self.assertFalse(new_cfg.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME))
         self.assertFalse(new_cfg.get_value(KEY_CONFIG_ITEM_LIVE_SURICATA))
         self.assertFalse(new_cfg.get_value(KEY_CONFIG_ITEM_LIVE_ZEEK))
 
