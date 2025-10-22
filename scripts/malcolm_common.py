@@ -33,6 +33,7 @@ from scripts.malcolm_utils import (
     remove_suffix,
     run_process,
     sizeof_fmt,
+    touch,
     which,
 )
 

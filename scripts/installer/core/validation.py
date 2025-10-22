@@ -24,6 +24,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
     KEY_CONFIG_ITEM_INDEX_DIR,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
@@ -129,7 +130,8 @@ def _validate_traefik_labels(malcolm_config, add_issue) -> None:
 
     try:
         primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
-        if isinstance(primary_mode, str) and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value:
+        os_exposed = malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH)
+        if isinstance(primary_mode, str) and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value and os_exposed:
             oshost = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST)
             host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_HOST)
             if not _is_non_empty_str(oshost) or (host and oshost == host):

@@ -196,7 +196,7 @@ def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_poli
         ):
             image_parts = image.rstrip().split(":")
             image_parts[-1] = image_parts[-1].split("-", 1)[0] + (
-                "" if image_arch == ImageArchitecture.AMD64 else '-' + str(image_arch)
+                "" if image_arch == ImageArchitecture.AMD64.value else '-' + str(image_arch)
             )
             deep_set(data, ['services', service, 'image'], ":".join(image_parts))
 
