@@ -65,6 +65,7 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
         KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
         KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
         KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
         KEY_CONFIG_ITEM_NGINX_SSL,
         KEY_CONFIG_ITEM_PCAP_NODE_NAME,
         KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
@@ -73,6 +74,19 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
         KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     )
     from scripts.malcolm_constants import OrchestrationFramework
+
+    used_keys = [
+        KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+        KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+        KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+        KEY_CONFIG_ITEM_NGINX_SSL,
+        KEY_CONFIG_ITEM_PCAP_NODE_NAME,
+        KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
+        KEY_CONFIG_ITEM_PROCESS_USER_ID,
+        KEY_CONFIG_ITEM_RUNTIME_BIN,
+        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
+    ]
 
     # determine orchestration to match legacy display behavior
     orch_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
@@ -110,6 +124,19 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
     )
 
     summary_items.append(("Node Name", malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NODE_NAME)))
+
+    for changed_config_key in malcolm_config.get_all_config_items(modified_only=True):
+        if changed_config_key not in used_keys:
+            try:
+                summary_items.append(
+                    (
+                        malcolm_config.get_item(str(changed_config_key)).label,
+                        malcolm_config.get_value(str(changed_config_key)) or "",
+                    )
+                )
+                used_keys.append(changed_config_key)
+            except Exception:
+                pass
 
     return summary_items
 

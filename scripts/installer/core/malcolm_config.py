@@ -158,14 +158,16 @@ class MalcolmConfig(ObservableStoreMixin):
         """Lookup the environment variable(s) for a given configuration item key"""
         return self._env_mapper.get_env_var_by_item_key(key)
 
-    def get_all_config_items(self) -> Dict[str, ConfigItem]:
+    def get_all_config_items(self, modified_only: bool = False) -> Dict[str, ConfigItem]:
         """Get all configuration items.
 
         Returns:
             Dictionary of all configuration items, where keys are item keys and
             values are ConfigItem instances.
         """
-        return copy.deepcopy(self._items)
+        if (result := copy.deepcopy(self._items)) and modified_only:
+            result = {key: result[key] for key in self._modified_keys if key in result}
+        return result
 
     def get_env_mapper(self) -> EnvMapper:
         """Get the environment variable mapper.
@@ -210,7 +212,13 @@ class MalcolmConfig(ObservableStoreMixin):
         """Get a list of all configuration item keys."""
         return list(self._items.keys())
 
-    def set_value(self, key: str, value: Any, ignore_errors: Optional[bool] = False):
+    def set_value(
+        self,
+        key: str,
+        value: Any,
+        ignore_errors: Optional[bool] = False,
+        track_change: Optional[bool] = True,
+    ):
         """Set the value of a configuration item.
 
         Args:
@@ -236,7 +244,9 @@ class MalcolmConfig(ObservableStoreMixin):
             if not success:
                 raise ConfigValueValidationError(key, value, error_message)
 
-            self._modified_keys.add(key)
+            if track_change:
+                self._modified_keys.add(key)
+
             self._notify_observers(key, item.get_value())
         except Exception as e:
             if ignore_errors:
@@ -454,7 +464,7 @@ class MalcolmConfig(ObservableStoreMixin):
             if winner_value is None or winner_value == "":
                 continue
             try:
-                self.set_value(item_key, winner_value)
+                self.set_value(item_key, winner_value, track_change=False)
             except (ConfigItemNotFoundError, ConfigValueValidationError) as e:
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")
@@ -504,6 +514,7 @@ class MalcolmConfig(ObservableStoreMixin):
                                 else ContainerRuntime.DOCKER
                             ),
                             ignore_errors=True,
+                            track_change=False,
                         )
 
                         # restart policy
@@ -519,6 +530,7 @@ class MalcolmConfig(ObservableStoreMixin):
                                 None,
                             ),
                             ignore_errors=True,
+                            track_change=False,
                         )
 
                         # network settings
@@ -527,6 +539,7 @@ class MalcolmConfig(ObservableStoreMixin):
                                 KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
                                 deep_get(compose_data, ["networks", "default", "name"]),
                                 ignore_errors=True,
+                                track_change=False,
                             )
 
                         # exposed services
@@ -561,11 +574,13 @@ class MalcolmConfig(ObservableStoreMixin):
                     and (port_parts[0] == SERVICE_IP_EXPOSED)
                     and (port_parts[2].split('/')[0] == service_tuple[1])
                 ):
-                    self.set_value(config_key, True, ignore_errors=True)
+                    self.set_value(config_key, True, ignore_errors=True, track_change=False)
                     items_exposed = True
 
         if items_exposed:
-            self.set_value(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True)
+            self.set_value(
+                KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True, track_change=False
+            )
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff
@@ -575,8 +590,8 @@ class MalcolmConfig(ObservableStoreMixin):
             if k.startswith("traefik")
         }
         if traefik_labels.get(TRAEFIK_ENABLE, False) is True:
-            self.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True, ignore_errors=True)
-            self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True)
+            self.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True, ignore_errors=True, track_change=False)
+            self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True, track_change=False)
             self.set_value(
                 KEY_CONFIG_ITEM_TRAEFIK_HOST,
                 (
@@ -587,16 +602,19 @@ class MalcolmConfig(ObservableStoreMixin):
                     or [""]
                 )[0],
                 ignore_errors=True,
+                track_change=False,
             )
             self.set_value(
                 KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
                 traefik_labels.get(LABEL_MALCOLM_ENTRYPOINTS),
                 ignore_errors=True,
+                track_change=False,
             )
             self.set_value(
                 KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
                 traefik_labels.get(LABEL_MALCOLM_CERTRESOLVER),
                 ignore_errors=True,
+                track_change=False,
             )
             self.set_value(
                 KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
@@ -608,6 +626,7 @@ class MalcolmConfig(ObservableStoreMixin):
                     or [""]
                 )[0],
                 ignore_errors=True,
+                track_change=False,
             )
 
     def _load_custom_storage_paths_from_orchestration_file(
@@ -654,13 +673,16 @@ class MalcolmConfig(ObservableStoreMixin):
                         self.set_value(
                             config_key,
                             local_path,
+                            track_change=False,
                         )
                         custom_path = True
                 except Exception as e:
                     InstallerLogger.warning(f"Could not read {service_tuple[1]} for service {service_tuple[0]}: {e}")
                     continue
             if custom_path:
-                self.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True)
+                self.set_value(
+                    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True, track_change=False
+                )
 
     def _notify_observers(self, key: str, value: Any):
         """Notify all registered observers for a given key."""
