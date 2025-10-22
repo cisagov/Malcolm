@@ -128,12 +128,8 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
     for changed_config_key in malcolm_config.get_all_config_items(modified_only=True):
         if changed_config_key not in used_keys:
             try:
-                summary_items.append(
-                    (
-                        malcolm_config.get_item(str(changed_config_key)).label,
-                        malcolm_config.get_value(str(changed_config_key)) or "",
-                    )
-                )
+                if item := malcolm_config.get_item(str(changed_config_key)):
+                    summary_items.append((item.label, item.get_value()))
                 used_keys.append(changed_config_key)
             except Exception:
                 pass
