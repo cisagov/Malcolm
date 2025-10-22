@@ -79,7 +79,7 @@ class MalcolmConfig(ObservableStoreMixin):
             EnvMapper()
         )  # contains the mapping of config items <--> environment variables as well as environment variables to .env files
         self._observers: Dict[str, List[Callable[[Any], None]]] = {}
-        self._modified_keys: Set[str] = set()
+        self._modified_keys: List[str] = []  # list instead of a set to preserve change order for display
         self._parent_map: Dict[str, List[str]] = {}
 
         # all items default to visible unless overridden
@@ -244,8 +244,8 @@ class MalcolmConfig(ObservableStoreMixin):
             if not success:
                 raise ConfigValueValidationError(key, value, error_message)
 
-            if track_change:
-                self._modified_keys.add(key)
+            if track_change and (key not in self._modified_keys):
+                self._modified_keys.append(key)
 
             self._notify_observers(key, item.get_value())
         except Exception as e:

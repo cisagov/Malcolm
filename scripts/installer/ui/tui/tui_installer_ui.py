@@ -167,7 +167,7 @@ class TUIInstallerUI(InstallerUI):
 
         for label, value in summary_items:
             display_value = format_summary_value(label, value)
-            summary_lines.append(f"{label:<30}: {display_value}")
+            summary_lines.append(f"{label:<50}: {display_value}")
 
         summary_lines.append("=" * 60)
 
