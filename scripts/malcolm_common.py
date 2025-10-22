@@ -1771,7 +1771,8 @@ def InstallerChooseMultiple(
 
 
 def _total_memory_bytes() -> int:
-    """Return total physical memory in bytes (Linux/BSD portable)."""
+    """Return total physical memory in bytes (Linux/BSD/Darwin portable)."""
+    result = 0  # unknown
     try:
         if plat := sys.platform:
             if plat.startswith('linux'):
@@ -1779,18 +1780,22 @@ def _total_memory_bytes() -> int:
                     for line in meminfo:
                         if line.startswith("MemTotal:"):
                             # value is in kB
-                            return int(line.split()[1]) * 1024
+                            result = int(line.split()[1]) * 1024
             elif plat.startswith('darwin') and which('sysctl'):
-                err, out = self.run_process(['sysctl', '-n', 'hw.memsize'], stderr=False)
+                err, out = run_process(['sysctl', '-n', 'hw.memsize'], stderr=False)
                 if (err == 0) and (len(out) > 0):
-                    return int(out[0].strip())
-
-        # Fallback that works on many *nix via sysconf
-        if hasattr(os, "sysconf"):
-            return int(os.sysconf('SC_PAGE_SIZE')) * int(os.sysconf('SC_PHYS_PAGES'))
-    except:
+                    result = int(out[0].strip())
+    except Exception:
         pass
-    return 0  # Unknown
+
+    # Fallback that works on many *nix via sysconf
+    if not result and hasattr(os, "sysconf"):
+        try:
+            result = int(os.sysconf('SC_PAGE_SIZE')) * int(os.sysconf('SC_PHYS_PAGES'))
+        except Exception:
+            pass
+
+    return result
 
 
 def total_memory_gb() -> int:

@@ -129,9 +129,14 @@ class MacInstaller(BaseInstaller):
         # macOS Docker constants from original installer
         MAC_BREW_DOCKER_PACKAGE = runtime_bin
         MAC_BREW_DOCKER_COMPOSE_PACKAGE = f"{runtime_bin}-compose"
-        MAC_BREW_DOCKER_SETTINGS = (
-            "/Users/{}/Library/Group Containers/group.com.docker/settings.json" if runtime_bin == "docker" else None
-        )
+        MAC_BREW_DOCKER_SETTINGS_FILE_CANDIDATES = [
+            (
+                "/Users/{}/Library/Group Containers/group.com.docker/settings-store.json"
+                if runtime_bin == "docker"
+                else None
+            ),
+            ("/Users/{}/Library/Group Containers/group.com.docker/settings.json" if runtime_bin == "docker" else None),
+        ]
 
         result = False
         script_user = os.environ.get("USER", os.environ.get("LOGNAME", ""))
@@ -214,12 +219,15 @@ class MacInstaller(BaseInstaller):
                 return False
 
             # At this point we either have installed docker successfully or we have to give up
-            result = result or self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
-
-            if result and MAC_BREW_DOCKER_SETTINGS:
-                settings_file = MAC_BREW_DOCKER_SETTINGS.format(script_user)
-                if os.path.isfile(settings_file) and install_context.configure_docker_resources:
-                    # Tweak CPU/RAM usage for Docker in Mac based on InstallContext decision
+            if (
+                result := result or self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
+            ) and install_context.configure_docker_resources:
+                # Tweak CPU/RAM usage for Docker in Mac based on InstallContext decision
+                for settings_file in [
+                    x.format(script_user)
+                    for x in MAC_BREW_DOCKER_SETTINGS_FILE_CANDIDATES
+                    if x and os.path.isfile(x.format(script_user))
+                ]:
                     self._configure_docker_resources(settings_file)
 
         return result
@@ -240,7 +248,9 @@ class MacInstaller(BaseInstaller):
         else:
             new_cpus = 2
 
-        if self.total_memory_gigs >= 64.0:
+        if self.total_memory_gigs >= 96:
+            new_memory_gib = 64
+        elif self.total_memory_gigs >= 64.0:
             new_memory_gib = 32
         elif self.total_memory_gigs >= 32.0:
             new_memory_gib = 24
@@ -260,13 +270,21 @@ class MacInstaller(BaseInstaller):
                 settings = json.load(f)
 
             # Update Docker settings
-            settings["cpus"] = new_cpus
-            settings["memoryMiB"] = new_memory_gib * 1024
+            settings["cpus" if os.path.basename(settings_file) == "settings.json" else "Cpus"] = new_cpus
+            settings["memoryMiB" if os.path.basename(settings_file) == "settings.json" else "MemoryMiB"] = (
+                new_memory_gib * 1024
+            )
 
             with open(settings_file, "w") as f:
                 json.dump(settings, f, indent=2)
 
-            InstallerLogger.info(f"Docker configured to use {new_cpus} CPUs and {new_memory_gib}GB RAM")
+            msg = f"Restart Docker to update resource allocation ({new_cpus} CPUs/{new_memory_gib}GB RAM)."
+            InstallerLogger.info(msg)
+            try:
+                if self.ui is not None:
+                    self.ui.display_message(msg)
+            except Exception:
+                pass
 
         except Exception as e:
             InstallerLogger.error(f"Failed to configure Docker resources: {e}")
