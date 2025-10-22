@@ -8,7 +8,7 @@
           "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
         },
         "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-        "panelsJSON": "[{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":21,\"i\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\"},\"panelIndex\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":6,\"y\":0,\"w\":12,\"h\":21,\"i\":\"51185dae-f178-44b6-bb85-de24e8474a92\"},\"panelIndex\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":18,\"y\":0,\"w\":23,\"h\":21,\"i\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\"},\"panelIndex\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"panelRefName\":\"panel_2\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":41,\"y\":0,\"w\":7,\"h\":21,\"i\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\"},\"panelIndex\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"},{\"version\":\"3.2.0\",\"gridData\":{\"x\":0,\"y\":21,\"w\":48,\"h\":29,\"i\":\"823f42bc-e67f-4227-9769-65309d15fe51\"},\"panelIndex\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"embeddableConfig\":{},\"panelRefName\":\"panel_4\"}]",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":21,\"i\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"w\":6,\"x\":0,\"y\":0},\"panelIndex\":\"a072e167-3719-4945-b072-b3dbfbf7bde9\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":21,\"i\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"w\":12,\"x\":6,\"y\":0},\"panelIndex\":\"51185dae-f178-44b6-bb85-de24e8474a92\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_1\"},{\"embeddableConfig\":{\"vis\":{\"legendOpen\":false}},\"gridData\":{\"h\":21,\"i\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"w\":23,\"x\":18,\"y\":0},\"panelIndex\":\"14c08791-9718-45b0-908c-0e6dcebf4f41\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_2\"},{\"embeddableConfig\":{\"hidePanelTitles\":false},\"gridData\":{\"h\":21,\"i\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"w\":7,\"x\":41,\"y\":0},\"panelIndex\":\"7386e15e-61f5-496e-b75e-ae50a5a20daa\",\"title\":\"Port Services Reference\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_3\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":29,\"i\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"w\":48,\"x\":0,\"y\":21},\"panelIndex\":\"823f42bc-e67f-4227-9769-65309d15fe51\",\"version\":\"3.2.0\",\"panelRefName\":\"panel_4\"}]",
         "timeRestore": false,
         "title": "VADR - Outdated",
         "version": 1
@@ -48,8 +48,8 @@
         }
       ],
       "type": "dashboard",
-      "updated_at": "2025-09-22T23:02:14.507Z",
-      "version": "WzEyNzEsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NzgsMV0="
     },
     {
       "attributes": {
@@ -60,7 +60,7 @@
         "title": "VADR Network Logs",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\nMALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
+        "visState": "{\"title\":\"VADR Network Logs\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"markdown\":\"### VADR Toolkit  \\n[Inventory](#/dashboard/d16105d0-2b75-11f0-92dc-5f54cacd4f4e)   \\n[Misconfigurations](#dashboard/f75511b0-2b79-11f0-92dc-5f54cacd4f4e)   \\n[Outdated/Insecure Services](#/dashboard/62ac0aa0-2b9c-11f0-bb82-8ffd215e5a91)  \\n[Remote Access](#/dashboard/985cb6a0-2ba0-11f0-bb82-8ffd215e5a91)    \\n[External Communications](#/dashboard/5cd4b680-2b8e-11f0-92dc-5f54cacd4f4e)   \\n[Domain Queries](#/dashboard/82e4ebe0-2d11-11f0-af4f-052f357bea07)     \\n[Network Time Protocol](#/dashboard/444a06e0-adea-11f0-96f4-a1d36a85a6ea)     \\n[Intrusion Detection Alerts](#/dashboard/8444dee0-3023-11f0-af4f-052f357bea07)     \\n[Segment Examiner](#/dashboard/0f52b420-9e08-11ef-8358-f36ccc4ae837)     \\n[Sankey Tool](#/dashboard/0fb588c0-2d0f-11f0-af4f-052f357bea07)     \\n[Force Directed Tool - Beta](#/dashboard/ac8b32c0-be66-11ef-9ff5-ff2a2927176e)     \\n[NAVV](#/dashboard/11cd7300-fc34-11ee-a696-1ddfa039ab2d)    \\n[Legacy Analysis](#/dashboard/590fcc10-fe8f-11ee-99f0-3db6323f1fae)    \\n\\nMALCOLM_NAVIGATION_MARKDOWN_REPLACER\",\"type\":\"markdown\",\"fontSize\":10,\"openLinksInNewTab\":false}}"
       },
       "id": "4fdd16a0-3334-11ef-94c9-09db3014d49a",
       "migrationVersion": {
@@ -71,8 +71,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:14.045Z",
-      "version": "WzI0MiwxXQ=="
+      "updated_at": "2025-10-20T19:25:34.461Z",
+      "version": "WzE2MTEsMV0="
     },
     {
       "attributes": {
@@ -100,14 +100,14 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:52:03.625Z",
-      "version": "Wzg0OCwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NzYsMV0="
     },
     {
       "attributes": {
         "description": "",
         "kibanaSavedObjectMeta": {
-          "searchSourceJSON": "{\"query\":{\"query\":\"destination.port:(20 OR 21 OR 79 OR 80 OR 110 OR 137 OR 138 OR 139 OR 389 OR 512 OR 513 OR 514) \\n\",\"language\":\"kuery\"},\"filter\":[]}"
+          "searchSourceJSON": "{\"query\":{\"query\":\"destination.port:(20 OR 21 OR 79 OR 80 OR 110 OR 137 OR 138 OR 139 OR 389 OR 512 OR 513) \\n\",\"language\":\"kuery\"},\"filter\":[]}"
         },
         "savedSearchRefName": "search_0",
         "title": "VADR Problematic Ports",
@@ -130,8 +130,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:07.838Z",
-      "version": "WzE5MywxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NzAsMV0="
     },
     {
       "attributes": {
@@ -142,7 +142,7 @@
         "title": "Port Services",
         "uiStateJSON": "{}",
         "version": 1,
-        "visState": "{\"title\":\"Port Services\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"20 - FTP   \\n21 - FTP   \\n22 - SSH   \\n23 - Telnet   \\n69 - TFTP   \\n79  - Finger   \\n80 - HTTP   \\n110 - POP3   \\n137 - NetBIOS   \\n138 - NetBIOS   \\n139 - NetBIOS   \\n389 - Plaintext LDAP   \\n512 - Remote Execution (rexec)   \\n513 - Remote Login  (rlogin)   \\n514 - Remote Shell (rshell)   \\n3389 - RDP   \\n5900 - VNC   \\n5901 - VNC   \\n5902 - VNC   \\n5938 - TeamViewer   \\n6568 - AnyDesk   \\n\\n\\n\"}}"
+        "visState": "{\"title\":\"Port Services\",\"type\":\"markdown\",\"aggs\":[],\"params\":{\"fontSize\":12,\"openLinksInNewTab\":false,\"markdown\":\"20 - FTP   \\n21 - FTP   \\n69 - TFTP   \\n80 - HTTP   \\n110 - POP3   \\n137 - NetBIOS   \\n138 - NetBIOS   \\n139 - NetBIOS   \\n389 - Plaintext LDAP   \\n\\n\"}}"
       },
       "id": "6e338fc0-2ba0-11f0-bb82-8ffd215e5a91",
       "migrationVersion": {
@@ -153,8 +153,8 @@
       ],
       "references": [],
       "type": "visualization",
-      "updated_at": "2025-09-22T22:51:10.928Z",
-      "version": "WzIyMiwxXQ=="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NzcsMV0="
     },
     {
       "attributes": {
@@ -183,8 +183,8 @@
         }
       ],
       "type": "visualization",
-      "updated_at": "2025-09-22T23:08:14.460Z",
-      "version": "WzEyNzksMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1NDUsMV0="
     },
     {
       "attributes": {
@@ -227,8 +227,8 @@
         }
       ],
       "type": "search",
-      "updated_at": "2025-09-22T22:52:35.597Z",
-      "version": "WzEyMjIsMV0="
+      "updated_at": "2025-10-20T19:16:08.928Z",
+      "version": "WzE1MzUsMV0="
     }
   ],
   "version": "3.2.0"
