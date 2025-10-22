@@ -10,6 +10,7 @@ from typing import List, Optional
 
 from scripts.malcolm_constants import OrchestrationFramework, ImageArchitecture
 from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO, UserInterfaceMode
+from scripts.installer.actions.shared import discover_compose_command
 
 # no direct UI imports needed here
 
@@ -75,7 +76,7 @@ class MacInstaller(BaseInstaller):
         """Check if Docker package is installed via Homebrew."""
         if not self.use_brew:
             return False
-        return self.package_is_installed(runtime_bin)
+        return self.package_is_installed("docker-desktop" if runtime_bin == "docker" else runtime_bin)
 
     def is_docker_compose_package_installed(self, runtime_bin: Optional[str] = "docker") -> bool:
         """Check if compose package is installed via Homebrew."""
@@ -127,8 +128,7 @@ class MacInstaller(BaseInstaller):
         import tempfile
 
         # macOS Docker constants from original installer
-        MAC_BREW_DOCKER_PACKAGE = runtime_bin
-        MAC_BREW_DOCKER_COMPOSE_PACKAGE = f"{runtime_bin}-compose"
+        MAC_BREW_DOCKER_PACKAGE = "docker-desktop" if runtime_bin == "docker" else runtime_bin
         MAC_BREW_DOCKER_SETTINGS_FILE_CANDIDATES = [
             (
                 "/Users/{}/Library/Group Containers/group.com.docker/settings-store.json"
@@ -165,13 +165,15 @@ class MacInstaller(BaseInstaller):
             elif install_context.install_docker_if_missing:
                 if self.use_brew:
                     # Install docker via brew
-                    docker_packages = [
-                        MAC_BREW_DOCKER_PACKAGE,
-                        MAC_BREW_DOCKER_COMPOSE_PACKAGE,
-                    ]
+                    docker_packages = [MAC_BREW_DOCKER_PACKAGE]
                     InstallerLogger.info(f"Installing {runtime_bin} packages: {docker_packages}")
                     if self.install_package(docker_packages):
-                        msg = f"Installation of {runtime_bin} apparently succeeded. Please start {runtime_bin}..."
+                        # attempt to start Docker desktop
+                        try:
+                            err, out = self.run_process(["open", "--background", "-a", "Docker"])
+                        except Exception:
+                            err = 1
+                        msg = f"Installation of {runtime_bin} apparently succeeded. Please start {runtime_bin}{' if it does not start automatically' if err == 0 else ''}..."
                     else:
                         msg = f"Installation of {runtime_bin} packages failed"
                     InstallerLogger.info(msg)
@@ -296,13 +298,13 @@ class MacInstaller(BaseInstaller):
         performs installation using brew (Docker Desktop + docker-compose formula).
         """
         if self.config_only:
-            InstallerLogger.info(f"Dry run: would install {runtime_bin} and Compose via brew")
+            InstallerLogger.info(f"Dry run: would install {runtime_bin} Compose via brew")
             return True
 
-        return self.is_docker_compose_package_installed(runtime_bin) or self.install_package(
-            [runtime_bin, f"{runtime_bin}-compose"]
-            if not self.is_docker_installed(runtime_bin=runtime_bin)
-            else [f"{runtime_bin}-compose"]
+        return (
+            bool(discover_compose_command(runtime_bin, self))
+            or self.is_docker_compose_package_installed(runtime_bin)
+            or self.install_package([f"{runtime_bin}-compose"])
         )
 
     def install(
@@ -348,8 +350,7 @@ class MacInstaller(BaseInstaller):
                 if not self.is_docker_installed(runtime_bin=runtime_bin):
                     if not self.install_docker(ctx):
                         return False
-                if not self.is_docker_compose_package_installed(runtime_bin):
-                    self.install_docker_compose(runtime_bin)  # best effort; verify later
+                self.install_docker_compose(runtime_bin)  # best effort; verify later
             else:
                 InstallerLogger.info(f"Dry run/config-only: would install {runtime_bin} and Compose")
 
