@@ -9,7 +9,7 @@ import os
 from typing import List, Optional
 
 from scripts.malcolm_constants import OrchestrationFramework, ImageArchitecture
-from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO
+from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO, UserInterfaceMode
 
 # no direct UI imports needed here
 
@@ -149,9 +149,13 @@ class MacInstaller(BaseInstaller):
             # Check if Docker is installed via brew but not running
             if self.is_docker_package_installed(runtime_bin):
                 if not result:
-                    InstallerLogger.warning(
-                        f"{runtime_bin} is installed but not running. Please start {runtime_bin}... "
-                    )
+                    msg = f"{runtime_bin} is installed but not running. Please start {runtime_bin}... "
+                    InstallerLogger.warning(msg)
+                    try:
+                        if self.ui is not None:
+                            self.ui.display_message(msg)
+                    except Exception:
+                        pass
 
             elif install_context.install_docker_if_missing:
                 if self.use_brew:
@@ -162,11 +166,15 @@ class MacInstaller(BaseInstaller):
                     ]
                     InstallerLogger.info(f"Installing {runtime_bin} packages: {docker_packages}")
                     if self.install_package(docker_packages):
-                        InstallerLogger.info(
-                            f"Installation of {runtime_bin} apparently succeeded. Please start {runtime_bin}..."
-                        )
+                        msg = f"Installation of {runtime_bin} apparently succeeded. Please start {runtime_bin}..."
                     else:
-                        InstallerLogger.error(f"Installation of {runtime_bin} packages failed")
+                        msg = f"Installation of {runtime_bin} packages failed"
+                    InstallerLogger.info(msg)
+                    try:
+                        if self.ui is not None:
+                            self.ui.display_message(msg)
+                    except Exception:
+                        pass
 
                 elif runtime_bin == "docker":
                     # Install docker via downloaded dmg file
@@ -183,18 +191,27 @@ class MacInstaller(BaseInstaller):
                         and os.path.isfile(temp_filename)
                         and os.path.getsize(temp_filename) > 0
                     ):
-                        InstallerLogger.info(f"Install {temp_filename} and start {runtime_bin}...")
+                        msg = f"Install {temp_filename} and start {runtime_bin}..."
+                        InstallerLogger.info(msg)
+                        try:
+                            if self.ui is not None:
+                                self.ui.display_message(msg)
+                        except Exception:
+                            pass
                     else:
                         InstallerLogger.error(f"Failed to download {docker_dmg_url} to {temp_filename}")
 
             else:
                 # No Docker found and user chose not to install
                 if runtime_bin.startswith("docker"):
-                    raise Exception(
+                    InstallerLogger.error(
                         f"install.py requires {runtime_bin}, please see https://docs.docker.com/desktop/install/mac/"
                     )
                 else:
-                    raise Exception(f"install.py requires {runtime_bin}, please consult your platform's documentation")
+                    InstallerLogger.error(
+                        f"install.py requires {runtime_bin}, please consult your platform's documentation"
+                    )
+                return False
 
             # At this point we either have installed docker successfully or we have to give up
             result = result or self.is_docker_installed(retry=12, retry_sleep_sec=5, runtime_bin=runtime_bin)
