@@ -20,6 +20,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
     KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
@@ -146,6 +147,7 @@ class TestValidationRequired(unittest.TestCase):
     def test_traefik_opensearch_host_required_when_local_primary(self):
         # behind reverse proxy + labels + local OpenSearch primary
         self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
+        self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(
             KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
