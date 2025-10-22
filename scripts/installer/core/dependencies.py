@@ -88,10 +88,10 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
         )
     ),
-    KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART: DependencySpec(
+    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            condition=lambda orch: orch != OrchestrationFramework.KUBERNETES,
+            condition=lambda orch: orch == OrchestrationFramework.DOCKER_COMPOSE,
             ui_parent=KEY_CONFIG_ITEM_RUNTIME_BIN,
         )
     ),
@@ -302,23 +302,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             condition=lambda orch_mode: orch_mode != OrchestrationFramework.DOCKER_COMPOSE,
             default_value=LOGSTASH_WORKERS_KUBERNETES,
-        ),
-    ),
-    # Profile-dependent nested items
-    # restart policy only applicable under compose and when auto-restart is enabled
-    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
-                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            ],
-            condition=lambda enabled, orch: bool(enabled) and orch == OrchestrationFramework.DOCKER_COMPOSE,
-            ui_parent=KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
-            condition=lambda enabled: bool(enabled),
-            default_value=DockerRestartPolicy.UNLESS_STOPPED.value,
         ),
     ),
     # -------------------------------------------------------------------------

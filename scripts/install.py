@@ -393,6 +393,9 @@ def main():
         parsed_args = parser.parse_args()
         if os.path.islink(os.path.join(SCRIPT_PATH, SCRIPT_NAME)) and SCRIPT_NAME.startswith('configure'):
             parsed_args.configOnly = True
+            if parsed_args.configOnly and parsed_args.dryRun:
+                InstallerLogger.error("error: argument --configure/-c: not allowed with argument --dry-run")
+                sys.exit(1)
     except Exception as e:
         InstallerLogger.error(f"Failed to parse arguments: {e}")
         sys.exit(1)

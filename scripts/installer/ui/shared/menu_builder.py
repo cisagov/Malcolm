@@ -142,7 +142,7 @@ class ValueFormatter:
         Example mappings:
           - yes/no -> Yes/No
           - always -> Always
-          - unless-stopped -> Unless-stopped
+          - unless-stopped -> Unless stopped
           - customize -> Customize
           - disabled/enabled -> Disabled/Enabled
           - local/remote -> Local/Remote
@@ -154,7 +154,7 @@ class ValueFormatter:
             "yes": "Yes",
             "no": "No",
             "always": "Always",
-            "unless-stopped": "Unless-stopped",
+            "unless-stopped": "Unless stopped",
             "customize": "Customize",
             "disabled": "Disabled",
             "enabled": "Enabled",

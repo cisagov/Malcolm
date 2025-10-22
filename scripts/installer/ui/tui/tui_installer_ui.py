@@ -153,9 +153,8 @@ class TUIInstallerUI(InstallerUI):
 
         # add installation options from the context (keep to simple, high-signal flags)
         if not install_context.config_only:
-            summary_items.append(("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
-        summary_items.append(("Config Only", "Yes" if install_context.config_only else "No"))
-        summary_items.append(("Dry Run", "Yes" if is_dry_run else "No"))
+            summary_items.insert(0, ("Auto Apply System Tweaks", "Yes" if install_context.auto_tweaks else "No"))
+        summary_items.insert(0, ("Configuration Only", "Yes" if install_context.config_only else "No"))
 
         # Clear screen and display the summary using TUI formatting
         ClearScreen()

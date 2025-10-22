@@ -23,8 +23,7 @@ def _normalize_display_string(value: str) -> str:
         "yes": "Yes",
         "no": "No",
         "always": "Always",
-        # keep hyphen but Title-case the first word for readability
-        "unless-stopped": "Unless-stopped",
+        "unless-stopped": "Unless stopped",
     }
     return mapping.get(lower, value)
 
@@ -39,19 +38,11 @@ def _get_restart_policy_display(malcolm_config) -> str:
         String representation of the restart policy
     """
     from scripts.installer.configs.constants.configuration_item_keys import (
-        KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
         KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     )
 
-    auto_restart = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART)
-    restart_policy = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY)
-
-    if not auto_restart:
-        # Keep display consistent with other booleans
-        return "No"
-
     # If auto-restart is enabled, use the configured policy or default to "unless-stopped"
-    if restart_policy:
+    if restart_policy := malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY):
         # Handle enum values explicitly
         if isinstance(restart_policy, Enum):
             return _normalize_display_string(restart_policy.value)
@@ -73,7 +64,6 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
     from scripts.installer.configs.constants.configuration_item_keys import (
         KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
         KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-        KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
         KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         KEY_CONFIG_ITEM_NGINX_SSL,
         KEY_CONFIG_ITEM_PCAP_NODE_NAME,
@@ -91,41 +81,35 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
         ("Configuration Directory", config_dir),
         ("Container Runtime", malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN)),
         ("Run Profile", malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)),
-        ("Node Name", malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NODE_NAME)),
-        ("Process User ID", malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID)),
         (
-            "Process Group ID",
-            malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID),
+            "Process UID/GID",
+            f"{malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID)}/{malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID)}",
         ),
     ]
 
     # legacy parity: only include auto-restart and restart policy when using docker compose
     if orch_mode != OrchestrationFramework.KUBERNETES:
-        summary_items.append(
-            (
-                "Auto-Restart Malcolm",
-                ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART) else "No"),
-            )
-        )
-        summary_items.append(("Restart Policy", _get_restart_policy_display(malcolm_config)))
+        summary_items.append(("Container Restart Policy", _get_restart_policy_display(malcolm_config)))
 
     # remaining items are common to both orchestration modes
     summary_items.extend(
         [
             (
-                "HTTPS/SSL",
-                "Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_NGINX_SSL) else "No",
+                "Container Network",
+                malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME) or "default",
             ),
             (
                 "Default Storage Locations",
                 ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS) else "No"),
             ),
             (
-                "Container Network",
-                malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME) or "default",
+                "HTTPS/SSL",
+                "Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_NGINX_SSL) else "No",
             ),
         ]
     )
+
+    summary_items.append(("Node Name", malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NODE_NAME)))
 
     return summary_items
 

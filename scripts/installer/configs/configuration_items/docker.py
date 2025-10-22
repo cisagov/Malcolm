@@ -24,7 +24,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-    KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     KEY_CONFIG_ITEM_PROCESS_GROUP_ID,
     KEY_CONFIG_ITEM_PROCESS_USER_ID,
@@ -65,24 +64,15 @@ CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE = ConfigItem(
     widget_type=WidgetType.SELECT,
 )
 
-CONFIG_ITEM_MALCOLM_AUTO_RESTART = ConfigItem(
-    key=KEY_CONFIG_ITEM_MALCOLM_AUTO_RESTART,
-    label="Auto-Restart Malcolm",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question=("Automatically restart Malcolm after system or container daemon restarts?"),
-    widget_type=WidgetType.CHECKBOX,
-)
-
 CONFIG_ITEM_MALCOLM_RESTART_POLICY = ConfigItem(
     key=KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     label="Malcolm Restart Policy",
     default_value=DockerRestartPolicy.NO.value,
     choices=[x.value for x in DockerRestartPolicy],
     validator=lambda x: isinstance(x, str) and x in [v.value for v in DockerRestartPolicy],
-    question="Select Malcolm restart policy",
+    question="Select policy for restarting Malcolm after system or container daemon restarts",
     widget_type=WidgetType.SELECT,
-) # fmt: skip
+)
 
 CONFIG_ITEM_BEHIND_REVERSE_PROXY = ConfigItem(
     key=KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
