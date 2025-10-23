@@ -732,14 +732,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
-            condition=lambda mode: mode != "none",
+            condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
         )
     ),
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
-            condition=lambda mode: mode != "none",
+            condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER,
         )
     ),
