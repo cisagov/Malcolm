@@ -101,8 +101,9 @@ CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE = ConfigItem(
     key=KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
     label="Secondary Document Store",
     default_value="",
-    choices=list(DATABASE_MODE_ENUMS.keys()),
-    validator=lambda x: x in DATABASE_MODE_ENUMS.keys(),
+    choices=list([k for k in DATABASE_MODE_ENUMS.keys() if k != DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]]),
+    validator=lambda x: x
+    in [k for k in DATABASE_MODE_ENUMS.keys() if k != DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal]],
     question="Secondary mode to forward Logstash logs to a remote document store",
     widget_type=WidgetType.TEXT,
 )
