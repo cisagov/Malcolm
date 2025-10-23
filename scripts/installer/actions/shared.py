@@ -8,8 +8,6 @@ Shared installer actions used by multiple platforms.
 import copy
 import glob
 import os
-import shutil
-import sys
 from enum import Enum
 from typing import Tuple, List, Optional
 
@@ -28,13 +26,11 @@ from scripts.malcolm_constants import (
 from scripts.malcolm_common import (
     BuildBoundPathReplacers,
     DumpYaml,
-    get_default_config_dir,
     LoadYaml,
     RemapBoundPaths,
 )
 from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
 
-from scripts.installer.configs.constants.config_env_files import ENV_FILE_SSL
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
     KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
@@ -534,45 +530,6 @@ def update_compose_files(
 
     except Exception as e:
         InstallerLogger.error(f"Error updating docker-compose files: {e}")
-        return InstallerResult.FAILURE
-
-
-def ensure_ssl_env(malcolm_config, config_dir: str, platform, ctx) -> InstallerResult:
-    """Ensure ssl.env exists in the configuration directory."""
-
-    try:
-        if not config_dir:
-            InstallerLogger.warning("SSL env step: configuration directory not provided; skipping.")
-            return InstallerResult.SKIPPED
-        ssl_env_path = os.path.join(config_dir, ENV_FILE_SSL)
-        if not os.path.isdir(config_dir):
-            if platform.is_dry_run():
-                InstallerLogger.info(f"Dry run: would create configuration directory: {config_dir}")
-                InstallerLogger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
-                return InstallerResult.SKIPPED
-            os.makedirs(config_dir, exist_ok=True)
-        if os.path.isfile(ssl_env_path):
-            InstallerLogger.info("ssl.env already present; leaving unchanged.")
-            return InstallerResult.SKIPPED
-        if platform.is_dry_run():
-            InstallerLogger.info(f"Dry run: would create {ENV_FILE_SSL} in configuration directory.")
-            return InstallerResult.SKIPPED
-        try:
-            templates_dir = get_default_config_dir()
-            template_ssl = os.path.join(templates_dir, ENV_FILE_SSL)
-            if os.path.isfile(template_ssl):
-                shutil.copyfile(template_ssl, ssl_env_path)
-                InstallerLogger.info("Created ssl.env from template.")
-                return InstallerResult.SUCCESS
-        except Exception:
-            pass
-        with open(ssl_env_path, "w") as f:
-            f.write("# Shared TLS-related environment variables used by multiple services\n")
-            f.write("PUSER_CA_TRUST=/var/local/ca-trust\n")
-        InstallerLogger.info("Created ssl.env in configuration directory.")
-        return InstallerResult.SUCCESS
-    except Exception as e:
-        InstallerLogger.error(f"Failed to ensure ssl.env: {e}")
         return InstallerResult.FAILURE
 
 

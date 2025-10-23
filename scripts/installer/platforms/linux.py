@@ -280,7 +280,7 @@ class LinuxInstaller(BaseInstaller):
                 self._add_users_to_docker_group(install_context.docker_extra_users)
             return True
         else:
-            raise Exception(f"Docker installation verification failed: {out}")
+            raise Exception("Docker installation verification failed")
 
     def _install_docker_from_repo(self) -> bool:
         """Install Docker from official repositories."""
@@ -575,11 +575,9 @@ class LinuxInstaller(BaseInstaller):
           1) Filesystem (shared)
           2) Dependencies (platform)
           3) Docker + Compose (platform) [compose orchestration only]
-          4) Runtime config (shared)
-          5) Orchestration files (shared) [compose only]
-          6) SSL env (shared)
-          7) Linux tweaks (platform-owned logic) when enabled
-          8) Docker operations (shared) [compose only]
+          4) Orchestration files (shared) [compose only]
+          5) Linux tweaks (platform-owned logic) when enabled
+          6) Docker operations (shared) [compose only]
         """
         from scripts.malcolm_constants import OrchestrationFramework
         from scripts.installer.actions import shared as shared_actions
@@ -626,11 +624,7 @@ class LinuxInstaller(BaseInstaller):
             if not _ok(shared_actions.update_compose_files(malcolm_config, config_dir, orchestration_file, self, ctx)):
                 return False
 
-        # 5) SSL env (shared)
-        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx)):
-            return False
-
-        # 6) Linux tweaks (only in install mode)
+        # 5) Linux tweaks (only in install mode)
         if self.should_run_install_steps():
             status, _ = self.apply_tweaks(malcolm_config, config_dir, ctx)
             if status == InstallerResult.FAILURE:
@@ -638,7 +632,7 @@ class LinuxInstaller(BaseInstaller):
         else:
             InstallerLogger.info(f"Dry run/config-only: would apply {PLATFORM_LINUX} system tweaks")
 
-        # 7) Docker operations (shared) [compose only and install mode]
+        # 6) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE:
             if self.should_run_install_steps():
                 if not _ok(shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)):

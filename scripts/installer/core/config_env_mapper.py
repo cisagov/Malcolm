@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional
 import os
 
 from scripts.installer.utils.logger_utils import InstallerLogger
-
+from scripts.installer.utils.exceptions import FileOperationError
 from ..utils.custom_transforms import *
 
 from scripts.malcolm_utils import (
@@ -394,299 +394,330 @@ class EnvMapper:
                         else:
                             InstallerLogger.warning(f"EnvMapper scan skipped missing file: {filepath}")
 
-        # Arkime
-        self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_FREESPACEG].config_items = [KEY_CONFIG_ITEM_ARKIME_FREESPACEG]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].config_items = [
-            KEY_CONFIG_ITEM_LIVE_ARKIME,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
-        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
-            KEY_CONFIG_ITEM_AUTO_ARKIME,
-            KEY_CONFIG_ITEM_LIVE_ARKIME,
-        ]
-        # Rotated flag is derived; do not treat it as authoritative for either item
-        self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].derived_items = [
-            KEY_CONFIG_ITEM_AUTO_ARKIME,
-            KEY_CONFIG_ITEM_LIVE_ARKIME,
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_AUTO_ANALYZE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_AUTO_ARKIME]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_ENABLED].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_HOT_WARM_ENABLED].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_OPTIMIZATION_PERIOD].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS
-        ]
-        self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS].config_items = [
-            KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS
-        ]
+        try:
+            # Arkime
+            self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].config_items = [
+                KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_FREESPACEG].config_items = [KEY_CONFIG_ITEM_ARKIME_FREESPACEG]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].derived_items = [
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_NODE_HOST].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].config_items = [
+                KEY_CONFIG_ITEM_AUTO_ARKIME,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+            ]
+            # Rotated flag is derived; do not treat it as authoritative for either item
+            self.env_var_by_map_key[KEY_ENV_ARKIME_ROTATED_PCAP].derived_items = [
+                KEY_CONFIG_ITEM_AUTO_ARKIME,
+                KEY_CONFIG_ITEM_LIVE_ARKIME,
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_AUTO_ANALYZE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_AUTO_ARKIME]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_ENABLED].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_HOT_WARM_ENABLED].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HOT_WARM
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_OPTIMIZATION_PERIOD].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZATION_TIME_PERIOD
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_HISTORY_IN_WEEKS
+            ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS].config_items = [
+                KEY_CONFIG_ITEM_INDEX_MANAGEMENT_OPTIMIZE_SESSION_SEGMENTS
+            ]
 
-        # Logstash
-        self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [KEY_CONFIG_ITEM_LOGSTASH_HOST]
-        self.env_var_by_map_key[KEY_ENV_LOGSTASH_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_LS_WORKERS]
-        self.env_var_by_map_key[KEY_ENV_LOGSTASH_REVERSE_DNS].config_items = [KEY_CONFIG_ITEM_REVERSE_DNS]
-        self.env_var_by_map_key[KEY_ENV_LOGSTASH_OUI_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_OUI]
-        self.env_var_by_map_key[KEY_ENV_LOGSTASH_JAVA_OPTS].config_items = [KEY_CONFIG_ITEM_LS_MEMORY]
-        self.env_var_by_map_key[KEY_ENV_FREQ_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_FREQ]
+            # Logstash
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [KEY_CONFIG_ITEM_LOGSTASH_HOST]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_LS_WORKERS]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_REVERSE_DNS].config_items = [KEY_CONFIG_ITEM_REVERSE_DNS]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_OUI_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_OUI]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_JAVA_OPTS].config_items = [KEY_CONFIG_ITEM_LS_MEMORY]
+            self.env_var_by_map_key[KEY_ENV_FREQ_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_FREQ]
 
-        # Filebeat
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LOG_FORMAT].config_items = [
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_SOURCE_FIELD].config_items = [
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_TARGET_FIELD].config_items = [
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_DROP_FIELD].config_items = [
-            KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_TAG].config_items = [KEY_CONFIG_ITEM_FILEBEAT_TCP_TAG]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_WATCHER_POLLING].config_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
-        # Derived: listen is implied by port; do not set port from listen
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].derived_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].config_items = [
-            KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
-            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        ]
-        # Port is authoritative; accept-syslog is derived from whether port is non-zero
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].derived_items = [
-            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
-        # Derived: listen is implied by port; do not set port from listen
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].derived_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].config_items = [
-            KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
-            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        ]
-        # Port is authoritative; accept-syslog is derived from whether port is non-zero
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].derived_items = [
-            KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
-        ]
+            # Filebeat
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_LOG_FORMAT].config_items = [
+                KEY_CONFIG_ITEM_FILEBEAT_TCP_LOG_FORMAT
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_SOURCE_FIELD].config_items = [
+                KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_TARGET_FIELD].config_items = [
+                KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_TARGET_FIELD
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_PARSE_DROP_FIELD].config_items = [
+                KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_DROP_FIELD
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_TCP_TAG].config_items = [KEY_CONFIG_ITEM_FILEBEAT_TCP_TAG]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_WATCHER_POLLING].config_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_TCP_PORT]
+            # Derived: listen is implied by port; do not set port from listen
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_LISTEN].derived_items = [
+                KEY_CONFIG_ITEM_SYSLOG_TCP_PORT
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].config_items = [
+                KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
+                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+            ]
+            # Port is authoritative; accept-syslog is derived from whether port is non-zero
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].derived_items = [
+                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
+            # Derived: listen is implied by port; do not set port from listen
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].derived_items = [
+                KEY_CONFIG_ITEM_SYSLOG_UDP_PORT
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].config_items = [
+                KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
+                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
+            ]
+            # Port is authoritative; accept-syslog is derived from whether port is non-zero
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].derived_items = [
+                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
+            ]
 
-        # NetBox
-        self.env_var_by_map_key[KEY_ENV_NETBOX_ENRICHMENT].config_items = [KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_CREATE_PREFIX].config_items = [
-            KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS
-        ]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_POPULATE].config_items = [KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_DEFAULT_SITE].config_items = [KEY_CONFIG_ITEM_NETBOX_SITE_NAME]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_URL].config_items = [
-            KEY_CONFIG_ITEM_NETBOX_MODE,
-            KEY_CONFIG_ITEM_NETBOX_URL,
-        ]
-        # Treat NETBOX_URL as authoritative for URL, derived for mode (NETBOX_MODE env is authoritative for mode)
-        self.env_var_by_map_key[KEY_ENV_NETBOX_URL].authoritative_items = [KEY_CONFIG_ITEM_NETBOX_URL]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_URL].derived_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
-        self.env_var_by_map_key[KEY_ENV_NETBOX_MODE].config_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
+            # NetBox
+            self.env_var_by_map_key[KEY_ENV_NETBOX_ENRICHMENT].config_items = [KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_CREATE_PREFIX].config_items = [
+                KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS
+            ]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_POPULATE].config_items = [KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_DEFAULT_SITE].config_items = [KEY_CONFIG_ITEM_NETBOX_SITE_NAME]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_URL].config_items = [
+                KEY_CONFIG_ITEM_NETBOX_MODE,
+                KEY_CONFIG_ITEM_NETBOX_URL,
+            ]
+            # Treat NETBOX_URL as authoritative for URL, derived for mode (NETBOX_MODE env is authoritative for mode)
+            self.env_var_by_map_key[KEY_ENV_NETBOX_URL].authoritative_items = [KEY_CONFIG_ITEM_NETBOX_URL]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_URL].derived_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_MODE].config_items = [KEY_CONFIG_ITEM_NETBOX_MODE]
 
-        # Nginx
-        self.env_var_by_map_key[KEY_ENV_NGINX_SSL].config_items = [KEY_CONFIG_ITEM_NGINX_SSL]
-        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV4].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4]
-        self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV6].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6]
+            # Nginx
+            self.env_var_by_map_key[KEY_ENV_NGINX_SSL].config_items = [KEY_CONFIG_ITEM_NGINX_SSL]
+            self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV4].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV4]
+            self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV6].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6]
 
-        # OpenSearch
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].config_items = [
-            KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT].config_items = [
-            KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_PRIMARY].config_items = [KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_URL].config_items = [
-            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION].config_items = [
-            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY_URL].config_items = [
-            KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION].config_items = [
-            KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY
-        ]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY].config_items = [KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_JAVA_OPTS].config_items = [KEY_CONFIG_ITEM_OS_MEMORY]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_URL].config_items = [KEY_CONFIG_ITEM_DASHBOARDS_URL]
-        self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE].config_items = [
-            KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE
-        ]
+            # OpenSearch
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].config_items = [
+                KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT].config_items = [
+                KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_PRIMARY].config_items = [KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_URL].config_items = [
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SSL_CERTIFICATE_VERIFICATION].config_items = [
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_SSL_VERIFY
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY_URL].config_items = [
+                KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY_SSL_CERTIFICATE_VERIFICATION].config_items = [
+                KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_SECONDARY].config_items = [
+                KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_JAVA_OPTS].config_items = [KEY_CONFIG_ITEM_OS_MEMORY]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_URL].config_items = [KEY_CONFIG_ITEM_DASHBOARDS_URL]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_DASHBOARDS_DARKMODE].config_items = [
+                KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE
+            ]
 
-        # PCAP capture
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].config_items = [
-            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].config_items = [
-            KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        # Only authoritative for tcpdump; derived (non-authoritative) for netsniff and live capture
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCPDUMP]
-        self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [
-            KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        self.env_var_by_map_key[KEY_ENV_PCAP_IFACE_TWEAK].config_items = [KEY_CONFIG_ITEM_TWEAK_IFACE]
-        self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
-        self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]
-        self.env_var_by_map_key[KEY_ENV_PCAP_NODE_NAME].config_items = [KEY_CONFIG_ITEM_PCAP_NODE_NAME]
-        self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].config_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
+            # PCAP capture
+            self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].config_items = [
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+            self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_NETSNIFF].derived_items = [
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC
+            ]
+            self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].config_items = [
+                KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            # Only authoritative for tcpdump; derived (non-authoritative) for netsniff and live capture
+            self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].authoritative_items = [KEY_CONFIG_ITEM_PCAP_TCPDUMP]
+            self.env_var_by_map_key[KEY_ENV_PCAP_ENABLE_TCPDUMP].derived_items = [
+                KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            self.env_var_by_map_key[KEY_ENV_PCAP_IFACE_TWEAK].config_items = [KEY_CONFIG_ITEM_TWEAK_IFACE]
+            self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
+            self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]
+            self.env_var_by_map_key[KEY_ENV_PCAP_NODE_NAME].config_items = [KEY_CONFIG_ITEM_PCAP_NODE_NAME]
+            self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].config_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
 
-        # Malcolm
-        self.env_var_by_map_key[KEY_ENV_PGID].config_items = [KEY_CONFIG_ITEM_PROCESS_GROUP_ID]
-        self.env_var_by_map_key[KEY_ENV_PUID].config_items = [KEY_CONFIG_ITEM_PROCESS_USER_ID]
-        self.env_var_by_map_key[KEY_ENV_PROFILE_KEY].config_items = [KEY_CONFIG_ITEM_MALCOLM_PROFILE]
-        self.env_var_by_map_key[KEY_ENV_CONTAINER_RUNTIME_KEY].config_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            KEY_CONFIG_ITEM_RUNTIME_BIN,
-        ]
+            # Malcolm
+            self.env_var_by_map_key[KEY_ENV_PGID].config_items = [KEY_CONFIG_ITEM_PROCESS_GROUP_ID]
+            self.env_var_by_map_key[KEY_ENV_PUID].config_items = [KEY_CONFIG_ITEM_PROCESS_USER_ID]
+            self.env_var_by_map_key[KEY_ENV_PROFILE_KEY].config_items = [KEY_CONFIG_ITEM_MALCOLM_PROFILE]
+            self.env_var_by_map_key[KEY_ENV_CONTAINER_RUNTIME_KEY].config_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+                KEY_CONFIG_ITEM_RUNTIME_BIN,
+            ]
 
-        # Suricata
-        self.env_var_by_map_key[KEY_ENV_SURICATA_UPDATE_RULES].config_items = [KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].config_items = [
-            KEY_CONFIG_ITEM_LIVE_SURICATA,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
-        self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_EVE_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_ROTATED_PCAP].config_items = [
-            KEY_CONFIG_ITEM_AUTO_SURICATA,
-            KEY_CONFIG_ITEM_LIVE_SURICATA,
-        ]
-        self.env_var_by_map_key[KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_AUTO_SURICATA]
+            # Suricata
+            self.env_var_by_map_key[KEY_ENV_SURICATA_UPDATE_RULES].config_items = [KEY_CONFIG_ITEM_SURICATA_RULE_UPDATE]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].config_items = [
+                KEY_CONFIG_ITEM_LIVE_SURICATA,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+            self.env_var_by_map_key[KEY_ENV_SURICATA_LIVE_CAPTURE].derived_items = [
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC
+            ]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_STATS_EVE_ENABLED].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_ROTATED_PCAP].config_items = [
+                KEY_CONFIG_ITEM_AUTO_SURICATA,
+                KEY_CONFIG_ITEM_LIVE_SURICATA,
+            ]
+            self.env_var_by_map_key[KEY_ENV_SURICATA_AUTO_ANALYZE_PCAP_FILES].config_items = [
+                KEY_CONFIG_ITEM_AUTO_SURICATA
+            ]
 
-        # Zeek
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
-        # This env var signals presence of a key but cannot reconstruct it; treat as derived
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].derived_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_EXTRACTOR_MODE].config_items = [KEY_CONFIG_ITEM_FILE_CARVE_MODE]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRESERVATION].config_items = [KEY_CONFIG_ITEM_FILE_PRESERVE_MODE]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_BEST_GUESS_ICS].config_items = [
-            KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].config_items = [
-            KEY_CONFIG_ITEM_LIVE_ZEEK,
-            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-        ]
-        # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
-        self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].derived_items = [KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_STATS].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].config_items = [
-            KEY_CONFIG_ITEM_AUTO_ZEEK,
-            KEY_CONFIG_ITEM_LIVE_ZEEK,
-        ]
-        # Rotated flag is derived; do not treat it as authoritative for either item
-        self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].derived_items = [
-            KEY_CONFIG_ITEM_AUTO_ZEEK,
-            KEY_CONFIG_ITEM_LIVE_ZEEK,
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_AUTO_ZEEK]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP].config_items = [
-            KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION].config_items = [
-            KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_FEED_SINCE].config_items = [KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION].config_items = [
-            KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_VTOT_API2_KEY].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT].config_items = [
-            KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_MAX_SIZE].config_items = [
-            KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE].config_items = [
-            KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP].config_items = [
-            KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY].config_items = [
-            KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY
-        ]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_YARA].config_items = [KEY_CONFIG_ITEM_YARA_SCAN]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CAPA].config_items = [KEY_CONFIG_ITEM_CAPA_SCAN]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV].config_items = [KEY_CONFIG_ITEM_CLAM_AV_SCAN]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_UPDATE_RULES].config_items = [KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE]
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].config_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
-        # Polling flags are derived from orchestration mode
-        self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].derived_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
+            # Zeek
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
+            # This env var signals presence of a key but cannot reconstruct it; treat as derived
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_VTOT].derived_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_EXTRACTOR_MODE].config_items = [KEY_CONFIG_ITEM_FILE_CARVE_MODE]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRESERVATION].config_items = [KEY_CONFIG_ITEM_FILE_PRESERVE_MODE]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_ICS_ALL].config_items = [KEY_CONFIG_ITEM_MALCOLM_ICS]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_BEST_GUESS_ICS].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_ICS_BEST_GUESS
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].config_items = [
+                KEY_CONFIG_ITEM_LIVE_ZEEK,
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            ]
+            # CAPTURE_LIVE_NETWORK_TRAFFIC is derived/managed by dependency system
+            self.env_var_by_map_key[KEY_ENV_ZEEK_LIVE_CAPTURE].derived_items = [
+                KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_DISABLE_STATS].config_items = [KEY_CONFIG_ITEM_CAPTURE_STATS]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].config_items = [
+                KEY_CONFIG_ITEM_AUTO_ZEEK,
+                KEY_CONFIG_ITEM_LIVE_ZEEK,
+            ]
+            # Rotated flag is derived; do not treat it as authoritative for either item
+            self.env_var_by_map_key[KEY_ENV_ZEEK_ROTATED_PCAP].derived_items = [
+                KEY_CONFIG_ITEM_AUTO_ZEEK,
+                KEY_CONFIG_ITEM_LIVE_ZEEK,
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_AUTO_ANALYZE_PCAP_FILES].config_items = [KEY_CONFIG_ITEM_AUTO_ZEEK]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_REFRESH_ON_STARTUP].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_FEED_SINCE].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION].config_items = [
+                KEY_CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_VTOT_API2_KEY].config_items = [KEY_CONFIG_ITEM_VTOT_API_KEY]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT].config_items = [
+                KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_MAX_SIZE].config_items = [
+                KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_ENABLE].config_items = [
+                KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_ZIP].config_items = [
+                KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY].config_items = [
+                KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVE_ENCRYPT_KEY
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_YARA].config_items = [KEY_CONFIG_ITEM_YARA_SCAN]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CAPA].config_items = [KEY_CONFIG_ITEM_CAPA_SCAN]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_ENABLE_CLAMAV].config_items = [KEY_CONFIG_ITEM_CLAM_AV_SCAN]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_UPDATE_RULES].config_items = [
+                KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE
+            ]
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].config_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
+            # Polling flags are derived from orchestration mode
+            self.env_var_by_map_key[KEY_ENV_ZEEK_FILE_WATCHER_POLLING].derived_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
 
-        # reverse precedence configuration (conflict-prone items)
-        # orchestration mode: authoritative CONTAINER_RUNTIME_KEY, then derived polling flags
-        self._reverse_precedence_by_item[KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE] = [
-            KEY_ENV_CONTAINER_RUNTIME_KEY,
-            KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
-            KEY_ENV_PCAP_PIPELINE_POLLING,
-            KEY_ENV_FILEBEAT_WATCHER_POLLING,
-        ]
+            # reverse precedence configuration (conflict-prone items)
+            # orchestration mode: authoritative CONTAINER_RUNTIME_KEY, then derived polling flags
+            self._reverse_precedence_by_item[KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE] = [
+                KEY_ENV_CONTAINER_RUNTIME_KEY,
+                KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
+                KEY_ENV_PCAP_PIPELINE_POLLING,
+                KEY_ENV_FILEBEAT_WATCHER_POLLING,
+            ]
 
-        # live capture flags: direct live capture beats rotated-pcap derived value
-        self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_ARKIME] = [
-            KEY_ENV_ARKIME_LIVE_CAPTURE,
-            KEY_ENV_ARKIME_ROTATED_PCAP,
-        ]
-        self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_SURICATA] = [
-            KEY_ENV_SURICATA_LIVE_CAPTURE,
-            KEY_ENV_SURICATA_ROTATED_PCAP,
-        ]
-        self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_ZEEK] = [
-            KEY_ENV_ZEEK_LIVE_CAPTURE,
-            KEY_ENV_ZEEK_ROTATED_PCAP,
-        ]
+            # live capture flags: direct live capture beats rotated-pcap derived value
+            self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_ARKIME] = [
+                KEY_ENV_ARKIME_LIVE_CAPTURE,
+                KEY_ENV_ARKIME_ROTATED_PCAP,
+            ]
+            self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_SURICATA] = [
+                KEY_ENV_SURICATA_LIVE_CAPTURE,
+                KEY_ENV_SURICATA_ROTATED_PCAP,
+            ]
+            self._reverse_precedence_by_item[KEY_CONFIG_ITEM_LIVE_ZEEK] = [
+                KEY_ENV_ZEEK_LIVE_CAPTURE,
+                KEY_ENV_ZEEK_ROTATED_PCAP,
+            ]
 
-        # netbox: explicit mode overrides URL-implied remote
-        self._reverse_precedence_by_item[KEY_CONFIG_ITEM_NETBOX_MODE] = [
-            KEY_ENV_NETBOX_MODE,
-            KEY_ENV_NETBOX_URL,
-        ]
+            # netbox: explicit mode overrides URL-implied remote
+            self._reverse_precedence_by_item[KEY_CONFIG_ITEM_NETBOX_MODE] = [
+                KEY_ENV_NETBOX_MODE,
+                KEY_ENV_NETBOX_URL,
+            ]
 
-        # Mark remaining polling flags as derived for orchestration as well
-        self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].derived_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
-        self.env_var_by_map_key[KEY_ENV_FILEBEAT_WATCHER_POLLING].derived_items = [
-            KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
-        ]
+            # Mark remaining polling flags as derived for orchestration as well
+            self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].derived_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
+            self.env_var_by_map_key[KEY_ENV_FILEBEAT_WATCHER_POLLING].derived_items = [
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
+            ]
+
+        except KeyError as ke:
+            InstallerLogger.error(
+                f"Error setting up default .env mappings ({ke}), likely missing .env.example template files"
+            )
+            raise FileOperationError(f"Failed to load {ke} from .env.example template files")
 
     # Convenience APIs used by MalcolmConfig and tests
     def has_env_mapping(self, item_key: str) -> bool:

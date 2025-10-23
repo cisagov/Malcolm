@@ -226,13 +226,13 @@ def handle_config_directories_tui_mode(
                 else:
                     InstallerLogger.warning(f"No .env files detected in provided input directory: {dirs.input_dir}")
                     if non_interactive:
-                        InstallerLogger.error(
-                            "Non-interactive mode: cannot prompt to use default config/. Re-run with a valid --environment-dir-input or omit it."
+                        InstallerLogger.warning(
+                            "Non-interactive mode: cannot prompt to use default config/. Proceeding with fresh configuration."
                         )
-                        return False
+
                     # interactive: offer to use the default config/ directory instead
-                    if ui_impl and ui_impl.ask_yes_no(
-                        f"No .env files found in {dirs.input_dir}.\nUse default config directory instead?\n({default_dir})",
+                    elif ui_impl and ui_impl.ask_yes_no(
+                        f"No .env files found in {dirs.input_dir}.\nCheck default config directory instead?\n({default_dir})",
                         default=True,
                     ):
                         dirs.input_dir = default_dir
@@ -266,14 +266,14 @@ def handle_config_directories_tui_mode(
                             else:
                                 InstallerLogger.info("Skipping load of existing .env files.")
                         else:
-                            InstallerLogger.warning(
-                                f"Default config directory also contains no .env files: {dirs.input_dir}"
+                            InstallerLogger.info(
+                                "No existing .env files found in config directory. Proceeding with fresh configuration."
                             )
+
                     else:
-                        InstallerLogger.error(
-                            "User declined using default config/. Please re-run with the correct --environment-dir-input."
+                        InstallerLogger.info(
+                            "No existing .env files found in config directory. Proceeding with fresh configuration."
                         )
-                        return False
 
     return True
 

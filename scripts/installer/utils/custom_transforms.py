@@ -441,7 +441,7 @@ def custom_reverse_transform_opensearch_url(value: str):
 # Live capture transforms
 def custom_transform_arkime_live_capture(liveArkime: bool, captureLive: bool) -> str:
     """Forward transform for ARKIME_LIVE_CAPTURE.
-    
+
     Write true only if live Arkime is enabled.
     captureLive is a derived/shared flag.
     """
@@ -450,7 +450,7 @@ def custom_transform_arkime_live_capture(liveArkime: bool, captureLive: bool) ->
 
 def custom_reverse_transform_arkime_live_capture(value: str):
     """Reverse transform for ARKIME_LIVE_CAPTURE.
-    
+
     Returns tuple (liveArkime, captureLive).
     """
     live_arkime = _env_str_to_bool(value)
@@ -460,7 +460,7 @@ def custom_reverse_transform_arkime_live_capture(value: str):
 
 def custom_transform_zeek_live_capture(liveZeek: bool, captureLive: bool) -> str:
     """Forward transform for ZEEK_LIVE_CAPTURE.
-    
+
     Write true only if live Zeek is enabled.
     captureLive is a derived/shared flag.
     """
@@ -469,7 +469,7 @@ def custom_transform_zeek_live_capture(liveZeek: bool, captureLive: bool) -> str
 
 def custom_reverse_transform_zeek_live_capture(value: str):
     """Reverse transform for ZEEK_LIVE_CAPTURE.
-    
+
     Returns tuple (liveZeek, captureLive).
     """
     live_zeek = _env_str_to_bool(value)
@@ -479,7 +479,7 @@ def custom_reverse_transform_zeek_live_capture(value: str):
 
 def custom_transform_suricata_live_capture(liveSuricata: bool, captureLive: bool) -> str:
     """Forward transform for SURICATA_LIVE_CAPTURE.
-    
+
     Write true only if live Suricata is enabled.
     captureLive is a derived/shared flag.
     """
@@ -488,7 +488,7 @@ def custom_transform_suricata_live_capture(liveSuricata: bool, captureLive: bool
 
 def custom_reverse_transform_suricata_live_capture(value: str):
     """Reverse transform for SURICATA_LIVE_CAPTURE.
-    
+
     Returns tuple (liveSuricata, captureLive).
     """
     live_suricata = _env_str_to_bool(value)
@@ -498,7 +498,7 @@ def custom_reverse_transform_suricata_live_capture(value: str):
 
 def custom_transform_pcap_enable_netsniff(pcapNetSniff: bool, captureLive: bool) -> str:
     """Forward transform for PCAP_ENABLE_NETSNIFF.
-    
+
     Write true only if netsniff is enabled.
     captureLive is a derived/shared flag.
     """
@@ -507,7 +507,7 @@ def custom_transform_pcap_enable_netsniff(pcapNetSniff: bool, captureLive: bool)
 
 def custom_reverse_transform_pcap_enable_netsniff(value: str):
     """Reverse transform for PCAP_ENABLE_NETSNIFF.
-    
+
     Returns tuple (pcapNetSniff, captureLive).
     """
     netsniff = _env_str_to_bool(value)

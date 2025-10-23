@@ -8,12 +8,11 @@
 import os
 import re
 import sys
-import datetime
 import copy
 
 from collections import defaultdict
 from enum import Enum
-from typing import Dict, Any, Callable, List, Tuple, Optional, Set
+from typing import Dict, Any, Callable, List, Tuple, Optional
 
 from scripts.malcolm_common import (
     DEFAULT_INDEX_DIR,
@@ -46,11 +45,6 @@ from scripts.installer.configs.constants.constants import (
     LABEL_OS_RULE,
     SERVICE_IP_EXPOSED,
     SERVICE_PORT_LOGSTASH,
-    SERVICE_PORT_MALCOLM,
-    SERVICE_PORT_MALCOLM_NO_SSL,
-    SERVICE_PORT_OSMALCOLM,
-    SERVICE_PORT_OSMALCOLM_NO_SSL,
-    SERVICE_PORT_SFTP_EXTERNAL,
     SERVICE_PORT_SFTP_INTERNAL,
     SERVICE_PORT_TCP_JSON,
     TRAEFIK_ENABLE,
@@ -303,10 +297,10 @@ class MalcolmConfig(ObservableStoreMixin):
             FileOperationError: If there is an issue writing the files.
         """
         if not os.path.isdir(config_dir):
-            raise FileOperationError("Configuration directory '{config_dir}' not found.")
+            raise FileOperationError(f"Configuration directory '{config_dir}' not found.")
 
         if not (dotenv_lib := DotEnvDynamic()):
-            raise Exception('Could not dynamically import dotenv library')
+            raise ImportError('Could not dynamically import dotenv library')
 
         # default templates directory if not provided
         if templates_dir is None:

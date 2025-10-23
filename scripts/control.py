@@ -178,7 +178,7 @@ def checkEnvFilesAndValues():
     global dotenvImported
     global yamlImported
 
-    # if a specific config/*.env file doesn't exist, use the *.example.env files as defaults
+    # if a specific config/*.env file doesn't exist, use the *.env.example files as defaults
     if os.path.isdir(examplesConfigDir := os.path.join(GetMalcolmPath(), 'config')):
 
         # process renames, copies, removes, etc. from env-var-actions.yml

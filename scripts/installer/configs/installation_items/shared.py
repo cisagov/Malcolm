@@ -10,7 +10,6 @@ This module contains all configuration items related to the installation process
 that are shared across all platforms (Linux, macOS, Windows).
 """
 
-import os
 from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.installation_item_keys import (

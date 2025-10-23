@@ -86,9 +86,6 @@ UFW_MANAGER_SCRIPT = 'ufw_manager.sh'
 # Default restart policy string (used for display/logging fallbacks)
 DEFAULT_RESTART_POLICY = "unless-stopped"
 
-# SSL env defaults
-SSL_CA_TRUST_DIR = "/var/local/ca-trust"
-
 # ---------------------------------------------------------------------------
 # Pre-existing installer constants referenced across core/ui
 # ---------------------------------------------------------------------------

@@ -9,7 +9,7 @@ import os
 from typing import List, Optional
 
 from scripts.malcolm_constants import OrchestrationFramework, ImageArchitecture
-from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO, UserInterfaceMode
+from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO
 from scripts.installer.actions.shared import discover_compose_command
 
 # no direct UI imports needed here
@@ -124,7 +124,6 @@ class MacInstaller(BaseInstaller):
         Note: This method assumes Docker is NOT already installed - the caller
         (docker_install.py step) should check for existing installation first.
         """
-        import requests
         import tempfile
 
         # macOS Docker constants from original installer
@@ -319,10 +318,8 @@ class MacInstaller(BaseInstaller):
         Order:
           1) Filesystem (shared)
           2) Docker + Compose (platform) [compose orchestration only]
-          3) Runtime config (shared)
-          4) Orchestration files (shared) [compose only]
-          5) SSL env (shared)
-          6) Docker operations (shared) [compose only, install mode]
+          3) Orchestration files (shared) [compose only]
+          4) Docker operations (shared) [compose only, install mode]
         """
         from scripts.malcolm_constants import OrchestrationFramework
         from scripts.installer.configs.constants.enums import InstallerResult
@@ -359,11 +356,7 @@ class MacInstaller(BaseInstaller):
             if not _ok(shared_actions.update_compose_files(malcolm_config, config_dir, orchestration_file, self, ctx)):
                 return False
 
-        # 4) SSL env (shared)
-        if not _ok(shared_actions.ensure_ssl_env(malcolm_config, config_dir, self, ctx)):
-            return False
-
-        # 5) Docker operations (shared) [compose only and install mode]
+        # 4) Docker operations (shared) [compose only and install mode]
         if self.orchestration_mode == OrchestrationFramework.DOCKER_COMPOSE and self.should_run_install_steps():
             if not _ok(shared_actions.perform_docker_operations(malcolm_config, config_dir, self, ctx)):
                 return False

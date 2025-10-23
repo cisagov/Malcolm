@@ -20,7 +20,6 @@ from scripts.installer.configs.constants.constants import (
 )
 
 from scripts.installer.configs.constants.enums import (
-    DockerRestartPolicy,
     FilebeatLogFormat,
     FilebeatFieldNames,
     SearchEngineMode,

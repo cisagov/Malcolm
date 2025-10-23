@@ -125,8 +125,10 @@ if mkdir "$DESTDIR"; then
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/install.py "$RUN_PATH/"
   git ls-files ./scripts/installer | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
+  rm -rf "$DESTDIR/"scripts/installer/tests "$DESTDIR/"scripts/installer/ui/gui
   pushd "./scripts" >/dev/null 2>&1
   git ls-files ./installer | /usr/bin/rsync -R --files-from=- ./ "$RUN_PATH/"
+  rm -rf "$RUN_PATH/"installer/tests "$RUN_PATH/"installer/ui/gui
   popd  >/dev/null 2>&1
   cp $VERBOSE ./scripts/malcolm_common.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/malcolm_common.py "$RUN_PATH/"

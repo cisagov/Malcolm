@@ -204,10 +204,8 @@ class InstallerUI(ABC):
             True if user confirms overwrite or no existing files, False if cancelled
         """
         try:
-            # Check if there are any .env files that are not .example files
-            existing_env_files = [
-                f for f in os.listdir(config_dir) if f.endswith(".env") and not f.endswith(".example")
-            ]
+            # Check if there are any .env files
+            existing_env_files = [f for f in os.listdir(config_dir) if f.endswith(".env")]
 
             if existing_env_files:
                 if not self.ask_yes_no(
