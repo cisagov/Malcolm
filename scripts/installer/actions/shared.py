@@ -56,6 +56,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
     KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
+    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
 )
 from scripts.installer.configs.constants.constants import (
@@ -456,16 +457,24 @@ def update_compose_files(
             f"Updating {len(compose_files)} compose file(s) for orchestration ({', '.join(sorted(os.path.basename(f) for f in compose_files))})..."
         )
 
-        # Load/write per file
         runtime_bin = malcolm_config.get_value(KEY_CONFIG_ITEM_RUNTIME_BIN) or "docker"
         restart_policy = _resolve_restart_policy(malcolm_config)
-        pcap_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_DIR) or DEFAULT_PCAP_DIR
-        zeek_log_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR) or DEFAULT_ZEEK_LOG_DIR
-        suricata_log_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR) or DEFAULT_SURICATA_LOG_DIR
-        index_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_DIR) or DEFAULT_INDEX_DIR
-        index_snapshot_dir = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR) or DEFAULT_INDEX_SNAPSHOT_DIR
         network_name = malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME)
         image_arch = malcolm_config.get_value(KEY_CONFIG_ITEM_IMAGE_ARCH)
+
+        def get_or_default(config, key, default, use_default):
+            return default if use_default else config.get_value(key) or default
+
+        use_default = malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)
+        pcap_dir = get_or_default(malcolm_config, KEY_CONFIG_ITEM_PCAP_DIR, DEFAULT_PCAP_DIR, use_default)
+        zeek_log_dir = get_or_default(malcolm_config, KEY_CONFIG_ITEM_ZEEK_LOG_DIR, DEFAULT_ZEEK_LOG_DIR, use_default)
+        suricata_log_dir = get_or_default(
+            malcolm_config, KEY_CONFIG_ITEM_SURICATA_LOG_DIR, DEFAULT_SURICATA_LOG_DIR, use_default
+        )
+        index_dir = get_or_default(malcolm_config, KEY_CONFIG_ITEM_INDEX_DIR, DEFAULT_INDEX_DIR, use_default)
+        index_snapshot_dir = get_or_default(
+            malcolm_config, KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, DEFAULT_INDEX_SNAPSHOT_DIR, use_default
+        )
 
         result = InstallerResult.SUCCESS
 
