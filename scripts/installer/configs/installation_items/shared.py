@@ -43,6 +43,9 @@ CONFIG_ITEM_PULL_MALCOLM_IMAGES = ConfigItem(
     validator=lambda x: isinstance(x, bool),
     question="Pull Malcolm images from container registry?",
     widget_type=WidgetType.CHECKBOX,
+    metadata={
+        "visible_when_runtime": "docker",
+    },
 )
 
 
