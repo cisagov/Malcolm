@@ -119,7 +119,7 @@ CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD = ConfigItem(
     key=KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD,
     label="Extracted File Percent Threshold",
     default_value=0,
-    validator=lambda x: isinstance(x, int),
+    validator=lambda x: isinstance(x, int) and (x >= 0) and (x <= 100),
     question="Delete Zeek-extracted files when the file system exceeds this percentage full (e.g., 90%, etc.)",
     widget_type=WidgetType.NUMBER,
 )
