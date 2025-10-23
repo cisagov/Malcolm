@@ -52,8 +52,9 @@ CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION = ConfigItem(
     label="Cron Expression for Threat Feed Updates",
     default_value="0 0 * * *",
     validator=lambda x: isinstance(x, str),
-    question="Cron expression for scheduled pulls from threat intelligence feeds",
+    question="Cron expression for scheduled pulls from threat intelligence feeds (blank to disable scheduled pulls)",
     widget_type=WidgetType.TEXT,
+    accept_blank=True,
 )
 
 CONFIG_ITEM_ZEEK_INTEL_ITEM_EXPIRATION = ConfigItem(

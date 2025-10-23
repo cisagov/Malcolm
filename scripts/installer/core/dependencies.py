@@ -1067,9 +1067,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
         ),
         value=ValueRule(
-            depends_on=[KEY_CONFIG_ITEM_AUTO_ZEEK, KEY_CONFIG_ITEM_LIVE_ZEEK],
-            condition=lambda auto, live: bool(auto) or bool(live),
-            default_value=False,
+            depends_on=[
+                KEY_CONFIG_ITEM_AUTO_ZEEK,
+                KEY_CONFIG_ITEM_LIVE_ZEEK,
+            ],
+            condition=lambda _auto, _live: True,
+            default_value=lambda _auto, _live: bool(on_startup) or bool(cron_exp),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP: DependencySpec(
@@ -1077,14 +1081,26 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: bool(enabled),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_ZEEK_PULL_INTELLIGENCE_FEEDS,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: "0 0 * * *" if bool(enabled) else "",
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_FEED_SINCE: DependencySpec(
         visibility=VisibilityRule(
