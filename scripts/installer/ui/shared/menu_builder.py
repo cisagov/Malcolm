@@ -174,7 +174,7 @@ class ValueFormatter:
         Returns:
             Formatted string representation
         """
-        if "password" in label.lower() and value:
+        if value and (("password" in label.lower()) or ("api key" in label.lower())):
             return "********"
         return _format_scalar(value, empty_label="empty")
 

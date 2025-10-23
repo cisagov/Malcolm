@@ -147,7 +147,7 @@ def format_summary_value(label: str, value) -> str:
     Returns:
         Formatted string suitable for display
     """
-    if "password" in label.lower() and value:
+    if value and (("password" in label.lower()) or ("api key" in label.lower())):
         return "********"
     # Use centralized outbound formatting, then apply simple scalar normalization
     try:
