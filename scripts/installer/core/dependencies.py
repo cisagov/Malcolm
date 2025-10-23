@@ -12,11 +12,11 @@ functional area and specify both visibility and value relationships.
 
 from typing import Dict, Any, Callable, List, Union
 from dataclasses import dataclass
-from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
-from scripts.malcolm_constants import OrchestrationFramework
+from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM, OrchestrationFramework
 from scripts.installer.configs.constants.constants import (
     LOGSTASH_WORKERS_KUBERNETES,
     SYSLOG_DEFAULT_PORT,
+    LOCAL_LOGSTASH_HOST,
 )
 
 from scripts.installer.configs.constants.enums import (
@@ -57,6 +57,17 @@ class DependencySpec:
     visibility: VisibilityRule = None
     value: ValueRule = None
 
+
+class _UnchangedType:
+    """Sentinel object for default_value indicating that it should remain unchanged."""
+
+    def __repr__(self) -> str:
+        return "<UNCHANGED>"
+
+
+# use DEFAULT_VALUE_UNCHANGED for ValueRule.default_value if you want
+# DependencyManager.value_observer to *not* update the value
+DEFAULT_VALUE_UNCHANGED = _UnchangedType()
 
 # =============================================================================
 # DECLARATIVE DEPENDENCY CONFIGURATION
@@ -206,7 +217,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda _profile: True,
-            default_value=lambda profile: 'logstash:5044' if profile == PROFILE_MALCOLM else '',
+            default_value=lambda profile: (
+                LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else DEFAULT_VALUE_UNCHANGED
+            ),
             only_if_unmodified=False,
         ),
     ),

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 from scripts.installer.core.dependencies import (
     DEPENDENCY_CONFIG,
+    DEFAULT_VALUE_UNCHANGED,
     DependencySpec,
     VisibilityRule,
     ValueRule,
@@ -188,14 +189,15 @@ class DependencyManager:
                         InstallerLogger.warning(f"Default value function for {item_key} raised: {e}")
                         return
 
-                    # InstallerLogger.debug(f"value_rule.condition({item_key}): {new_val}")
+                    if new_val is not DEFAULT_VALUE_UNCHANGED:
+                        # InstallerLogger.debug(f"value_rule.condition({item_key}): {new_val}")
 
-                    # Apply via MalcolmConfig API to avoid touching internals
-                    try:
-                        self.config.apply_default(item_key, new_val)
-                    except Exception as e:
-                        # Do not break dependency processing; surface the error
-                        InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
+                        # Apply via MalcolmConfig API to avoid touching internals
+                        try:
+                            self.config.apply_default(item_key, new_val)
+                        except Exception as e:
+                            # Do not break dependency processing; surface the error
+                            InstallerLogger.warning(f"Failed to apply default for {item_key}: {e}")
 
             except Exception as e:
                 InstallerLogger.error(f"Error in value observer for {item_key}: {e}")

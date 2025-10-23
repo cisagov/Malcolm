@@ -83,6 +83,8 @@ SERVICE_PORT_TCP_JSON = "5045"
 TRAEFIK_ENABLE = "traefik.enable"
 UFW_MANAGER_SCRIPT = 'ufw_manager.sh'
 
+LOCAL_LOGSTASH_HOST = f"logstash:{SERVICE_PORT_LOGSTASH}"
+
 # Default restart policy string (used for display/logging fallbacks)
 DEFAULT_RESTART_POLICY = "unless-stopped"
 

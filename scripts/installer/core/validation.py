@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import List
 
 from scripts.malcolm_constants import PROFILE_HEDGEHOG
-
+from scripts.installer.configs.constants.constants import LOCAL_LOGSTASH_HOST
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
@@ -218,10 +218,10 @@ def _validate_hedgehog_profile(malcolm_config, add_issue) -> None:
     profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
     if isinstance(profile, str) and profile == PROFILE_HEDGEHOG:
         lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
-        if not _is_non_empty_str(lshost):
+        if (not _is_non_empty_str(lshost)) or (lshost == LOCAL_LOGSTASH_HOST):
             add_issue(
                 KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                "Required when running with the Hedgehog profile (host:port)",
+                "Remote Logstash required when running with the Hedgehog profile (host:port)",
             )
 
 
