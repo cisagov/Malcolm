@@ -952,27 +952,27 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
             ],
             condition=lambda cleanup, limit: (not bool(cleanup)) or bool(limit),
-            default_value=lambda cleanup, limit: (False if not bool(cleanup) else bool(limit)),
+            default_value=lambda cleanup, limit: False if not bool(cleanup) else (bool(limit) and str(limit) != "0"),
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
-            condition=lambda enabled: bool(enabled),
+            condition=lambda cleanup: bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
-            condition=lambda cleanup: not bool(cleanup),
-            default_value="0",
+            condition=lambda _cleanup: True,
+            default_value=lambda cleanup: "0" if not bool(cleanup) else DEFAULT_VALUE_UNCHANGED,
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
-            condition=lambda enabled: bool(enabled),
+            condition=lambda cleanup: bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
         )
     ),
