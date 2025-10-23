@@ -33,7 +33,6 @@ from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
 
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
@@ -199,8 +198,7 @@ def _update_services_runtime_settings(data: dict, runtime_bin: str, restart_poli
 
 def _get_traefik_config(malcolm_config):
     try:
-        behind_reverse_proxy = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY))
-        traefik_labels_enabled = behind_reverse_proxy and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
+        traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
         traefik_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_HOST) or ""
         traefik_os_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST) or ""
         traefik_entrypoint = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT) or ""
@@ -212,12 +210,11 @@ def _get_traefik_config(malcolm_config):
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
         )
     except Exception:
-        behind_reverse_proxy = traefik_labels_enabled = False
+        traefik_labels_enabled = False
         traefik_host = traefik_os_host = traefik_entrypoint = traefik_resolver = ""
         expose_opensearch = False
         os_primary_mode = DatabaseMode.OpenSearchLocal
     return (
-        behind_reverse_proxy,
         traefik_labels_enabled,
         traefik_host,
         traefik_os_host,
@@ -230,7 +227,6 @@ def _get_traefik_config(malcolm_config):
 
 def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
     (
-        behind_reverse_proxy,
         traefik_labels_enabled,
         traefik_host,
         traefik_os_host,
@@ -247,7 +243,7 @@ def _apply_traefik_labels_if_present(data: dict, traefik_tuple) -> None:
         _clear_known_traefik_labels(labels_dict)
 
         # Always write a boolean traefik.enable label
-        labels_dict[TRAEFIK_ENABLE] = bool(behind_reverse_proxy and traefik_labels_enabled)
+        labels_dict[TRAEFIK_ENABLE] = bool(traefik_labels_enabled)
         if labels_dict[TRAEFIK_ENABLE]:
             if len(traefik_host) > 1 and len(traefik_entrypoint) > 1 and len(traefik_resolver) > 1:
                 _apply_malcolm_labels(labels_dict, traefik_host, traefik_entrypoint, traefik_resolver)
@@ -267,10 +263,7 @@ def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
 
 def _get_exposed_services_config(malcolm_config):
     try:
-        behind_reverse_proxy = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY) or False)
-        traefik_labels_enabled = behind_reverse_proxy and bool(
-            malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS) or False
-        )
+        traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS) or False)
         open_ports = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) or False)
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
         os_primary_mode = (
@@ -289,7 +282,6 @@ def _get_exposed_services_config(malcolm_config):
         syslog_tcp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0
         syslog_udp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0
     except Exception:
-        behind_reverse_proxy = False
         traefik_labels_enabled = False
         open_ports = False
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
@@ -304,7 +296,6 @@ def _get_exposed_services_config(malcolm_config):
         syslog_udp_port = 0
 
     return (
-        behind_reverse_proxy,
         traefik_labels_enabled,
         open_ports,
         profile,
@@ -322,7 +313,6 @@ def _get_exposed_services_config(malcolm_config):
 
 def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> None:
     (
-        behind_reverse_proxy,
         traefik_labels_enabled,
         open_ports,
         profile,
@@ -392,7 +382,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
     if 'nginx-proxy' in data['services']:
 
         # set bind IPs and ports based on whether it should be externally exposed or not
-        if (profile == PROFILE_HEDGEHOG) or (behind_reverse_proxy and traefik_labels_enabled):
+        if (profile == PROFILE_HEDGEHOG) or traefik_labels_enabled:
             data['services']['nginx-proxy'].pop('ports', None)
         else:
             data['services']['nginx-proxy']['ports'] = [

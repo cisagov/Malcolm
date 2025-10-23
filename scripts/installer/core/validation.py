@@ -21,7 +21,6 @@ from typing import List
 from scripts.malcolm_constants import PROFILE_HEDGEHOG
 
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
@@ -100,13 +99,11 @@ def _validate_secondary_remote(malcolm_config, add_issue) -> None:
 
 def _validate_traefik_labels(malcolm_config, add_issue) -> None:
     try:
-        behind = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY))
         tlabels = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS))
     except Exception:
-        behind = False
         tlabels = False
 
-    if not (behind and tlabels):
+    if not tlabels:
         return
 
     for key, reason in (

@@ -116,8 +116,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
-    # behind reverse proxy: forced true in kubernetes (no prompt); compose shows normally
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY: DependencySpec(
+    # Traefik configuration: forced true in kubernetes (no prompt); compose shows normally
+    KEY_CONFIG_ITEM_TRAEFIK_LABELS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
@@ -202,14 +202,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_HEDGEHOG,
             is_top_level=True,
-        )
-    ),
-    # Traefik configuration: shown when reverse proxy is enabled
-    KEY_CONFIG_ITEM_TRAEFIK_LABELS: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
-            condition=lambda behind: bool(behind),
-            ui_parent=KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
         )
     ),
     KEY_CONFIG_ITEM_TRAEFIK_HOST: DependencySpec(

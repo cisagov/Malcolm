@@ -21,7 +21,6 @@ from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.constants import ORCHESTRATION_MODE_CHOICES
 from scripts.installer.configs.constants.enums import DockerRestartPolicy
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
@@ -74,21 +73,12 @@ CONFIG_ITEM_MALCOLM_RESTART_POLICY = ConfigItem(
     widget_type=WidgetType.SELECT,
 )
 
-CONFIG_ITEM_BEHIND_REVERSE_PROXY = ConfigItem(
-    key=KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
-    label="Behind Reverse Proxy",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question="Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?",
-    widget_type=WidgetType.CHECKBOX,
-)
-
 CONFIG_ITEM_TRAEFIK_LABELS = ConfigItem(
     key=KEY_CONFIG_ITEM_TRAEFIK_LABELS,
     label="Traefik Labels",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
-    question="Configure labels for Traefik?",
+    question="Enable labels for Traefik reverse proxy?",
     widget_type=WidgetType.CHECKBOX,
 )
 

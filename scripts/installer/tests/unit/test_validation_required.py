@@ -18,7 +18,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL,
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
@@ -130,8 +129,7 @@ class TestValidationRequired(unittest.TestCase):
 
     # ---------------------- Traefik labels ----------------------
     def test_traefik_labels_require_host_and_resolver(self):
-        # Enable behind reverse proxy and Traefik labels
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
+        # Enable Traefik labels
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         # Defaults: host="", resolver="", entrypoint="websecure"
         issues = validate_required(self.cfg)
@@ -145,8 +143,7 @@ class TestValidationRequired(unittest.TestCase):
         self.assertTrue(self.cfg.is_item_visible(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER))
 
     def test_traefik_opensearch_host_required_when_local_primary(self):
-        # behind reverse proxy + labels + local OpenSearch primary
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
+        # traefik labels + local OpenSearch primary
         self.cfg.set_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(

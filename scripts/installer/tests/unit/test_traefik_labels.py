@@ -18,7 +18,6 @@ from scripts.installer.actions.shared import update_compose_files
 from scripts.installer.tests.mock.test_framework import MockPlatform
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_TRAEFIK_LABELS,
     KEY_CONFIG_ITEM_TRAEFIK_HOST,
     KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
@@ -67,7 +66,6 @@ class TestTraefikLabels(unittest.TestCase):
 
     def test_labels_enabled_with_required_fields(self):
         # arrange
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org")
@@ -120,7 +118,6 @@ class TestTraefikLabels(unittest.TestCase):
         data["services"]["nginx-proxy"]["labels"] = dict(pre_labels)
         _write_compose(self.compose_path, data)
 
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, False)
 
         # act
@@ -137,7 +134,6 @@ class TestTraefikLabels(unittest.TestCase):
 
     def test_opensearch_labels_absent_when_remote_or_not_exposed(self):
         # arrange: labels enabled but remote primary
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT, "websecure")
@@ -161,7 +157,6 @@ class TestTraefikLabels(unittest.TestCase):
 
     def test_opensearch_labels_absent_when_local_but_not_exposed(self):
         # arrange: primary local, not exposed
-        self.cfg.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True)
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_HOST, "malcolm.example.org")
         self.cfg.set_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST, "os.malcolm.example.org")

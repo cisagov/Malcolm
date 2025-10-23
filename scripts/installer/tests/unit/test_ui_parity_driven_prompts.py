@@ -21,7 +21,6 @@ from scripts.installer.configs.constants.enums import ControlFlow
 
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
     KEY_CONFIG_ITEM_LS_WORKERS,
@@ -58,7 +57,6 @@ class TestUIParityDrivenPrompts(unittest.TestCase):
             KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE: OrchestrationFramework.DOCKER_COMPOSE,
             KEY_CONFIG_ITEM_RUNTIME_BIN: "docker",
             KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY: "unless-stopped",
-            KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY: True,
             KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME: "custom_net",
             KEY_CONFIG_ITEM_PROCESS_USER_ID: 1001,
             KEY_CONFIG_ITEM_PROCESS_GROUP_ID: 1001,

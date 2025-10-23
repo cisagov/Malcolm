@@ -609,7 +609,6 @@ class MalcolmConfig(ObservableStoreMixin):
             if k.startswith("traefik")
         }
         if traefik_labels.get(TRAEFIK_ENABLE, False) is True:
-            self.set_value(KEY_CONFIG_ITEM_BEHIND_REVERSE_PROXY, True, ignore_errors=True, track_change=False)
             self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True, track_change=False)
             self.set_value(
                 KEY_CONFIG_ITEM_TRAEFIK_HOST,
