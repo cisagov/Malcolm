@@ -18,7 +18,7 @@ Goals:
 from dataclasses import dataclass
 from typing import List
 
-from scripts.malcolm_constants import PROFILE_HEDGEHOG
+from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
 from scripts.installer.configs.constants.constants import LOCAL_LOGSTASH_HOST
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
@@ -214,14 +214,26 @@ def _validate_non_default_storage(malcolm_config, add_issue) -> None:
                     )
 
 
-def _validate_hedgehog_profile(malcolm_config, add_issue) -> None:
+def _validate_logstash_port(malcolm_config, add_issue) -> None:
     profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
-    if isinstance(profile, str) and profile == PROFILE_HEDGEHOG:
+    if isinstance(profile, str):
         lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
-        if (not _is_non_empty_str(lshost)) or (lshost == LOCAL_LOGSTASH_HOST):
+        if _is_non_empty_str(lshost):
+            if profile == PROFILE_HEDGEHOG:
+                if lshost == LOCAL_LOGSTASH_HOST:
+                    add_issue(
+                        KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                        f"{profile} run profile requires remote Logstash connection (host:port)",
+                    )
+            elif lshost != LOCAL_LOGSTASH_HOST:
+                add_issue(
+                    KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                    f"{profile} run profile requires {LOCAL_LOGSTASH_HOST} for its Logstash connection",
+                )
+        else:
             add_issue(
                 KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                "Remote Logstash required when running with the Hedgehog profile (host:port)",
+                f"Logstash connection cannot be blank ({LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else 'host:port'})",
             )
 
 
@@ -282,7 +294,7 @@ def validate_required(malcolm_config) -> List[ValidationIssue]:
 
     # 7) Hedgehog profile -> require Logstash host:port
     try:
-        _validate_hedgehog_profile(malcolm_config, add_issue)
+        _validate_logstash_port(malcolm_config, add_issue)
     except Exception:
         pass
 
