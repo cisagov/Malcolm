@@ -533,34 +533,6 @@ def update_compose_files(
         return InstallerResult.FAILURE
 
 
-# TODO: check these out, do we need this sudo stuff?
-
-
-def _resolve_podman_rootless_user(platform):
-
-    user = os.environ.get("SUDO_USER") or os.environ.get("LOGNAME") or os.environ.get("USER")
-    if not user or user == "root":
-        return None, None, None
-    uid = None
-    rc, out = platform.run_process(["id", "-u", user], stderr=False)
-    if rc == 0 and out:
-        uid = out[0].strip()
-    socket_path = f"/run/user/{uid}/podman/podman.sock" if uid else None
-    return user, uid, socket_path
-
-
-def _prepare_podman_rootless_command(base_cmd: List[str], action: str, platform) -> List[str]:
-
-    user, uid, socket_path = _resolve_podman_rootless_user(platform)
-    if os.geteuid() == 0 and user:
-        InstallerLogger.info(f"Podman: {action} as {user} (socket {socket_path})")
-        return ["sudo", "-u", user] + base_cmd
-    actor = user or os.environ.get("USER") or "current user"
-    suffix = f" (socket {socket_path})" if socket_path else ""
-    InstallerLogger.info(f"Podman: {action} as {actor}{suffix}")
-    return base_cmd
-
-
 def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx) -> Tuple[InstallerResult, str]:
     """Validate runtime and compose invocation; provide user guidance/do pulls/loads."""
 
@@ -596,27 +568,21 @@ def perform_docker_operations(malcolm_config, config_dir: str, platform, ctx) ->
             compose_cmd = compose_cmd or discover_compose_command(runtime_bin, platform)
             if compose_cmd is None:
                 InstallerLogger.warning("Could not find a working compose command for image pull")
-                return InstallerResult.SUCCESS, "Compose command unavailable; manual start required"
+                return InstallerResult.SUCCESS, "Compose command unavailable; manual image pull required"
             if runtime_bin.startswith("podman"):
-                # best-effort socket activation; guidance only on failure
-                rc, _ = platform.run_process(["systemctl", "--user", "is-active", "podman.socket"], stderr=False)
-                # Not enforcing strict failure, keep behavior pragmatic
+                InstallerLogger.warning("Podman (rootless) runtime requested; manual image pull required")
+                return InstallerResult.SUCCESS, "Podman (rootless) runtime requested; manual image pull required"
+
             compose_base = compose_cmd + ["-f", compose_file]
             if profile:
                 compose_base.extend(["--profile", profile])
             if pull_requested:
                 ecode = -1
-                if runtime_bin.startswith("podman"):
-                    pull_cmd = _prepare_podman_rootless_command(
-                        compose_base + ["pull"], "pulling images rootless", platform, InstallerLogger
-                    )
+                for priv in (False, True):
+                    pull_cmd = compose_base + ["pull"]
                     ecode = platform.run_process_streaming(pull_cmd)
-                else:
-                    for priv in (False, True):
-                        pull_cmd = compose_base + ["pull"]
-                        ecode = platform.run_process_streaming(pull_cmd)
-                        if ecode == 0:
-                            break
+                    if ecode == 0:
+                        break
                 if ecode == 0:
                     InstallerLogger.info("Malcolm images pulled successfully.")
                 else:
