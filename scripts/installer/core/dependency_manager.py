@@ -188,6 +188,8 @@ class DependencyManager:
                         InstallerLogger.warning(f"Default value function for {item_key} raised: {e}")
                         return
 
+                    # InstallerLogger.debug(f"value_rule.condition({item_key}): {new_val}")
+
                     # Apply via MalcolmConfig API to avoid touching internals
                     try:
                         self.config.apply_default(item_key, new_val)

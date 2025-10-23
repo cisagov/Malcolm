@@ -132,7 +132,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             condition=lambda orch: orch == OrchestrationFramework.KUBERNETES,
             default_value=True,
-            only_if_unmodified=True,
         ),
     ),
     KEY_CONFIG_ITEM_REVERSE_DNS: DependencySpec(
@@ -180,7 +179,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=lambda profile: profile == PROFILE_MALCOLM,
+            # actually visible in both profiles, as "hedgehog mode" arkime viewer manages PCAP too
+            condition=lambda _: True,
             is_top_level=True,
         ),
         # Parent item: automatically enabled when either of the children is enabled
@@ -908,13 +908,16 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-                KEY_CONFIG_ITEM_AUTO_ARKIME,
-            ],
-            condition=lambda cleanup, auto_arkime: bool(cleanup) and bool(auto_arkime),
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda cleanup: bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda cleanup: not bool(cleanup),
+            default_value=False,
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_ARKIME_FREESPACEG: DependencySpec(
         visibility=VisibilityRule(
@@ -925,17 +928,35 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     ),
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-            condition=lambda enabled: bool(enabled),
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            ],
+            condition=lambda profile, cleanup: (profile == PROFILE_MALCOLM) and bool(cleanup),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-        )
+        ),
+        value=ValueRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+                KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
+            ],
+            condition=lambda cleanup, limit: (not bool(cleanup)) or bool(limit),
+            default_value=lambda cleanup, limit: (False if not bool(cleanup) else bool(limit)),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+            condition=lambda cleanup: not bool(cleanup),
+            default_value="0",
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT: DependencySpec(
         visibility=VisibilityRule(

@@ -399,6 +399,9 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].config_items = [
                 KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP
             ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_MANAGE_PCAP_FILES].derived_items = [
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            ]
             self.env_var_by_map_key[KEY_ENV_ARKIME_FREESPACEG].config_items = [KEY_CONFIG_ITEM_ARKIME_FREESPACEG]
             self.env_var_by_map_key[KEY_ENV_ARKIME_LIVE_CAPTURE].config_items = [
                 KEY_CONFIG_ITEM_LIVE_ARKIME,
@@ -520,6 +523,10 @@ class EnvMapper:
             # OpenSearch
             self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].config_items = [
                 KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT
+            ]
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].derived_items = [
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
+                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
             ]
             self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_NAME_SORT].config_items = [
                 KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT
