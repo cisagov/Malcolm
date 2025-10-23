@@ -202,7 +202,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_HEDGEHOG,
             is_top_level=True,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
+            default_value=lambda profile: 'logstash:5044' if profile == PROFILE_MALCOLM else '',
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_TRAEFIK_HOST: DependencySpec(
         visibility=VisibilityRule(
