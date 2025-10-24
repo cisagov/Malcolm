@@ -22,6 +22,7 @@ from scripts.installer.configs.constants.constants import (
 from scripts.installer.configs.constants.enums import (
     FilebeatLogFormat,
     FilebeatFieldNames,
+    FileExtractionMode,
     SearchEngineMode,
     NetboxMode,
     OpenPortsChoices,
@@ -127,7 +128,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
-    # Traefik configuration: forced true in kubernetes (no prompt); compose shows normally
     KEY_CONFIG_ITEM_TRAEFIK_LABELS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[
@@ -138,12 +138,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 profile == PROFILE_MALCOLM and orch == OrchestrationFramework.DOCKER_COMPOSE
             ),
             is_top_level=True,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            condition=lambda orch: orch == OrchestrationFramework.KUBERNETES,
-            default_value=True,
-        ),
+        )
     ),
     KEY_CONFIG_ITEM_REVERSE_DNS: DependencySpec(
         visibility=VisibilityRule(
@@ -194,7 +189,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda _: True,
             is_top_level=True,
         ),
-        # Parent item: automatically enabled when either of the children is enabled
         value=ValueRule(
             depends_on=[
                 KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
@@ -204,7 +198,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             default_value=lambda arkime_manage_pcap, clean_old_indices: (
                 bool(arkime_manage_pcap) or bool(clean_old_indices)
             ),
-            only_if_unmodified=False,
         ),
     ),
     # Hedgehog profile top-level items
@@ -439,8 +432,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda enabled: bool(enabled),
-            default_value=SYSLOG_DEFAULT_PORT,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: SYSLOG_DEFAULT_PORT if enabled else 0,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT: DependencySpec(
@@ -451,8 +445,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda enabled: bool(enabled),
-            default_value=SYSLOG_DEFAULT_PORT,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: SYSLOG_DEFAULT_PORT if enabled else 0,
+            only_if_unmodified=False,
         ),
     ),
     # Dark mode depends on profile and primary store mode
@@ -485,7 +480,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             default_value=lambda netsniff, tcpdump, arkime, zeek, suricata: (
                 bool(netsniff) or bool(tcpdump) or bool(arkime) or bool(zeek) or bool(suricata)
             ),
-            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_PCAP_IFACE: DependencySpec(
@@ -513,7 +507,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             # netsniff the default capture engine for Malcolm profile when
             # using local OpenSearch and live capture is enabled, unless the
             # user has explicitly enabled tcpdump or Arkime.
-            condition=lambda live_traffic, profile, mode, tcpdump, arkime: True,
+            condition=lambda _live_traffic, _profile, _mode, _tcpdump, _arkime: True,
             default_value=lambda live_traffic, profile, mode, tcpdump, arkime: (
                 bool(live_traffic)
                 and (profile == PROFILE_MALCOLM)
@@ -536,7 +530,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_PCAP_NETSNIFF,
                 KEY_CONFIG_ITEM_LIVE_ARKIME,
             ],
-            condition=lambda live_traffic, netsniff, arkime: (not bool(live_traffic)) or bool(netsniff) or bool(arkime),
+            condition=lambda _live_traffic, _netsniff, _arkime: True,
             default_value=False,
             only_if_unmodified=False,
         ),
@@ -566,7 +560,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ],
             # Always compute the default from current dependency values, but
             # only apply it if the user hasn't modified the item yet.
-            condition=lambda live_traffic, profile, mode, netsniff, tcpdump: True,
+            condition=lambda _live_traffic, _profile, _mode, _netsniff, _tcpdump: True,
             default_value=lambda live_traffic, profile, mode, netsniff, tcpdump: (
                 bool(live_traffic)
                 and ((profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value))
@@ -584,8 +578,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            condition=lambda enabled: bool(enabled),
-            default_value=True,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: bool(enabled),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_SURICATA: DependencySpec(
@@ -596,8 +591,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            condition=lambda enabled: bool(enabled),
-            default_value=True,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: bool(enabled),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_PCAP_FILTER: DependencySpec(
@@ -615,8 +611,9 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            condition=lambda enabled: bool(enabled),
-            default_value=True,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: bool(enabled),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_CAPTURE_STATS: DependencySpec(
@@ -686,12 +683,10 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda auto, live: bool(auto) or bool(live),
             ui_parent=KEY_CONFIG_ITEM_AUTO_ZEEK,
         ),
-        # Parent item: automatically enabled when either of the children is enabled
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
             condition=lambda _mode: True,
-            default_value=lambda mode: mode != "none",
-            only_if_unmodified=False,
+            default_value=lambda mode: mode != FileExtractionMode.NONE.value,
         ),
     ),
     KEY_CONFIG_ITEM_FILE_CARVE_MODE: DependencySpec(
@@ -699,35 +694,49 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_ENABLED,
+            condition=lambda _enabled: True,
+            default_value=lambda enabled: (
+                FileExtractionMode.INTERESTING.value if enabled else FileExtractionMode.NONE.value
+            ),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_FILE_PRESERVE_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_SIZE_THRESHOLD: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
+            condition=lambda _mode: True,
+            default_value=lambda mode: mode != FileExtractionMode.NONE.value,
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_FILE_CARVE_HTTP_SERVER_ZIP: DependencySpec(
         visibility=VisibilityRule(
@@ -746,40 +755,40 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_CAPA_SCAN: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_CLAM_AV_SCAN: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_YARA_SCAN: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_VTOT_API_KEY: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         )
     ),
     KEY_CONFIG_ITEM_FILE_SCAN_RULE_UPDATE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             ui_parent=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != "none",
+            condition=lambda mode: mode != FileExtractionMode.NONE.value,
             default_value=False,
         ),
     ),

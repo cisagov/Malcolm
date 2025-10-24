@@ -75,7 +75,7 @@ CONFIG_ITEM_SYSLOG_TCP_PORT = ConfigItem(
     label="Syslog TCP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question="Listen for Syslog (TCP) on this port",
+    question="Listen for Syslog (TCP) on this port (0 for disabled)",
     widget_type=WidgetType.NUMBER,
 )
 
@@ -85,7 +85,7 @@ CONFIG_ITEM_SYSLOG_UDP_PORT = ConfigItem(
     label="Syslog UDP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question="Listen for Syslog (UDP) on this port",
+    question="Listen for Syslog (UDP) on this (0 for disabled)",
     widget_type=WidgetType.NUMBER,
 )
 
