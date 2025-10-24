@@ -163,6 +163,7 @@ class DependencyManager:
             try:
                 # Check if we should only apply to unmodified items
                 if value_rule.only_if_unmodified and item.is_modified:
+                    # InstallerLogger.debug(f"{item_key} is modified, leaving alone")
                     return
 
                 dep_values = None

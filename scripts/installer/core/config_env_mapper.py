@@ -98,7 +98,7 @@ _STRING_VARS = [
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS,
     KEY_ENV_LOGSTASH_HOST,
     KEY_ENV_OPENSEARCH_DASHBOARDS_URL,
-    KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT,
+    KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD,
     KEY_ENV_FILEBEAT_TCP_LOG_FORMAT,
     KEY_ENV_FILEBEAT_TCP_PARSE_SOURCE_FIELD,
     KEY_ENV_FILEBEAT_TCP_PARSE_TARGET_FIELD,
@@ -256,9 +256,9 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         reverse=custom_reverse_transform_pcap_enable_netsniff,
     ),
     # Keep human-readable size/percent strings; write '0' when unset
-    KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT: TransformHook(
-        forward=custom_transform_opensearch_index_size_prune_limit,
-        reverse=custom_reverse_transform_opensearch_index_size_prune_limit,
+    KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD: TransformHook(
+        forward=custom_transform_opensearch_index_prune_threshold,
+        reverse=custom_reverse_transform_opensearch_index_prune_threshold,
     ),
 }
 
@@ -521,10 +521,10 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_NGINX_RESOLVER_IPV6].config_items = [KEY_CONFIG_ITEM_NGINX_RESOLVER_IPV6]
 
             # OpenSearch
-            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].config_items = [
-                KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD].config_items = [
+                KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD
             ]
-            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT].derived_items = [
+            self.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD].derived_items = [
                 KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
                 KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
             ]

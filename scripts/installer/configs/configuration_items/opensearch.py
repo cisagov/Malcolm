@@ -137,7 +137,7 @@ CONFIG_ITEM_DASHBOARDS_URL = ConfigItem(
 
 CONFIG_ITEM_SECONDARY_DOCUMENT_STORE = ConfigItem(
     key=KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
-    label="Forward Logs from Logstash",
+    label="Forward Logs to Remote Secondary Store",
     default_value=False,
     question="Forward Logstash logs to a secondary remote document store?",
     widget_type=WidgetType.CHECKBOX,

@@ -27,7 +27,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_REPLICAS,
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_SPI_DATA_RETENTION,
     KEY_CONFIG_ITEM_INDEX_PRUNE_NAME_SORT,
-    KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
+    KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
@@ -124,9 +124,9 @@ CONFIG_ITEM_EXTRACTED_FILE_MAX_PERCENT_THRESHOLD = ConfigItem(
     widget_type=WidgetType.NUMBER,
 )
 
-CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT = ConfigItem(
-    key=KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
-    label="Index Prune Size Limit",
+CONFIG_ITEM_INDEX_PRUNE_THRESHOLD = ConfigItem(
+    key=KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
+    label="Index Prune Threshold",
     default_value="",
     validator=lambda x: isinstance(x, str),
     question="Delete the oldest indices when the database exceeds this threshold (e.g., 250GB, 1TB, 60%, etc.)",

@@ -211,8 +211,7 @@ class MalcolmConfig(ObservableStoreMixin):
         key: str,
         value: Any,
         ignore_errors: Optional[bool] = False,
-        track_change: Optional[bool] = True,
-    ):
+    ) -> None:
         """Set the value of a configuration item.
 
         Args:
@@ -238,17 +237,22 @@ class MalcolmConfig(ObservableStoreMixin):
             if not success:
                 raise ConfigValueValidationError(key, value, error_message)
 
-            if track_change and (key not in self._modified_keys):
+            if key not in self._modified_keys:
                 self._modified_keys.append(key)
 
             self._notify_observers(key, item.get_value())
         except Exception as e:
             if ignore_errors:
-                InstallerLogger.debug(f'Ignored exception setting "{key}"="{value}": "{e}"')
+                InstallerLogger.error(f'Ignored exception setting "{key}"="{value}": "{e}"')
             else:
                 raise
 
-    def apply_default(self, key: str, value: Any) -> None:
+    def apply_default(
+        self,
+        key: str,
+        value: Any,
+        ignore_errors: Optional[bool] = False,
+    ) -> None:
         """Apply a default value without marking the item as modified and notify observers.
 
         This is used by the dependency system to set computed defaults while
@@ -258,33 +262,39 @@ class MalcolmConfig(ObservableStoreMixin):
             key: Configuration item key
             value: Default value to apply
         """
-        item = self.get_item(key)
-        if not item:
-            InstallerLogger.warning(f"Cannot apply default for unknown item: {key}")
-            return
-
-        # Transform Registry for inbound normalization
-        value = apply_inbound(key, value)
-
-        # Validate before applying, mirroring set_value semantics but without marking modified
-        if item.validator:
-            result = item.validator(value)
-            valid, error = result if isinstance(result, tuple) else (bool(result), "")
-            if not valid:
-                InstallerLogger.warning(f"Failed to set default for {key}: {error}")
+        try:
+            item = self.get_item(key)
+            if not item:
+                InstallerLogger.warning(f'Cannot apply default for unknown item: "{key}"')
                 return
 
-        # If value unchanged, avoid notifying to prevent observer loops
-        if item.get_value() == value:
-            return
+            # Transform Registry for inbound normalization
+            value = apply_inbound(key, value)
 
-        # Apply without flipping is_modified so future syncs can adjust
-        item.value = value
-        try:
-            self._notify_observers(key, item.get_value())
+            # Validate before applying, mirroring set_value semantics but without marking modified
+            if item.validator:
+                result = item.validator(value)
+                valid, error = result if isinstance(result, tuple) else (bool(result), "")
+                if not valid:
+                    InstallerLogger.warning(f'Failed to set default for "{key}": "{error}"')
+                    return
+
+            # If value unchanged, avoid notifying to prevent observer loops
+            if item.get_value() == value:
+                return
+
+            # Apply without flipping is_modified so future syncs can adjust
+            item.value = value
+            try:
+                self._notify_observers(key, item.get_value())
+            except Exception as e:
+                # Avoid breaking dependency processing; surface the error
+                InstallerLogger.error(f'Observer error applying default for "{key}"="{value}": "{e}"')
         except Exception as e:
-            # Avoid breaking dependency processing; surface the error
-            InstallerLogger.error(f"Observer error after applying default for '{key}': {e}")
+            if ignore_errors:
+                InstallerLogger.error(f'Ignored exception applying default for "{key}"="{value}": "{e}"')
+            else:
+                raise
 
     def generate_env_files(self, config_dir: str, templates_dir: Optional[str] = None):
         """Generate environment files from current configuration.
@@ -483,7 +493,7 @@ class MalcolmConfig(ObservableStoreMixin):
             if winner_value is None or winner_value == "":
                 continue
             try:
-                self.set_value(item_key, winner_value, track_change=False)
+                self.apply_default(item_key, winner_value, ignore_errors=True)
             except (ConfigItemNotFoundError, ConfigValueValidationError) as e:
                 if "unittest" not in sys.modules:
                     InstallerLogger.warning(f"Could not set config for {item_key} from env: {e}")
@@ -522,7 +532,7 @@ class MalcolmConfig(ObservableStoreMixin):
                         #   (meaning we'll just end up with the defaults)
 
                         # container runtime docker vs. podman
-                        self.set_value(
+                        self.apply_default(
                             KEY_CONFIG_ITEM_RUNTIME_BIN,
                             (
                                 ContainerRuntime.PODMAN
@@ -533,11 +543,10 @@ class MalcolmConfig(ObservableStoreMixin):
                                 else ContainerRuntime.DOCKER
                             ),
                             ignore_errors=True,
-                            track_change=False,
                         )
 
                         # restart policy
-                        self.set_value(
+                        self.apply_default(
                             KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
                             next(
                                 iter(
@@ -549,16 +558,14 @@ class MalcolmConfig(ObservableStoreMixin):
                                 None,
                             ),
                             ignore_errors=True,
-                            track_change=False,
                         )
 
                         # network settings
                         if deep_get(compose_data, ["networks", "default", "external"], False):
-                            self.set_value(
+                            self.apply_default(
                                 KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
                                 deep_get(compose_data, ["networks", "default", "name"]),
                                 ignore_errors=True,
-                                track_change=False,
                             )
 
                         # exposed services
@@ -593,13 +600,11 @@ class MalcolmConfig(ObservableStoreMixin):
                     and (port_parts[0] == SERVICE_IP_EXPOSED)
                     and (port_parts[2].split('/')[0] == service_tuple[1])
                 ):
-                    self.set_value(config_key, True, ignore_errors=True, track_change=False)
+                    self.apply_default(config_key, True, ignore_errors=True)
                     items_exposed = True
 
         if items_exposed:
-            self.set_value(
-                KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True, track_change=False
-            )
+            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff
@@ -609,8 +614,8 @@ class MalcolmConfig(ObservableStoreMixin):
             if k.startswith("traefik")
         }
         if traefik_labels.get(TRAEFIK_ENABLE, False) is True:
-            self.set_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True, track_change=False)
-            self.set_value(
+            self.apply_default(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True)
+            self.apply_default(
                 KEY_CONFIG_ITEM_TRAEFIK_HOST,
                 (
                     re.findall(
@@ -620,21 +625,14 @@ class MalcolmConfig(ObservableStoreMixin):
                     or [""]
                 )[0],
                 ignore_errors=True,
-                track_change=False,
             )
-            self.set_value(
-                KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT,
-                traefik_labels.get(LABEL_MALCOLM_ENTRYPOINTS),
-                ignore_errors=True,
-                track_change=False,
+            self.apply_default(
+                KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT, traefik_labels.get(LABEL_MALCOLM_ENTRYPOINTS), ignore_errors=True
             )
-            self.set_value(
-                KEY_CONFIG_ITEM_TRAEFIK_RESOLVER,
-                traefik_labels.get(LABEL_MALCOLM_CERTRESOLVER),
-                ignore_errors=True,
-                track_change=False,
+            self.apply_default(
+                KEY_CONFIG_ITEM_TRAEFIK_RESOLVER, traefik_labels.get(LABEL_MALCOLM_CERTRESOLVER), ignore_errors=True
             )
-            self.set_value(
+            self.apply_default(
                 KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST,
                 (
                     re.findall(
@@ -644,7 +642,6 @@ class MalcolmConfig(ObservableStoreMixin):
                     or [""]
                 )[0],
                 ignore_errors=True,
-                track_change=False,
             )
 
     def _load_custom_storage_paths_from_orchestration_file(
@@ -686,21 +683,11 @@ class MalcolmConfig(ObservableStoreMixin):
                 service_tuple[1],
                 os.path.dirname(compose_file_name),
             ):
-                try:
-                    if not same_file_or_dir(local_path, service_tuple[2]):
-                        self.set_value(
-                            config_key,
-                            local_path,
-                            track_change=False,
-                        )
-                        custom_path = True
-                except Exception as e:
-                    InstallerLogger.warning(f"Could not read {service_tuple[1]} for service {service_tuple[0]}: {e}")
-                    continue
-            if custom_path:
-                self.set_value(
-                    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True, track_change=False
-                )
+                if not same_file_or_dir(local_path, service_tuple[2]):
+                    self.apply_default(config_key, local_path, ignore_errors=True)
+                    custom_path = True
+        if custom_path:
+            self.apply_default(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False, ignore_errors=True)
 
     def _notify_observers(self, key: str, value: Any):
         """Notify all registered observers for a given key."""

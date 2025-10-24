@@ -255,8 +255,8 @@ def custom_reverse_transform_filebeat_syslog_udp_port(value: str):
     return (port_value, accept_syslog)
 
 
-def custom_reverse_transform_opensearch_index_size_prune_limit(value: str) -> str:
-    """Reverse transform for OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT.
+def custom_reverse_transform_opensearch_index_prune_threshold(value: str) -> str:
+    """Reverse transform for OPENSEARCH_INDEX_PRUNE_THRESHOLD.
 
     Accept the raw string (e.g., '250G', '60%'). Treat '0' or empty as unset
     so the config item (expects string) validates and can remain at default.
@@ -267,15 +267,15 @@ def custom_reverse_transform_opensearch_index_size_prune_limit(value: str) -> st
     return "" if v in ("", "0") else v
 
 
-def custom_transform_opensearch_index_size_prune_limit(limit_str: str) -> str:
-    """Forward transform for OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT.
+def custom_transform_opensearch_index_prune_threshold(threshold_str: str) -> str:
+    """Forward transform for OPENSEARCH_INDEX_PRUNE_THRESHOLD.
 
     Consumers expect '0' to disable pruning. When the config item is empty,
     write '0' instead of an empty string. Otherwise, pass through verbatim.
     """
-    if limit_str is None or str(limit_str).strip() == "":
+    if threshold_str is None or str(threshold_str).strip() == "":
         return "0"
-    return str(limit_str)
+    return str(threshold_str)
 
 
 def custom_transform_logstash_java_opts(lsMemory: str) -> str:

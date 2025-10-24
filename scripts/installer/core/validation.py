@@ -18,13 +18,20 @@ Goals:
 from dataclasses import dataclass
 from typing import List
 
+from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
-from scripts.installer.configs.constants.constants import LOCAL_LOGSTASH_HOST
+from scripts.installer.configs.constants.constants import (
+    LOCAL_LOGSTASH_HOST,
+    LOCAL_DASHBOARDS_URL,
+    LOCAL_OPENSEARCH_URL,
+)
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+    KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
     KEY_CONFIG_ITEM_INDEX_DIR,
+    KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
     KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
@@ -66,25 +73,73 @@ def _is_non_empty_str(value) -> bool:
     return isinstance(value, str) and len(value.strip()) > 0
 
 
-def _validate_primary_remote(malcolm_config, add_issue) -> None:
+def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
+    profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
     primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
-    if isinstance(primary_mode, str) and primary_mode in {
-        SearchEngineMode.OPENSEARCH_REMOTE.value,
-        SearchEngineMode.ELASTICSEARCH_REMOTE.value,
-    }:
-        val = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL)
-        if not _is_non_empty_str(val):
-            add_issue(
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
-                "Required when primary document store is remote",
-            )
-        if primary_mode == SearchEngineMode.ELASTICSEARCH_REMOTE.value:
-            dval = malcolm_config.get_value(KEY_CONFIG_ITEM_DASHBOARDS_URL)
-            if not _is_non_empty_str(dval):
+
+    if isinstance(profile, str) and isinstance(primary_mode, str):
+        lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
+        osurl = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL)
+        dashurl = malcolm_config.get_value(KEY_CONFIG_ITEM_DASHBOARDS_URL)
+
+        if _is_non_empty_str(lshost):
+            if profile == PROFILE_HEDGEHOG:
+                if lshost == LOCAL_LOGSTASH_HOST:
+                    add_issue(
+                        KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                        f"{profile} run profile requires remote Logstash connection (host:port)",
+                    )
+            elif lshost != LOCAL_LOGSTASH_HOST:
                 add_issue(
-                    KEY_CONFIG_ITEM_DASHBOARDS_URL,
-                    "Required when using remote Elasticsearch (Dashboards)",
+                    KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                    f"{profile} run profile requires {LOCAL_LOGSTASH_HOST} for its Logstash connection",
                 )
+        else:
+            add_issue(
+                KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                f"Logstash connection cannot be blank ({LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else 'host:port'})",
+            )
+
+        def _validate_url(
+            url_value: str,
+            local_url: str,
+            key_name: str,
+            label: str,
+            mode: str,
+        ):
+            if _is_non_empty_str(url_value):
+                if mode != SearchEngineMode.OPENSEARCH_LOCAL.value:
+                    if url_value == local_url:
+                        add_issue(
+                            key_name,
+                            f"Primary data store {mode} requires remote {label} URL",
+                        )
+                elif url_value != local_url:
+                    add_issue(
+                        key_name,
+                        f"Primary data store {mode} requires {local_url} for its {label} URL",
+                    )
+            else:
+                add_issue(
+                    key_name,
+                    f"{label} URL cannot be blank ({local_url if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else 'https://host:port'})",
+                )
+
+        _validate_url(
+            osurl,
+            LOCAL_OPENSEARCH_URL,
+            KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
+            "OpenSearch",
+            primary_mode,
+        )
+
+        _validate_url(
+            dashurl,
+            LOCAL_DASHBOARDS_URL,
+            KEY_CONFIG_ITEM_DASHBOARDS_URL,
+            "Dashboards",
+            primary_mode,
+        )
 
 
 def _validate_secondary_remote(malcolm_config, add_issue) -> None:
@@ -214,27 +269,39 @@ def _validate_non_default_storage(malcolm_config, add_issue) -> None:
                     )
 
 
-def _validate_logstash_port(malcolm_config, add_issue) -> None:
-    profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
-    if isinstance(profile, str):
-        lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
-        if _is_non_empty_str(lshost):
-            if profile == PROFILE_HEDGEHOG:
-                if lshost == LOCAL_LOGSTASH_HOST:
-                    add_issue(
-                        KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                        f"{profile} run profile requires remote Logstash connection (host:port)",
-                    )
-            elif lshost != LOCAL_LOGSTASH_HOST:
-                add_issue(
-                    KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                    f"{profile} run profile requires {LOCAL_LOGSTASH_HOST} for its Logstash connection",
-                )
-        else:
-            add_issue(
-                KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                f"Logstash connection cannot be blank ({LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else 'host:port'})",
-            )
+def _validate_live_pcap_capture(malcolm_config, add_issue) -> None:
+    netsniff = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF))
+    tcpdump = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP))
+    arkime = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME))
+    if sum([netsniff, tcpdump, arkime]) > 1:
+        add_issue(
+            KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+            f"Only one PCAP generator (tcpdump, netsniff-ng, or Arkime) can be enabled for live capture",
+        )
+
+    if (
+        arkime
+        and (profile := malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE))
+        and (primary_mode := malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE))
+        and isinstance(profile, str)
+        and isinstance(primary_mode, str)
+        and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+        and profile == PROFILE_MALCOLM
+    ):
+        add_issue(
+            KEY_CONFIG_ITEM_LIVE_ARKIME,
+            f"Arime live capture is not available for the {profile} run profile with {primary_mode} as the primary data store",
+        )
+
+
+def _validate_old_artifact_cleanup(malcolm_config, add_issue) -> None:
+    delete_old_indexes = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES))
+    index_prune_threshold = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD) or ""
+    if delete_old_indexes and ((not index_prune_threshold) or (str(index_prune_threshold) == "0")):
+        add_issue(
+            KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
+            f'"Delete Old Indices" is enabled without specifying a prune threshold',
+        )
 
 
 def validate_required(malcolm_config) -> List[ValidationIssue]:
@@ -254,49 +321,54 @@ def validate_required(malcolm_config) -> List[ValidationIssue]:
         label = item.label if item else key
         issues.append(ValidationIssue(key=key, label=label, message=reason))
 
-    # 1) OpenSearch primary remote -> require URL
+    # 1) OpenSearch/Elasticsearch primary local vs.  remote mode requires valid URLs,
+    #    Hedgehog profile -> require Logstash host:port
     try:
-        _validate_primary_remote(malcolm_config, add_issue)
-    except Exception:
-        pass
+        _validate_local_vs_remote_urls(malcolm_config, add_issue)
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_local_vs_remote_urls): {e}")
 
     # 2) Secondary remote -> require URL (enforced by visibility)
     try:
         _validate_secondary_remote(malcolm_config, add_issue)
-    except Exception:
-        pass
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_secondary_remote): {e}")
 
     # 3) Traefik labels enabled -> require host/entrypoint/resolver
     try:
         _validate_traefik_labels(malcolm_config, add_issue)
-    except Exception:
-        pass
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_traefik_labels): {e}")
 
     # 4) Live capture with any capture method -> require interface
     try:
         _validate_live_capture_iface(malcolm_config, add_issue)
-    except Exception:
-        pass
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_live_capture_iface): {e}")
 
     # 5) NetBox remote -> require URL
     try:
         _validate_netbox_remote(malcolm_config, add_issue)
-    except Exception:
-        pass
-
-    # container external network name is explicitly optional (blank => default networking)
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_netbox_remote): {e}")
 
     # 6) Non-default storage locations -> require the user to supply directories (must be user-modified)
     try:
         _validate_non_default_storage(malcolm_config, add_issue)
-    except Exception:
-        pass
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_non_default_storage): {e}")
 
-    # 7) Hedgehog profile -> require Logstash host:port
+    # 7) Only one live PCAP capture method allowed, arkime can't be used with malcolm profile and opensearch-local
     try:
-        _validate_logstash_port(malcolm_config, add_issue)
-    except Exception:
-        pass
+        _validate_live_pcap_capture(malcolm_config, add_issue)
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_live_pcap_capture): {e}")
+
+    # 8) old artifact cleanup
+    try:
+        _validate_old_artifact_cleanup(malcolm_config, add_issue)
+    except Exception as e:
+        InstallerLogger.error(f"Error validating configuration (_validate_old_artifact_cleanup): {e}")
 
     return issues
 
@@ -309,5 +381,5 @@ def format_validation_summary(issues: List[ValidationIssue]) -> str:
         "Some required settings are missing:",
     ]
     for issue in issues:
-        lines.append(f"- {issue.label}: {issue.message} ({issue.key})")
+        lines.append(f"- {issue.label}: {issue.message}")
     return "\n".join(lines)

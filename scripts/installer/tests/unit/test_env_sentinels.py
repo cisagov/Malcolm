@@ -8,11 +8,11 @@ import unittest
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.installer.configs.constants.config_env_var_keys import (
     KEY_ENV_ZEEK_VTOT_API2_KEY,
-    KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT,
+    KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_VTOT_API_KEY,
-    KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
+    KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
 )
 
 
@@ -34,7 +34,7 @@ class TestEnvSentinels(unittest.TestCase):
         mapper = ref.get_env_mapper()
 
         vt_env = mapper.env_var_by_map_key[KEY_ENV_ZEEK_VTOT_API2_KEY]
-        prune_env = mapper.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT]
+        prune_env = mapper.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD]
 
         os.makedirs(self.temp_dir, exist_ok=True)
         with open(os.path.join(self.temp_dir, vt_env.file_name), "a") as f:
@@ -47,18 +47,18 @@ class TestEnvSentinels(unittest.TestCase):
 
         # Expect both to be treated as unset/empty
         vtot = cfg2.get_value(KEY_CONFIG_ITEM_VTOT_API_KEY)
-        prune = cfg2.get_value(KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT)
+        prune = cfg2.get_value(KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD)
         self.assertTrue(vtot is None or vtot == "")
         self.assertTrue(prune is None or prune == "")
 
-    def test_generate_writes_zero_for_empty_prune_limit(self):
-        # By default the prune limit is empty; generation should write '0'
+    def test_generate_writes_zero_for_empty_prune_threshold(self):
+        # By default the prune threshold is empty; generation should write '0'
         cfg = MalcolmConfig()
         cfg.generate_env_files(self.temp_dir)
 
         ref = MalcolmConfig()
         mapper = ref.get_env_mapper()
-        prune_env = mapper.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_SIZE_PRUNE_LIMIT]
+        prune_env = mapper.env_var_by_map_key[KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD]
         path = os.path.join(self.temp_dir, prune_env.file_name)
         with open(path, "r") as f:
             content = f.read()

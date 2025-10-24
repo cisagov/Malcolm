@@ -84,6 +84,8 @@ TRAEFIK_ENABLE = "traefik.enable"
 UFW_MANAGER_SCRIPT = 'ufw_manager.sh'
 
 LOCAL_LOGSTASH_HOST = f"logstash:{SERVICE_PORT_LOGSTASH}"
+LOCAL_DASHBOARDS_URL = "http://dashboards:5601/dashboards"
+LOCAL_OPENSEARCH_URL = f"https://opensearch:{SERVICE_PORT_OSMALCOLM}"
 
 # Default restart policy string (used for display/logging fallbacks)
 DEFAULT_RESTART_POLICY = "unless-stopped"

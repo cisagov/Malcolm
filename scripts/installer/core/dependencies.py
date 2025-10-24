@@ -17,6 +17,8 @@ from scripts.installer.configs.constants.constants import (
     LOGSTASH_WORKERS_KUBERNETES,
     SYSLOG_DEFAULT_PORT,
     LOCAL_LOGSTASH_HOST,
+    LOCAL_DASHBOARDS_URL,
+    LOCAL_OPENSEARCH_URL,
 )
 
 from scripts.installer.configs.constants.enums import (
@@ -249,24 +251,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     # Malcolm profile children
-    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=lambda profile: profile == PROFILE_MALCOLM,
-            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-        ),
-        # Keep primary mode in sync with the maintain flag when user hasn't explicitly set it.
-        # True  -> opensearch-local
-        # False -> opensearch-remote
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
-            condition=lambda maintain: isinstance(maintain, bool),
-            default_value=lambda maintain: (
-                SearchEngineMode.OPENSEARCH_LOCAL.value if bool(maintain) else SearchEngineMode.OPENSEARCH_REMOTE.value
-            ),
-            only_if_unmodified=False,
-        ),
-    ),
     KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
@@ -278,6 +262,27 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             condition=lambda mode: isinstance(mode, str) and mode != "",
             default_value=lambda mode: mode == SearchEngineMode.OPENSEARCH_LOCAL.value,
+            only_if_unmodified=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
+            ],
+            condition=lambda profile, maintain: (profile == PROFILE_MALCOLM) and (not bool(maintain)),
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+        # Keep primary mode in sync with the maintain flag when user hasn't explicitly set it.
+        # True  -> opensearch-local
+        # False -> opensearch-remote
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
+            condition=lambda _maintain: True,
+            default_value=lambda maintain: (
+                SearchEngineMode.OPENSEARCH_LOCAL.value if bool(maintain) else SearchEngineMode.OPENSEARCH_REMOTE.value
+            ),
             only_if_unmodified=False,
         ),
     ),
@@ -345,13 +350,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            condition=lambda mode: mode
-            in [
-                SearchEngineMode.OPENSEARCH_REMOTE.value,
-                SearchEngineMode.ELASTICSEARCH_REMOTE.value,
-            ],
+            condition=lambda mode: mode != SearchEngineMode.OPENSEARCH_LOCAL.value,
             ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            condition=lambda _mode: True,
+            default_value=lambda mode: (
+                LOCAL_OPENSEARCH_URL if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else DEFAULT_VALUE_UNCHANGED
+            ),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL: DependencySpec(
         visibility=VisibilityRule(
@@ -367,9 +376,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_DASHBOARDS_URL: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            condition=lambda mode: mode == SearchEngineMode.ELASTICSEARCH_REMOTE.value,
+            condition=lambda mode: mode != SearchEngineMode.OPENSEARCH_LOCAL.value,
             ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            condition=lambda _mode: True,
+            default_value=lambda mode: (
+                LOCAL_DASHBOARDS_URL if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else DEFAULT_VALUE_UNCHANGED
+            ),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE: DependencySpec(
         visibility=VisibilityRule(
@@ -429,26 +446,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda _enabled: True,
-            default_value=lambda enabled: SYSLOG_DEFAULT_PORT if enabled else 0,
-            only_if_unmodified=False,
-        ),
+        )
     ),
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        ),
-        value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda _enabled: True,
-            default_value=lambda enabled: SYSLOG_DEFAULT_PORT if enabled else 0,
-            only_if_unmodified=False,
-        ),
+        )
     ),
     # Dark mode depends on profile and primary store mode
     KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE: DependencySpec(
@@ -515,7 +520,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 and (not bool(tcpdump))
                 and (not bool(arkime))
             ),
-            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_PCAP_TCPDUMP: DependencySpec(
@@ -527,12 +531,19 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         value=ValueRule(
             depends_on=[
                 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
                 KEY_CONFIG_ITEM_PCAP_NETSNIFF,
                 KEY_CONFIG_ITEM_LIVE_ARKIME,
             ],
-            condition=lambda _live_traffic, _netsniff, _arkime: True,
-            default_value=False,
-            only_if_unmodified=False,
+            condition=lambda _live_traffic, _profile, _mode, _netsniff, _arkime: True,
+            default_value=lambda live_traffic, profile, mode, netsniff, arkime: (
+                bool(live_traffic)
+                and (profile == PROFILE_MALCOLM)
+                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+                and (not bool(netsniff))
+                and (not bool(arkime))
+            ),
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ARKIME: DependencySpec(
@@ -567,7 +578,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 and (not bool(netsniff))
                 and (not bool(tcpdump))
             ),
-            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_LIVE_ZEEK: DependencySpec(
@@ -934,8 +944,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-            condition=lambda cleanup: not bool(cleanup),
-            default_value=False,
+            condition=lambda _cleanup: True,
+            default_value=lambda cleanup: bool(cleanup),
             only_if_unmodified=False,
         ),
     ),
@@ -956,16 +966,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
         ),
         value=ValueRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
-                KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT,
-            ],
-            condition=lambda cleanup, limit: (not bool(cleanup)) or bool(limit),
-            default_value=lambda cleanup, limit: False if not bool(cleanup) else (bool(limit) and str(limit) != "0"),
+            depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+            condition=lambda _cleanup: True,
+            default_value=lambda cleanup: bool(cleanup),
             only_if_unmodified=False,
         ),
     ),
-    KEY_CONFIG_ITEM_INDEX_PRUNE_SIZE_LIMIT: DependencySpec(
+    KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
             condition=lambda cleanup: bool(cleanup),
@@ -974,7 +981,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
             condition=lambda _cleanup: True,
-            default_value=lambda cleanup: "0" if not bool(cleanup) else DEFAULT_VALUE_UNCHANGED,
+            default_value=lambda cleanup: "" if not bool(cleanup) else DEFAULT_VALUE_UNCHANGED,
             only_if_unmodified=False,
         ),
     ),

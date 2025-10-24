@@ -84,7 +84,7 @@ def _pick_valid_value(item: ConfigItem, current_value):
             return random.choice(port_alts)
 
     # Items where '0' is a sentinel for empty (avoid "0")
-    if item.key in {"vtotApiKey", "indexPruneSizeLimit"}:
+    if item.key in {"vtotApiKey", "indexPruneThreshold"}:
         opts = [
             _random_string(12),
             "abc123DEF456",

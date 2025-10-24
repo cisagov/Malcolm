@@ -147,7 +147,7 @@ class TestDockerOpsAction(BaseInstallerTest):
             result,
             (
                 InstallerResult.SUCCESS,
-                "Compose command unavailable; manual start required",
+                "Compose command unavailable; manual image pull required",
             ),
         )  # Should continue despite missing compose command
 
