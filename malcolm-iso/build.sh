@@ -167,6 +167,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./.justfile "$MALCOLM_DEST_DIR/.justfile"
   cp ./.envrc.example "$MALCOLM_DEST_DIR/.envrc.example"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/legacy_install.py "$MALCOLM_DEST_DIR/scripts/"
   cp -r ./scripts/installer/ "$MALCOLM_DEST_DIR/scripts/"
   rm -rf "$MALCOLM_DEST_DIR/scripts/installer/tests" "$MALCOLM_DEST_DIR/scripts/installer/ui/gui"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"

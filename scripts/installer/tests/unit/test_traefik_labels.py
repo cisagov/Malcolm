@@ -5,7 +5,7 @@
 
 Validates that ancillary.update_compose_files applies or clears
 Traefik labels on the nginx-proxy service based on MalcolmConfig values,
-matching the original install.py behavior.
+matching the legacy installer behavior.
 """
 
 import os

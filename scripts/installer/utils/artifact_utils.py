@@ -138,8 +138,13 @@ def decide_and_handle_artifacts(
     """
     # 1) Handle CLI-provided artifacts
     # CLI args are always present; empty string means "not provided"
-    cli_m = parsed_args.mfile or None
-    cli_i = parsed_args.ifile or None
+    cli_m = str(parsed_args.mfile) or ""
+    cli_i = str(parsed_args.ifile) or ""
+    if ignore_cli_m := (
+        (len(cli_m) == 64) and all(c in '0123456789abcdefABCDEF' for c in cli_m) and (not os.path.isfile(cli_m))
+    ):
+        # special short-circuit during the installer from appliance-packaged Malcolm
+        cli_m = ""
 
     # Kubernetes orchestration fast-exit: when Kubernetes mode is active and the user
     # did not explicitly supply artifact paths via CLI, skip tarball/images handling entirely.
@@ -152,7 +157,9 @@ def decide_and_handle_artifacts(
     if cli_m or cli_i:
         return _handle_cli_artifacts(parsed_args, ui_impl, malcolm_config, control_flow, orig_path, cli_m, cli_i)
 
-    return _handle_detected_artifacts(parsed_args, ui_impl, malcolm_config, control_flow, orig_path)
+    return _handle_detected_artifacts(
+        parsed_args, ui_impl, malcolm_config, control_flow, orig_path, ignore_cli_m=ignore_cli_m
+    )
 
 
 def _validate_cli_paths(cli_m: Optional[str], cli_i: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
@@ -241,9 +248,12 @@ def _handle_detected_artifacts(
     malcolm_config,
     control_flow,
     orig_path: str,
+    ignore_cli_m: bool = False,
 ) -> Tuple[bool, Optional[str], Optional[str], Optional[str], Optional[str]]:
     # 2) Neither provided via CLI: detect and prompt early
     mal_files, img_files = _detect_files_or_exit()
+    if ignore_cli_m:
+        mal_files = []
 
     # Offer tarball first; if accepted, offer images once; then fast-path
     if mal_files:

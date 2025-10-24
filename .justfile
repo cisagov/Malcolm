@@ -1,5 +1,5 @@
 # .envrc and .justfile can be used by direnv (https://github.com/direnv/direnv) and
-#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/configure
+#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/legacy_install.py
 #   and ./scripts/auth_setup. This will all likely be made obsolete when cisagov/Malcolm#395
 #   is complete. This hasn't been exhaustively tested, so it's recommended more for
 #   development convenience than it is for production use.
@@ -8,7 +8,7 @@ call_recipe := just_executable() + " --justfile=" + justfile()
 
 _base_config +CAPTURE_FLAGS:
   #!/usr/bin/env bash
-  ./scripts/configure $VERBOSE --defaults \
+  ./scripts/legacy_install.py $VERBOSE --configure --defaults \
     --configure-file "$MALCOLM_COMPOSE_FILE" \
     --environment-dir "$MALCOLM_CONFIG_DIR" \
     --runtime "$MALCOLM_CONTAINER_RUNTIME" \

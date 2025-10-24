@@ -5,6 +5,7 @@
 
 """Read and write settings (JSON/YAML) for MalcolmConfig and InstallContext."""
 
+import os
 import json
 import datetime
 from pathlib import Path
@@ -25,7 +26,7 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
-from scripts.malcolm_common import get_malcolm_version, YAMLDynamic
+from scripts.malcolm_common import get_malcolm_version, YAMLDynamic, get_main_script_path
 from scripts.installer.utils.logger_utils import InstallerLogger
 from enum import Enum, Flag
 
@@ -175,8 +176,7 @@ class SettingsFileHandler:
             "metadata": {
                 "description": "Malcolm installer configuration file",
                 "version": CONFIG_FILE_VERSION,
-                "documentation": "https://malcolm.readthedocs.io/en/latest/installation.html",
-                "usage": "Run installer with: ./install.py --import-config <path_to_this_file>",
+                "usage": f"Run installer with: {os.path.basename(get_main_script_path())} --import-config <path_to_this_file>",
             },
             "configuration": {},
             "installation": {},

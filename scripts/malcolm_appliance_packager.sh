@@ -123,7 +123,9 @@ if mkdir "$DESTDIR"; then
 
   # these scripts go in both the tarball and the run path
   cp $VERBOSE ./scripts/install.py "$DESTDIR/scripts/"
+  cp $VERBOSE ./scripts/legacy_install.py "$DESTDIR/scripts/"
   cp $VERBOSE ./scripts/install.py "$RUN_PATH/"
+  cp $VERBOSE ./scripts/legacy_install.py "$RUN_PATH/"
   git ls-files ./scripts/installer | /usr/bin/rsync -R --files-from=- ./ "$DESTDIR/"
   rm -rf "$DESTDIR/"scripts/installer/tests "$DESTDIR/"scripts/installer/ui/gui
   pushd "./scripts" >/dev/null 2>&1
@@ -183,9 +185,7 @@ if mkdir "$DESTDIR"; then
     echo ""
   fi
   echo ""
-  echo "To install Malcolm:" | tee -a "$README"
-  echo "  1. Run install.py" | tee -a "$README"
-  echo "  2. Follow the prompts" | tee -a "$README"
+  echo "To install and configure Malcolm, run install.py" | tee -a "$README"
   echo "" | tee -a "$README"
   echo "To start, stop, restart, etc. Malcolm:" | tee -a "$README"
   echo "  Use the control scripts in the \"scripts/\" directory:" | tee -a "$README"

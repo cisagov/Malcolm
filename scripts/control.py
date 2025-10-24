@@ -3424,7 +3424,7 @@ def main():
                     debug=log_level_is_debug(args.verbose),
                 )
             if err != 0:
-                raise Exception(f'{ScriptName} requires docker-compose, please run install.py')
+                raise Exception(f'{ScriptName} requires docker compose, please run install.py')
 
             # load compose file YAML (used to find some volume bind mount locations)
             with open(args.composeFile, 'r') as cf:

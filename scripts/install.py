@@ -6,6 +6,7 @@
 import argparse
 from dataclasses import dataclass
 import os
+import secrets
 import sys
 import types
 from typing import Optional
@@ -41,7 +42,7 @@ from scripts.installer.args.basic_args import add_basic_args
 from scripts.installer.args.orchestration_args import add_orchestration_args
 from scripts.installer.args.environment_args import add_environment_args
 from scripts.installer.args.extras_args import add_extras_args
-from scripts.installer.args.install_files_args import add_install_files_args
+from scripts.installer.args.install_files_args import add_install_files_args, remove_malcolm_file_args
 from scripts.installer.args.presentation_args import add_presentation_args
 
 from scripts.installer.configs.constants.installation_item_keys import *
@@ -602,10 +603,13 @@ def main():
     )
     if handled:
         if sel_path and os.path.isdir(sel_path):
-            new_installer_py = os.path.join(sel_path, os.path.join('scripts', 'install.py'))
+            new_installer_py = os.path.join(sel_path, os.path.join('scripts', SCRIPT_NAME))
             if os.path.isfile(new_installer_py):
                 # exec the new installer and abandon this one (replace the process)
-                os.execv(sys.executable, [sys.executable, new_installer_py, *sys.argv[1:]])
+                cleaned_argv = remove_malcolm_file_args(sys.argv[1:])
+                # send something bogus that doesn't exist for --malcolm-file so we don't loop
+                cleaned_argv.extend(["--malcolm-file", secrets.token_hex(32)])
+                os.execv(sys.executable, [sys.executable, new_installer_py, *cleaned_argv])
         return
 
     # capture any selections for downstream logic if needed (artifact handler performs work)

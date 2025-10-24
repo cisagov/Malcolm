@@ -9,7 +9,7 @@ import os
 from typing import List, Optional
 
 from scripts.malcolm_constants import OrchestrationFramework, ImageArchitecture
-from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO
+from scripts.malcolm_common import DownloadToFile, SYSTEM_INFO, get_main_script_path
 from scripts.installer.actions.shared import discover_compose_command
 
 # no direct UI imports needed here
@@ -119,11 +119,7 @@ class MacInstaller(BaseInstaller):
         return success
 
     def install_docker(self, install_context: InstallContext, runtime_bin: Optional[str] = "docker") -> bool:
-        """Install Docker on macOS using InstallContext decisions.
-
-        Note: This method assumes Docker is NOT already installed - the caller
-        (docker_install.py step) should check for existing installation first.
-        """
+        """Install Docker on macOS using InstallContext decisions."""
         import tempfile
 
         # macOS Docker constants from original installer
@@ -211,11 +207,11 @@ class MacInstaller(BaseInstaller):
                 # No Docker found and user chose not to install
                 if runtime_bin.startswith("docker"):
                     InstallerLogger.error(
-                        f"install.py requires {runtime_bin}, please see https://docs.docker.com/desktop/install/mac/"
+                        f"{os.path.basename(get_main_script_path())} requires {runtime_bin}, please see https://docs.docker.com/desktop/install/mac/"
                     )
                 else:
                     InstallerLogger.error(
-                        f"install.py requires {runtime_bin}, please consult your platform's documentation"
+                        f"{os.path.basename(get_main_script_path())} requires {runtime_bin}, please consult your platform's documentation"
                     )
                 return False
 

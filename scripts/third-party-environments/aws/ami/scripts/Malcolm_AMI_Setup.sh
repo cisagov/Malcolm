@@ -336,7 +336,7 @@ function InstallMalcolm {
 # Configure Malcolm on first login
 if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
     pushd ~/Malcolm >/dev/null 2>&1
-    ./scripts/configure
+    ./scripts/install.py --configure
     ./scripts/auth_setup
     popd >/dev/null 2>&1
     clear
