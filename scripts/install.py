@@ -327,7 +327,9 @@ def handle_config_export(parsed_args, malcolm_config, install_context):
                 export_filename = parsed_args.exportMalcolmConfigFile
 
             # save settings to file
-            settings_handler.save_to_file(export_filename, file_format="auto", include_installation_items=True)
+            settings_handler.save_to_file(
+                export_filename, file_format="auto", include_installation_items=not install_context.config_only
+            )
             InstallerLogger.info(f"Configuration exported successfully to: {export_filename}")
 
         except Exception as e:
