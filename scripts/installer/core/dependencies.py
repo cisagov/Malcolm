@@ -1068,12 +1068,11 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=[
-                KEY_CONFIG_ITEM_AUTO_ZEEK,
-                KEY_CONFIG_ITEM_LIVE_ZEEK,
+                KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP,
+                KEY_CONFIG_ITEM_ZEEK_INTEL_CRON_EXPRESSION,
             ],
-            condition=lambda _auto, _live: True,
-            default_value=lambda _auto, _live: bool(on_startup) or bool(cron_exp),
-            only_if_unmodified=False,
+            condition=lambda _on_startup, _cron_exp: True,
+            default_value=lambda on_startup, cron_exp: bool(on_startup) or bool(cron_exp),
         ),
     ),
     KEY_CONFIG_ITEM_ZEEK_INTEL_ON_STARTUP: DependencySpec(
