@@ -376,14 +376,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_DASHBOARDS_URL: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            condition=lambda mode: mode != SearchEngineMode.OPENSEARCH_LOCAL.value,
+            condition=lambda mode: mode
+            not in [SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value],
             ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             condition=lambda _mode: True,
             default_value=lambda mode: (
-                LOCAL_DASHBOARDS_URL if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else DEFAULT_VALUE_UNCHANGED
+                LOCAL_DASHBOARDS_URL
+                if mode in [SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value]
+                else DEFAULT_VALUE_UNCHANGED
             ),
             only_if_unmodified=False,
         ),

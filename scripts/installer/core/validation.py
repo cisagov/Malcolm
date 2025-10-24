@@ -16,7 +16,7 @@ Goals:
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Set
 
 from scripts.installer.utils.logger_utils import InstallerLogger
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM
@@ -103,12 +103,13 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
         def _validate_url(
             url_value: str,
             local_url: str,
+            local_modes: Set[str],
             key_name: str,
             label: str,
             mode: str,
         ):
             if _is_non_empty_str(url_value):
-                if mode != SearchEngineMode.OPENSEARCH_LOCAL.value:
+                if mode not in local_modes:
                     if url_value == local_url:
                         add_issue(
                             key_name,
@@ -128,6 +129,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
         _validate_url(
             osurl,
             LOCAL_OPENSEARCH_URL,
+            {SearchEngineMode.OPENSEARCH_LOCAL.value},
             KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL,
             "OpenSearch",
             primary_mode,
@@ -136,6 +138,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
         _validate_url(
             dashurl,
             LOCAL_DASHBOARDS_URL,
+            {SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value},
             KEY_CONFIG_ITEM_DASHBOARDS_URL,
             "Dashboards",
             primary_mode,

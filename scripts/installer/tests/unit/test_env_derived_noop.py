@@ -51,8 +51,8 @@ class TestEnvDerivedNoop(unittest.TestCase):
         cfg = MalcolmConfig()
         cfg.load_from_env_files(self.temp_dir)
 
-        self.assertIsNone(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT))
-        self.assertIsNone(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT))
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT), 0)
+        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT), 0)
 
         # Now set explicit ports along with conflicting listen flags; ports must win
         _write_env(mapper, self.temp_dir, KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT, "5514")
