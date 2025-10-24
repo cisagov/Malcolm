@@ -49,6 +49,7 @@ from scripts.installer.configs.constants.constants import (
     SERVICE_PORT_TCP_JSON,
     SERVICE_PORT_OSMALCOLM,
     SERVICE_PORT_OSMALCOLM_NO_SSL,
+    SYSLOG_DEFAULT_PORT,
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
 )
@@ -593,32 +594,80 @@ class MalcolmConfig(ObservableStoreMixin):
         }
 
     def _load_exposed_services_from_orchestration_file(self, compose_data: Dict[Any, Any]):
-        items_exposed = False
+        exposed_services = set()
 
         service_ports_to_check = {
-            KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: ("filebeat", [SERVICE_PORT_TCP_JSON]),
-            KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: ("logstash", [SERVICE_PORT_LOGSTASH]),
-            KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: ("nginx-proxy", [SERVICE_PORT_OSMALCOLM, SERVICE_PORT_OSMALCOLM_NO_SSL]),
-            KEY_CONFIG_ITEM_EXPOSE_SFTP: ("upload", [SERVICE_PORT_SFTP_INTERNAL]),
+            KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: (
+                "filebeat",
+                {SERVICE_PORT_TCP_JSON},
+                "filebeat",
+                True,  # authoritative
+            ),
+            KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: (
+                "logstash",
+                {SERVICE_PORT_LOGSTASH},
+                "logstash",
+                True,  # authoritative
+            ),
+            KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: (
+                "nginx-proxy",
+                {SERVICE_PORT_OSMALCOLM, SERVICE_PORT_OSMALCOLM_NO_SSL},
+                "opensearch",
+                True,  # authoritative
+            ),
+            KEY_CONFIG_ITEM_EXPOSE_SFTP: (
+                "upload",
+                {SERVICE_PORT_SFTP_INTERNAL},
+                "sftp",
+                True,  # authoritative
+            ),
+            "nonauthoritative_syslog_check": (
+                "filebeat",
+                {
+                    SYSLOG_DEFAULT_PORT,
+                    self.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT),
+                    self.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT),
+                },
+                "syslog",
+                False,  # not authoritative (the .env files are)
+            ),
         }
+
+        # look in each `ports` section for 0.0.0.0:... exposed services
         for config_key, service_tuple in service_ports_to_check.items():
             for port in deep_get(compose_data, ["services", service_tuple[0], "ports"], []):
                 port_parts = port.split(':')
                 if (
                     (len(port_parts) == 3)
                     and (port_parts[0] == SERVICE_IP_EXPOSED)
-                    and (port_parts[2].split('/')[0] in service_tuple[1])
+                    and (port_parts[2].split('/')[0] in [str(x) for x in service_tuple[1] if x])
                 ):
-                    self.apply_default(config_key, True, ignore_errors=True)
-                    items_exposed = True
+                    exposed_services.add(service_tuple[2])
+                    if service_tuple[3]:
+                        self.apply_default(config_key, True, ignore_errors=True)
 
-        # opensearch could also be exposed via traefik instead:
-        traefik_labels = self._get_traefik_labels(compose_data)
-        if (traefik_labels.get(TRAEFIK_ENABLE, False) is True) and traefik_labels.get(LABEL_OS_RULE):
+        # opensearch could also be exposed via traefik instead of via `ports`:
+        if (
+            (traefik_labels := self._get_traefik_labels(compose_data))
+            and (traefik_labels.get(TRAEFIK_ENABLE, False) is True)
+            and traefik_labels.get(LABEL_OS_RULE)
+        ):
             self.apply_default(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True, ignore_errors=True)
+            exposed_services.add("opensearch")
 
-        if items_exposed:
-            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True)
+        if exposed_services:
+            self.apply_default(
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                (
+                    # the "Yes" selection equates to filebeat, logstash, and opensearch; otherwise it's "customize"
+                    OpenPortsChoices.YES
+                    if exposed_services == {"filebeat", "logstash", "opensearch"}
+                    else OpenPortsChoices.CUSTOMIZE
+                ),
+                ignore_errors=True,
+            )
+        else:
+            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, False, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff
