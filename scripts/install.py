@@ -327,9 +327,7 @@ def handle_config_export(parsed_args, malcolm_config, install_context):
                 export_filename = parsed_args.exportMalcolmConfigFile
 
             # save settings to file
-            settings_handler.save_to_file(
-                export_filename, file_format="auto", include_installation_items=not install_context.config_only
-            )
+            settings_handler.save_to_file(export_filename, file_format="auto")
             InstallerLogger.info(f"Configuration exported successfully to: {export_filename}")
 
         except Exception as e:
@@ -635,17 +633,25 @@ def main():
                 if parsed_args.debug:
                     for item_key in missing_items["missing_configuration"]:
                         item = malcolm_config.get_item(item_key)
-                        InstallerLogger.info(f"  {item_key}: using default {item.current_value}")
+                        InstallerLogger.debug(f'  {item_key}: using default "{str(item.get_value())}"')
 
             # report missing installation items that used defaults
             if missing_items["missing_installation"]:
                 InstallerLogger.warning(f"Found {len(missing_items['missing_installation'])} installation items missing from settings file, using defaults") # fmt: skip
                 if parsed_args.debug:
                     for item_key in missing_items["missing_installation"]:
-                        InstallerLogger.info(f"  {item_key}: using default value") # fmt: skip
+                        InstallerLogger.debug(f'  {item_key}: using default "{str(item.get_value())}"')
 
         except Exception as e:
             InstallerLogger.error(f"Failed to load settings from {parsed_args.importMalcolmConfigFile}: {e}") # fmt: skip
+
+            import traceback
+
+            tb = traceback.format_exc()
+            # Include traceback in error log so failures are actionable without --debug
+            InstallerLogger.error(f"Error executing main(): {e}\n{tb}")
+            InstallerLogger.debug(f"Main debug: {e}\n{tb}")
+
             sys.exit(1)
 
     # check if input environment directory was specified via --environment-dir-input

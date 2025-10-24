@@ -94,9 +94,10 @@ class SettingsFileHandler:
             missing_items["missing_configuration"] = self._load_configuration_section(configuration_section)
 
         # process installation section
-        installation_section = settings_data.get("installation", {})
-        if isinstance(installation_section, dict):
-            missing_items["missing_installation"] = self._load_installation_section(installation_section)
+        if not self.install_context.config_only:
+            installation_section = settings_data.get("installation", {})
+            if isinstance(installation_section, dict):
+                missing_items["missing_installation"] = self._load_installation_section(installation_section)
 
         return missing_items
 
@@ -104,7 +105,6 @@ class SettingsFileHandler:
         self,
         settings_file_path: str,
         file_format: str = "auto",
-        include_installation_items: bool = True,
         dry_run: bool = False,
     ) -> None:
         """Save current configuration to JSON/YAML settings file.
@@ -112,7 +112,6 @@ class SettingsFileHandler:
         Args:
             settings_file_path: Path where to save the settings file
             file_format: Format to use ('json', 'yaml', or 'auto' to detect from extension)
-            include_installation_items: Whether to include installation section
 
         Raises:
             FileOperationError: If file cannot be written
@@ -127,7 +126,7 @@ class SettingsFileHandler:
                 file_format = "json"
 
         # build settings structure
-        settings_data = self._build_settings_data(include_installation_items)
+        settings_data = self._build_settings_data(include_installation_items=not self.install_context.config_only)
 
         # dry-run support: report intended action and return
         if dry_run:
