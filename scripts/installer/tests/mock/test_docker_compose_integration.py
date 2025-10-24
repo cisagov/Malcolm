@@ -23,11 +23,15 @@ from scripts.installer.actions.shared import update_compose_files
 from scripts.installer.core.install_context import InstallContext
 from scripts.installer.tests.mock.test_framework import MockPlatform
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_RUNTIME_BIN,
+    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS,
+    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+    KEY_CONFIG_ITEM_INDEX_DIR,
+    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
     KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
     KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
+    KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_ZEEK_LOG_DIR,
-    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
 )
 from scripts.installer.tests.mock.test_framework import BaseInstallerTest
 
@@ -144,13 +148,20 @@ class TestDockerComposeIntegration(BaseInstallerTest):
     def test_volume_mount_updates(self):
         """Test that volume mounts are updated with custom paths."""
         malcolm_config = MalcolmConfig()
-        # Create real temporary directories so RemapBoundPaths will remap
-        custom_pcap = os.path.join(self.test_dir, "pcap-custom")
-        custom_zeek = os.path.join(self.test_dir, "zeek-custom")
-        os.makedirs(custom_pcap, exist_ok=True)
-        os.makedirs(os.path.join(custom_zeek, "upload"), exist_ok=True)
 
+        custom_opensearch = os.path.join(self.test_dir, "os-custom")
+        custom_pcap = os.path.join(self.test_dir, "pcap-custom")
+        custom_snapshot = os.path.join(self.test_dir, "os-bak-custom")
+        custom_suricata = os.path.join(self.test_dir, "suricata-custom")
+        custom_zeek = os.path.join(self.test_dir, "zeek-custom")
+        for custpath in [custom_opensearch, custom_pcap, custom_snapshot, custom_suricata, custom_zeek]:
+            os.makedirs(custpath, exist_ok=True)
+
+        malcolm_config.set_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, False)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_INDEX_DIR, custom_opensearch)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, custom_snapshot)
         malcolm_config.set_value(KEY_CONFIG_ITEM_PCAP_DIR, custom_pcap)
+        malcolm_config.set_value(KEY_CONFIG_ITEM_SURICATA_LOG_DIR, custom_suricata)
         malcolm_config.set_value(KEY_CONFIG_ITEM_ZEEK_LOG_DIR, custom_zeek)
 
         result = update_compose_files(malcolm_config, self.test_dir, None, MockPlatform(), InstallContext())
@@ -159,7 +170,7 @@ class TestDockerComposeIntegration(BaseInstallerTest):
         # Verify volume mount updates
         updated_data = LoadYaml(self.compose_file)
 
-        # Check arkime pcap volume mount
+        # Spot check volume mounts
         arkime_volumes = updated_data["services"]["arkime"]["volumes"]
         self.assertIn(f"{custom_pcap}:/data/pcap", arkime_volumes)
 
