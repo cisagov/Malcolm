@@ -2,13 +2,25 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import random
 import string
 import tempfile
 import unittest
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
+from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
+    KEY_CONFIG_ITEM_LIVE_ARKIME,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_NETBOX_MODE,
+    KEY_CONFIG_ITEM_NETBOX_URL,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+)
 
 
 def _cleanup_dir(path: str):
@@ -44,7 +56,7 @@ def _pick_valid_value(item: ConfigItem, current_value):
     """
 
     choices = list(getattr(item, "choices", []) or [])
-    if choices:
+    if choices and (item.key != 'dockerOrchestrationMode'):
         # Normalize enum-like choices to their literal value
         alt_choices = [c for c in choices if c != current_value]
         if alt_choices:
@@ -94,6 +106,9 @@ def _pick_valid_value(item: ConfigItem, current_value):
         alts = [o for o in opts if o != current_value]
         if alts:
             return random.choice(alts)
+
+    if item.key == 'dockerOrchestrationMode':
+        return random.choice([OrchestrationFramework.DOCKER_COMPOSE, OrchestrationFramework.KUBERNETES])
 
     candidates = []
 
@@ -190,27 +205,37 @@ class TestEnvFullRoundtrip(unittest.TestCase):
 
         # Write mutated config to env and load into fresh instance
         with tempfile.TemporaryDirectory() as td:
-            # Normalize mutually-exclusive capture engine flags to avoid impossible roundtrips
-            # PCAP_ENABLE_TCPDUMP forward depends on both tcpdump and netsniff; ensure not both true
-            try:
-                from scripts.installer.configs.constants.configuration_item_keys import (
-                    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
-                    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
-                    KEY_CONFIG_ITEM_NETBOX_MODE,
-                    KEY_CONFIG_ITEM_NETBOX_URL,
-                )
 
-                if bool(cfg1.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP)) and bool(
-                    cfg1.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF)
-                ):
-                    # Prefer tcpdump in tie to satisfy PCAP_ENABLE_TCPDUMP semantics
+            # Normalize mutually-exclusive capture engine flags to avoid impossible roundtrips
+            try:
+                if cfg1.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) != "hedgehog":
+                    cfg1.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True, ignore_errors=True)
+                    cfg1.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, True, ignore_errors=True)
                     cfg1.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, False, ignore_errors=True)
+                    cfg1.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, False, ignore_errors=True)
+
+                elif (
+                    sum(
+                        [
+                            bool(cfg1.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP)),
+                            bool(cfg1.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF)),
+                            bool(cfg1.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME)),
+                        ]
+                    )
+                    > 1
+                ):
+                    cfg1.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True, ignore_errors=True)
+                    cfg1.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, True, ignore_errors=True)
+                    cfg1.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, False, ignore_errors=True)
+                    cfg1.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, False, ignore_errors=True)
 
                 # Ensure NetBox URL is emitted: require remote mode when URL is non-empty
                 nb_url = cfg1.get_value(KEY_CONFIG_ITEM_NETBOX_URL)
                 if isinstance(nb_url, str) and nb_url.strip():
                     cfg1.set_value(KEY_CONFIG_ITEM_NETBOX_MODE, "remote", ignore_errors=True)
-            except Exception:
+
+            except Exception as e:
+                print(e, file=sys.stderr)
                 pass
 
             cfg1.generate_env_files(td)

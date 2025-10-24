@@ -319,10 +319,8 @@ def BuildBoundPathReplacers(
 def RemapBoundPaths(docker_compose_contents: dict, replacements: Tuple[BoundPathReplacer]) -> int:
     remap_count = 0
     for replacer in replacements:
-        if (
-            (replacer.service in docker_compose_contents['services'])
-            and ('volumes' in docker_compose_contents['services'][replacer.service])
-            and os.path.isdir(replacer.source)
+        if (replacer.service in docker_compose_contents['services']) and (
+            'volumes' in docker_compose_contents['services'][replacer.service]
         ):
             for vol_idx, vol_val in enumerate(docker_compose_contents['services'][replacer.service]['volumes']):
                 if (

@@ -235,20 +235,18 @@ def _validate_netbox_remote(malcolm_config, add_issue) -> None:
 
 
 def _validate_non_default_storage(malcolm_config, add_issue) -> None:
-    use_defaults_item = malcolm_config.get_item(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)
-    use_defaults = bool(use_defaults_item.get_value()) if use_defaults_item else True
-    if use_defaults_item and use_defaults_item.is_modified and not use_defaults:
+    if not bool(malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)):
         for key, label_hint in (
             (KEY_CONFIG_ITEM_PCAP_DIR, "PCAP storage directory"),
             (KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "Zeek log directory"),
             (KEY_CONFIG_ITEM_SURICATA_LOG_DIR, "Suricata log directory"),
         ):
-            item = malcolm_config.get_item(key)
-            if not item or not item.is_modified:
+            if not malcolm_config.get_value(key):
                 add_issue(
                     key,
                     f"Required when not using default storage locations ({label_hint})",
                 )
+
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
         primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
         if (
@@ -264,8 +262,7 @@ def _validate_non_default_storage(malcolm_config, add_issue) -> None:
                     "OpenSearch snapshot directory",
                 ),
             ):
-                item = malcolm_config.get_item(key)
-                if not item or not item.is_modified:
+                if not malcolm_config.get_value(key):
                     add_issue(
                         key,
                         f"Required when not using default storage locations ({label_hint})",
