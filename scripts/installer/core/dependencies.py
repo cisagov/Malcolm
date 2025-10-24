@@ -388,6 +388,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             only_if_unmodified=False,
         ),
     ),
+    KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+            ],
+            condition=lambda profile, mode: (
+                profile == PROFILE_MALCOLM and mode != SearchEngineMode.ELASTICSEARCH_REMOTE.value
+            ),
+        )
+    ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE,
@@ -453,19 +464,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
             condition=lambda enabled: bool(enabled),
             ui_parent=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        )
-    ),
-    # Dark mode depends on profile and primary store mode
-    KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=[
-                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-                KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            ],
-            condition=lambda profile, mode: (
-                profile == PROFILE_MALCOLM and mode != SearchEngineMode.ELASTICSEARCH_REMOTE.value
-            ),
-            is_top_level=True,
         )
     ),
     # -------------------------------------------------------------------------
@@ -798,8 +796,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
-            condition=lambda mode: mode != FileExtractionMode.NONE.value,
-            default_value=False,
+            condition=lambda _mode: True,
+            default_value=lambda mode: not (mode == FileExtractionMode.NONE.value),
         ),
     ),
     # -------------------------------------------------------------------------
@@ -836,8 +834,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.YES.value,
-            default_value=True,
+            condition=lambda _selection: True,
+            default_value=lambda selection: {
+                OpenPortsChoices.YES.value: True,
+                OpenPortsChoices.NO.value: False,
+            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: DependencySpec(
@@ -848,8 +850,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.YES.value,
-            default_value=True,
+            condition=lambda _selection: True,
+            default_value=lambda selection: {
+                OpenPortsChoices.YES.value: True,
+                OpenPortsChoices.NO.value: False,
+            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_SFTP: DependencySpec(
@@ -860,8 +866,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.YES.value,
-            default_value=True,
+            condition=lambda _selection: True,
+            default_value=lambda selection: {
+                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                OpenPortsChoices.YES.value: False,
+                OpenPortsChoices.NO.value: False,
+            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES: DependencySpec(
@@ -872,8 +883,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.YES.value,
-            default_value=True,
+            condition=lambda _selection: True,
+            default_value=lambda selection: {
+                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                OpenPortsChoices.YES.value: False,
+                OpenPortsChoices.NO.value: False,
+            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_FILEBEAT_TCP_DEFAULTS: DependencySpec(
