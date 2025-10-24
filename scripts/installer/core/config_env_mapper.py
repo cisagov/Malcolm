@@ -90,43 +90,45 @@ _BOOLEAN_VARS = [
 # 2. String transform logic
 _STRING_VARS = [
     KEY_ENV_ARKIME_FREESPACEG,
-    KEY_ENV_ARKIME_LIVE_NODE_HOST,
+    KEY_ENV_ARKIME_INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS,
+    KEY_ENV_ARKIME_INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_OPTIMIZATION_PERIOD,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME,
-    KEY_ENV_ARKIME_INDEX_MANAGEMENT_OLDER_SESSION_REPLICAS,
-    KEY_ENV_ARKIME_INDEX_MANAGEMENT_HISTORY_RETENTION_WEEKS,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS,
-    KEY_ENV_LOGSTASH_HOST,
-    KEY_ENV_OPENSEARCH_DASHBOARDS_URL,
-    KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD,
+    KEY_ENV_ARKIME_LIVE_NODE_HOST,
+    KEY_ENV_CONTAINER_RUNTIME_KEY,
+    KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT,
+    KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT,
     KEY_ENV_FILEBEAT_TCP_LOG_FORMAT,
+    KEY_ENV_FILEBEAT_TCP_PARSE_DROP_FIELD,
     KEY_ENV_FILEBEAT_TCP_PARSE_SOURCE_FIELD,
     KEY_ENV_FILEBEAT_TCP_PARSE_TARGET_FIELD,
-    KEY_ENV_FILEBEAT_TCP_PARSE_DROP_FIELD,
     KEY_ENV_FILEBEAT_TCP_TAG,
+    KEY_ENV_LOGSTASH_HOST,
+    KEY_ENV_LOGSTASH_PIPELINE_WORKERS,
     KEY_ENV_NETBOX_DEFAULT_SITE,
     KEY_ENV_NETBOX_MODE,
+    KEY_ENV_OPENSEARCH_DASHBOARDS_URL,
+    KEY_ENV_OPENSEARCH_INDEX_PRUNE_THRESHOLD,
     KEY_ENV_OPENSEARCH_PRIMARY,
-    KEY_ENV_OPENSEARCH_URL,
     KEY_ENV_OPENSEARCH_SECONDARY,
     KEY_ENV_OPENSEARCH_SECONDARY_URL,
-    KEY_ENV_PCAP_IFACE,
+    KEY_ENV_OPENSEARCH_URL,
     KEY_ENV_PCAP_FILTER,
-    KEY_ENV_PUID,
-    KEY_ENV_PGID,
+    KEY_ENV_PCAP_IFACE,
     KEY_ENV_PCAP_NODE_NAME,
+    KEY_ENV_PGID,
+    KEY_ENV_PROFILE_KEY,
+    KEY_ENV_PUID,
     KEY_ENV_ZEEK_EXTRACTOR_MODE,
-    KEY_ENV_ZEEK_FILE_PRESERVATION,
-    KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT,
-    KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_MAX_SIZE,
     KEY_ENV_ZEEK_FILE_HTTP_SERVER_KEY,
-    KEY_ENV_ZEEK_VTOT_API2_KEY,
-    KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION,
+    KEY_ENV_ZEEK_FILE_PRESERVATION,
+    KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_MAX_SIZE,
+    KEY_ENV_ZEEK_FILE_PRUNE_THRESHOLD_TOTAL_DISK_USAGE_PERCENT,
     KEY_ENV_ZEEK_INTEL_FEED_SINCE,
     KEY_ENV_ZEEK_INTEL_ITEM_EXPIRATION,
-    KEY_ENV_PROFILE_KEY,
-    KEY_ENV_CONTAINER_RUNTIME_KEY,
-    KEY_ENV_LOGSTASH_PIPELINE_WORKERS,
+    KEY_ENV_ZEEK_INTEL_REFRESH_CRON_EXPRESSION,
+    KEY_ENV_ZEEK_VTOT_API2_KEY,
 ]
 
 
@@ -229,14 +231,6 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         forward=custom_transform_filebeat_syslog_udp_listen,
         reverse=custom_reverse_transform_filebeat_syslog_udp_listen,
         reverse_noop=True,
-    ),
-    KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT: TransformHook(
-        forward=custom_transform_filebeat_syslog_tcp_port,
-        reverse=custom_reverse_transform_filebeat_syslog_tcp_port,
-    ),
-    KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT: TransformHook(
-        forward=custom_transform_filebeat_syslog_udp_port,
-        reverse=custom_reverse_transform_filebeat_syslog_udp_port,
     ),
     # Live capture transforms
     KEY_ENV_ARKIME_LIVE_CAPTURE: TransformHook(
@@ -479,11 +473,6 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].config_items = [
                 KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
-                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            ]
-            # Port is authoritative; accept-syslog is derived from whether port is non-zero
-            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT].derived_items = [
-                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
             ]
             self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_LISTEN].config_items = [KEY_CONFIG_ITEM_SYSLOG_UDP_PORT]
             # Derived: listen is implied by port; do not set port from listen
@@ -492,11 +481,6 @@ class EnvMapper:
             ]
             self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].config_items = [
                 KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
-                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            ]
-            # Port is authoritative; accept-syslog is derived from whether port is non-zero
-            self.env_var_by_map_key[KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT].derived_items = [
-                KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES
             ]
 
             # NetBox

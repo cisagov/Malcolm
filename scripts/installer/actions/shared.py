@@ -32,7 +32,6 @@ from scripts.malcolm_common import (
 from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
 
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
     KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
@@ -271,17 +270,14 @@ def _get_exposed_services_config(malcolm_config):
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
         )
         nginx_ssl = malcolm_config.get_value(KEY_CONFIG_ITEM_NGINX_SSL) or True
-        accept_standard_syslog_messages = bool(
-            open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES) or False)
-        )
         expose_filebeat_tcp = open_ports and bool(
             malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP) or False
         )
         expose_logstash = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_LOGSTASH) or False)
         expose_opensearch = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH) or False)
         expose_sftp = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_SFTP) or False)
-        syslog_tcp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0
-        syslog_udp_port = malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0
+        syslog_tcp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0) if open_ports else 0
+        syslog_udp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0) if open_ports else 0
     except Exception:
         traefik_labels_enabled = False
         open_ports = False
@@ -292,7 +288,6 @@ def _get_exposed_services_config(malcolm_config):
         expose_logstash = False
         expose_opensearch = False
         expose_sftp = False
-        accept_standard_syslog_messages = False
         syslog_tcp_port = 0
         syslog_udp_port = 0
 
@@ -306,7 +301,6 @@ def _get_exposed_services_config(malcolm_config):
         expose_logstash,
         expose_opensearch,
         expose_sftp,
-        accept_standard_syslog_messages,
         syslog_tcp_port,
         syslog_udp_port,
     )
@@ -323,7 +317,6 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
         expose_logstash,
         expose_opensearch,
         expose_sftp,
-        accept_standard_syslog_messages,
         syslog_tcp_port,
         syslog_udp_port,
     ) = exposed_services_tuple
@@ -346,8 +339,8 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
     for service, port_infos in {
         'filebeat': [
             [expose_filebeat_tcp, int(SERVICE_PORT_TCP_JSON), int(SERVICE_PORT_TCP_JSON), 'tcp'],
-            [accept_standard_syslog_messages and (syslog_tcp_port > 0), syslog_tcp_port, syslog_tcp_port, 'tcp'],
-            [accept_standard_syslog_messages and (syslog_udp_port > 0), syslog_udp_port, syslog_udp_port, 'udp'],
+            [syslog_tcp_port > 0, syslog_tcp_port, syslog_tcp_port, 'tcp'],
+            [syslog_udp_port > 0, syslog_udp_port, syslog_udp_port, 'udp'],
         ],
         'logstash': [
             [expose_logstash, int(SERVICE_PORT_LOGSTASH), int(SERVICE_PORT_LOGSTASH), 'tcp'],

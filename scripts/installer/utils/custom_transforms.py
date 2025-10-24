@@ -205,56 +205,6 @@ def custom_reverse_transform_filebeat_syslog_udp_listen(value: str) -> None:
     return None
 
 
-def custom_transform_filebeat_syslog_tcp_port(tcp_port: int, accept_syslog: bool) -> str:
-    """Forward transform for FILEBEAT_SYSLOG_TCP_PORT.
-
-    Takes both the port and accept_syslog flag, but only the port is written.
-    The accept_syslog flag determines whether the port should be written (it's
-    derived from whether the port is non-zero).
-    """
-    return str(tcp_port) if tcp_port is not None else "0"
-
-
-def custom_reverse_transform_filebeat_syslog_tcp_port(value: str):
-    """Return tuple (port, accept_syslog_enabled).
-
-    If a non-zero port is configured, we infer that syslog should be accepted.
-    """
-    try:
-        port = int(str(value).strip())
-    except Exception:
-        return (None, False)
-
-    port_value = None if port == 0 else port
-    accept_syslog = port is not None and port > 0
-    return (port_value, accept_syslog)
-
-
-def custom_transform_filebeat_syslog_udp_port(udp_port: int, accept_syslog: bool) -> str:
-    """Forward transform for FILEBEAT_SYSLOG_UDP_PORT.
-
-    Takes both the port and accept_syslog flag, but only the port is written.
-    The accept_syslog flag determines whether the port should be written (it's
-    derived from whether the port is non-zero).
-    """
-    return str(udp_port) if udp_port is not None else "0"
-
-
-def custom_reverse_transform_filebeat_syslog_udp_port(value: str):
-    """Return tuple (port, accept_syslog_enabled).
-
-    If a non-zero port is configured, we infer that syslog should be accepted.
-    """
-    try:
-        port = int(str(value).strip())
-    except Exception:
-        return (None, False)
-
-    port_value = None if port == 0 else port
-    accept_syslog = port is not None and port > 0
-    return (port_value, accept_syslog)
-
-
 def custom_reverse_transform_opensearch_index_prune_threshold(value: str) -> str:
     """Reverse transform for OPENSEARCH_INDEX_PRUNE_THRESHOLD.
 

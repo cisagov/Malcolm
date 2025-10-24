@@ -47,6 +47,8 @@ from scripts.installer.configs.constants.constants import (
     SERVICE_PORT_LOGSTASH,
     SERVICE_PORT_SFTP_INTERNAL,
     SERVICE_PORT_TCP_JSON,
+    SERVICE_PORT_OSMALCOLM,
+    SERVICE_PORT_OSMALCOLM_NO_SSL,
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
 )
@@ -583,14 +585,21 @@ class MalcolmConfig(ObservableStoreMixin):
 
         return None
 
+    def _get_traefik_labels(self, compose_data: Dict[Any, Any]) -> Dict[Any, Any]:
+        return {
+            k: v
+            for k, v in deep_get(compose_data, ["services", "nginx-proxy", "labels"], {}).items()
+            if k.startswith("traefik")
+        }
+
     def _load_exposed_services_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         items_exposed = False
 
         service_ports_to_check = {
-            KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: ("filebeat", SERVICE_PORT_TCP_JSON),
-            KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: ("logstash", SERVICE_PORT_LOGSTASH),
-            KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: ("nginx-proxy", SERVICE_PORT_LOGSTASH),
-            KEY_CONFIG_ITEM_EXPOSE_SFTP: ("upload", SERVICE_PORT_SFTP_INTERNAL),
+            KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: ("filebeat", [SERVICE_PORT_TCP_JSON]),
+            KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: ("logstash", [SERVICE_PORT_LOGSTASH]),
+            KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: ("nginx-proxy", [SERVICE_PORT_OSMALCOLM, SERVICE_PORT_OSMALCOLM_NO_SSL]),
+            KEY_CONFIG_ITEM_EXPOSE_SFTP: ("upload", [SERVICE_PORT_SFTP_INTERNAL]),
         }
         for config_key, service_tuple in service_ports_to_check.items():
             for port in deep_get(compose_data, ["services", service_tuple[0], "ports"], []):
@@ -598,21 +607,22 @@ class MalcolmConfig(ObservableStoreMixin):
                 if (
                     (len(port_parts) == 3)
                     and (port_parts[0] == SERVICE_IP_EXPOSED)
-                    and (port_parts[2].split('/')[0] == service_tuple[1])
+                    and (port_parts[2].split('/')[0] in service_tuple[1])
                 ):
                     self.apply_default(config_key, True, ignore_errors=True)
                     items_exposed = True
+
+        # opensearch could also be exposed via traefik instead:
+        traefik_labels = self._get_traefik_labels(compose_data)
+        if (traefik_labels.get(TRAEFIK_ENABLE, False) is True) and traefik_labels.get(LABEL_OS_RULE):
+            self.apply_default(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True, ignore_errors=True)
 
         if items_exposed:
             self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, OpenPortsChoices.CUSTOMIZE, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff
-        traefik_labels = {
-            k: v
-            for k, v in deep_get(compose_data, ["services", "nginx-proxy", "labels"], {}).items()
-            if k.startswith("traefik")
-        }
+        traefik_labels = self._get_traefik_labels(compose_data)
         if traefik_labels.get(TRAEFIK_ENABLE, False) is True:
             self.apply_default(KEY_CONFIG_ITEM_TRAEFIK_LABELS, True, ignore_errors=True)
             self.apply_default(

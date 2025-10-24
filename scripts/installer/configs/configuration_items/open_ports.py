@@ -13,7 +13,6 @@ from scripts.malcolm_constants import WidgetType
 from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import OpenPortsChoices
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
     KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
@@ -69,33 +68,22 @@ CONFIG_ITEM_EXPOSE_SFTP = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
-# Default value handled in MalcolmConfig based on ACCEPT_STANDARD_SYSLOG_MESSAGES
 CONFIG_ITEM_SYSLOG_TCP_PORT = ConfigItem(
     key=KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
     label="Syslog TCP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question="Listen for Syslog (TCP) on this port (0 for disabled)",
+    question="Listen for standard Syslog (TCP) on this port (0 for disabled)",
     widget_type=WidgetType.NUMBER,
 )
 
-# Default value handled in MalcolmConfig based on ACCEPT_STANDARD_SYSLOG_MESSAGES
 CONFIG_ITEM_SYSLOG_UDP_PORT = ConfigItem(
     key=KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
     label="Syslog UDP Port",
     default_value=None,
     validator=lambda x: isinstance(x, int),
-    question="Listen for Syslog (UDP) on this (0 for disabled)",
+    question="Listen for standard Syslog (UDP) on this port (0 for disabled)",
     widget_type=WidgetType.NUMBER,
-)
-
-CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES = ConfigItem(
-    key=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-    label="Accept Standard Syslog Messages",
-    default_value=False,
-    validator=lambda x: isinstance(x, bool),
-    question="Accept standard Syslog messages?",
-    widget_type=WidgetType.CHECKBOX,
 )
 
 

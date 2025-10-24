@@ -15,7 +15,6 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_TWEAK_IFACE,
     KEY_CONFIG_ITEM_CAPTURE_STATS,
     KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT,
     KEY_CONFIG_ITEM_FILEBEAT_TCP_PARSE_SOURCE_FIELD,
@@ -57,20 +56,6 @@ class TestLiveCaptureDependencies(unittest.TestCase):
         cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE, PROFILE_HEDGEHOG)
         cfg.set_value(KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC, True)
         self._assert_live_capture_defaults(cfg, expect_arkime=True)
-
-
-class TestSyslogDependency(unittest.TestCase):
-    """Ensure that opting into standard Syslog automatically assigns default ports."""
-
-    def test_syslog_ports_default(self):
-        cfg = MalcolmConfig()
-        # Ports should be unset initially
-        self.assertIsNone(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT))
-        self.assertIsNone(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT))
-
-        cfg.set_value(KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES, True)
-        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT), 514)
-        self.assertEqual(cfg.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT), 514)
 
 
 class TestFilebeatJsonDefaults(unittest.TestCase):

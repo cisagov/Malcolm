@@ -450,23 +450,6 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     # -------------------------------------------------------------------------
-    # NETWORK AND SYSLOG DEPENDENCIES
-    # -------------------------------------------------------------------------
-    KEY_CONFIG_ITEM_SYSLOG_TCP_PORT: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda enabled: bool(enabled),
-            ui_parent=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        )
-    ),
-    KEY_CONFIG_ITEM_SYSLOG_UDP_PORT: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-            condition=lambda enabled: bool(enabled),
-            ui_parent=KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES,
-        )
-    ),
-    # -------------------------------------------------------------------------
     # LIVE CAPTURE DEPENDENCIES
     # -------------------------------------------------------------------------
     # Parent item: automatically enabled when any capture/analysis method is enabled
@@ -875,7 +858,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             only_if_unmodified=False,
         ),
     ),
-    KEY_CONFIG_ITEM_ACCEPT_STANDARD_SYSLOG_MESSAGES: DependencySpec(
+    KEY_CONFIG_ITEM_SYSLOG_TCP_PORT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
             condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
@@ -886,8 +869,25 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             condition=lambda _selection: True,
             default_value=lambda selection: {
                 # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
-                OpenPortsChoices.YES.value: False,
-                OpenPortsChoices.NO.value: False,
+                OpenPortsChoices.YES.value: 0,
+                OpenPortsChoices.NO.value: 0,
+            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            only_if_unmodified=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_SYSLOG_UDP_PORT: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
+            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
+            condition=lambda _selection: True,
+            default_value=lambda selection: {
+                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                OpenPortsChoices.YES.value: 0,
+                OpenPortsChoices.NO.value: 0,
             }.get(selection, DEFAULT_VALUE_UNCHANGED),
             only_if_unmodified=False,
         ),
