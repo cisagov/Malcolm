@@ -169,7 +169,7 @@ def handle_artifact_path_preseed_file(malcolm_config):
                     if base_path := disk_format_info.get(base_key):
                         path = os.path.realpath(os.path.join(base_path, subdir) if subdir else base_path)
                         if (not path_must_exist) or os.path.isdir(path):
-                            malcolm_config.set_value(config_key, path, ignore_errors=True)
+                            malcolm_config.apply_default(config_key, path, ignore_errors=True)
                             InstallerLogger.debug(
                                 f"Set default for {config_key} to {path} from {os.path.basename(disk_format_info_file)}"
                             )
