@@ -6,6 +6,7 @@
 import argparse
 from dataclasses import dataclass
 import os
+import pathlib
 import secrets
 import sys
 import types
@@ -20,8 +21,16 @@ if "scripts" not in sys.modules:
 sys.dont_write_bytecode = True
 
 from scripts.malcolm_constants import (
-    PresentationMode,
+    DEFAULT_INDEX_DIR,
+    DEFAULT_INDEX_SNAPSHOT_DIR,
+    DEFAULT_PCAP_DIR,
+    DEFAULT_SURICATA_LOG_DIR,
+    DEFAULT_ZEEK_LOG_DIR,
+    MALCOLM_DB_DIR,
+    MALCOLM_LOGS_DIR,
+    MALCOLM_PCAP_DIR,
     OrchestrationFramework,
+    PresentationMode,
     SettingsFileFormat,
 )
 
@@ -40,7 +49,13 @@ from scripts.malcolm_common import (
     UserInterfaceMode,
     YAMLDynamic,
 )
-from scripts.malcolm_utils import ChownRecursive, base64_encode_files_in_dir, base64_decode_files_to_dir
+from scripts.malcolm_utils import (
+    base64_decode_files_to_dir,
+    base64_encode_files_in_dir,
+    ChownRecursive,
+    get_main_script_dir,
+    LoadFileIfJson,
+)
 
 from scripts.installer.args.basic_args import add_basic_args
 from scripts.installer.args.orchestration_args import add_orchestration_args
@@ -117,6 +132,50 @@ def create_ui_implementation(presentation_mode: PresentationMode, ui_mode_flag: 
         return None
     else:
         raise Exception("Unsupported interface mode")
+
+
+def handle_artifact_path_preseed_file(malcolm_config):
+
+    # special case for the Malcolm ISO-installed environment: if the file .os-disk-config-defaults was created by
+    # the environment (os-disk-config.py) we'll use those as defaults for the artifact storage directories
+    disk_format_info_file = os.path.join(
+        os.path.realpath(os.path.join(get_main_script_dir(), "..")), ".os-disk-config-defaults"
+    )
+    if malcolm_config and os.path.isfile(disk_format_info_file):
+        try:
+            InstallerLogger.debug("here")
+            with open(disk_format_info_file) as f:
+                disk_format_info = LoadFileIfJson(f)
+
+            if disk_format_info := {k: v for k, v in disk_format_info.items() if os.path.isdir(v)}:
+
+                dirs_to_create = {
+                    MALCOLM_DB_DIR: [DEFAULT_INDEX_DIR, DEFAULT_INDEX_SNAPSHOT_DIR],
+                    MALCOLM_LOGS_DIR: [DEFAULT_ZEEK_LOG_DIR, DEFAULT_SURICATA_LOG_DIR],
+                }
+                for base_key, subdirs in dirs_to_create.items():
+                    if base_path := disk_format_info.get(base_key):
+                        for subdir in subdirs:
+                            pathlib.Path(os.path.join(base_path, subdir)).mkdir(parents=False, exist_ok=True)
+
+                paths_to_check = [
+                    (MALCOLM_DB_DIR, DEFAULT_INDEX_DIR, KEY_CONFIG_ITEM_INDEX_DIR, True),
+                    (MALCOLM_DB_DIR, DEFAULT_INDEX_SNAPSHOT_DIR, KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR, True),
+                    (MALCOLM_PCAP_DIR, None, KEY_CONFIG_ITEM_PCAP_DIR, False),
+                    (MALCOLM_LOGS_DIR, DEFAULT_SURICATA_LOG_DIR, KEY_CONFIG_ITEM_SURICATA_LOG_DIR, True),
+                    (MALCOLM_LOGS_DIR, DEFAULT_ZEEK_LOG_DIR, KEY_CONFIG_ITEM_ZEEK_LOG_DIR, True),
+                ]
+                for base_key, subdir, config_key, path_must_exist in paths_to_check:
+                    if base_path := disk_format_info.get(base_key):
+                        path = os.path.realpath(os.path.join(base_path, subdir) if subdir else base_path)
+                        if (not path_must_exist) or os.path.isdir(path):
+                            malcolm_config.set_value(config_key, path, ignore_errors=True)
+                            InstallerLogger.debug(
+                                f"Set default for {config_key} to {path} from {os.path.basename(disk_format_info_file)}"
+                            )
+
+        except Exception as e:
+            InstallerLogger.error(f"Failed to set path defaults from {os.path.basename(disk_format_info_file)}: {e}")
 
 
 def handle_config_directories_tui_mode(
@@ -279,6 +338,8 @@ def handle_config_directories_tui_mode(
                         InstallerLogger.info(
                             "No existing .env files found in config directory. Proceeding with fresh configuration."
                         )
+
+    handle_artifact_path_preseed_file(malcolm_config)
 
     return True
 
