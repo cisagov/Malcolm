@@ -43,6 +43,7 @@ from malcolm_utils import (
     get_verbosity_env_var_count,
     touch,
 )
+from malcolm_constants import DatabaseMode
 import watch_common
 
 from collections import defaultdict
@@ -344,7 +345,7 @@ def main():
         default=malcolm_utils.DatabaseModeStrToEnum(
             os.getenv(
                 'OPENSEARCH_PRIMARY',
-                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+                default=malcolm_utils.DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
             )
         ),
         required=False,
@@ -455,7 +456,7 @@ def main():
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
 
-    opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+    opensearchIsLocal = (args.opensearchMode == DatabaseMode.OpenSearchLocal) or (
         args.opensearchUrl == 'https://opensearch:9200'
     )
     opensearchCreds = ParseCurlFile(args.opensearchCurlRcFile)
@@ -467,7 +468,7 @@ def main():
             args.opensearchUrl = opensearchCreds['url']
 
     DatabaseInitArgs = {}
-    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+    if args.opensearchMode == DatabaseMode.ElasticsearchRemote:
         from elasticsearch import Elasticsearch as DatabaseClass
         from elasticsearch_dsl import Search as SearchClass
         from elasticsearch.exceptions import ConnectionError, ConnectionTimeout, AuthenticationException

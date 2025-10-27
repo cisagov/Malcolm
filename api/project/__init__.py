@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse, urljoin
+from malcolm_constants import DatabaseMode
 
 # map categories of field names to OpenSearch dashboards
 fields_to_urls = []
@@ -205,9 +206,7 @@ zeekExtractedFileLoggerTopicPort = app.config["ZEEK_EXTRACTED_FILE_LOGGER_TOPIC_
 zeekExtractedFileMonitorHost = app.config["ZEEK_EXTRACTED_FILE_MONITOR_HOST"]
 zeekExtractedFileTopicPort = app.config["ZEEK_EXTRACTED_FILE_TOPIC_PORT"]
 
-opensearchLocal = (databaseMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
-    opensearchUrl == 'https://opensearch:9200'
-)
+opensearchLocal = (databaseMode == DatabaseMode.OpenSearchLocal) or (opensearchUrl == 'https://opensearch:9200')
 opensearchSslVerify = app.config["OPENSEARCH_SSL_CERTIFICATE_VERIFICATION"] == "true"
 opensearchCreds = malcolm_utils.ParseCurlFile(app.config["OPENSEARCH_CREDS_CONFIG_FILE"])
 
@@ -224,7 +223,7 @@ else:
     opensearchHttpAuth = None
     opensearchReqHttpAuth = None
 
-if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
+if databaseMode == DatabaseMode.ElasticsearchRemote:
     import elasticsearch as DatabaseImport
     from elasticsearch_dsl import Search as SearchClass, A as AggregationClass, Q as QueryClass
 
@@ -481,7 +480,7 @@ def urls_for_field(fieldname, start_time=None, end_time=None):
     )
     translated = []
 
-    if databaseMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+    if databaseMode != DatabaseMode.ElasticsearchRemote:
         for field in malcolm_utils.get_iterable(fieldname):
             for url_regex_pair in fields_to_urls:
                 if (len(url_regex_pair) == 2) and re.search(url_regex_pair[0], field, flags=re.IGNORECASE):
@@ -1169,7 +1168,7 @@ def ready():
                 [
                     "status",
                     "overall",
-                    "level" if databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote else "state",
+                    "level" if databaseMode == DatabaseMode.ElasticsearchRemote else "state",
                 ],
                 "red",
             )
@@ -1221,12 +1220,12 @@ def dashboard_export(dashid):
 
     args = get_request_arguments(request)
     try:
-        if databaseMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
+        if databaseMode != DatabaseMode.ElasticsearchRemote:
             # TODO: this is deprecated, but still works in OpenSearch. Need to replace with "api/saved_objects/_export",
             #   but that exports NDJSON instead of JSON so we'd need to do a little more than just change the API.
             # call the API to get the dashboard JSON
             response = requests.get(
-                f"{dashboardsUrl}/api/{'kibana' if (databaseMode == malcolm_utils.DatabaseMode.ElasticsearchRemote) else 'opensearch-dashboards'}/dashboards/export",
+                f"{dashboardsUrl}/api/{'kibana' if (databaseMode == DatabaseMode.ElasticsearchRemote) else 'opensearch-dashboards'}/dashboards/export",
                 params={
                     'dashboard': dashid,
                 },

@@ -16,6 +16,7 @@ from requests.auth import HTTPBasicAuth
 
 import malcolm_utils
 from malcolm_utils import str2bool, ParseCurlFile, get_iterable, set_logging, get_verbosity_env_var_count
+from malcolm_constants import DatabaseMode
 
 ###################################################################################################
 script_name = os.path.basename(__file__)
@@ -81,7 +82,7 @@ def parse_args():
         default=malcolm_utils.DatabaseModeStrToEnum(
             os.getenv(
                 'OPENSEARCH_PRIMARY',
-                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+                default=malcolm_utils.DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
             )
         ),
         required=False,
@@ -153,7 +154,7 @@ def setup_environment(args):
     args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
     opensearch_creds = ParseCurlFile(args.opensearch_curl_rc_file)
 
-    opensearch_is_local = (args.opensearch_mode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
+    opensearch_is_local = (args.opensearch_mode == DatabaseMode.OpenSearchLocal) or (
         args.opensearch_url == 'https://opensearch:9200'
     )
 

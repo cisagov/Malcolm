@@ -16,6 +16,7 @@ import urllib3
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
+from malcolm_constants import DatabaseMode
 
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
@@ -106,7 +107,7 @@ def parse_args():
         default=malcolm_utils.DatabaseModeStrToEnum(
             os.getenv(
                 'OPENSEARCH_PRIMARY',
-                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+                default=malcolm_utils.DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
             )
         ),
         required=False,
@@ -172,8 +173,7 @@ def setup_environment(args):
         args.netbox_url = '/netbox'
 
     opensearch_is_local = (
-        args.opensearch_mode == malcolm_utils.DatabaseMode.OpenSearchLocal
-        or args.opensearch_url == 'https://opensearch:9200'
+        args.opensearch_mode == DatabaseMode.OpenSearchLocal or args.opensearch_url == 'https://opensearch:9200'
     )
 
     if not args.opensearch_url:
@@ -187,7 +187,7 @@ def setup_environment(args):
         args.index = os.getenv(args.index, '')
 
     return args, make_session(
-        "kbn-xsrf" if args.opensearch_mode == malcolm_utils.DatabaseMode.ElasticsearchRemote else "osd-xsrf",
+        "kbn-xsrf" if args.opensearch_mode == DatabaseMode.ElasticsearchRemote else "osd-xsrf",
         args.opensearch_ssl_verify,
         (
             HTTPBasicAuth(opensearch_creds['user'], opensearch_creds['password'])
@@ -435,7 +435,7 @@ def main():
     logging.info(logline)
     print(logline)
 
-    if args.opensearch_mode == malcolm_utils.DatabaseMode.OpenSearchLocal and args.fix_unassigned and not args.dryrun:
+    if args.opensearch_mode == DatabaseMode.OpenSearchLocal and args.fix_unassigned and not args.dryrun:
         # set some configuration-related indexes' (e.g., opensearch/opendistro) replica count to 0
         # so we don't have yellow index state on those
         fix_unassigned_shards(args, session)
