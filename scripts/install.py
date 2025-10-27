@@ -46,6 +46,7 @@ from scripts.malcolm_common import (
     get_platform_name,
     KubernetesDynamic,
     LoadYamlOrJson,
+    MalcolmCfgRunOnceFile,
     RequestsDynamic,
     SYSTEM_INFO,
     UserInterfaceMode,
@@ -57,6 +58,7 @@ from scripts.malcolm_utils import (
     ChownRecursive,
     get_main_script_dir,
     LoadFileIfJson,
+    touch,
 )
 
 from scripts.installer.args.basic_args import add_basic_args
@@ -903,20 +905,25 @@ def main():
             InstallerLogger.warning(f"Failed to apply --extra settings: {e}")
 
         # Adjust ownership if running as root
-        try:
-            puid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID) or SYSTEM_INFO.get(
-                "recommended_nonroot_uid", None
-            )
-            pgid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID) or SYSTEM_INFO.get(
-                "recommended_nonroot_gid", None
-            )
+        puid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID) or SYSTEM_INFO.get(
+            "recommended_nonroot_uid", 0
+        )
+        pgid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID) or SYSTEM_INFO.get(
+            "recommended_nonroot_gid", 0
+        )
+        if needs_config_chown := (
+            (SYSTEM_INFO.get('platform_name') in ("linux", "macos")) and (os.getuid() == 0) and puid and pgid
+        ):
+            InstallerLogger.info(f"Setting ownership of {dirs.output_dir} directory to {puid}:{pgid}...")
+            try:
+                ChownRecursive(dirs.output_dir, puid, pgid)
+            except Exception as e:
+                InstallerLogger.warning(f"Could not change ownership of config directory: {e}")
 
-            if os.getuid() == 0 and puid and pgid:
-                InstallerLogger.info(f"Setting ownership of {dirs.output_dir} directory to {puid}:{pgid}...")
-                try:
-                    ChownRecursive(dirs.output_dir, puid, pgid)
-                except Exception as e:
-                    InstallerLogger.warning(f"Could not change ownership of config directory: {e}")
+        try:
+            touch(MalcolmCfgRunOnceFile)
+            if needs_config_chown:
+                os.chown(MalcolmCfgRunOnceFile, int(puid), int(pgid))
         except Exception:
             pass
 
