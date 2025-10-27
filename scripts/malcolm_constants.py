@@ -147,3 +147,9 @@ class WidgetType(Enum):
     DATETIME = auto()
     NUMBER = auto()
     DIRECTORY = auto()
+
+
+class SettingsFileFormat(Enum):
+    JSON = "JSON"
+    YAML = "YAML"
+    UNKNOWN = "UNKNOWN"

@@ -38,9 +38,7 @@ def add_basic_args(parser):
         default=False,
         help="Suppress console logging output during installation",
     )
-    # --configure and --dry-run are mutually exclusive
-    mutex = basicArgGroup.add_mutually_exclusive_group()
-    mutex.add_argument(
+    basicArgGroup.add_argument(
         "--configure",
         "-c",
         dest="configOnly",
@@ -51,7 +49,7 @@ def add_basic_args(parser):
         default=False,
         help="Only write configuration and ancillary files; skip installation steps",
     )
-    mutex.add_argument(
+    basicArgGroup.add_argument(
         "--dry-run",
         dest="dryRun",
         action="store_true",

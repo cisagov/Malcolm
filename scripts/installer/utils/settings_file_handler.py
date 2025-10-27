@@ -8,6 +8,7 @@
 import os
 import json
 import datetime
+import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -26,7 +27,8 @@ from scripts.installer.configs.constants.installation_item_keys import (
     KEY_INSTALLATION_ITEM_TRY_DOCKER_REPOSITORY,
     KEY_INSTALLATION_ITEM_USE_HOMEBREW,
 )
-from scripts.malcolm_common import get_malcolm_version, YAMLDynamic, get_main_script_path
+from scripts.malcolm_common import get_malcolm_version, get_main_script_path, DumpYaml, LoadYamlOrJson
+from scripts.malcolm_utils import base64_encode_files_in_dir
 from scripts.installer.utils.logger_utils import InstallerLogger
 from enum import Enum, Flag
 
@@ -58,7 +60,11 @@ class SettingsFileHandler:
         self.malcolm_config = malcolm_config
         self.install_context = install_context or InstallContext()
 
-    def load_from_file(self, settings_file_path: str) -> Dict[str, List[str]]:
+    def load_from_file(
+        self,
+        settings_file_path: str,
+        config_only: Optional[bool] = False,
+    ) -> Dict[str, List[str]]:
         """Load configuration from JSON/YAML settings file.
 
         This method loads settings from a file and applies them to both the
@@ -94,7 +100,7 @@ class SettingsFileHandler:
             missing_items["missing_configuration"] = self._load_configuration_section(configuration_section)
 
         # process installation section
-        if not self.install_context.config_only:
+        if not config_only:
             installation_section = settings_data.get("installation", {})
             if isinstance(installation_section, dict):
                 missing_items["missing_installation"] = self._load_installation_section(installation_section)
@@ -105,7 +111,8 @@ class SettingsFileHandler:
         self,
         settings_file_path: str,
         file_format: str = "auto",
-        dry_run: bool = False,
+        config_only: Optional[bool] = False,
+        include_raw_envs: Optional[bool] = True,
     ) -> None:
         """Save current configuration to JSON/YAML settings file.
 
@@ -126,29 +133,28 @@ class SettingsFileHandler:
                 file_format = "json"
 
         # build settings structure
-        settings_data = self._build_settings_data(include_installation_items=not self.install_context.config_only)
+        settings_data = self._build_settings_data(include_installation_items=not config_only)
 
-        # dry-run support: report intended action and return
-        if dry_run:
-            InstallerLogger.info(f"Dry run: would save settings to {settings_file_path} as {file_format}")
-            return
+        if (
+            include_raw_envs
+            and (raw_env_dir := (self.malcolm_config.config_dir_written or self.malcolm_config.config_dir_loaded))
+            and os.path.isdir(raw_env_dir)
+        ):
+            settings_data["raw"] = base64_encode_files_in_dir(raw_env_dir, "*.env")
 
         # write to file
         try:
             settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-            if (file_format == "yaml") and (yamlImported := YAMLDynamic()):
-                yaml = yamlImported.YAML(typ="safe", pure=True)
-                yaml.default_flow_style = False
-                yaml.width = 4096  # prevent line wrapping
-                with open(settings_path, "w") as f:
-                    yaml.dump(settings_data, f)
+            if file_format == "yaml":
+                DumpYaml(settings_data, settings_path)
+
             else:  # json
                 file_format = "json"
                 with open(settings_path, "w") as f:
                     json.dump(settings_data, f, indent=2, sort_keys=True)
 
-            InstallerLogger.debug(f"Settings saved to {settings_file_path}")
+            InstallerLogger.debug(f"Settings saved to {settings_file_path} {config_only=}")
         except Exception as e:
             raise FileOperationError(f"Failed to write settings file {settings_file_path}: {e}")
 
@@ -223,26 +229,8 @@ class SettingsFileHandler:
             FileOperationError: If file cannot be parsed
         """
         try:
-            # determine file format and parse accordingly
-            yamlImported = YAMLDynamic()
-            if (settings_path.suffix.lower() in [".yml", ".yaml"]) and yamlImported:
-                yaml = yamlImported.YAML(typ="safe", pure=True)
-                with open(settings_path, "r") as f:
-                    return yaml.load(f) or {}
-            elif settings_path.suffix.lower() == ".json":
-                with open(settings_path, "r") as f:
-                    return json.load(f)
-            else:
-                # try to auto-detect by parsing content
-                with open(settings_path, "r") as f:
-                    content = f.read().strip()
-                    if content.startswith("{"):
-                        return json.loads(content)
-                    elif yamlImported:
-                        yaml = yamlImported.YAML(typ="safe", pure=True)
-                        return yaml.load(content) or {}
-                    else:
-                        return {}
+            data, _ = LoadYamlOrJson(settings_path)
+            return data
         except Exception as e:
             raise FileOperationError(f"Failed to parse settings file {settings_path}: {e}")
 
@@ -267,7 +255,7 @@ class SettingsFileHandler:
                         continue
                     # delegate normalization and validation to MalcolmConfig
                     self.malcolm_config.set_value(key, value)
-                    InstallerLogger.debug(f"Set configuration item {key} = {value}")
+                    # InstallerLogger.debug(f"Set configuration item {key} = {value}")
                 except Exception as e:
                     InstallerLogger.warning(f"Failed to set configuration item {key}: {e}")
             else:

@@ -40,6 +40,7 @@ from scripts.malcolm_utils import (
 from collections import defaultdict, namedtuple
 from enum import IntEnum, Flag, IntFlag, auto
 from typing import Tuple, List, Optional
+from pathlib import Path
 
 from scripts.malcolm_constants import (
     DEFAULT_INDEX_DIR,
@@ -67,6 +68,7 @@ from scripts.malcolm_constants import (
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
     PUID_DEFAULT,
+    SettingsFileFormat,
     SURICATA_LOG_CONTAINER_PATH,
     UPLOAD_ARTIFACT_CONTAINER_PATH,
     YAML_VERSION,
@@ -1359,9 +1361,37 @@ def LoadYaml(inputFileName):
                 inYaml.emitter.alt_null = None
                 inYaml.preserve_quotes = True
                 inYaml.representer.ignore_aliases = lambda *args: True
-                inYaml.width = 4096
+                inYaml.width = sys.maxsize
                 result = inYaml.load(f)
     return result
+
+
+###################################################################################################
+def LoadYamlOrJson(inputFileName):
+    result = None
+    fmt = SettingsFileFormat.UNKNOWN
+
+    if inputFileName and os.path.isfile(inputFileName):
+        extension = Path(inputFileName).suffix.lower()
+        if extension in [".yml", ".yaml"]:
+            if result := LoadYaml(inputFileName):
+                fmt = SettingsFileFormat.YAML
+        elif extension == ".json":
+            with open(inputFileName, "r") as f:
+                if result := json.load(f):
+                    fmt = SettingsFileFormat.JSON
+        else:
+            # try to auto-detect by parsing content
+            with open(inputFileName, "r") as f:
+                content = f.read().strip()
+                if content.startswith("{"):
+                    if result := json.loads(content):
+                        fmt = SettingsFileFormat.JSON
+            if not result:
+                if result := LoadYaml(inputFileName):
+                    fmt = SettingsFileFormat.YAML
+
+    return result or {}, fmt
 
 
 ###################################################################################################
@@ -1388,7 +1418,7 @@ def DumpYaml(data, outputFileName):
                 outYaml.representer.ignore_aliases = lambda *args: True
                 outYaml.representer.add_representer(type(None), NullRepresenter())
                 outYaml.version = YAML_VERSION
-                outYaml.width = 4096
+                outYaml.width = sys.maxsize
                 outYaml.dump(data, outfile)
             # ruamel puts the YAML version header (2 lines) at the top, which docker-compose
             #   doesn't like, so we need to remove it

@@ -1011,7 +1011,7 @@ def StartMalcolm(
                             outYaml.representer.add_representer(type(None), NullRepresenter())
                             outYaml.boolean_representation = ['false', 'true']
                             outYaml.version = YAML_VERSION
-                            outYaml.width = 4096
+                            outYaml.width = sys.maxsize
                             outYaml.dump_all(manYamlFileContents, tmpYmlFile)
 
                     if not dryrun:

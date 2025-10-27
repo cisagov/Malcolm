@@ -22,6 +22,7 @@ sys.dont_write_bytecode = True
 from scripts.malcolm_constants import (
     PresentationMode,
     OrchestrationFramework,
+    SettingsFileFormat,
 )
 
 from scripts.malcolm_common import (
@@ -29,14 +30,17 @@ from scripts.malcolm_common import (
     DetermineYamlFileFormat,
     DoDynamicImport,
     DotEnvDynamic,
+    DumpYaml,
     get_default_config_dir,
     get_platform_name,
     KubernetesDynamic,
+    LoadYamlOrJson,
     RequestsDynamic,
     SYSTEM_INFO,
     UserInterfaceMode,
     YAMLDynamic,
 )
+from scripts.malcolm_utils import ChownRecursive, base64_encode_files_in_dir, base64_decode_files_to_dir
 
 from scripts.installer.args.basic_args import add_basic_args
 from scripts.installer.args.orchestration_args import add_orchestration_args
@@ -314,6 +318,7 @@ def handle_config_export(parsed_args, malcolm_config, install_context):
         malcolm_config: MalcolmConfig instance with user's choices
         install_context: InstallContext instance with installation choices
     """
+    result = None
     if parsed_args.exportMalcolmConfigFile is not None:
         try:
             settings_handler = SettingsFileHandler(malcolm_config, install_context)
@@ -327,13 +332,18 @@ def handle_config_export(parsed_args, malcolm_config, install_context):
                 export_filename = parsed_args.exportMalcolmConfigFile
 
             # save settings to file
-            settings_handler.save_to_file(export_filename, file_format="auto")
+            settings_handler.save_to_file(
+                export_filename, config_only=parsed_args.configOnly or install_context.config_only
+            )
+            result = export_filename
             InstallerLogger.info(f"Configuration exported successfully to: {export_filename}")
 
         except Exception as e:
             InstallerLogger.error(
                 f"Failed to export settings to {export_filename if 'export_filename' in locals() else 'config file'}: {e}"
             )
+
+    return result
 
 
 def determine_presentation_mode(parsed_args: argparse.Namespace) -> PresentationMode:
@@ -394,9 +404,6 @@ def main():
         parsed_args = parser.parse_args()
         if os.path.islink(os.path.join(SCRIPT_PATH, SCRIPT_NAME)) and SCRIPT_NAME.startswith('configure'):
             parsed_args.configOnly = True
-            if parsed_args.configOnly and parsed_args.dryRun:
-                InstallerLogger.error("error: argument --configure/-c: not allowed with argument --dry-run")
-                sys.exit(1)
     except Exception as e:
         InstallerLogger.error(f"Failed to parse arguments: {e}")
         sys.exit(1)
@@ -430,6 +437,9 @@ def main():
         control_flow = ControlFlow.CONFIG
     else:
         control_flow = ControlFlow.INSTALL
+
+    exported_config_file = None
+    imported_config_file = None
 
     if parsed_args.quiet:
         InstallerLogger.set_console_output(False)
@@ -623,8 +633,10 @@ def main():
     if parsed_args.importMalcolmConfigFile:
         try:
             settings_handler = SettingsFileHandler(malcolm_config, install_context)
-            missing_items = settings_handler.load_from_file(parsed_args.importMalcolmConfigFile)
-
+            missing_items = settings_handler.load_from_file(
+                parsed_args.importMalcolmConfigFile, config_only=parsed_args.configOnly or install_context.config_only
+            )
+            imported_config_file = parsed_args.importMalcolmConfigFile
             InstallerLogger.info(f"Successfully loaded settings from: {parsed_args.importMalcolmConfigFile}") # fmt: skip
 
             # report missing configuration items that used defaults
@@ -644,14 +656,6 @@ def main():
 
         except Exception as e:
             InstallerLogger.error(f"Failed to load settings from {parsed_args.importMalcolmConfigFile}: {e}") # fmt: skip
-
-            import traceback
-
-            tb = traceback.format_exc()
-            # Include traceback in error log so failures are actionable without --debug
-            InstallerLogger.error(f"Error executing main(): {e}\n{tb}")
-            InstallerLogger.debug(f"Main debug: {e}\n{tb}")
-
             sys.exit(1)
 
     # check if input environment directory was specified via --environment-dir-input
@@ -776,7 +780,7 @@ def main():
 
     # Export configuration to malcolm config file if requested (no writes to env yet)
     if parsed_args.exportMalcolmConfigFile is not None:
-        handle_config_export(parsed_args, malcolm_config, install_context)
+        exported_config_file = handle_config_export(parsed_args, malcolm_config, install_context)
 
     # Final summary and confirmation (interactive modes only)
     if presentation_mode in [PresentationMode.MODE_TUI, PresentationMode.MODE_DUI]:
@@ -808,6 +812,20 @@ def main():
         else f"Configuration will be saved to {dirs.output_dir}"
     )
     if control_flow.should_write_files():
+
+        # if we imported a configuration from a .json/.yaml file earlier, before we write out
+        # the final .env files here we want to write the contents of the "raw" file stored in
+        # that import file to the output directory. this way we also preserve the user's other
+        # settings/comments that are in the .env files but are not known by MalcolmConfig
+        if os.path.isfile(str(imported_config_file)):
+            imported_config_data, imported_config_format = LoadYamlOrJson(imported_config_file)
+            if isinstance(imported_config_data, dict) and ("raw" in imported_config_data):
+                if raw_envs := imported_config_data.get("raw", {}):
+                    base64_decode_files_to_dir(raw_envs, dirs.output_dir)
+                    InstallerLogger.info(
+                        f"Raw configuration from {imported_config_file} ({len(raw_envs)} files) restored to {dirs.output_dir}"
+                    )
+
         malcolm_config.generate_env_files(dirs.output_dir)
 
         # Apply any arbitrary extra .env settings requested via CLI (handle after file generation)
@@ -823,13 +841,14 @@ def main():
 
         # Adjust ownership if running as root
         try:
-            from scripts.malcolm_utils import ChownRecursive
+            puid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID) or SYSTEM_INFO.get(
+                "recommended_nonroot_uid", None
+            )
+            pgid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID) or SYSTEM_INFO.get(
+                "recommended_nonroot_gid", None
+            )
 
-            puid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_USER_ID) or 1000
-            pgid = malcolm_config.get_value(KEY_CONFIG_ITEM_PROCESS_GROUP_ID) or 1000
-            import os as _os
-
-            if _os.getuid() == 0:
+            if os.getuid() == 0 and puid and pgid:
                 InstallerLogger.info(f"Setting ownership of {dirs.output_dir} directory to {puid}:{pgid}...")
                 try:
                     ChownRecursive(dirs.output_dir, puid, pgid)
@@ -837,6 +856,26 @@ def main():
                     InstallerLogger.warning(f"Could not change ownership of config directory: {e}")
         except Exception:
             pass
+
+        # if we exported configuration to a file, update the "raw" section containing the base64-encoded
+        # .env files with these new/fresher .env files we just wrote out
+        if os.path.isfile(str(exported_config_file)):
+            exported_config_data, exported_config_format = LoadYamlOrJson(exported_config_file)
+            if (
+                isinstance(exported_config_data, dict)
+                and ("raw" in exported_config_data)
+                and exported_config_format != SettingsFileFormat.UNKNOWN
+            ):
+                exported_config_data["raw"] = base64_encode_files_in_dir(dirs.output_dir, "*.env")
+                if exported_config_data.get("raw"):
+                    if exported_config_format == SettingsFileFormat.YAML:
+                        DumpYaml(exported_config_data, exported_config_file)
+                    else:
+                        with open(exported_config_file, "w") as f:
+                            json.dump(exported_config_data, f, indent=2, sort_keys=True)
+                    InstallerLogger.info(
+                        f"Updated raw configuration in: {exported_config_file} ({exported_config_format.value})"
+                    )
 
     # Run installation steps (dry-run skips body; config-only skips install steps)
     if control_flow.is_dry_run():

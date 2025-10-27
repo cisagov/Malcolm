@@ -6,6 +6,7 @@
 import contextlib
 import enum
 import fnmatch
+import glob
 import hashlib
 import importlib
 import inspect
@@ -24,7 +25,7 @@ import tempfile
 import time
 import types
 
-from base64 import b64decode
+from base64 import b64encode, b64decode, binascii
 from datetime import datetime
 from multiprocessing import RawValue
 from subprocess import PIPE, STDOUT, Popen, CalledProcessError
@@ -119,6 +120,52 @@ def base64_decode_if_prefixed(s: str):
         return b64decode(s[7:]).decode('utf-8')
     else:
         return s
+
+
+def base64_encode_files_in_dir(directory, pattern):
+    """
+    Return a dict mapping relative file paths to Base64-encoded contents
+    for all files in the given directory (recursively) matching the glob pattern.
+    Example:
+        /tmp/foobar/app.env           -> "app.env"
+        /tmp/foobar/barbaz/what.env   -> "barbaz/what.env"
+    """
+    result = {}
+    # Enable recursive search with **
+    search_pattern = os.path.join(directory, "**", pattern)
+    for filepath in glob.glob(search_pattern, recursive=True):
+        if os.path.isfile(filepath):
+            with open(filepath, "rb") as f:
+                encoded = b64encode(f.read()).decode("utf-8")
+            rel_path = os.path.relpath(filepath, directory)
+            result[rel_path] = encoded
+    return result
+
+
+def base64_decode_files_to_dir(encoded_dict, dest_dir):
+    """
+    Given a dict mapping relative paths to Base64-encoded contents,
+    recreate the files under dest_dir.
+
+    - Creates dest_dir and subdirectories if they don’t exist
+    - Skips entries that fail Base64 decoding
+    """
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for rel_path, b64data in encoded_dict.items():
+        try:
+            decoded = b64decode(b64data, validate=True)
+        except (binascii.Error, ValueError) as e:
+            continue
+
+        full_path = os.path.join(dest_dir, rel_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        try:
+            with open(full_path, "wb") as f:
+                f.write(decoded)
+        except Exception:
+            continue
 
 
 ###################################################################################################

@@ -5,10 +5,12 @@
 
 """Configuration store for Malcolm installer settings."""
 
+import glob
 import os
 import re
 import sys
 import copy
+import shutil
 
 from collections import defaultdict
 from enum import Enum
@@ -22,6 +24,7 @@ from scripts.malcolm_common import (
     DEFAULT_ZEEK_LOG_DIR,
     DotEnvDynamic,
     FILEBEAT_ZEEK_LOG_CONTAINER_PATH,
+    get_default_config_dir,
     LocalPathForContainerBindMount,
     OPENSEARCH_BACKUP_CONTAINER_PATH,
     OPENSEARCH_DATA_CONTAINER_PATH,
@@ -71,6 +74,8 @@ class MalcolmConfig(ObservableStoreMixin):
     """Configuration store managing items, dependencies, and env mapping."""
 
     def __init__(self):
+        self.config_dir_loaded = None  # only set when items are loaded from .env files in a config_dir
+        self.config_dir_written = None  # only set when items are written to .env files in a config_dir
         self._items: Dict[str, ConfigItem] = copy.deepcopy(ALL_CONFIG_ITEMS_DICT)
         self._env_mapper: EnvMapper = (
             EnvMapper()
@@ -317,11 +322,19 @@ class MalcolmConfig(ObservableStoreMixin):
 
         # default templates directory if not provided
         if templates_dir is None:
-            from scripts.malcolm_common import get_default_config_dir
-
             templates_dir = get_default_config_dir()
 
-        if not os.path.isdir(templates_dir):
+        if os.path.isdir(templates_dir):
+            # if any *.env file doesn't exist, use the template *.env.example files as defaults
+            for env_exampl_file in glob.glob(os.path.join(templates_dir, '*.env.example')):
+                env_file = os.path.join(config_dir, os.path.basename(env_exampl_file[: -len('.example')]))
+                if not os.path.isfile(env_file):
+                    shutil.copyfile(env_exampl_file, env_file)
+                    InstallerLogger.info(
+                        f"Created {os.path.basename(env_file)} from {os.path.basename(env_exampl_file)}"
+                    )
+
+        else:
             # Suppress warning during unit tests
             if "unittest" not in sys.modules:
                 InstallerLogger.warning(f"Could not find .env.example templates directory. Expected: {templates_dir}")
@@ -391,6 +404,7 @@ class MalcolmConfig(ObservableStoreMixin):
                         )
 
                 InstallerLogger.info(f"Wrote environment file: {os.path.basename(filepath)}")
+            self.config_dir_written = config_dir
 
         except (IOError, OSError) as e:
             raise FileOperationError(f"Failed to write environment file(s): {e}") from e
@@ -407,6 +421,7 @@ class MalcolmConfig(ObservableStoreMixin):
         env_values = self._collect_env_values(config_dir)
         candidates = self._build_candidates_from_env(env_values)
         self._apply_env_candidates(candidates)
+        self.config_dir_loaded = config_dir
 
     def _collect_env_values(self, config_dir: str) -> Dict[str, str]:
         env_values: Dict[str, str] = {}
