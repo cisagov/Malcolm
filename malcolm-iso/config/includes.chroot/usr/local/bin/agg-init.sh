@@ -27,7 +27,14 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
       FIRST_RUN=1
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
-        /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py --configure --defaults --restart-malcolm
+        # export the existing config
+        SETTINGS_FILE="$(mktemp --suffix=.json)"
+        /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
+          --configure --dry-run --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
+        # set the restart policy to "unless-stopped" then re-apply the config
+        jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+        /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
+          --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
       fi
       rm -f "$MAIN_USER_HOME"/Malcolm/firstrun "$MAIN_USER_HOME"/Malcolm/.configured
       chown -R 1000:1000 "$MAIN_USER_HOME"/Malcolm

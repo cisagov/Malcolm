@@ -4,12 +4,14 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import argparse
-from dataclasses import dataclass
+import json
 import os
 import pathlib
 import secrets
 import sys
 import types
+
+from dataclasses import dataclass
 from typing import Optional
 
 # Dynamically create a module named "scripts" which points to this directory
@@ -244,10 +246,10 @@ def handle_config_directories_tui_mode(
 
         if env_files:
             decision = load_existing_env
-            if decision is None:
+            if (decision is None) and (not importing_configs):
                 if non_interactive:
                     decision = True
-                elif ui_impl and not importing_configs:
+                elif ui_impl:
                     decision = ui_impl.ask_yes_no(
                         f"Found existing .env files in: {dirs.input_dir}\nDo you want to load settings from these files?",
                         default=True,
@@ -307,7 +309,7 @@ def handle_config_directories_tui_mode(
 
                         if fallback_env_files:
                             decision = load_existing_env
-                            if decision is None:
+                            if (decision is None) and (not importing_configs):
                                 decision = ui_impl.ask_yes_no(
                                     f"Found .env files in: {dirs.input_dir}\nDo you want to load settings from these files?",
                                     default=True,
