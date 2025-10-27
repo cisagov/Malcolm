@@ -1,7 +1,6 @@
 import dateparser
 import json
 import malcolm_utils
-import os
 import platform
 import psutil
 import random
@@ -13,11 +12,10 @@ import urllib3
 import warnings
 
 from collections import defaultdict, OrderedDict
-from collections.abc import Iterable
 from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 from requests.auth import HTTPBasicAuth
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 from malcolm_constants import DatabaseMode
 
 # map categories of field names to OpenSearch dashboards

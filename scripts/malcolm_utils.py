@@ -4,11 +4,9 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import contextlib
-import enum
 import fnmatch
 import glob
 import hashlib
-import importlib
 import inspect
 import ipaddress
 import json
@@ -21,14 +19,13 @@ import socket
 import string
 import subprocess
 import sys
-import tempfile
 import time
 import types
 
 from base64 import b64encode, b64decode, binascii
 from datetime import datetime
 from multiprocessing import RawValue
-from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
 from threading import Lock
 from typing import Optional
@@ -37,7 +34,7 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, OrderedDict
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -46,11 +43,6 @@ if "scripts" not in sys.modules:
     sys.modules["scripts"] = scripts_module
 
 from scripts.malcolm_constants import (
-    PGID_DEFAULT,
-    PUID_DEFAULT,
-    PLATFORM_LINUX,
-    PLATFORM_MAC,
-    PLATFORM_WINDOWS,
     DATABASE_MODE_ENUMS,
     DATABASE_MODE_LABELS,
 )
@@ -155,7 +147,7 @@ def base64_decode_files_to_dir(encoded_dict, dest_dir):
     for rel_path, b64data in encoded_dict.items():
         try:
             decoded = b64decode(b64data, validate=True)
-        except (binascii.Error, ValueError) as e:
+        except (binascii.Error, ValueError):
             continue
 
         full_path = os.path.join(dest_dir, rel_path)
@@ -884,7 +876,7 @@ def tablify(matrix, file=sys.stdout):
 @contextlib.contextmanager
 def temporary_filename(suffix=None):
     try:
-        f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
+        f = NamedTemporaryFile(suffix=suffix, delete=False)
         tmp_name = f.name
         f.close()
         yield tmp_name
