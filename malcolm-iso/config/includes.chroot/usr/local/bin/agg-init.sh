@@ -35,6 +35,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
         jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
           --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
+        rm -f "${SETTINGS_FILE}"
       fi
       rm -f "$MAIN_USER_HOME"/Malcolm/firstrun "$MAIN_USER_HOME"/Malcolm/.configured
       chown -R 1000:1000 "$MAIN_USER_HOME"/Malcolm
