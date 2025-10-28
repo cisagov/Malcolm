@@ -1875,8 +1875,8 @@ def suggest_os_memory(total_gb: Optional[int] = None) -> str:
     """Return OpenSearch heap suggestion (e.g., "24g")."""
     if total_gb is None:
         total_gb = total_memory_gb()
-    # Rough rule: half of RAM, capped at 32 GiB, min 4 GiB
-    heap_gb = max(4, min(32, total_gb // 2))
+    # Rough rule: half of RAM, capped at 31 GiB, min 4 GiB
+    heap_gb = max(4, min(31, total_gb // 2))
     return f"{heap_gb}g"
 
 

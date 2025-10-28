@@ -9,6 +9,8 @@ This module contains all configuration items related to OpenSearch settings,
 including connection modes, memory allocation, and remote connectivity options.
 """
 
+import re
+
 from scripts.malcolm_constants import (
     DATABASE_MODE_ENUMS,
     DATABASE_MODE_LABELS,
@@ -56,7 +58,7 @@ CONFIG_ITEM_OS_MEMORY = ConfigItem(
     key=KEY_CONFIG_ITEM_OS_MEMORY,
     label="OpenSearch Memory",
     default_value=SYSTEM_INFO.get("suggested_os_memory", "8g"),
-    validator=lambda x: isinstance(x, str),
+    validator=lambda x: isinstance(x, str) and bool(re.fullmatch(r'\d+([kKmMgG])?', x)),
     question="Memory allocation for OpenSearch (e.g., 16g, 9500m, etc.)",
     widget_type=WidgetType.TEXT,
 )

@@ -10,6 +10,8 @@ This module contains all configuration items related to Logstash settings,
 including memory allocation and worker configuration.
 """
 
+import re
+
 from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.core.config_item import ConfigItem
@@ -23,6 +25,7 @@ CONFIG_ITEM_LS_MEMORY = ConfigItem(
     key=KEY_CONFIG_ITEM_LS_MEMORY,
     label="Logstash Memory",
     default_value=SYSTEM_INFO["suggested_ls_memory"],
+    validator=lambda x: isinstance(x, str) and bool(re.fullmatch(r'\d+([kKmMgG])?', x)),
     question="Memory allocation for Logstash (e.g., 4g, 2500m, etc.)",
     widget_type=WidgetType.TEXT,
 )
@@ -32,7 +35,7 @@ CONFIG_ITEM_LS_WORKERS = ConfigItem(
     key=KEY_CONFIG_ITEM_LS_WORKERS,
     label="Logstash Workers",
     default_value=SYSTEM_INFO["suggested_ls_workers"],
-    validator=lambda x: isinstance(x, int),
+    validator=lambda x: isinstance(x, int) and x > 0,
     question="Number of Logstash pipeline workers (e.g., 4, 8, etc.)",
     widget_type=WidgetType.NUMBER,
 )
