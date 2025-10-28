@@ -11,11 +11,13 @@ export MALCOLM_URL=
 
 # main configuration variables
 export VERBOSE=
-export MALCOLM_PROFILE=true
+export MALCOLM_PROFILE=malcolm
 export NODE_NAME=malcolm
 export DARK_MODE=true
 export HTTPS=true
-export RESTART_MALCOLM=false
+export NGINX_RESOLVER_IPV4=true
+export NGINX_RESOLVER_IPV6=false
+export RESTART_MALCOLM=no
 export REVERSE_PROXIED=false
 export TRAEFIK_HOST=
 export TRAEFIK_HOST_OPENSEARCH=
@@ -63,9 +65,9 @@ export AUTO_ZEEK=true
 export ZEEK_ICS=true
 export ZEEK_ICS_BEST_GUESS=true
 export ZEEK_INTEL_ON_STARTUP=true
-export ZEEK_INTEL_FEED_SINCE="7 days ago"
+export ZEEK_INTEL_FEED_SINCE="24 hours ago"
 export ZEEK_INTEL_CRON_EXPRESSION='0 0 * * *'
-export ZEEK_INTEL_TIME_EXPIRATION="-1min"
+export ZEEK_INTEL_ITEM_EXPIRATION="-1min"
 export REVERSE_DNS=false
 export AUTO_OUI=true
 export AUTO_FREQ=true
