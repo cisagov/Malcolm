@@ -123,6 +123,30 @@ if [[ -n ${PUSER_MKDIR} ]]; then
   done
 fi
 
+# If there are files that need to be copied that are explicitly specified, copy them here. format of $PUSER_COPY is:
+#   source_path:destination_path
+# Multiple entries can be separated by semicolon.
+# Ownership of copied files will be set to PUID/PGID
+#
+# e.g.,
+#   For the entry: /source/file.conf:/dest/file.conf;/source/dir:/dest/dir
+#   Will copy /source/file.conf to /dest/file.conf and /source/dir to /dest/dir
+#   and chown both to PUID:PGID
+if [[ -n ${PUSER_COPY} ]]; then
+  IFS=';' read -ra ENTITIES <<< "${PUSER_COPY}"
+  for ENTITY in "${ENTITIES[@]}"; do
+    SRC="$(echo "${ENTITY}" | cut -d: -f1)"
+    DST="$(echo "${ENTITY}" | cut -d: -f2-)"
+    if [[ -n ${SRC} ]] && [[ -e "${SRC}" ]] && [[ -n ${DST} ]]; then
+      # Create destination directory if it doesn't exist
+      mkdir -p "$(dirname "${DST}")" 2>/dev/null
+      cp -r "${SRC}" "${DST}" 2>/dev/null
+      [[ -n ${PUID} ]] && chown -R -f ${PUID} "${DST}" 2>/dev/null
+      [[ -n ${PGID} ]] && chown -R -f :${PGID} "${DST}" 2>/dev/null
+    fi
+  done
+fi
+
 # if there is a trusted CA file or directory specified and openssl is available, handle it
 if [[ -n ${PUSER_CA_TRUST} ]] && command -v openssl >/dev/null 2>&1; then
   declare -a CA_FILES
