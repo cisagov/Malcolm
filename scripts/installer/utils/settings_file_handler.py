@@ -254,8 +254,8 @@ class SettingsFileHandler:
                         InstallerLogger.debug(f"Skipping configuration item {key} (sentinel value)")
                         continue
                     # delegate normalization and validation to MalcolmConfig
-                    self.malcolm_config.set_value(key, value)
-                    # InstallerLogger.debug(f"Set configuration item {key} = {value}")
+                    self.malcolm_config.apply_default(key, value)
+                    InstallerLogger.debug(f"Set configuration item {key} = {value}")
                 except Exception as e:
                     InstallerLogger.warning(f"Failed to set configuration item {key}: {e}")
             else:

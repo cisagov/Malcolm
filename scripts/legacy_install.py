@@ -655,7 +655,7 @@ class Installer(object):
         dockerNetworkExternalName = ""
         zeekIntelParamsProvided = False
         zeekIntelCronExpression = '0 0 * * *'
-        zeekIntelFeedSince = '7 days ago'
+        zeekIntelFeedSince = '24 hours ago'
         zeekIntelItemExipration = '-1min'
         zeekIntelOnStartup = True
         nginxResolverIpv4 = False
@@ -4750,8 +4750,8 @@ def main():
         required=False,
         metavar='<string>',
         type=str,
-        default='7 days ago',
-        help=f"When pulling from threat intelligence feeds, only process indicators created or modified since the time represented by this value; either a fixed date (01/01/2021) or relative interval (7 days ago)",
+        default='24 hours ago',
+        help=f"When pulling from threat intelligence feeds, only process indicators created or modified since the time represented by this value; either a fixed date (01/01/2021) or relative interval (24 hours ago)",
     )
     zeekIntelGroup.add_argument(
         '--zeek-intel-cron-expression',
