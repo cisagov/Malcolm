@@ -315,6 +315,12 @@ build *SERVICES:
   #!/usr/bin/env bash
   ./scripts/build.sh {{SERVICES}}
 
+pull:
+  #!/usr/bin/env bash
+  [[ -x ./scripts/github_image_helper.sh ]] && \
+    ./scripts/github_image_helper.sh "$(./scripts/github_image_helper.sh 99999 2>&1 | grep PullAndTagGithubWorkflowImages | awk '{print $1}')" || \
+    "${MALCOLM_CONTAINER_RUNTIME:-docker}" compose --file "${MALCOLM_COMPOSE_FILE:-docker-compose.yml}" --profile "${MALCOLM_PROFILE:-malcolm}" pull
+
 [positional-arguments]
 upload *args='':
   #!/usr/bin/env bash
