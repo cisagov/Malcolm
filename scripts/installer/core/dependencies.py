@@ -342,7 +342,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 SearchEngineMode.OPENSEARCH_REMOTE.value,
                 SearchEngineMode.ELASTICSEARCH_REMOTE.value,
             ],
-            is_top_level=True,
+            ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
         )
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY: DependencySpec(
@@ -353,7 +353,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 SearchEngineMode.OPENSEARCH_REMOTE.value,
                 SearchEngineMode.ELASTICSEARCH_REMOTE.value,
             ],
-            is_top_level=True,
+            ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_MODE,
         )
     ),
     KEY_CONFIG_ITEM_OS_MEMORY: DependencySpec(
