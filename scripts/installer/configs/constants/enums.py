@@ -124,6 +124,7 @@ class ImageHandlingMethod(Enum):
 class ContainerRuntime(Enum):
     DOCKER = "docker"
     PODMAN = "podman"
+    KUBERNETES = "kubernetes"
 
 
 # File extraction mode constants

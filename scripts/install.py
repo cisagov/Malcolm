@@ -70,7 +70,7 @@ from scripts.installer.args.presentation_args import add_presentation_args
 
 from scripts.installer.configs.constants.installation_item_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
-from scripts.installer.configs.constants.enums import InstallerResult, ControlFlow
+from scripts.installer.configs.constants.enums import InstallerResult, ControlFlow, ContainerRuntime
 from scripts.installer.configs.constants.constants import MAIN_MENU_KEYS
 
 from scripts.installer.core.malcolm_config import MalcolmConfig
@@ -206,6 +206,8 @@ def handle_config_directories_tui_mode(
     """
     # Note: MalcolmConfig initialization earlier will fail fast if templates are missing.
 
+    orch_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE)
+
     # 2. Ensure output config directory exists
     if not os.path.exists(dirs.output_dir):
         if non_interactive:
@@ -263,14 +265,15 @@ def handle_config_directories_tui_mode(
                 except Exception as e:
                     InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}") # fmt: skip
                     return False
-                try:
-                    loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
-                        dirs.input_dir, malcolm_orchestration_file
-                    )
-                    InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
-                except Exception as e:
-                    InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
-                    return False
+                if orch_mode != OrchestrationFramework.KUBERNETES:
+                    try:
+                        loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
+                            dirs.input_dir, malcolm_orchestration_file
+                        )
+                        InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
+                    except Exception as e:
+                        InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
+                        return False
 
             else:
                 InstallerLogger.info("Skipping load of existing .env files.") # fmt: skip
@@ -323,14 +326,15 @@ def handle_config_directories_tui_mode(
                                 except Exception as e:
                                     InstallerLogger.error(f"Failed to load .env files from {dirs.input_dir}: {e}")
                                     return False
-                                try:
-                                    loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
-                                        dirs.input_dir, malcolm_orchestration_file
-                                    )
-                                    InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
-                                except Exception as e:
-                                    InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
-                                    return False
+                                if orch_mode != OrchestrationFramework.KUBERNETES:
+                                    try:
+                                        loaded_from_orch_filename = malcolm_config.load_from_orchestration_file(
+                                            dirs.input_dir, malcolm_orchestration_file
+                                        )
+                                        InstallerLogger.info(f"Loaded config from from: {loaded_from_orch_filename}") # fmt: skip
+                                    except Exception as e:
+                                        InstallerLogger.error(f"Failed to load config from compose file: {e}") # fmt: skip
+                                        return False
                             else:
                                 InstallerLogger.info("Skipping load of existing .env files.")
                         else:
@@ -639,8 +643,10 @@ def main():
         # persist orchestration mode into config for downstream transforms
         try:
             malcolm_config.set_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE, orchestration_mode)
-        except Exception:
-            pass
+            if orchestration_mode == OrchestrationFramework.KUBERNETES:
+                malcolm_config.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, ContainerRuntime.KUBERNETES.value)
+        except Exception as e:
+            InstallerLogger.error(f"Failed to persist orchestration settings: {e}")
 
         InstallerLogger.start("Spawning Platform-specific Installer")
         platform_installer = get_platform_installer(
