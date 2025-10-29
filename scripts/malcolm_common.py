@@ -999,6 +999,16 @@ def posInt(value):
 
 
 ###################################################################################################
+def FormatNetBoxSubnetFilter(value):
+    stripSpacePattern = re.compile(r'\s+')
+    return ';'.join(
+        f"{k.strip()}:{stripSpacePattern.sub('', v)}"
+        for item in value.split(';')
+        for k, v in [item.split(':', 1) if ':' in item else ('*', item)]
+    )
+
+
+###################################################################################################
 def ValidNetBoxSubnetFilter(value):
     if not value.strip():
         return True

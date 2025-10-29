@@ -551,7 +551,7 @@ function InstallMalcolm {
           | .configuration.netboxSiteName = \"$(hostname -s)\"
           | .configuration.netboxLogstashEnrich = true
           | .configuration.netboxAutoPopulate = true
-          | .configuration.netboxLogstashAutoSubnets = true
+          | .configuration.netboxLogstashAutoCreatePrefix = true
           | .configuration.runtimeBin = \"docker\"" \
           "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
       python3 ./scripts/configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"

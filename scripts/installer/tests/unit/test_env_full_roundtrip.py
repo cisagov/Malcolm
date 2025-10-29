@@ -20,6 +20,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_PCAP_TCPDUMP,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+    KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+    KEY_CONFIG_ITEM_RUNTIME_BIN,
 )
 
 
@@ -228,6 +230,12 @@ class TestEnvFullRoundtrip(unittest.TestCase):
                     cfg1.set_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF, True, ignore_errors=True)
                     cfg1.set_value(KEY_CONFIG_ITEM_LIVE_ARKIME, False, ignore_errors=True)
                     cfg1.set_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP, False, ignore_errors=True)
+
+                # makesure orchestration mode and runtime bin match
+                if cfg1.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE) == OrchestrationFramework.KUBERNETES:
+                    cfg1.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "kubernetes", ignore_errors=True)
+                else:
+                    cfg1.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, random.choice(["docker", "podman"]), ignore_errors=True)
 
                 # Ensure NetBox URL is emitted: require remote mode when URL is non-empty
                 nb_url = cfg1.get_value(KEY_CONFIG_ITEM_NETBOX_URL)

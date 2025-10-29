@@ -14,12 +14,14 @@ from scripts.installer.core.config_item import ConfigItem
 from scripts.installer.configs.constants.enums import NetboxMode
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE,
-    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS,
+    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX,
+    KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER,
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH,
     KEY_CONFIG_ITEM_NETBOX_MODE,
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME,
     KEY_CONFIG_ITEM_NETBOX_URL,
 )
+from scripts.malcolm_common import ValidNetBoxSubnetFilter
 from scripts.malcolm_constants import WidgetType
 
 CONFIG_ITEM_NETBOX_MODE = ConfigItem(
@@ -59,8 +61,8 @@ CONFIG_ITEM_NETBOX_AUTO_POPULATE = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
-CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS = ConfigItem(
-    key=KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS,
+CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX = ConfigItem(
+    key=KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX,
     label="Auto-Create Subnet Prefixes",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
@@ -68,7 +70,16 @@ CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS = ConfigItem(
     widget_type=WidgetType.CHECKBOX,
 )
 
-# Default value handled in MalcolmConfig based on AUTO_POPULATE/AUTO_SUBNETS and PCAP_NODE_NAME
+CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER = ConfigItem(
+    key=KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER,
+    label="NetBox IP Autopopulation Filter",
+    default_value="",
+    validator=lambda x: isinstance(x, str) and ValidNetBoxSubnetFilter(x),
+    question='Comma-separated list of private CIDR subnets to control NetBox IP autopopulation',
+    widget_type=WidgetType.TEXT,
+)
+
+# Default value handled in MalcolmConfig based on AUTO_POPULATE/AUTO_CREATE_PREFIX and PCAP_NODE_NAME
 CONFIG_ITEM_NETBOX_SITE_NAME = ConfigItem(
     key=KEY_CONFIG_ITEM_NETBOX_SITE_NAME,
     label="NetBox Site Name",

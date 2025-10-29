@@ -63,6 +63,9 @@ KEY_ENV_NETBOX_ENRICHMENT = "NETBOX_ENRICHMENT"  # enrich network traffic metada
 KEY_ENV_NETBOX_AUTO_CREATE_PREFIX = (
     "NETBOX_AUTO_CREATE_PREFIX"  # create missing NetBox subnet prefixes based on observed network traffic
 )
+KEY_ENV_NETBOX_AUTO_POPULATE_SUBNET_FILTER = (
+    "NETBOX_AUTO_POPULATE_SUBNETS"  # Comma-separated list of private CIDR subnets to control NetBox IP autopopulation
+)
 KEY_ENV_NETBOX_AUTO_POPULATE = "NETBOX_AUTO_POPULATE"  # populate the NetBox inventory based on observed network traffic
 KEY_ENV_NETBOX_DEFAULT_SITE = "NETBOX_DEFAULT_SITE"  # NetBox default site name
 KEY_ENV_NETBOX_URL = "NETBOX_URL"  # remote netbox URL

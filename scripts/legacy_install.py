@@ -70,9 +70,9 @@ from malcolm_common import (
     ChooseMultiple,
     ChooseOne,
     DetermineYamlFileFormat,
-    DialogInit,
     DialogBackException,
     DialogCanceledException,
+    DialogInit,
     DisplayMessage,
     DOCKER_COMPOSE_INSTALL_URLS,
     DOCKER_INSTALL_URLS,
@@ -80,17 +80,18 @@ from malcolm_common import (
     DownloadToFile,
     DumpYaml,
     EnvValue,
+    FormatNetBoxSubnetFilter,
+    GetMalcolmPath,
     HOMEBREW_INSTALL_URLS,
     KubernetesDynamic,
     LoadYaml,
     MalcolmCfgRunOnceFile,
-    GetMalcolmPath,
-    SetMalcolmPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
     RemapBoundPaths,
     RequestsDynamic,
     ScriptPath,
+    SetMalcolmPath,
     UpdateEnvFiles,
     UserInputDefaultsBehavior,
     UserInterfaceMode,
@@ -1926,7 +1927,6 @@ class Installer(object):
                         extraLabel=BACK_LABEL,
                     )
                     loopBreaker = CountUntilException(MaxAskForValueCount, 'Invalid NetBox IP autopopulation filter')
-                    stripSpacePattern = re.compile(r'\s+')
                     while loopBreaker.increment():
                         netboxAutoPopulateSubnets = (
                             InstallerAskForString(
@@ -1938,11 +1938,7 @@ class Installer(object):
                             else ''
                         )
                         if netboxAutoPopulateSubnets:
-                            netboxAutoPopulateSubnets = ';'.join(
-                                f"{k.strip()}:{stripSpacePattern.sub('', v)}"
-                                for item in netboxAutoPopulateSubnets.split(';')
-                                for k, v in [item.split(':', 1) if ':' in item else ('*', item)]
-                            )
+                            netboxAutoPopulateSubnets = FormatNetBoxSubnetFilter(netboxAutoPopulateSubnets)
                         if ValidNetBoxSubnetFilter(netboxAutoPopulateSubnets):
                             break
                     netboxLogstashAutoSubnets = netboxLogstashEnrich and InstallerYesOrNo(

@@ -678,7 +678,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
-    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS: DependencySpec(
+    KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
             condition=lambda mode: mode != NetboxMode.DISABLED.value,
@@ -686,6 +686,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_SITE_NAME: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
+            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
             condition=lambda mode: mode != NetboxMode.DISABLED.value,

@@ -15,6 +15,7 @@ from scripts.malcolm_utils import (
     DATABASE_MODE_LABELS,
     DATABASE_MODE_ENUMS,
 )
+from scripts.malcolm_common import FormatNetBoxSubnetFilter
 
 
 def _env_str_to_bool(value: Optional[str]) -> bool:
@@ -344,6 +345,14 @@ def custom_transform_zeek_disable_best_guess_ics(zeekICSBestGuess: bool) -> str:
 def custom_reverse_transform_zeek_disable_best_guess_ics(value: str) -> bool:
     # Empty string means the disable flag is not set, so best-guess ICS analysis remains enabled (True)
     return True if value == "" else not (value.lower() == "true")
+
+
+def custom_transform_netbox_auto_populate_subnet_filter(value: str) -> str:
+    return FormatNetBoxSubnetFilter(value)
+
+
+def custom_reverse_transform_netbox_auto_populate_subnet_filter(value: str) -> str:
+    return value
 
 
 def custom_transform_netbox_url(netboxMode: str, netboxUrl: str) -> str:

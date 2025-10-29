@@ -157,6 +157,10 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         forward=custom_transform_netbox_url,
         reverse=custom_reverse_transform_netbox_url,
     ),
+    KEY_ENV_NETBOX_AUTO_POPULATE_SUBNET_FILTER: TransformHook(
+        forward=custom_transform_netbox_auto_populate_subnet_filter,
+        reverse=custom_reverse_transform_netbox_auto_populate_subnet_filter,
+    ),
     KEY_ENV_OPENSEARCH_PRIMARY: TransformHook(
         forward=custom_transform_opensearch_primary,
         reverse=custom_reverse_transform_opensearch_primary,
@@ -486,10 +490,13 @@ class EnvMapper:
             # NetBox
             self.env_var_by_map_key[KEY_ENV_NETBOX_ENRICHMENT].config_items = [KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH]
             self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_CREATE_PREFIX].config_items = [
-                KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_SUBNETS
+                KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX
             ]
             self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_POPULATE].config_items = [KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE]
             self.env_var_by_map_key[KEY_ENV_NETBOX_DEFAULT_SITE].config_items = [KEY_CONFIG_ITEM_NETBOX_SITE_NAME]
+            self.env_var_by_map_key[KEY_ENV_NETBOX_AUTO_POPULATE_SUBNET_FILTER].config_items = [
+                KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER
+            ]
             self.env_var_by_map_key[KEY_ENV_NETBOX_URL].config_items = [
                 KEY_CONFIG_ITEM_NETBOX_MODE,
                 KEY_CONFIG_ITEM_NETBOX_URL,
