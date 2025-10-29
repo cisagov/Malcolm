@@ -15,6 +15,8 @@ from dataclasses import dataclass
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM, OrchestrationFramework
 from scripts.installer.configs.constants.constants import (
     LOGSTASH_WORKERS_KUBERNETES,
+    OPENSEARCH_MEMORY_KUBERNETES,
+    LOGSTASH_MEMORY_KUBERNETES,
     SYSLOG_DEFAULT_PORT,
     LOCAL_LOGSTASH_HOST,
     LOCAL_DASHBOARDS_URL,
@@ -175,7 +177,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
             is_top_level=True,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch_mode: orch_mode == OrchestrationFramework.KUBERNETES,
+            default_value=OpenPortsChoices.CUSTOMIZE,
+        ),
     ),
     KEY_CONFIG_ITEM_NETBOX_MODE: DependencySpec(
         visibility=VisibilityRule(
@@ -305,7 +312,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_MALCOLM,
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch_mode: orch_mode == OrchestrationFramework.KUBERNETES,
+            default_value=LOGSTASH_MEMORY_KUBERNETES,
+        ),
     ),
     KEY_CONFIG_ITEM_LS_WORKERS: DependencySpec(
         visibility=VisibilityRule(
@@ -315,7 +327,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
-            condition=lambda orch_mode: orch_mode != OrchestrationFramework.DOCKER_COMPOSE,
+            condition=lambda orch_mode: orch_mode == OrchestrationFramework.KUBERNETES,
             default_value=LOGSTASH_WORKERS_KUBERNETES,
         ),
     ),
@@ -350,9 +362,14 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
             ],
-            condition=lambda profile, maintain: profile == PROFILE_MALCOLM and bool(maintain),
+            condition=lambda profile, maintain: (profile == PROFILE_MALCOLM) and bool(maintain),
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch_mode: orch_mode == OrchestrationFramework.KUBERNETES,
+            default_value=OPENSEARCH_MEMORY_KUBERNETES,
+        ),
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL: DependencySpec(
         visibility=VisibilityRule(
@@ -802,9 +819,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[
                 KEY_CONFIG_ITEM_OPEN_PORTS,
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
-            condition=lambda ports, mode: (
-                ports == OpenPortsChoices.CUSTOMIZE.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+            condition=lambda expose_selection, mode, orch_mode: (
+                (orch_mode != OrchestrationFramework.KUBERNETES)
+                and (expose_selection == OpenPortsChoices.CUSTOMIZE.value)
+                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
             ),
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
@@ -812,93 +832,145 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             depends_on=[
                 KEY_CONFIG_ITEM_OPEN_PORTS,
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
-            condition=lambda ports, mode: (
-                ports == OpenPortsChoices.YES.value and mode == SearchEngineMode.OPENSEARCH_LOCAL.value
+            condition=lambda expose_selection, mode, orch_mode: (
+                ((expose_selection != OpenPortsChoices.NO.value) or (orch_mode == OrchestrationFramework.KUBERNETES))
+                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
             ),
             default_value=True,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda expose_selection, orch_mode: (
+                (orch_mode != OrchestrationFramework.KUBERNETES)
+                and (expose_selection == OpenPortsChoices.CUSTOMIZE.value)
+            ),
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda _selection: True,
-            default_value=lambda selection: {
-                OpenPortsChoices.YES.value: True,
-                OpenPortsChoices.NO.value: False,
-            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda _expose_selection, _orch_mode: True,
+            default_value=lambda expose_selection, orch_mode: (
+                (orch_mode == OrchestrationFramework.KUBERNETES)
+                or {
+                    OpenPortsChoices.YES.value: True,
+                    OpenPortsChoices.NO.value: False,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
+            ),
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda expose_selection, orch_mode: (
+                (orch_mode == OrchestrationFramework.KUBERNETES)
+                or (expose_selection == OpenPortsChoices.CUSTOMIZE.value)
+            ),
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda _selection: True,
-            default_value=lambda selection: {
-                OpenPortsChoices.YES.value: True,
-                OpenPortsChoices.NO.value: False,
-            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda _expose_selection, _orch_mode: True,
+            default_value=lambda expose_selection, orch_mode: (
+                (orch_mode == OrchestrationFramework.KUBERNETES)
+                or {
+                    OpenPortsChoices.YES.value: True,
+                    OpenPortsChoices.NO.value: False,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
+            ),
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_SFTP: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda expose_selection, orch_mode: (
+                (orch_mode != OrchestrationFramework.KUBERNETES)
+                and (expose_selection == OpenPortsChoices.CUSTOMIZE.value)
+            ),
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda _selection: True,
-            default_value=lambda selection: {
-                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
-                OpenPortsChoices.YES.value: False,
-                OpenPortsChoices.NO.value: False,
-            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda _expose_selection, _orch_mode: True,
+            default_value=lambda expose_selection, orch_mode: (
+                (orch_mode == OrchestrationFramework.KUBERNETES)
+                or {
+                    # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                    OpenPortsChoices.YES.value: False,
+                    OpenPortsChoices.NO.value: False,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
+            ),
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            condition=lambda expose_selection: expose_selection == OpenPortsChoices.CUSTOMIZE.value,
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda _selection: True,
-            default_value=lambda selection: {
-                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
-                OpenPortsChoices.YES.value: 0,
-                OpenPortsChoices.NO.value: 0,
-            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda _expose_selection, _orch_mode: True,
+            default_value=lambda expose_selection, orch_mode: (
+                SYSLOG_DEFAULT_PORT
+                if (orch_mode == OrchestrationFramework.KUBERNETES)
+                else {
+                    # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                    OpenPortsChoices.YES.value: 0,
+                    OpenPortsChoices.NO.value: 0,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
+            ),
             only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_SYSLOG_UDP_PORT: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda selection: selection == OpenPortsChoices.CUSTOMIZE.value,
+            condition=lambda expose_selection: expose_selection == OpenPortsChoices.CUSTOMIZE.value,
             ui_parent=KEY_CONFIG_ITEM_OPEN_PORTS,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPEN_PORTS,
-            condition=lambda _selection: True,
-            default_value=lambda selection: {
-                # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
-                OpenPortsChoices.YES.value: 0,
-                OpenPortsChoices.NO.value: 0,
-            }.get(selection, DEFAULT_VALUE_UNCHANGED),
+            depends_on=[
+                KEY_CONFIG_ITEM_OPEN_PORTS,
+                KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            ],
+            condition=lambda _expose_selection, _orch_mode: True,
+            default_value=lambda expose_selection, orch_mode: (
+                SYSLOG_DEFAULT_PORT
+                if (orch_mode == OrchestrationFramework.KUBERNETES)
+                else {
+                    # they only get this if they do "customize", it's not on by default even with KEY_CONFIG_ITEM_OPEN_PORTS="Yes""
+                    OpenPortsChoices.YES.value: 0,
+                    OpenPortsChoices.NO.value: 0,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
+            ),
             only_if_unmodified=False,
         ),
     ),

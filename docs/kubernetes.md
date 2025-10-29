@@ -397,9 +397,13 @@ Select an item number to configure, or an action:
 │   ├── 51. Auto-Populate NetBox Inventory (current: Yes)
 │   ├── 52. NetBox Enrichment (current: Yes)
 │   └── 53. NetBox Site Name (current: Malcolm)
-├── 54. Expose Malcolm Service Ports (current: No)
-├── 55. Network Traffic Node Name (current: malcolm-cluster)
-└── 56. Capture Live Network Traffic (current: No)
+├── 54. Expose Malcolm Service Ports (current: Customize)
+│   ├── 55. Expose Filebeat TCP (current: Yes)
+│   │   └── 56. Use Filebeat TCP Listener Defaults (current: Yes)
+│   ├── 57. Syslog TCP Port (current: 514)
+│   └── 58. Syslog UDP Port (current: 514)
+├── 59. Network Traffic Node Name (current: malcolm-cluster)
+└── 60. Capture Live Network Traffic (current: No)
 
 --- Actions ---
   s. Save and Continue

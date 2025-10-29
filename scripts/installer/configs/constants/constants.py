@@ -96,9 +96,11 @@ DEFAULT_RESTART_POLICY = "unless-stopped"
 # Default syslog listen port used by dependencies and validations
 SYSLOG_DEFAULT_PORT = 514
 
-# Default Logstash workers by orchestration mode (parity with legacy logic)
+# Default resource settings specific for Docker vs. Kubernetes (where we can't auto-detect)
 LOGSTASH_WORKERS_DOCKER_COMPOSE = 3
 LOGSTASH_WORKERS_KUBERNETES = 6
+OPENSEARCH_MEMORY_KUBERNETES = "31g"
+LOGSTASH_MEMORY_KUBERNETES = "4g"
 
 MAIN_MENU_KEYS = [
     KEY_CONFIG_ITEM_RUNTIME_BIN,
