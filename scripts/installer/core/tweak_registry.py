@@ -62,7 +62,6 @@ def get_linux_tweak_definitions() -> List[Dict]:
         ("security_limits", "Security Limits (/etc/security/limits.d)"),
         ("systemd_limits", "Systemd Limits (/etc/systemd/system.conf.d)"),
         ("grub_cgroup", "Enable cgroup kernel parameters"),
-        ("network_interface", "Optimize Capture Network Interface"),
     ]:
         defs.append(
             {

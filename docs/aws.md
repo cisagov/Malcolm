@@ -268,6 +268,7 @@ Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
   inflating: malcolm_common.py
   inflating: malcolm_kubernetes.py
   inflating: malcolm_utils.py
+  ...
 ```
 
 * Run `install.py`.

@@ -30,28 +30,7 @@ The types of third-party logs and metrics discussed in this document are *not* t
 
 ## <a name="Malcolm"></a>Configuring Malcolm
 
-The environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)), as can be seen from the following excerpt from the [Installation example](ubuntu-install-example.md#InstallationExample):
-
-```
-…
-Expose Logstash port to external hosts? (y/N): y
-…
-Expose Filebeat TCP port to external hosts? (y/N): y
-1: json
-2: raw
-Select log format for messages sent to Filebeat TCP listener (json): 1
-
-Source field to parse for messages sent to Filebeat TCP listener (message): message
-
-Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener (miscbeat): miscbeat
-
-Field to drop from events sent to Filebeat TCP listener (message): message
-
-Tag to apply to messages sent to Filebeat TCP listener (_malcolm_beats): _malcolm_beats
-…
-```
-
-The variables corresponding to these questions can be found in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars):
+The environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars) for configuring how Malcolm accepts external logs are prefixed with `FILEBEAT_TCP_…`. These values can be specified during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)). Using the default values recommended by the configuration script is recommended. The variables corresponding to these settings can be found in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars):
 
 * `FILEBEAT_TCP_LISTEN` - whether or not to expose a [Filebeat TCP input listener](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) to which logs may be sent (the default TCP port is `5045`: users may need to adjust firewall accordingly)
 * `FILEBEAT_TCP_LOG_FORMAT` - log format expected for logs sent to the Filebeat TCP input listener (`json` or `raw`)
@@ -283,7 +262,7 @@ Running  fluentbit_winev... fluentbit_winevtlog
 
 Elastic [Beats](https://www.elastic.co/beats/) can also be used to forward data to Malcolm's Filebeat TCP listener. Follow the [Get started with Beats](https://www.elastic.co/guide/en/beats/libbeat/current/getting-started.html) documentation for configuring Beats on a host system.
 
-In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Answer `Y` when prompted `Expose Logstash port to external hosts?` during Malcolm configuration (i.e., when running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) to allow external remote Beats forwarders to send logs to Logstash.
+In contrast to Fluent Bit, Beats forwarders write to Malcolm's Logstash input over TCP port 5044 (rather than its Filebeat TCP input). Select `Y` for **Expose Malcolm Service Ports** (or `customize` and **Expose Logstash**) during [Malcolm configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems) to allow external remote Beats forwarders to send logs to Logstash.
 
 The Beat's [configuration YML file](https://www.elastic.co/guide/en/beats/libbeat/current/config-file-format.html) file might look something like this sample [winlogbeat.yml](https://www.elastic.co/guide/en/beats/winlogbeat/current/configuring-howto-winlogbeat.html) file:
 

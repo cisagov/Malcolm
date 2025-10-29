@@ -1,8 +1,6 @@
 # <a name="ConfigAndTuning"></a>Malcolm Configuration
 
-Malcolm's runtime settings are stored (with a few exceptions) as environment variables in configuration files ending with a `.env` suffix in the `./config` directory. The `./scripts/configure` script can help users configure and tune these settings.
-
-Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**.
+Malcolm's runtime settings are stored (with a few exceptions) as environment variables in configuration files ending with a `.env` suffix in the `./config` directory. The `./scripts/configure` script can help users configure and tune these settings. For an in-depth treatment of the configuration script, see the **Configuration** section in [**End-to-end Malcolm and Hedgehog Linux ISO Installation**](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems).
 
 ## <a name="MalcolmConfigEnvVars"></a>Environment variable files
 
@@ -195,22 +193,83 @@ Although the configuration script automates many of the following configuration 
 The `./scripts/configure` script can also be run noninteractively which can be useful for scripting Malcolm setup. This behavior can be selected by supplying the `-d` or `--defaults` option on the command line. Running with the `--help` option will list the arguments accepted by the script:
 
 ```
-$ ./scripts/configure --help
-usage: configure <arguments>
+usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run] [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive] [--compose-file <string>] [--environment-dir-input <string>] [--environment-dir-output <string>]
+                 [--export-malcolm-config-file [<path>]] [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults] [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
 
-Malcolm install script
+Malcolm Installer
 
 options:
-  -v [true|false], --verbose [true|false]
-                        Verbose output
-  -d [true|false], --defaults [true|false]
-                        Accept defaults to prompts without user interaction
-  -c [true|false], --configure [true|false]
-                        Only do configuration (not installation)
+  -h, --help            show this help message and exit
+
+Installer Options:
+  --debug, --verbose [true|false]
+                        Enable debug output including tracebacks and debug utilities
+  --quiet, --silent     Suppress console logging output during installation
+  --configure, -c [true|false]
+                        Only write configuration and ancillary files; skip installation steps
+  --dry-run             Log planned actions without writing files or making system changes
+  --log-to-file [filename]
+                        Log output to file. If no filename provided, creates timestamped log file.
+  --skip-splash         Skip the splash screen prompt on startup
+
+Interface Mode (mutually exclusive):
+  --tui                 Run in command-line text-based interface mode (default)
+  --dui                 Run in python dialogs text-based user interface mode (if available - requires python dialogs)
+  --gui                 Run in graphical user interface mode (if available - requires customtkinter)
+  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user prompts)
+
+Configuration File Options:
+  --compose-file, --configure-file, --kube-file, -f <string>
+                        Path to docker-compose.yml (for compose) or kubeconfig (for Kubernetes)
+
+Environment Config Options:
+  --environment-dir-input <string>
+                        Input directory containing Malcolm's .env and .env.example files
+  --environment-dir-output, -e <string>
+                        Target directory for writing Malcolm's .env files
+  --export-malcolm-config-file, --export-mc-file [<path>]
+                        Export configuration to JSON/YAML settings file (auto-generates filename if not specified)
+  --import-malcolm-config-file, --import-mc-file <path>
+                        Import configuration from JSON/YAML settings file
+  --load-existing-env, -l [true|false]
+                        Automatically load provided config/ .env files from the input directory when present. Can be used in conjunction with --environment-dir-input
+  --defaults, -d        Use built-in default configuration values and skip loading from the config directory
+
+Installation Files:
+  --malcolm-file, -m <string>
+                        Malcolm .tar.gz file for installation
+  --image-file, -i <string>
+                        Malcolm container images .tar.xz file for installation
+
+Additional Configuration Options:
+  --extra [EXTRASETTINGS ...]
+                        Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)
 …
 ```
 
-Note that the value for **any** argument not specified on the command line will be reset to its default (as if for a new Malcolm installation) regardless of the setting's current value in the corresponding `.env` file. In other words, users who want to use the `--defaults` option should carefully review all available command-line options and choose all that apply.
+Once Malcolm is configured correctly, the `--export-malcolm-config-file` option can be used to export the configuration to a file that can be used with `--import-malcolm-config-file` to restore it later or transfer it to another Malcolm instance for import.
+
+To modify Malcolm settings programatically in scripting, a tool like [`jq`](https://jqlang.org/) can be used with `--export-malcolm-config-file` and `--import-malcolm-config-file`, as illustrated here:
+```bash
+# export the current configuration to a JSON file without modifying anything in ./config/
+SETTINGS_FILE="$(mktemp --suffix=.json)"
+./scripts/configure --dry-run --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
+
+# use JQ To set whatever options in the exported JSON configuration file you wish to change
+JQ_FILE="$(mktemp --suffix=.jq)"
+tee "${JQ_FILE}" >/dev/null <<EOF
+  .configuration.dashboardsDarkMode = true
+  | .configuration.reverseDns = true
+  | .configuration.pcapNodeName = "Engineering Workstation"
+EOF
+jq -f "${JQ_FILE}" "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+
+# import the modified configuration
+./scripts/configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
+
+# clean up
+rm -f "${SETTINGS_FILE}" "${JQ_FILE}"
+```
 
 Similarly, [authentication](authsetup.md#AuthSetup)-related settings can also be set noninteractively by using the [command-line arguments](authsetup.md#CommandLineConfig) for `./scripts/auth_setup`.
 

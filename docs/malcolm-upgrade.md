@@ -24,7 +24,7 @@ Here are the basic steps to perform an upgrade if Malcolm was checked with a `gi
 1. apply saved configuration change stashed earlier
     * `git stash pop`
 1. if `Merge conflict` messages appear, resolve the [conflicts](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging#_basic_merge_conflicts) with a text editor
-1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning) in case there are any new configuration parameters for Malcolm that need to be set up
+1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) in case there are any new configuration parameters for Malcolm that need to be set up
 1. start Malcolm
     * `./scripts/start`
 1. users may be prompted to [configure authentication](authsetup.md#AuthSetup) if there are new authentication-related files that need to be generated
@@ -46,7 +46,7 @@ If Malcolm was installed from [pre-packaged installation files]({{ site.github.r
     * `cp -r ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/scripts ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/README.md ./`
 1. replace (overwrite) `docker-compose*.yml` file with new versions
     * `cp ./malcolm_YYYYMMDD_HHNNSS_xxxxxxx/docker-compose*.yml ./`
-1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-config.md#ConfigAndTuning)
+1. re-run `./scripts/configure` as described in [Malcolm Configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
     * to do an in-depth comparison of the previous version's settings with the new setings:
         + using a file comparison tool (e.g., `diff`, `meld`, `Beyond Compare`, etc.), compare `docker-compose.yml` and the `docker-compose.yml` files backed up in Step 3, and manually migrate over any customizations in file
         + compare the contents of each  `.env` file  Malcolm's `./config/` directory with its corresponding `.env.example` file. the author uses this command which uses [difftastic](https://github.com/Wilfred/difftastic), [bat](https://github.com/sharkdp/bat), [unbuffer](https://manpages.debian.org/stretch/expect/unbuffer.1.en.html), and [cmp](https://en.wikipedia.org/wiki/Cmp_(Unix)).

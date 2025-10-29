@@ -15,6 +15,7 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
     - [ISO Installation](#ISOInstallMalcolm)
     - [Desktop Environment](#MalcolmDesktop)
     - [Configuration](#MalcolmConfig)
+        + [Malcolm Configuration Menu Items](#MalcolmConfigItems)
     - [Configure Hostname and Time Sync](#MalcolmTimeSync)
     - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
@@ -25,12 +26,12 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
         + [Capture](#HedgehogConfigCapture)
         + [File extraction and scanning](#HedgehogZeekFileExtraction)
     - [Configure Forwarding](#HedgehogConfigForwarding)
-        * [arkime-capture](#Hedgehogarkime-capture): Arkime session forwarding
-        * [ssl-client-receive](#HedgehogGetCerts): Receive client SSL files for filebeat from Malcolm
-        * [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
-        * [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
-        * [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
-        * [tags-configure](#HedgehogTags): Specify extra tags for forwarded logs
+        + [arkime-capture](#Hedgehogarkime-capture): Arkime session forwarding
+        + [ssl-client-receive](#HedgehogGetCerts): Receive client SSL files for filebeat from Malcolm
+        + [filebeat](#Hedgehogfilebeat): Zeek and Suricata log forwarding
+        + [miscbeat](#Hedgehogmiscbeat): System metrics forwarding        
+        + [acl-configure](#HedgehogACL): Configure ACL for artifact reachback from Malcolm
+        + [tags-configure](#HedgehogTags): Specify extra tags for forwarded logs
     - [Autostart services](#HedgehogConfigAutostart)
     - [Managing disk usage](#HedgehogDiskUsage)
 * [Verifying Traffic Capture and Forwarding](#Verify)
@@ -141,182 +142,331 @@ The first time the Malcolm base operating system boots the **Malcolm Configurati
 
 ![Malcolm Configuration on first boot](./images/screenshots/malcolm_first_boot_config.png)
 
-The [configuration and tuning](malcolm-config.md#ConfigAndTuning) wizard's questions proceed as follows. Users may not see every question listed in the bulleted list below as some questions depend on earlier responses. Usually the default selection is recommended unless otherwise indicated. The configuration values resulting from these questions (in **bold**) are stored in [environment variable files](malcolm-config.md#MalcolmConfigEnvVars) in the `./config` directory.
+The configuration script's dialog- and terminal-based user interfaces identical configuration workflows with only slightly different presentations. This document will use the terminal-based ("TUI") interface, which can be forced by running `install.py` with the `--tui` flag, as opposed to the dialog-based ("DUI") interface, which can be forced with the `--dui` flag.
 
-* **Select container runtime engine**
+Users will first be presented with a Malcolm logo splash screen unless the `--skip-splash` flag is specified.
+```
+user@host:~/Malcolm$ ./scripts/configure
+
+                                                     Welcome To
+
+ ██████   ██████        █████        ████              ██████████████     █████     ████              ██████   ██████
+░░██████ ██████       ███░░░███     ░░███             ░░███░░░░░░░░░██   ███  ██   ░░███             ░░██████ ██████ 
+ ░███░█████░███      ███   ░░███     ░███              ░███        ░░   █████████   ░███              ░███░█████░███ 
+ ░███░░███ ░███     █████████████    ░███              ░███             ████ ████   ░███              ░███░░███ ░███ 
+ ░███ ░░░  ░███    ░███░░░░░░░███    ░███              ░███             ████ ████   ░███              ░███ ░░░  ░███ 
+ ░███      ░███    ░███      ░███    ░███              ░███             █ ███████   ░███              ░███      ░███ 
+ ░███      ░███    ░███      ░███    ░███              ░███         ██  ██████ ██   ░███              ░███      ░███ 
+ █████     █████   █████     █████   ██████████████    ██████████████    ███████    ██████████████    █████     █████
+░░░░░     ░░░░░   ░░░░░     ░░░░░   ░░░░░░░░░░░░░░    ░░░░░░░░░░░░░░      █████    ░░░░░░░░░░░░░░    ░░░░░     ░░░░░ 
+
+                                       v{{ site.malcolm.version }}. Press any key to continue...
+```
+
+The items in the **Malcolm Configuration Menu** are arranged hierarchically, with the current setting displayed next to each option. For the most part, each option in the menu corresponds to an [environment variable](malcolm-config.md#MalcolmConfigEnvVars) stored in the [`./config`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/config) directory, used by Malcolm to determine runtime behavior.
+
+```
+--- Malcolm Configuration Menu ---
+Select an item number to configure, or an action:
+├── 1. Container Runtime (current: docker)
+│   ├── 2. Container Network Name (current: empty)
+│   ├── 3. Malcolm Restart Policy (current: No)
+│   ├── 4. Process Group ID (current: 1000)
+│   └── 5. Process User ID (current: 1000)
+├── 6. Run Profile (current: malcolm)
+│   ├── 7. Dark Mode for Dashboards (current: Yes)
+│   ├── 8. Forward Logs to Remote Secondary Store (current: No)
+│   ├── 9. Local OpenSearch Instance (current: Yes)
+│   ├── 10. Logstash Memory (current: 1g)
+│   ├── 11. Logstash Workers (current: 3)
+│   └── 12. OpenSearch Memory (current: 4g)
+├── 13. Require HTTPS Connections (current: Yes)
+├── 14. IPv4 for nginx Resolver Directive (current: Yes)
+├── 15. IPv6 for nginx Resolver Directive (current: No)
+├── 16. Traefik Labels (current: No)
+├── 17. Use Default Storage Location (current: Yes)
+├── 18. Clean Up Artifacts (current: No)
+├── 19. Enable Arkime Index Management (current: No)
+├── 20. Enable Arkime Analysis (current: Yes)
+├── 21. Enable Suricata Analysis (current: Yes)
+│   └── 22. Enable Suricata Rule Updates (current: No)
+├── 23. Enable Zeek Analysis (current: Yes)
+│   ├── 24. Enable Zeek File Extraction (current: No)
+│   ├── 25. Enable Zeek ICS/OT Analyzers (current: No)
+│   └── 26. Use Threat Feeds for Zeek Intelligence (current: Yes)
+│       ├── 27. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
+│       ├── 28. Intel::item_expiration Timeout (current: -1min)
+│       ├── 29. Pull Threat Intelligence Feeds on Startup (current: Yes)
+│       └── 30. Threat Indicator "Since" Period (current: 24 hours ago)
+├── 31. Enrich with Reverse DNS Lookups (current: No)
+├── 32. Enrich with Manufacturer (OUI) Lookups (current: Yes)
+├── 33. Enrich with Frequency Scoring (current: Yes)
+├── 34. NetBox Mode (current: Disabled)
+├── 35. Expose Malcolm Service Ports (current: No)
+├── 36. Network Traffic Node Name (current: host)
+└── 37. Capture Live Network Traffic (current: No)
+
+--- Actions ---
+  s. Save and Continue Installation
+  w. Where Is...? (search for settings)
+  x. Exit Installer
+---------------------------------
+
+Enter item number or action: 
+```
+
+For some settings, additional sub-items will become available when that setting is enabled. For example, enabling **Zeek File Extraction** exposes the settings related to that feature:
+```
+…
+├── 23. Enable Zeek Analysis (current: Yes)
+│   ├── 24. Enable Zeek File Extraction (current: No)
+│   ├── 25. Enable Zeek ICS/OT Analyzers (current: No)
+…
+Enter item number or action: 24
+
+Enable Zeek File Extraction (current: No)
+Enable file extraction with Zeek? (y / N): Y
+```
+
+```
+…
+├── 23. Enable Zeek Analysis (current: Yes)
+│   ├── 24. Enable Zeek File Extraction (current: Yes)
+│   │   └── 25. File Extraction Mode (current: interesting)
+│   │       ├── 26. Extracted File Percent Threshold (current: 0)
+│   │       ├── 27. Extracted File Size Threshold (current: empty)
+│   │       ├── 28. File Preservation (current: quarantined)
+│   │       ├── 29. Preserved Files HTTP Server (current: Yes)
+│   │       │   ├── 30. Downloaded Preserved File Password (current: empty)
+│   │       │   └── 31. Zip Downloads (current: No)
+│   │       ├── 32. Scan with capa (current: Yes)
+│   │       ├── 33. Scan with ClamAV (current: Yes)
+│   │       ├── 34. Scan with YARA (current: Yes)
+│   │       ├── 35. Update Scan Rules (current: Yes)
+│   │       └── 36. VirusTotal API Key (current: empty)
+│   ├── 37. Enable Zeek ICS/OT Analyzers (current: No)
+…
+Enter item number or action: 25
+File Extraction Mode (current: interesting)
+1: none
+2: known
+3: mapped
+4: all
+5: interesting
+6: notcommtxt
+Enter choice number (interesting): 4
+…
+```
+
+Once the desired Malcolm configuration options have been selected, select **s** to save the settings and proceed to the final configuration summary for confirmation. Then, select **y** to write the changed configuration to the corresponding [environment variable](malcolm-config.md#MalcolmConfigEnvVars) files.
+
+
+```
+…
+--- Actions ---
+  s. Save and Continue
+  w. Where Is...? (search for settings)
+  x. Exit Installer
+---------------------------------
+
+Enter item number or action: s
+```
+
+```
+============================================================
+FINAL CONFIGURATION SUMMARY
+============================================================
+Configuration Only                                : Yes
+Configuration Directory                           : /home/user/Malcolm/config
+Container Runtime                                 : docker
+Run Profile                                       : malcolm
+Process UID/GID                                   : 1000/1000
+Container Restart Policy                          : unless-stopped
+Container Network                                 : default
+Default Storage Locations                         : Yes
+HTTPS/SSL                                         : Yes
+Node Name                                         : host
+============================================================
+
+Proceed with Malcolm installation using the above configuration? (y / N): y
+```
+
+
+### <a name="MalcolmConfigItems"></a> Malcolm Configuration Menu Items
+
+* **Container Runtime**
     - When deployed locally (i.e., not via Kubernetes), Malcolm can run under [Docker](https://docs.docker.com/get-started/docker-overview/) or [Podman](https://podman.io/). However, for brevity's sake, the term "Docker" is used throughout this documentation. It should be noted that if rootless Podman is used, Malcolm itself cannot perform [traffic capture on local network interfaces](live-analysis.md#LocalPCAP), although it can accept network traffic metadata forwarded from a [a network sensor appliance](live-analysis.md#Hedgehog).
-* **Malcolm processes will run as UID 1000 and GID 1000. Is this OK?**
-    - Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
-* **Run with Malcolm (all containers) or Hedgehog (capture only) profile?**
-    - Malcolm can be run in either of two [profiles](https://docs.docker.com/compose/profiles/): the "malcolm" profile runs all containers including those for log enrichment and indexing, while the "hedgehog" (named as a nod to [Hedgehog Linux](hedgehog.md), Malcolm's [dedicated network sensor OS](live-analysis.md#Hedgehog)) profile rules only the containers required for [live traffic analysis](live-analysis.md#LocalPCAP). When using the "hedgehog" profile, captured network artifacts must be forwarded to another Malcolm instance: its [OpenSearch instance](opensearch-instances.md#OpenSearchInstance) connection parameters (e.g., `https://192.168.122.5:9200`) and Logstash connection parameters (e.g., `192.168.122.5:5044`) must be specified later on in the configuration. See [idaholab/Malcolm#254](https://github.com/idaholab/Malcolm/issues/254) for the origin of this feature.
-* **Should Malcolm use and maintain its own OpenSearch instance?**
-    - Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
-* **Forward Logstash logs to a secondary remote document store?**
-    - Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance.
-* **Setting 16g for OpenSearch and 3g for Logstash. Is this OK?**
-    - Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 24 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
-* **Setting 3 workers for Logstash pipelines. Is this OK?**
-    - This setting is used to tune the performance and resource utilization of the the `logstash` container. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
-* **Restart Malcolm upon system or container daemon restart?**
-    - This question allows users to configure Docker's [restart policy](https://docs.docker.com/config/containers/start-containers-automatically/#use-a-restart-policy) for Malcolm (i.e., the behavior used to restart Malcolm should the system be shut down or rebooted, or should one of Malcolm's components crash). Possible options are:
-        + no - do not automatically restart the container
-        + on-failure - restart the container if it exits due to an error, which manifests as a non-zero exit code
-        + always - always restart the container if it stops
-        + unless-stopped - similar to always, except that when the container is stopped (manually or otherwise), it is not restarted even after Docker daemon restarts; this is usually a good choice
-* **Require encrypted HTTPS connections?**
-    - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Answering **Y** to this question is almost always preferred. The only situation where **N** would be appropriate would be when running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates automatically and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. Users should ensure they understand these implications and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying the local firewall configuration, when answering **N** to this question.
-* **Which IP version does the network support? (IPv4, IPv6, or both)**
-    - This question is used to configure the [resolver directive](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) for Malcolm's nginx reverse proxy. Note that this selection does not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: it is only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides. See related settings for nginx in the [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) configuration file.
-* **Will Malcolm be running behind another reverse proxy (Traefik, Caddy, etc.)?**
-    - See the previous question. If Malcolm is configured behind a remote proxy, Malcolm can prompt users to *Configure labels for Traefik?* to allow it to identify itself to Traefik.
-* **Specify external container network name (or leave blank for default networking)**
-    - This configures Malcolm to use [custom container networks](https://docs.docker.com/compose/networking/#specify-custom-networks). If unsure, leave this blank.
-* **Store PCAP, log and index files in /home/user/Malcolm?**
-    - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This question allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
-* **Enable index management policies (ILM/ISM) in Arkime?**
-    - Choose **Y** to proceed to the following related questions about [using ILM/ISM with Arkime](index-management.md#ArkimeIndexPolicies).
-    - **Should Arkime use a hot/warm design in which non-session data is stored in a warm index?**
-        - This quesion allows users to specify if Arkime should store non-session indices (`arkime-history`) indices in a warm index. This requires additional configuration as demonstrated in the [Arkime documentation](https://arkime.com/faq#ilm).
-    - **How long should Arkime keep an index in the hot node? (e.g. 25h, 5d, etc.)**
-        - This question allows users to specify how long an Arkime index should remain in the **hot** state before moving into a **warm** state.
-    - **How long should Arkime retain SPI data before deleting it? (e.g. 25h, 90d, etc.)**
-        - This question is used to set the maximum age at which Arkime session indices are deleted.
-    - **How many segments should Arkime use to optimize?**
-        - This question asks for the number of segments to use for optimization.
-    - **How many replicas should Arkime maintain for older session indices?**
-        - This defines how many additional copies of older session indices Arkime should store.
-    - **How many weeks of history should Arkime keep?**
-        - This defines the retention period (in weeks) for `arkime-history` indices.
-* **Should Malcolm delete the oldest database indices and capture artifacts based on available storage?**
-    - Choose **Y** to proceed to the following related questions about [managing the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
-    - **Delete the oldest indices when the database exceeds a certain size?**
+    - **Container Network Name**
+        + This configures Malcolm to use [custom container networks](https://docs.docker.com/compose/networking/#specify-custom-networks). If unsure, leave this blank.
+    - **Malcolm Restart Policy**
+        + This setting specifies Docker's [restart policy](https://docs.docker.com/config/containers/start-containers-automatically/#use-a-restart-policy) for Malcolm (i.e., the behavior used to restart Malcolm should the system be shut down or rebooted, or should one of Malcolm's components crash). Possible options are:
+            * `no` - do not automatically restart the container
+            * `on-failure` - restart the container if it exits due to an error, which manifests as a non-zero exit code
+            * `always` - always restart the container if it stops
+            * `unless-stopped` - similar to `always`, except that when the container is stopped (manually or otherwise), it is not restarted even after Docker daemon restarts; this is usually a good choice
+    - **Process Group ID** and **Process User ID**
+        + Docker runs all of its containers as the privileged `root` user by default. For better security, Malcolm immediately drops to non-privileged user accounts for executing internal processes wherever possible. The `PUID` (**p**rocess **u**ser **ID**) and `PGID` (**p**rocess **g**roup **ID**) environment variables allow Malcolm to map internal non-privileged user accounts to a corresponding [user account](https://en.wikipedia.org/wiki/User_identifier) on the host.
+* **Run Profile**
+    - Malcolm can be run in [either](live-analysis.md#Profiles) of two [profiles](https://docs.docker.com/compose/profiles/): the `malcolm` profile runs all containers including those for log enrichment and indexing, while the `hedgehog` profile (named as a nod to [Hedgehog Linux](hedgehog.md), Malcolm's [dedicated network sensor OS](live-analysis.md#Hedgehog)) runs only the containers required for [live traffic analysis](live-analysis.md#LocalPCAP). When using the `hedgehog` profile, captured network artifacts must be forwarded to another Malcolm instance: its [OpenSearch instance](opensearch-instances.md#OpenSearchInstance) connection parameters (e.g., `https://192.168.122.5:9200`) and Logstash connection parameters (e.g., `192.168.122.5:5044`) must be specified later on in the configuration. See [idaholab/Malcolm#254](https://github.com/idaholab/Malcolm/issues/254) for the origin of this feature.
+    - **Dark Mode for Dashboards**
+        + Select **Y** for dark-themed dashboards or **N** for light-themed ones.
+    - **Forward Logs to Remote Secondary Store**
+        + Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance. If this option is enabled, sub-items will become available to configure the secondary document store type (`opensearch-remote` vs `elasticsearch-remote`) and URL.
+    - **Local OpenSearch Instance** and **Primary Document Store**
+        + Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
+        + If this setting is set to `N`, the **Primary Document Store** option will appear to allow the user to select `opensearch-remote` or `elasticsearch-remote` as the alternative to the local OpenSearch instance, as well as the corresponding URL for the remote instance.
+    - **OpenSearch Memory** and **Logstash Memory**
+        + Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 24 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
+    - **Logstash Workers**
+        + This setting is used to tune the performance and resource utilization of the the `logstash` container. The default is calculated based on the number of logical CPUs the system has. See [Tuning and Profiling Logstash Performance](https://www.elastic.co/guide/en/logstash/current/tuning-logstash.html), [`logstash.yml`](https://www.elastic.co/guide/en/logstash/current/logstash-settings-file.html) and [Multiple Pipelines](https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html).
+* **Require HTTPS Connections**
+    - Malcolm uses [TLS](authsetup.md#TLSCerts) encryption for its web browser-accessible user interfaces. Setting **Y** for this option is almost always preferred. The only situation where **N** would be appropriate would be when running Malcolm behind a third-party reverse proxy (e.g., [Traefik](https://doc.traefik.io/traefik/) or [Caddy](https://caddyserver.com/docs/quick-starts/reverse-proxy)) to handle the issuance of the certificates automatically and to broker the connections between clients and Malcolm. Reverse proxies such as these often implement the [ACME](https://datatracker.ietf.org/doc/html/rfc8555) protocol for domain name authentication and can be used to request certificates from certificate authorities such as [Let's Encrypt](https://letsencrypt.org/how-it-works/). In this configuration, the reverse proxy will be encrypting the connections instead of Malcolm. Users should ensure they understand these implications and ensure that external connections cannot reach ports over which Malcolm will be communicating without encryption, including verifying the local firewall configuration, when setting this to **N**.
+* **IPv4 for nginx Resolver Directive** and **IPv6 for nginx Resolver Directive**
+    - These settings configure the [resolver directives](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver) for Malcolm's nginx reverse proxy. Note that this selection does not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: it is only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides. See related settings for nginx in the [`nginx.env`](malcolm-config.md#MalcolmConfigEnvVars) configuration file.
+* **Traefik Labels**
+    - If Malcolm is configured behind Traefik, a [Docker-aware remote proxy](https://doc.traefik.io/traefik/reference/install-configuration/providers/docker/), Malcolm needs to be able to identify its endpoints to the proxy service. Enabling this setting exposes sub-items for specifying the values for the labels used for Traefik.
+* **Use Default Storage Location**
+    - Malcolm generates a number of large file sets during normal operation: PCAP files, Zeek or Suricata logs, OpenSearch indices, etc. By default all of these are stored in subdirectories in the Malcolm installation directory. This option and its sub-items allows users to specify alternative storage location(s) (for example, a separate dedicated drive or RAID volume) for these artifacts.
+* **Clean Up Artifacts**
+    - Choose **Y** to expose the the following sub-items used to [manage the data storage](malcolm-config.md#DiskUsage) used by Malcolm.
+    - **Delete Old Indices** and **Index Prune Threshold**
         - Most of the configuration around OpenSearch [Index State Management](https://opensearch.org/docs/latest/im-plugin/ism/index/) and [Snapshot Management](https://opensearch.org/docs/latest/opensearch/snapshots/sm-dashboards/) can be done in OpenSearch Dashboards. In addition to (or instead of) the OpenSearch index state management operations, Malcolm can also be configured to delete the oldest network session metadata indices when the database exceeds a certain size to prevent filling up all available storage with OpenSearch indices.
-    - **Should Arkime delete uploaded PCAP files based on available storage?**
-        - Answering **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion).
-    - **Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.)**
-        - If [Arkime PCAP-deletion](https://arkime.com/faq#pcap-deletion) is enabled, Arkime will delete PCAP files when **free space** is lower than this value, specified as integer gigabytes (e.g., `500`) or a percentage (e.g., `10%`)
-* **Automatically analyze all PCAP files with Suricata?**
+    - **Delete Old PCAP** and **Delete PCAP Threshold**
+        - Selecting **Y** allows Arkime to prune (delete) old PCAP files based on available disk space (see https://arkime.com/faq#pcap-deletion). When [Arkime PCAP-deletion](https://arkime.com/faq#pcap-deletion) is enabled, rkime will delete PCAP files when **free space** is lower than this threshold value, specified as integer gigabytes (e.g., `500`) or a percentage (e.g., `10%`)
+* **Enable Arkime Index Management**
+    - Choose **Y** to expose to the following sub-items for [using ILM/ISM with Arkime](index-management.md#ArkimeIndexPolicies).
+    - **History Retention (Weeks)**
+        - This defines the retention period (in weeks) for `arkime-history` indices.
+    - **Hot Node Time Period**
+        - This allows users to specify how long an Arkime index should remain in the **hot** state before moving into a **warm** state.
+    - **Optimize Segments**
+        - This defines the number of segments to use for optimization.
+    - **Replica Count (Warm)**
+        - This defines how many additional copies of older session indices Arkime should store.
+    - **SPI Data Retention**
+        - This defines the maximum age at which Arkime session indices are deleted.
+    - **Use Hot/Warm Indexing**
+        - This specifies whether Arkime should store non-session indices (`arkime-history`) indices in a warm index. This requires additional configuration as demonstrated in the [Arkime documentation](https://arkime.com/faq#ilm).
+* **Enable Arkime Analysis**
+    - This option is used to enable [Arkime](https://arkime.com/) to analyze PCAP files uploaded to Malcolm via its upload web interface.
+* **Enable Suricata Analysis**
     - This option is used to enable [Suricata](https://suricata.io/) (an IDS and threat detection engine) to analyze PCAP files uploaded to Malcolm via its upload web interface.
-* **Download updated Suricata signatures periodically?**
-    - If the Malcolm instance has Internet connectivity, answer **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm.
-* **Automatically analyze all PCAP files with Zeek?**
+    - **Enable Suricata Rule Updates**
+        + If the Malcolm instance has Internet connectivity, select **Y** to [enable automatic updates](https://suricata-update.readthedocs.io/en/latest/) of the Suricata rules used by Malcolm. This setting also applies to the rules used for live analysis when **Analyze Live Traffic with Suricata** is enabled.
+* **Enable Zeek Analysis**
     - This option is used to enable [Zeek](https://www.zeek.org/index.html) (a network analysis framework and IDS) to analyze PCAP files uploaded to Malcolm via its upload web interface.
-* **Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network?**
-    - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable Malcolm's ICS protocol analyzers for Zeek.
-* **Should Malcolm use "best guess" to identify potential OT/ICS traffic with Zeek?**
-    - If using Malcolm in a control systems (OT/ICS) network, answer **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
-* **Perform reverse DNS lookup locally for source and destination IP addresses in logs?**
-    - If enabled, this option will perform reverse [DNS lookups](https://www.elastic.co/guide/en/logstash/current/plugins-filters-dns.html) on IP addresses found in traffic and use the results to enrich network logs. Answer **Y** if the Malcolm instance has access to a DNS server to perform these lookups.
-* **Perform hardware vendor OUI lookups for MAC addresses?**
-    - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. Users probably want to answer **Y** to this question.
-* **Perform string randomness scoring on some fields?**
-    - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to answer **Y** to this question.
-* **Should Malcolm accept logs and metrics from a Hedgehog Linux sensor or other forwarder?**
-    - Answer **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following several questions in this list. Answer **customize** to proceed to answer the following related questions individually:
-    - **Expose OpenSearch port to external hosts?**
-        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
-    - **Expose Logstash port to external hosts?**
-        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
-    - **Expose Filebeat TCP port to external hosts?**
-        + Answer **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
-    - **Use default field values for Filebeat TCP listener?**
-        + Answer **Y** to use the defaults and skip the next five questions about the Filebeat TCP listener.
-    - **Select log format for messages sent to Filebeat TCP listener**
-        + Possible choices include `json` and `raw`; users probably want to choose `json`.
-    - **Source field to parse for messages sent to Filebeat TCP listener**
-        + The default choice (and the one Hedgehog Linux will be sending) is `message`.
-    - **Target field under which to store decoded JSON fields for messages sent to Filebeat TCP listener**
-        + The default choice (and the one that corresponds to Malcolm's dashboards built for the resource utilization metrics sent by Hedgehog Linux) is `miscbeat`.
-    - **Field to drop from events sent to Filebeat TCP listener**
-        + Users most likely want this to be the default, `message`, to match the field name specified above.
-    - **Tag to apply to messages sent to Filebeat TCP listener**
-        + The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
-    - **Expose SFTP server (for PCAP upload) to external hosts?**
-        + Users should answer **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; answering **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
-    - **Accept standard syslog messages?**
-        + Answer **Y** for Malcolm to accept syslog messages according to the RFC3164 and RFC5424 standards over TCP or UDP.
-            * **Enter port for syslog over TCP (e.g., 514) or 0 to disable** and **Enter port for syslog over UDP (e.g., 514) or 0 to disable**
-                - Specify the port numbers on which to accept syslog messages for TCP or UDP, respectively. Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
-                - If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
-* **Enable file extraction with Zeek?**
-    - Answer **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
-    - **Select file extraction behavior**
-        + This determines which files Zeek should extract for scanning:
-            * `none`: no file extraction
-            * `interesting`: extraction of files with mime types of common attack vectors
-            * `mapped`: extraction of files with recognized mime types
-            * `known`: extraction of files for which any mime type can be determined
-            * `all`: extract all files
-            * `notcommtxt`: extract all files except common plain text files
-    - **Select file preservation behavior**
-        + This determines the behavior for preservation of Zeek-extracted files:
-            *  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
-            * `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
-            * `none`: preserve no extracted files
-    - **Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%)**
-        + Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
-    - **Expose web interface for downloading preserved files?**
-        + Answering **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://﹤Malcolm host or IP address﹥/extracted-files/**. Beware that Zeek-extracted files may contain malware.
-    - **ZIP downloaded preserved files?**
-        + Answering **Y** will cause that Zeek-extracted files downloaded as described under the previous question will be archived using the ZIP file format.
-    - **Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected)** and **Enter AES-256-CBC encryption password for downloaded preserved files (or leave blank for unencrypted)**
-        + A non-blank value will be used as either the ZIP archive file password (if the previous question was answered **Y**) or as the encryption key for the file to be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
-    - **Scan extracted files with ClamAV?**
-        + Answer **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
-    - **Scan extracted files with Yara?**
-        + Answer **Y** to scan extracted files with [Yara](https://github.com/VirusTotal/yara), a tool used to identify and classify malware samples.
-    - **Scan extracted PE files with Capa?**
-        + Answer **Y** to scan extracted executable files with [Capa](https://github.com/fireeye/capa), a tool for detecting capabilities in executable files.
-    - **Lookup extracted file hashes with VirusTotal?**
-        + Answer **Y** to be prompted for a [**VirusTotal**](https://www.virustotal.com/en/#search) API key, which will be used for submitting the hashes of extracted files. Only specify this option if the Malcolm instance has Internet connectivity.
-    - **Enter VirusTotal API key**
-        + Specify the [**VirusTotal**](https://www.virustotal.com/en/#search) [API key](https://support.virustotal.com/hc/en-us/articles/115002100149-API) as indicated under the previous question.
-    - **Download updated file scanner signatures periodically?**
-        + If the Malcolm instance has Internet connectivity, answer **Y** to enable periodic downloads of signatures used by ClamAV and YARA.
-* **Configure pulling from threat intelligence feeds for Zeek intelligence framework?**
-    - Answer **Y** to configure pulling from threat intelligence feeds to populate the [Zeek intelligence framework](zeek-intel.md#ZeekIntel). Answer **N** to leave settings for pulling from threat intelligence feeds unmodified.
-    - **Pull from threat intelligence feeds on startup?**
-        + Answer **Y** for Malcolm to pull from threat intelligence feeds when the `zeek-offline` container starts up.
-    - **Cron expression for scheduled pulls from threat intelligence feeds**
-        + Specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) (using [`cronexpr`](https://github.com/aptible/supercronic/tree/master/cronexpr#implementation)-compatible syntax) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files.
-    - **Threat indicator "since" period**
-        + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), [Google](zeek-intel.md#ZeekIntelGoogle), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`24 hours ago`). Note that this value can be overridden per-feed by adding a `since:` value to each feed's respective configuration YAML file.
-    - **`Intel::item_expiration` timeout for intelligence items (`-1min` to disable)**
-        + Specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration).
-* **Should Malcolm utilize NetBox, an infrastructure resource modeling tool?**
+    - **Enable Zeek File Extraction**
+        + Select **Y** to indicate that Zeek should [extract files](file-scanning.md#ZeekFileExtraction) transfered in observed network traffic.
+        + **File Extraction Mode**
+            * This determines which files Zeek should extract for scanning:
+                - `none`: no file extraction
+                - `interesting`: extraction of files with mime types of common attack vectors
+                - `mapped`: extraction of files with recognized mime types
+                - `known`: extraction of files for which any mime type can be determined
+                - `all`: extract all files
+                - `notcommtxt`: extract all files except common plain text files
+        + **Extracted File Percent Threshold** and **Extracted File Size Threshold**
+            * Files [extracted by Zeek](file-scanning.md#ZeekFileExtraction) can be periodically pruned to ensure the disk storage they consume does not exceed a user-specified threshold. See the documentation on [managing Malcolm's disk usage](malcolm-config.md#DiskUsage) for more information.
+        + **File Preservation**
+            * This determines the behavior for preservation of Zeek-extracted files:
+                -  `quarantined`: preserve only flagged files in `./zeek-logs/extract_files/quarantine`
+                - `all`: preserve flagged files in `./zeek-logs/extract_files/quarantine` and all other extracted files in `./zeek-logs/extract_files/preserved`
+                - `none`: preserve no extracted files
+        + **Preserved Files HTTP Server**
+            * Choosing **Y** enables access to the Zeek-extracted files path through the means of a simple HTTPS directory server at **https://﹤Malcolm host or IP address﹥/extracted-files/**. Beware that Zeek-extracted files may contain malware.
+        + **Downloaded Preserved File Password**
+            * A non-blank value will be used as either the ZIP archive file password (if **Zip Downloads** is enabled) or as the encryption key for the file to be AES-256-CBC-encrypted in an `openssl enc`-compatible format (e.g., `openssl enc -aes-256-cbc -d -in example.exe.encrypted -out example.exe`).
+        + **Zip Downloads**
+            * Selecting **Y** will cause that Zeek-extracted file downloads will be archived using the ZIP file format.
+        + **Scan with capa**
+            * Select **Y** to scan extracted executable files with [Capa](https://github.com/fireeye/capa), a tool for detecting capabilities in executable files.
+        + **Scan with ClamAV**
+            * Select **Y** to scan extracted files with [ClamAV](https://www.clamav.net/), an antivirus engine.
+        + **Scan with YARA**
+            * Select **Y** to scan extracted files with [Yara](https://github.com/VirusTotal/yara), a tool used to identify and classify malware samples.
+        + **Update Scan Rules**
+            * If the Malcolm instance has Internet connectivity, choose **Y** to enable periodic downloads of signatures used by ClamAV and YARA.
+        + **VirusTotal API Key**
+            * Specifying the [**VirusTotal**](https://www.virustotal.com/en/#search) [API key](https://support.virustotal.com/hc/en-us/articles/115002100149-API) to be used for submitting the hashes of extracted files to VirusTotal. Only specify this option if the Malcolm instance has Internet connectivity.
+    - **Enable Zeek ICS/OT Analyzers**
+        + If using Malcolm in a control systems (OT/ICS) network, select **Y** to enable Malcolm's ICS protocol analyzers for Zeek.
+        + **Enable Zeek ICS "Best Guess"**
+            * If using Malcolm in a control systems (OT/ICS) network, select **Y** to enable ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess).
+    - **Use Threat Feeds for Zeek Intelligence**
+        + Select **Y** to configure pulling from threat intelligence feeds to populate the [Zeek intelligence framework](zeek-intel.md#ZeekIntel).
+        + **Cron Expression for Threat Feed Updates**
+            + Specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) (using [`cronexpr`](https://github.com/aptible/supercronic/tree/master/cronexpr#implementation)-compatible syntax) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files.
+        + **`Intel::item_expiration` Timeout**
+            + Specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration).
+        + **Pull Threat Intelligence Feeds on Startup**
+            + Select **Y** for Malcolm to pull from threat intelligence feeds when the `zeek-offline` container starts up.
+        + **Threat Indicator "Since" Period**
+            + When querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), [Google](zeek-intel.md#ZeekIntelGoogle), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`24 hours ago`). Note that this value can be overridden per-feed by adding a `since:` value to each feed's respective configuration YAML file.
+* **Enrich with Reverse DNS Lookups**
+    - If enabled, this option will perform reverse [DNS lookups](https://www.elastic.co/guide/en/logstash/current/plugins-filters-dns.html) on IP addresses found in traffic and use the results to enrich network logs. Select **Y** if the Malcolm instance has access to a DNS server to perform these lookups.
+* **Enrich with Manufacturer (OUI) Lookups**
+    - Malcolm will [map MAC addresses](https://standards.ieee.org/products-programs/regauth/) to hardware manufacturer when possible. Users probably want to select **Y** for this setting.
+* **Enrich with Frequency Scoring**
+    - If enabled, domain names observed in network traffic (from DNS queries and SSL server names) will be assigned entropy scores as calculated by [`freq`](https://github.com/MarkBaggett/freq). Users probably want to select **Y** for this setting.
+* **NetBox Mode**
     - Specifies whether Malcolm will use [NetBox](https://netbox.dev/), a tool for modeling networks and documenting network assets; options are `local` (use an embedded instance NetBox maintained by Malcolm), `remote` (use a remote instance of NetBox), or `disabled` (do not use NetBox).
-* **Should Malcolm enrich network traffic using NetBox?**
-    - Answer **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs against the NetBox asset inventory.
-* **Should Malcolm automatically populate NetBox inventory based on observed network traffic?**
-    - Answer **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
-* **Specify NetBox IP autopopulation filter**
-    - Defines the filter for [subnets considered for autopopulation](asset-interaction-analysis.md#NetBoxAutoPopSubnets), which can be used to excluding IP ranges (such as dynamic address ranges used by DHCP) which should not trigger autopopulation in NetBox.
-* **Specify default NetBox site name**
-    - NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used for NetBox enrichment lookups performed by Logstash and will be associated with traffic Malcolm itself [captures on local interfaces](live-analysis.md#LocalPCAP).
-* **Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic?**
-    - Answer **Y** to automatically create NetBox IP prefixes for private address space based on observed traffic.
-* **Should Malcolm capture live network traffic?**
-    - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). Answer **no** to this question in installations where Hedgehog Linux will be handling all network traffic capture. If users want Malcolm to observe and capture traffic instead of, or in addition to, a sensor running Hedgehog Linux, they should answer **yes** enable life traffic analysis using default settings, or select **customize** to proceed to answer the following related questions individually.
-    - **Should Malcolm capture live network traffic to PCAP files for analysis with Arkime?**
-        - Answer **Y** for Malcolm to [capture network traffic](live-analysis.md#LocalPCAP) on the local network interface(s) indicated to be periodically rotated into Arkime for analysis.
-    - **Capture packets using netsniff-ng?**
-        - Answer **Y** to use [netsniff-ng](http://netsniff-ng.org/) to generate PCAP files for Arkime to analyze. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
-    - **Capture packets using tcpdump?**
-        - Answer **Y** to use [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng) to generate PCAP files for Arkime to analyze.
-    - **Should Malcolm analyze live network traffic with Suricata?**
-        - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
-    - **Should Malcolm analyze live network traffic with Zeek?**
-        - Answering **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek. Users configuring Hedgehog Linux for capture probably want to answer **N** to this question. See the question above above about "captur[ing] live network traffic."
-    - **Capture filter (tcpdump-like filter expression; leave blank to capture all traffic)**
-        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`.
-    - **Disable capture interface hardware offloading and adjust ring buffer sizes?**
-        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s); this should be enabled if the interface(s) are being used for capture **only**, otherwise answer **N**. If unsure, users should probably answer **N**.
-    - **Enable live packet capture statistics?**
-        - If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users answer **Y** to this question, Malcolm will enable statistics collection for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats), which data is used to populate the **Packet Capture Statistics** dashboard.
-    - **Specify capture interface(s) (comma-separated)**
+    - **Auto-Create Subnet Prefixes**
+        + Select **Y** to automatically create NetBox IP prefixes for private address space based on observed traffic.
+    - **Auto-Populate NetBox Inventory**
+        + Select **Y** to [populate the NetBox inventory](asset-interaction-analysis.md#NetBoxPopPassive) based on observed network traffic. Autopopulation is **not** recommended: [manual inventory population](asset-interaction-analysis.md#NetBoxPopManual) is the preferred method to create an accurate representation of the intended network design.
+    - **NetBox Enrichment**
+        + Select **Y** to [cross-reference](asset-interaction-analysis.md#AssetInteractionAnalysis) network traffic logs against the NetBox asset inventory.
+    - **NetBox Site Name**
+        + NetBox has the concept of [sites](https://demo.netbox.dev/static/docs/core-functionality/sites-and-racks/); this default site name will be used for NetBox enrichment lookups performed by Logstash and will be associated with traffic Malcolm itself [captures on local interfaces](live-analysis.md#LocalPCAP).
+    - **NetBox IP Autopopulation Filter**
+        + Defines the filter for [subnets considered for autopopulation](asset-interaction-analysis.md#NetBoxAutoPopSubnets), which can be used to excluding IP ranges (such as dynamic address ranges used by DHCP) which should not trigger autopopulation in NetBox.
+* **Expose Malcolm Service Ports**
+    - Select **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following sub-items in this list. Select **customize** to proceed to enable or disable exposing of the following services individually:
+    - **Expose Filebeat TCP**
+        + Select **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
+    - **Use Filebeat TCP Listener Defaults**
+        + Select **Y** to use the defaults (recommended) or **N** to specify custom values for the Filebeat TCP listener.
+        + **Filebeat TCP Log Format**
+            * Possible choices include `json` and `raw`; users probably want to choose `json`.
+            * **Filebeat TCP Drop Field**
+                - Users most likely want this to be the default, `message`, to match the field name specified above.
+            * **Filebeat TCP Source Field**
+                - The default choice (and the one Hedgehog Linux will be sending) is `message`.
+            * **Filebeat TCP Target Field**
+                - The default choice (and the one that corresponds to Malcolm's dashboards built for the resource utilization metrics sent by Hedgehog Linux) is `miscbeat`.
+            * **Filebeat TCP Tag**
+                - The default is `_malcolm_beats`, which is used by Malcolm to recognize and parse metrics sent from Hedgehog Linux.
+    - **Expose Logstash**
+        + Select **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 5044 so that Zeek and Suricata logs can be ingested by Malcolm's Logstash instance.
+    - **Expose OpenSearch**
+        + Select **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux) to TCP port 9200 so that Arkime sessions can be written to Malcolm's OpenSearch database.
+    - **Expose SFTP**
+        + Users should select **N** unless they plan to use SFTP/SCP to [upload](upload.md#Upload) PCAP files to Malcolm; select **Y** will expose TCP port 8022 in Malcolm's firewall for SFTP/SCP connections
+    - **Syslog TCP Port** and **Syslog UDP Port**
+        + Specify the port numbers on which over which to accept syslog messages according to the RFC3164 and RFC5424 standards over TCP or UDP, respectively, or `0` to disable that listener. Other options for configuring how Malcolm accepts and processes syslog messages can be configured via environment variables in [`filebeat.env`](malcolm-config.md#MalcolmConfigEnvVars).
+        + If Malcolm is running in an instance installed via the [Malcolm installer ISO](malcolm-iso.md#ISO), please see also [ISO-installed Desktop Environment Firewall](third-party-logs.md#SyslogISOFirewall).
+* **Network Traffic Node Name**
+    * Specifies the node name (usually the Malcolm instance's host name) to associate with network traffic metadata.
+* **Capture Live Network Traffic**
+    - Malcolm itself can perform [live analysis](live-analysis.md#LocalPCAP) of traffic it sees on another network interface (ideally not the same one used for its management). Select **no** to this question in installations where Hedgehog Linux will be handling all network traffic capture. If users want Malcolm to observe and capture traffic instead of, or in addition to, a sensor running Hedgehog Linux, they should select **yes** and proceed to configure the following sub-items individually.
+    - **Analyze Live Traffic with Suricata**
+        + Selecting **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Suricata.
+    - **Analyze Live Traffic with Zeek**
+        + Selecting **Y** will allow Malcolm itself to perform [live traffic analysis](live-analysis.md#LocalPCAP) using Zeek.
+    - **Capture Filter**
+        + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) as described above, users may optionally provide a capture filter. This filter will be used to limit what traffic the PCAP service ([netsniff-ng](http://netsniff-ng.org/) or [tcpdump](https://www.tcpdump.org/)) and the traffic analysis services ([Zeek](https://www.zeek.org/) and [Suricata](https://suricata.io/)) will see. Capture filters are specified using [Berkeley Packet Filter (BPF)](http://biot.com/capstats/bpf.html) syntax. For example, to indicate that Malcolm should ignore the ports it uses to communicate with Hedgehog Linux, users could specify `not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200`.
+    - **Capture Interface(s)**
         + Specify the network interface(s) for [live traffic analysis](live-analysis.md#LocalPCAP) if it is enabled for netsniff-ng, tcpdump, Suricata or Zeek as described above. For multiple interfaces, separate the interface names with a comma (e.g., `enp0s25` or `enp10s0,enp11s0`).
-* **Enable dark mode for OpenSearch Dashboards?**
-    - Answer **Y** for dark-themed dashboards or **N** for light-themed ones.
+    - **Capture Live Traffic with netsniff-ng**
+        + Select **Y** to use [netsniff-ng](http://netsniff-ng.org/) to generate PCAP files to be periodically rotated into Arkime for analysis. netsniff-ng is Malcolm's preferred tool for capturing network traffic.
+    - **Capture Live Traffic with tcpdump**
+        + Select **Y** to use [tcpdump](https://www.tcpdump.org/) (instead of netsniff-ng) to generate PCAP files to be periodically rotated into Arkime for analysis.
+    - **Capture Live Traffic with Arkime**
+        + When running the ["Hedgehog" run profile](live-analysis.md#Profiles), when using [a remote OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance), or in a [Kubernetes-based deployment](kubernetes.md#Kubernetes), users may choose to have Arkime's `capture` tool monitor live traffic on the network interface without using netsniff-ng or tcpdump to generate intermediate PCAP files. See [**Live Analysis**](live-analysis.md#LocalPCAP) for more information.
+    - **Gather Traffic Capture Statistics**
+        + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users enable this setting, Malcolm will gather capture statistics for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats) to populate the **Packet Capture Statistics** dashboard.
+    - **Optimize Interface Settings for Capture**
+        + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and this option is enabled, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s) to improve performance; this should be enabled if the interface(s) are being used for capture **only**, otherwise select **N**. If unsure, users should probably answer **N**.
 
 ### <a name="MalcolmTimeSync"></a> Configure Hostname and Time Sync
 

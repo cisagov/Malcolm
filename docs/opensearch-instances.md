@@ -9,26 +9,29 @@ As the permutations of OpenSearch cluster configurations are numerous, it is bey
 
 As an alternative to OpenSearch, Malcolm [may now be configured](https://github.com/idaholab/Malcolm/issues/258) to use a remote [Elasticsearch](https://www.elastic.co/elasticsearch/) cluster with its own instance of [Kibana](https://www.elastic.co/kibana). This configuration is intended for users that already have the Elastic stack deployed in their environments; OpenSearch is recommended for greenfield deployments.
 
-The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance (`opensearch-local`), a remote OpenSearch instance (`opensearch-remote`) or a remote Elasticsearch instance (`elasticsearch-remote`) as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-config.md#ConfigAndTuning)) can help users configure these options.
+The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance (`opensearch-local`), a remote OpenSearch instance (`opensearch-remote`) or a remote Elasticsearch instance (`elasticsearch-remote`) as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)) can help users configure these options.
 
-For example, to use the default standalone configuration, answer `Y` when prompted `Should Malcolm use and maintain its own OpenSearch instance?`
+For example, to use the default standalone configuration, select **Yes** for `Local OpenSearch Instance`:
+```
+…
+├── 6. Run Profile (current: malcolm)
+…
+│   ├── 9. Local OpenSearch Instance (current: Yes)
+…
+│   └── 12. OpenSearch Memory (current: 31g)
+…
+```
 
 To use a remote OpenSearch cluster:
 
 ```
 …
-Should Malcolm use and maintain its own OpenSearch instance? (Y / n): n
-
-1: opensearch-local - local OpenSearch
-2: opensearch-remote - remote OpenSearch
-3: elasticsearch-remote - remote Elasticsearch
-Select primary Malcolm document store (opensearch-local): 2
-
-Enter primary remote OpenSearch connection URL (e.g., https://192.168.1.123:9200): https://10.9.0.215:9200
-
-Require SSL certificate validation for communication with remote OpenSearch instance? (y / N): n
-
-You must run auth_setup after configure to store data store connection credentials.
+├── 6. Run Profile (current: malcolm)
+…
+│   ├── 9. Local OpenSearch Instance (current: No)
+…
+│   └── 12. Primary Document Store (current: opensearch-remote)
+│       └── 13. Primary OpenSearch/Elasticsearch URL (current: https://opensearch.example.org:9200)
 …
 ```
 
@@ -36,20 +39,13 @@ To use a remote Elasticsearch cluster and Kibana:
 
 ```
 …
-Should Malcolm use and maintain its own OpenSearch instance? (Y / n): n
-
-1: opensearch-local - local OpenSearch
-2: opensearch-remote - remote OpenSearch
-3: elasticsearch-remote - remote Elasticsearch
-Select primary Malcolm document store (opensearch-local): 3
-
-Enter primary remote Elasticsearch connection URL (e.g., https://192.168.1.123:9200) (): https://10.9.0.215:9200
-
-Require SSL certificate validation for communication with remote Elasticsearch instance? (y / N): n
-
-Enter Kibana connection URL (e.g., https://192.168.1.123:5601) (): https://10.9.0.215:5601
-
-You must run auth_setup after configure to store data store connection credentials.
+├── 6. Run Profile (current: malcolm)
+…
+│   ├── 8. Local OpenSearch Instance (current: No)
+…
+│   └── 11. Primary Document Store (current: elasticsearch-remote)
+│       ├── 12. Dashboards/Kibana URL (current: https://kibana.example.org:5601/kibana)
+│       └── 13. Primary OpenSearch/Elasticsearch URL (current: https://elasticsearch.example.org:9200)
 …
 ```
 

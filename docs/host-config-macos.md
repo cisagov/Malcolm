@@ -2,52 +2,37 @@
 
 ## Automatic installation using `install.py`
 
-The `install.py` script will attempt to guide you through the installation of Docker and Docker Compose if they are not present. If that works, skip ahead to **Configure docker daemon option** in this section.
+The `install.py` script will attempt to guide you through the installation of Docker and Docker Compose if they are not present, similar to how it's illustrated in the [**Installation example using Ubuntu 24.04 LTS**](ubuntu-install-example.md#InstallationExample). If that works, skip ahead to **Configure docker daemon option** in this section.
 
 ## Install Homebrew
 
 The easiest way to install and maintain docker on Mac is using the [Homebrew cask](https://brew.sh). Execute the following in a terminal.
 
 ```
-$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 $ brew install cask
-$ brew tap homebrew/cask-versions
 ```
 
-## Install docker
+## Install Docker Desktop and Docker Compose
 
 ```
-$ brew install --cask docker
+$ brew install --cask docker-desktop
 ```
 This will install the latest version of `docker`. It can be upgraded later using `brew` as well:
 ```
 $ brew upgrade --cask --no-quarantine docker
 ```
-You can now run Docker from the Applications folder.
-
-## Install docker compose
-
-```
-$ brew install docker-compose
-```
-
-This will install the latest version of the Docker Compose plugin. It can be upgraded later using [`brew`] as well:
-
-```
-$ brew upgrade --no-quarantine docker-compose
-```
-
-The [brew formula for docker-compose notes](https://formulae.brew.sh/formula/docker-compose) has the following note about needing to symlink for Docker to find the compose plugin:
-
-```
-Compose is now a Docker plugin. For Docker to find this plugin, symlink it:
-    mkdir -p ~/.docker/cli-plugins
-    ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-```
+You can now run Docker from the Applications folder. Docker Desktop on macOS also includes the Docker Compose plugin.
 
 ## Configure docker daemon option
 
-Some changes should be made for performance ([this link](http://markshust.com/2018/01/30/performance-tuning-docker-mac) gives a good succinct overview).
+Some changes should be made for performance. See the following (unaffiliated) posts/articles for more information:
+
+* [What Are the Latest Docker Desktop Enterprise-Grade Performance Optimizations?](https://www.docker.com/blog/what-are-the-latest-docker-desktop-enterprise-grade-performance-optimizations/)
+* [Docker on MacOS is still slow?](https://www.paolomainardi.com/posts/docker-performance-macos-2025)
+* [Docker on MacOS is slow and how to fix it](https://www.cncf.io/blog/2023/02/02/docker-on-macos-is-slow-and-how-to-fix-it)
+* [The most performant Docker setup on macOS](https://medium.com/%40guillem.riera/the-most-performant-docker-setup-on-macos-apple-silicon-m1-m2-m3-for-x64-amd64-compatibility-da5100e2557d)
+* [Why Docker Compose Is Actually Killing Your M1 Mac](https://medium.com/%40sohail_saifi/why-docker-compose-is-actually-killing-your-m1-mac-the-performance-truth-no-one-talks-about-4357678c8584)
 
 * **Resource allocation** - For best results, Mac users should be running recent system with at least 32GB RAM and an SSD. In the system tray, select **Docker** → **Preferences** → **Advanced**. Set the resources available to Docker to at least 6 CPUs and at least 24GB RAM (even more is preferable).
 
