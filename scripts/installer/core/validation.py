@@ -276,7 +276,7 @@ def _validate_live_pcap_capture(malcolm_config, add_issue) -> None:
     if sum([netsniff, tcpdump, arkime]) > 1:
         add_issue(
             KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            f"Only one PCAP generator (tcpdump, netsniff-ng, or Arkime) can be enabled for live capture",
+            "Only one PCAP generator (tcpdump, netsniff-ng, or Arkime) can be enabled for live capture",
         )
 
     if (
@@ -300,7 +300,7 @@ def _validate_old_artifact_cleanup(malcolm_config, add_issue) -> None:
     if delete_old_indexes and ((not index_prune_threshold) or (str(index_prune_threshold) == "0")):
         add_issue(
             KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
-            f'"Delete Old Indices" is enabled without specifying a prune threshold',
+            '"Delete Old Indices" is enabled without specifying a prune threshold',
         )
 
 

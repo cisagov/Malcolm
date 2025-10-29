@@ -25,7 +25,6 @@ sys.dont_write_bytecode = True
 from scripts.malcolm_constants import (
     DEFAULT_INDEX_DIR,
     DEFAULT_INDEX_SNAPSHOT_DIR,
-    DEFAULT_PCAP_DIR,
     DEFAULT_SURICATA_LOG_DIR,
     DEFAULT_ZEEK_LOG_DIR,
     MALCOLM_DB_DIR,

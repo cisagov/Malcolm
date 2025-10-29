@@ -15,7 +15,7 @@ from scripts.malcolm_utils import (
     DATABASE_MODE_LABELS,
     DATABASE_MODE_ENUMS,
 )
-from scripts.malcolm_common import FormatNetBoxSubnetFilter
+from scripts.malcolm_common import FormatNetBoxSubnetFilter, SYSTEM_INFO
 
 
 def _env_str_to_bool(value: Optional[str]) -> bool:
@@ -235,11 +235,14 @@ def custom_transform_logstash_java_opts(lsMemory: str) -> str:
 
 def custom_reverse_transform_logstash_java_opts(value: str) -> str:
     match = re.search(r"-Xm[sx](\d+)([gGmMkK]?)", value)
-    if match:
-        size, unit = match.groups()
-        # Default to 'g' if no unit captured (older patterns)
-        return f"{size}{unit or 'g'}"
-    return "2500"
+    if not match:
+        return ""
+    size, unit = match.groups()
+    mem = f"{size}{unit or 'g'}"
+    # Skip returning the default value (10g) to avoid unnecessary overrides
+    if mem.lower() == SYSTEM_INFO.get("suggested_ls_memory", "3g"):
+        return ""
+    return mem
 
 
 def custom_transform_opensearch_primary(opensearchPrimaryMode) -> str:
@@ -270,8 +273,8 @@ def custom_reverse_transform_opensearch_java_opts(value: str) -> str:
         return ""
     size, unit = match.groups()
     mem = f"{size}{unit or 'g'}"
-    # Skip returning the default value (10g) to avoid unnecessary overrides
-    if mem.lower() == "10g":
+    # Skip returning the default valueto avoid unnecessary overrides
+    if mem.lower() == SYSTEM_INFO.get("suggested_os_memory", "16g"):
         return ""
     return mem
 

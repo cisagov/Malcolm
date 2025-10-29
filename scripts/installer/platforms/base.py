@@ -191,7 +191,7 @@ class BaseInstaller(abc.ABC):
 
             if i < retry:
                 InstallerLogger.warning(
-                    f"Command failed (attempt {i + 1}/{retry+1}). Retrying in {retry_sleep_sec} seconds..."
+                    f"Command failed (attempt {i + 1}/{retry + 1}). Retrying in {retry_sleep_sec} seconds..."
                 )
                 output = []
                 time.sleep(retry_sleep_sec)
