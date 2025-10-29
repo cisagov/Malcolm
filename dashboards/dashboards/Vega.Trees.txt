@@ -8,7 +8,7 @@
       https://vega.github.io/vega/docs/
       https://vega.github.io/vega/examples/tree-layout/
     Commit:
-      Corresponds to a1d271d in SMILE-Analytics/trees
+      Corresponds to 6e8538d in SMILE-Analytics/trees
   **/
   ##  Set up Vega specification definitions
   ##  Pay attention to Vega additions after V5
@@ -123,6 +123,7 @@
     {
       "name": "userInputRoot",
       "init": "''",
+      // "init": "'10.10.10.5'"
       "bind": {
         "input": "search",
         "placeholder": "  x.x.x.x ", // place holder to show syntax to user - spaces used to center placeholder in bind box
@@ -141,13 +142,16 @@
       "name": "initialRoot",
       "update": "pluck(data('table'), 'src')[rootIndex]",
     },
-
     // pulls enrichment data for the intialRoot based on rootIndex
     {
       "name": "initialRootData",
       "update": "pluck(data('table'), 'aggregated_objs')[rootIndex]",
     },
-
+    // checks if the searched IP exists in table or if the search bar is empty to determine whether to show the error
+    {
+      "name": "nonexistentIPWarning",
+      "update": "(rootIndex !== -1) || (userInputRoot === '') ? true : false"
+    },
     {
       "name": "treeDepth",
       "update": "data('completeTree') && data('completeTree').root ? data('completeTree').root.height : -1"
@@ -229,13 +233,20 @@
           "update": "n <= nPrev",
           "force": true
         },
-      {
-        "events": {
-          "signal": "timeFilter"
+        {
+          "events": {
+            "signal": "timeFilter"
+          },
+          "update": "timeFilter",
+          "force": true
         },
-        "update": "timeFilter",
-        "force": true
-      },
+        {
+          "events": {
+            "signal": "userInputRoot"
+          },
+          "update": "nonexistentIPWarning",
+          "force": true
+        },
       ]
     },
     // A counter that triggers the BF iteration
@@ -663,7 +674,7 @@
       },
       {
         "trigger": "clear || initialRoot",
-        "insert": "{'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData}"
+        "insert": "nonexistentIPWarning !== false ? {'src': null, 'dst': initialRoot, 'id': initialRoot, 'depth': 0, 'enrichment': initialRootData} : null"    // If IP exists in table then insert the initial node, otherwise do not insert
       },
       {
         "trigger": "step",
@@ -1200,7 +1211,27 @@
             }
           }
         },
-
+        {
+          "type": "text",     // nonexistent IP warning text
+          "zindex": 0,
+          "encode": {
+              "enter": {
+                "baseline": {"value": "center"},
+                "fill": {"value": "black"},
+              },
+              "update": {
+                // "x": {"value": -400},
+                "x": {"value": -400},
+                // "y": {"value": 1400},
+                "y": { "signal": "legend_height + 1000" },
+                "text": {"value": "IP address not found."},
+                "font": {"value": "Arial"},
+                "fontStyle": {"value": "bold"},
+                "fontSize": {"value": 20},
+                "opacity": {"signal": "nonexistentIPWarning === true ? 0 : 1" } // if IP exists in table then do not show error, otherwise show the error
+              }
+            }
+        },
         // Draw the nodes
         {
           "type": "symbol",
