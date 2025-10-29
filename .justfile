@@ -101,7 +101,8 @@ _base_config +CAPTURE_FLAG:
     | .configuration.malcolmProfile = "${MALCOLM_PROFILE:-malcolm}"
     | .configuration.malcolmRestartPolicy = "${RESTART_MALCOLM:-no}"
     | .configuration.netboxAutoPopulate = ${NETBOX_AUTOPOPULATE:-false}
-    | .configuration.netboxLogstashAutoSubnets = ${NETBOX_AUTO_PREFIXES:-false}
+    | .configuration.netboxLogstashAutoCreatePrefix = ${NETBOX_AUTO_PREFIXES:-false}
+    | .configuration.netboxAutoPopulateSubnetFilter = "${NETBOX_AUTO_POPULATE_SUBNETS}"
     | .configuration.netboxLogstashEnrich = ${NETBOX_ENRICH:-true}
     | .configuration.netboxMode = "${NETBOX:-local}"
     | .configuration.netboxSiteName = "${NETBOX_SITE_NAME:-Malcolm}"
@@ -164,7 +165,6 @@ _base_config +CAPTURE_FLAG:
           "arkime.env:ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}" \
           "filebeat.env:FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-2}" \
           "logstash.env:LOGSTASH_ZEEK_IGNORED_LOGS=${LOGSTASH_ZEEK_IGNORED_LOGS:-loaded_scripts,png,stderr,stdout}" \
-          "netbox-common.env:NETBOX_AUTO_POPULATE_SUBNETS=${NETBOX_AUTO_POPULATE_SUBNETS}" \
           "netbox-common.env:NETBOX_ENRICHMENT_DEBUG=${NETBOX_ENRICHMENT_DEBUG:-false}" \
           "netbox-common.env:NETBOX_ENRICHMENT_DEBUG_TIMINGS=${NETBOX_ENRICHMENT_DEBUG_TIMINGS:-false}" \
           "netbox.env:CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-https://*}" \

@@ -1000,6 +1000,9 @@ def posInt(value):
 
 ###################################################################################################
 def FormatNetBoxSubnetFilter(value):
+    if (not value) or (not isinstance(value, str)) or (not value.strip()):
+        return ""
+
     stripSpacePattern = re.compile(r'\s+')
     return ';'.join(
         f"{k.strip()}:{stripSpacePattern.sub('', v)}"
