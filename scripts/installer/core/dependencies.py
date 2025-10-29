@@ -130,6 +130,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             is_top_level=True,
         )
     ),
+    KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
+            condition=lambda orch: orch != OrchestrationFramework.KUBERNETES,
+            is_top_level=True,
+        )
+    ),
     KEY_CONFIG_ITEM_TRAEFIK_LABELS: DependencySpec(
         visibility=VisibilityRule(
             depends_on=[
