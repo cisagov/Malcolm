@@ -220,7 +220,7 @@ The steps to configure and tune Malcolm for a Kubernetes deployment are [very si
 
 Malcolm's configuration and runtime scripts (e.g., `./scripts/configure`, `./scripts/auth_setup`, `./scripts/start`, etc.) are used for both Docker- and Kubernetes-based deployments. In order to indicate to these scripts that Kubernetes is being used rather than `docker compose`, users can provide the script with the [kubeconfig file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/) used to communicate with the API server of the Kubernetes cluster (e.g., `./scripts/configure -f k3s.yaml` or `./scripts/start -f kubeconfig.yaml`, etc.). The scripts will detect whether the YAML file specified is a kubeconfig file or a Docker compose file and act accordingly.
 
-Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**. Users will need to run [`./scripts/auth_setup`](authsetup.md#AuthSetup) to configure authentication.
+Run `./scripts/configure` to configure Malcolm. For an in-depth treatment of the configuration options, see the **Malcolm Configuration Menu Items** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)**. Users will need to run [`./scripts/auth_setup`](authsetup.md#AuthSetup) to configure authentication.
 
 ### <a name="OpenSearchInstances"></a> OpenSearch and Elasticsearch Instances
 
@@ -338,116 +338,94 @@ server    | server   | 192.168.56.10 | server      | k3s           | 4000m     |
 Pod Name | State | Pod IP | Pod Kind | Worker Node | CPU Usage | Memory Usage | Container Name:Restarts | Container Image |
 ```
 
-Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**:
+Run `./scripts/configure` to configure Malcolm. For an in-depth treatment of the configuration options, see the **Malcolm Configuration Menu Items** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems)**.:
 
 
 ```
-$ ./scripts/configure -f /path/to/kubeconfig.yaml
+--- Malcolm Configuration Menu ---
+Select an item number to configure, or an action:
+├── 1. Container Runtime (current: kubernetes)
+│   ├── 2. Process Group ID (current: 1000)
+│   └── 3. Process User ID (current: 1000)
+├── 4. Run Profile (current: malcolm)
+│   ├── 5. Dark Mode for Dashboards (current: Yes)
+│   ├── 6. Forward Logs to Remote Secondary Store (current: No)
+│   ├── 7. Local OpenSearch Instance (current: Yes)
+│   ├── 8. Logstash Memory (current: 6g)
+│   ├── 9. Logstash Workers (current: 6)
+│   └── 10. OpenSearch Memory (current: 31g)
+├── 11. Require HTTPS Connections (current: Yes)
+├── 12. IPv4 for nginx Resolver Directive (current: Yes)
+├── 13. IPv6 for nginx Resolver Directive (current: No)
+├── 14. Use Default Storage Location (current: Yes)
+├── 15. Clean Up Artifacts (current: Yes)
+│   ├── 16. Delete Old Indices (current: Yes)
+│   │   ├── 17. Index Prune Threshold (current: 500G)
+│   │   └── 18. Prune Indices by Name (current: No)
+│   └── 19. Delete Old PCAP (current: Yes)
+│       └── 20. Delete PCAP Threshold (current: 5%)
+├── 21. Enable Arkime Index Management (current: No)
+├── 22. Enable Arkime Analysis (current: Yes)
+├── 23. Enable Suricata Analysis (current: Yes)
+│   └── 24. Enable Suricata Rule Updates (current: Yes)
+├── 25. Enable Zeek Analysis (current: Yes)
+│   ├── 26. Enable Zeek File Extraction (current: Yes)
+│   │   └── 27. File Extraction Mode (current: interesting)
+│   │       ├── 28. Extracted File Percent Threshold (current: 100)
+│   │       ├── 29. Extracted File Size Threshold (current: 25G)
+│   │       ├── 30. File Preservation (current: quarantined)
+│   │       ├── 31. Preserved Files HTTP Server (current: Yes)
+│   │       │   ├── 32. Downloaded Preserved File Password (current: ********)
+│   │       │   └── 33. Zip Downloads (current: Yes)
+│   │       ├── 34. Scan with capa (current: Yes)
+│   │       ├── 35. Scan with ClamAV (current: Yes)
+│   │       ├── 36. Scan with YARA (current: Yes)
+│   │       ├── 37. Update Scan Rules (current: Yes)
+│   │       └── 38. VirusTotal API Key (current: empty)
+│   ├── 39. Enable Zeek ICS/OT Analyzers (current: Yes)
+│   │   └── 40. Enable Zeek ICS "Best Guess" (current: Yes)
+│   └── 41. Use Threat Feeds for Zeek Intelligence (current: Yes)
+│       ├── 42. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
+│       ├── 43. Intel::item_expiration Timeout (current: -1min)
+│       ├── 44. Pull Threat Intelligence Feeds on Startup (current: Yes)
+│       └── 45. Threat Indicator "Since" Period (current: 7 days ago)
+├── 46. Enrich with Reverse DNS Lookups (current: No)
+├── 47. Enrich with Manufacturer (OUI) Lookups (current: Yes)
+├── 48. Enrich with Frequency Scoring (current: Yes)
+├── 49. NetBox Mode (current: Local)
+│   ├── 50. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 51. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 52. NetBox Enrichment (current: Yes)
+│   └── 53. NetBox Site Name (current: Malcolm)
+├── 54. Expose Malcolm Service Ports (current: No)
+├── 55. Network Traffic Node Name (current: malcolm-cluster)
+└── 56. Capture Live Network Traffic (current: No)
 
-Malcolm processes will run as UID 1000 and GID 1000. Is this OK? (Y / n): y
+--- Actions ---
+  s. Save and Continue
+  w. Where Is...? (search for settings)
+  d. Debug menu structure
+  x. Exit Installer
+---------------------------------
 
-Run with Malcolm (all containers) or Hedgehog (capture only) profile? (Y (Malcolm) / n (Hedgehog)): y
+Enter item number or action: s
 
-Should Malcolm use and maintain its own OpenSearch instance? (Y / n): y
+…
 
-Compress local OpenSearch index snapshots? (y / N): n
+============================================================
+FINAL CONFIGURATION SUMMARY
+============================================================
+Configuration Only                                : Yes
+Configuration Directory                           : /home/user/Malcolm/config
+Container Runtime                                 : kubernetes
+Run Profile                                       : malcolm
+Process UID/GID                                   : 1000/1000
+HTTPS/SSL                                         : Yes
+Node Name                                         : malcolm-cluster
+============================================================
 
-Forward Logstash logs to a secondary remote document store? (y / N): n
+Proceed with Malcolm installation using the above configuration? (y / N): y
 
-Setting 16g for OpenSearch and 3g for Logstash. Is this OK? (Y / n): y
-
-Setting 6 workers for Logstash pipelines. Is this OK? (Y / n): y
-
-Require encrypted HTTPS connections? (Y / n): y
-
-1: ipv4 - IPv4
-2: ipv6 - IPv6
-Which IP version does the network support? (IPv4, IPv6, or both) (ipv4): 1,2
-
-Enable index management policies (ILM/ISM) in Arkime? (y / N): n
-
-Should Malcolm delete the oldest database indices and capture artifacts based on available storage? (y / N): y
-
-Delete the oldest indices when the database exceeds a certain size? (y / N): y
-
-Enter index threshold (e.g., 250GB, 1TB, 60%, etc.): 250G
-
-Determine oldest indices by name (instead of creation time)? (Y / n): y
-
-Should Arkime delete uploaded PCAP files based on available storage (see https://arkime.com/faq#pcap-deletion)? (y / N): y
-
-Enter PCAP deletion threshold in gigabytes or as a percentage (e.g., 500, 10%, etc.): 10%
-
-Automatically analyze all PCAP files with Suricata? (Y / n): y
-
-Download updated Suricata signatures periodically? (y / N): y
-
-Automatically analyze all PCAP files with Zeek? (Y / n): y
-
-Is Malcolm being used to monitor an Operational Technology/Industrial Control Systems (OT/ICS) network? (y / N): n
-
-Perform reverse DNS lookup locally for source and destination IP addresses in logs? (y / N): n
-
-Perform hardware vendor OUI lookups for MAC addresses? (Y / n): y
-
-Perform string randomness scoring on some fields? (Y / n): y
-
-Use default field values for Filebeat TCP listener? (Y / n): y
-
-Enable file extraction with Zeek? (y / N): y
-1: none
-2: known
-3: mapped
-4: all
-5: interesting
-6: notcommtxt
-
-Select file extraction behavior (none): 5
-1: quarantined
-2: all
-3: none
-Select file preservation behavior (quarantined): 1
-
-Enter maximum allowed space for Zeek-extracted files (e.g., 250GB) or file system fill threshold (e.g., 90%): 100G
-
-Expose web interface for downloading preserved files? (y / N): y
-
-ZIP downloaded preserved files? (y / N): y
-
-Enter ZIP archive password for downloaded preserved files (or leave blank for unprotected): infected
-
-Scan extracted files with ClamAV? (Y / n): y
-
-Scan extracted files with Yara? (Y / n): y
-
-Scan extracted PE files with Capa? (Y / n): y
-
-Lookup extracted file hashes with VirusTotal? (y / N): n
-
-Download updated file scanner signatures periodically? (y / N): y
-
-Configure pulling from threat intelligence feeds for Zeek intelligence framework? (y / N): n
-
-1: disabled - disable NetBox
-2: local - Run and maintain an embedded NetBox instance
-3: remote - Use a remote NetBox instance
-Should Malcolm utilize NetBox, an infrastructure resource modeling tool? (disabled): 2
-
-Should Malcolm enrich network traffic using NetBox? (Y / n): y
-
-Should Malcolm automatically populate NetBox inventory based on observed network traffic? (y / N): n
-
-Specify NetBox IP autopopulation filter:
-
-Specify default NetBox site name: Malcolm
-
-Should Malcolm automatically create missing NetBox subnet prefixes based on observed network traffic? (y / N): n
-
-Enable dark mode for OpenSearch Dashboards? (Y / n): y
-
-Malcolm has been installed to /home/user/Malcolm. See README.md for more information.
-
-Scripts for starting and stopping Malcolm and changing authentication-related settings can be found in /home/user/Malcolm/scripts.
 ```
 
 Run `./scripts/auth_setup` and answer the questions to [configure authentication](authsetup.md#AuthSetup):

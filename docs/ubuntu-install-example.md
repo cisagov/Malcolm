@@ -167,7 +167,6 @@ Enter item number or action:
     + `convenience_script` - Install Docker [using covenience script](https://docs.docker.com/engine/install/ubuntu/#install-using-the-convenience-script)
 * **Docker Users**
   - When using the Docker runtime, because Malcolm's containers' processes should run without superuser permissions, the username of the non-root user under which Malcolm will be run should be specified here to be added to the `docker` group.
-* 
   - Select **Y** to attempt to install Docker using the installation method specified above.
 * **Pull Malcolm Images**
   - Select **Y** for the installer to attempt to pull the Malcolm container images after installation. This can always be done later by running `docker compose --profile malcolm pull` or the [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) convenience script.
