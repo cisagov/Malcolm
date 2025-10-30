@@ -102,16 +102,18 @@ def build_configuration_summary_items(malcolm_config, config_dir: str) -> List[T
     ]
 
     if orch_mode != OrchestrationFramework.KUBERNETES:
-        summary_items.append(
-            ("Container Restart Policy", _get_restart_policy_display(malcolm_config)),
-            (
-                "Container Network",
-                malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME) or "default",
-            ),
-            (
-                "Default Storage Locations",
-                ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS) else "No"),
-            ),
+        summary_items.extend(
+            [
+                ("Container Restart Policy", _get_restart_policy_display(malcolm_config)),
+                (
+                    "Container Network",
+                    malcolm_config.get_value(KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME) or "default",
+                ),
+                (
+                    "Default Storage Locations",
+                    ("Yes" if malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS) else "No"),
+                ),
+            ]
         )
 
     # remaining item(s) are common to both orchestration modes
