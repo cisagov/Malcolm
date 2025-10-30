@@ -2961,7 +2961,7 @@ def main():
         metavar='<string>',
         type=str,
         default=os.getenv('MALCOLM_IMAGE_TAG', None),
-        help='Tag for container images (e.g., "25.10.0"; only for "start" operation with Kubernetes)',
+        help='Tag for container images (e.g., "25.11.0"; only for "start" operation with Kubernetes)',
     )
     kubernetesGroup.add_argument(
         '--delete-namespace',
