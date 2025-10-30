@@ -18,7 +18,6 @@ from scripts.malcolm_utils import (
 from scripts.malcolm_common import FormatNetBoxSubnetFilter, SYSTEM_INFO
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.configs.constants.enums import SearchEngineMode
-from scripts.installer.utils.logger_utils import InstallerLogger
 
 
 def _env_str_to_bool(value: Optional[str]) -> bool:
@@ -308,7 +307,6 @@ def custom_transform_container_runtime_key(orch_mode, runtime_bin: str) -> str:
     Accepts either OrchestrationFramework enum or string for orch_mode.
     """
     result = "kubernetes" if _orch_is_k8s(orch_mode) else runtime_bin
-    InstallerLogger.debug(f"custom_transform_container_runtime_key({orch_mode}, {runtime_bin}) -> {result}")
     return result
 
 
@@ -322,7 +320,6 @@ def custom_reverse_transform_container_runtime_key(value: str):
     """
     orch_mode = OrchestrationFramework.KUBERNETES if value == "kubernetes" else OrchestrationFramework.DOCKER_COMPOSE
     result = (orch_mode, value)
-    InstallerLogger.debug(f"custom_reverse_transform_container_runtime_key({value}) -> {result}")
     return result
 
 
