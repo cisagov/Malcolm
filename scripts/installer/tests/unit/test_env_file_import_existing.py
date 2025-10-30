@@ -36,7 +36,6 @@ class TestEnvFileImportExisting(unittest.TestCase):
 
         # Simulate legacy boolean strings for several variables
         _write_env_var(KEY_ENV_FREQ_LOOKUP, "true")
-        _write_env_var(KEY_ENV_PCAP_PIPELINE_POLLING, "true")
         _write_env_var(KEY_ENV_ARKIME_MANAGE_PCAP_FILES, "false")
 
     def tearDown(self):
@@ -58,11 +57,6 @@ class TestEnvFileImportExisting(unittest.TestCase):
             self.fail(f"load_from_env_files raised an exception: {e}")
 
         self.assertTrue(cfg.get_value(KEY_CONFIG_ITEM_AUTO_FREQ))
-        # "true" for PCAP_PIPELINE_POLLING translates to orchestrator mode OrchestrationFramework.KUBERNETES
-        self.assertEqual(
-            cfg.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE),
-            OrchestrationFramework.KUBERNETES,
-        )
         # "false" for MANAGE_PCAP_FILES translates to False boolean
         self.assertFalse(cfg.get_value(KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP))
 

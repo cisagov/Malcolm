@@ -16,6 +16,9 @@ from scripts.malcolm_utils import (
     DATABASE_MODE_ENUMS,
 )
 from scripts.malcolm_common import FormatNetBoxSubnetFilter, SYSTEM_INFO
+from scripts.malcolm_constants import OrchestrationFramework
+from scripts.installer.configs.constants.enums import SearchEngineMode
+from scripts.installer.utils.logger_utils import InstallerLogger
 
 
 def _env_str_to_bool(value: Optional[str]) -> bool:
@@ -30,8 +33,6 @@ def _env_str_to_bool(value: Optional[str]) -> bool:
 
 def _orch_is_k8s(orch_mode: Any) -> bool:
     """Return True for Kubernetes orchestration from enum or string input."""
-    from scripts.malcolm_constants import OrchestrationFramework
-
     if isinstance(orch_mode, OrchestrationFramework):
         return orch_mode == OrchestrationFramework.KUBERNETES
     return str(orch_mode).strip().upper() == "KUBERNETES"
@@ -170,9 +171,9 @@ def custom_reverse_transform_zeek_rotated_pcap(value: str):
     return ("", live_zeek)
 
 
-def custom_transform_zeek_file_watcher_polling(orchMode) -> str:
+def custom_transform_zeek_file_watcher_polling(orch_mode) -> str:
     """Return 'true' when running under Kubernetes orchestration."""
-    return true_or_false_no_quotes(_orch_is_k8s(orchMode))
+    return true_or_false_no_quotes(_orch_is_k8s(orch_mode))
 
 
 def custom_reverse_transform_zeek_file_watcher_polling(value: str):
@@ -180,19 +181,21 @@ def custom_reverse_transform_zeek_file_watcher_polling(value: str):
     return _orch_from_bool_str(value)
 
 
-def custom_transform_pcap_pipeline_polling(orchMode) -> str:
-    return true_or_false_no_quotes(_orch_is_k8s(orchMode))
+def custom_transform_pcap_pipeline_polling(orch_mode) -> str:
+    return true_or_false_no_quotes(_orch_is_k8s(orch_mode))
 
 
 def custom_reverse_transform_pcap_pipeline_polling(value: str):
+    """Return the appropriate OrchestrationFramework value based on the polling flag."""
     return _orch_from_bool_str(value)
 
 
-def custom_transform_filebeat_watcher_polling(orchMode) -> str:
-    return true_or_false_no_quotes(_orch_is_k8s(orchMode))
+def custom_transform_filebeat_watcher_polling(orch_mode) -> str:
+    return true_or_false_no_quotes(_orch_is_k8s(orch_mode))
 
 
 def custom_reverse_transform_filebeat_watcher_polling(value: str):
+    """Return the appropriate OrchestrationFramework value based on the polling flag."""
     return _orch_from_bool_str(value)
 
 
@@ -297,24 +300,16 @@ def custom_reverse_transform_pcap_enable_tcpdump(value: str):
     return (tcpdump_enabled, "", "")
 
 
-def custom_transform_container_runtime_key(orchMode, runtimeBin: str) -> str:
+def custom_transform_container_runtime_key(orch_mode, runtime_bin: str) -> str:
     """Derive CONTAINER_RUNTIME_KEY from orchestration + runtime.
 
     - For Kubernetes orchestration, emit 'kubernetes'
     - Otherwise, emit the runtime binary (e.g., 'docker', 'podman')
-    Accepts either OrchestrationFramework enum or string for orchMode.
+    Accepts either OrchestrationFramework enum or string for orch_mode.
     """
-    try:
-        from scripts.malcolm_constants import OrchestrationFramework
-
-        if isinstance(orchMode, OrchestrationFramework):
-            is_k8s = orchMode == OrchestrationFramework.KUBERNETES
-        else:
-            is_k8s = str(orchMode).upper() == "KUBERNETES"
-        return "kubernetes" if is_k8s else runtimeBin
-    except Exception:
-        # fail-safe: prefer runtimeBin unless explicit 'KUBERNETES' string
-        return "kubernetes" if str(orchMode).upper() == "KUBERNETES" else runtimeBin
+    result = "kubernetes" if _orch_is_k8s(orch_mode) else runtime_bin
+    InstallerLogger.debug(f"custom_transform_container_runtime_key({orch_mode}, {runtime_bin}) -> {result}")
+    return result
 
 
 def custom_reverse_transform_container_runtime_key(value: str):
@@ -322,14 +317,13 @@ def custom_reverse_transform_container_runtime_key(value: str):
 
     orch_mode is returned as an OrchestrationFramework enum instance so that the
     target config item validator passes.
-    """
-    from scripts.malcolm_constants import OrchestrationFramework
-
-    if value == "kubernetes":
-        return (OrchestrationFramework.KUBERNETES, "")
 
     # For docker runtimes, preserve the runtime binary string as-is
-    return (OrchestrationFramework.DOCKER_COMPOSE, value)
+    """
+    orch_mode = OrchestrationFramework.KUBERNETES if value == "kubernetes" else OrchestrationFramework.DOCKER_COMPOSE
+    result = (orch_mode, value)
+    InstallerLogger.debug(f"custom_reverse_transform_container_runtime_key({value}) -> {result}")
+    return result
 
 
 def custom_transform_zeek_disable_ics_all(malcolmIcs: bool) -> str:
@@ -376,8 +370,6 @@ def custom_transform_opensearch_url(opensearchPrimaryMode: str, opensearchPrimar
     even if the user didn't provide one (since the field is hidden for local mode).
     For remote modes, return the user-provided URL or empty if None.
     """
-    from scripts.installer.configs.constants.enums import SearchEngineMode
-
     if opensearchPrimaryMode == SearchEngineMode.OPENSEARCH_LOCAL.value:
         # For local mode, use default if URL is None/empty
         if not opensearchPrimaryUrl or str(opensearchPrimaryUrl).strip() == "":

@@ -11,6 +11,7 @@ import unittest
 from scripts.installer.core.malcolm_config import MalcolmConfig
 from scripts.malcolm_constants import OrchestrationFramework
 from scripts.installer.core.config_item import ConfigItem
+from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
@@ -156,7 +157,7 @@ class TestEnvFullRoundtrip(unittest.TestCase):
     def test_defaults_full_config_roundtrip(self):
         cfg1 = MalcolmConfig()
         mapper = cfg1.get_env_mapper()
-        with tempfile.TemporaryDirectory() as td:
+        with tempfile.TemporaryDirectory(delete=False) as td:
             # Write defaults
             cfg1.generate_env_files(td)
             # Read into fresh instance
@@ -234,7 +235,11 @@ class TestEnvFullRoundtrip(unittest.TestCase):
                 if cfg1.get_value(KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE) == OrchestrationFramework.KUBERNETES:
                     cfg1.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, "kubernetes", ignore_errors=True)
                 else:
-                    cfg1.set_value(KEY_CONFIG_ITEM_RUNTIME_BIN, random.choice(["docker", "podman"]), ignore_errors=True)
+                    cfg1.set_value(
+                        KEY_CONFIG_ITEM_RUNTIME_BIN,
+                        random.choice([ContainerRuntime.DOCKER.value, ContainerRuntime.PODMAN.value]),
+                        ignore_errors=True,
+                    )
 
                 # Ensure NetBox URL is emitted: require remote mode when URL is non-empty
                 nb_url = cfg1.get_value(KEY_CONFIG_ITEM_NETBOX_URL)

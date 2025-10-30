@@ -27,7 +27,6 @@ from scripts.malcolm_utils import (
 from scripts.malcolm_common import get_default_config_dir, DotEnvDynamic
 from scripts.installer.configs.constants.configuration_item_keys import *
 from scripts.installer.configs.constants.config_env_var_keys import *
-from scripts.installer.configs.constants.config_env_files import *
 
 
 def _default_string_transform(value: Any) -> str:
@@ -675,12 +674,15 @@ class EnvMapper:
             ]
 
             # reverse precedence configuration (conflict-prone items)
-            # orchestration mode: authoritative CONTAINER_RUNTIME_KEY, then derived polling flags
+
+            # orchestration mode: authoritative CONTAINER_RUNTIME_KEY
             self._reverse_precedence_by_item[KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE] = [
                 KEY_ENV_CONTAINER_RUNTIME_KEY,
-                KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
-                KEY_ENV_PCAP_PIPELINE_POLLING,
-                KEY_ENV_FILEBEAT_WATCHER_POLLING,
+                # We don't derive orchestration mode from polling, they could have reason
+                #   to set polling = false without using kubernetes. runtime is enough.
+                # KEY_ENV_ZEEK_FILE_WATCHER_POLLING,
+                # KEY_ENV_PCAP_PIPELINE_POLLING,
+                # KEY_ENV_FILEBEAT_WATCHER_POLLING,
             ]
 
             # live capture flags: direct live capture beats rotated-pcap derived value
