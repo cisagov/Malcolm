@@ -549,6 +549,23 @@ def main():
         InstallerLogger.set_log_file(log_filename)
         InstallerLogger.info(f"Logging to file: {log_filename}") # fmt: skip
 
+    for pkgLoop in (1, 2):
+        requests_imported = RequestsDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=(pkgLoop == 1)
+        )
+        yaml_imported = YAMLDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=(pkgLoop == 1)
+        )
+        dotenv_imported = DotEnvDynamic(
+            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=(pkgLoop == 1)
+        )
+        InstallerLogger.debug(f"Imported requests: {requests_imported}")
+        InstallerLogger.debug(f"Imported yaml: {yaml_imported}")
+        InstallerLogger.debug(f"Imported dotenv: {dotenv_imported}")
+        if (not all((requests_imported, yaml_imported, dotenv_imported))) and (pkgLoop != 1):
+            InstallerLogger.error(f"Missing one or more required libraries")
+            sys.exit(1)
+
     try:
         # note: this will fail if the .env.example files are not present in config/ as we use them to map the .env files
         InstallerLogger.start("Initializing Internal Malcolm Configs") # fmt: skip
@@ -569,22 +586,6 @@ def main():
     except Exception as e:
         InstallerLogger.error(f"Failed to create UI implementation: {e}") # fmt: skip
         sys.exit(1)
-
-    for pkgLoop in (1, 2):
-        requests_imported = RequestsDynamic(
-            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
-        )
-        yaml_imported = YAMLDynamic(
-            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
-        )
-        dotenv_imported = DotEnvDynamic(
-            debug=parsed_args.debug, forceInteraction=(not parsed_args.non_interactive), silent=False
-        )
-        InstallerLogger.debug(f"Imported requests: {requests_imported}")
-        InstallerLogger.debug(f"Imported yaml: {yaml_imported}")
-        InstallerLogger.debug(f"Imported dotenv: {dotenv_imported}")
-        if (not all((requests_imported, yaml_imported, dotenv_imported))) and (pkgLoop != 1):
-            sys.exit(1)
 
     try:
         # detect orchestration mode from provided configuration file, if any
