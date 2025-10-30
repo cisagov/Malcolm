@@ -299,6 +299,7 @@ class LinuxInstaller(BaseInstaller):
                 'apt-transport-https',
                 'ca-certificates',
                 'curl',
+                'gpg',
                 'gpg-agent',
             ]
         elif self.distro == PLATFORM_LINUX_FEDORA:
