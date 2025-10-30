@@ -117,6 +117,7 @@ removed_environment_variables:
   arkime_live:
     - VIEWER
   arkime_offline:
+    - ARKIME_PCAP_PROCESSOR
     - VIEWER
     - WISE
   auth_common:
@@ -158,6 +159,10 @@ removed_environment_variables:
     - DB_HOST
     - DB_USER
     - DB_PASSWORD
+  suricata_offline:
+    - SURICATA_PCAP_PROCESSOR
+  zeek_offline:
+    - ZEEK_PCAP_PROCESSOR
 relocated_files:
   # Files/directories to relocate (relative to Malcolm installation directory)
   # Only occurs if Malcolm is not running, source exists, and destination does not.
