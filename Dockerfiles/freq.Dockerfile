@@ -51,6 +51,8 @@ RUN apt-get -q update && \
       curl -sSL "$FREQ_URL" | tar xzvf - -C ./freq_server --strip-components 1 && \
       rm -rf /opt/freq_server/systemd /opt/freq_server/upstart /opt/freq_server/*.md /opt/freq_server/*.exe && \
       mv -v "$(ls /opt/freq_server/*.freq | tail -n 1)" /opt/freq_server/freq_table.freq && \
+      awk '/Remember:/ {gsub(/\\&/, "\\\\&")} {print}' /opt/freq_server/freq_server.py > /tmp/freq_server.py && \
+        mv /tmp/freq_server.py /opt/freq_server/freq_server.py && \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} && \
       useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} && \
       chown -R ${PUSER}:${PGROUP} /opt/freq_server && \
