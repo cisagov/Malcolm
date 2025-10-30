@@ -6,6 +6,7 @@
 import base64
 import glob
 import os
+import sys
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import nullcontext
