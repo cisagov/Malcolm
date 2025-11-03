@@ -332,7 +332,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
             ufw_manager_cmd = None
 
     if ufw_manager_cmd:
-        err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'])
+        err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'], privileged=True)
         if err != 0:
             InstallerLogger.error(f"Resetting UFW firewall failed: {out}")
 
@@ -361,7 +361,8 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                         )
                         if ufw_manager_cmd:
                             err, out = platform.run_process(
-                                [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}']
+                                [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}'],
+                                privileged=True,
                             )
                             if err != 0:
                                 InstallerLogger.error(
@@ -396,7 +397,8 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                             '-a',
                             'allow',
                             f"{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp",
-                        ]
+                        ],
+                        privileged=True,
                     )
                     if err != 0:
                         InstallerLogger.error(
