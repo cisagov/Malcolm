@@ -168,14 +168,20 @@ def handle_artifact_path_preseed_file(malcolm_config):
                     (MALCOLM_LOGS_DIR, DEFAULT_SURICATA_LOG_DIR, KEY_CONFIG_ITEM_SURICATA_LOG_DIR, True),
                     (MALCOLM_LOGS_DIR, DEFAULT_ZEEK_LOG_DIR, KEY_CONFIG_ITEM_ZEEK_LOG_DIR, True),
                 ]
+                default_storage = True
                 for base_key, subdir, config_key, path_must_exist in paths_to_check:
                     if base_path := disk_format_info.get(base_key):
                         path = os.path.realpath(os.path.join(base_path, subdir) if subdir else base_path)
                         if (not path_must_exist) or os.path.isdir(path):
                             malcolm_config.apply_default(config_key, path, ignore_errors=True)
+                            default_storage = False
                             InstallerLogger.debug(
                                 f"Set default for {config_key} to {path} from {os.path.basename(disk_format_info_file)}"
                             )
+                if not default_storage:
+                    malcolm_config.apply_default(
+                        KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS, default_storage, ignore_errors=True
+                    )
 
         except Exception as e:
             InstallerLogger.error(f"Failed to set path defaults from {os.path.basename(disk_format_info_file)}: {e}")
