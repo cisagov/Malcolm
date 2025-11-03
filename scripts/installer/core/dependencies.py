@@ -814,7 +814,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_FILE_CARVE_MODE,
             condition=lambda _mode: True,
-            default_value=lambda mode: not (mode == FileExtractionMode.NONE.value),
+            default_value=False,
         ),
     ),
     # -------------------------------------------------------------------------
@@ -1160,7 +1160,7 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         ),
         value=ValueRule(
             depends_on=[KEY_CONFIG_ITEM_AUTO_SURICATA, KEY_CONFIG_ITEM_LIVE_SURICATA],
-            condition=lambda auto, live: bool(auto) or bool(live),
+            condition=lambda _auto, _live: True,
             default_value=False,
         ),
     ),
