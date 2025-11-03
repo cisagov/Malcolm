@@ -6,5 +6,6 @@ python3-netifaces
 python3-psutil
 python3-pycryptodome
 python3-dialog
+python3-distro
 python3-requests
 python3-yaml

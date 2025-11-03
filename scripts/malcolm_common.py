@@ -1957,10 +1957,13 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str], Opti
 
         # if the distro library can do it for us, prefer that
         if distro_lib := DoDynamicImport("distro", "distro"):
-            distro = distro_lib.id()
-            codename = distro_lib.codename()
-            release = distro_lib.version()
-            os_release_info = distro_lib.os_release_info()
+            try:
+                distro = distro_lib.id()
+                codename = distro_lib.codename()
+                release = distro_lib.version()
+                os_release_info = distro_lib.os_release_info()
+            except Exception:
+                pass
 
         # check /etc/os-release values
         if not os_release_info:
