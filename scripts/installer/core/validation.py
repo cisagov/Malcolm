@@ -234,41 +234,6 @@ def _validate_netbox_remote(malcolm_config, add_issue) -> None:
                 )
 
 
-def _validate_non_default_storage(malcolm_config, add_issue) -> None:
-    if not bool(malcolm_config.get_value(KEY_CONFIG_ITEM_USE_DEFAULT_STORAGE_LOCATIONS)):
-        for key, label_hint in (
-            (KEY_CONFIG_ITEM_PCAP_DIR, "PCAP storage directory"),
-            (KEY_CONFIG_ITEM_ZEEK_LOG_DIR, "Zeek log directory"),
-            (KEY_CONFIG_ITEM_SURICATA_LOG_DIR, "Suricata log directory"),
-        ):
-            if not malcolm_config.get_value(key):
-                add_issue(
-                    key,
-                    f"Required when not using default storage locations ({label_hint})",
-                )
-
-        profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)
-        primary_mode = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE)
-        if (
-            isinstance(profile, str)
-            and profile == "malcolm"
-            and isinstance(primary_mode, str)
-            and primary_mode == SearchEngineMode.OPENSEARCH_LOCAL.value
-        ):
-            for key, label_hint in (
-                (KEY_CONFIG_ITEM_INDEX_DIR, "OpenSearch index directory"),
-                (
-                    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-                    "OpenSearch snapshot directory",
-                ),
-            ):
-                if not malcolm_config.get_value(key):
-                    add_issue(
-                        key,
-                        f"Required when not using default storage locations ({label_hint})",
-                    )
-
-
 def _validate_live_pcap_capture(malcolm_config, add_issue) -> None:
     netsniff = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF))
     tcpdump = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP))
@@ -352,19 +317,13 @@ def validate_required(malcolm_config) -> List[ValidationIssue]:
     except Exception as e:
         InstallerLogger.error(f"Error validating configuration (_validate_netbox_remote): {e}")
 
-    # 6) Non-default storage locations -> require the user to supply directories (must be user-modified)
-    try:
-        _validate_non_default_storage(malcolm_config, add_issue)
-    except Exception as e:
-        InstallerLogger.error(f"Error validating configuration (_validate_non_default_storage): {e}")
-
-    # 7) Only one live PCAP capture method allowed, arkime can't be used with malcolm profile and opensearch-local
+    # 6) Only one live PCAP capture method allowed, arkime can't be used with malcolm profile and opensearch-local
     try:
         _validate_live_pcap_capture(malcolm_config, add_issue)
     except Exception as e:
         InstallerLogger.error(f"Error validating configuration (_validate_live_pcap_capture): {e}")
 
-    # 8) old artifact cleanup
+    # 7) old artifact cleanup
     try:
         _validate_old_artifact_cleanup(malcolm_config, add_issue)
     except Exception as e:
