@@ -5,9 +5,9 @@
 
 """Dialog-based configuration menu using python3-dialog."""
 
+import re
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
-from scripts.malcolm_utils import remove_prefix, remove_suffix
 from scripts.malcolm_common import (
     InstallerAskForString,
     InstallerChooseOne,
@@ -95,7 +95,7 @@ class DialogConfigurationMenu:
             visible_children = [c for c in self.child_map.get(key, []) if self.mc.is_item_visible(c)]
             if visible_children:
                 # visually indent group navigation entries to indicate dependency
-                nav_tag = f" ↳ {remove_suffix(remove_prefix(item.label, 'Enable '), ' Mode')} Settings"
+                nav_tag = " ↳ " + re.sub(r'^(?:Enable |Use )| Mode$', '', item.label) + " Settings"
                 tag_map[nav_tag] = f"GROUP:{key}"
                 choices.append((nav_tag, "", False))
 
@@ -130,7 +130,7 @@ class DialogConfigurationMenu:
 
             try:
                 label = "Malcolm Configuration" if parent_key is None else self.mc.get_item(parent_key).label
-                prompt = f"{remove_suffix(remove_prefix(label, 'Enable '), ' Mode')}: select an item to configure"
+                prompt = re.sub(r'^(?:Enable |Use )| Mode$', '', label) + ": select an item to configure"
                 result = InstallerChooseOne(
                     prompt,
                     choices=choices,
