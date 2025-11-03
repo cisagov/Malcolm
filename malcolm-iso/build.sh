@@ -233,6 +233,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
   cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
+  cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/
