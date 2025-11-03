@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Configure Malcolm
-Exec=tilix --title="Malcolm Configuration" --maximize -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/install.py --configure"
+Exec=tilix --title="Malcolm Configuration" --maximize -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/install.py --configure --load-existing-env"
 Comment=install.py --configure
 Terminal=false
 Type=Application

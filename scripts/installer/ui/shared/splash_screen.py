@@ -110,14 +110,7 @@ def splash_screen():
     required_width = max(len(header), len(footer), *(len(line) for line in preview_lines))
 
     if cols < required_width:
-        print(
-            "We have a fancy splash screen to show you...\n"
-            "But it looks like your terminal isn't wide enough. :(\n"
-            "Resize your terminal and re-run the installer to see it. :)\n"
-            "Or skip this message next time with --skip-splash"
-        )
-        print(f"\nMinimum width required: {required_width}. Current width: {cols}.\n")
-        KeyReader().wait_for_key("Press any key to continue with install... ")
+        # not wide enough to show splash screen, so silently skip it
         return
 
     pad_left = max(0, (cols - len(preview_lines[0])) // 2)
