@@ -172,9 +172,9 @@ _base_config +CAPTURE_FLAG:
           "nginx.env:NGINX_KEYCLOAK_BASIC_AUTH=${NGINX_KEYCLOAK_BASIC_AUTH:-false}" \
           "nginx.env:NGINX_LOG_ACCESS_AND_ERRORS=${NGINX_LOG_ACCESS_AND_ERRORS:-true}" \
           "opensearch.env:MALCOLM_NETWORK_INDEX_ALIAS=${MALCOLM_NETWORK_INDEX_ALIAS:-malcolm_network}" \
-          "opensearch.env:MALCOLM_NETWORK_INDEX_SUFFIX=${MALCOLM_NETWORK_INDEX_SUFFIX:-%{%y%m%d}}" \
+          "opensearch.env:MALCOLM_NETWORK_INDEX_SUFFIX=${MALCOLM_NETWORK_INDEX_SUFFIX:-'%{%y%m%d}'}" \
           "opensearch.env:MALCOLM_OTHER_INDEX_ALIAS=${MALCOLM_OTHER_INDEX_ALIAS:-malcolm_other}" \
-          "opensearch.env:MALCOLM_OTHER_INDEX_SUFFIX=${MALCOLM_OTHER_INDEX_SUFFIX:-%{%y%m%d}}" \
+          "opensearch.env:MALCOLM_OTHER_INDEX_SUFFIX=${MALCOLM_OTHER_INDEX_SUFFIX:-'%{%y%m%d}'}" \
           "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_PROCESSES=${SURICATA_AUTO_ANALYZE_PCAP_PROCESSES:-2}" \
           "suricata-offline.env:SURICATA_AUTO_ANALYZE_PCAP_THREADS=${SURICATA_AUTO_ANALYZE_PCAP_THREADS:-0}" \
           "upload-common.env:MALCOLM_API_DEBUG=${MALCOLM_API_DEBUG:-false}" \
