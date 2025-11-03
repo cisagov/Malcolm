@@ -385,7 +385,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                 f"{(SERVICE_PORT_MALCOLM if nginx_ssl else SERVICE_PORT_MALCOLM_NO_SSL)}:"
                 f"{SERVICE_PORT_MALCOLM}/tcp",
             ]
-            if (os_primary_mode == DatabaseMode.OpenSearchLocal) and expose_opensearch:
+            if _is_opensearch_local_and_exposed(os_primary_mode, expose_opensearch):
                 data['services']['nginx-proxy']['ports'].append(
                     f"{SERVICE_IP_EXPOSED}:{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}:{SERVICE_PORT_OSMALCOLM}/tcp"
                 )
