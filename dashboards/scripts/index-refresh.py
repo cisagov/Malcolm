@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
+
 import argparse
 import json
 import logging
@@ -14,6 +16,7 @@ import urllib3
 from collections import defaultdict
 from requests.auth import HTTPBasicAuth
 from urllib.parse import urlparse
+from malcolm_constants import DatabaseMode
 
 GET_STATUS_API = 'api/status'
 GET_INDEX_PATTERN_INFO_URI = 'api/saved_objects/_find'
@@ -26,16 +29,14 @@ SHARD_UNASSIGNED_STATUS = 'UNASSIGNED'
 NETBOX_URL_DEFAULT = 'http://netbox:8080/netbox'
 
 ###################################################################################################
-scriptName = os.path.basename(__file__)
-scriptPath = os.path.dirname(os.path.realpath(__file__))
+script_name = os.path.basename(__file__)
+script_path = os.path.dirname(os.path.realpath(__file__))
 origPath = os.getcwd()
 urllib3.disable_warnings()
 
 
-###################################################################################################
-# main
-def main():
-    parser = argparse.ArgumentParser(description=scriptName, add_help=True, usage=f'{scriptName} <arguments>')
+def parse_args():
+    parser = argparse.ArgumentParser(description=script_name, add_help=True, usage=f'{script_name} <arguments>')
     parser.add_argument(
         '--verbose',
         '-v',
@@ -55,7 +56,7 @@ def main():
     parser.add_argument(
         '-d',
         '--dashboards',
-        dest='dashboardsUrl',
+        dest='dashboards_url',
         metavar='<protocol://host:port>',
         type=str,
         default=os.getenv('DASHBOARDS_URL', 'http://dashboards:5601/dashboards'),
@@ -64,7 +65,7 @@ def main():
     parser.add_argument(
         '-o',
         '--opensearch',
-        dest='opensearchUrl',
+        dest='opensearch_url',
         metavar='<protocol://host:port>',
         type=str,
         default=os.getenv('OPENSEARCH_URL', None),
@@ -73,7 +74,7 @@ def main():
     parser.add_argument(
         '-b',
         '--netbox-url',
-        dest='netboxUrl',
+        dest='netbox_url',
         metavar='<protocol://host:port>',
         type=str,
         default=os.getenv('NETBOX_URL') or NETBOX_URL_DEFAULT,
@@ -82,7 +83,7 @@ def main():
     parser.add_argument(
         '-c',
         '--opensearch-curlrc',
-        dest='opensearchCurlRcFile',
+        dest='opensearch_curl_rc_file',
         metavar='<filename>',
         type=str,
         default=os.getenv('OPENSEARCH_CREDS_CONFIG_FILE', '/var/local/curlrc/.opensearch.primary.curlrc'),
@@ -90,7 +91,7 @@ def main():
     )
     parser.add_argument(
         '--opensearch-ssl-verify',
-        dest='opensearchSslVerify',
+        dest='opensearch_ssl_verify',
         type=malcolm_utils.str2bool,
         nargs='?',
         const=True,
@@ -99,14 +100,14 @@ def main():
     )
     parser.add_argument(
         '--opensearch-mode',
-        dest='opensearchMode',
+        dest='opensearch_mode',
         help="Malcolm data store mode ('opensearch-local', 'opensearch-remote', 'elasticsearch-remote')",
         type=malcolm_utils.DatabaseModeStrToEnum,
         metavar='<STR>',
         default=malcolm_utils.DatabaseModeStrToEnum(
             os.getenv(
                 'OPENSEARCH_PRIMARY',
-                default=malcolm_utils.DatabaseModeEnumToStr(malcolm_utils.DatabaseMode.OpenSearchLocal),
+                default=malcolm_utils.DatabaseModeEnumToStr(DatabaseMode.OpenSearchLocal),
             )
         ),
         required=False,
@@ -123,7 +124,7 @@ def main():
     parser.add_argument(
         '-u',
         '--unassigned',
-        dest='fixUnassigned',
+        dest='fix_unassigned',
         type=malcolm_utils.str2bool,
         nargs='?',
         const=True,
@@ -146,337 +147,303 @@ def main():
         if e.code == 2:
             parser.print_help()
         sys.exit(e.code)
+    return args
 
+
+def make_session(xsrf_header, verify_ssl=False, auth=None):
+    session = requests.Session()
+    session.auth = auth
+    session.verify = verify_ssl
+    session.headers.update(
+        {
+            'Content-Type': 'application/json',
+            xsrf_header: 'true',
+        }
+    )
+
+    return session
+
+
+def setup_environment(args):
     args.verbose = malcolm_utils.set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True)
-    logging.debug(os.path.join(scriptPath, scriptName))
-    logging.debug(f"Arguments: {sys.argv[1:]}")
-    logging.debug(f"Arguments: {args}")
+    opensearch_creds = malcolm_utils.ParseCurlFile(args.opensearch_curl_rc_file)
 
-    opensearchIsLocal = (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) or (
-        args.opensearchUrl == 'https://opensearch:9200'
-    )
-    opensearchCreds = malcolm_utils.ParseCurlFile(args.opensearchCurlRcFile)
+    args.netbox_url = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(args.netbox_url, '/'), '/api')
+    if args.netbox_url == NETBOX_URL_DEFAULT:
+        args.netbox_url = '/netbox'
 
-    args.netboxUrl = malcolm_utils.remove_suffix(malcolm_utils.remove_suffix(args.netboxUrl, '/'), '/api')
-    if netboxEmbedded := (args.netboxUrl == NETBOX_URL_DEFAULT):
-        args.netboxUrl = '/netbox'
-
-    if args.opensearchMode == malcolm_utils.DatabaseMode.ElasticsearchRemote:
-        xsrfHeader = "kbn-xsrf"
-    else:
-        xsrfHeader = "osd-xsrf"
-
-    if not args.opensearchUrl:
-        if opensearchIsLocal:
-            args.opensearchUrl = 'https://opensearch:9200'
-        elif 'url' in opensearchCreds:
-            args.opensearchUrl = opensearchCreds['url']
-    opensearchReqHttpAuth = (
-        HTTPBasicAuth(opensearchCreds['user'], opensearchCreds['password'])
-        if opensearchCreds['user'] is not None
-        else None
+    opensearch_is_local = (
+        args.opensearch_mode == DatabaseMode.OpenSearchLocal or args.opensearch_url == 'https://opensearch:9200'
     )
 
-    # get version number so Dashboards doesn't think we're doing a XSRF when we do the PUT
-    statusInfoResponse = requests.get(
-        '{}/{}'.format(args.dashboardsUrl, GET_STATUS_API),
-        auth=opensearchReqHttpAuth,
-        verify=args.opensearchSslVerify,
-    )
-    statusInfoResponse.raise_for_status()
-    statusInfo = statusInfoResponse.json()
-    dashboardsVersion = statusInfo['version']['number']
-    logging.info('Dashboards version is {}'.format(dashboardsVersion))
-
-    opensearchInfoResponse = requests.get(
-        args.opensearchUrl,
-        auth=opensearchReqHttpAuth,
-        verify=args.opensearchSslVerify,
-    )
-    opensearchInfo = opensearchInfoResponse.json()
-    opensearchVersion = opensearchInfo['version']['number']
-    logging.info('OpenSearch version is {}'.format(opensearchVersion))
+    if not args.opensearch_url:
+        if opensearch_is_local:
+            args.opensearch_url = 'https://opensearch:9200'
+        elif 'url' in opensearch_creds:
+            args.opensearch_url = opensearch_creds['url']
 
     # if they actually just specified the name of the environment variable, resolve that for the index name
     if args.index.startswith('MALCOLM_'):
         args.index = os.getenv(args.index, '')
 
-    # find the ID of the index name (probably will be the same as the name)
-    getIndexInfoResponse = requests.get(
-        '{}/{}'.format(args.dashboardsUrl, GET_INDEX_PATTERN_INFO_URI),
-        params={'type': 'index-pattern', 'fields': 'id', 'search': '"{}"'.format(args.index)},
-        auth=opensearchReqHttpAuth,
-        verify=args.opensearchSslVerify,
+    return args, make_session(
+        "kbn-xsrf" if args.opensearch_mode == DatabaseMode.ElasticsearchRemote else "osd-xsrf",
+        args.opensearch_ssl_verify,
+        (
+            HTTPBasicAuth(opensearch_creds['user'], opensearch_creds['password'])
+            if opensearch_creds['user'] is not None
+            else None
+        ),
     )
-    getIndexInfoResponse.raise_for_status()
-    getIndexInfo = getIndexInfoResponse.json()
-    indexId = getIndexInfo['saved_objects'][0]['id'] if (len(getIndexInfo['saved_objects']) > 0) else None
-    logging.debug('Index ID for {} is {}'.format(args.index, indexId))
 
-    if indexId is not None:
-        # get the current fields list
-        getFieldsResponse = requests.get(
-            '{}/{}'.format(args.dashboardsUrl, GET_FIELDS_URI),
-            params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        getFieldsResponse.raise_for_status()
-        getFieldsList = getFieldsResponse.json()['fields']
-        fieldsNames = [field['name'] for field in getFieldsList if 'name' in field]
 
-        # get the fields from the template, if specified, and merge those into the fields list
-        if args.template is not None:
-            try:
-                # request template from OpenSearch and pull the mappings/properties (field list) out
-                getTemplateResponse = requests.get(
-                    '{}/{}/{}'.format(args.opensearchUrl, OS_GET_INDEX_TEMPLATE_URI, args.template),
-                    auth=opensearchReqHttpAuth,
-                    verify=args.opensearchSslVerify,
-                )
-                getTemplateResponse.raise_for_status()
-                getTemplateResponseJson = getTemplateResponse.json()
-                if 'index_templates' in getTemplateResponseJson:
-                    for template in getTemplateResponseJson['index_templates']:
-                        templateFields = malcolm_utils.deep_get(
-                            template, ['index_template', 'template', 'mappings', 'properties'], default={}
-                        )
+def get_versions(args, session):
+    dashboards_ver = session.get(f"{args.dashboards_url}/{GET_STATUS_API}").json()["version"]["number"]
+    logging.info(f"Dashboards version is {dashboards_ver}")
 
-                        # also include fields from component templates into templateFields before processing
-                        # https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
-                        composedOfList = malcolm_utils.deep_get(template, ['index_template', 'composed_of'], default=[])
+    opensearch_ver = session.get(args.opensearch_url).json()["version"]["number"]
+    logging.info(f"OpenSearch version is {opensearch_ver}")
 
-                        for componentName in composedOfList:
-                            getComponentResponse = requests.get(
-                                '{}/{}/{}'.format(args.opensearchUrl, OS_GET_COMPONENT_TEMPLATE_URI, componentName),
-                                auth=opensearchReqHttpAuth,
-                                verify=args.opensearchSslVerify,
-                            )
-                            getComponentResponse.raise_for_status()
-                            getComponentResponseJson = getComponentResponse.json()
-                            if 'component_templates' in getComponentResponseJson:
-                                for component in getComponentResponseJson['component_templates']:
-                                    properties = malcolm_utils.deep_get(
-                                        component,
-                                        ['component_template', 'template', 'mappings', 'properties'],
-                                        default=None,
-                                    )
-                                    if properties:
-                                        templateFields.update(properties)
+    return dashboards_ver, opensearch_ver
 
-                        # a field should be merged if it's not already in the list we have from Dashboards, and it's
-                        # in the list of types we're merging (leave more complex types like nested and geolocation
-                        # to be handled naturally as the data shows up)
-                        for field in templateFields:
-                            mergeFieldTypes = ("date", "float", "integer", "ip", "keyword", "long", "short", "text")
-                            if (
-                                (field not in fieldsNames)
-                                and ('type' in templateFields[field])
-                                and (templateFields[field]['type'] in mergeFieldTypes)
-                            ):
-                                # create field dict in same format as those returned by GET_FIELDS_URI above
-                                mergedFieldInfo = {}
-                                mergedFieldInfo['name'] = field
-                                mergedFieldInfo['esTypes'] = [templateFields[field]['type']]
-                                if (
-                                    (templateFields[field]['type'] == 'float')
-                                    or (templateFields[field]['type'] == 'integer')
-                                    or (templateFields[field]['type'] == 'long')
-                                    or (templateFields[field]['type'] == 'short')
-                                ):
-                                    mergedFieldInfo['type'] = 'number'
-                                elif (templateFields[field]['type'] == 'keyword') or (
-                                    templateFields[field]['type'] == 'text'
-                                ):
-                                    mergedFieldInfo['type'] = 'string'
-                                else:
-                                    mergedFieldInfo['type'] = templateFields[field]['type']
-                                mergedFieldInfo['searchable'] = True
-                                mergedFieldInfo['aggregatable'] = "text" not in mergedFieldInfo['esTypes']
-                                mergedFieldInfo['readFromDocValues'] = mergedFieldInfo['aggregatable']
-                                fieldsNames.append(field)
-                                getFieldsList.append(mergedFieldInfo)
 
-                            # else:
-                            #   logging.debug('Not merging {}: {}'.format(field, json.dumps(templateFields[field])))
-
-            except Exception as e:
-                logging.error('"{}" raised for "{}", skipping template merge'.format(str(e), args.template))
-
-        logging.info('{} would have {} fields'.format(args.index, len(getFieldsList)))
-
-        # first get the previous field format map as a starting point, if any
-        getResponse = requests.get(
-            '{}/{}/{}'.format(args.dashboardsUrl, GET_PUT_INDEX_PATTERN_URI, indexId),
-            headers={
-                'Content-Type': 'application/json',
-                xsrfHeader: 'true',
-            },
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
-        )
-        getResponse.raise_for_status()
-        try:
-            fieldFormatMap = json.loads(
-                malcolm_utils.deep_get(getResponse.json(), ['attributes', 'fieldFormatMap'], default="{}")
-            )
-        except Exception as e:
-            fieldFormatMap = {}
-
-        # define field formatting map for Dashboards -> Arkime drilldown and other URL drilldowns
-        #
-        # fieldFormatMap is
-        #    {
-        #        "destination.port": {
-        #           "id": "url",
-        #           "params": {
-        #             "urlTemplate": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}",
-        #             "labelTemplate": "{{value}}",
-        #             "openLinkInCurrentTab": false
-        #           }
-        #        },
-        #        ...
-        #    }
-        pivotIgnoreTypes = ['date']
-        if args.opensearchMode != malcolm_utils.DatabaseMode.ElasticsearchRemote:
-            for field in [
-                x
-                for x in getFieldsList
-                if x['name'][:1].isalpha() and (x['name'] not in fieldFormatMap) and (x['type'] not in pivotIgnoreTypes)
-            ]:
-                fieldFormatInfo = {}
-                fieldFormatInfo['id'] = 'url'
-                fieldFormatInfo['params'] = {}
-
-                if field['name'].endswith('.segment.id'):
-                    fieldFormatInfo['params']['urlTemplate'] = f'{args.netboxUrl}/ipam/prefixes/{{{{value}}}}'
-
-                elif field['name'].endswith('.segment.name') or (field['name'] == 'network.name'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=ipam.prefix&lookup=iexact'
-
-                elif field['name'].endswith('.segment.tenant'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=tenancy.tenant&lookup=iexact'
-
-                elif field['name'].endswith('.device.id') or (field['name'] == 'related.device_id'):
-                    fieldFormatInfo['params']['urlTemplate'] = f'{args.netboxUrl}/dcim/devices/{{{{value}}}}'
-
-                elif field['name'].endswith('.device.name') or (field['name'] == 'related.device_name'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
-
-                elif field['name'].endswith('.device.cluster'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=virtualization.cluster&lookup=iexact'
-
-                elif field['name'].endswith('.device.device_type') or (field['name'] == 'related.device_type'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.devicetype'
-
-                elif field['name'].endswith('.device.manufacturer') or (field['name'] == 'related.manufacturer'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.manufacturer'
-
-                elif field['name'].endswith('.device.role') or (field['name'] == 'related.role'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.devicerole'
-
-                elif field['name'].endswith('.device.service') or (field['name'] == 'related.service'):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=ipam.service'
-
-                elif (
-                    field['name'].endswith('.device.site')
-                    or field['name'].endswith('.segment.site')
-                    or (field['name'] == 'related.site')
-                ):
-                    fieldFormatInfo['params'][
-                        'urlTemplate'
-                    ] = f'{args.netboxUrl}/search/?q={{{{value}}}}&obj_types=dcim.site&lookup=iexact'
-
-                elif field['name'].endswith('.reference'):
-                    # TODO: this doesn't actually work, because it has to be relative to the dashboards app...
-                    fieldFormatInfo['params']['urlTemplate'] = '/refred/{{value}}'
-
-                elif field['name'] == 'zeek.files.extracted_uri':
-                    fieldFormatInfo['params']['urlTemplate'] = '/{{value}}'
-
-                else:
-                    # for Arkime to query by database field name, see arkime issue/PR 1461/1463
-                    valQuote = '"' if field['type'] == 'string' else ''
-                    valDbPrefix = (
-                        '' if (field['name'].startswith('zeek') or field['name'].startswith('suricata')) else 'db:'
-                    )
-                    fieldFormatInfo['params']['urlTemplate'] = '/iddash2ark/{}{} == {}{{{{value}}}}{}'.format(
-                        valDbPrefix, field['name'], valQuote, valQuote
-                    )
-
-                fieldFormatInfo['params']['labelTemplate'] = '{{value}}'
-                fieldFormatInfo['params']['openLinkInCurrentTab'] = False
-
-                fieldFormatMap[field['name']] = fieldFormatInfo
-
-        # set the index pattern with our complete list of fields
-        putIndexInfo = {}
-        putIndexInfo['attributes'] = {}
-        putIndexInfo['attributes']['title'] = args.index
-        putIndexInfo['attributes']['fields'] = json.dumps(getFieldsList)
-        putIndexInfo['attributes']['fieldFormatMap'] = json.dumps(fieldFormatMap)
-
-        if not args.dryrun:
-            putResponse = requests.put(
-                '{}/{}/{}'.format(args.dashboardsUrl, GET_PUT_INDEX_PATTERN_URI, indexId),
-                headers={
-                    'Content-Type': 'application/json',
-                    xsrfHeader: 'true',
-                },
-                data=json.dumps(putIndexInfo),
-                auth=opensearchReqHttpAuth,
-                verify=args.opensearchSslVerify,
-            )
-            putResponse.raise_for_status()
-
-        # if we got this far, it probably worked!
-        if args.dryrun:
-            print("success (dry run only, no write performed)")
-        else:
-            print("success")
-
+def get_index_id(args, session):
+    resp = session.get(
+        f"{args.dashboards_url}/{GET_INDEX_PATTERN_INFO_URI}",
+        params={'type': 'index-pattern', 'fields': 'id', 'search': f'"{args.index}"'},
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    index_id = data['saved_objects'][0]['id'] if data['saved_objects'] else None
+    if index_id:
+        logging.info(f'Index ID for {args.index} is {index_id}')
+        return index_id
     else:
-        print("failure (could not find Index ID for {})".format(args.index))
+        raise ValueError(f"Could not get index ID for {args.index}")
 
-    if (args.opensearchMode == malcolm_utils.DatabaseMode.OpenSearchLocal) and args.fixUnassigned and not args.dryrun:
-        # set some configuration-related indexes (opensearch/opendistro) replica count to 0
-        # so we don't have yellow index state on those
-        shardsResponse = requests.get(
-            '{}/{}'.format(args.opensearchUrl, GET_SHARDS_URL),
-            auth=opensearchReqHttpAuth,
-            verify=args.opensearchSslVerify,
+
+def get_fields_list(args, session):
+    resp = session.get(
+        f"{args.dashboards_url}/{GET_FIELDS_URI}",
+        params={'pattern': args.index, 'meta_fields': ["_source", "_id", "_type", "_index", "_score"]},
+    )
+    resp.raise_for_status()
+    return resp.json()['fields']
+
+
+def merge_template_fields(args, session, fields):
+    if not args.template:
+        return fields
+
+    try:
+        # request template from OpenSearch and pull the mappings/properties (field list) out
+        get_template_response = session.get(f"{args.opensearch_url}/{OS_GET_INDEX_TEMPLATE_URI}/{args.template}")
+        get_template_response.raise_for_status()
+        template_json = get_template_response.json()
+
+        fields_names = {f['name'] for f in fields if 'name' in f}
+        merge_field_types = {"date", "float", "integer", "ip", "keyword", "long", "short", "text"}
+
+        for template in template_json.get('index_templates', []):
+            template_fields = malcolm_utils.deep_get(
+                template, ['index_template', 'template', 'mappings', 'properties'], default={}
+            )
+
+            # also include fields from component templates into template_fields before processing
+            # https://opensearch.org/docs/latest/opensearch/index-templates/#composable-index-templates
+            for component_name in malcolm_utils.deep_get(template, ['index_template', 'composed_of'], default=[]):
+                comp_resp = session.get(f"{args.opensearch_url}/{OS_GET_COMPONENT_TEMPLATE_URI}/{component_name}")
+                comp_resp.raise_for_status()
+                comp_json = comp_resp.json()
+                for component in comp_json.get('component_templates', []):
+                    props = malcolm_utils.deep_get(
+                        component, ['component_template', 'template', 'mappings', 'properties'], default={}
+                    )
+                    if props:
+                        template_fields.update(props)
+
+            # merge fields
+            for name, meta in template_fields.items():
+                # a field should be merged if it's not already in the list we have from Dashboards, and it's
+                # in the list of types we're merging (leave more complex types like nested and geolocation
+                # to be handled naturally as the data shows up)
+                if name not in fields_names and meta.get('type') in merge_field_types:
+                    mapped_type = (
+                        'number'
+                        if meta['type'] in {'float', 'integer', 'long', 'short'}
+                        else 'string' if meta['type'] in {'keyword', 'text'} else meta['type']
+                    )
+                    # create field dict in same format as those returned by GET_FIELDS_URI
+                    fields.append(
+                        {
+                            'name': name,
+                            'esTypes': [meta['type']],
+                            'type': mapped_type,
+                            'searchable': True,
+                            'aggregatable': "text" not in meta['type'],
+                            'readFromDocValues': "text" not in meta['type'],
+                        }
+                    )
+                    fields_names.add(name)
+
+        return fields
+
+    except Exception as e:
+        logging.exception(f'"{e}" raised for "{args.template}", skipping template merge')
+        return fields
+
+
+def get_prev_field_format_map(args, session, index_id):
+    resp = session.get('{}/{}/{}'.format(args.dashboards_url, GET_PUT_INDEX_PATTERN_URI, index_id))
+    resp.raise_for_status()
+    return malcolm_utils.LoadStrIfJson(
+        malcolm_utils.deep_get(resp.json(), ['attributes', 'fieldFormatMap'], default="{}"), default={}
+    )
+
+
+def build_field_format_map(args, fields, prev_field_format_map):
+    # fieldFormatMap is
+    #    {
+    #        "destination.port": {
+    #           "id": "url",
+    #           "params": {
+    #             "urlTemplate": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search={{value}}",
+    #             "labelTemplate": "{{value}}",
+    #             "openLinkInCurrentTab": false
+    #           }
+    #        },
+    #        ...
+    #    }
+
+    pivot_ignore_types = ['date']
+    format_map = prev_field_format_map or {}
+
+    def netbox_url(path):
+        return f'{args.netbox_url}{path}'
+
+    # mapping of fields (by suffixes or exact names) -> urlTemplate
+    field_map = {
+        # suffixes
+        '.segment.id': lambda: netbox_url('/ipam/prefixes/{{value}}'),
+        '.segment.name': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'),
+        '.segment.tenant': lambda: netbox_url('/search/?q={{value}}&obj_types=tenancy.tenant&lookup=iexact'),
+        '.device.id': lambda: netbox_url('/dcim/devices/{{value}}'),
+        '.device.name': lambda: netbox_url(
+            '/search/?q={{value}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
+        ),
+        '.device.cluster': lambda: netbox_url('/search/?q={{value}}&obj_types=virtualization.cluster&lookup=iexact'),
+        '.device.device_type': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicetype'),
+        '.device.manufacturer': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.manufacturer'),
+        '.device.role': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicerole'),
+        '.device.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
+        '.device.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
+        '.segment.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
+        '.reference': lambda: '/refred/{{value}}',
+        # exact matches
+        'network.name': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.prefix&lookup=iexact'),
+        'related.device_id': lambda: netbox_url('/dcim/devices/{{value}}'),
+        'related.device_name': lambda: netbox_url(
+            '/search/?q={{value}}&obj_types=dcim.device&obj_types=virtualization.virtualmachine&lookup=iexact'
+        ),
+        'related.device_type': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicetype'),
+        'related.manufacturer': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.manufacturer'),
+        'related.role': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.devicerole'),
+        'related.service': lambda: netbox_url('/search/?q={{value}}&obj_types=ipam.service'),
+        'related.site': lambda: netbox_url('/search/?q={{value}}&obj_types=dcim.site&lookup=iexact'),
+        'zeek.files.extracted_uri': lambda: '/{{value}}',
+    }
+
+    for f in [
+        x
+        for x in fields
+        if x['name'][:1].isalpha() and (x['name'] not in format_map) and (x['type'] not in pivot_ignore_types)
+    ]:
+        name = f['name']
+        fmt = {'id': 'url', 'params': {'labelTemplate': '{{value}}', 'openLinkInCurrentTab': False}}
+
+        # lookup by exact name or suffix
+        template_func = field_map.get(name) or next(
+            (fn for suffix, fn in field_map.items() if name.endswith(suffix)), None
         )
-        for shardLine in shardsResponse.iter_lines():
-            shardInfo = shardLine.decode('utf-8').split()
-            if (shardInfo is not None) and (len(shardInfo) == 2) and (shardInfo[1] == SHARD_UNASSIGNED_STATUS):
-                putResponse = requests.put(
-                    '{}/{}/{}'.format(args.opensearchUrl, shardInfo[0], '_settings'),
-                    headers={
-                        'Content-Type': 'application/json',
-                        xsrfHeader: 'true',
-                    },
-                    data=json.dumps({'index': {'number_of_replicas': 0}}),
-                    auth=opensearchReqHttpAuth,
-                    verify=args.opensearchSslVerify,
-                )
-                putResponse.raise_for_status()
+        if template_func:
+            fmt['params']['urlTemplate'] = template_func()
+        else:
+            # for Arkime to query by database field name, see arkime issue/PR 1461/1463
+            val_quote = '"' if f['type'] == 'string' else ''
+            prefix = '' if name.startswith(('zeek', 'suricata')) else 'db:'
+            fmt['params']['urlTemplate'] = f'/iddash2ark/{prefix}{name} == {val_quote}{{{{value}}}}{val_quote}'
+
+        format_map[name] = fmt
+
+    return format_map
+
+
+def update_dashboard_index_pattern(args, session, index_id, fields, field_format_map):
+    put_index_info = {
+        'attributes': {
+            'title': args.index,
+            'fields': json.dumps(fields),
+            'fieldFormatMap': json.dumps(field_format_map),
+        }
+    }
+    put_response = session.put(
+        f"{args.dashboards_url}/{GET_PUT_INDEX_PATTERN_URI}/{index_id}", data=json.dumps(put_index_info)
+    )
+    put_response.raise_for_status()
+
+
+def fix_unassigned_shards(args, session):
+    resp = session.get(f"{args.opensearch_url}/{GET_SHARDS_URL}")
+    for line in resp.iter_lines():
+        shard_info = line.decode('utf-8').split()
+        if len(shard_info) == 2 and shard_info[1] == SHARD_UNASSIGNED_STATUS:
+            put_response = session.put(
+                f"{args.opensearch_url}/{shard_info[0]}/_settings",
+                data=json.dumps({'index': {'number_of_replicas': 0}}),
+            )
+            put_response.raise_for_status()
+
+
+###################################################################################################
+# main
+def main():
+    args = parse_args()
+    args, session = setup_environment(args)
+    get_versions(args, session)
+
+    logging.debug(os.path.join(script_path, script_name))
+    logging.debug(f"Arguments: {sys.argv[1:]}")
+    logging.debug(f"Arguments: {args}")
+
+    # find the ID of the index name (probably will be the same as the name)
+    index_id = get_index_id(args, session)
+    # get the current fields list
+    fields = get_fields_list(args, session)
+    # get the fields from the template, if specified, and merge those into the fields list
+    fields = merge_template_fields(args, session, fields)
+    logging.info(f'{args.index} would have {len(fields)} fields')
+
+    # define field formatting map for Dashboards -> Arkime drilldown and other URL drilldowns
+    field_format_map = build_field_format_map(args, fields, get_prev_field_format_map(args, session, index_id))
+
+    if not args.dryrun:
+        # set the index pattern with our complete list of fields
+        update_dashboard_index_pattern(args, session, index_id, fields, field_format_map)
+        logline = "success"
+    else:
+        logline = "success (dry run only, no write performed)"
+    logging.info(logline)
+    print(logline)
+
+    if args.opensearch_mode == DatabaseMode.OpenSearchLocal and args.fix_unassigned and not args.dryrun:
+        # set some configuration-related indexes' (e.g., opensearch/opendistro) replica count to 0
+        # so we don't have yellow index state on those
+        fix_unassigned_shards(args, session)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        logging.exception(f"Unexpected error: {e}")
+        sys.exit(1)

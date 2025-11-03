@@ -91,6 +91,7 @@ cp -r "$SCRIPT_PATH"/../shared \
       "$SCRIPT_PATH"/../README.md "$SCRIPT_PATH"/
 cp "$SCRIPT_PATH"/../scripts/documentation_build.sh "$SCRIPT_PATH"/docs/
 cp "$SCRIPT_PATH"/../scripts/malcolm_utils.py "$SCRIPT_PATH"/shared/bin/
+cp "$SCRIPT_PATH"/../scripts/malcolm_constants.py "$SCRIPT_PATH"/shared/bin/
 mkdir "$SCRIPT_PATH"/nginx "$SCRIPT_PATH"/suricata
 cp -r "$SCRIPT_PATH"/../suricata/rules-default "$SCRIPT_PATH"/suricata/
 cp -r "$SCRIPT_PATH"/../nginx/landingpage/css "$SCRIPT_PATH"/nginx/

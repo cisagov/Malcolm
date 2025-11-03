@@ -33,7 +33,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 ENV ARKIME_DIR "/opt/arkime"
-ENV ARKIME_VERSION "5.8.0"
+ENV ARKIME_VERSION "5.8.2"
 ENV ARKIME_DEB_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/arkime_${ARKIME_VERSION}-1.debian13_XXX.deb"
 ENV ARKIME_JA4_SO_URL "https://github.com/arkime/arkime/releases/download/v${ARKIME_VERSION}/ja4plus.XXX.so"
 ENV ARKIME_LOCALELASTICSEARCH no
@@ -172,6 +172,7 @@ ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/pcap_processor.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=644 arkime/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 container-health-scripts/arkime.sh /usr/local/bin/container_health.sh

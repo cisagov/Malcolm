@@ -262,37 +262,25 @@ $ ls -l malcolm*.zip
 ```bash
 $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
 Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
-  inflating: install.py
-  inflating: malcolm_20250401_225238_df27028c.README.txt
-  inflating: malcolm_20250401_225238_df27028c.tar.gz
-  inflating: malcolm_common.py
-  inflating: malcolm_kubernetes.py
-  inflating: malcolm_utils.py
+creating: installer/
+…
+inflating: install.py              
+inflating: legacy_install.py       
+inflating: malcolm_20251029_140727_d22a504f.README.txt  
+inflating: malcolm_20251029_140727_d22a504f.tar.gz  
+inflating: malcolm_common.py       
+inflating: malcolm_constants.py    
+inflating: malcolm_kubernetes.py   
+inflating: malcolm_utils.py 
 ```
 
-* Run `install.py`.
-    - Malcolm's installation and configuration scripts will guide users through the setup process.
-    - Use the following resources to answer the installation and configuration questions:
-        + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
-        + [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
-
-* `install.py` part 1: Docker installation and system configuration
-    - The [installer script](malcolm-config.md#ConfigAndTuning) will install and configure Docker and Docker Compose, and make necessary changes to system configuration.
-
-```bash
-"docker info" failed, attempt to install Docker? (Y / n): y
-
-Attempt to install Docker using official repositories? (Y / n): y
-
-Apply recommended system tweaks automatically without asking for confirmation? y
-```
-
-* `install.py` part 2: Malcolm configuration
-    - Users should answer the remaining [configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig) as they apply to their use case.
+* Run `install.py`. Use the following resources to answer the installation and configuration options:
+    + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#UIOpts)
+    + [In-depth description of configuration menu items](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
 
 * Pull Malcolm container images
-    - Answer **Yes** when prompted to **Pull Malcolm images?**
-    - Pulling the container images may take several minutes.
+    - Select **Yes** for **Pull Malcolm Images** in the **Malcolm Installation Options** menu, or pull the images manually by running `docker compose --profile malcolm pull` or the [`./scripts/github_image_helper.sh`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/scripts/github_image_helper.sh) convenience script
+    - Pulling the container images may take several minutes
 
 * Reboot the instance (`sudo reboot`)
     - This allows the changes to system configuration to take effect
@@ -573,20 +561,24 @@ done
     ```bash
     $ unzip malcolm-{{ site.malcolm.version }}-docker_install.zip
     Archive:  malcolm-{{ site.malcolm.version }}-docker_install.zip
-      inflating: install.py
-      inflating: malcolm_20250401_225238_df27028c.README.txt
-      inflating: malcolm_20250401_225238_df27028c.tar.gz
-      inflating: malcolm_common.py
-      inflating: malcolm_kubernetes.py
-      inflating: malcolm_utils.py
+    creating: installer/
+    …
+    inflating: install.py              
+    inflating: legacy_install.py       
+    inflating: malcolm_20251029_140727_d22a504f.README.txt  
+    inflating: malcolm_20251029_140727_d22a504f.tar.gz  
+    inflating: malcolm_common.py       
+    inflating: malcolm_constants.py    
+    inflating: malcolm_kubernetes.py   
+    inflating: malcolm_utils.py 
     ```
 
 * Configure Malcolm
-    * `./install.py -f "${KUBECONFIG:-$HOME/.kube/config}"`
+    * `./configure -f "${KUBECONFIG:-$HOME/.kube/config}"`
     * Malcolm's configuration scripts will guide users through the setup process.
     * Use the following resources to answer the installation and configuration questions:
-        * [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)
-        * [In-depth description of configuration questions](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
+        + [Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#UIOpts)
+        + [In-depth description of configuration menu items](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)
     * Configure [authentication](authsetup.md#AuthSetup)
         * `./Malcolm/scripts/auth_setup -f "${KUBECONFIG:-$HOME/.kube/config}"`
         * [This example](malcolm-hedgehog-e2e-iso-install.md#MalcolmAuthSetup) can guide users through the prompts.

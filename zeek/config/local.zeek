@@ -120,7 +120,7 @@ global json_format = (getenv("ZEEK_JSON") == true_regex) ? T : F;
 @load ./login.zeek
 @load ./kafka.zeek
 
-@if (!disable_best_guess_ics)
+@if ((!disable_ics_all) && (!disable_best_guess_ics))
  @load ./guess.zeek
 @endif
 

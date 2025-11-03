@@ -855,6 +855,9 @@
                     "id": {
                       "type": "integer"
                     },
+                    "opcode": {
+                      "type": "integer"
+                    },
                     "rrname": {
                       "type": "keyword"
                     },

@@ -6,6 +6,7 @@
 import base64
 import glob
 import os
+import sys
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import nullcontext
@@ -14,6 +15,11 @@ from itertools import chain
 from io import StringIO
 from pathlib import Path
 
+from malcolm_constants import (
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
+)
+
 from malcolm_common import (
     DotEnvDynamic,
     GetMemMegabytesFromJavaOptsLine,
@@ -21,8 +27,6 @@ from malcolm_common import (
     KubernetesDynamic,
     GetMalcolmPath,
     NullRepresenter,
-    PROFILE_HEDGEHOG,
-    PROFILE_MALCOLM,
     YAMLDynamic,
     YAML_VERSION,
 )
@@ -1008,7 +1012,7 @@ def StartMalcolm(
                             outYaml.representer.add_representer(type(None), NullRepresenter())
                             outYaml.boolean_representation = ['false', 'true']
                             outYaml.version = YAML_VERSION
-                            outYaml.width = 4096
+                            outYaml.width = sys.maxsize
                             outYaml.dump_all(manYamlFileContents, tmpYmlFile)
 
                     if not dryrun:

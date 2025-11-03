@@ -527,33 +527,37 @@ function InstallMalcolm {
   if [[ $CONFIRMATION =~ ^[Yy] ]]; then
     if _GitClone https://github.com/idaholab/Malcolm "$MALCOLM_PATH"; then
       pushd "$MALCOLM_PATH" >/dev/null 2>&1
-      python3 ./scripts/configure \
-          --defaults \
-          --runtime docker \
-          --malcolm-profile \
-          --restart-malcolm \
-          --auto-arkime \
-          --auto-suricata \
-          --auto-zeek \
-          --zeek-ics \
-          --zeek-ics-best-guess \
-          --auto-oui \
-          --auto-freq \
-          --file-extraction notcommtxt \
-          --file-preservation quarantined \
-          --extracted-file-server \
-          --extracted-file-server-password infected \
-          --extracted-file-server-zip \
-          --extracted-file-capa \
-          --extracted-file-clamav \
-          --extracted-file-yara \
-          --netbox local \
-          --netbox-enrich \
-          --netbox-autopopulate \
-          --netbox-auto-prefixes \
-          --netbox-site-name "$(hostname -s)"
-
-      grep image: docker-compose.yml | awk '{print $2}' | sort -u | xargs -l -r $SUDO_CMD docker pull
+      SETTINGS_FILE="$(mktemp --suffix=.json)"
+      python3 ./scripts/configure --defaults --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
+      jq ".configuration.malcolmRestartPolicy = \"unless-stopped\"
+          | .configuration.malcolmProfile = true
+          | .configuration.autoArkime = true
+          | .configuration.autoSuricata = true
+          | .configuration.autoZeek = true
+          | .configuration.malcolmIcs = true
+          | .configuration.zeekICSBestGuess = true
+          | .configuration.autoOui = true
+          | .configuration.autoFreq = true
+          | .configuration.fileCarveEnabled = true
+          | .configuration.fileCarveMode = \"notcommtxt\"
+          | .configuration.filePreserveMode = \"quarantined\"
+          | .configuration.fileCarveHttpServer = true
+          | .configuration.fileCarveHttpServerZip = true
+          | .configuration.fileCarveHttpServeEncryptKey = \"infected\"
+          | .configuration.capaScan = true
+          | .configuration.clamAvScan = true
+          | .configuration.yaraScan = true
+          | .configuration.netboxMode = \"local\"
+          | .configuration.netboxSiteName = \"$(hostname -s)\"
+          | .configuration.netboxLogstashEnrich = true
+          | .configuration.netboxAutoPopulate = true
+          | .configuration.netboxLogstashAutoCreatePrefix = true
+          | .configuration.runtimeBin = \"docker\"" \
+          "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+      python3 ./scripts/configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
+      rm -f "${SETTINGS_FILE}"
+      echo "Pulling Malcolm container images..." >&2
+      ./scripts/github_image_helper.sh "$(./scripts/github_image_helper.sh 99999 2>&1 | grep PullAndTagGithubWorkflowImages | awk '{print $1}')"
       echo "Please run $MALCOLM_PATH/scripts/auth_setup to complete configuration" >&2
       popd >/dev/null 2>&1
     fi

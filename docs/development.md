@@ -87,36 +87,15 @@ Alternately, if you have forked Malcolm on GitHub, [workflow files]({{ site.gith
 
 ```
 $ ./scripts/malcolm_appliance_packager.sh 
-You must set a username and password for Malcolm, and self-signed X.509 certificates will be generated
-
-Package Kubernetes manifests in addition to docker-compose.yml [y/N]?
-
-Packaged Malcolm to "/home/user/tmp/malcolm_20250310_134542_2425d08b.tar.gz"
-
-Do you need to package container images also [y/N]? n
-
-To install Malcolm:
-  1. Run install.py
-  2. Follow the prompts
-
-To start, stop, restart, etc. Malcolm:
-  Use the control scripts in the "scripts/" directory:
-   - start       (start Malcolm)
-   - stop        (stop Malcolm)
-   - restart     (restart Malcolm)
-   - logs        (monitor Malcolm logs)
-   - wipe        (stop Malcolm and clear its database)
-   - auth_setup  (change authentication-related settings)
-
-Malcolm services can be accessed at https://<IP or hostname>/
+...
+Packaged Malcolm to "/home/user/Downloads/malcolm_20251029_140727_d22a504f.tar.gz"
 
 Do you need to package container images also [y/N]? y
+This might take a few minutes...
 
-Packaged Malcolm images to "/home/user/tmp/malcolm_20250310_134542_2425d08b_images.tar.xz"
+Packaged Malcolm images to "/home/user/Downloads/malcolm_20251029_140727_d22a504f_images.tar.xz"
 
-To install Malcolm:
-  1. Run install.py
-  2. Follow the prompts
+To install and configure Malcolm, run install.py
 
 To start, stop, restart, etc. Malcolm:
   Use the control scripts in the "scripts/" directory:
@@ -134,11 +113,17 @@ The above example will result in the following artifacts for distribution as exp
 
 ```
 $ ls -lh
-total 2.0G
--rwxr-xr-x 1 user user  61k May 13 11:32 install.py
--rw-r--r-- 1 user user 2.0G May 13 11:37 malcolm_20190513_101117_f0d052c_images.tar.xz
--rw-r--r-- 1 user user  683 May 13 11:37 malcolm_20190513_101117_f0d052c.README.txt
--rw-r--r-- 1 user user 183k May 13 11:32 malcolm_20190513_101117_f0d052c.tar.gz
+total 4.0G
+drwxrwxr-x 10 user user  156 Oct 29 17:22 installer
+-rwxrwxr-x  1 user user  44K Oct 29 17:22 install.py
+-rwxrwxr-x  1 user user 236K Oct 29 17:22 legacy_install.py
+-rw-rw-r--  1 user user  460 Oct 29 17:22 malcolm_20251029_140727_d22a504f.README.txt
+-rw-rw-r--  1 user user 270K Oct 29 17:22 malcolm_20251029_140727_d22a504f.tar.gz
+-rw-rw-r--  1 user user   4G Oct 29 17:22 malcolm_20251029_140727_d22a504f_images.tar.xz
+-rw-rw-r--  1 user user  74K Oct 29 17:22 malcolm_common.py
+-rw-rw-r--  1 user user 5.6K Oct 29 17:22 malcolm_constants.py
+-rw-rw-r--  1 user user  50K Oct 29 17:22 malcolm_kubernetes.py
+-rw-rw-r--  1 user user  37K Oct 29 17:22 malcolm_utils.py
 ```
 
 ## Installing from pre-packaged installation files
@@ -148,6 +133,6 @@ If you have obtained pre-packaged installation files to install Malcolm on a non
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.README.txt` - This readme file contains minimal setup instructions for extracting the contents of the other tarballs and running the Malcolm appliance.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` - This tarball contains the configuration files and directory configuration used by an instance of Malcolm. It can be extracted via `tar -xf malcolm_YYYYMMDD_HHNNSS_xxxxxxx.tar.gz` upon which a directory will be created (named similarly to the tarball) containing the directories and configuration files. Alternatively, `install.py` can accept this filename as an argument and handle its extraction and initial configuration for you.
 * `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz` - This tarball contains the images used by Malcolm. It can be imported manually via `docker load -i malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`
-* `install.py` - This install script can load the images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you.
+* `install.py` - This install script can load the images and extract Malcolm configuration files from the aforementioned tarballs and do some initial configuration for you (see [Running `install.py`](ubuntu-install-example.md#UIOpts)).
 
 Run `install.py malcolm_XXXXXXXX_XXXXXX_XXXXXXX.tar.gz` and follow the prompts. If you do not already have Docker and Docker Compose installed, the `install.py` script will help you install them.

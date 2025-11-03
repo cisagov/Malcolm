@@ -117,9 +117,7 @@ Packaged Malcolm to "/home/romeogdetlevjr/Malcolm/releases/malcolm_20241008_2159
 
 Do you need to package container images also [y/N]? n
 
-To install Malcolm:
-  1. Run install.py
-  2. Follow the prompts
+To install and configure Malcolm, run install.py
 
 To start, stop, restart, etc. Malcolm:
   Use the control scripts in the "scripts/" directory:
@@ -133,13 +131,16 @@ To start, stop, restart, etc. Malcolm:
 Malcolm services can be accessed at https://<IP or hostname>/
 
 $ ls -l
-total 462,848
--rwxr-xr-x 1 romeogdetlevjr romeogdetlevjr 219,939 Oct 22 10:32 install.py
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr     475 Oct 22 10:33 malcolm_20241008_215936_deadbeef.README.txt
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr 115,865 Oct 22 10:32 malcolm_20241008_215936_deadbeef.tar.gz
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr  41,372 Oct 22 10:32 malcolm_common.py
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr  44,226 Oct 22 10:32 malcolm_kubernetes.py
--rw-r--r-- 1 romeogdetlevjr romeogdetlevjr  24,865 Oct 22 10:32 malcolm_utils.py
+total 749,568
+drwxrwxr-x 10 romeogdetlevjr romeogdetlevjr     156 Oct 29 14:15 installer
+-rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr  44,201 Oct 29 14:15 install.py
+-rwxrwxr-x  1 romeogdetlevjr romeogdetlevjr 241,524 Oct 29 14:15 legacy_install.py
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr     460 Oct 29 14:15 malcolm_20251029_140727_d22a504f.README.txt
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr 275,657 Oct 29 14:15 malcolm_20251029_140727_d22a504f.tar.gz
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  75,769 Oct 29 14:15 malcolm_common.py
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr   5,685 Oct 29 14:15 malcolm_constants.py
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  50,329 Oct 29 14:15 malcolm_kubernetes.py
+-rw-rw-r--  1 romeogdetlevjr romeogdetlevjr  36,952 Oct 29 14:15 malcolm_utils.py
 ```
 
 The resultant `.py`, `.tar.gz,` and `.txt` files are ready to be included as assets in the Malcolm release on GitHub.

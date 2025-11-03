@@ -1,8 +1,6 @@
 # <a name="ConfigAndTuning"></a>Malcolm Configuration
 
-Malcolm's runtime settings are stored (with a few exceptions) as environment variables in configuration files ending with a `.env` suffix in the `./config` directory. The `./scripts/configure` script can help users configure and tune these settings.
-
-Run `./scripts/configure` and answer the questions to configure Malcolm. For an in-depth treatment of these configuration questions, see the **Configuration** section in **[End-to-end Malcolm and Hedgehog Linux ISO Installation](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)**.
+Malcolm's runtime settings are stored (with a few exceptions) as environment variables in configuration files ending with a `.env` suffix in the `./config` directory. The `./scripts/configure` script can help users configure and tune these settings. For an in-depth treatment of the configuration script, see the **Configuration** section in [**End-to-end Malcolm and Hedgehog Linux ISO Installation**](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems).
 
 ## <a name="MalcolmConfigEnvVars"></a>Environment variable files
 
@@ -103,8 +101,8 @@ Although the configuration script automates many of the following configuration 
     - `NGINX_X_FORWARDED_PROTO_OVERRIDE`
     - The following variables control nginx's [resolver directive](https://nginx.org/en/docs/http/ngx_http_core_module.html#resolver). Note that these settings do not affect Malcolm's ability to capture or inspect IPv4/IPv6 traffic: they are only used if and when nginx itself needs to resolve hostnames in the network in which Malcolm resides.
         + `NGINX_RESOLVER_OVERRIDE` - if set, overrides automatic detection of the resolver address used (default is unset)
-        + `NGINX_RESOLVER_IPV4_OFF` - if `true`, sets the `ipv4=off` parameter in the resolver directive (default is `false`)
-        + `NGINX_RESOLVER_IPV6_OFF` - if `true`, sets the `ipv6=off` parameter in the resolver directive; it is recommended to set this to `true` if your network does not support IPv6 (default is `false`)
+        + `NGINX_RESOLVER_IPV4` - if `false`, sets the `ipv4=off` parameter in the resolver directive (default is `true`)
+        + `NGINX_RESOLVER_IPV6` - if `false`, sets the `ipv6=off` parameter in the resolver directive; it is recommended to set this to `false` if your network does not support IPv6 (default is `true`)
 * **`opensearch.env`** - settings specific to [OpenSearch](https://opensearch.org/)
     - `OPENSEARCH_JAVA_OPTS` - one of OpenSearch's most [important settings](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/index/#important-settings), the `-Xmx` and `-Xms` values set the size of OpenSearch's Java heap (we recommend setting this value to half of system RAM, up to 32 gigabytes)
     - `OPENSEARCH_PRIMARY` - one of `opensearch-local`, `opensearch-remote`, or `elasticsearch-remote`, to determine the [OpenSearch or Elasticsearch instance](opensearch-instances.md#OpenSearchInstance) Malcolm will use  (default `opensearch-local`)
@@ -175,7 +173,7 @@ Although the configuration script automates many of the following configuration 
     - `ZEEK_DISABLE_ICS_ALL` and `ZEEK_DISABLE_ICS_…` - if set to `true`, these variables can be used to disable Zeek's protocol analyzers for Operational Technology/Industrial Control Systems (OT/ICS) protocols
     - `ZEEK_DISABLE_BEST_GUESS_ICS` - see ["Best Guess" Fingerprinting for ICS Protocols](ics-best-guess.md#ICSBestGuess)
     - `ZEEK_EXTRACTOR_MODE` – determines the file extraction behavior for file transfers detected by Zeek; see [Automatic file extraction and scanning](file-scanning.md#ZeekFileExtraction) for more details
-    - `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), [Google](zeek-intel.md#ZeekIntelGoogle), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`7 days ago`). Note that this value can be overridden per-feed by adding a `since:` value to each feed's respective configuration YAML file.
+    - `ZEEK_INTEL_FEED_SINCE` - when querying a [TAXII](zeek-intel.md#ZeekIntelSTIX), [MISP](zeek-intel.md#ZeekIntelMISP), [Google](zeek-intel.md#ZeekIntelGoogle), or [Mandiant](zeek-intel.md#ZeekIntelMandiant) threat intelligence feed, only process threat indicators created or modified since the time represented by this value; it may be either a fixed date/time (`01/01/2025`) or relative interval (`24 hours ago`). Note that this value can be overridden per-feed by adding a `since:` value to each feed's respective configuration YAML file.
     - `ZEEK_INTEL_ITEM_EXPIRATION` - specifies the value for Zeek's [`Intel::item_expiration`](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html#id-Intel::item_expiration) timeout as used by the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) (default `-1min`, which disables item expiration)
     - `ZEEK_INTEL_REFRESH_CRON_EXPRESSION` - Specifies a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression) (using [`cronexpr`](https://github.com/aptible/supercronic/tree/master/cronexpr#implementation)-compatible syntax) indicating the refresh interval for generating the [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel) files (defaults to empty, which disables automatic refresh)
     - `ZEEK_JA4SSH_PACKET_COUNT` - the Zeek [JA4+ plugin](https://github.com/FoxIO-LLC/ja4) calculates the JA4SSH value once for every *x* SSH packets; *x* is set here (default `200`)
@@ -195,22 +193,83 @@ Although the configuration script automates many of the following configuration 
 The `./scripts/configure` script can also be run noninteractively which can be useful for scripting Malcolm setup. This behavior can be selected by supplying the `-d` or `--defaults` option on the command line. Running with the `--help` option will list the arguments accepted by the script:
 
 ```
-$ ./scripts/configure --help
-usage: configure <arguments>
+usage: configure [-h] [--debug [true|false]] [--quiet] [--configure [true|false]] [--dry-run] [--log-to-file [filename]] [--skip-splash] [--tui | --dui | --gui | --non-interactive] [--compose-file <string>] [--environment-dir-input <string>] [--environment-dir-output <string>]
+                 [--export-malcolm-config-file [<path>]] [--import-malcolm-config-file <path> | --load-existing-env [true|false] | --defaults] [--malcolm-file <string>] [--image-file <string>] [--extra [EXTRASETTINGS ...]]
 
-Malcolm install script
+Malcolm Installer
 
 options:
-  -v [true|false], --verbose [true|false]
-                        Verbose output
-  -d [true|false], --defaults [true|false]
-                        Accept defaults to prompts without user interaction
-  -c [true|false], --configure [true|false]
-                        Only do configuration (not installation)
+  -h, --help            show this help message and exit
+
+Installer Options:
+  --debug, --verbose [true|false]
+                        Enable debug output including tracebacks and debug utilities
+  --quiet, --silent     Suppress console logging output during installation
+  --configure, -c [true|false]
+                        Only write configuration and ancillary files; skip installation steps
+  --dry-run             Log planned actions without writing files or making system changes
+  --log-to-file [filename]
+                        Log output to file. If no filename provided, creates timestamped log file.
+  --skip-splash         Skip the splash screen prompt on startup
+
+Interface Mode (mutually exclusive):
+  --tui                 Run in command-line text-based interface mode (default)
+  --dui                 Run in python dialogs text-based user interface mode (if available - requires python dialogs)
+  --gui                 Run in graphical user interface mode (if available - requires customtkinter)
+  --non-interactive     Run in non-interactive mode for unattended installations (suppresses all user prompts)
+
+Configuration File Options:
+  --compose-file, --configure-file, --kube-file, -f <string>
+                        Path to docker-compose.yml (for compose) or kubeconfig (for Kubernetes)
+
+Environment Config Options:
+  --environment-dir-input <string>
+                        Input directory containing Malcolm's .env and .env.example files
+  --environment-dir-output, -e <string>
+                        Target directory for writing Malcolm's .env files
+  --export-malcolm-config-file, --export-mc-file [<path>]
+                        Export configuration to JSON/YAML settings file (auto-generates filename if not specified)
+  --import-malcolm-config-file, --import-mc-file <path>
+                        Import configuration from JSON/YAML settings file
+  --load-existing-env, -l [true|false]
+                        Automatically load provided config/ .env files from the input directory when present. Can be used in conjunction with --environment-dir-input
+  --defaults, -d        Use built-in default configuration values and skip loading from the config directory
+
+Installation Files:
+  --malcolm-file, -m <string>
+                        Malcolm .tar.gz file for installation
+  --image-file, -i <string>
+                        Malcolm container images .tar.xz file for installation
+
+Additional Configuration Options:
+  --extra [EXTRASETTINGS ...]
+                        Extra environment variables to set (e.g., foobar.env:VARIABLE_NAME=value)
 …
 ```
 
-Note that the value for **any** argument not specified on the command line will be reset to its default (as if for a new Malcolm installation) regardless of the setting's current value in the corresponding `.env` file. In other words, users who want to use the `--defaults` option should carefully review all available command-line options and choose all that apply.
+Once Malcolm is configured correctly, the `--export-malcolm-config-file` option can be used to export the configuration to a file that can be used with `--import-malcolm-config-file` to restore it later or transfer it to another Malcolm instance for import.
+
+To modify Malcolm settings programatically in scripting, a tool like [`jq`](https://jqlang.org/) can be used with `--export-malcolm-config-file` and `--import-malcolm-config-file`, as illustrated here:
+```bash
+# export the current configuration to a JSON file without modifying anything in ./config/
+SETTINGS_FILE="$(mktemp --suffix=.json)"
+./scripts/configure --dry-run --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
+
+# use JQ To set whatever options in the exported JSON configuration file you wish to change
+JQ_FILE="$(mktemp --suffix=.jq)"
+tee "${JQ_FILE}" >/dev/null <<EOF
+  .configuration.dashboardsDarkMode = true
+  | .configuration.reverseDns = true
+  | .configuration.pcapNodeName = "Engineering Workstation"
+EOF
+jq -f "${JQ_FILE}" "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+
+# import the modified configuration
+./scripts/configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
+
+# clean up
+rm -f "${SETTINGS_FILE}" "${JQ_FILE}"
+```
 
 Similarly, [authentication](authsetup.md#AuthSetup)-related settings can also be set noninteractively by using the [command-line arguments](authsetup.md#CommandLineConfig) for `./scripts/auth_setup`.
 

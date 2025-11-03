@@ -1,5 +1,5 @@
 # .envrc and .justfile can be used by direnv (https://github.com/direnv/direnv) and
-#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/configure
+#   just (https://github.com/casey/just) for quicker turnaround for ./scripts/legacy_install.py
 #   and ./scripts/auth_setup. This will all likely be made obsolete when cisagov/Malcolm#395
 #   is complete. This hasn't been exhaustively tested, so it's recommended more for
 #   development convenience than it is for production use.
@@ -11,11 +11,13 @@ export MALCOLM_URL=
 
 # main configuration variables
 export VERBOSE=
-export MALCOLM_PROFILE=true
+export MALCOLM_PROFILE=malcolm
 export NODE_NAME=malcolm
 export DARK_MODE=true
 export HTTPS=true
-export RESTART_MALCOLM=false
+export NGINX_RESOLVER_IPV4=true
+export NGINX_RESOLVER_IPV6=false
+export RESTART_MALCOLM=no
 export REVERSE_PROXIED=false
 export TRAEFIK_HOST=
 export TRAEFIK_HOST_OPENSEARCH=
@@ -63,9 +65,9 @@ export AUTO_ZEEK=true
 export ZEEK_ICS=true
 export ZEEK_ICS_BEST_GUESS=true
 export ZEEK_INTEL_ON_STARTUP=true
-export ZEEK_INTEL_FEED_SINCE="7 days ago"
+export ZEEK_INTEL_FEED_SINCE="24 hours ago"
 export ZEEK_INTEL_CRON_EXPRESSION='0 0 * * *'
-export ZEEK_INTEL_TIME_EXPIRATION="-1min"
+export ZEEK_INTEL_ITEM_EXPIRATION="-1min"
 export REVERSE_DNS=false
 export AUTO_OUI=true
 export AUTO_FREQ=true
@@ -86,8 +88,8 @@ export NETBOX_AUTOPOPULATE=false
 export NETBOX_AUTO_PREFIXES=false
 export NETBOX_SITE_NAME=Malcolm
 export NETBOX_AUTO_POPULATE_SUBNETS=
-export LIVE_CAPTURE_IFACE=eth0
-export LIVE_CAPTURE_FILTER="not\ port\ 5044\ and\ not\ port\ 5045\ and\ not\ port\ 8005\ and\ not\ port\ 8006\ and\ not\ port\ 9200"
+export LIVE_CAPTURE_IFACE=
+export LIVE_CAPTURE_FILTER="not port 5044 and not port 5045 and not port 8005 and not port 8006 and not port 9200"
 export LIVE_CAPTURE_IFACE_TWEAK=true
 export LIVE_CAPTURE_STATS=true
 export LIVE_CAPTURE_ARKIME_NODE_HOST=

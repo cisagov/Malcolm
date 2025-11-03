@@ -33,11 +33,11 @@ ENV PUSER_RLIMIT_UNLOCK true
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
-ENV SUPERCRONIC_VERSION "0.2.34"
+ENV SUPERCRONIC_VERSION "0.2.38"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.47.2"
+ENV YQ_VERSION "4.48.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV SURICATA_VERSION_PATTERN "1:7.0.*"
@@ -134,6 +134,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
 
 COPY --from=ghcr.io/mmguero-dev/gostatic --chmod=755 /goStatic /usr/bin/goStatic
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/pcap_utils.py /usr/local/bin/
 ADD --chmod=644 shared/bin/suricata_socket.py /usr/local/bin/
 ADD --chmod=644 suricata/supervisord.conf /etc/supervisord.conf

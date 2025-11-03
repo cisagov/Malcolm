@@ -14,7 +14,7 @@ Installing and configuring Docker to run under the Windows Subsystem for Linux (
 1. If running Ubuntu 22.04 LTS, to ensure container networking works correctly, run `sudo update-alternatives --config iptables` and select the option for `iptables-legacy`.
 1. Restart WSL by rebooting the system.
 1. Upon rebooting, open the Start Menu and select the name of the Linux distribution you installed (**Ubuntu** is the default).
-1. Continue with the Malcolm installation and configuration as described in the [**Quick start**](quickstart.md#QuickStart) documentation or illustrated with the **[Installation example using Ubuntu 22.04 LTS](ubuntu-install-example.md#InstallationExample)**.
+1. Continue with the Malcolm installation and configuration as described in the [**Quick start**](quickstart.md#QuickStart) documentation or illustrated with the **[Installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample)**.
 
 Once the configuration is complete, Malcolm will be started and stopped from within your WSL distribution's terminal environment as described in [**Running Malcolm**](running.md).
 

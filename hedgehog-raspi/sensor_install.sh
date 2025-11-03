@@ -32,7 +32,7 @@ SHARED_DIR='/opt/buildshared'
 WORK_DIR="$(mktemp -d -p "$HOME" -t hedgehog-XXXXXX)"
 SENSOR_DIR='/opt/sensor'
 
-ARKIME_VERSION="5.8.0"
+ARKIME_VERSION="5.8.2"
 
 BEATS_VER="8.19.2"
 BEATS_OSS="-oss"
@@ -358,6 +358,7 @@ install_files() {
 
     # Shared Scripts setup
     ln -s /usr/local/bin/malcolm_utils.py "/opt/zeek/bin/"
+    ln -s /usr/local/bin/malcolm_constants.py "/opt/zeek/bin/"
     mv /usr/local/bin/zeekdeploy.sh "/opt/zeek/bin/"
     mv /usr/local/bin/zeek_iana_lookup_generator.py "/opt/zeek/bin/"
     rm -rf /usr/local/bin/aide_integrity_check.sh

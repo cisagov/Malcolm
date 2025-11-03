@@ -69,11 +69,11 @@ ARG FILEBEAT_SYSLOG_TCP_LISTEN=false
 ARG FILEBEAT_SYSLOG_UDP_LISTEN=false
 ARG PCAP_NODE_NAME=malcolm
 
-ENV SUPERCRONIC_VERSION "0.2.34"
+ENV SUPERCRONIC_VERSION "0.2.38"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
-ENV YQ_VERSION "4.47.2"
+ENV YQ_VERSION "4.48.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ENV EVTX_VERSION "0.9.0"
@@ -135,6 +135,7 @@ ADD --chmod=644 filebeat/filebeat-syslog-udp.yml /usr/share/filebeat-syslog-udp/
 ADD --chmod=644 filebeat/filebeat-syslog-tcp.yml /usr/share/filebeat-syslog-tcp/filebeat-syslog-tcp.yml
 ADD filebeat/scripts /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=755 shared/bin/opensearch_status.sh /usr/local/bin/
 ADD --chmod=644 filebeat/supervisord.conf /etc/supervisord.conf
