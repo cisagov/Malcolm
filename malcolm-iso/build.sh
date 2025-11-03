@@ -167,6 +167,9 @@ if [ -d "$WORKDIR" ]; then
   cp ./.justfile "$MALCOLM_DEST_DIR/.justfile"
   cp ./.envrc.example "$MALCOLM_DEST_DIR/.envrc.example"
   cp ./scripts/install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/legacy_install.py "$MALCOLM_DEST_DIR/scripts/"
+  cp -r ./scripts/installer/ "$MALCOLM_DEST_DIR/scripts/"
+  rm -rf "$MALCOLM_DEST_DIR/scripts/installer/tests" "$MALCOLM_DEST_DIR/scripts/installer/ui/gui"
   cp ./scripts/control.py "$MALCOLM_DEST_DIR/scripts/"
   pushd "$MALCOLM_DEST_DIR/scripts/" >/dev/null 2>&1
   ln -s ./control.py auth_setup
@@ -183,6 +186,7 @@ if [ -d "$WORKDIR" ]; then
   cp ./config/*.example "$MALCOLM_DEST_DIR/config/"
   cp ./config/*.yml "$MALCOLM_DEST_DIR/config/"
   cp ./scripts/malcolm_common.py "$MALCOLM_DEST_DIR/scripts/"
+  cp ./scripts/malcolm_constants.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_kubernetes.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./scripts/malcolm_utils.py "$MALCOLM_DEST_DIR/scripts/"
   cp ./kubernetes/*.* "$MALCOLM_DEST_DIR/kubernetes/"
@@ -229,6 +233,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
   cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
+  cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/
 
   mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/

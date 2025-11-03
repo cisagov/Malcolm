@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch-dashboards:3.2.0
+FROM opensearchproject/opensearch-dashboards:3.3.0
 
 LABEL maintainer="malcolm@inl.gov"
 LABEL org.opencontainers.image.authors='malcolm@inl.gov'
@@ -41,8 +41,8 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
     usermod -a -G tty ${PUSER} && \
     cd /tmp && \
         unzip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
-        sed -i "s/3\.0\.0/3\.2\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
-        sed -i "s/3\.0\.0/3\.2\.0/g" opensearch-dashboards/transformVis/package.json && \
+        sed -i "s/3\.0\.0/3\.3\.0/g" opensearch-dashboards/transformVis/opensearch_dashboards.json && \
+        sed -i "s/3\.0\.0/3\.3\.0/g" opensearch-dashboards/transformVis/package.json && \
         zip transformVis.zip opensearch-dashboards/transformVis/opensearch_dashboards.json opensearch-dashboards/transformVis/package.json && \
         cd /usr/share/opensearch-dashboards/plugins && \
         /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin install file:///tmp/transformVis.zip --allow-root && \
@@ -61,6 +61,7 @@ ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD --chmod=644 dashboards/opensearch_dashboards.yml /usr/share/opensearch-dashboards/config/opensearch_dashboards.orig.yml
 ADD --chmod=755 dashboards/scripts/docker_entrypoint.sh /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \

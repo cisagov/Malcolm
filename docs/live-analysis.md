@@ -41,7 +41,7 @@ When configuring the `hedgehog` profile, users must provide connection details f
 
 ## <a name="ExternalForward"></a>Manually forwarding logs from an external source
 
-Malcolm's Logstash instance can also be configured to accept logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat) by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) and answering "yes" to "`Expose Logstash port to external hosts?`" Enabling encrypted transport of these log files is discussed in [Configure authentication](authsetup.md#AuthSetup) and the description of the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars).
+Malcolm's Logstash instance can also be configured to accept logs from a [remote forwarder](https://www.elastic.co/products/beats/filebeat). Select `Y` for **Expose Malcolm Service Ports** (or `customize` and **Expose Logstash**) during [Malcolm configuration](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfigItems) to allow external remote forwarders to send logs to Logstash. Enabling encrypted transport of these log files is discussed in [Configure authentication](authsetup.md#AuthSetup) and the description of the `BEATS_SSL` environment variable in [`beats-common.env`](malcolm-config.md#MalcolmConfigEnvVars).
 
 Configuring Filebeat to forward Zeek logs to Malcolm might look something like this example [`filebeat.yml`](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html):
 ```

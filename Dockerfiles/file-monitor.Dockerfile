@@ -98,7 +98,7 @@ ENV EXTRACTED_FILE_HTTP_SERVER_KEY $EXTRACTED_FILE_HTTP_SERVER_KEY
 ENV EXTRACTED_FILE_HTTP_SERVER_RECURSIVE $EXTRACTED_FILE_HTTP_SERVER_RECURSIVE
 ENV EXTRACTED_FILE_HTTP_SERVER_PORT $EXTRACTED_FILE_HTTP_SERVER_PORT
 
-ENV SUPERCRONIC_VERSION "0.2.34"
+ENV SUPERCRONIC_VERSION "0.2.38"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
@@ -226,6 +226,7 @@ ADD --chmod=755 shared/bin/zeek_carve*.py /usr/local/bin/
 ADD --chmod=755 shared/bin/extracted_files_http_server.py /usr/local/bin/
 ADD --chmod=644 shared/bin/watch_common.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 ADD --chmod=644 file-monitor/supervisord.conf /etc/supervisord.conf
 ADD --chmod=755 file-monitor/docker-entrypoint.sh /docker-entrypoint.sh
 

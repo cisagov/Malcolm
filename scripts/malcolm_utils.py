@@ -4,8 +4,8 @@
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 
 import contextlib
-import enum
 import fnmatch
+import glob
 import hashlib
 import inspect
 import ipaddress
@@ -13,55 +13,39 @@ import json
 import logging
 import mmap
 import os
+import platform
 import re
 import socket
 import string
 import subprocess
 import sys
-import tempfile
 import time
+import types
 
-
-from base64 import b64decode
+from base64 import b64encode, b64decode, binascii
 from datetime import datetime
 from multiprocessing import RawValue
-from subprocess import PIPE, STDOUT, Popen, CalledProcessError
+from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
 from threading import Lock
+from typing import Optional
 
 try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, OrderedDict
 
+# Dynamically create a module named "scripts" which points to this directory
+if "scripts" not in sys.modules:
+    scripts_module = types.ModuleType("scripts")
+    scripts_module.__path__ = [os.path.dirname(os.path.abspath(__file__))]
+    sys.modules["scripts"] = scripts_module
 
-###################################################################################################
-# methods for Malcolm's connection to a data store
-class DatabaseMode(enum.IntFlag):
-    OpenSearchLocal = enum.auto()
-    OpenSearchRemote = enum.auto()
-    ElasticsearchRemote = enum.auto()
-    DatabaseUnset = enum.auto()
-
-
-DATABASE_MODE_LABELS = defaultdict(lambda: '')
-DATABASE_MODE_ENUMS = defaultdict(lambda: DatabaseMode.DatabaseUnset)
-DATABASE_MODE_LABELS[DatabaseMode.OpenSearchLocal] = 'opensearch-local'
-DATABASE_MODE_LABELS[DatabaseMode.OpenSearchRemote] = 'opensearch-remote'
-DATABASE_MODE_LABELS[DatabaseMode.ElasticsearchRemote] = 'elasticsearch-remote'
-DATABASE_MODE_ENUMS['opensearch-local'] = DatabaseMode.OpenSearchLocal
-DATABASE_MODE_ENUMS['opensearch-remote'] = DatabaseMode.OpenSearchRemote
-DATABASE_MODE_ENUMS['elasticsearch-remote'] = DatabaseMode.ElasticsearchRemote
-
-OS_MODE_HEDGEHOG = 'hedgehog'
-OS_MODE_MALCOLM = 'malcolm'
-
-HEDGEHOG_PCAP_DIR = "pcap"
-HEDGEHOG_ZEEK_DIR = "zeek"
-MALCOLM_DB_DIR = "datastore"
-MALCOLM_PCAP_DIR = "pcap"
-MALCOLM_LOGS_DIR = "logs"
+from scripts.malcolm_constants import (
+    DATABASE_MODE_ENUMS,
+    DATABASE_MODE_LABELS,
+)
 
 
 def DatabaseModeEnumToStr(val):
@@ -82,7 +66,7 @@ def aggressive_url_encode(val):
 # atomic integer class and context manager
 class AtomicInt:
     def __init__(self, value=0):
-        self.val = RawValue('i', value)
+        self.val = RawValue("i", value)
         self.lock = Lock()
 
     def increment(self):
@@ -112,7 +96,7 @@ class CountUntilException:
     def __init__(self, max=100, err=None):
         self.val = 0
         self.max = max
-        self.err = err if err else 'Invalid value'
+        self.err = err if err else "Invalid value"
 
     def increment(self):
         self.val += 1
@@ -128,6 +112,52 @@ def base64_decode_if_prefixed(s: str):
         return b64decode(s[7:]).decode('utf-8')
     else:
         return s
+
+
+def base64_encode_files_in_dir(directory, pattern):
+    """
+    Return a dict mapping relative file paths to Base64-encoded contents
+    for all files in the given directory (recursively) matching the glob pattern.
+    Example:
+        /tmp/foobar/app.env           -> "app.env"
+        /tmp/foobar/barbaz/what.env   -> "barbaz/what.env"
+    """
+    result = {}
+    # Enable recursive search with **
+    search_pattern = os.path.join(directory, "**", pattern)
+    for filepath in glob.glob(search_pattern, recursive=True):
+        if os.path.isfile(filepath):
+            with open(filepath, "rb") as f:
+                encoded = b64encode(f.read()).decode("utf-8")
+            rel_path = os.path.relpath(filepath, directory)
+            result[rel_path] = encoded
+    return result
+
+
+def base64_decode_files_to_dir(encoded_dict, dest_dir):
+    """
+    Given a dict mapping relative paths to Base64-encoded contents,
+    recreate the files under dest_dir.
+
+    - Creates dest_dir and subdirectories if they don’t exist
+    - Skips entries that fail Base64 decoding
+    """
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for rel_path, b64data in encoded_dict.items():
+        try:
+            decoded = b64decode(b64data, validate=True)
+        except (binascii.Error, ValueError):
+            continue
+
+        full_path = os.path.join(dest_dir, rel_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        try:
+            with open(full_path, "wb") as f:
+                f.write(decoded)
+        except Exception:
+            continue
 
 
 ###################################################################################################
@@ -262,7 +292,7 @@ class ContextLockedOrderedDict(OrderedDict):
 
 ###################################################################################################
 def custom_make_translation(text, translation):
-    regex = re.compile('|'.join(map(re.escape, translation)))
+    regex = re.compile("|".join(map(re.escape, translation)))
     return regex.sub(lambda match: translation[match.group(0)], text)
 
 
@@ -327,16 +357,55 @@ def deep_merge_in_place(source, destination):
 # recursive dictionary key search
 def dictsearch(d, target):
     val = filter(
-        None, [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()]
+        None,
+        [[b] if a == target else dictsearch(b, target) if isinstance(b, dict) else None for a, b in d.items()],
     )
     return [i for b in val for i in b]
+
+
+###################################################################################################
+# given a dict, return the first value sorted by value
+def min_hash_value_by_value(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the first value sorted by key
+def min_hash_value_by_key(x):
+    return next(
+        iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values())),
+        None,
+    )
+
+
+###################################################################################################
+# given a dict, return the last value sorted by value
+def max_hash_value_by_value(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[1])}.values()))
+    except Exception:
+        last = None
+    return last
+
+
+###################################################################################################
+# given a dict, return the last value sorted by key
+def max_hash_value_by_key(x):
+    try:
+        *_, last = iter(list({k: v for k, v in sorted(x.items(), key=lambda item: item[0])}.values()))
+    except Exception:
+        last = None
+    return last
 
 
 ###################################################################################################
 # print to stderr
 def eprint(*args, **kwargs):
     filteredArgs = (
-        {k: v for (k, v) in kwargs.items() if k not in ('timestamp', 'flush')} if isinstance(kwargs, dict) else {}
+        {k: v for (k, v) in kwargs.items() if k not in ("timestamp", "flush")} if isinstance(kwargs, dict) else {}
     )
     if "timestamp" in kwargs and kwargs["timestamp"]:
         print(
@@ -353,8 +422,8 @@ def eprint(*args, **kwargs):
 
 ###################################################################################################
 def EscapeAnsi(line):
-    ansiEscape = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
-    return ansiEscape.sub('', line)
+    ansiEscape = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+    return ansiEscape.sub("", line)
 
 
 ###################################################################################################
@@ -393,7 +462,7 @@ def UnescapeForCurl(s):
 # reference: https://github.com/openssl/openssl/blob/6f0ac0e2f27d9240516edb9a23b7863e7ad02898/crypto/evp/evp_key.c#L74
 #            https://gist.github.com/chrono-meter/d122cbefc6f6248a0af554995f072460
 EVP_KEY_SIZE = 32
-OPENSSL_ENC_MAGIC = b'Salted__'
+OPENSSL_ENC_MAGIC = b"Salted__"
 PKCS5_SALT_LEN = 8
 
 
@@ -508,29 +577,35 @@ def get_primary_ip():
     s.settimeout(0)
     try:
         # this IP doesn't have to be reachable
-        s.connect(('10.254.254.254', 1))
+        s.connect(("10.254.254.254", 1))
         ip = s.getsockname()[0]
     except Exception:
-        ip = '127.0.0.1'
+        ip = "127.0.0.1"
     finally:
         s.close()
     return ip
 
 
 ###################################################################################################
+# return the first part of the system's hostname
+def get_hostname_without_domain():
+    return os.getenv("HOSTNAME", os.getenv("COMPUTERNAME", platform.node())).split(".")[0]
+
+
+###################################################################################################
 # attempt to decode a string as JSON, returning the object if it decodes and None otherwise
-def LoadStrIfJson(jsonStr):
+def LoadStrIfJson(jsonStr, default=None):
     try:
         return json.loads(jsonStr)
     except ValueError:
-        return None
+        return default
 
 
 ###################################################################################################
 # attempt to decode a file (given by handle) as JSON, returning the object if it decodes and
 # None otherwise. Also, if attemptLines=True, attempt to handle cases of a file containing
 # individual lines of valid JSON.
-def LoadFileIfJson(fileHandle, attemptLines=False):
+def LoadFileIfJson(fileHandle, attemptLines=False, default=None):
     if fileHandle is not None:
 
         try:
@@ -538,19 +613,22 @@ def LoadFileIfJson(fileHandle, attemptLines=False):
         except ValueError:
             result = None
 
-        if (result is None) and attemptLines:
-            fileHandle.seek(0)
-            result = []
-            for line in fileHandle:
-                try:
-                    result.append(json.loads(line))
-                except ValueError:
-                    pass
-            if not result:
-                result = None
+        if result is None:
+            if attemptLines:
+                fileHandle.seek(0)
+                result = []
+                for line in fileHandle:
+                    try:
+                        result.append(json.loads(line))
+                    except ValueError:
+                        pass
+                if not result:
+                    result = default
+            else:
+                result = default
 
     else:
-        result = None
+        result = default
 
     return result
 
@@ -573,21 +651,21 @@ def LoadFileIfJson(fileHandle, attemptLines=False):
 #    'insecure': ''
 #   }
 def ParseCurlFile(curlCfgFileName):
-    result = defaultdict(lambda: '')
+    result = defaultdict(lambda: "")
     if os.path.isfile(curlCfgFileName):
-        itemRegEx = re.compile(r'^([^\s:=]+)((\s*[:=]?\s*)(.*))?$')
-        with open(curlCfgFileName, 'r') as f:
-            allLines = [x.strip().lstrip('-') for x in f.readlines() if not x.startswith('#')]
+        itemRegEx = re.compile(r"^([^\s:=]+)((\s*[:=]?\s*)(.*))?$")
+        with open(curlCfgFileName, "r") as f:
+            allLines = [x.strip().lstrip("-") for x in f.readlines() if not x.startswith("#")]
         for line in allLines:
             found = itemRegEx.match(line)
             if found is not None:
                 key = found.group(1)
                 value = UnescapeForCurl(found.group(4).lstrip('"').rstrip('"'))
-                if (key == 'user') and (':' in value):
-                    splitVal = value.split(':', 1)
+                if (key == "user") and (":" in value):
+                    splitVal = value.split(":", 1)
                     result[key] = splitVal[0]
                     if len(splitVal) > 1:
-                        result['password'] = splitVal[1]
+                        result["password"] = splitVal[1]
                 else:
                     result[key] = value
 
@@ -615,7 +693,12 @@ def ChownRecursive(path, uid, gid):
             for dname in dirnames:
                 os.chown(os.path.join(dirpath, dname), int(uid), int(gid))
             for fname in filenames:
-                os.chown(os.path.join(dirpath, fname), int(uid), int(gid), follow_symlinks=False)
+                os.chown(
+                    os.path.join(dirpath, fname),
+                    int(uid),
+                    int(gid),
+                    follow_symlinks=False,
+                )
 
 
 ###################################################################################################
@@ -707,7 +790,7 @@ def sha256sum(filename):
     h = hashlib.sha256()
     b = bytearray(64 * 1024)
     mv = memoryview(b)
-    with open(filename, 'rb', buffering=0) as f:
+    with open(filename, "rb", buffering=0) as f:
         for n in iter(lambda: f.readinto(mv), 0):
             h.update(mv[:n])
     return h.hexdigest()
@@ -715,12 +798,28 @@ def sha256sum(filename):
 
 ###################################################################################################
 # nice human-readable file sizes
-def sizeof_fmt(num, suffix='B'):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+def sizeof_fmt(num, suffix="B"):
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(num) < 1024.0:
             return f"{num:3.1f}{unit}{suffix}"
         num /= 1024.0
     return f"{num:.1f}{'Yi'}{suffix}"
+
+
+##################################################################################################
+def str2percent(val):
+    """
+    Convert a string (which may end with a '%') to an integer percent value.
+    The result is clamped between 0 and 100. If val is empty or None, returns 0.
+    """
+    if not val:
+        return 0
+    # Remove a trailing '%' if present
+    if val.endswith("%"):
+        val = val[:-1]
+    percent = int(val)
+    # Clamp the value between 0 and 100
+    return max(min(100, percent), 0)
 
 
 ###################################################################################################
@@ -741,6 +840,27 @@ def str2bool(v):
         raise ValueError("Boolean value expected")
 
 
+def bool_to_str(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    else:
+        return str(v)
+
+
+def true_or_false_no_quotes(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    else:
+        return str(v)
+
+
+def true_or_false_quotes(v):
+    if isinstance(v, bool):
+        return "'true'" if v else "'false'"
+    else:
+        return str(v)
+
+
 ###################################################################################################
 # tablify
 def tablify(matrix, file=sys.stdout):
@@ -756,7 +876,7 @@ def tablify(matrix, file=sys.stdout):
 @contextlib.contextmanager
 def temporary_filename(suffix=None):
     try:
-        f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
+        f = NamedTemporaryFile(suffix=suffix, delete=False)
         tmp_name = f.name
         f.close()
         yield tmp_name
@@ -767,7 +887,7 @@ def temporary_filename(suffix=None):
 ###################################################################################################
 # open a file and close it, updating its access time
 def touch(filename):
-    open(filename, 'a').close()
+    open(filename, "a").close()
     os.utime(filename, None)
 
 
@@ -776,19 +896,19 @@ def touch(filename):
 def append_to_file(filename, value):
     with open(filename, "a") as f:
         if isinstance(value, Iterable) and not isinstance(value, str):
-            f.write('\n'.join(value))
+            f.write("\n".join(value))
         else:
             f.write(value)
 
 
 ###################################################################################################
 # read the contents of a file, first assuming text (with encoding), optionally falling back to binary
-def file_contents(filename, encoding='utf-8', binary_fallback=False):
+def file_contents(filename, encoding="utf-8", binary_fallback=False):
     if os.path.isfile(filename):
         decodeErr = False
 
         try:
-            with open(filename, 'r', encoding=encoding) as f:
+            with open(filename, "r", encoding=encoding) as f:
                 return f.read()
         except (UnicodeDecodeError, AttributeError):
             if binary_fallback:
@@ -797,7 +917,7 @@ def file_contents(filename, encoding='utf-8', binary_fallback=False):
                 raise
 
         if decodeErr and binary_fallback:
-            with open(filename, 'rb') as f:
+            with open(filename, "rb") as f:
                 return f.read()
 
     else:
@@ -817,9 +937,9 @@ def val2bool(v):
             elif v.lower() in ("no", "false", "f", "n"):
                 return False
             else:
-                raise ValueError(f'Boolean value expected (got {v})')
+                raise ValueError(f"Boolean value expected (got {v})")
         else:
-            raise ValueError(f'Boolean value expected (got {v})')
+            raise ValueError(f"Boolean value expected (got {v})")
     except Exception:
         # just pitch it back and let the caller worry about it
         return v
@@ -938,6 +1058,43 @@ def run_subprocess(command, stdout=True, stderr=False, stdin=None, timeout=60):
             output.extend(p.stdout.splitlines())
 
     return retcode, output
+
+
+def get_main_script_path() -> Optional[str]:
+    """
+    Return the absolute path to the original top-level Python script
+    that started execution (the "main" script), handling various
+    invocation methods and packaging scenarios.
+    Returns None if no script path can be determined (e.g. interactive shell).
+    """
+    import __main__
+    import shutil
+
+    # Case 1: Frozen app (PyInstaller, cx_Freeze, etc.)
+    if getattr(sys, 'frozen', False):
+        return os.path.abspath(sys.executable)
+
+    # Case 2: Normal script or module invocation
+    if hasattr(__main__, "__file__"):
+        return os.path.abspath(__main__.__file__)
+
+    # Case 3: sys.argv[0] fallback (covers direct + relative execution)
+    argv0 = sys.argv[0]
+    if argv0:
+        if not os.path.isabs(argv0):
+            resolved = shutil.which(argv0)
+            if resolved:
+                return os.path.abspath(resolved)
+        return os.path.abspath(argv0)
+
+    # Case 4: Interactive shell or embedded Python
+    return None
+
+
+def get_main_script_dir() -> Optional[str]:
+    if mpath := get_main_script_path():
+        return os.path.dirname(os.path.abspath(mpath))
+    return None
 
 
 ###################################################################################################

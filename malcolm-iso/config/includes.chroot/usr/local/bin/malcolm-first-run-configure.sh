@@ -8,5 +8,5 @@ if [[ -d "$HOME"/Malcolm ]] && [[ ! -f "$HOME"/Malcolm/.configured ]] ; then
     tilix \
       --title="Malcolm Configuration" \
       --maximize \
-      -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/install.py --configure"
+      -e /bin/bash -l -c "/usr/bin/python3 ~/Malcolm/scripts/install.py --configure --load-existing-env"
 fi

@@ -1,4 +1,4 @@
-FROM opensearchproject/opensearch:3.2.0
+FROM opensearchproject/opensearch:3.3.2
 
 # Copyright (c) 2025 Battelle Energy Alliance, LLC.  All rights reserved.
 LABEL maintainer="malcolm@inl.gov"
@@ -32,7 +32,7 @@ ENV TERM xterm
 ENV TINI_VERSION v0.19.0
 ENV TINI_URL https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini
 
-ENV YQ_VERSION "4.47.2"
+ENV YQ_VERSION "4.48.1"
 ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 ARG DISABLE_INSTALL_DEMO_CONFIG=true
@@ -51,6 +51,7 @@ RUN export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') 
   curl -fsSL -o /usr/local/bin/yq "${YQ_URL}${BINARCH}" && \
       chmod 755 /usr/local/bin/yq && \
   /usr/share/opensearch/bin/opensearch-plugin remove opensearch-performance-analyzer --purge && \
+  /usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3 && \
   sed -i "s/#[[:space:]]*\([0-9]*-[0-9]*:-XX:-\(UseConcMarkSweepGC\|UseCMSInitiatingOccupancyOnly\)\)/\1/" /usr/share/opensearch/config/jvm.options && \
   sed -i "s/^[0-9][0-9]*\(-:-XX:\(+UseG1GC\|G1ReservePercent\|InitiatingHeapOccupancyPercent\)\)/$($OPENSEARCH_JAVA_HOME/bin/java -version 2>&1 | grep version | awk '{print $3}' | tr -d '\"' | cut -d. -f1)\1/" /usr/share/opensearch/config/jvm.options && \
   mkdir -p /var/local/ca-trust \
@@ -80,6 +81,7 @@ ADD --chmod=755 opensearch-config/scripts/*.* /usr/local/bin/
 ADD --chmod=644 opensearch-config/config/opensearch/*.* /usr/share/opensearch/config/
 ADD --chmod=644 opensearch-config/config/opensearch-security/*.* /usr/share/opensearch/config/opensearch-security/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 ENV bootstrap.memory_lock "true"
 ENV cluster.routing.allocation.disk.threshold_enabled "false"

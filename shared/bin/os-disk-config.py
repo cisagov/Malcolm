@@ -23,15 +23,17 @@ import fileinput
 from collections import defaultdict
 from fstab import Fstab
 
-from malcolm_utils import (
+from malcolm_constants import (
     HEDGEHOG_PCAP_DIR,
     HEDGEHOG_ZEEK_DIR,
-    LoadFileIfJson,
     MALCOLM_DB_DIR,
     MALCOLM_LOGS_DIR,
     MALCOLM_PCAP_DIR,
     OS_MODE_HEDGEHOG,
     OS_MODE_MALCOLM,
+)
+from malcolm_utils import (
+    LoadFileIfJson,
     remove_prefix,
     run_subprocess,
     set_logging,
@@ -714,7 +716,7 @@ def main():
                                 print(line)
 
                 elif (osMode == OS_MODE_MALCOLM) and os.path.isdir(os.path.join(ownerHome, 'Malcolm')):
-                    # write .os-disk-config-defaults for to be picked up by install.py
+                    # write .os-disk-config-defaults to be picked up by install.py
                     configFilePath = os.path.join(os.path.join(ownerHome, 'Malcolm'), '.os-disk-config-defaults')
                     createdUserDirsFull = None
                     if os.path.isfile(configFilePath):

@@ -33,7 +33,7 @@ ln -s -r "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.vimrc "$HO
 ln -s -r -f "$HOME"/Malcolm/malcolm-iso/config/includes.chroot/etc/skel/.config/systemd/user/*.service "$HOME"/.config/systemd/user/
 
 pushd Malcolm
-python3 ./scripts/install.py --defaults --restart-malcolm
+sudo python3 ./scripts/install.py --defaults --non-interactive
 sudo usermod -a -G docker "$USER"
 sudo loginctl enable-linger "$USER"
 sudo ln -s -r /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
@@ -47,28 +47,32 @@ popd
 if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
     pushd ~/Malcolm >/dev/null 2>&1
 
-    python3 ./scripts/configure \
-        --defaults \
-        --restart-malcolm \
-        --auto-arkime \
-        --auto-suricata \
-        --auto-zeek \
-        --zeek-ics \
-        --zeek-ics-best-guess \
-        --auto-oui \
-        --auto-freq \
-        --file-extraction notcommtxt \
-        --file-preservation quarantined \
-        --extracted-file-server \
-        --extracted-file-server-password infected \
-        --extracted-file-server-zip \
-        --extracted-file-capa \
-        --extracted-file-clamav \
-        --extracted-file-yara \
-        --netbox local \
-        --netbox-enrich \
-        --netbox-site-name malcolm \
-        --runtime docker
+    SETTINGS_FILE="$(mktemp --suffix=.json)"
+    python3 ./scripts/configure --defaults --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
+    jq '.configuration.malcolmRestartPolicy = "unless-stopped"
+        | .configuration.autoArkime = true
+        | .configuration.autoSuricata = true
+        | .configuration.autoZeek = true
+        | .configuration.malcolmIcs = true
+        | .configuration.zeekICSBestGuess = true
+        | .configuration.autoOui = true
+        | .configuration.autoFreq = true
+        | .configuration.fileCarveEnabled = true
+        | .configuration.fileCarveMode = "notcommtxt"
+        | .configuration.filePreserveMode = "quarantined"
+        | .configuration.fileCarveHttpServer = true
+        | .configuration.fileCarveHttpServerZip = true
+        | .configuration.fileCarveHttpServeEncryptKey = "infected"
+        | .configuration.capaScan = true
+        | .configuration.clamAvScan = true
+        | .configuration.yaraScan = true
+        | .configuration.netboxMode = "local"
+        | .configuration.netboxSiteName = "malcolm"
+        | .configuration.netboxLogstashEnrich = true
+        | .configuration.runtimeBin = "docker"' \
+        "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+    python3 ./scripts/configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
+    rm -f "${SETTINGS_FILE}"
 
     # username: analyst
     # password: M@lc0lm

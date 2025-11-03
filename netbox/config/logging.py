@@ -1,3 +1,6 @@
+# disable Black formatting (https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#ignoring-sections)
+# fmt: off
+
 # # Remove first comment(#) on each line to implement this working logging example.
 # # Add LOGLEVEL environment variable to netbox if you use this example & want a different log level.
 # from os import environ

@@ -32,7 +32,7 @@ fi
 # -u UID      (user UID, e.g., 1000)
 VERBOSE_FLAG=
 MALCOLM_REPO=${MALCOLM_REPO:-idaholab/Malcolm}
-MALCOLM_TAG=${MALCOLM_TAG:-v25.09.0}
+MALCOLM_TAG=${MALCOLM_TAG:-v25.11.0}
 [[ -z "$MALCOLM_UID" ]] && ( [[ $EUID -eq 0 ]] && MALCOLM_UID=1000 || MALCOLM_UID="$(id -u)" )
 while getopts 'vr:t:u:' OPTION; do
   case "$OPTION" in
@@ -336,7 +336,7 @@ function InstallMalcolm {
 # Configure Malcolm on first login
 if [[ $- == *i* ]] && [[ -d ~/Malcolm ]] &&  [[ ! -f ~/Malcolm/.configured ]]; then
     pushd ~/Malcolm >/dev/null 2>&1
-    ./scripts/configure
+    ./scripts/install.py --configure
     ./scripts/auth_setup
     popd >/dev/null 2>&1
     clear

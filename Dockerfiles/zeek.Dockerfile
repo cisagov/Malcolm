@@ -34,7 +34,7 @@ USER root
 # see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 
 # for download and install
-ARG ZEEK_VERSION=8.0.1-0
+ARG ZEEK_VERSION=8.0.3-0
 ENV ZEEK_VERSION $ZEEK_VERSION
 ARG ZEEK_DEB_ALTERNATE_DOWNLOAD_URL=""
 
@@ -50,12 +50,13 @@ ADD --chmod=755 shared/bin/zeek-deb-download.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_install_plugins.sh /usr/local/bin/
 ADD --chmod=755 shared/bin/zeek_iana_lookup_generator.py /usr/local/bin/
 ADD --chmod=644 scripts/malcolm_utils.py /usr/local/bin/
+ADD --chmod=644 scripts/malcolm_constants.py /usr/local/bin/
 
 # custom one-off packages locally
 ADD zeek/custom-pkg "$ZEEK_DIR"/custom-pkg
 ADD --chmod=644 zeek/requirements.txt /usr/local/src/requirements.txt
 
-ENV SUPERCRONIC_VERSION "0.2.34"
+ENV SUPERCRONIC_VERSION "0.2.38"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "${ZEEK_DIR}/crontab"
 
@@ -180,7 +181,8 @@ RUN groupadd --gid ${DEFAULT_GID} ${PUSER} && \
     touch "${SUPERCRONIC_CRONTAB}" && \
     chown -R ${DEFAULT_UID}:${DEFAULT_GID} "${ZEEK_DIR}"/share/zeek/site/intel "${SUPERCRONIC_CRONTAB}" && \
     ln -sfr /usr/local/bin/pcap_processor.py /usr/local/bin/pcap_zeek_processor.py && \
-    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py
+    ln -sfr /usr/local/bin/malcolm_utils.py "${ZEEK_DIR}"/bin/malcolm_utils.py && \
+    ln -sfr /usr/local/bin/malcolm_constants.py "${ZEEK_DIR}"/bin/malcolm_constants.py
 
 # sanity checks to make sure the plugins installed and copied over correctly
 # these ENVs should match the third party scripts/plugins installed by zeek_install_plugins.sh
