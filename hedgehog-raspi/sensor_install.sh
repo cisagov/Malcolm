@@ -358,6 +358,7 @@ install_files() {
 
     # Shared Scripts setup
     ln -s /usr/local/bin/malcolm_utils.py "/opt/zeek/bin/"
+    ln -s /usr/local/bin/malcolm_constants.py "/opt/zeek/bin/"
     mv /usr/local/bin/zeekdeploy.sh "/opt/zeek/bin/"
     mv /usr/local/bin/zeek_iana_lookup_generator.py "/opt/zeek/bin/"
     rm -rf /usr/local/bin/aide_integrity_check.sh

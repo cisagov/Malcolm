@@ -82,6 +82,7 @@ extra_root_shell_cmds = [
     'cp -r "%s/config/requirements.txt" "${ROOT?}/opt/sensor/requirements-sensor.txt"' % SENSOR_DIR,
     'cp -r "%s/shared/bin/"* "${ROOT?}/usr/local/bin"' % MALCOLM_DIR,
     'cp "%s/scripts/malcolm_utils.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
+    'cp "%s/scripts/malcolm_constants.py" "${ROOT?}/usr/local/bin/"' % MALCOLM_DIR,
     'cp "%s/config/archives/beats.list.chroot" "${ROOT?}/etc/apt/sources.list.d/beats.list"' % SENSOR_DIR,
     'cp "%s/config/archives/beats.key.chroot" "${ROOT?}/etc/apt/keyrings/"' % SENSOR_DIR,
     'cp "%s/config/archives/fluentbit.list.chroot" "${ROOT?}/etc/apt/sources.list.d/fluentbit.list"' % SENSOR_DIR,
