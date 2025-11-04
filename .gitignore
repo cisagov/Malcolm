@@ -29,6 +29,8 @@
 config.*/
 /redis
 /postgres
+malcolm-config_2*.json
+malcolm-config_2*.yaml
 
 # development
 .envrc
