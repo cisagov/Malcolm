@@ -59,9 +59,7 @@ MALCOLM_SETUP_NONINTERACTIVE=${MALCOLM_SETUP_NONINTERACTIVE:-0}
 # variables for env development environments and tools
 ENV_LIST=(
   age
-  bat
   direnv
-  eza
   fd
   fzf
   jq
@@ -313,64 +311,113 @@ function InstallCommonPackages {
 }
 
 ################################################################################
-# _InstallCroc - schollz/croc: easily and securely send things from one computer to another
+# _InstallTool - generalized GitHub binary installer
+# Usage:
+#   _InstallTool <repo> <binary_name> <asset_pattern_amd64> <asset_pattern_arm64> [--strip N]
+#
+# Examples:
+#   _InstallTool schollz/croc croc \
+#     "croc_{ver}_Linux-64bit.tar.gz" "croc_{ver}_Linux-ARM64.tar.gz" --strip 0
+#
+#   _InstallTool mikefarah/yq yq \
+#     "yq_linux_amd64" "yq_linux_arm64"
+################################################################################
+function _InstallTool {
+  local repo="$1"
+  local bin_name="$2"
+  local amd64_pattern="$3"
+  local arm64_pattern="$4"
+  local strip_components=1
+
+  shift 4
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --strip) strip_components="$2"; shift ;;
+    esac
+    shift
+  done
+
+  local release="$(_GitLatestRelease "$repo")"
+  local dest_dir=/usr/local/bin
+  $SUDO_CMD mkdir -p "$dest_dir"
+  local tmp_dir="$(mktemp -d)"
+
+  local linux_cpu="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+  local arch_pattern=""
+  case "$linux_cpu" in
+    amd64) arch_pattern="$amd64_pattern" ;;
+    arm64) arch_pattern="$arm64_pattern" ;;
+    *) echo "Unsupported architecture: $linux_cpu" >&2; return 1 ;;
+  esac
+
+  arch_pattern="${arch_pattern//\{ver\}/$release}"
+  local url="https://github.com/${repo}/releases/download/${release}/${arch_pattern}"
+
+  # Default binary name = repo basename if omitted or '-'
+  if [[ -z "$bin_name" || "$bin_name" == "-" ]]; then
+    bin_name="$(basename "$repo")"
+  fi
+
+  echo "Installing $bin_name from $url" >&2
+
+  local is_tarball=false
+  [[ "$arch_pattern" =~ \.tar\.gz$|\.tgz$ ]] && is_tarball=true
+
+  if $is_tarball; then
+    if [[ "$strip_components" -eq 0 ]]; then
+      curl -sSL "$url" | tar xzf - -C "$tmp_dir"
+    else
+      curl -sSL "$url" | tar xzf - --strip-components "$strip_components" -C "$tmp_dir"
+    fi
+
+    # Try to locate binary
+    local found_bin
+    found_bin="$(find "$tmp_dir" -type f -executable \( -name "$bin_name" -o -printf "%f\n" \) 2>/dev/null | head -n1)"
+    if [[ -z "$found_bin" ]]; then
+      # fallback: just grab first executable file
+      found_bin="$(find "$tmp_dir" -type f -perm -111 | head -n1)"
+    fi
+    if [[ -z "$found_bin" ]]; then
+      echo "Error: could not detect binary in tarball" >&2
+      rm -rf "$tmp_dir"
+      return 1
+    fi
+
+    $SUDO_CMD cp -f "$found_bin" "$dest_dir/$bin_name"
+  else
+    $SUDO_CMD curl -sSL -o "$dest_dir/$bin_name" "$url"
+  fi
+
+  $SUDO_CMD chmod 755 "$dest_dir/$bin_name"
+  $SUDO_CMD chown root:root "$dest_dir/$bin_name"
+  rm -rf "$tmp_dir"
+}
+
 function _InstallCroc {
-  mkdir -p "$LOCAL_BIN_PATH"
-
-  CROC_RELEASE="$(_GitLatestRelease schollz/croc)"
-  TMP_CLONE_DIR="$(mktemp -d)"
-  if [[ "$LINUX_CPU" == "arm64" ]]; then
-    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-ARM64.tar.gz"
-  elif [[ "$LINUX_CPU" == "amd64" ]]; then
-    CROC_URL="https://github.com/schollz/croc/releases/download/${CROC_RELEASE}/croc_${CROC_RELEASE}_Linux-64bit.tar.gz"
-  else
-    CROC_URL=
-  fi
-  if [[ -n "$CROC_URL" ]]; then
-    curl -sSL "$CROC_URL" | tar xvzf - -C "${TMP_CLONE_DIR}"
-    cp -f "${TMP_CLONE_DIR}"/croc "$LOCAL_BIN_PATH"/croc
-    chmod 755 "$LOCAL_BIN_PATH"/croc
-  fi
-  rm -rf "$TMP_CLONE_DIR"
+  _InstallTool schollz/croc - \
+    "croc_{ver}_Linux-64bit.tar.gz" \
+    "croc_{ver}_Linux-ARM64.tar.gz" --strip 0
 }
-
-################################################################################
-# _InstallYQ - mikefarah/yq: YAML command-line utility
 function _InstallYQ {
-  mkdir -p "$LOCAL_BIN_PATH"
-  YQ_RELEASE="$(_GitLatestRelease mikefarah/yq)"
-  if [[ "$LINUX_CPU" == "arm64" ]]; then
-    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_arm64"
-  elif [[ "$LINUX_CPU" == "amd64" ]]; then
-    YQ_URL="https://github.com/mikefarah/yq/releases/download/${YQ_RELEASE}/yq_linux_amd64"
-  else
-    YQ_URL=
-  fi
-  if [[ -n "$YQ_URL" ]]; then
-    curl -sSL -o "$LOCAL_BIN_PATH"/yq "$YQ_URL"
-    chmod 755 "$LOCAL_BIN_PATH"/yq
-  fi
+  _InstallTool mikefarah/yq - \
+    "yq_linux_amd64" "yq_linux_arm64"
 }
 
-################################################################################
-# _InstallBoringProxy - boringproxy/boringproxy: a reverse proxy and tunnel manager
 function _InstallBoringProxy {
-  mkdir -p "$LOCAL_BIN_PATH"
+  _InstallTool boringproxy/boringproxy - \
+    "boringproxy-linux-x86_64" "boringproxy-linux-arm64"
+}
 
-  BORING_RELEASE="$(_GitLatestRelease boringproxy/boringproxy)"
-  if [[ "$LINUX_CPU" == "arm64" ]]; then
-    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-arm64"
-  elif [[ "$LINUX_CPU" == "amd64" ]]; then
-    BORING_URL="https://github.com/boringproxy/boringproxy/releases/download/${BORING_RELEASE}/boringproxy-linux-x86_64"
-  else
-    BORING_URL=
-  fi
-  if [[ -n "$BORING_URL" ]]; then
-    curl -sSL -o "${LOCAL_BIN_PATH}"/boringproxy.new "$BORING_URL"
-    chmod 755 "${LOCAL_BIN_PATH}"/boringproxy.new
-    [[ -f "$LOCAL_BIN_PATH"/boringproxy ]] && rm -f "$LOCAL_BIN_PATH"/boringproxy
-    mv "$LOCAL_BIN_PATH"/boringproxy.new "$LOCAL_BIN_PATH"/boringproxy
-  fi
+function _InstallBat {
+  _InstallTool sharkdp/bat - \
+    "bat-{ver}-x86_64-unknown-linux-musl.tar.gz" \
+    "bat-{ver}-aarch64-unknown-linux-musl.tar.gz" --strip 1
+}
+
+function _InstallEza {
+  _InstallTool eza-community/eza - \
+    "eza_x86_64-unknown-linux-musl.tar.gz" \
+    "eza_aarch64-unknown-linux-gnu_no_libgit.tar.gz" --strip 1
 }
 
 ################################################################################
@@ -381,6 +428,8 @@ function InstallUserLocalBinaries {
     [[ ! -f "${LOCAL_BIN_PATH}"/croc ]] && _InstallCroc
     [[ ! -f "${LOCAL_BIN_PATH}"/yq ]] && _InstallYQ
     [[ ! -f "${LOCAL_BIN_PATH}"/boringproxy ]] && _InstallBoringProxy
+    [[ ! -f "${LOCAL_BIN_PATH}"/bat ]] && _InstallBat
+    [[ ! -f "${LOCAL_BIN_PATH}"/eza ]] && _InstallEza
   fi
 }
 
