@@ -329,6 +329,7 @@ function _InstallBat {
   _InstallTool sharkdp/bat - \
     "bat-{ver}-x86_64-unknown-linux-musl.tar.gz" \
     "bat-{ver}-aarch64-unknown-linux-musl.tar.gz" --strip 1
+  $SUDO_CMD ln -s -r /usr/bin/bat /usr/bin/batcat
 }
 
 function _InstallEza {
