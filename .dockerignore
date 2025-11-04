@@ -19,6 +19,8 @@
 .trigger_workflow_build
 .tmp
 config.*
+malcolm-config_2*.json
+malcolm-config_2*.yaml
 docker-compose*yml
 Dockerfiles
 Gemfile.lock
