@@ -224,11 +224,11 @@ function InstallEnvPackages {
 
     if python3 -m pip -V >/dev/null 2>&1; then
       python3 -m pip install --user -U \
-        dateparser==1.2.1 \
-        kubernetes==32.0.1 \
-        python-dotenv==1.1.0 \
+        dateparser==1.2.2 \
+        kubernetes==34.1.0 \
+        python-dotenv==1.2.1 \
         pythondialog==3.5.3 \
-        mmguero==1.4.4
+        mmguero==2.0.3
     fi
   fi
 
