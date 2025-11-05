@@ -100,8 +100,4 @@ A few minutes after starting Malcolm (probably 5 or so for Logstash to be comple
 
 ## <a name="DockerVPodman"></a>Docker vs. Podman
 
-Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. When [Running Malcolm](running.md#Running) with Podman, [`podman compose`](https://docs.podman.io/en/latest/markdown/podman-compose.1.html) is used as a wrapper around an external compose provider (such as [`docker-compose`](https://docs.docker.com/compose/) or [`podman-compose`](https://github.com/containers/podman-compose)), which in turn uses the Podman back end to run and orchestrate containers. The same Malcolm runtime scripts (e.g., `./scripts/start`, `./scripts/stop`, etc.) are used whether using Docker or Podman.
-
-As it is a somewhat more advanced procedure, installation and configuration of Podman is not covered in this documentation. Please see the Podman [documentation](https://podman.io/docs/installation).
-
-It should be noted that if rootless Podman is used, Malcolm itself cannot perform [traffic capture on local network interfaces](live-analysis.md#LocalPCAP), although it can accept network traffic metadata forwarded from a [a network sensor appliance](live-analysis.md#Hedgehog).
+Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. See the Linux instructions for [Installing and configuring Podman](host-config-linux.md#HostSystemConfigLinuxPodman) for more information.

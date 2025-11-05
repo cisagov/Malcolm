@@ -20,4 +20,4 @@ Once the configuration is complete, Malcolm will be started and stopped from wit
 
 ## Podman
 
-See [Docker vs. Podman](quickstart.md#DockerVPodman).
+Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. See the Linux instructions for [Installing and configuring Podman](host-config-linux.md#HostSystemConfigLinuxPodman) for more information.
