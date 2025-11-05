@@ -431,7 +431,6 @@ services:
     - ./config/opensearch.env
     - ./config/upload-common.env
     - ./config/pcap-capture.env
-    - ./config/auth.env
     - ./config/arkime.env
     - ./config/arkime-live.env
     - ./config/arkime-secret.env

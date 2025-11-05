@@ -10,7 +10,6 @@
 
 # auth-related
 /.ldap_config_defaults
-/auth.env
 /config/*.env
 /.opensearch*.curlrc
 /logstash/certs
