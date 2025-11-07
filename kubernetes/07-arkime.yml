@@ -65,9 +65,6 @@ spec:
               name: arkime-offline-env
           - secretRef:
               name: arkime-secret-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "arkime.malcolm.local"
         livenessProbe:
           exec:
             command:

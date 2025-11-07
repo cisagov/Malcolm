@@ -50,9 +50,6 @@ spec:
               name: ssl-env
           - configMapRef:
               name: opensearch-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "dashboards.malcolm.local"
         livenessProbe:
           exec:
             command:
