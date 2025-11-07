@@ -58,9 +58,6 @@ spec:
               name: upload-common-env
           - secretRef:
               name: auth-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "upload.malcolm.local"
         livenessProbe:
           exec:
             command:

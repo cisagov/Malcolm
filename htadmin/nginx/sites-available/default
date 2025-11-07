@@ -7,7 +7,7 @@ server {
     root /var/www/htadmin;
     index htadmin.php index.html index.htm;
 
-    server_name htaccess.malcolm.local;
+    server_name htaccess;
 
     location / {
         try_files $uri $uri/ =404;

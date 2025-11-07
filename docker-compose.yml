@@ -25,8 +25,6 @@ services:
     - ./config/ssl.env
     - ./config/auth-common.env
     - ./config/opensearch.env
-    environment:
-      VIRTUAL_HOST: 'os.malcolm.local'
     ulimits:
       memlock:
         soft: -1
@@ -99,8 +97,6 @@ services:
     - ./config/netbox-common.env
     - ./config/dashboards.env
     - ./config/dashboards-helper.env
-    environment:
-      VIRTUAL_HOST: 'dashboards-helper.malcolm.local'
     depends_on:
     - opensearch
     volumes:
@@ -147,8 +143,6 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/opensearch.env
-    environment:
-      VIRTUAL_HOST: 'dashboards.malcolm.local'
     depends_on:
     - opensearch
     - dashboards-helper
@@ -357,8 +351,6 @@ services:
     - ./config/arkime.env
     - ./config/arkime-offline.env
     - ./config/arkime-secret.env
-    environment:
-      VIRTUAL_HOST: 'arkime.malcolm.local'
     depends_on:
     - opensearch
     volumes:
@@ -738,8 +730,6 @@ services:
     - ./config/dashboards.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
-    environment:
-      VIRTUAL_HOST: 'file-monitor.malcolm.local'
     volumes:
     - type: bind
       bind:
@@ -890,8 +880,6 @@ services:
     - ./config/ssl.env
     - ./config/auth.env
     - ./config/upload-common.env
-    environment:
-      VIRTUAL_HOST: 'upload.malcolm.local'
     ports:
     - 127.0.0.1:8022:22
     volumes:
@@ -932,8 +920,6 @@ services:
     - ./config/ssl.env
     - ./config/auth.env
     - ./config/auth-common.env
-    environment:
-      VIRTUAL_HOST: 'htadmin.malcolm.local'
     volumes:
     - type: bind
       bind:
@@ -976,8 +962,6 @@ services:
     - ./config/process.env
     - ./config/ssl.env
     - ./config/lookup-common.env
-    environment:
-      VIRTUAL_HOST: 'freq.malcolm.local'
     volumes:
     - type: bind
       bind:
@@ -1015,8 +999,6 @@ services:
     - ./config/netbox-secret.env
     - ./config/postgres.env
     - ./config/redis.env
-    environment:
-      VIRTUAL_HOST: 'netbox.malcolm.local'
     depends_on:
     - postgres
     - redis
@@ -1077,8 +1059,6 @@ services:
     - ./config/ssl.env
     - ./config/netbox-common.env
     - ./config/postgres.env
-    environment:
-      VIRTUAL_HOST: 'postgres.malcolm.local'
     volumes:
     - type: bind
       bind:
@@ -1117,8 +1097,6 @@ services:
     - ./config/ssl.env
     - ./config/netbox-common.env
     - ./config/redis.env
-    environment:
-      VIRTUAL_HOST: 'redis.malcolm.local'
     command:
     - sh
     - -c
@@ -1161,8 +1139,6 @@ services:
     - ./config/ssl.env
     - ./config/netbox-common.env
     - ./config/redis.env
-    environment:
-      VIRTUAL_HOST: 'redis-cache.malcolm.local'
     command:
     - sh
     - -c
@@ -1206,8 +1182,6 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox-secret.env
     - ./config/opensearch.env
-    environment:
-      VIRTUAL_HOST: 'api.malcolm.local'
     volumes:
     - type: bind
       bind:
