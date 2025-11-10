@@ -56,6 +56,8 @@ _base_config +CAPTURE_FLAG:
 
   tee "${JQ_FILE}" >/dev/null <<EOF
     .configuration.runtimeBin = "${MALCOLM_CONTAINER_RUNTIME:-docker}"
+    | .configuration.processUserId = ${PUID:-$(id -u)}
+    | .configuration.processGroupId = ${PGID:-$(id -g)}
     | .configuration.arkimeFreeSpaceG = "${DELETE_PCAP_THRESHOLD:-1%}"
     | .configuration.arkimeManagePCAP = ${DELETE_OLD_PCAP:-false}
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}

@@ -12,6 +12,8 @@ export MALCOLM_URL=
 # main configuration variables
 export VERBOSE=
 export MALCOLM_PROFILE=malcolm
+export PUID=$(id -u)
+export PGID=$(id -g)
 export NODE_NAME=malcolm
 export DARK_MODE=true
 export HTTPS=true

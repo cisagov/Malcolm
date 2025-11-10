@@ -72,9 +72,6 @@ spec:
               name: postgres-env
           - secretRef:
               name: redis-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "netbox.malcolm.local"
         livenessProbe:
           exec:
             command:

@@ -74,9 +74,6 @@ spec:
               name: zeek-env
           - secretRef:
               name: zeek-secret-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "file-monitor.malcolm.local"
         livenessProbe:
           exec:
             command:

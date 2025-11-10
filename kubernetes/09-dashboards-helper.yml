@@ -56,9 +56,6 @@ spec:
               name: dashboards-env
           - configMapRef:
               name: dashboards-helper-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "dashboards-helper.malcolm.local"
         livenessProbe:
           exec:
             command:

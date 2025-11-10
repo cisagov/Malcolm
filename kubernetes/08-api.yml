@@ -72,9 +72,6 @@ spec:
               name: netbox-secret-env
           - configMapRef:
               name: opensearch-env
-        env:
-          - name: VIRTUAL_HOST
-            value: "api.malcolm.local"
         livenessProbe:
           exec:
             command:
