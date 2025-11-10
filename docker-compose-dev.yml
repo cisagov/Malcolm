@@ -1471,13 +1471,13 @@ services:
       traefik.enable: false
 
   jaeger:
+    # TODO: should this be removed before we ship the feature?
     image: jaegertracing/all-in-one:1.42
     pull_policy: always
     profiles: ["malcolm", "hedgehog"]
     hostname: jaeger
     restart: 'no'
     environment:
-      VIRTUAL_HOST: 'jaeger.malcolm.local'
       COLLECTOR_OTLP_ENABLED: true
     networks:
     - default
@@ -1498,14 +1498,21 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-backend
     restart: 'no'
-    environment:
-      VIRTUAL_HOST: 'strelka-backend.malcolm.local'
     depends_on:
     - strelka-coordinator
     networks:
     - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
     shm_size: 512mb
     volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
     - type: bind
       bind:
         create_host_path: false
@@ -1529,8 +1536,6 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-frontend
     restart: 'no'
-    environment:
-      VIRTUAL_HOST: 'strelka-frontend.malcolm.local'
     command:
     - strelka-frontend
     - -locallog=true
@@ -1540,9 +1545,18 @@ services:
     - strelka-gatekeeper
     networks:
     - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
     #ports:
     #- 57314:57314
     volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
     - type: bind
       bind:
         create_host_path: false
@@ -1561,15 +1575,22 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-manager
     restart: 'no'
-    environment:
-      VIRTUAL_HOST: 'strelka-manager.malcolm.local'
     command:
     - strelka-manager
     depends_on:
     - strelka-coordinator
     networks:
     - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
     volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
     - type: bind
       bind:
         create_host_path: false
@@ -1586,14 +1607,15 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-coordinator
     restart: 'no'
-    environment:
-      VIRTUAL_HOST: 'strelka-coordinator.malcolm.local'
     command:
     - sh
     - -c
     - redis-server --save '' --appendonly no
     networks:
     - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
     #ports:
     #- 16379:6379
     logging:
@@ -1613,14 +1635,15 @@ services:
     profiles: ["malcolm", "hedgehog"]
     hostname: strelka-gatekeeper
     restart: 'no'
-    environment:
-      VIRTUAL_HOST: 'strelka-gatekeeper.malcolm.local'
     command:
     - sh
     - -c
     - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru
     networks:
     - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
     #ports:
     #- 16380:6379
     logging:
@@ -1641,13 +1664,20 @@ services:
   #  profiles: ["malcolm", "hedgehog"]
   #  restart: 'no'
   #  hostname: strelka-clamav
-  #  environment:
-  #    VIRTUAL_HOST: 'strelka-clamav.malcolm.local'
   #  networks:
   #  - default
+  # env_file:
+  # - ./config/process.env
+  # - ./config/ssl.env
   #  ports:
   #  - 3301:3301
   #  volumes:
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./nginx/ca-trust
+  #    target: /var/local/ca-trust
+  #    read_only: true
   #  - strelka-clamav:/var/lib/clamav/
   #  logging:
   #    driver: local
