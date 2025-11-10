@@ -1,0 +1,25 @@
+client: 'go-fileshot-default'
+conn:
+  server: 'localhost:57314'
+  #cert: './cert/devtest.crt' # Optional, remove key if not needed
+  timeout:
+    dial: 5s
+    file: 5m
+throughput:
+  concurrency: 8
+  chunk: 98304
+  delay: 1s
+files:
+  patterns:
+    - '/glob/to/your/files/*'
+  minsize: 0                  # Optional, remove key if not needed
+  maxsize: 9999999999         # Optional, remove key if not needed
+  limitpattern: 999           # Optional, remove key if not needed
+  limittotal: 99999           # Optional, remove key if not needed
+  modified: 99999             # Optional, remove key if not needed
+  mimetypes:                  # Optional, remove key if not needed
+    - 'application/mimetype'
+  delete: false
+  gatekeeper: true
+response:
+  log: 'strelka.log'

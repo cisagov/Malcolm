@@ -1,0 +1,3 @@
+[submodule "strelka"]
+	path = strelka
+	url = ../strelka

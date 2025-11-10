@@ -122,7 +122,7 @@ if [[ -n "$SERVICE" ]]; then
             PORT=5601
         elif [[ "$SERVICE" == "dashboards-helper" ]]; then
             PORT=28991
-        elif [[ "$SERVICE" == "file-monitor" ]]; then
+        elif [[ "$SERVICE" == "filescan" ]]; then
             PORT=8440
         elif [[ "$SERVICE" == "freq" ]]; then
             PORT=10004

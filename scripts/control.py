@@ -1161,7 +1161,7 @@ def stop(wipe=False):
                 # there is some overlap here among some of these containers, but it doesn't matter
                 boundPathsToWipe = (
                     BoundPath("filebeat", "/zeek", True, None, None),
-                    BoundPath("file-monitor", "/zeek/logs", True, None, None),
+                    BoundPath("filescan", "/filescan-data/logs", True, None, None),
                     BoundPath("opensearch", "/usr/share/opensearch/data", True, ["nodes"], None),
                     BoundPath("pcap-monitor", "/pcap", True, ["arkime-live", "processed", "upload"], None),
                     BoundPath("suricata", "/var/log/suricata", True, None, ["."]),
@@ -1303,7 +1303,8 @@ def start():
         if args.service is None:
             # make sure some directories exist before we start
             boundPathsToCreate = (
-                BoundPath("file-monitor", "/zeek/logs", False, None, None),
+                BoundPath("filescan", "/filescan-data/logs", False, None, None),
+                BoundPath("filescan", "/filescan-data/files", False, None, None),
                 BoundPath("nginx-proxy", "/var/local/ca-trust", False, None, None),
                 BoundPath("netbox", "/opt/netbox/netbox/media", False, None, None),
                 BoundPath("postgres", "/var/lib/postgresql/data", False, None, None),

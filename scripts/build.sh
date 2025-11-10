@@ -133,7 +133,7 @@ if (( $# == 0 )); then
     "/usr/share/filebeat-logs/filebeat-logs.yml;filebeat-oss"
     "/var/www/upload/filepond/dist/filepond.js;file-upload"
     "/opt/freq_server/freq_server.py;freq"
-    "/usr/local/bin/capa;file-monitor"
+    "/filescan/filescan-config.yml;filescan"
     "/var/www/htadmin/htadmin.php;htadmin"
     "/etc/ip_protocol_name_to_number.yaml;logstash"
     "/etc/vendor_macs.yaml;logstash"
@@ -154,13 +154,13 @@ if (( $# == 0 )); then
     (( "$(filesize_in_image $IMAGE "$FILE")" > 0 )) || { echo "Failed to create \"$FILE\" in \"$IMAGE\""; exit 1; }
   done
 
-  DIRS_IN_IMAGES=(
-    "/var/lib/clamav;file-monitor;200000000"
-  )
-  for i in ${DIRS_IN_IMAGES[@]}; do
-    DIR="$(echo "$i" | cut -d';' -f1)"
-    IMAGE="$(echo "$i" | cut -d';' -f2)"
-    MINSIZE="$(echo "$i" | cut -d';' -f3)"
-    (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
-  done
+  #DIRS_IN_IMAGES=(
+  #  "/filescan;filescan;20"
+  #)
+  #for i in ${DIRS_IN_IMAGES[@]}; do
+  #  DIR="$(echo "$i" | cut -d';' -f1)"
+  #  IMAGE="$(echo "$i" | cut -d';' -f2)"
+  #  MINSIZE="$(echo "$i" | cut -d';' -f3)"
+  #  (( "$(dirsize_in_image $IMAGE "$DIR")" > $MINSIZE )) || { echo "Failed to create \"$DIR\" in \"$IMAGE\""; exit 1; }
+  #done
 fi

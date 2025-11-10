@@ -21,7 +21,7 @@ export PIPELINE_EXTRA_CONF_FILE="00_config.conf"
 ENRICHMENT_PIPELINE=${LOGSTASH_ENRICHMENT_PIPELINE:-"enrichment"}
 
 # the name of the pipeline(s) to which input will send logs for parsing (comma-separated list, no quotes)
-PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse,suricata-parse,beats-parse"}
+PARSE_PIPELINE_ADDRESSES=${LOGSTASH_PARSE_PIPELINE_ADDRESSES:-"zeek-parse,suricata-parse,beats-parse,filescan-parse"}
 
 # pipeline addresses for forwarding from Logstash to OpenSearch (both "internal" and "external" pipelines)
 export OPENSEARCH_PIPELINE_ADDRESS_INTERNAL=${LOGSTASH_OPENSEARCH_PIPELINE_ADDRESS_INTERNAL:-"internal-os"}

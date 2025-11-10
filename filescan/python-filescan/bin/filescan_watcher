@@ -1,0 +1,597 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+from pydantic import BaseModel
+
+__version__ = "0.1a"
+
+
+################################################################################
+# import this first and setup super basic logging to try to minimize any issues
+# caused by other modules importing logging-related things too soon... we've had
+# some problems in the past, so this is mostly to be safe, YMMV
+from filescan import logging
+logging.basicConfig()
+log = logging.getLogger(__name__)
+################################################################################
+
+
+import anyio
+import functools
+import json
+import redis.exceptions
+import statfs
+import sys
+import time
+from anyio.from_thread import BlockingPortal
+from collections import defaultdict
+from filescan.click import click
+from filescan.config import BaseConfig, AnyWatch, DirectoryWatch, RedisWatch, RedisOptions
+from filescan.model import FileEvent, ScanRequest, ScanSubmit
+from filescan.watch import (
+    AsyncFileSystemEventHandler,
+    CreatedEvent,
+    DeletedEvent,
+    FileClosedEvent,
+    FileCreatedEvent,
+    FileDeletedEvent,
+    FileModifiedEvent,
+    FileMovedEvent,
+    FileSystemEvent,
+    ModifiedEvent,
+    MovedEvent,
+)
+from pathlib import Path, PurePosixPath
+from redis.asyncio import Redis
+from statfs import FSType
+from typing import Awaitable, Iterable, cast, Any, Final, override
+from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
+
+
+class WatcherOptions(BaseModel, frozen=True):
+    watches: list[AnyWatch] = []
+    polling_close_delay: float = 5.0
+    startup_wait: float = 2.0
+
+class WatcherConfig(BaseConfig, frozen=True):
+    watcher: WatcherOptions = WatcherOptions()
+
+
+################################################################################
+## DIRECTORY WATCH SUPPORT #####################################################
+################################################################################
+
+
+class FileEventHandler(AsyncFileSystemEventHandler):
+    config: WatcherConfig
+    redis: Redis
+
+    __path_map: list[tuple[PurePosixPath, Path]]
+    __pending: dict[Path, float]
+
+    def __init__(
+        self,
+        *,
+        options: WatcherConfig,
+        redis: Redis,
+    ) -> None:
+        super().__init__()
+        self.config = options
+        self.redis = redis
+        # sort these by length on the off chance that nested paths have
+        # different associated "fake" paths
+        self.__path_map = sorted(
+            options.path_maps.items(),
+            key=lambda e: (len(str(e[1])), len(str(e[0]))),
+        )
+        self.__pending = {}
+
+    @functools.lru_cache()
+    def pathify(self, value: str | bytes | Path) -> Path:
+        # we might receive any number of things in the events, so ensure we know
+        # what we're working with
+        if isinstance(value, bytes):
+            value = value.decode()
+        if not isinstance(value, Path):
+            value = Path(value)
+        return value
+
+    @functools.lru_cache()
+    def remap_path(self, path: Path) -> tuple[PurePosixPath, Path]:
+        # try to remap our path to be relative to one of our "fake" paths
+        for (base, real) in self.__path_map:
+            if path.is_relative_to(real):
+                rel = path.relative_to(real)
+                return base / rel, path
+        return PurePosixPath(path), path
+
+    @override
+    async def dispatch(self, event: FileSystemEvent) -> None:
+        # drop any directory events, since we don't care about them
+        if event.is_directory:
+            return
+        await super().dispatch(event)
+
+    async def handle_polling_watches(self) -> None:
+        # run our pending file checker indefinitely
+        while True:
+            now = time.time()
+            # find all of our pending files that have percolated long enough
+            # since they were last modified to be considered "closed"
+            to_publish = [
+                p for p, m in self.__pending.items()
+                if (now - m) > self.config.watcher.polling_close_delay
+            ]
+            # remove and emit the matched files from our pending set
+            for path in to_publish:
+                self.__pending.pop(path, None)
+                await self.__send_event(path)
+            # sleep until we should check again
+            await anyio.sleep(0.5)
+
+    def __update_pending(self, path: str | bytes) -> None:
+        # we saw an event for a path, update its pending record
+        self.__pending[self.pathify(path)] = time.time()
+
+    def __remove_pending(self, path: str | bytes) -> None:
+        # we're done with a specific pending record, so remove it
+        self.__pending.pop(self.pathify(path), None)
+
+    async def __send_event(self, path: str | bytes | Path) -> None:
+        fake, real = self.remap_path(self.pathify(path))
+        if not real.is_file():
+            return
+        logging.info('observed file event: %s', path)
+        await handle_file_event(
+            config=self.config,
+            conn=self.redis,
+            # FIXME: it'd be nice to have a source associated with each watch
+            #        (because different directories might contain the output of
+            #        specific tools)
+            source='filesystem',
+            event=FileEvent.for_path(real, path=fake),
+            metadata=None,
+        )
+
+    async def on_created(self, event: CreatedEvent) -> None:
+        self.__update_pending(event.src_path)
+
+    async def on_modified(self, event: ModifiedEvent) -> None:
+        self.__update_pending(event.src_path)
+
+    async def on_deleted(self, event: DeletedEvent) -> None:
+        self.__remove_pending(event.src_path)
+
+    async def on_closed(self, event: FileClosedEvent) -> None:
+        self.__remove_pending(event.src_path)
+        await self.__send_event(event.src_path)
+
+    async def on_moved(self, event: MovedEvent) -> None:
+        await self.__send_event(event.dest_path)
+
+
+KNOWN_FS_TYPES: Final = {
+    **{k: 'inotify' for k in {
+        FSType.BTRFS,
+        FSType.EXT,
+        FSType.EXT2,
+        FSType.EXT3,
+        FSType.EXT4,
+        FSType.REISERFS,
+        FSType.HFS,
+        FSType.NTFS,
+        FSType.MSDOS,
+        FSType.TMPFS,
+    }},
+    **{k: 'polling' for k in {
+        FSType.NFS,
+        FSType.CIFS,
+        FSType.SMB,
+        FSType.SMB2,
+    }},
+}
+
+
+def ensure_dir_watch_strategy(watch: DirectoryWatch) -> DirectoryWatch:
+    # if we aren't guessing, then just bail now
+    if watch.strategy != 'guess':
+        return watch
+    else:
+        params = watch.model_dump()
+        # see if the path is pointing to a filesystem type we know for sure fits
+        # into one category or another; hopefully anything we're looking at will
+        # be handled here and we can be done
+        fsinfo = statfs.statfs(watch.path)
+        if (strat := KNOWN_FS_TYPES.get(fsinfo.type)):
+            params['strategy'] = strat
+        else:
+            # FIXME: we could try writing a file and looking for inotify events?
+            # unsure, so just default to polling to make sure the watch works
+            params['strategy'] = 'polling'
+
+        # rebuild the watch and return
+        return DirectoryWatch.model_validate(params)
+
+
+def deduplicate_dir_watches(
+    watches: Iterable[DirectoryWatch],
+) -> list[DirectoryWatch]:
+    # resolve any unknown strategies before we continue
+    new_watches = [ensure_dir_watch_strategy(w) for w in watches]
+    # look for any conflicting watches and do what we can to patch them up
+    to_remove = []
+    for root in new_watches:
+        # only look for recursive entries; this also short-circuits the loop if
+        # no entries are recursive
+        if not root.recursive:
+            continue
+        for watch in new_watches:
+            # ignore things that are the same entry, or not nested
+            if watch is root or not watch.path.is_relative_to(root.path):
+                continue
+            # if strategies don't match, then we really shouldn't continue
+            if watch.strategy != root.strategy:
+                log.critical("\n\t".join([
+                    'nested path with recursive monitoring contains path '
+                    'with different strategy:',
+                        '- parent: %s',
+                        '- child:  %s',
+                ]), root.path, watch.path)
+                raise click.exceptions.Exit(1)
+            # if the child isn't recursive, warn the user about the fact the
+            # child is being ignored because of the recursive parent
+            if not watch.recursive:
+                logging.warning("\n\t".join([
+                    'recursive path obviates non-recursive nested child:',
+                        '- parent: %s',
+                        '- child:  %s',
+                ]), root.path, watch.path)
+            # if we made it this far, mark the child for removal because
+            # it's entirely contained within the root
+            to_remove.append(watch)
+    # remove any conflicts that were resolvable
+    return [w for w in new_watches if not w in to_remove]
+
+
+################################################################################
+## REDIS WATCH SUPPORT #########################################################
+################################################################################
+
+
+async def watch_list(
+    config: WatcherConfig,
+    redis: RedisOptions,
+    output: Redis,
+    conn: Redis,
+    keys: dict[str, RedisWatch] | None,
+) -> None:
+    if not keys:
+        return
+    log.info(
+        'watching lists: %s:%d/%d => {%s}',
+        redis.host, redis.port, redis.db, ', '.join(keys),
+    )
+    list_keys = list(keys.keys())
+    try:
+        while True:
+            key, data = await cast(Awaitable, conn.blpop(list_keys))
+            await handle_ecs_event(
+                config, output, keys[key], key, json.loads(data),
+            )
+    except anyio.get_cancelled_exc_class():
+        pass
+
+
+async def watch_pubsub(
+    config: WatcherConfig,
+    redis: RedisOptions,
+    output: Redis,
+    conn: Redis,
+    keys: dict[str, RedisWatch] | None,
+) -> None:
+    if not keys:
+        return
+    log.info(
+        'subscribing to keys: %s:%d/%d => {%s}',
+        redis.host, redis.port, redis.db, ', '.join(keys),
+    )
+    try:
+        pubsub = conn.pubsub()
+        await pubsub.subscribe(*keys.keys())
+        while True:
+            msg = await pubsub.get_message(ignore_subscribe_messages=True)
+            if not msg or msg.get('type') != 'message' \
+                    or not (key := msg.get('channel')) \
+                    or not (data := msg.get('data')):
+                continue
+            await handle_ecs_event(
+                config, output, keys[key], key, json.loads(data),
+            )
+    except anyio.get_cancelled_exc_class():
+        pass
+
+
+def remap_path(config: WatcherConfig, path: Path) -> tuple[PurePosixPath, Path]:
+    for base, real in config.path_maps.items():
+        if path.is_relative_to(base):
+            if (new := real / path.relative_to(base)).exists():
+                return PurePosixPath(path), new
+    for base, real in config.path_maps.items():
+        if (new := real / path).exists():
+            log.warning(
+                'file exists in search path, but without prefix: %s => %s',
+                path, base,
+            )
+            return base / path, new
+    if path.exists():
+        log.warning('file exists, but not in search path: %s', path)
+        return PurePosixPath(path), path
+    raise FileNotFoundError(path)
+
+
+def get_item(obj: Any, path: str, default: Any = None) -> Any:
+    if not path:
+        return obj
+    *head, tail = path.split('.')
+    for e in head:
+        obj = obj.get(e, {})
+    return obj.get(tail, default)
+
+
+def get_single(obj: Any, path: str, default: Any = None) -> Any:
+    value = get_item(obj, path, default)
+    if isinstance(value, list):
+        log.warning(
+            'ECS %s is an array, should be a single value: %r', path, value,
+        )
+        return value[0]
+    return value
+
+
+async def handle_ecs_event(
+    config: WatcherConfig,
+    output: Redis,
+    watch: RedisWatch,
+    key: str,
+    record: dict,
+) -> None:
+    path, real = remap_path(config, Path(get_single(record, 'file.path')))
+    await handle_file_event(
+        config=config,
+        conn=output,
+        source=(watch.source or key),
+        event=FileEvent.model_validate({
+            'path': path,
+            'local_path': real,
+            'size': get_single(record, 'file.size'),
+            'sha256': get_single(record, 'file.hash.sha256'),
+            'mime_type': get_single(record, 'file.mime_type'),
+        }),
+        metadata={
+            'record': json.dumps(record, separators=(',', ':')),
+        },
+    )
+
+
+################################################################################
+## REDIS OUTPUT SUPPORT ########################################################
+################################################################################
+
+
+async def handle_file_event(
+    config: WatcherConfig,
+    conn: Redis,
+    source: str,
+    event: FileEvent,
+    metadata: dict[str, str] | None,
+) -> None:
+    # first publish the scan request to our scanners
+    count = await conn.publish(
+        config.redis.keys.request,
+        (request := ScanRequest(
+            file=event,
+            metadata=metadata,
+            source=source,
+        )).model_dump_json(),
+    )
+    # and then publish a file notification to our loggers
+    await conn.publish(
+        config.redis.keys.notify,
+        request.get_submit(count).model_dump_json(),
+    )
+    log.info('submitted %s to %d scanner(s)', request.id, count)
+
+
+################################################################################
+## MAIN LOGIC ##################################################################
+################################################################################
+
+
+@click.command()
+@click.version_option(
+        __version__,
+        help = "print the version of this tool and exit")
+@click.option(
+        "--verbose", "-v",
+        count= True,
+        help = "increase logging verbosity (may be repeated)")
+@click.option(
+        "--quiet/--no-quiet", "-q",
+        help = "run silently except for critical errors")
+@click.option(
+        "--config", "-c",
+        type = click.Path(exists=True, dir_okay=False, path_type=Path),
+        help = "specify a config file to load")
+async def main(
+    verbose: int,
+    quiet: bool,
+    config: Path | None,
+) -> None:
+    # setup logging properly as early as possible
+    logging.basicConfig(verbosity=verbose, quiet=quiet, force=True)
+
+    # get an options object, one way or another
+    if config:
+        options = WatcherConfig.from_path(config)
+    else:
+        log.warning('no config file specified, this is probably not what you '
+                    'want! continuing anyway...')
+        options = WatcherConfig()
+
+    connections = {}
+    dir_observers = {}
+
+    async def open_redis_connection(config: RedisOptions | None) -> RedisOptions:
+        if config is None:
+            config = options.redis
+        if config not in connections:
+            conn = connections[config] = Redis(
+                host=config.host,
+                port=config.port,
+                db=config.db,
+                username=config.username,
+                password=config.password,
+                decode_responses=True,
+                client_name=Path(sys.argv[0]).stem,
+            )
+            await conn.ping()
+        return config
+
+    try:
+        try:
+            await open_redis_connection(None)
+        except redis.exceptions.ConnectionError as exc:
+            # log the error, but don't print a novel
+            exc.__suppress_context__ = True
+            log.debug(
+                'failed to open primary redis connection',
+                exc_info=True,
+            )
+            log.fatal(
+                'unable to open primary redis connection: %s:%d/%d',
+                options.redis.host, options.redis.port, options.redis.db,
+            )
+            # this is an error we can't really recover from
+            sys.exit(1)
+
+        redis_watch_keys = defaultdict(lambda: defaultdict(dict))
+        dir_watch_paths = {}
+        for watch in options.watcher.watches:
+            if isinstance(watch, RedisWatch):
+                try:
+                    cfg = await open_redis_connection(watch.redis)
+                    redis_watch_keys[cfg][watch.method].update({
+                        k: watch for k in watch.keys
+                    })
+                except redis.exceptions.ConnectionError as exc:
+                    # this is logically true (if it were none, we'd use the
+                    # primary connection, which at this point in the code is
+                    # guaranteed to be opened, and won't raise the exception),
+                    # so coerce the type checker into not complaining about it
+                    assert watch.redis is not None
+                    # log the error, but don't print a novel
+                    exc.__suppress_context__ = True
+                    log.debug(
+                        'failed to open redis connection for watch',
+                        exc_info=True,
+                    )
+                    log.error(
+                        'failed to open redis connection for watch: %s:%d/%d',
+                        watch.redis.host, watch.redis.port, watch.redis.db,
+                    )
+
+            elif isinstance(watch, DirectoryWatch):
+                if not watch.path.exists():
+                    log.warning('skipping missing watch path: %s', watch.path)
+                    continue
+                if (prev := dir_watch_paths.get(watch.path)) is not None:
+                    log.warning('duplicate watch path: %s', prev.path)
+                dir_watch_paths[watch.path] = watch
+
+        # consolidate our set of directory watches
+        dir_watches = deduplicate_dir_watches(dir_watch_paths.values())
+        # build our base set of observers (which will be pruned later)
+        dir_observers.update({
+            'polling': PollingObserver(),
+            'inotify': Observer(),
+        })
+
+        async with (
+            anyio.create_task_group() as group,
+            BlockingPortal() as portal,
+        ):
+            output = connections[options.redis]
+            if options.watcher.startup_wait:
+                log.info('giving subscribers time to come online...')
+                await anyio.sleep(options.watcher.startup_wait)
+            log.info(
+                'starting with %d scanner(s) and %d logger(s)',
+                *(n for _, n in await output.pubsub_numsub(
+                    options.redis.keys.request,
+                    options.redis.keys.notify,
+                )),
+            )
+
+            # create our directory watch event async adapter/handler
+            dir_event_handler = FileEventHandler(
+                options=options,
+                redis=output,
+                portal=portal,
+            )
+            # start its polling handler task in the background
+            group.start_soon(dir_event_handler.handle_polling_watches)
+            # for each of our watches, schedule with the appropriate observer
+            for watch in dir_watches:
+                dir_observers[watch.strategy].schedule(
+                    dir_event_handler,
+                    str(watch.path),
+                    recursive=watch.recursive,
+                    event_filter=[
+                        FileCreatedEvent,
+                        FileClosedEvent,
+                        FileDeletedEvent,
+                        FileModifiedEvent,
+                        FileMovedEvent,
+                    ],
+                )
+
+            # start any observers that have watches scheduled
+            for strat, observer in list(dir_observers.items()):
+                # if this observer had nothing added to it, remove it from our
+                # set of known observers, since we don't need to run it at all
+                if not observer.emitters:
+                    dir_observers.pop(strat)
+            if dir_observers:
+                log.info('starting directory watches...')
+                for observer in dir_observers.values():
+                    # otherwise, it's necessary, so go ahead and kick it off
+                    observer.start()
+
+            log.info('starting redis watches...')
+            for cfg, keys in redis_watch_keys.items():
+                conn = connections[cfg]
+                group.start_soon(
+                    watch_list, options, cfg, output, conn,
+                    keys.get('list'),
+                )
+                group.start_soon(
+                    watch_pubsub, options, cfg, output, conn,
+                    keys.get('pubsub'),
+                )
+
+            # and allow our portal to schedule cross-thread async calls
+            await portal.sleep_until_stopped()
+
+    except anyio.get_cancelled_exc_class():
+        if dir_observers:
+            log.info('stopping directory watches...')
+            for observer in dir_observers.values():
+                observer.stop()
+                observer.join(10)
+
+
+if __name__ == "__main__":
+    main()
+

@@ -1,0 +1,2 @@
+# Example rules for Suricata
+alert tcp any any -> any 80,8080 (msg:"HTTP Request Detected"; flow:to_server,established; content:"GET"; depth:4; sid:1000001; rev:1;)

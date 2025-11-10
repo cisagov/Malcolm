@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+service Frontend {
+  rpc ScanFile(stream ScanFileRequest) returns (stream ScanResponse) {}
+}
+
+message Request {
+  string id = 1;
+  string client = 2;
+  string source = 3;
+  bool gatekeeper = 4;
+}
+
+message Attributes {
+  string filename = 1;
+  map<string, string> metadata = 2;
+}
+
+message ScanFileRequest {
+  bytes data = 1; // required
+  Request request = 2;
+  Attributes attributes = 3;
+}
+
+message ScanResponse {
+  string id = 1;
+  string event = 2;
+}

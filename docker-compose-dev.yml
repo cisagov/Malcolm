@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/opensearch.Dockerfile
-    image: ghcr.io/idaholab/malcolm/opensearch:25.11.1
+    image: ghcr.io/idaholab/malcolm/opensearch:25.12.0
     # Technically the "hedgehog" profile doesn't have OpenSearch, but in that case
     #   OPENSEARCH_PRIMARY will be set to remote, which means the container will
     #   start but not actually run OpenSearch. It's included in both profiles to
@@ -84,7 +84,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards-helper.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.11.1
+    image: ghcr.io/idaholab/malcolm/dashboards-helper:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -138,7 +138,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/dashboards.Dockerfile
-    image: ghcr.io/idaholab/malcolm/dashboards:25.11.1
+    image: ghcr.io/idaholab/malcolm/dashboards:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -184,7 +184,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/logstash.Dockerfile
-    image: ghcr.io/idaholab/malcolm/logstash-oss:25.11.1
+    image: ghcr.io/idaholab/malcolm/logstash-oss:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -215,6 +215,7 @@ services:
     - ./config/netbox-common.env
     - ./config/netbox.env
     - ./config/netbox-secret.env
+    - ./config/redis.env
     - ./config/beats-common.env
     - ./config/lookup-common.env
     - ./config/logstash.env
@@ -299,7 +300,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/filebeat.Dockerfile
-    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.11.1
+    image: ghcr.io/idaholab/malcolm/filebeat-oss:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -350,6 +351,11 @@ services:
     - type: bind
       bind:
         create_host_path: false
+      source: ./filescan-data/logs
+      target: /filescan
+    - type: bind
+      bind:
+        create_host_path: false
       source: ./filebeat/certs/ca.crt
       target: /certs/ca.crt
       read_only: true
@@ -375,7 +381,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:25.11.1
+    image: ghcr.io/idaholab/malcolm/arkime:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -466,7 +472,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/arkime.Dockerfile
-    image: ghcr.io/idaholab/malcolm/arkime:25.11.1
+    image: ghcr.io/idaholab/malcolm/arkime:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -562,7 +568,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:25.11.1
+    image: ghcr.io/idaholab/malcolm/zeek:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -634,7 +640,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/zeek.Dockerfile
-    image: ghcr.io/idaholab/malcolm/zeek:25.11.1
+    image: ghcr.io/idaholab/malcolm/zeek:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -704,7 +710,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:25.11.1
+    image: ghcr.io/idaholab/malcolm/suricata:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -763,7 +769,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/suricata.Dockerfile
-    image: ghcr.io/idaholab/malcolm/suricata:25.11.1
+    image: ghcr.io/idaholab/malcolm/suricata:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -822,11 +828,11 @@ services:
       timeout: 15s
       retries: 3
       start_period: 120s
-  file-monitor:
+  filescan:
     build:
       context: .
-      dockerfile: Dockerfiles/file-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-monitor:25.11.1
+      dockerfile: Dockerfiles/filescan.Dockerfile
+    image: ghcr.io/idaholab/malcolm/filescan:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -837,7 +843,7 @@ services:
     restart: "no"
     stdin_open: false
     tty: true
-    hostname: file-monitor
+    hostname: filescan
     networks:
     - default
     env_file:
@@ -845,10 +851,12 @@ services:
     - ./config/ssl.env
     - ./config/auth-common.env
     - ./config/dashboards.env
+    - ./config/logstash.env
+    - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
-    environment:
-      VIRTUAL_HOST: 'file-monitor.malcolm.local'
+    - ./config/strelka.env
+    - ./config/filescan.env
     volumes:
     - type: bind
       bind:
@@ -864,14 +872,13 @@ services:
     - type: bind
       bind:
         create_host_path: false
-      source: ./zeek-logs/current
-      target: /zeek/logs
+      source: ./filescan-data/logs
+      target: /filescan/data/logs
     - type: bind
       bind:
         create_host_path: false
-      source: ./yara/rules
-      target: /yara-rules/custom
-      read_only: true
+      source: ./filescan-data/files
+      target: /filescan/data/files
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
@@ -882,7 +889,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-capture.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-capture:25.11.1
+    image: ghcr.io/idaholab/malcolm/pcap-capture:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -935,7 +942,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/pcap-monitor.Dockerfile
-    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.11.1
+    image: ghcr.io/idaholab/malcolm/pcap-monitor:25.12.0
     profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
@@ -989,7 +996,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/file-upload.Dockerfile
-    image: ghcr.io/idaholab/malcolm/file-upload:25.11.1
+    image: ghcr.io/idaholab/malcolm/file-upload:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1031,7 +1038,7 @@ services:
       retries: 3
       start_period: 60s
   htadmin:
-    image: ghcr.io/idaholab/malcolm/htadmin:25.11.1
+    image: ghcr.io/idaholab/malcolm/htadmin:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1079,7 +1086,7 @@ services:
       retries: 3
       start_period: 60s
   freq:
-    image: ghcr.io/idaholab/malcolm/freq:25.11.1
+    image: ghcr.io/idaholab/malcolm/freq:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1116,7 +1123,7 @@ services:
       retries: 3
       start_period: 60s
   netbox:
-    image: ghcr.io/idaholab/malcolm/netbox:25.11.1
+    image: ghcr.io/idaholab/malcolm/netbox:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1185,7 +1192,7 @@ services:
       retries: 3
       start_period: 120s
   postgres:
-    image: ghcr.io/idaholab/malcolm/postgresql:25.11.1
+    image: ghcr.io/idaholab/malcolm/postgresql:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1228,7 +1235,7 @@ services:
       retries: 3
       start_period: 45s
   redis:
-    image: ghcr.io/idaholab/malcolm/redis:25.11.1
+    image: ghcr.io/idaholab/malcolm/redis:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1275,7 +1282,7 @@ services:
       retries: 3
       start_period: 45s
   redis-cache:
-    image: ghcr.io/idaholab/malcolm/redis:25.11.1
+    image: ghcr.io/idaholab/malcolm/redis:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1317,7 +1324,7 @@ services:
       retries: 3
       start_period: 45s
   api:
-    image: ghcr.io/idaholab/malcolm/api:25.11.1
+    image: ghcr.io/idaholab/malcolm/api:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1367,7 +1374,7 @@ services:
       retries: 3
       start_period: 60s
   keycloak:
-    image: ghcr.io/idaholab/malcolm/keycloak:25.11.1
+    image: ghcr.io/idaholab/malcolm/keycloak:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1410,7 +1417,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfiles/nginx.Dockerfile
-    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.11.1
+    image: ghcr.io/idaholab/malcolm/nginx-proxy:25.12.0
     profiles: ["malcolm"]
     logging:
       driver: local
@@ -1439,7 +1446,7 @@ services:
     - api
     - arkime
     - dashboards
-    - file-monitor
+    - filescan
     - htadmin
     - keycloak
     - netbox
@@ -1488,8 +1495,192 @@ services:
     labels:
       traefik.enable: false
 
+  jaeger:
+    image: jaegertracing/all-in-one:1.42
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: jaeger
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'jaeger.malcolm.local'
+      COLLECTOR_OTLP_ENABLED: true
+    networks:
+    - default
+    #ports:
+    #- 16686:16686
+    #- 6831:6831/udp
+    #- 4317:4317
+    #- 4318:4318
+    #- 14268:14268
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-backend:
+    build:
+      context: .
+      dockerfile: Dockerfiles/strelka-backend.Dockerfile
+    image: ghcr.io/idaholab/malcolm/strelka-backend:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-backend
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-backend.malcolm.local'
+    depends_on:
+    - strelka-coordinator
+    networks:
+    - default
+    shm_size: 512mb
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/python/backend/
+      target: /etc/strelka/
+      read_only: false # FIXME: this should be false, but I need to see if that breaks anything!
+    #- type: bind
+    #  bind:
+    #    create_host_path: false
+    #  source: ./strelka/plugins/
+    #  target: /strelka/plugins/
+    #  read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfiles/strelka-frontend.Dockerfile
+    image: ghcr.io/idaholab/malcolm/strelka-frontend:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-frontend
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-frontend.malcolm.local'
+    command:
+    - strelka-frontend
+    - -locallog=true
+    - -kafkalog=false
+    depends_on:
+    - strelka-coordinator
+    - strelka-gatekeeper
+    networks:
+    - default
+    #ports:
+    #- 57314:57314
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/go/frontend/
+      target: /etc/strelka/
+      read_only: true
+    - strelka-logs:/var/log/strelka/
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-manager:
+    build:
+      context: .
+      dockerfile: Dockerfiles/strelka-manager.Dockerfile
+    image: ghcr.io/idaholab/malcolm/strelka-manager:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-manager
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-manager.malcolm.local'
+    command:
+    - strelka-manager
+    depends_on:
+    - strelka-coordinator
+    networks:
+    - default
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/go/manager/
+      target: /etc/strelka/
+      read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  # FIXME: this should point to our redis
+  strelka-coordinator:
+    image: redis:alpine
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-coordinator
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-coordinator.malcolm.local'
+    command:
+    - sh
+    - -c
+    - redis-server --save '' --appendonly no
+    networks:
+    - default
+    #ports:
+    #- 16379:6379
+    logging:
+      driver: local
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli ping | grep PONG
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  # FIXME: this should point to our redis
+  strelka-gatekeeper:
+    image: redis:alpine
+    pull_policy: always
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-gatekeeper
+    restart: 'no'
+    environment:
+      VIRTUAL_HOST: 'strelka-gatekeeper.malcolm.local'
+    command:
+    - sh
+    - -c
+    - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru
+    networks:
+    - default
+    #ports:
+    #- 16380:6379
+    logging:
+      driver: local
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli ping | grep PONG
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+  #strelka-clamav:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfiles/strelka-clamav.Dockerfile
+  #  image: ghcr.io/idaholab/malcolm/strelka-clamav:25.12.0
+  #  profiles: ["malcolm", "hedgehog"]
+  #  restart: 'no'
+  #  hostname: strelka-clamav
+  #  environment:
+  #    VIRTUAL_HOST: 'strelka-clamav.malcolm.local'
+  #  networks:
+  #  - default
+  #  ports:
+  #  - 3301:3301
+  #  volumes:
+  #  - strelka-clamav:/var/lib/clamav/
+  #  logging:
+  #    driver: local
+  #  # FIXME: healthcheck?
+
 volumes:
   # shared named volume so filebeat can access nginx access logs
+  strelka-logs:
   nginx-log-path:
 
 networks:
