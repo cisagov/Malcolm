@@ -1,0 +1,24 @@
+name: strelka-manager-build-and-push-ghcr
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - pipeline-merge
+    paths:
+      - 'strelka/**'
+      - 'Dockerfiles/strelka-manager.Dockerfile'
+      - 'container-health-scripts/strelka-manager.sh'
+      - 'shared/bin/docker-uid-gid-setup.sh'
+      - 'shared/bin/service_check_passthrough.sh'
+      - '.trigger_workflow_build'
+  workflow_dispatch:
+  repository_dispatch:
+
+jobs:
+  docker:
+    uses: ./.github/workflows/docker-build-push-scan.yml
+    with:
+      service: strelka-manager
+      dockerfile: ./Dockerfiles/strelka-manager.Dockerfile

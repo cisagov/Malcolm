@@ -11,18 +11,6 @@ LABEL org.opencontainers.image.vendor='Idaho National Laboratory'
 LABEL org.opencontainers.image.title='ghcr.io/idaholab/malcolm/filescan'
 LABEL org.opencontainers.image.description='Malcolm container for scanning files extracted by Zeek'
 
-# to be populated at build-time:
-ARG BUILD_DATE
-ARG MALCOLM_VERSION
-ARG VCS_REVISION
-ENV BUILD_DATE $BUILD_DATE
-ENV MALCOLM_VERSION $MALCOLM_VERSION
-ENV VCS_REVISION $VCS_REVISION
-
-LABEL org.opencontainers.image.created=$BUILD_DATE
-LABEL org.opencontainers.image.version=$MALCOLM_VERSION
-LABEL org.opencontainers.image.revision=$VCS_REVISION
-
 ################################################################################
 
 ARG DEFAULT_UID=1000
@@ -32,7 +20,6 @@ ENV DEFAULT_GID $DEFAULT_GID
 ENV PUSER "scan"
 ENV PGROUP "scan"
 ENV PUSER_PRIV_DROP true
-# see PUSER_CHOWN at the bottom of the file (after the other environment variables it references)
 USER root
 
 ################################################################################
@@ -129,7 +116,7 @@ ENV ZEEK_EXTRACTOR_PATH $ZEEK_EXTRACTOR_PATH
 # does, we ought to redo a lot of steps)
 RUN set -e ; \
     groupadd --gid ${DEFAULT_GID} ${PGROUP} ; \
-    useradd -m --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} ${PUSER} ; \
+    useradd -M --uid ${DEFAULT_UID} --gid ${DEFAULT_GID} --home /nonexistant ${PUSER} ; \
     usermod -a -G tty ${PUSER}
 
 ################################################################################
@@ -166,6 +153,7 @@ RUN set -e ; \
     apt-get install -y -q \
       --no-install-recommends \
       automake \
+      bash \
       gcc \
       git \
       inotify-tools \
@@ -184,6 +172,7 @@ RUN set -e ; \
       python3-dev \
       python3-pip \
       python3-venv \
+      rsync \
       webfs
 
 ################################################################################
@@ -202,7 +191,7 @@ COPY --chmod=644 \
     filescan/python-filescan \
     /install-filescan/
 RUN cd /install-filescan && \
-    python3 -m pip install --break-system-packages --no-cache-dir -r Requirements.txt && \
+    python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt && \
     make && \
     python3 -m pip install --break-system-packages --no-cache-dir .
 RUN rm -rf /install-filescan
@@ -258,3 +247,14 @@ ENTRYPOINT ["/usr/bin/tini", \
 
 CMD ["/usr/local/bin/supervisord", "-c", "/etc/supervisord.conf", "-n"]
 
+# to be populated at build-time:
+ARG BUILD_DATE
+ARG MALCOLM_VERSION
+ARG VCS_REVISION
+ENV BUILD_DATE $BUILD_DATE
+ENV MALCOLM_VERSION $MALCOLM_VERSION
+ENV VCS_REVISION $VCS_REVISION
+
+LABEL org.opencontainers.image.created=$BUILD_DATE
+LABEL org.opencontainers.image.version=$MALCOLM_VERSION
+LABEL org.opencontainers.image.revision=$VCS_REVISION

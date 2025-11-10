@@ -1,0 +1,29 @@
+name: filescan-build-and-push-ghcr
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - pipeline-merge
+    paths:
+      - 'filescan/**'
+      - 'Dockerfiles/filescan.Dockerfile'
+      - 'container-health-scripts/filescan.sh'
+      - 'scripts/malcolm_constants.py'
+      - 'scripts/malcolm_utils.py'
+      - 'shared/bin/docker-uid-gid-setup.sh'
+      - 'shared/bin/pcap_utils.py'
+      - 'shared/bin/pcap_watcher.py'
+      - 'shared/bin/service_check_passthrough.sh'
+      - 'shared/bin/watch_common.py'
+      - '.trigger_workflow_build'
+  workflow_dispatch:
+  repository_dispatch:
+
+jobs:
+  docker:
+    uses: ./.github/workflows/docker-build-push-scan.yml
+    with:
+      service: filescan
+      dockerfile: ./Dockerfiles/filescan.Dockerfile
