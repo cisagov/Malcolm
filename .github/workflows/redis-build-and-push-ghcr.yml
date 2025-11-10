@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - pipeline-merge
     paths:
       - 'redis-scripts/container_health.sh'
       - 'Dockerfiles/redis.Dockerfile'
