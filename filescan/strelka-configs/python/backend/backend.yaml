@@ -10,6 +10,7 @@ limits:
 coordinator:
   addr: 'strelka-coordinator:6379'
   db: 0
+  password: null
 #  blocking_pop_time_sec: 5
 tasting:
   mime_db: null

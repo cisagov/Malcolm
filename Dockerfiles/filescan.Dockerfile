@@ -72,6 +72,10 @@ ENV SUPERCRONIC_VERSION "0.2.33"
 ENV SUPERCRONIC_URL "https://github.com/aptible/supercronic/releases/download/v$SUPERCRONIC_VERSION/supercronic-linux-"
 ENV SUPERCRONIC_CRONTAB "/etc/crontab"
 
+ARG YQ_VERSION=4.48.1
+ENV YQ_VERSION $YQ_VERSION
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
+
 ENV REDIS_CACHE_HOST $REDIS_CACHE_HOST
 ENV REDIS_CACHE_PORT $REDIS_CACHE_PORT
 ENV FILESCAN_REDIS_DB $FILESCAN_REDIS_DB
@@ -144,6 +148,10 @@ RUN set -e ; \
     export BINARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') ; \
     curl -fsSL -o /usr/local/bin/supercronic "${SUPERCRONIC_URL}${BINARCH}" ; \
     chmod +x /usr/local/bin/supercronic
+
+# Download and install YQ
+RUN curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+    chmod 755 /usr/local/bin/yq
 
 ################################################################################
 

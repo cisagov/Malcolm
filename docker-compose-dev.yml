@@ -1499,7 +1499,7 @@ services:
     hostname: strelka-backend
     restart: 'no'
     depends_on:
-    - strelka-coordinator
+    - redis-cache
     networks:
     - default
     env_file:
@@ -1541,8 +1541,7 @@ services:
     - -locallog=true
     - -kafkalog=false
     depends_on:
-    - strelka-coordinator
-    - strelka-gatekeeper
+    - redis-cache
     networks:
     - default
     env_file:
@@ -1561,7 +1560,7 @@ services:
       bind:
         create_host_path: false
       source: ./filescan/strelka-configs/go/frontend/
-      target: /etc/strelka/
+      target: /etc/strelka/configmap
       read_only: true
     - strelka-logs:/var/log/strelka/
     logging:
@@ -1578,7 +1577,7 @@ services:
     command:
     - strelka-manager
     depends_on:
-    - strelka-coordinator
+    - redis-cache
     networks:
     - default
     env_file:
@@ -1595,67 +1594,11 @@ services:
       bind:
         create_host_path: false
       source: ./filescan/strelka-configs/go/manager/
-      target: /etc/strelka/
+      target: /etc/strelka/configmap
       read_only: true
     logging:
       driver: local
     # FIXME: healthcheck?
-  # FIXME: this should point to our redis
-  strelka-coordinator:
-    image: redis:alpine
-    pull_policy: always
-    profiles: ["malcolm", "hedgehog"]
-    hostname: strelka-coordinator
-    restart: 'no'
-    command:
-    - sh
-    - -c
-    - redis-server --save '' --appendonly no
-    networks:
-    - default
-    env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    #ports:
-    #- 16379:6379
-    logging:
-      driver: local
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - redis-cli ping | grep PONG
-      interval: 60s
-      timeout: 15s
-      retries: 3
-      start_period: 45s
-  # FIXME: this should point to our redis
-  strelka-gatekeeper:
-    image: redis:alpine
-    pull_policy: always
-    profiles: ["malcolm", "hedgehog"]
-    hostname: strelka-gatekeeper
-    restart: 'no'
-    command:
-    - sh
-    - -c
-    - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru
-    networks:
-    - default
-    env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    #ports:
-    #- 16380:6379
-    logging:
-      driver: local
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - redis-cli ping | grep PONG
-      interval: 60s
-      timeout: 15s
-      retries: 3
-      start_period: 45s
   #strelka-clamav:
   #  build:
   #    context: .

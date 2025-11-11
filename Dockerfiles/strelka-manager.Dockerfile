@@ -34,12 +34,26 @@ ENV PUSER "strelka"
 ENV PGROUP "strelka"
 ENV PUSER_PRIV_DROP true
 USER root
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/etc/strelka"
+
+ARG YQ_VERSION=4.48.1
+ENV YQ_VERSION $YQ_VERSION
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 COPY --from=build /tmp/strelka-manager /usr/local/bin/strelka-manager
 
 RUN apk update --no-cache; \
     apk upgrade --no-cache; \
-    apk add --no-cache tini shadow bash jq psmisc rsync
+    apk add --no-cache tini shadow bash curl jq psmisc rsync
+
+# Download and install YQ
+RUN curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+    chmod 755 /usr/local/bin/yq
 
 RUN addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
       adduser -D -H -u ${DEFAULT_UID} -h /nonexistant -s /sbin/nologin -G ${PGROUP} -g ${PUSER} ${PUSER} ; \
@@ -49,6 +63,9 @@ COPY --chmod=755 \
     shared/bin/docker-uid-gid-setup.sh \
     shared/bin/service_check_passthrough.sh \
     /usr/local/bin/
+
+# see PUSER_CHOWN comment above
+VOLUME ["/etc/strelka"]
 
 ENTRYPOINT ["/sbin/tini", \
             "--", \

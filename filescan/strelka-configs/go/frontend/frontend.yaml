@@ -2,12 +2,14 @@ server: ":57314"
 coordinator:
   addr: 'strelka-coordinator:6379'
   db: 0
+  password: null
   pool: 100
   read: 10s
 #  blockingpoptime: 5s
 gatekeeper:
   addr: 'strelka-gatekeeper:6379'
   db: 0
+  password: null
   pool: 100
   read: 10s
   ttl: 1h

@@ -1,6 +1,6 @@
 # Base and setup configuration
 #FROM ubuntu:24.04
-FROM ubuntu:22.04
+FROM debian:13-slim
 
 LABEL maintainer="malcolm@inl.gov"
 # LABEL maintainer="Target Brands, Inc. TTS-CFC-OpenSource@target.com"
@@ -20,6 +20,12 @@ ENV PUSER "strelka"
 ENV PGROUP "strelka"
 ENV PUSER_PRIV_DROP true
 USER root
+# This is to handle an issue when running with rootless podman and
+#   "userns_mode: keep-id". It seems that anything defined as a VOLUME
+#   in the Dockerfile is getting set with an ownership of 999:999.
+#   This is to override that, although I'm not yet sure if there are
+#   other implications. See containers/podman#23347.
+ENV PUSER_CHOWN "/etc/strelka"
 
 # Environment variables
 ENV DEBIAN_FRONTEND noninteractive
@@ -35,6 +41,10 @@ RUN mkdir -p /home/${PUSER} && \
       usermod -a -G tty ${PUSER} && \
     chown -R $PUSER:$PGROUP /home/${PUSER}
 
+RUN sed -i "s/main$/main contrib non-free/g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get -q update && \
+    apt-get -y -q --no-install-recommends upgrade
+
 RUN rm -f /etc/apt/apt.conf.d/docker-clean && \
     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache
 
@@ -44,6 +54,9 @@ ARG JOHN_VERSION=1.9.1-ce
 ARG YARA_VERSION=4.3.1
 ARG EXIFTOOL_VERSION=12.60
 ARG SEVENZ_VERSION=2409
+ARG YQ_VERSION=4.48.1
+ENV YQ_VERSION $YQ_VERSION
+ENV YQ_URL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_"
 
 # Install build packages
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -112,6 +125,10 @@ RUN mkdir -p /tmp/install-7z && \
     tar -xf 7z.tar.xz && \
     cp 7zz /usr/local/bin
 
+# Download and install YQ
+RUN curl -fsSL -o /usr/local/bin/yq "${YQ_URL}$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')" && \
+    chmod 755 /usr/local/bin/yq
+
 # Install YARA
 RUN mkdir -p /tmp/build-yara && \
     cd /tmp/build-yara && \
@@ -166,7 +183,7 @@ RUN apt-get -q update && \
     tesseract-ocr \
     unrar \
     unzip \
-    upx \
+    upx-ucl \
     jq
 
 RUN apt-get clean -qq && \
@@ -187,20 +204,19 @@ RUN python3 -m venv /home/$PUSER/venv && \
 
 # Set the working directory and copy the project files
 WORKDIR /home/$PUSER/strelka/
-ADD ./strelka/pyproject.toml \
-    ./strelka/poetry.lock \
-    ./
+COPY ./strelka/pyproject.toml ./strelka/poetry.lock ./
+COPY ./strelka/src/python/ ./
 
 #./strelka/build/python/backend/oscrypto-1.3.0-version-regex-fix.patch
 
-RUN . /home/$PUSER/venv/bin/activate && \
-    poetry install --only main
+RUN sed -i '/strelka/ {/src\/python/ s/,\s*from\s*=\s*"[^"]*"//}' ./pyproject.toml && \
+    . /home/$PUSER/venv/bin/activate && \
+    CFLAGS=-Wno-int-conversion poetry install --only main
 
 #patch -Np1 \
 #    -d $(dirname $(python3 -c 'import oscrypto as o; print(o.__file__)')) \
 #    < oscrypto-1.3.0-version-regex-fix.patch
 
-COPY ./strelka/src/python/ ./
 RUN . /home/$PUSER/venv/bin/activate && \
     python3 setup.py -q build && \
     python3 setup.py -q install
@@ -245,6 +261,9 @@ COPY --chmod=755 \
     shared/bin/docker-uid-gid-setup.sh \
     shared/bin/service_check_passthrough.sh \
     /usr/local/bin/
+
+# see PUSER_CHOWN comment above
+VOLUME ["/etc/strelka"]
 
 ENTRYPOINT ["/usr/bin/tini", \
             "--", \
