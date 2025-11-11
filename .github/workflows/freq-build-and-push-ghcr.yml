@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - hedgehog-iso-refactor
     paths:
       - 'freq-server/**'
       - 'Dockerfiles/freq.Dockerfile'

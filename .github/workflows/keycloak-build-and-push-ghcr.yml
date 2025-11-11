@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - hedgehog-iso-refactor
     paths:
       - 'keycloak/**'
       - 'Dockerfiles/keycloak.Dockerfile'

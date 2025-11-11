@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - staging
+      - hedgehog-iso-refactor
     paths:
       - 'Dockerfiles/redis.Dockerfile'
       - 'container-health-scripts/redis.sh'
