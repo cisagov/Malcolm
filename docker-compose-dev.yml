@@ -869,6 +869,7 @@ services:
         create_host_path: false
       source: ./filescan-data/files
       target: /filescan/data/files
+      read_only: true
     healthcheck:
       test: ["CMD", "/usr/local/bin/container_health.sh"]
       interval: 30s
