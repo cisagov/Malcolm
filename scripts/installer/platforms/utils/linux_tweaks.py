@@ -42,6 +42,7 @@ def apply_sysctl(malcolm_config, config_dir: str, platform, ctx) -> tuple[Instal
         ("vm.swappiness", "1"),
         ("vm.dirty_background_ratio", "40"),
         ("vm.dirty_ratio", "80"),
+        ("vm.overcommit_memory", "1"),
         ("net.core.somaxconn", "65535"),
         ("net.ipv4.tcp_retries2", "5"),
     ]

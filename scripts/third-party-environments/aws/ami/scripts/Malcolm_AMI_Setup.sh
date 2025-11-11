@@ -192,6 +192,9 @@ vm.dirty_background_ratio=40
 
 # maximum % of dirty system memory before committing everything
 vm.dirty_ratio=80
+
+# virtual memory accounting mode: always overcommit, never check
+vm.overcommit_memory=1
 EOT
     fi # sysctl check
 
