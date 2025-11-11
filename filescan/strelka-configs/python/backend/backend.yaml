@@ -21,8 +21,8 @@ telemetry:
   traces:
     sampling: 1.0
 # OTLP-gRPC
-    exporter: otlp-grpc
-    addr: jaeger:4317
+#    exporter: otlp-grpc
+#    addr: jaeger:4317
 # OTLP-HTTP
 #    exporter: otlp-http
 #    addr: http://jaeger:4318/v1/traces

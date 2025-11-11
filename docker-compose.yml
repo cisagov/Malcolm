@@ -734,7 +734,6 @@ services:
     - ./config/ssl.env
     - ./config/auth-common.env
     - ./config/dashboards.env
-    - ./config/logstash.env
     - ./config/redis.env
     - ./config/zeek.env
     - ./config/zeek-secret.env
@@ -768,6 +767,135 @@ services:
       timeout: 15s
       retries: 3
       start_period: 60s
+  strelka-backend:
+    image: ghcr.io/idaholab/malcolm/strelka-backend:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-backend
+    restart: 'no'
+    depends_on:
+    - redis-cache
+    networks:
+    - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/redis.env
+    shm_size: 512mb
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/python/backend/
+      target: /etc/strelka/configmap
+      read_only: true
+    #- type: bind
+    #  bind:
+    #    create_host_path: false
+    #  source: ./strelka/plugins/
+    #  target: /strelka/plugins/
+    #  read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-frontend:
+    image: ghcr.io/idaholab/malcolm/strelka-frontend:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-frontend
+    restart: 'no'
+    command:
+    - strelka-frontend
+    - -locallog=true
+    - -kafkalog=false
+    depends_on:
+    - redis-cache
+    networks:
+    - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/redis.env
+    #ports:
+    #- 57314:57314
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/go/frontend/
+      target: /etc/strelka/configmap
+      read_only: true
+    - strelka-logs:/var/log/strelka/
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  strelka-manager:
+    image: ghcr.io/idaholab/malcolm/strelka-manager:25.12.0
+    profiles: ["malcolm", "hedgehog"]
+    hostname: strelka-manager
+    restart: 'no'
+    command:
+    - strelka-manager
+    depends_on:
+    - redis-cache
+    networks:
+    - default
+    env_file:
+    - ./config/process.env
+    - ./config/ssl.env
+    - ./config/redis.env
+    volumes:
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./nginx/ca-trust
+      target: /var/local/ca-trust
+      read_only: true
+    - type: bind
+      bind:
+        create_host_path: false
+      source: ./filescan/strelka-configs/go/manager/
+      target: /etc/strelka/configmap
+      read_only: true
+    logging:
+      driver: local
+    # FIXME: healthcheck?
+  #strelka-clamav:
+  #  build:
+  #    context: .
+  #    dockerfile: Dockerfiles/strelka-clamav.Dockerfile
+  #  image: ghcr.io/idaholab/malcolm/strelka-clamav:25.12.0
+  #  profiles: ["malcolm", "hedgehog"]
+  #  restart: 'no'
+  #  hostname: strelka-clamav
+  #  networks:
+  #  - default
+  # env_file:
+  # - ./config/process.env
+  # - ./config/ssl.env
+  #  ports:
+  #  - 3301:3301
+  #  volumes:
+  #  - type: bind
+  #    bind:
+  #      create_host_path: false
+  #    source: ./nginx/ca-trust
+  #    target: /var/local/ca-trust
+  #    read_only: true
+  #  - strelka-clamav:/var/lib/clamav/
+  #  logging:
+  #    driver: local
+  #  # FIXME: healthcheck?
   pcap-capture:
     image: ghcr.io/idaholab/malcolm/pcap-capture:25.12.0
     profiles: ["malcolm", "hedgehog"]
@@ -1325,156 +1453,6 @@ services:
       start_period: 120s
     labels:
       traefik.enable: false
-
-  jaeger:
-    # TODO: should this be removed before we ship the feature?
-    image: jaegertracing/all-in-one:1.42
-    pull_policy: always
-    profiles: ["malcolm", "hedgehog"]
-    hostname: jaeger
-    restart: 'no'
-    environment:
-      COLLECTOR_OTLP_ENABLED: true
-    networks:
-    - default
-    #ports:
-    #- 16686:16686
-    #- 6831:6831/udp
-    #- 4317:4317
-    #- 4318:4318
-    #- 14268:14268
-    logging:
-      driver: local
-    # FIXME: healthcheck?
-  strelka-backend:
-    image: ghcr.io/idaholab/malcolm/strelka-backend:25.12.0
-    profiles: ["malcolm", "hedgehog"]
-    hostname: strelka-backend
-    restart: 'no'
-    depends_on:
-    - redis-cache
-    networks:
-    - default
-    env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    - ./config/redis.env
-    shm_size: 512mb
-    volumes:
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./nginx/ca-trust
-      target: /var/local/ca-trust
-      read_only: true
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./filescan/strelka-configs/python/backend/
-      target: /etc/strelka/configmap
-      read_only: true
-    #- type: bind
-    #  bind:
-    #    create_host_path: false
-    #  source: ./strelka/plugins/
-    #  target: /strelka/plugins/
-    #  read_only: true
-    logging:
-      driver: local
-    # FIXME: healthcheck?
-  strelka-frontend:
-    image: ghcr.io/idaholab/malcolm/strelka-frontend:25.12.0
-    profiles: ["malcolm", "hedgehog"]
-    hostname: strelka-frontend
-    restart: 'no'
-    command:
-    - strelka-frontend
-    - -locallog=true
-    - -kafkalog=false
-    depends_on:
-    - redis-cache
-    networks:
-    - default
-    env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    - ./config/redis.env
-    #ports:
-    #- 57314:57314
-    volumes:
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./nginx/ca-trust
-      target: /var/local/ca-trust
-      read_only: true
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./filescan/strelka-configs/go/frontend/
-      target: /etc/strelka/configmap
-      read_only: true
-    - strelka-logs:/var/log/strelka/
-    logging:
-      driver: local
-    # FIXME: healthcheck?
-  strelka-manager:
-    image: ghcr.io/idaholab/malcolm/strelka-manager:25.12.0
-    profiles: ["malcolm", "hedgehog"]
-    hostname: strelka-manager
-    restart: 'no'
-    command:
-    - strelka-manager
-    depends_on:
-    - redis-cache
-    networks:
-    - default
-    env_file:
-    - ./config/process.env
-    - ./config/ssl.env
-    - ./config/redis.env
-    volumes:
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./nginx/ca-trust
-      target: /var/local/ca-trust
-      read_only: true
-    - type: bind
-      bind:
-        create_host_path: false
-      source: ./filescan/strelka-configs/go/manager/
-      target: /etc/strelka/configmap
-      read_only: true
-    logging:
-      driver: local
-    # FIXME: healthcheck?
-  #strelka-clamav:
-  #  build:
-  #    context: .
-  #    dockerfile: Dockerfiles/strelka-clamav.Dockerfile
-  #  image: ghcr.io/idaholab/malcolm/strelka-clamav:25.12.0
-  #  profiles: ["malcolm", "hedgehog"]
-  #  restart: 'no'
-  #  hostname: strelka-clamav
-  #  networks:
-  #  - default
-  # env_file:
-  # - ./config/process.env
-  # - ./config/ssl.env
-  #  ports:
-  #  - 3301:3301
-  #  volumes:
-  #  - type: bind
-  #    bind:
-  #      create_host_path: false
-  #    source: ./nginx/ca-trust
-  #    target: /var/local/ca-trust
-  #    read_only: true
-  #  - strelka-clamav:/var/lib/clamav/
-  #  logging:
-  #    driver: local
-  #  # FIXME: healthcheck?
 
 volumes:
   # shared named volume so filebeat can access nginx access logs
