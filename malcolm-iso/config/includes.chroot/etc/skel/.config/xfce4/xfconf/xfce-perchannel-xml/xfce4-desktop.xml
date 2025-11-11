@@ -27,12 +27,12 @@
         <property name="workspace0" type="empty">
           <property name="color-style" type="int" value="1"/>
           <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/usr/share/images/desktop-base/Malcolm_background.png"/>
+          <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
         </property>
         <property name="workspace1" type="empty">
           <property name="color-style" type="int" value="1"/>
           <property name="image-style" type="int" value="5"/>
-          <property name="last-image" type="string" value="/usr/share/images/desktop-base/Malcolm_background.png"/>
+          <property name="last-image" type="string" value="/usr/share/images/desktop-base/default"/>
         </property>
       </property>
     </property>

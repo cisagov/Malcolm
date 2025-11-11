@@ -22,8 +22,12 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
     # fix some permisions to make sure things belong to the right person
     FixPermissions "$MAIN_USER"
 
-    # if Malcolm's config file has never been touched, configure it now
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
+    [[ -r "$MAIN_USER_HOME"/Malcolm/.os-info ]] && \
+      VARIANT_ID="$(awk -F= '/^VARIANT_ID=/{gsub(/"/,""); print $2}' "$MAIN_USER_HOME"/Malcolm/.os-info)" ||
+      VARIANT_ID=
+
+    # if Malcolm's config file has never been touched, configure it now
     if [[ -f "$MAIN_USER_HOME"/Malcolm/firstrun ]]; then
       FIRST_RUN=1
       if [[ -r "$MAIN_USER_HOME"/Malcolm/scripts/install.py ]]; then
@@ -34,12 +38,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
         # set the restart policy to "unless-stopped" then re-apply the config
         jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         # set the run profile based on the ISO variant
-        if [[ -r "$MAIN_USER_HOME"/Malcolm/.os-info ]]; then
-          VARIANT_ID="$(awk -F= '/^VARIANT_ID=/{gsub(/"/,""); print $2}' "$MAIN_USER_HOME"/Malcolm/.os-info)"
-          if [[ -n "$VARIANT_ID" ]]; then
-            jq ".configuration.malcolmProfile = \"$VARIANT_ID\"" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
-          fi
-        fi
+        [[ -n "$VARIANT_ID" ]] && jq ".configuration.malcolmProfile = \"$VARIANT_ID\"" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
           --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
         rm -f "${SETTINGS_FILE}"
@@ -50,6 +49,13 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
     # make sure read permission is set correctly for the nginx worker processes
     chmod 644 "$MAIN_USER_HOME"/Malcolm/nginx/htpasswd "$MAIN_USER_HOME"/Malcolm/htadmin/metadata >/dev/null 2>&1
+  fi
+
+  # set the default wallpaper based on ISO variant
+  if [[ "$VARIANT_ID" == malcolm ]] && [[ -f /usr/share/images/desktop-base/Malcolm_background.png ]] ; then
+    ln -s -f -r /usr/share/images/desktop-base/Malcolm_background.png /usr/share/images/desktop-base/default
+  elif [[ "$VARIANT_ID" == hedgehog ]] && [[ -f /usr/share/images/desktop-base/hedgehog-wallpaper.png ]] ; then
+    ln -s -f -r /usr/share/images/desktop-base/Malcolm_background.png /usr/share/images/desktop-base/default
   fi
 
   # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
