@@ -1,6 +1,5 @@
 #!/bin/bash
 
-IMAGE_NAME=malcolm
 IMAGE_PUBLISHER=idaholab
 IMAGE_VERSION=1.0.0
 IMAGE_DISTRIBUTION=trixie
@@ -9,9 +8,11 @@ BUILD_ERROR_CODE=1
 
 DOCKER_IMAGES_TXZ=""
 DOCKER_IMAGES_TXZ_RM=0
-while getopts rd: opts; do
+IMAGE_NAME=malcolm
+while getopts rd:p: opts; do
    case ${opts} in
       d) DOCKER_IMAGES_TXZ=${OPTARG} ;;
+      p) IMAGE_NAME=${OPTARG} ;;
       r) DOCKER_IMAGES_TXZ_RM=1 ;;
    esac
 done
@@ -32,7 +33,7 @@ RUN_PATH="$(pwd)"
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
-WORKDIR="$(mktemp -d -p "$HOME" -t malcolm-XXXXXX)"
+WORKDIR="$(mktemp -d -p "$HOME" -t "$ISO_RUN_PROFILE-XXXXXX")"
 
 function cleanup {
   echo "Cleaning up..." 1>&2
@@ -71,9 +72,16 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root *
 
   # configure installation options
-  YML_IMAGE_VERSION="$(grep -P "^\s+image:.*/malcolm/" "$SCRIPT_PATH"/../docker-compose.yml | awk '{print $2}' | cut -d':' -f2 | uniq -c | sort -nr | awk '{print $2}' | head -n 1)"
+  YML_IMAGE_VERSION="$(python3 - <<'PYCODE'
+import importlib.util
+spec = importlib.util.spec_from_file_location("malcolm_constants", "scripts/malcolm_constants.py")
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+print(mod.MALCOLM_VERSION)
+PYCODE
+)"
   [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
-  sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"Malcolm $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
+  sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"${IMAGE_NAME^} $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_base_crypto.cfg
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -198,6 +206,9 @@ if [ -d "$WORKDIR" ]; then
   cp -r ./netbox/config/ "$MALCOLM_DEST_DIR/netbox/"
   cp ./netbox/preload/*.yml "$MALCOLM_DEST_DIR/netbox/preload/"
 
+  sed -i "s/^\(MALCOLM_PROFILE=\).*/\1"${IMAGE_NAME}"/" "$MALCOLM_DEST_DIR"/config/process.env.example
+  sed -i "s/^\(export[[:space:]]*MALCOLM_PROFILE=\).*/\1"${IMAGE_NAME}"/" "$MALCOLM_DEST_DIR"/.envrc.example
+
   touch "$MALCOLM_DEST_DIR"/firstrun
   popd >/dev/null 2>&1
 
@@ -210,8 +221,8 @@ if [ -d "$WORKDIR" ]; then
 
   # write out some version stuff specific to this installation version
   echo "BUILD_ID=\"$(date +'%Y-%m-%d')-${IMAGE_VERSION}\""                         > "$MALCOLM_DEST_DIR"/.os-info
-  echo "VARIANT=\"Hedgehog Linux (Malcolm) v${IMAGE_VERSION}\""                   >> "$MALCOLM_DEST_DIR"/.os-info
-  echo "VARIANT_ID=\"hedgehog-malcolm\""                                          >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "VARIANT=\"${IMAGE_NAME^} v${IMAGE_VERSION}\""                             >> "$MALCOLM_DEST_DIR"/.os-info
+  echo "VARIANT_ID=\"${IMAGE_NAME}\""                                             >> "$MALCOLM_DEST_DIR"/.os-info
   echo "ID_LIKE=\"debian\""                                                       >> "$MALCOLM_DEST_DIR"/.os-info
   echo "HOME_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""                >> "$MALCOLM_DEST_DIR"/.os-info
   echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""       >> "$MALCOLM_DEST_DIR"/.os-info
@@ -239,6 +250,7 @@ if [ -d "$WORKDIR" ]; then
   mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/
   mkdir -p ./config/includes.chroot/usr/share/icons/hicolor/{64x64,48x48,32x32,24x24,16x16}
   cp "$SCRIPT_PATH"/../docs/images/logo/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
+  cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon64.png ./config/includes.chroot/usr/share/icons/hicolor/64x64/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon48.png ./config/includes.chroot/usr/share/icons/hicolor/48x48/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon32.png ./config/includes.chroot/usr/share/icons/hicolor/32x32/malcolm.png

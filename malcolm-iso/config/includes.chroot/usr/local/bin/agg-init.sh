@@ -33,6 +33,13 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
           --configure --dry-run --non-interactive --export-malcolm-config-file "${SETTINGS_FILE}"
         # set the restart policy to "unless-stopped" then re-apply the config
         jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+        # set the run profile based on the ISO variant
+        if [[ -r "$MAIN_USER_HOME"/Malcolm/.os-info ]]; then
+          VARIANT_ID="$(awk -F= '/^VARIANT_ID=/{gsub(/"/,""); print $2}' "$MAIN_USER_HOME"/Malcolm/.os-info)"
+          if [[ -n "$VARIANT_ID" ]]; then
+            jq ".configuration.malcolmProfile = \"$VARIANT_ID\"" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+          fi
+        fi
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
           --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
         rm -f "${SETTINGS_FILE}"
