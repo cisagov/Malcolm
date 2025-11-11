@@ -31,6 +31,9 @@ vm.dirty_background_ratio=40
 
 # maximum % of dirty system memory before committing everything
 vm.dirty_ratio=80
+
+# virtual memory accounting mode: always overcommit, never check
+vm.overcommit_memory=1
 ```
 
 * In addition, the [some suggest](https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config-tcpretries.html) lowering the TCP retransmission timeout to `5`. However, if your host communicates with other systems over a low-quality network, this low of a setting may be detrimental to those communications. To set this value, add the following to `/etc/sysctl.d/99-sysctl-performance.conf`:
@@ -365,6 +368,7 @@ vm.max_map_count = 262144
 vm.swappiness = 1
 vm.dirty_background_ratio = 40
 vm.dirty_ratio = 80
+vm.overcommit_memory = 1
 net.core.somaxconn = 65535
 net.ipv4.tcp_retries2 = 5
 net.ipv4.ip_unprivileged_port_start = 443

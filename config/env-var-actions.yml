@@ -105,6 +105,10 @@ copied_environment_variables:
       REDIS_CACHE_HOST:
         REDIS_CACHE_HOST:
           "netbox-redis-cache": redis-cache
+      REDIS_NETBOX_DATABASE:
+        REDIS_DATABASE
+      REDIS_NETBOX_CACHE_DATABASE:
+        REDIS_CACHE_DATABASE
     netbox_secret:
       REDIS_PASSWORD:
         REDIS_PASSWORD
@@ -145,6 +149,8 @@ removed_environment_variables:
     - DB_NAME
     - REDIS_CACHE_HOST
     - REDIS_HOST
+    - REDIS_CACHE_DATABASE
+    - REDIS_DATABASE
     - REMOTE_AUTH_STAFF_USERS
     - REMOTE_AUTH_SUPERUSERS
   netbox_redis_cache:

@@ -42,6 +42,7 @@ def get_linux_tweak_definitions() -> List[Dict]:
         ("vm.swappiness", "Swappiness"),
         ("vm.dirty_background_ratio", "Dirty background ratio"),
         ("vm.dirty_ratio", "Dirty ratio"),
+        ("vm.overcommit_memory", "Virtual memory accounting mode"),
         ("net.core.somaxconn", "Socket connection limits"),
         ("net.ipv4.tcp_retries2", "TCP retry configuration"),
     ]
