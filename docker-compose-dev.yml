@@ -1286,7 +1286,7 @@ services:
     command:
     - sh
     - -c
-    - redis-server --requirepass $$REDIS_PASSWORD
+    - redis-server --save '' --appendonly no --maxmemory-policy allkeys-lru --requirepass $$REDIS_PASSWORD
     volumes:
     - type: bind
       bind:
