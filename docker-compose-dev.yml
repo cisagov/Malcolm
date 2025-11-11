@@ -1232,7 +1232,7 @@ services:
     command:
     - sh
     - -c
-    - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD
+    - redis-server --dir /data --appendonly yes --requirepass $$REDIS_PASSWORD
     volumes:
     - type: bind
       bind:

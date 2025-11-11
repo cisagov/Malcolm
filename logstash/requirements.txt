@@ -1,4 +1,4 @@
 ipaddress==1.0.23
 manuf==1.1.5
-pyyaml==6.0.2
+pyyaml==6.0.3
 supervisor==4.3.0

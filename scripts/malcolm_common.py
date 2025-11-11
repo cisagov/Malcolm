@@ -1510,7 +1510,8 @@ LOG_IGNORE_REGEX = re.compile(
   | Info:\s+unix-socket:
   | kube-probe/
   | loaded\s+config\s+'/etc/netbox/config/
-  | LOG:\s+checkpoint\s+(complete|starting)
+  | LOG:\s+checkpoint\s+(complete|starting)\
+  | No\s+active\s+configuration\s+revision\s+found\s+-\s+falling\s+back\s+to\s+most\s+recent
   | Notice:\s+pcap:\s+read\s+(\d+)\s+file
   | opensearch.*has\s+insecure\s+file\s+permissions
   | POST\s+/(arkime_\w+)(/\w+)?/_(d?stat|doc|search).+HTTP/[\d\.].+\b20[01]\b

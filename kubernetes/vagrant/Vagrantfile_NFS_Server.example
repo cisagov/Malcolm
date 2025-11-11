@@ -72,6 +72,9 @@ vm.dirty_background_ratio=40
 # maximum % of dirty system memory before committing everything
 vm.dirty_ratio=80
 
+# virtual memory accounting mode: always overcommit, never check
+vm.overcommit_memory=1
+
 net.core.netdev_max_backlog=250000
 net.core.optmem_max=33554432
 net.core.rmem_default=425984

@@ -47,7 +47,7 @@ spec:
                "redis",
                "sh",
                "-c",
-               "redis-server --appendonly yes --requirepass $(REDIS_PASSWORD)"]
+               "redis-server --dir /data --appendonly yes --requirepass $(REDIS_PASSWORD)"]
         ports:
           - name: redis
             protocol: TCP

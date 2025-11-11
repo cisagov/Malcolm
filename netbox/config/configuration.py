@@ -67,19 +67,19 @@ if '*' not in ALLOWED_HOSTS and 'localhost' not in ALLOWED_HOSTS:
 
 # PostgreSQL database configuration. See the Django documentation for a complete list of available parameters:
 #   https://docs.djangoproject.com/en/stable/ref/settings/#databases
-DATABASE = {
-    'NAME': environ.get('POSTGRES_NETBOX_DB', 'netbox'),       # Database name
-    'USER': environ.get('POSTGRES_NETBOX_USER', ''),           # PostgreSQL username
-    'PASSWORD': _read_secret('db_password', environ.get('POSTGRES_NETBOX_PASSWORD', '')),
-                                                               # PostgreSQL password
-    'HOST': environ.get('POSTGRES_HOST', 'localhost'),         # Database server
-    'PORT': environ.get('PGPORT', ''),                         # Database port (leave blank for default)
-    'OPTIONS': {'sslmode': environ.get('DB_SSLMODE', 'prefer')},
-                                                    # Database connection SSLMODE
-    'CONN_MAX_AGE': _environ_get_and_map('DB_CONN_MAX_AGE', '300', _AS_INT),
-                                                    # Max database connection age
-    'DISABLE_SERVER_SIDE_CURSORS': _environ_get_and_map('DB_DISABLE_SERVER_SIDE_CURSORS', 'False', _AS_BOOL),
-                                                    # Disable the use of server-side cursors transaction pooling
+DATABASES = {
+    'default': {
+        'NAME': environ.get('POSTGRES_NETBOX_DB', environ.get('DB_NAME', 'netbox')),       # Database name
+        'USER': environ.get('POSTGRES_NETBOX_USER', environ.get('DB_USER', '')),           # PostgreSQL username
+        'PASSWORD': _read_secret('db_password', environ.get('POSTGRES_NETBOX_PASSWORD', environ.get('DB_PASSWORD', ''))),
+                                                                                           # PostgreSQL password
+        'HOST': environ.get('POSTGRES_HOST', environ.get('DB_HOST', 'postgres')),          # Database server
+        'PORT': environ.get('PGPORT', environ.get('DB_PORT', '')),                         # Database port (leave blank for default)
+        'OPTIONS': {'sslmode': environ.get('DB_SSLMODE', 'prefer')},                       # Database connection SSLMODE
+        'CONN_MAX_AGE': _environ_get_and_map('DB_CONN_MAX_AGE', '300', _AS_INT),           # Max database connection age
+        'DISABLE_SERVER_SIDE_CURSORS': _environ_get_and_map('DB_DISABLE_SERVER_SIDE_CURSORS', 'False', _AS_BOOL),
+                                                        # Disable the use of server-side cursors transaction pooling
+    }
 }
 
 # Redis database settings. Redis is used for caching and for queuing background tasks such as webhook events. A separate
@@ -94,7 +94,7 @@ REDIS = {
         'SENTINEL_TIMEOUT': _environ_get_and_map('REDIS_SENTINEL_TIMEOUT', 10, _AS_INT),
         'USERNAME': environ.get('REDIS_USERNAME', ''),
         'PASSWORD': _read_secret('redis_password', environ.get('REDIS_PASSWORD', '')),
-        'DATABASE': _environ_get_and_map('REDIS_DATABASE', 0, _AS_INT),
+        'DATABASE': _environ_get_and_map('REDIS_NETBOX_DATABASE', environ.get('REDIS_DATABASE', '0'), _AS_INT),
         'SSL': _environ_get_and_map('REDIS_SSL', 'False', _AS_BOOL),
         'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False', _AS_BOOL),
     },
@@ -105,7 +105,7 @@ REDIS = {
         'SENTINEL_SERVICE': environ.get('REDIS_CACHE_SENTINEL_SERVICE', environ.get('REDIS_SENTINEL_SERVICE', 'default')),
         'USERNAME': environ.get('REDIS_CACHE_USERNAME', environ.get('REDIS_USERNAME', '')),
         'PASSWORD': _read_secret('redis_cache_password', environ.get('REDIS_CACHE_PASSWORD', environ.get('REDIS_PASSWORD', ''))),
-        'DATABASE': _environ_get_and_map('REDIS_CACHE_DATABASE', '1', _AS_INT),
+        'DATABASE': _environ_get_and_map('REDIS_NETBOX_CACHE_DATABASE', environ.get('REDIS_CACHE_DATABASE', '1'), _AS_INT),
         'SSL': _environ_get_and_map('REDIS_CACHE_SSL', environ.get('REDIS_SSL', 'False'), _AS_BOOL),
         'INSECURE_SKIP_TLS_VERIFY': _environ_get_and_map('REDIS_CACHE_INSECURE_SKIP_TLS_VERIFY', environ.get('REDIS_INSECURE_SKIP_TLS_VERIFY', 'False'), _AS_BOOL),
     },
@@ -117,6 +117,9 @@ REDIS = {
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-SECRET_KEY
 SECRET_KEY = _read_secret('secret_key', environ.get('SECRET_KEY', ''))
 
+API_TOKEN_PEPPERS = {}
+if api_token_pepper := _read_secret('api_token_pepper_1', environ.get('API_TOKEN_PEPPER_1', '')):
+    API_TOKEN_PEPPERS.update({1: api_token_pepper})
 
 #########################
 #                       #

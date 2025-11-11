@@ -3721,6 +3721,16 @@ class LinuxInstaller(Installer):
             ConfigLines(
                 [],
                 '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
+                'vm.overcommit_memory=',
+                'vm.overcommit_memory is the virtual memory accounting mode',
+                [
+                    '# virtual memory accounting mode: always overcommit, never check',
+                    'vm.overcommit_memory=1',
+                ],
+            ),
+            ConfigLines(
+                [],
+                '/etc/sysctl.d/99-sysctl-performance.conf' if os.path.isdir('/etc/sysctl.d') else '/etc/sysctl.conf',
                 'net.ipv4.tcp_retries2=',
                 'net.ipv4.tcp_retries2 defines the maximum number of TCP retransmissions',
                 ['# maximum number of TCP retransmissions', 'net.ipv4.tcp_retries2=5'],
