@@ -62,6 +62,7 @@ RUN addgroup -g ${DEFAULT_GID} ${PGROUP} ; \
 COPY --chmod=755 \
     shared/bin/docker-uid-gid-setup.sh \
     shared/bin/service_check_passthrough.sh \
+    shared/bin/strelka-expand-redis-config.sh \
     /usr/local/bin/
 
 # see PUSER_CHOWN comment above
@@ -71,7 +72,8 @@ ENTRYPOINT ["/sbin/tini", \
             "--", \
             "/usr/local/bin/docker-uid-gid-setup.sh", \
             "/usr/local/bin/service_check_passthrough.sh", \
-            "-s", "strelka"]
+            "-s", "strelka-manager", \
+            "/usr/local/bin/strelka-expand-redis-config.sh"]
 
 CMD ["strelka-manager"]
 

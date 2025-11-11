@@ -1358,6 +1358,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/redis.env
     shm_size: 512mb
     volumes:
     - type: bind
@@ -1370,8 +1371,8 @@ services:
       bind:
         create_host_path: false
       source: ./filescan/strelka-configs/python/backend/
-      target: /etc/strelka/
-      read_only: false # FIXME: this should be false, but I need to see if that breaks anything!
+      target: /etc/strelka/configmap
+      read_only: true
     #- type: bind
     #  bind:
     #    create_host_path: false
@@ -1397,6 +1398,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/redis.env
     #ports:
     #- 57314:57314
     volumes:
@@ -1430,6 +1432,7 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
+    - ./config/redis.env
     volumes:
     - type: bind
       bind:

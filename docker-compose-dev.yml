@@ -1517,8 +1517,8 @@ services:
       bind:
         create_host_path: false
       source: ./filescan/strelka-configs/python/backend/
-      target: /etc/strelka/
-      read_only: false # FIXME: this should be false, but I need to see if that breaks anything!
+      target: /etc/strelka/configmap
+      read_only: true
     #- type: bind
     #  bind:
     #    create_host_path: false
