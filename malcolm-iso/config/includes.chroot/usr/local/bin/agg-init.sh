@@ -24,7 +24,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
 
     MAIN_USER_HOME="$(getent passwd "$MAIN_USER" | cut -d: -f6)"
     [[ -r "$MAIN_USER_HOME"/Malcolm/.os-info ]] && \
-      VARIANT_ID="$(awk -F= '/^VARIANT_ID=/{gsub(/"/,""); print $2}' "$MAIN_USER_HOME"/Malcolm/.os-info)" ||
+      VARIANT_ID="$(awk -F= '/^VARIANT_ID=/{gsub(/"/,""); print $2}' "$MAIN_USER_HOME"/Malcolm/.os-info)" || \
       VARIANT_ID=
 
     # if Malcolm's config file has never been touched, configure it now
