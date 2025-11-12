@@ -623,7 +623,7 @@ class MalcolmConfig(ObservableStoreMixin):
         }
 
     def _load_exposed_services_from_orchestration_file(self, compose_data: Dict[Any, Any]):
-        exposed_services = set()
+        exposed_services = {}
 
         service_ports_to_check = {
             KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP: (
@@ -671,9 +671,7 @@ class MalcolmConfig(ObservableStoreMixin):
                     and (port_parts[0] == SERVICE_IP_EXPOSED)
                     and (port_parts[2].split('/')[0] in [str(x) for x in service_tuple[1] if x])
                 ):
-                    exposed_services.add(service_tuple[2])
-                    if service_tuple[3]:
-                        self.apply_default(config_key, True, ignore_errors=True)
+                    exposed_services[service_tuple[2]] = {config_key: service_tuple[3]}
 
         # opensearch could also be exposed via traefik instead of via `ports`:
         if (
@@ -681,20 +679,21 @@ class MalcolmConfig(ObservableStoreMixin):
             and (traefik_labels.get(TRAEFIK_ENABLE, False) is True)
             and traefik_labels.get(LABEL_OS_RULE)
         ):
-            self.apply_default(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH, True, ignore_errors=True)
-            exposed_services.add("opensearch")
+            exposed_services["opensearch"] = {KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH: True}
 
         if exposed_services:
-            self.apply_default(
-                KEY_CONFIG_ITEM_OPEN_PORTS,
-                (
-                    # the "Yes" selection equates to filebeat, logstash, and opensearch; otherwise it's "customize"
-                    OpenPortsChoices.YES
-                    if exposed_services == {"filebeat", "logstash", "opensearch"}
-                    else OpenPortsChoices.CUSTOMIZE
-                ),
-                ignore_errors=True,
+            # set the overall "expose services" key
+            # the "Yes" selection equates to filebeat, logstash, and opensearch; otherwise it's "customize"
+            open_ports_choice = (
+                OpenPortsChoices.YES
+                if set(exposed_services.keys()) == {"filebeat", "logstash", "opensearch"}
+                else OpenPortsChoices.CUSTOMIZE
             )
+            self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, open_ports_choice, ignore_errors=True)
+            if open_ports_choice == OpenPortsChoices.CUSTOMIZE:
+                # set the individual exposed services
+                for expose_key in [k for v in exposed_services.values() for k, flag in v.items() if flag]:
+                    self.apply_default(expose_key, True, ignore_errors=True)
         else:
             self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, False, ignore_errors=True)
 
