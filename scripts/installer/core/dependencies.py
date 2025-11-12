@@ -265,6 +265,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     # Malcolm profile children
+    KEY_CONFIG_ITEM_EXTRA_TAGS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile in (PROFILE_HEDGEHOG, PROFILE_MALCOLM),
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        )
+    ),
     KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,

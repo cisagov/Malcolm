@@ -5,6 +5,7 @@
 
 import contextlib
 import fnmatch
+import functools
 import glob
 import hashlib
 import inspect
@@ -882,6 +883,25 @@ def temporary_filename(suffix=None):
         yield tmp_name
     finally:
         os.unlink(tmp_name)
+
+
+###################################################################################################
+# Returns the raw underlying function behind a method, classmethod, staticmethod, or functools.partial/wrapped method.
+def unwrap_method(method):
+
+    # Handle classmethod / staticmethod
+    if isinstance(method, (classmethod, staticmethod)):
+        method = method.__func__
+
+    # Unwrap functools.partial, wraps, etc.
+    while hasattr(method, "__wrapped__"):
+        method = method.__wrapped__
+
+    # functools.partialmethod stores the underlying function in `func`
+    if isinstance(method, functools.partial):
+        method = method.func
+
+    return method
 
 
 ###################################################################################################
