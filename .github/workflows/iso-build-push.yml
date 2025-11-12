@@ -140,7 +140,8 @@ jobs:
           pushd ./malcolm-iso
           mkdir -p ./shared
           echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" > ./shared/environment.chroot
-          sudo /usr/bin/env bash ./build.sh -r -p ${{ inputs.profile }} -d "$DEST_IMAGES_TXZ"
+          echo "MALCOLM_PROFILE=${{ inputs.profile }}" > ./shared/environment.chroot
+          sudo /usr/bin/env bash ./build.sh -r -i ${{ inputs.profile }} -d "$DEST_IMAGES_TXZ"
           rm -rf ./shared/ "$DEST_IMAGES_TXZ"
           sudo chmod 644 ./${{ inputs.profile }}-*.*
           popd

@@ -9,10 +9,10 @@ BUILD_ERROR_CODE=1
 DOCKER_IMAGES_TXZ=""
 DOCKER_IMAGES_TXZ_RM=0
 IMAGE_NAME=malcolm
-while getopts rd:p: opts; do
+while getopts rd:i: opts; do
    case ${opts} in
       d) DOCKER_IMAGES_TXZ=${OPTARG} ;;
-      p) IMAGE_NAME=${OPTARG} ;;
+      i) IMAGE_NAME=${OPTARG} ;;
       r) DOCKER_IMAGES_TXZ_RM=1 ;;
    esac
 done
@@ -33,7 +33,7 @@ RUN_PATH="$(pwd)"
 SCRIPT_PATH="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_PATH" >/dev/null 2>&1
 
-WORKDIR="$(mktemp -d -p "$HOME" -t "$ISO_RUN_PROFILE-XXXXXX")"
+WORKDIR="$(mktemp -d -p "$HOME" -t "$IMAGE_NAME-XXXXXX")"
 
 function cleanup {
   echo "Cleaning up..." 1>&2
@@ -233,6 +233,7 @@ PYCODE
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
     cat "$SCRIPT_PATH/shared/environment.chroot" >> ./config/environment.chroot
   echo "PYTHONDONTWRITEBYTECODE=1" >> ./config/environment.chroot
+  echo "MALCOLM_PROFILE=${IMAGE_NAME}" >> ./config/environment.chroot
 
   # clone and build htpdate .deb package in its own clean environment (rather than in hooks/)
   bash "$SCRIPT_PATH/htpdate/build-docker-image.sh"
