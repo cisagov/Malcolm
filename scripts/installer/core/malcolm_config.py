@@ -42,6 +42,9 @@ from scripts.installer.configs.configuration_items import (
 )
 from scripts.installer.configs.constants.constants import (
     COMPOSE_FILENAME,
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
     LABEL_MALCOLM_CERTRESOLVER,
     LABEL_MALCOLM_ENTRYPOINTS,
     LABEL_MALCOLM_RULE,
@@ -696,6 +699,22 @@ class MalcolmConfig(ObservableStoreMixin):
                     self.apply_default(expose_key, True, ignore_errors=True)
         else:
             self.apply_default(KEY_CONFIG_ITEM_OPEN_PORTS, False, ignore_errors=True)
+
+        # for hedgehog mode, we have the request reachback ACL stored in an extension
+        reachback_request_acl = deep_get(
+            compose_data,
+            [
+                COMPOSE_MALCOLM_EXTENSION,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+            ],
+            [],
+        )
+        if isinstance(reachback_request_acl, str):
+            reachback_request_acl = [reachback_request_acl]
+        elif not isinstance(reachback_request_acl, list):
+            reachback_request_acl = []
+        self.apply_default(KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL, reachback_request_acl, ignore_errors=True)
 
     def _load_traefik_settings_from_orchestration_file(self, compose_data: Dict[Any, Any]):
         # traefik/reverse proxy stuff

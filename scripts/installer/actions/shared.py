@@ -46,6 +46,7 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPEN_PORTS,
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
@@ -63,6 +64,9 @@ from scripts.installer.configs.constants.constants import (
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
     COMPOSE_UP_SUBCOMMAND,
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
     DEFAULT_RESTART_POLICY,
     DOCKER_LOG_DRIVER,
     LABEL_MALCOLM_CERTRESOLVER,
@@ -88,6 +92,8 @@ from scripts.installer.configs.constants.constants import (
     SERVICE_PORT_SFTP_EXTERNAL,
     SERVICE_PORT_SFTP_INTERNAL,
     SERVICE_PORT_TCP_JSON,
+    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
     TRAEFIK_ENABLE,
     UFW_MANAGER_SCRIPT,
     USERNS_MODE_KEEP_ID,
@@ -209,7 +215,8 @@ def _get_traefik_config(malcolm_config):
         os_primary_mode = (
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
         )
-    except Exception:
+    except Exception as e:
+        InstallerLogger.error(f"_get_traefik_config: {e}")
         traefik_labels_enabled = False
         traefik_host = traefik_os_host = traefik_entrypoint = traefik_resolver = ""
         expose_opensearch = False
@@ -278,7 +285,14 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp = open_ports and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_SFTP) or False)
         syslog_tcp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_TCP_PORT) or 0) if open_ports else 0
         syslog_udp_port = (malcolm_config.get_value(KEY_CONFIG_ITEM_SYSLOG_UDP_PORT) or 0) if open_ports else 0
-    except Exception:
+        reachback_request_acl = (
+            (malcolm_config.get_value(KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL) or [])
+            if (profile == PROFILE_HEDGEHOG)
+            else []
+        )
+
+    except Exception as e:
+        InstallerLogger.error(f"_get_exposed_services_config: {e}")
         traefik_labels_enabled = False
         open_ports = False
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
@@ -290,6 +304,7 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp = False
         syslog_tcp_port = 0
         syslog_udp_port = 0
+        reachback_request_acl = []
 
     return (
         traefik_labels_enabled,
@@ -303,6 +318,7 @@ def _get_exposed_services_config(malcolm_config):
         expose_sftp,
         syslog_tcp_port,
         syslog_udp_port,
+        reachback_request_acl,
     )
 
 
@@ -319,11 +335,11 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
         expose_sftp,
         syslog_tcp_port,
         syslog_udp_port,
+        reachback_request_acl,
     ) = exposed_services_tuple
 
     ###################################
-    # set bind IPs based on whether services should be externally exposed or not
-
+    # if we can control the UFW firewall (e.g., Malcolm ISO), clear it now
     ufw_manager_cmd = UFW_MANAGER_SCRIPT
     if not which(ufw_manager_cmd):
         if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
@@ -335,6 +351,9 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
         err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'], privileged=True)
         if err != 0:
             InstallerLogger.error(f"Resetting UFW firewall failed: {out}")
+
+    ###################################
+    # set bind IPs based on whether services should be externally exposed or not
 
     for service, port_infos in {
         'filebeat': [
@@ -359,6 +378,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                         data['services'][service]['ports'].append(
                             f"{SERVICE_IP_EXPOSED}:{port_info[1]}:{port_info[2]}/{port_info[3]}"
                         )
+                        # update the firewall as wel
                         if ufw_manager_cmd:
                             err, out = platform.run_process(
                                 [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}'],
@@ -370,6 +390,53 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                                 )
                 if not data['services'][service]['ports']:
                     data['services'][service].pop('ports', None)
+    ###################################
+
+    ###################################
+    # reachback request ACL for hedgehog Linux run profile
+
+    # remove previously exposed ports from compose
+    for hh_profile_service in ('file-monitor', 'arkime'):
+        if hh_profile_service in data['services']:
+            data['services'][hh_profile_service].pop('ports', None)
+
+    # remove HH ACL section from extension
+    if deep_get(data, [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_HEDGEHOG], []):
+        data[COMPOSE_MALCOLM_EXTENSION][COMPOSE_MALCOLM_EXTENSION_HEDGEHOG].pop(
+            COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL, None
+        )
+
+    # if we're hedgehog mode and have an ACL...
+    if (profile == PROFILE_HEDGEHOG) and reachback_request_acl:
+        # set the ACL into the malcolm extension
+        deep_set(
+            data,
+            [
+                COMPOSE_MALCOLM_EXTENSION,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+                COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+            ],
+            reachback_request_acl,
+        )
+        # and update the firewall, if possible
+        if ufw_manager_cmd:
+            for ip in reachback_request_acl:
+                for port in [
+                    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+                    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
+                ]:
+                    err, out = platform.run_process(
+                        [ufw_manager_cmd, '-a', 'allow', 'from', ip, 'to', 'any', 'port', port, 'tcp'],
+                        privileged=True,
+                    )
+                    if err != 0:
+                        InstallerLogger.error(f"Setting UFW 'allow from {ip}' failed: {out}")
+
+        for service, port in {
+            'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
+            'arkime': SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+        }.items():
+            data['services'][service]['ports'] = [f"{SERVICE_IP_EXPOSED}:{port}:{port}/tcp"]
     ###################################
 
     ###################################

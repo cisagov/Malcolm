@@ -216,12 +216,12 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ),
         ),
     ),
-    # Hedgehog profile top-level items
+    # Hedgehog profile items
     KEY_CONFIG_ITEM_LOGSTASH_HOST: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda profile: profile == PROFILE_HEDGEHOG,
-            is_top_level=True,
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
@@ -229,6 +229,19 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             default_value=lambda profile: (
                 LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else DEFAULT_VALUE_UNCHANGED
             ),
+            only_if_unmodified=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile == PROFILE_HEDGEHOG,
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
+            default_value=lambda profile: ([] if profile == PROFILE_MALCOLM else DEFAULT_VALUE_UNCHANGED),
             only_if_unmodified=False,
         ),
     ),
@@ -292,17 +305,24 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_MALCOLM_PROFILE,
                 KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
             ],
-            condition=lambda profile, maintain: (profile == PROFILE_MALCOLM) and (not bool(maintain)),
+            condition=lambda profile, maintain: (
+                (profile == PROFILE_HEDGEHOG) or ((profile == PROFILE_MALCOLM) and (not bool(maintain)))
+            ),
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         ),
         # Keep primary mode in sync with the maintain flag when user hasn't explicitly set it.
         # True  -> opensearch-local
         # False -> opensearch-remote
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
-            condition=lambda _maintain: True,
-            default_value=lambda maintain: (
-                SearchEngineMode.OPENSEARCH_LOCAL.value if bool(maintain) else SearchEngineMode.OPENSEARCH_REMOTE.value
+            depends_on=[
+                KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+                KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
+            ],
+            condition=lambda _profile, _maintain: True,
+            default_value=lambda profile, maintain: (
+                SearchEngineMode.OPENSEARCH_LOCAL.value
+                if ((profile == PROFILE_MALCOLM) and bool(maintain))
+                else SearchEngineMode.OPENSEARCH_REMOTE.value
             ),
             only_if_unmodified=False,
         ),
@@ -380,15 +400,19 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     ),
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            condition=lambda mode: mode != SearchEngineMode.OPENSEARCH_LOCAL.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE],
+            condition=lambda profile, mode: (
+                (profile == PROFILE_HEDGEHOG) or (mode != SearchEngineMode.OPENSEARCH_LOCAL.value)
+            ),
             ui_parent=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-            condition=lambda _mode: True,
-            default_value=lambda mode: (
-                LOCAL_OPENSEARCH_URL if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else DEFAULT_VALUE_UNCHANGED
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE],
+            condition=lambda _profile, _mode: True,
+            default_value=lambda profile, mode: (
+                LOCAL_OPENSEARCH_URL
+                if ((mode == SearchEngineMode.OPENSEARCH_LOCAL.value) and (profile == PROFILE_MALCOLM))
+                else DEFAULT_VALUE_UNCHANGED
             ),
             only_if_unmodified=False,
         ),

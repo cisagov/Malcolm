@@ -85,6 +85,7 @@ KEY_CONFIG_ITEM_TRAEFIK_RESOLVER = "traefikResolver"
 KEY_CONFIG_ITEM_TRAEFIK_LABELS = "traefikLabels"
 KEY_CONFIG_ITEM_OPEN_PORTS = "openPortsSelection"
 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = "captureLiveNetworkTraffic"  # captureSelection in legacy installer
+KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL = "reachbackRequestAcl"
 
 # Open ports options
 KEY_CONFIG_ITEM_EXPOSE_LOGSTASH = "exposeLogstash"
