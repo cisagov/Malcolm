@@ -38,7 +38,11 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
         # set the restart policy to "unless-stopped" then re-apply the config
         jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         # set the run profile based on the ISO variant
-        [[ -n "$VARIANT_ID" ]] && jq ".configuration.malcolmProfile = \"$VARIANT_ID\"" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+        if [[ -n "$VARIANT_ID" ]]; then
+          [[ "$VARIANT_ID" == "hedgehog" ]] && LOGSTASH_HOST=malcolm.home.arpa:5044 || LOGSTASH_HOST=logstash:5044
+          jq ".configuration.malcolmProfile = \"$VARIANT_ID\" | .configuration.logstashHost = \"$LOGSTASH_HOST\"" \
+            < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+        fi
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
           --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"
         rm -f "${SETTINGS_FILE}"
