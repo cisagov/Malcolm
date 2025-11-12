@@ -180,6 +180,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./malcolm-iso
+          build-args: |
+            IMAGE_NAME=${{ inputs.profile }}
           push: true
           provenance: false
           tags: ghcr.io/${{ github.repository_owner }}/malcolm/${{ inputs.profile }}:${{ steps.extract_branch.outputs.branch }}
