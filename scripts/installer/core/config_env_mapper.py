@@ -9,6 +9,10 @@
 Includes reverse import from existing env files and lookup helpers.
 """
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
@@ -49,6 +53,23 @@ def _default_string_reverse_transform(value: str):
         except ValueError:
             pass  # fall through to return original value
     return value
+
+
+def _default_list_of_strings_transform(value: Any) -> List[str]:
+    if value is None:
+        result = []
+    elif isinstance(value, str):
+        result = [value]
+    elif isinstance(value, Iterable):
+        result = [str(v) for v in value]
+    else:
+        result = [str(value)]
+
+    return ",".join([true_or_false_no_quotes(x).strip() for x in result])
+
+
+def _default_list_of_strings_reverse_transform(value: str) -> List[str]:
+    return [s.strip() for s in value.split(",") if s.strip()] if value.strip() else []
 
 
 # 1. Boolean transform logic (single config item only)
@@ -130,8 +151,13 @@ _STRING_VARS = [
     KEY_ENV_ZEEK_VTOT_API2_KEY,
 ]
 
+# 3. List-of-strings transform logic
+_LIST_OF_STRING_VARS = [
+    KEY_ENV_EXTRA_TAGS,
+]
 
-# 3. Custom transform logic
+
+# 4. Custom transform logic
 @dataclass(frozen=True)
 class TransformHook:
     forward: Callable
@@ -366,6 +392,9 @@ class EnvMapper:
 
                                     if map_key_constant_value in _CUSTOM_VARS:
                                         self._handle_custom_transform(env_var_instance, map_key_constant_value)
+                                    elif map_key_constant_value in _LIST_OF_STRING_VARS:
+                                        env_var_instance.transform = _default_list_of_strings_transform
+                                        env_var_instance.reverse_transform = _default_list_of_strings_reverse_transform
                                     elif map_key_constant_value in _STRING_VARS:
                                         env_var_instance.transform = _default_string_transform
                                         env_var_instance.reverse_transform = _default_string_reverse_transform
@@ -568,6 +597,7 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_PCAP_IFACE].config_items = [KEY_CONFIG_ITEM_PCAP_IFACE]
             self.env_var_by_map_key[KEY_ENV_PCAP_FILTER].config_items = [KEY_CONFIG_ITEM_PCAP_FILTER]
             self.env_var_by_map_key[KEY_ENV_PCAP_NODE_NAME].config_items = [KEY_CONFIG_ITEM_PCAP_NODE_NAME]
+            self.env_var_by_map_key[KEY_ENV_EXTRA_TAGS].config_items = [KEY_CONFIG_ITEM_EXTRA_TAGS]
             self.env_var_by_map_key[KEY_ENV_PCAP_PIPELINE_POLLING].config_items = [
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE
             ]

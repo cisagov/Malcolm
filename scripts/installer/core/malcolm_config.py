@@ -32,7 +32,7 @@ from scripts.malcolm_common import (
     SURICATA_LOG_CONTAINER_PATH,
     YAMLDynamic,
 )
-from scripts.malcolm_utils import deep_get, get_main_script_path, same_file_or_dir, touch
+from scripts.malcolm_utils import deep_get, get_main_script_path, same_file_or_dir, touch, unwrap_method
 
 from scripts.installer.configs.constants.config_env_var_keys import *
 from scripts.installer.configs.constants.configuration_item_keys import *
@@ -68,6 +68,12 @@ from scripts.installer.utils.exceptions import (
 )
 from scripts.installer.core.observable import ObservableStoreMixin
 from scripts.installer.core.transform_registry import apply_inbound
+
+
+def overrides_set_value(obj):
+    item_func = unwrap_method(obj.__class__.set_value)
+    base_func = unwrap_method(ConfigItem.set_value)
+    return item_func is not base_func
 
 
 class MalcolmConfig(ObservableStoreMixin):
@@ -291,8 +297,16 @@ class MalcolmConfig(ObservableStoreMixin):
             if item.get_value() == value:
                 return
 
-            # Apply without flipping is_modified so future syncs can adjust
-            item.value = value
+            if not overrides_set_value(item):
+                # set value directly without set_value (i.e., without flipping is_modified) so future syncs can adjust
+                item.value = value
+            else:
+                # this config item overrides set_value so they must want to do something special,
+                # so call its set_value but preserve its is_modified flag
+                old_modified = item.is_modified
+                item.set_value(value)
+                item.is_modified = old_modified
+
             try:
                 self._notify_observers(key, item.get_value())
             except Exception as e:
