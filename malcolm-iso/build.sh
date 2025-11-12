@@ -62,6 +62,19 @@ if [ -d "$WORKDIR" ]; then
   # ensure that if we "grabbed a lock", we release it (works for clean exit, SIGTERM, and SIGINT/Ctrl-C)
   trap "cleanup" EXIT
 
+  # extract Malcolm version from malcolm_constants.py
+  pushd "$SCRIPT_PATH/.." >/dev/null 2>&1
+  YML_IMAGE_VERSION="$(python3 - <<'PYCODE'
+import importlib.util
+spec = importlib.util.spec_from_file_location("malcolm_constants", "scripts/malcolm_constants.py")
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+print(mod.MALCOLM_VERSION)
+PYCODE
+)"
+  popd >/dev/null 2>&1
+  [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
+
   pushd "$WORKDIR" >/dev/null 2>&1
   mkdir -p ./output "./work/$IMAGE_NAME-Live-Build"
   pushd "./work/$IMAGE_NAME-Live-Build" >/dev/null 2>&1
@@ -72,15 +85,6 @@ if [ -d "$WORKDIR" ]; then
   chown -R root:root *
 
   # configure installation options
-  YML_IMAGE_VERSION="$(python3 - <<'PYCODE'
-import importlib.util
-spec = importlib.util.spec_from_file_location("malcolm_constants", "scripts/malcolm_constants.py")
-mod = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(mod)
-print(mod.MALCOLM_VERSION)
-PYCODE
-)"
-  [[ -n $YML_IMAGE_VERSION ]] && IMAGE_VERSION="$YML_IMAGE_VERSION"
   sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"${IMAGE_NAME^} $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_base_crypto.cfg
