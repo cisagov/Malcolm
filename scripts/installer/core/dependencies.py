@@ -265,6 +265,13 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
         )
     ),
     # Malcolm profile children
+    KEY_CONFIG_ITEM_EXTRA_TAGS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: profile in (PROFILE_HEDGEHOG, PROFILE_MALCOLM),
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        )
+    ),
     KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
@@ -841,11 +848,15 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
                 KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
                 KEY_CONFIG_ITEM_DOCKER_ORCHESTRATION_MODE,
             ],
-            condition=lambda expose_selection, mode, orch_mode: (
-                ((expose_selection != OpenPortsChoices.NO.value) or (orch_mode == OrchestrationFramework.KUBERNETES))
-                and (mode == SearchEngineMode.OPENSEARCH_LOCAL.value)
+            condition=lambda _expose_selection, _mode, _orch_mode: True,
+            default_value=lambda expose_selection, mode, orch_mode: (
+                (orch_mode == OrchestrationFramework.KUBERNETES)
+                or {
+                    OpenPortsChoices.YES.value: True,
+                    OpenPortsChoices.NO.value: False,
+                }.get(expose_selection, DEFAULT_VALUE_UNCHANGED)
             ),
-            default_value=True,
+            only_if_unmodified=False,
         ),
     ),
     KEY_CONFIG_ITEM_EXPOSE_LOGSTASH: DependencySpec(
