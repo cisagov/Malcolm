@@ -39,9 +39,23 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
         jq '.configuration.malcolmRestartPolicy = "unless-stopped"' < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         # set the run profile based on the ISO variant
         if [[ -n "$VARIANT_ID" ]]; then
-          [[ "$VARIANT_ID" == "hedgehog" ]] && LOGSTASH_HOST=malcolm.home.arpa:5044 || LOGSTASH_HOST=logstash:5044
-          jq ".configuration.malcolmProfile = \"$VARIANT_ID\" | .configuration.logstashHost = \"$LOGSTASH_HOST\"" \
-            < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
+          if [[ "$VARIANT_ID" == "hedgehog" ]]; then
+            LOGSTASH_HOST=malcolm.home.arpa:5044
+            OPENSEARCH_URL=https://malcolm.home.arpa:9200
+            OPENSEARCH_PRIMARY=opensearch-remote
+          else
+            LOGSTASH_HOST=logstash:5044
+            OPENSEARCH_URL=https://opensearch:9200
+            OPENSEARCH_PRIMARY=opensearch-local
+          fi
+          JQ_SETTINGS=$(cat <<EOF
+.configuration.malcolmProfile = "$VARIANT_ID" |
+.configuration.opensearchPrimaryMode = "$OPENSEARCH_PRIMARY" |
+.configuration.opensearchPrimaryUrl = "$OPENSEARCH_URL" |
+.configuration.logstashHost = "$LOGSTASH_HOST"
+EOF
+)
+          jq "$JQ_SETTINGS" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"
         fi
         /usr/bin/env python3 "$MAIN_USER_HOME"/Malcolm/scripts/install.py \
           --configure --non-interactive --import-malcolm-config-file "${SETTINGS_FILE}"

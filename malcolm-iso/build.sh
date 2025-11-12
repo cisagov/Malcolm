@@ -89,6 +89,9 @@ PYCODE
   sed -i "s@Install Malcolm*@Install ${IMAGE_NAME^}@g" ./config/bootloaders/syslinux_common/install_text.cfg
   sed -i "s@Install Malcolm*@Install ${IMAGE_NAME^}@g" ./config/bootloaders/grub-pc/grub.cfg
   sed -i "s@MalcolmHedgehog@${IMAGE_NAME^}@g" ./config/includes.binary/install/preseed_base.cfg
+  [[ "$IMAGE_NAME" == "hedgehog" ]] && \
+    sed -i "s@^[[:space:]]*#[[:space:]]*d-i[[:space:]]*passwd/\(username\|user-fullname\)[[:space:]]*string[[:space:]]*.*@d-i passwd/\1 sensor@g" ./config/includes.binary/install/preseed_base.cfg
+
   declare -A BOOTLOADERS=(
       ["grub-legacy"]="xpm.gz"``
       ["grub-pc"]="png"
