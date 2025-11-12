@@ -86,6 +86,20 @@ PYCODE
 
   # configure installation options
   sed -i "s@^\(title-text[[:space:]]*:\).*@\1 \"${IMAGE_NAME^} $IMAGE_VERSION $(date +'%Y-%m-%d %H:%M:%S')\"@g" ./config/bootloaders/grub-pc/live-theme/theme.txt
+  sed -i "s@Install Malcolm*@Install ${IMAGE_NAME^}@g" ./config/bootloaders/syslinux_common/install_text.cfg
+  sed -i "s@Install Malcolm*@Install ${IMAGE_NAME^}@g" ./config/bootloaders/grub-pc/grub.cfg
+  sed -i "s@MalcolmHedgehog@${IMAGE_NAME^}@g" ./config/includes.binary/install/preseed_base.cfg
+  declare -A BOOTLOADERS=(
+      ["grub-legacy"]="xpm.gz"``
+      ["grub-pc"]="png"
+      ["syslinux_common"]="svg"
+  )
+  for BOOTLOADER in "${!BOOTLOADERS[@]}"; do
+      EXT="${BOOTLOADERS[$BOOTLOADER]}"
+      SRC="./config/bootloaders/$BOOTLOADER/splash-${IMAGE_NAME}.$EXT"
+      DEST="./config/bootloaders/$BOOTLOADER/splash.$EXT"
+      [[ -f "$SRC" ]] && cp "$SRC" "$DEST"
+  done
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_minimal.cfg
   cp ./config/includes.binary/install/preseed_base.cfg ./config/includes.binary/install/preseed_base_crypto.cfg
   cp ./config/includes.binary/install/preseed_multipar.cfg ./config/includes.binary/install/preseed_multipar_crypto.cfg
@@ -261,6 +275,12 @@ PYCODE
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon32.png ./config/includes.chroot/usr/share/icons/hicolor/32x32/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon24.png ./config/includes.chroot/usr/share/icons/hicolor/24x24/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon16.png ./config/includes.chroot/usr/share/icons/hicolor/16x16/malcolm.png
+  [[ "$IMAGE_NAME" == "hedgehog" ]] && \
+    ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/hedgehog-wallpaper.png \
+                ./config/includes.chroot/usr/share/images/desktop-base/default || \
+    ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
+                ./config/includes.chroot/usr/share/images/desktop-base/default
+
   chown -R root:root ./config/includes.chroot/usr/share/images ./config/includes.chroot/usr/share/icons
 
   mkdir -p ./config/includes.installer

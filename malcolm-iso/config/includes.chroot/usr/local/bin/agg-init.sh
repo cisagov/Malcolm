@@ -59,7 +59,7 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
   if [[ "$VARIANT_ID" == malcolm ]] && [[ -f /usr/share/images/desktop-base/Malcolm_background.png ]] ; then
     ln -s -f -r /usr/share/images/desktop-base/Malcolm_background.png /usr/share/images/desktop-base/default
   elif [[ "$VARIANT_ID" == hedgehog ]] && [[ -f /usr/share/images/desktop-base/hedgehog-wallpaper.png ]] ; then
-    ln -s -f -r /usr/share/images/desktop-base/Malcolm_background.png /usr/share/images/desktop-base/default
+    ln -s -f -r /usr/share/images/desktop-base/hedgehog-wallpaper.png /usr/share/images/desktop-base/default
   fi
 
   # we're going to let wicd manage networking on the aggregator, so remove physical interfaces from /etc/network/interfaces
