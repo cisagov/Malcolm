@@ -152,6 +152,7 @@ ScriptPath = os.path.dirname(os.path.realpath(__file__))
 MalcolmPath = os.path.abspath(os.path.join(ScriptPath, os.pardir))
 MalcolmTmpPath = os.path.join(MalcolmPath, '.tmp')
 MalcolmCfgRunOnceFile = os.path.join(MalcolmPath, '.configured')
+MalcolmISOOsInfoFile = os.path.join(MalcolmPath, '.os-info')
 
 # Utility helpers for referring to the root of the Malcolm repository from
 # other helper scripts.
@@ -2168,6 +2169,24 @@ def get_distro_info() -> tuple[Optional[str], Optional[str], Optional[str], Opti
     return distro, codename, ubuntu_codename, release
 
 
+def IsMalcolmISOInstalled():
+    result = False
+    if os.path.isfile(MalcolmISOOsInfoFile):
+        os_info = {}
+        with open(MalcolmISOOsInfoFile, 'r') as f:
+            for line in f:
+                try:
+                    k, v = line.rstrip().split("=", 1)
+                    os_info[k.lower()] = v.strip('"')
+                except Exception:
+                    pass
+        result = (os_info.get('variant_id', '').lower() in (PROFILE_HEDGEHOG, PROFILE_MALCOLM)) and any(
+            os_info.get('variant', '').lower().startswith(p) for p in (PROFILE_HEDGEHOG, PROFILE_MALCOLM)
+        )
+
+    return result
+
+
 _rec_puid_pgid = GetUidGidFromEnv()
 if (int(_rec_puid_pgid['PUID']) == 0) or (int(_rec_puid_pgid['PGID']) == 0):
     _rec_puid_pgid = GetNonRootUidGid(
@@ -2196,6 +2215,7 @@ SYSTEM_INFO: dict[str, object] = {
 SYSTEM_INFO["suggested_os_memory"] = suggest_os_memory(SYSTEM_INFO["total_mem_gb"])
 SYSTEM_INFO["suggested_ls_memory"] = suggest_ls_memory(SYSTEM_INFO["total_mem_gb"])
 SYSTEM_INFO["suggested_ls_workers"] = suggest_ls_workers(SYSTEM_INFO["cpu_cores"])
+SYSTEM_INFO["malcolm_iso_install"] = IsMalcolmISOInstalled()
 
 __all__ = [
     "SYSTEM_INFO",

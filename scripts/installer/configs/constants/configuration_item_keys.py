@@ -85,7 +85,19 @@ KEY_CONFIG_ITEM_TRAEFIK_RESOLVER = "traefikResolver"
 KEY_CONFIG_ITEM_TRAEFIK_LABELS = "traefikLabels"
 KEY_CONFIG_ITEM_OPEN_PORTS = "openPortsSelection"
 KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC = "captureLiveNetworkTraffic"  # captureSelection in legacy installer
+
+# Malcolm ISO-installed environment specific extensions
 KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL = "reachbackRequestAcl"
+KEY_CONFIG_ITEM_AUX_FW_AIDE = "auxFwAide"
+KEY_CONFIG_ITEM_AUX_FW_AUDITLOG = "auxFwAuditlog"
+KEY_CONFIG_ITEM_AUX_FW_CPU = "auxFwCPU"
+KEY_CONFIG_ITEM_AUX_FW_DF = "auxFwDf"
+KEY_CONFIG_ITEM_AUX_FW_DISK = "auxFwDisk"
+KEY_CONFIG_ITEM_AUX_FW_KMSG = "auxFwKmsg"
+KEY_CONFIG_ITEM_AUX_FW_MEM = "auxFwMem"
+KEY_CONFIG_ITEM_AUX_FW_NETWORK = "auxFwNetwork"
+KEY_CONFIG_ITEM_AUX_FW_SYSTEMD = "auxFwSystemd"
+KEY_CONFIG_ITEM_AUX_FW_THERMAL = "auxFwThermal"
 
 # Open ports options
 KEY_CONFIG_ITEM_EXPOSE_LOGSTASH = "exposeLogstash"

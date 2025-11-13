@@ -47,6 +47,16 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
     KEY_CONFIG_ITEM_PCAP_DIR,
     KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
+    KEY_CONFIG_ITEM_AUX_FW_AIDE,
+    KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
+    KEY_CONFIG_ITEM_AUX_FW_CPU,
+    KEY_CONFIG_ITEM_AUX_FW_DF,
+    KEY_CONFIG_ITEM_AUX_FW_DISK,
+    KEY_CONFIG_ITEM_AUX_FW_KMSG,
+    KEY_CONFIG_ITEM_AUX_FW_MEM,
+    KEY_CONFIG_ITEM_AUX_FW_NETWORK,
+    KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
+    KEY_CONFIG_ITEM_AUX_FW_THERMAL,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
@@ -67,6 +77,17 @@ from scripts.installer.configs.constants.constants import (
     COMPOSE_MALCOLM_EXTENSION,
     COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
     COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
     DEFAULT_RESTART_POLICY,
     DOCKER_LOG_DRIVER,
     LABEL_MALCOLM_CERTRESOLVER,
@@ -473,6 +494,38 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                         )
 
 
+def _apply_malcolm_extensions(data: dict, malcolm_config):
+    aux_fw_key_map = {
+        KEY_CONFIG_ITEM_AUX_FW_AIDE: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+        KEY_CONFIG_ITEM_AUX_FW_AUDITLOG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+        KEY_CONFIG_ITEM_AUX_FW_CPU: COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+        KEY_CONFIG_ITEM_AUX_FW_DF: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+        KEY_CONFIG_ITEM_AUX_FW_DISK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+        KEY_CONFIG_ITEM_AUX_FW_KMSG: COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+        KEY_CONFIG_ITEM_AUX_FW_MEM: COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+        KEY_CONFIG_ITEM_AUX_FW_NETWORK: COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+        KEY_CONFIG_ITEM_AUX_FW_SYSTEMD: COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+        KEY_CONFIG_ITEM_AUX_FW_THERMAL: COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    }
+    aux_fw_values = {}
+    for key in aux_fw_key_map.keys():
+        aux_fw_values[key] = bool(malcolm_config.get_value(key) or False)
+
+    if deep_get(data, [COMPOSE_MALCOLM_EXTENSION], []):
+        data[COMPOSE_MALCOLM_EXTENSION].pop(COMPOSE_MALCOLM_EXTENSION_AUX_FW, None)
+
+    for key, value in aux_fw_values.items():
+        deep_set(
+            data,
+            [
+                COMPOSE_MALCOLM_EXTENSION,
+                COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+                aux_fw_key_map[key],
+            ],
+            value,
+        )
+
+
 def _write_or_log_changes(original: dict, data: dict, config_file: str, platform, dump_yaml) -> bool:
     changed = data != original
     if platform.should_write_files():
@@ -566,6 +619,9 @@ def update_compose_files(
 
                 # open ports for exposed services
                 _apply_exposed_services(data, _get_exposed_services_config(malcolm_config), platform)
+
+                # Malcolm x- extensions in compose file (except for reachback ACL which is done in _apply_exposed_services)
+                _apply_malcolm_extensions(data, malcolm_config)
 
                 # Traefik label handling
                 _apply_traefik_labels_if_present(data, _get_traefik_config(malcolm_config))

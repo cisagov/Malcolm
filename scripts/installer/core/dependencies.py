@@ -13,6 +13,7 @@ functional area and specify both visibility and value relationships.
 from typing import Dict, Any, Callable, List, Union
 from dataclasses import dataclass
 from scripts.malcolm_constants import PROFILE_HEDGEHOG, PROFILE_MALCOLM, OrchestrationFramework
+from scripts.malcolm_common import SYSTEM_INFO
 from scripts.installer.configs.constants.constants import (
     LOGSTASH_WORKERS_KUBERNETES,
     OPENSEARCH_MEMORY_KUBERNETES,
@@ -235,14 +236,88 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=lambda profile: profile == PROFILE_HEDGEHOG,
+            condition=lambda profile: (profile == PROFILE_HEDGEHOG) and SYSTEM_INFO["malcolm_iso_install"],
             ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         ),
         value=ValueRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
             condition=lambda _profile: True,
-            default_value=lambda profile: ([] if profile == PROFILE_MALCOLM else DEFAULT_VALUE_UNCHANGED),
+            default_value=lambda profile: (
+                []
+                if ((profile == PROFILE_MALCOLM) or (not SYSTEM_INFO["malcolm_iso_install"]))
+                else DEFAULT_VALUE_UNCHANGED
+            ),
             only_if_unmodified=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_AIDE: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_AUDITLOG: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_CPU: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_DF: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_DISK: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_KMSG: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_MEM: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_NETWORK: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_SYSTEMD: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+        ),
+    ),
+    KEY_CONFIG_ITEM_AUX_FW_THERMAL: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: SYSTEM_INFO["malcolm_iso_install"],
+            ui_parent=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
         ),
     ),
     KEY_CONFIG_ITEM_TRAEFIK_HOST: DependencySpec(
