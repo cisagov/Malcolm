@@ -67,6 +67,8 @@ from scripts.malcolm_constants import (
     PLATFORM_LINUX_UBUNTU,
     PLATFORM_MAC,
     PLATFORM_WINDOWS,
+    PROFILE_HEDGEHOG,
+    PROFILE_MALCOLM,
     PUID_DEFAULT,
     SettingsFileFormat,
     SURICATA_LOG_CONTAINER_PATH,
@@ -685,6 +687,120 @@ def AskForString(
         ).strip()
         if (len(reply) == 0) and (default is not None) and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept):
             reply = default
+
+    else:
+        raise RuntimeError("No user interfaces available")
+
+    if clearScreen is True:
+        ClearScreen()
+
+    return reply
+
+
+def AskForStrings(
+    prompt,
+    labels,
+    defaults=None,
+    defaultBehavior=UserInputDefaultsBehavior.DefaultsPrompt,
+    uiMode=UserInterfaceMode.InteractionDialog | UserInterfaceMode.InteractionInput,
+    clearScreen=False,
+    extraLabel=None,
+    visibleInputLength=40,
+    maxInputLength=1024,
+    maxFormHeight=15,
+):
+    global Dialog
+    global MainDialog
+
+    if (defaults is not None) and (
+        (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsNonInteractive)
+    ):
+        reply = defaults
+
+    elif (uiMode & UserInterfaceMode.InteractionDialog) and (MainDialog is not None):
+        # Compute label alignment
+        label_width = max(len(label) for label in labels) if labels else 0
+        label_col = 1
+        field_col = label_col + label_width + 2  # 2 spaces between label and field
+
+        # Define field sizing
+        field_length = visibleInputLength
+        input_length = maxInputLength
+
+        # Build the form elements
+        elements = [
+            (
+                # label text
+                label,
+                # label position (row, col)
+                i + 1,
+                label_col,
+                # default value or ""
+                (
+                    defaults[i]
+                    if (
+                        defaults
+                        and (defaults[i] is not None)
+                        and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+                    )
+                    else ""
+                ),
+                # field position (row, col)
+                i + 1,
+                field_col,
+                # field length (visible width)
+                visibleInputLength,
+                # input length (max chars)
+                maxInputLength,
+            )
+            for i, label in enumerate(labels)
+        ]
+
+        # Compute dialog width and height dynamically
+        width = field_col + field_length + 5  # padding at the end for borders and breathing room
+        height = len(elements) + 6  # room for prompt and spacing
+        form_height = len(elements)  # show all fields at once (or tweak if too tall)
+
+        kwargs = {
+            "extra_button": (extraLabel is not None),
+            "extra_label": (str(extraLabel) if (extraLabel is not None) else ""),
+            "height": height,
+            "width": width,
+            "form_height": min(form_height, maxFormHeight),
+        }
+
+        code, reply = MainDialog.form(prompt, elements, **kwargs)
+        if (code == Dialog.CANCEL) or (code == Dialog.ESC):
+            raise DialogCanceledException(prompt)
+        elif code == Dialog.EXTRA:
+            raise DialogBackException(prompt)
+        else:
+            reply = [x.strip() for x in reply]
+
+    elif uiMode & UserInterfaceMode.InteractionInput:
+        print(f"\n{prompt}")
+
+        reply = []
+        for i, label in enumerate(labels):
+            default = (
+                defaults[i]
+                if (
+                    defaults
+                    and (defaults[i] is not None)
+                    and (defaultBehavior & UserInputDefaultsBehavior.DefaultsPrompt)
+                )
+                else None
+            )
+            value = str(input(f"\n{label}{f' ({default})' if default  else ''}: ")).strip()
+            if (
+                (len(value) == 0)
+                and (default is not None)
+                and (defaultBehavior & UserInputDefaultsBehavior.DefaultsAccept)
+            ):
+                reply.append(default)
+            else:
+                reply.append(value)
 
     else:
         raise RuntimeError("No user interfaces available")
@@ -1320,23 +1436,28 @@ def AuthFileCheck(fileName, allowEmpty=False):
         return False
 
 
-def MalcolmAuthFilesExist(configDir=None):
+def MalcolmAuthFilesExist(configDir=None, run_profile=PROFILE_MALCOLM):
     configDirToCheck = (
         configDir if configDir is not None and os.path.isdir(configDir) else os.path.join(MalcolmPath, 'config')
     )
     return (
-        AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
-        and AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
-        and AuthFileCheck(
-            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+        (
+            (run_profile == PROFILE_HEDGEHOG)
+            or (
+                AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'htpasswd')))
+                and AuthFileCheck(os.path.join(MalcolmPath, os.path.join('nginx', 'nginx_ldap.conf')), allowEmpty=True)
+                and AuthFileCheck(
+                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'cert.pem'))), allowEmpty=True
+                )
+                and AuthFileCheck(
+                    os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
+                )
+                and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
+                and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
+                and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
+            )
         )
-        and AuthFileCheck(
-            os.path.join(MalcolmPath, os.path.join('nginx', os.path.join('certs', 'key.pem'))), allowEmpty=True
-        )
-        and AuthFileCheck(os.path.join(configDirToCheck, 'netbox-secret.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'postgres.env'))
         and AuthFileCheck(os.path.join(configDirToCheck, 'redis.env'))
-        and AuthFileCheck(os.path.join(configDirToCheck, 'auth.env'))
         and AuthFileCheck(os.path.join(MalcolmPath, '.opensearch.primary.curlrc'))
     )
 

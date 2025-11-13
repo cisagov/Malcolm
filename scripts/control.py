@@ -45,6 +45,7 @@ from malcolm_constants import (
 from malcolm_common import (
     AskForPassword,
     AskForString,
+    AskForStrings,
     BoundPath,
     ChooseOne,
     ClearScreen,
@@ -53,12 +54,12 @@ from malcolm_common import (
     DisplayProgramBox,
     DotEnvDynamic,
     EnvValue,
+    GetMalcolmPath,
     GetUidGidFromEnv,
     KubernetesDynamic,
     LocalPathForContainerBindMount,
     MainDialog,
     MalcolmAuthFilesExist,
-    GetMalcolmPath,
     MalcolmTmpPath,
     OrchestrationFramework,
     OrchestrationFrameworksSupported,
@@ -75,11 +76,12 @@ from malcolm_utils import (
     CountUntilException,
     deep_get,
     dictsearch,
-    flatten,
     EscapeAnsi,
     EscapeForCurl,
+    flatten,
     get_iterable,
     get_primary_ip,
+    get_verbosity_env_var_count,
     LoadStrIfJson,
     log_level_is_debug,
     ParseCurlFile,
@@ -89,7 +91,6 @@ from malcolm_utils import (
     run_process,
     same_file_or_dir,
     set_logging,
-    get_verbosity_env_var_count,
     str2bool,
     touch,
     which,
@@ -1258,13 +1259,15 @@ def start():
 
         # make sure the auth files exist. if we are in an interactive shell and we're
         # missing any of the auth files, prompt to create them now
-        if sys.__stdin__.isatty() and (not MalcolmAuthFilesExist(configDir=args.configDir)):
+        if sys.__stdin__.isatty() and (
+            not MalcolmAuthFilesExist(configDir=args.configDir, run_profile=args.composeProfile)
+        ):
             authSetup()
 
         # still missing? sorry charlie
-        if not MalcolmAuthFilesExist(configDir=args.configDir):
+        if not MalcolmAuthFilesExist(configDir=args.configDir, run_profile=args.composeProfile):
             raise Exception(
-                'Malcolm administrator account authentication files are missing, please run ./scripts/auth_setup to generate them'
+                'Files relating to authentication and/or secrets are missing, please run ./scripts/auth_setup to generate them'
             )
 
         # if the OpenSearch keystore doesn't exist exist, create empty ones
@@ -1576,14 +1579,14 @@ def authSetup():
                 [],
             ),
             (
-                'method',
+                'method' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 f"Select authentication method (currently \"{nginxAuthMode}\")",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or bool(args.authMode),
                 [],
             ),
             (
-                'admin',
+                'admin' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 "Store administrator username/password for basic HTTP authentication",
                 False,
                 (not args.cmdAuthSetupNonInteractive)
@@ -1591,7 +1594,7 @@ def authSetup():
                 [],
             ),
             (
-                'webcerts',
+                'webcerts' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 "(Re)generate self-signed certificates for HTTPS access",
                 False,
                 not args.cmdAuthSetupNonInteractive
@@ -1604,7 +1607,7 @@ def authSetup():
                 [os.path.join(GetMalcolmPath(), os.path.join('nginx', os.path.join('certs', 'key.pem')))],
             ),
             (
-                'fwcerts',
+                'fwcerts' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 "(Re)generate self-signed certificates for a remote log forwarder",
                 False,
                 not args.cmdAuthSetupNonInteractive
@@ -1619,7 +1622,11 @@ def authSetup():
                 ],
             ),
             (
-                'keycloak' if nginxAuthMode.startswith('keycloak') else None,
+                (
+                    'keycloak'
+                    if ((args.composeProfile == PROFILE_MALCOLM) and nginxAuthMode.startswith('keycloak'))
+                    else None
+                ),
                 "Configure Keycloak",
                 False,
                 bool(
@@ -1637,56 +1644,71 @@ def authSetup():
                 [],
             ),
             (
-                'rbac' if nginxAuthMode.startswith('keycloak') else None,
+                'rbac' if ((args.composeProfile == PROFILE_MALCOLM) and nginxAuthMode.startswith('keycloak')) else None,
                 "Configure Role-Based Access Control",
                 False,
                 bool(nginxAuthMode.startswith('keycloak') or args.authRbacEnabled),
                 [],
             ),
             (
-                'remoteos' if any('-remote' in x for x in [osPrimaryMode, osSecondaryMode]) else None,
-                "Configure remote primary or secondary OpenSearch/Elasticsearch instance",
+                (
+                    'remoteos'
+                    if (
+                        (args.composeProfile != PROFILE_MALCOLM)
+                        or any('-remote' in x for x in [osPrimaryMode, osSecondaryMode])
+                    )
+                    else None
+                ),
+                f"Store username/password for {'primary or secondary ' if (args.composeProfile == PROFILE_MALCOLM) else ''}OpenSearch/Elasticsearch instance",
                 False,
                 False,
                 [],
             ),
             (
-                'localos' if osPrimaryMode == 'opensearch-local' else None,
+                (
+                    'localos'
+                    if ((args.composeProfile == PROFILE_MALCOLM) and (osPrimaryMode == 'opensearch-local'))
+                    else None
+                ),
                 "(Re)generate internal passwords for local primary OpenSearch instance",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenOpensearchCreds,
                 [os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc')],
             ),
             (
-                'email',
+                'email' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 "Store username/password for OpenSearch Alerting email sender account",
                 False,
                 False,
                 [],
             ),
             (
-                'netbox' if (netboxMode == 'local') else None,
+                'netbox' if ((args.composeProfile == PROFILE_MALCOLM) and (netboxMode == 'local')) else None,
                 "(Re)generate internal passwords for NetBox",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenNetBoxPasswords,
                 [],
             ),
             (
-                'netbox-remote-token' if (netboxMode == 'remote') else None,
+                (
+                    'netbox-remote-token'
+                    if ((args.composeProfile == PROFILE_MALCOLM) and (netboxMode == 'remote'))
+                    else None
+                ),
                 "Store API token for remote NetBox instance",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or (bool(args.authNetBoxRemoteToken)),
                 [],
             ),
             (
-                'keycloakdb' if nginxAuthMode == 'keycloak' else None,
+                'keycloakdb' if ((args.composeProfile == PROFILE_MALCOLM) and (nginxAuthMode == 'keycloak')) else None,
                 "(Re)generate internal passwords for Keycloak's PostgreSQL database",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenKeycloakDbPassword,
                 [],
             ),
             (
-                'postgres',
+                'postgres' if (args.composeProfile == PROFILE_MALCOLM) else None,
                 "(Re)generate internal superuser passwords for PostgreSQL",
                 False,
                 (not args.cmdAuthSetupNonInteractive) or args.authGenPostgresPassword,
@@ -1707,8 +1729,12 @@ def authSetup():
                 [],
             ),
             (
-                'txfwcerts' if txRxScript else None,
-                "Transfer self-signed client certificates to a remote log forwarder",
+                f"{'tx' if (args.composeProfile == PROFILE_MALCOLM) else 'rx'}fwcerts" if txRxScript else None,
+                (
+                    "Transfer self-signed client certificates to a remote log forwarder"
+                    if (args.composeProfile == PROFILE_MALCOLM)
+                    else "Receive client certificates from Malcolm"
+                ),
                 False,
                 False,
                 [],
@@ -2179,9 +2205,9 @@ def authSetup():
 
                 # create and populate connection parameters file for remote OpenSearch instance(s)
                 elif authItem[0] == 'remoteos':
-                    for instance in ['primary', 'secondary']:
+                    for instance in ['primary', 'secondary'][: 2 if args.composeProfile == PROFILE_MALCOLM else 1]:
                         openSearchCredFileName = os.path.join(GetMalcolmPath(), f'.opensearch.{instance}.curlrc')
-                        if YesOrNo(
+                        if (args.composeProfile != PROFILE_MALCOLM) or YesOrNo(
                             f'Store username/password for {instance} remote OpenSearch/Elasticsearch instance?',
                             default=False,
                             defaultBehavior=defaultBehavior,
@@ -2729,32 +2755,86 @@ def authSetup():
                             stat.S_IRUSR | stat.S_IWUSR,
                         )
 
-                elif authItem[0] == 'txfwcerts':
-                    DisplayMessage(
-                        'Run configure-capture on the remote log forwarder, select "Configure Forwarding," then "Receive client SSL files..."',
-                        defaultBehavior=defaultBehavior,
-                    )
-                    # generate new client key/crt and send it
-                    with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
-                        with pushd(tmpCertDir):
-                            clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
-                                caCrt=os.path.join(logstashPath, 'ca.crt'),
-                                caKey=os.path.join(logstashPath, 'ca.key'),
-                                clientConf=os.path.join(logstashPath, 'client.conf'),
-                                outputDir=tmpCertDir,
+                elif authItem[0].endswith('xfwcerts'):
+                    if args.composeProfile == PROFILE_MALCOLM:
+                        DisplayMessage(
+                            'Run auth_setup on the sensor and select "Receive client certificates from Malcolm"',
+                            defaultBehavior=defaultBehavior,
+                        )
+                        # generate new client key/crt and send it
+                        with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
+                            with pushd(tmpCertDir):
+                                clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
+                                    caCrt=os.path.join(logstashPath, 'ca.crt'),
+                                    caKey=os.path.join(logstashPath, 'ca.key'),
+                                    clientConf=os.path.join(logstashPath, 'client.conf'),
+                                    outputDir=tmpCertDir,
+                                )
+                                if (
+                                    (not clientKey)
+                                    or (not clientCrt)
+                                    or (not clientCaCrt)
+                                    or (not os.path.isfile(clientKey))
+                                    or (not os.path.isfile(clientCrt))
+                                    or (not os.path.isfile(clientCaCrt))
+                                ):
+                                    raise Exception(f'Unable to generate client key/crt')
+
+                                with Popen(
+                                    [txRxScript, '-t', clientCaCrt, clientCrt, clientKey],
+                                    stdout=PIPE,
+                                    stderr=STDOUT,
+                                    bufsize=0 if MainDialog else -1,
+                                ) as p:
+                                    if MainDialog:
+                                        DisplayProgramBox(
+                                            fileDescriptor=p.stdout.fileno(),
+                                            text='ssl-client-transmit',
+                                            clearScreen=True,
+                                        )
+                                    else:
+                                        while True:
+                                            output = p.stdout.readline()
+                                            if (len(output) == 0) and (p.poll() is not None):
+                                                break
+                                            if output:
+                                                print(output.decode('utf-8').rstrip())
+                                            else:
+                                                time.sleep(0.5)
+
+                                    p.poll()
+                    else:
+                        # use tx-rx-secure.sh (via croc) to get certs from Malcolm
+                        DisplayMessage(
+                            'Run auth_setup on Malcolm and select "Transfer self-signed client certificates..."',
+                            defaultBehavior=defaultBehavior,
+                        )
+
+                        tx_ip = None
+                        rx_token = None
+                        loopBreaker = CountUntilException(
+                            MaxAskForValueCount, 'Invalid Malcolm Server IP and/or code phrase'
+                        )
+                        while (not args.cmdAuthSetupNonInteractive) and loopBreaker.increment():
+                            values = AskForStrings(
+                                prompt='Receive client certificates from Malcolm',
+                                labels=['Malcolm Server IP', 'Single-use Code Phrase'],
+                                defaultBehavior=defaultBehavior,
                             )
-                            if (
-                                (not clientKey)
-                                or (not clientCrt)
-                                or (not clientCaCrt)
-                                or (not os.path.isfile(clientKey))
-                                or (not os.path.isfile(clientCrt))
-                                or (not os.path.isfile(clientCaCrt))
-                            ):
-                                raise Exception(f'Unable to generate client key/crt')
+                            if (len(values) == 2) and (len(values[0]) >= 3) and (len(values[1]) >= 16):
+                                tx_ip = values[0]
+                                rx_token = values[1]
+                                break
+
+                        if tx_ip and rx_token:
+                            for oldFile in ('ca.crt', 'client.crt', 'client.key'):
+                                try:
+                                    os.unlink(os.path.join(filebeatPath, oldFile))
+                                except Exception:
+                                    pass
 
                             with Popen(
-                                [txRxScript, '-t', clientCaCrt, clientCrt, clientKey],
+                                [txRxScript, '-s', tx_ip, '-r', rx_token, '-o', filebeatPath],
                                 stdout=PIPE,
                                 stderr=STDOUT,
                                 bufsize=0 if MainDialog else -1,
@@ -2762,7 +2842,7 @@ def authSetup():
                                 if MainDialog:
                                     DisplayProgramBox(
                                         fileDescriptor=p.stdout.fileno(),
-                                        text='ssl-client-transmit',
+                                        text='ssl-client-receive',
                                         clearScreen=True,
                                     )
                                 else:
@@ -2776,6 +2856,7 @@ def authSetup():
                                             time.sleep(0.5)
 
                                 p.poll()
+
     finally:
         if MainDialog and (not args.cmdAuthSetupNonInteractive):
             ClearScreen()

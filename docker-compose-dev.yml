@@ -1208,7 +1208,7 @@ services:
       start_period: 45s
   redis:
     image: ghcr.io/idaholab/malcolm/redis:25.11.1
-    profiles: ["malcolm"]
+    profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
       options:
@@ -1227,7 +1227,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/netbox-common.env
     - ./config/redis.env
     command:
     - sh
@@ -1253,7 +1252,7 @@ services:
       start_period: 45s
   redis-cache:
     image: ghcr.io/idaholab/malcolm/redis:25.11.1
-    profiles: ["malcolm"]
+    profiles: ["malcolm", "hedgehog"]
     logging:
       driver: local
       options:
@@ -1272,7 +1271,6 @@ services:
     env_file:
     - ./config/process.env
     - ./config/ssl.env
-    - ./config/netbox-common.env
     - ./config/redis.env
     command:
     - sh
