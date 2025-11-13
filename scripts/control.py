@@ -1382,7 +1382,7 @@ def start():
 
         ###################################
         # if we can control the UFW firewall (e.g., Malcolm ISO), clear it now
-        if SYSTEM_INFO["malcolm_iso_install"]:
+        if SYSTEM_INFO["malcolm_iso_install"] and dockerComposeYaml:
             ufw_manager_cmd = 'ufw_manager.sh'
             if not which(ufw_manager_cmd):
                 if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
@@ -1390,7 +1390,7 @@ def start():
                 else:
                     ufw_manager_cmd = None
 
-            if ufw_manager_cmd and dockerComposeYaml:
+            if ufw_manager_cmd:
                 ufw_manager_cmd = ["sudo", ufw_manager_cmd]
 
                 # clear out the firewall
@@ -1440,6 +1440,41 @@ def start():
                                 logging.info(f'Allowing port {port} from {ip} through the UFW firewall')
                             else:
                                 logging.error(f"Setting UFW 'allow from {ip}' failed: {out}")
+
+            # start/stop auxiliary forwarders (fluent bit)
+            if (
+                aux_fw_settings := deep_get(
+                    dockerComposeYaml, [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_AUX_FW], {}
+                )
+            ) and isinstance(aux_fw_settings, dict):
+                aux_fw_service_map = {
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: ['aide-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: ['auditlog-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU: ['cpu-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF: ['df-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK: ['disk-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG: ['kmsg-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM: ['mem-malcolm.service', 'memp-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK: ['network-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: ['systemd-malcolm.service'],
+                    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: ['thermal-malcolm.service'],
+                }
+                for aux_fw_key, enabled in aux_fw_settings.items():
+                    if isinstance(aux_fw_key, str) and isinstance(enabled, bool):
+                        for sysctl_service in aux_fw_service_map.get(aux_fw_key, []):
+                            # TODO: we need to edit the destination in these service files before starting them!
+                            err, out = run_process(
+                                ['systemctl', '--user', 'enable' if enabled else 'disable', '--now', sysctl_service],
+                                debug=log_level_is_debug(args.verbose),
+                            )
+                            if err == 0:
+                                logging.info(
+                                    f"{'Started and enabled' if enabled else 'Stopped and disabled'} {sysctl_service}"
+                                )
+                            else:
+                                logging.error(
+                                    f"{'Starting and enabling' if enabled else 'Stopping and disabling'} {sysctl_service} failed: {out}"
+                                )
 
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
         osEnv = os.environ.copy()
