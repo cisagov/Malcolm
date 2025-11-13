@@ -77,6 +77,27 @@ MALCOLM_PCAP_DIR = "pcap"
 MALCOLM_LOGS_DIR = "logs"
 
 ###################################################################################################
+SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER = "8005"
+SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES = "8006"
+
+# Malcolm extension fields for docker-compose
+COMPOSE_MALCOLM_EXTENSION = "x-malcolm"
+COMPOSE_MALCOLM_EXTENSION_HEDGEHOG = "hedgehog"
+COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL = "request_acl"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW = "aux-forwarders"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE = "aide"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG = "auditlog"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU = "cpu"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF = "df"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK = "disk"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG = "kmsg"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM = "mem"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK = "network"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD = "systemd"
+COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL = "thermal"
+
+
+###################################################################################################
 # Directory path constants for volume mapping
 
 # Container paths (inside containers) used for volume mappings

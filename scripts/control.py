@@ -40,6 +40,22 @@ from malcolm_constants import (
     PROFILE_KEY,
     PROFILE_MALCOLM,
     PLATFORM_WINDOWS,
+    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
 )
 
 from malcolm_common import (
@@ -54,6 +70,7 @@ from malcolm_common import (
     DisplayProgramBox,
     DotEnvDynamic,
     EnvValue,
+    GetExposedPorts,
     GetMalcolmPath,
     GetUidGidFromEnv,
     KubernetesDynamic,
@@ -70,6 +87,7 @@ from malcolm_common import (
     UserInputDefaultsBehavior,
     YAMLDynamic,
     YesOrNo,
+    SYSTEM_INFO,
 )
 
 from malcolm_utils import (
@@ -453,6 +471,7 @@ def keystore_op(service, dropPriv=False, *keystore_args, **run_process_kwargs):
     global args
     global dockerBin
     global dockerComposeBin
+    global dockerComposeYaml
     global orchMode
 
     err = -1
@@ -1251,6 +1270,7 @@ def start():
     global dockerBin
     global dockerComposeBin
     global orchMode
+    global dockerComposeYaml
 
     if args.service is None:
         touch(os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')))
@@ -1359,6 +1379,67 @@ def start():
                                     pass
                                 else:
                                     raise
+
+        ###################################
+        # if we can control the UFW firewall (e.g., Malcolm ISO), clear it now
+        if SYSTEM_INFO["malcolm_iso_install"]:
+            ufw_manager_cmd = 'ufw_manager.sh'
+            if not which(ufw_manager_cmd):
+                if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
+                    ufw_manager_cmd = os.path.join('/usr/local/bin/', ufw_manager_cmd)
+                else:
+                    ufw_manager_cmd = None
+
+            if ufw_manager_cmd and dockerComposeYaml:
+                ufw_manager_cmd = ["sudo", ufw_manager_cmd]
+
+                # clear out the firewall
+                err, out = run_process([ufw_manager_cmd, '-a', 'reset'], debug=log_level_is_debug(args.verbose))
+                if err == 0:
+                    logging.info('Reset the UFW firewall')
+                else:
+                    logging.error(f"Resetting UFW firewall failed: {out}")
+
+                # open ports in the docker-compose.yml that are exposed (e.g., 0.0.0.0),
+                # with the exception of those controlled by ACL (arkime and extracted file reachback)
+                for port in GetExposedPorts(
+                    dockerComposeYaml,
+                    exclude_ports={
+                        str(SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER),
+                        str(SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES),
+                    },
+                ):
+                    err, out = run_process(
+                        [ufw_manager_cmd, '-a', 'allow', str(port)], debug=log_level_is_debug(args.verbose)
+                    )
+                    if err == 0:
+                        logging.info(f'Allowing port {port} through the UFW firewall')
+                    else:
+                        logging.error(f"Setting UFW 'allow {port}' failed: {out}")
+
+                # open the reachback ports for the IPs in the ACL
+                if reachback_request_acl_list := deep_get(
+                    dockerComposeYaml,
+                    [
+                        COMPOSE_MALCOLM_EXTENSION,
+                        COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+                        COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+                    ],
+                    [],
+                ):
+                    for ip in reachback_request_acl_list:
+                        for port in [
+                            SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+                            SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
+                        ]:
+                            err, out = run_process(
+                                [ufw_manager_cmd, '-a', 'allow', 'from', ip, 'to', 'any', 'port', port],
+                                debug=log_level_is_debug(args.verbose),
+                            )
+                            if err == 0:
+                                logging.info(f'Allowing port {port} from {ip} through the UFW firewall')
+                            else:
+                                logging.error(f"Setting UFW 'allow from {ip}' failed: {out}")
 
         # increase COMPOSE_HTTP_TIMEOUT to be ridiculously large so docker-compose never times out the TTY doing debug output
         osEnv = os.environ.copy()

@@ -22,6 +22,22 @@ from scripts.malcolm_constants import (
     PROFILE_HEDGEHOG,
     PROFILE_MALCOLM,
     ImageArchitecture,
+    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
+    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
+    COMPOSE_MALCOLM_EXTENSION,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
+    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
+    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
 )
 from scripts.malcolm_common import (
     BuildBoundPathReplacers,
@@ -74,20 +90,6 @@ from scripts.installer.configs.constants.constants import (
     COMPOSE_FILE_GLOB,
     COMPOSE_FILENAME,
     COMPOSE_UP_SUBCOMMAND,
-    COMPOSE_MALCOLM_EXTENSION,
-    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG,
-    COMPOSE_MALCOLM_EXTENSION_HEDGEHOG_REACHBACK_REQUEST_ACL,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DF,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_DISK,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_KMSG,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_MEM,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
-    COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
     DEFAULT_RESTART_POLICY,
     DOCKER_LOG_DRIVER,
     LABEL_MALCOLM_CERTRESOLVER,
@@ -113,10 +115,7 @@ from scripts.installer.configs.constants.constants import (
     SERVICE_PORT_SFTP_EXTERNAL,
     SERVICE_PORT_SFTP_INTERNAL,
     SERVICE_PORT_TCP_JSON,
-    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
-    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
     TRAEFIK_ENABLE,
-    UFW_MANAGER_SCRIPT,
     USERNS_MODE_KEEP_ID,
 )
 from scripts.installer.configs.constants.enums import InstallerResult
@@ -360,20 +359,6 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
     ) = exposed_services_tuple
 
     ###################################
-    # if we can control the UFW firewall (e.g., Malcolm ISO), clear it now
-    ufw_manager_cmd = UFW_MANAGER_SCRIPT
-    if not which(ufw_manager_cmd):
-        if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
-            ufw_manager_cmd = os.path.join('/usr/local/bin/', ufw_manager_cmd)
-        else:
-            ufw_manager_cmd = None
-
-    if ufw_manager_cmd:
-        err, out = platform.run_process([ufw_manager_cmd, '-a', 'reset'], privileged=True)
-        if err != 0:
-            InstallerLogger.error(f"Resetting UFW firewall failed: {out}")
-
-    ###################################
     # set bind IPs based on whether services should be externally exposed or not
 
     for service, port_infos in {
@@ -399,16 +384,6 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                         data['services'][service]['ports'].append(
                             f"{SERVICE_IP_EXPOSED}:{port_info[1]}:{port_info[2]}/{port_info[3]}"
                         )
-                        # update the firewall as wel
-                        if ufw_manager_cmd:
-                            err, out = platform.run_process(
-                                [ufw_manager_cmd, '-a', 'allow', f'{port_info[1]}/{port_info[3]}'],
-                                privileged=True,
-                            )
-                            if err != 0:
-                                InstallerLogger.error(
-                                    f"Setting UFW 'allow {port_info[1]}/{port_info[3]}' failed: {out}"
-                                )
                 if not data['services'][service]['ports']:
                     data['services'][service].pop('ports', None)
     ###################################
@@ -439,20 +414,6 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
             ],
             reachback_request_acl,
         )
-        # and update the firewall, if possible
-        if ufw_manager_cmd:
-            for ip in reachback_request_acl:
-                for port in [
-                    SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
-                    SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
-                ]:
-                    err, out = platform.run_process(
-                        [ufw_manager_cmd, '-a', 'allow', 'from', ip, 'to', 'any', 'port', port, 'tcp'],
-                        privileged=True,
-                    )
-                    if err != 0:
-                        InstallerLogger.error(f"Setting UFW 'allow from {ip}' failed: {out}")
-
         for service, port in {
             'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
             'arkime': SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
@@ -477,21 +438,6 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
                 data['services']['nginx-proxy']['ports'].append(
                     f"{SERVICE_IP_EXPOSED}:{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}:{SERVICE_PORT_OSMALCOLM}/tcp"
                 )
-
-                if ufw_manager_cmd:
-                    err, out = platform.run_process(
-                        [
-                            ufw_manager_cmd,
-                            '-a',
-                            'allow',
-                            f"{SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp",
-                        ],
-                        privileged=True,
-                    )
-                    if err != 0:
-                        InstallerLogger.error(
-                            f"Setting UFW 'allow {SERVICE_PORT_OSMALCOLM if nginx_ssl else SERVICE_PORT_OSMALCOLM_NO_SSL}/tcp' failed: {out}"
-                        )
 
 
 def _apply_malcolm_extensions(data: dict, malcolm_config):

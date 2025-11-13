@@ -288,6 +288,25 @@ def LocalPathForContainerBindMount(
     return local_path
 
 
+def GetExposedPorts(docker_compose_contents, exclude_ports=None):
+    exclude_ports = exclude_ports or set()
+    host_ports = set()
+
+    for svc in docker_compose_contents.get("services", {}).values():
+        for port_str in svc.get("ports", []):
+            parts = port_str.split(":")
+            if len(parts) == 3:
+                ip, host_port, _ = parts
+                if ip in ("", "0.0.0.0") and host_port not in exclude_ports:
+                    host_ports.add(host_port)
+            elif len(parts) == 2:
+                host_port, _ = parts
+                if host_port not in exclude_ports:
+                    host_ports.add(host_port)
+
+    return sorted(host_ports, key=int)
+
+
 def BuildBoundPathReplacers(
     pcap_dir=DEFAULT_PCAP_DIR,
     suricata_log_dir=DEFAULT_SURICATA_LOG_DIR,
