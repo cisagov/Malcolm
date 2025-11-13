@@ -36,6 +36,8 @@ hedgehog-raspi
 nginx/nginx_ldap*.conf
 pcap
 _site
+shared/bin/malcolm_constants.py
+shared/bin/malcolm_utils.py
 scripts
 !scripts/malcolm_common.py
 !scripts/malcolm_constants.py

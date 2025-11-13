@@ -84,6 +84,7 @@ from malcolm_utils import (
     get_verbosity_env_var_count,
     LoadStrIfJson,
     log_level_is_debug,
+    openssl_self_signed_keygen,
     ParseCurlFile,
     pushd,
     RemoveEmptyFolders,
@@ -1435,88 +1436,6 @@ def start():
 
 
 ###################################################################################################
-def clientForwarderCertGen(caCrt, caKey, clientConf, outputDir):
-    global args
-    global opensslBin
-
-    clientKey = None
-    clientCrt = None
-    clientCaCrt = None
-
-    with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
-        with pushd(tmpCertDir):
-            err, out = run_process(
-                [opensslBin, 'genrsa', '-out', 'client.key', '2048'],
-                stderr=True,
-                debug=log_level_is_debug(args.verbose),
-            )
-            if err != 0:
-                raise Exception(f'Unable to generate client.key: {out}')
-
-            err, out = run_process(
-                [
-                    opensslBin,
-                    'req',
-                    '-sha512',
-                    '-new',
-                    '-key',
-                    'client.key',
-                    '-out',
-                    'client.csr',
-                    '-config',
-                    clientConf,
-                ],
-                stderr=True,
-                debug=log_level_is_debug(args.verbose),
-            )
-            if err != 0:
-                raise Exception(f'Unable to generate client.csr: {out}')
-
-            err, out = run_process(
-                [
-                    opensslBin,
-                    'x509',
-                    '-days',
-                    '3650',
-                    '-req',
-                    '-sha512',
-                    '-in',
-                    'client.csr',
-                    '-CAcreateserial',
-                    '-CA',
-                    caCrt,
-                    '-CAkey',
-                    caKey,
-                    '-out',
-                    'client.crt',
-                    '-extensions',
-                    'v3_req',
-                    '-extensions',
-                    'usr_cert',
-                    '-extfile',
-                    clientConf,
-                ],
-                stderr=True,
-                debug=log_level_is_debug(args.verbose),
-            )
-            if err != 0:
-                raise Exception(f'Unable to generate client.crt: {out}')
-
-            if os.path.isfile('client.key'):
-                shutil.move('client.key', outputDir)
-                clientKey = os.path.join(outputDir, 'client.key')
-            if os.path.isfile('client.crt'):
-                shutil.move('client.crt', outputDir)
-                clientCrt = os.path.join(outputDir, 'client.crt')
-            clientCaCrt = os.path.join(outputDir, os.path.basename(caCrt))
-            if not os.path.isfile(clientCaCrt) or not same_file_or_dir(caCrt, clientCaCrt):
-                shutil.copy2(caCrt, clientCaCrt)
-            # -----------------------------------------------
-
-    return clientKey, clientCrt, clientCaCrt
-
-
-###################################################################################################
 def authSetup():
     global args
     global opensslBin
@@ -2031,176 +1950,56 @@ def authSetup():
                     with pushd(os.path.join(GetMalcolmPath(), os.path.join('nginx', 'certs'))):
                         # remove previous files
                         for oldfile in glob.glob("*.pem"):
-                            os.remove(oldfile)
+                            try:
+                                os.remove(oldfile)
+                            except Exception:
+                                pass
 
-                        # generate dhparam -------------------------------
-                        err, out = run_process(
-                            [opensslBin, 'dhparam', '-out', 'dhparam.pem', '2048'],
-                            stderr=True,
+                        # generate dhparam/key/cert -------------------------------
+                        file_renames = {'server.key': 'key.pem', 'server.crt': 'cert.pem'}
+                        for file in openssl_self_signed_keygen(
+                            openssl=opensslBin,
+                            dhparam_prefix='dhparam',
+                            ca_prefix=None,
+                            server_prefix='server',
+                            temp_dir=MalcolmTmpPath if os.path.isdir(str(MalcolmTmpPath)) else None,
                             debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate dhparam.pem file: {out}')
-
-                        # generate key/cert -------------------------------
-                        err, out = run_process(
-                            [
-                                opensslBin,
-                                'req',
-                                '-subj',
-                                '/CN=localhost',
-                                '-x509',
-                                '-newkey',
-                                'rsa:4096',
-                                '-nodes',
-                                '-keyout',
-                                'key.pem',
-                                '-out',
-                                'cert.pem',
-                                '-days',
-                                '3650',
-                            ],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate key.pem/cert.pem file(s): {out}')
+                        ):
+                            filename = os.path.basename(file)
+                            if filename in file_renames:
+                                shutil.move(file, file_renames[filename])
 
                 elif authItem[0] == 'fwcerts':
-                    with pushd(logstashPath):
-                        # make clean to clean previous files
-                        for pat in ['*.srl', '*.csr', '*.key', '*.crt', '*.pem']:
-                            for oldfile in glob.glob(pat):
-                                os.remove(oldfile)
-
-                        # -----------------------------------------------
-                        # generate new ca/server/client certificates/keys
-                        # ca -------------------------------
-                        err, out = run_process(
-                            [opensslBin, 'genrsa', '-out', 'ca.key', '2048'],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate ca.key: {out}')
-
-                        err, out = run_process(
-                            [
-                                opensslBin,
-                                'req',
-                                '-x509',
-                                '-new',
-                                '-nodes',
-                                '-key',
-                                'ca.key',
-                                '-sha256',
-                                '-days',
-                                '9999',
-                                '-subj',
-                                '/C=US/ST=ID/O=sensor/OU=ca',
-                                '-out',
-                                'ca.crt',
-                            ],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate ca.crt: {out}')
-
-                        # server -------------------------------
-                        err, out = run_process(
-                            [opensslBin, 'genrsa', '-out', 'server.key', '2048'],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate server.key: {out}')
-
-                        err, out = run_process(
-                            [
-                                opensslBin,
-                                'req',
-                                '-sha512',
-                                '-new',
-                                '-key',
-                                'server.key',
-                                '-out',
-                                'server.csr',
-                                '-config',
-                                'server.conf',
-                            ],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate server.csr: {out}')
-
-                        err, out = run_process(
-                            [
-                                opensslBin,
-                                'x509',
-                                '-days',
-                                '3650',
-                                '-req',
-                                '-sha512',
-                                '-in',
-                                'server.csr',
-                                '-CAcreateserial',
-                                '-CA',
-                                'ca.crt',
-                                '-CAkey',
-                                'ca.key',
-                                '-out',
-                                'server.crt',
-                                '-extensions',
-                                'v3_req',
-                                '-extfile',
-                                'server.conf',
-                            ],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate server.crt: {out}')
-
-                        shutil.move("server.key", "server.key.pem")
-                        err, out = run_process(
-                            [opensslBin, 'pkcs8', '-in', 'server.key.pem', '-topk8', '-nocrypt', '-out', 'server.key'],
-                            stderr=True,
-                            debug=log_level_is_debug(args.verbose),
-                        )
-                        if err != 0:
-                            raise Exception(f'Unable to generate server.key: {out}')
-
-                        # client -------------------------------
-                        # mkdir filebeat/certs if it doesn't exist
+                    for cpath in (logstashPath, filebeatPath):
+                        # ensure dest directories exist
                         try:
-                            os.makedirs(filebeatPath)
+                            os.makedirs(cpath)
                         except OSError as exc:
-                            if (exc.errno == errno.EEXIST) and os.path.isdir(filebeatPath):
+                            if (exc.errno == errno.EEXIST) and os.path.isdir(cpath):
                                 pass
                             else:
                                 raise
+                        # make clean to clean previous files
+                        for oldfile in glob.glob(os.path.join(cpath, "*")):
+                            try:
+                                os.remove(oldfile)
+                            except Exception:
+                                pass
 
-                        # remove previous files in filebeat/certs
-                        for oldfile in glob.glob(os.path.join(filebeatPath, "*")):
-                            os.remove(oldfile)
-
-                        clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
-                            caCrt=os.path.join(logstashPath, 'ca.crt'),
-                            caKey=os.path.join(logstashPath, 'ca.key'),
-                            clientConf=os.path.join(logstashPath, 'client.conf'),
-                            outputDir=filebeatPath,
+                    with pushd(logstashPath):
+                        # -----------------------------------------------
+                        # generate new ca/server/client certificates/keys
+                        ssl_files = openssl_self_signed_keygen(
+                            openssl=opensslBin,
+                            ca_prefix='ca',
+                            server_prefix='server',
+                            client_prefix='client',
+                            clients=1,
+                            temp_dir=MalcolmTmpPath if os.path.isdir(str(MalcolmTmpPath)) else None,
+                            debug=log_level_is_debug(args.verbose),
                         )
-                        if (
-                            (not clientKey)
-                            or (not clientCrt)
-                            or (not clientCaCrt)
-                            or (not os.path.isfile(clientKey))
-                            or (not os.path.isfile(clientCrt))
-                            or (not os.path.isfile(clientCaCrt))
-                        ):
-                            raise Exception(f'Unable to generate client key/crt')
+                        for filename in [x for x in ssl_files if os.path.basename(x).startswith('client')]:
+                            shutil.move(filename, os.path.join(filebeatPath, os.path.basename(filename)))
                         # -----------------------------------------------
 
                 # create and populate connection parameters file for remote OpenSearch instance(s)
@@ -2764,12 +2563,24 @@ def authSetup():
                         # generate new client key/crt and send it
                         with tempfile.TemporaryDirectory(dir=MalcolmTmpPath) as tmpCertDir:
                             with pushd(tmpCertDir):
-                                clientKey, clientCrt, clientCaCrt = clientForwarderCertGen(
-                                    caCrt=os.path.join(logstashPath, 'ca.crt'),
-                                    caKey=os.path.join(logstashPath, 'ca.key'),
-                                    clientConf=os.path.join(logstashPath, 'client.conf'),
-                                    outputDir=tmpCertDir,
+                                client_files = openssl_self_signed_keygen(
+                                    openssl=opensslBin,
+                                    outdir=tmpCertDir,
+                                    existing_ca_key=os.path.join(logstashPath, 'ca.key'),
+                                    existing_ca_crt=os.path.join(logstashPath, 'ca.crt'),
+                                    ca_prefix=None,
+                                    server_prefix=None,
+                                    client_prefix='client',
+                                    clients=1,
+                                    temp_dir=MalcolmTmpPath if os.path.isdir(str(MalcolmTmpPath)) else None,
+                                    debug=log_level_is_debug(args.verbose),
                                 )
+                                clientKey, clientCrt, clientCaCrt = (
+                                    os.path.join(tmpCertDir, 'client.key'),
+                                    os.path.join(tmpCertDir, 'client.crt'),
+                                    os.path.join(tmpCertDir, 'ca.crt'),
+                                )
+                                shutil.copyfile(os.path.join(logstashPath, 'ca.crt'), clientCaCrt)
                                 if (
                                     (not clientKey)
                                     or (not clientCrt)

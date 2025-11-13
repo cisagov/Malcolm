@@ -37,6 +37,8 @@ malcolm-config_2*.yaml
 .vagrant
 .fuse_*
 .venv
+shared/bin/malcolm_constants.py
+shared/bin/malcolm_utils.py
 malcolm_*images.tar.gz
 malcolm_*images.tar.xz
 malcolm_netbox_backup_*.gz
