@@ -2000,6 +2000,7 @@ def authSetup():
                         )
                         for filename in [x for x in ssl_files if os.path.basename(x).startswith('client')]:
                             shutil.move(filename, os.path.join(filebeatPath, os.path.basename(filename)))
+                        shutil.copyfile(os.path.join(logstashPath, 'ca.crt'), os.path.join(filebeatPath, 'ca.crt'))
                         # -----------------------------------------------
 
                 # create and populate connection parameters file for remote OpenSearch instance(s)
