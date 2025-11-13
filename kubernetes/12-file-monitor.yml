@@ -16,7 +16,7 @@ spec:
     - port: 5988
       protocol: TCP
       name: loggertopic
-    - port: 8440
+    - port: 8006
       protocol: TCP
       name: http
   selector:
@@ -60,7 +60,7 @@ spec:
             protocol: TCP
           - name: http
             protocol: TCP
-            containerPort: 8440
+            containerPort: 8006
         envFrom:
           - configMapRef:
               name: process-env

@@ -558,7 +558,7 @@ def main():
     defaultTls = os.getenv('EXTRACTED_FILE_HTTP_SERVER_TLS', 'false')
     defaultLinks = os.getenv('EXTRACTED_FILE_HTTP_SERVER_LINKS', 'false')
     defaultMalcolm = os.getenv('EXTRACTED_FILE_HTTP_SERVER_MALCOLM', 'false')
-    defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8440))
+    defaultPort = int(os.getenv('EXTRACTED_FILE_HTTP_SERVER_PORT', 8006))
     defaultKey = os.getenv('EXTRACTED_FILE_HTTP_SERVER_KEY', 'infected')
     defaultDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_PATH', orig_path)
     defaultAssetsDir = os.getenv('EXTRACTED_FILE_HTTP_SERVER_ASSETS_DIR', '/opt/assets')
