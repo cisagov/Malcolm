@@ -84,6 +84,7 @@ from malcolm_common import (
     posInt,
     ProcessLogLine,
     ScriptPath,
+    test_http_connection,
     UpdateEnvFiles,
     UserInputDefaultsBehavior,
     YAMLDynamic,
@@ -1632,9 +1633,14 @@ def authSetup():
         netboxMode = str(dotenvImported.dotenv_values(netboxCommonEnvFile).get('NETBOX_MODE', '')).lower()
     osPrimaryMode = ''
     osSecondaryMode = ''
+    osPrimaryUrl = ''
+    osSecondaryUrl = ''
     if os.path.isfile(openSearchEnvFile):
-        osPrimaryMode = str(dotenvImported.dotenv_values(openSearchEnvFile).get('OPENSEARCH_PRIMARY', '')).lower()
-        osSecondaryMode = str(dotenvImported.dotenv_values(openSearchEnvFile).get('OPENSEARCH_SECONDARY', '')).lower()
+        openSearchEnvs = dotenvImported.dotenv_values(openSearchEnvFile)
+        osPrimaryMode = str(openSearchEnvs.get('OPENSEARCH_PRIMARY', '')).lower()
+        osSecondaryMode = str(openSearchEnvs.get('OPENSEARCH_SECONDARY', '')).lower()
+        osPrimaryUrl = str(openSearchEnvs.get('OPENSEARCH_URL', '')).lower()
+        osSecondaryUrl = str(openSearchEnvs.get('OPENSEARCH_SECONDARY_URL', '')).lower()
 
     # don't make them go through every thing every time, give them a choice instead
     # 0 - key
@@ -2169,59 +2175,97 @@ def authSetup():
                         ):
                             prevCurlContents = ParseCurlFile(openSearchCredFileName)
 
-                            # prompt host, username and password
-                            esUsername = None
-                            esPassword = None
-                            esPasswordConfirm = None
+                            while True:
+                                # prompt host, username and password
+                                esUsername = None
+                                esPassword = None
+                                esPasswordConfirm = None
 
-                            loopBreaker = CountUntilException(
-                                MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
-                            )
-                            while loopBreaker.increment():
-                                esUsername = AskForString(
-                                    "OpenSearch/Elasticsearch username",
-                                    default=prevCurlContents['user'],
-                                    defaultBehavior=defaultBehavior,
+                                loopBreaker = CountUntilException(
+                                    MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch username'
                                 )
-                                if (len(esUsername) > 0) and (':' not in esUsername):
-                                    break
-                                logging.error("Username is blank (or contains a colon, which is not allowed)")
-
-                            loopBreaker = CountUntilException(
-                                MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
-                            )
-                            while loopBreaker.increment():
-                                esPassword = AskForPassword(
-                                    f"{esUsername} password: ",
-                                    default='',
-                                    defaultBehavior=defaultBehavior,
-                                )
-                                if (
-                                    (len(esPassword) == 0)
-                                    and (prevCurlContents['password'] is not None)
-                                    and YesOrNo(
-                                        f'Use previously entered password for "{esUsername}"?',
-                                        default=True,
+                                while loopBreaker.increment():
+                                    esUsername = AskForString(
+                                        "OpenSearch/Elasticsearch username",
+                                        default=prevCurlContents['user'],
                                         defaultBehavior=defaultBehavior,
                                     )
-                                ):
-                                    esPassword = prevCurlContents['password']
-                                    esPasswordConfirm = esPassword
-                                else:
-                                    esPasswordConfirm = AskForPassword(
-                                        f"{esUsername} password (again): ",
+                                    if (len(esUsername) > 0) and (':' not in esUsername):
+                                        break
+                                    logging.error("Username is blank (or contains a colon, which is not allowed)")
+
+                                loopBreaker = CountUntilException(
+                                    MaxAskForValueCount, 'Invalid OpenSearch/Elasticsearch password'
+                                )
+                                while loopBreaker.increment():
+                                    esPassword = AskForPassword(
+                                        f"{esUsername} password: ",
                                         default='',
                                         defaultBehavior=defaultBehavior,
                                     )
-                                if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
-                                    break
-                                logging.error("Passwords do not match")
+                                    if (
+                                        (len(esPassword) == 0)
+                                        and (prevCurlContents['password'] is not None)
+                                        and YesOrNo(
+                                            f'Use previously entered password for "{esUsername}"?',
+                                            default=True,
+                                            defaultBehavior=defaultBehavior,
+                                        )
+                                    ):
+                                        esPassword = prevCurlContents['password']
+                                        esPasswordConfirm = esPassword
+                                    else:
+                                        esPasswordConfirm = AskForPassword(
+                                            f"{esUsername} password (again): ",
+                                            default='',
+                                            defaultBehavior=defaultBehavior,
+                                        )
+                                    if (esPassword == esPasswordConfirm) and (len(esPassword) > 0):
+                                        break
+                                    logging.error("Passwords do not match")
 
-                            esSslVerify = YesOrNo(
-                                'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
-                                default=False,
-                                defaultBehavior=defaultBehavior,
-                            )
+                                esSslVerify = YesOrNo(
+                                    'Require SSL certificate validation for OpenSearch/Elasticsearch communication?',
+                                    default=False,
+                                    defaultBehavior=defaultBehavior,
+                                )
+
+                                # test the connection if we're intereractive
+                                if (
+                                    not args.cmdAuthSetupNonInteractive
+                                    and (
+                                        test_connection_url := {
+                                            'primary': osPrimaryUrl,
+                                            'secondary': osSecondaryUrl,
+                                        }.get(instance, '')
+                                    )
+                                    and (
+                                        test_connection_mode := {
+                                            'primary': osPrimaryMode,
+                                            'secondary': osSecondaryMode,
+                                        }.get(instance, '')
+                                    )
+                                    and ('remote' in test_connection_mode)
+                                ):
+                                    retcode, message = test_http_connection(
+                                        url=test_connection_url,
+                                        username=esUsername,
+                                        password=esPassword,
+                                        ssl_verify=esSslVerify,
+                                    )
+                                    if retcode == 200:
+                                        DisplayMessage(
+                                            f'{instance} {test_connection_mode} connection succeeded! ({retcode} {message})'
+                                        )
+                                        break
+                                    elif YesOrNo(
+                                        f'{instance} {test_connection_mode} connection failed: ({retcode} {message}). Ignore error?',
+                                        default=True,
+                                        defaultBehavior=defaultBehavior,
+                                        yesLabel="Ignore Error",
+                                        noLabel="Start Over",
+                                    ):
+                                        break
 
                             with open(openSearchCredFileName, 'w') as f:
                                 f.write(f'user: "{EscapeForCurl(esUsername)}:{EscapeForCurl(esPassword)}"\n')

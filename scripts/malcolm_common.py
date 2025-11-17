@@ -13,10 +13,15 @@ import math
 import platform
 import re
 import site
+import ssl
 import string
 import sys
 import time
 import types
+
+from base64 import b64encode
+from http.client import HTTPSConnection, HTTPConnection
+from urllib.parse import urlparse
 
 # Dynamically create a module named "scripts" which points to this directory
 if "scripts" not in sys.modules:
@@ -1592,6 +1597,59 @@ def DownloadToFile(url, local_filename, debug=False):
     if debug:
         eprint(f"Download of {url} to {local_filename} {'succeeded' if fExists else 'failed'} ({sizeof_fmt(fSize)})")
     return fExists and (fSize > 0)
+
+
+###################################################################################################
+# test a connection to an HTTP/HTTPS server
+def test_http_connection(
+    protocol=None,
+    host=None,
+    port=None,
+    uri=None,
+    url=None,
+    username=None,
+    password=None,
+    ssl_verify="full",
+    user_agent="malcolm",
+):
+    status = 400
+    message = "Connection error"
+
+    # If URL is provided, parse it and override host/port/protocol/uri
+    if url:
+        parsed = urlparse(url)
+        protocol = parsed.scheme
+        host = parsed.hostname
+        port = parsed.port
+        uri = parsed.path.lstrip("/")
+        if port is None:
+            port = 443 if protocol == "https" else 80
+
+    # Set up the connection
+    c = None
+    if protocol.lower() == "https":
+        if (isinstance(ssl_verify, bool) and ssl_verify) or (
+            isinstance(ssl_verify, str) and (ssl_verify.lower() == "full")
+        ):
+            c = HTTPSConnection(host, port=port)
+        else:
+            c = HTTPSConnection(host, port=port, context=ssl._create_unverified_context())
+    elif protocol.lower() == "http":
+        c = HTTPConnection(host, port=port)
+
+    if c:
+        try:
+            headers = {'User-agent': user_agent}
+            if username and password:
+                headers['Authorization'] = 'Basic %s' % b64encode(f"{username}:{password}".encode()).decode("ascii")
+            c.request('GET', f'/{str(uri)}', headers=headers)
+            res = c.getresponse()
+            status = res.status
+            message = res.reason
+        except Exception as e:
+            message = f"Error: {e}"
+
+    return status, message
 
 
 ###################################################################################################
