@@ -4,6 +4,7 @@
     - [Installation](#ISOInstallation)
     - [Generating the ISO](#ISOBuild)
     - [Setup](#ISOSetup)
+        + [Network Interface Configuration](#NetConf)
     - [Time synchronization](time-sync.md#ConfigTime)
 
 Malcolm's container-based deployment model allows Malcolm to run on a variety of platforms. However, in some circumstances (for example, as a long-running appliance as part of a security operations center, or inside a virtual machine) it may be desirable to install Malcolm as a dedicated standalone installation.
@@ -54,7 +55,7 @@ $ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_image
 
 A system installed from the resulting ISO will load the Malcolm images upon first boot. This method is desirable when the ISO is to be installed in an "air gapped" environment or for distribution to non-networked machines.
 
-Alternately, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in a image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
+Alternatively, if users have forked Malcolm on GitHub, [workflow files]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/.github/workflows/) are provided that contain instructions for GitHub to build the images and [sensor](live-analysis.md#Hedgehog) and [Malcolm](#ISO) installer ISOs - specifically [`malcolm-iso-build-docker-wrap-push-ghcr.yml`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/.github/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) for the Malcolm ISO. Users must run the workflows to build and push the fork's Malcolm images before building the ISO. The resulting ISO file is wrapped in a image that provides an HTTP server from which the ISO may be downloaded.  See [Using GitHub runners to build Malcolm images](contributing-github-runners.md#GitHubRunners) for more information.
 
 ## <a name="ISOInstallation"></a>Installation
 
@@ -87,3 +88,33 @@ When the system boots for the first time, the Malcolm images will load if the in
 Open a terminal (click the red terminal 🗔 icon next to the Debian swirl logo 🍥 menu button in the menu bar). At this point, setup is similar to the steps described in the [Quick start](quickstart.md#QuickStart) section. Navigate to the Malcolm directory (`cd ~/Malcolm`) and run [`auth_setup`](authsetup.md#AuthSetup) to configure authentication. If the ISO does not include pre-packaged Malcolm images, or to retrieve the latest updates, run `docker compose --profile malcolm pull`. Finalize the configuration by running `scripts/configure` and follow the prompts as illustrated in the [installation example](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig).
 
 Once Malcolm is configured, users can [start Malcolm](running.md#Starting) via the command line or by clicking the "play" icon (▷) in the menu bar.
+
+### <a name="NetConf"></a>Network Interface Configuration
+
+The Malcolm base operating system does not use Dynamic Host Configuration Protocol (DHCP) to assign IP addresses to any ethernet interfaces by default. To configure DHCP, click the icon for the NetworkManager applet in the system tray and select **Auto Ethernet**:
+
+![Auto Ethernet](./images/screenshots/malcolm-desktop-ethernet-auto.png)
+
+Alternatively, to configure a network interface with a static IP address:
+
+1. Right-click the icon for the NetworkManager applet in the system tray and select **Edit Connections**
+
+![Edit Connections](./images/screenshots/malcolm-desktop-ethernet-manual-1.png)
+
+2. Click the plus ➕ icon on the **Network Connections** dialog
+
+![Add a new connection](./images/screenshots/malcolm-desktop-ethernet-manual-2.png)
+
+3. Select **Ethernet** for the Connection Type
+
+![Connection type](./images/screenshots/malcolm-desktop-ethernet-manual-3.png)
+
+4. On the **Ethernet** tab, select the **Device** (e.g., `eth0`, `enp1s0`, etc.) on
+
+![Device selection](./images/screenshots/malcolm-desktop-ethernet-manual-4.png)
+
+5. On the **IPv4 Settings** tab, set the method **Manual** and add the address/netmask/gateway and specify DNS servers, if applicable
+
+![IPv4 settings](./images/screenshots/malcolm-desktop-ethernet-manual-5.png)
+
+6. Click **Save**

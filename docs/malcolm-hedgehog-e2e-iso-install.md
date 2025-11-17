@@ -14,9 +14,10 @@ In contrast to using the ISO installer, Malcolm can also be installed on any x86
 * [Malcolm Installation and Configuration](#MalcolmInstallAndConfig)
     - [ISO Installation](#ISOInstallMalcolm)
     - [Desktop Environment](#MalcolmDesktop)
-    - [Configuration](#MalcolmConfig)
-        + [Malcolm Configuration Menu Items](#MalcolmConfigItems)
+    - [Configure Network Interfaces](#NetConf)
     - [Configure Hostname and Time Sync](#MalcolmTimeSync)
+    - [Configure Malcolm](#MalcolmConfig)
+        + [Malcolm Configuration Menu Items](#MalcolmConfigItems)
     - [Setting up Authentication](#MalcolmAuthSetup)
 * [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig)
     - [Hedgehog Linux ISO Installation](#ISOInstallHedgehog)
@@ -136,7 +137,55 @@ The panel bordering the top of the Malcolm desktop is home to a number of useful
 
 ![Malcolm Desktop](./images/screenshots/malcolm_desktop.png)
 
-### <a name="MalcolmConfig"></a> Configuration
+### <a name="NetConf"></a>Configure Network Interfaces
+
+The Malcolm base operating system does not use Dynamic Host Configuration Protocol (DHCP) to assign IP addresses to any ethernet interfaces by default. To configure DHCP, click the icon for the NetworkManager applet in the system tray and select **Auto Ethernet**:
+
+![Auto Ethernet](./images/screenshots/malcolm-desktop-ethernet-auto.png)
+
+Alternatively, to configure a network interface with a static IP address (recommended):
+
+1. Right-click the icon for the NetworkManager applet in the system tray and select **Edit Connections**
+
+![Edit Connections](./images/screenshots/malcolm-desktop-ethernet-manual-1.png)
+
+2. Click the plus ➕ icon on the **Network Connections** dialog
+
+![Add a new connection](./images/screenshots/malcolm-desktop-ethernet-manual-2.png)
+
+3. Select **Ethernet** for the Connection Type
+
+![Connection type](./images/screenshots/malcolm-desktop-ethernet-manual-3.png)
+
+4. On the **Ethernet** tab, select the **Device** (e.g., `eth0`, `enp1s0`, etc.) on
+
+![Device selection](./images/screenshots/malcolm-desktop-ethernet-manual-4.png)
+
+5. On the **IPv4 Settings** tab, set the method **Manual** and add the address/netmask/gateway and specify DNS servers, if applicable
+
+![IPv4 settings](./images/screenshots/malcolm-desktop-ethernet-manual-5.png)
+
+6. Click **Save**
+
+### <a name="MalcolmTimeSync"></a> Configure Hostname and Time Sync
+
+If users wish to change Malcolm's hostname or configure system time synchronization, they can open a terminal (the icon immediately to the right of the **Applications** menu icon at the top of the Malcolm desktop) and run `configure-interfaces` then enter the user (if the user is part of the `sudo` group) or `root` password.
+
+Here users can configure Malcolm to keep its time synchronized with either an NTP server (using the NTP protocol), another [Malcolm]({{ site.github.repository_url }}) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method to configure.
+
+![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
+
+If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
+
+![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
+
+If *ntpdate* is selected, users will be prompted to enter the IP address or hostname of the NTP server.
+
+![NTP configuration](./images/hedgehog/images/ntp_host.png)
+
+Upon configuring time synchronization, a "Time synchronization configured successfully!" message will be displayed, after which users will be returned to the welcome screen. Select **Cancel**.
+
+### <a name="MalcolmConfig"></a> Configure Malcolm
 
 The first time the Malcolm base operating system boots the **Malcolm Configuration** wizard will start automatically. This same configuration script can be run again later by running [`./scripts/configure`](malcolm-config.md#ConfigAndTuning) from the Malcolm installation directory, or clicking the **Configure Malcolm** 🔳 icon in the top panel.
 
@@ -467,24 +516,6 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
         + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and users enable this setting, Malcolm will gather capture statistics for [Zeek](https://docs.zeek.org/en/master/scripts/policy/misc/stats.zeek.html#type-Stats::Info) and [Suricata](https://docs.suricata.io/en/latest/configuration/suricata-yaml.html#stats) to populate the **Packet Capture Statistics** dashboard.
     - **Optimize Interface Settings for Capture**
         + If Malcolm is doing its own [live traffic analysis](live-analysis.md#LocalPCAP) and this option is enabled, Malcolm will [use `ethtool`]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/shared/bin/nic-capture-setup.sh) to disable NIC hardware offloading features and adjust ring buffer sizes for capture interface(s) to improve performance; this should be enabled if the interface(s) are being used for capture **only**, otherwise select **N**. If unsure, users should probably answer **N**.
-
-### <a name="MalcolmTimeSync"></a> Configure Hostname and Time Sync
-
-If users wish to change Malcolm's hostname or configure system time synchronization, they can open a terminal (the icon immediately to the right of the **Applications** menu icon at the top of the Malcolm desktop) and run `sudo configure-interfaces.py` then enter the password. If users get an error about not belonging to the `sudo` group, run `su -c configure-interfaces.py` and use the `root` password instead.
-
-Here users can configure Malcolm to keep its time synchronized with either an NTP server (using the NTP protocol), another [Malcolm]({{ site.github.repository_url }}) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method to configure.
-
-![Time synchronization method](./images/hedgehog/images/time_sync_mode.png)
-
-If **htpdate** is selected, users will be prompted to enter the URL of an HTTP/HTTPS server (for another Malcolm instance, either port `443` or port `9200` over `https` may be used) and the time synchronization check frequency in minutes. A test connection will be made to determine if the time can be retrieved from the server.
-
-![*htpdate* configuration](./images/hedgehog/images/htpdate_setup.png)
-
-If *ntpdate* is selected, users will be prompted to enter the IP address or hostname of the NTP server.
-
-![NTP configuration](./images/hedgehog/images/ntp_host.png)
-
-Upon configuring time synchronization, a "Time synchronization configured successfully!" message will be displayed, after which users will be returned to the welcome screen. Select **Cancel**.
 
 ### <a name="MalcolmAuthSetup"></a> Setting up Authentication
 

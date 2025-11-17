@@ -138,6 +138,7 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
     - [Installation](malcolm-iso.md#ISOInstallation)
     - [Generating the ISO](malcolm-iso.md#ISOBuild)
     - [Setup](malcolm-iso.md#ISOSetup)
+        + [Network Interface Configuration](malcolm-iso.md#NetConf)
     - [Time synchronization](time-sync.md#ConfigTime)
 * [Deploying Malcolm with Kubernetes](kubernetes.md#Kubernetes)
     - [Configuration](kubernetes.md#Config)
