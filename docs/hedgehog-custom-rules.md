@@ -1,3 +1,0 @@
-# <a name="CustomRulesAndScripts"></a>Custom Rules, Scripts and Plugins
-
-Using custom rules, scripts and plugins on Hedgehog Linux is nearly identical to what is done for Malcolm, the only deviations being the locations of the related directories and environment variables. Please see [Custom Rules, Scripts and Plugins](custom-rules.md#CustomRulesAndScripts) in the main Malcolm documentation for more information.

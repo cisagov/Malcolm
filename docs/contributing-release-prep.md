@@ -40,7 +40,7 @@ In addition to the `.iso` spot checks described above, Romeo uses [`malcolm-test
 
 ## 6. Build Hedgehog Linux Raspberry Pi image
 
-Earlier, Romeo reminded himself that images and artifacts for release should not be built on his own development workstation. While this is a worthy goal, at the time of this writing GitHub does not provide [standard hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners) for arm64, so the [workflow for building the Hedgehog Linux Raspberry Pi image]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/actions/workflows/hedgehog-raspi-build-docker-wrap-push-ghcr.yml) would have to be emulated in QEMU. Romeo knows from personal experience that this build process would exceed GitHub's time limit and be killed, so he has to resort to [building the Raspberry Pi image](hedgehog-raspi-build.md#HedgehogRaspiBuild) locally. He has read that arm64 standard runners are [coming soon](https://github.com/orgs/community/discussions/19197#discussioncomment-10895290) and suspects that soon Malcolm will support building the Hedgehog Linux Raspberry Pi image natively using GitHub runners.
+TODO: update documentation for pulling and extracting the arm64 raspberry pi image
 
 ## 7. Submit and merge a pull request
 

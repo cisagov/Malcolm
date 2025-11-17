@@ -30,6 +30,8 @@ The build should work with a variety of [Vagrant providers](https://developer.ha
 
 To perform a clean build of the Malcolm installer ISO, navigate to the local Malcolm working copy and run:
 
+# TODO Malcolm vs. hedgehog flavor
+
 ```
 $ ./malcolm-iso/build_via_vagrant.sh -f
 …

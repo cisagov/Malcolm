@@ -33,7 +33,7 @@ Before [running](#Running) Malcolm, either copy one of the `99-ingress-…` file
 
 Malcolm's [ingress controller manifest]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/99-ingress-nginx.yml) uses the [Ingress-NGINX controller for Kubernetes](https://github.com/kubernetes/ingress-nginx). A few Malcolm features require some customization when installing and configuring the Ingress-NGINX controller. As well as being listed below, see [kubernetes/vagrant/deploy_ingress_nginx.sh]({{ site.github.repository_url }}/blob/{{ site.github.build_revision }}/kubernetes/vagrant/deploy_ingress_nginx.sh) for an example of how to configure and apply the Ingress-NGINX controller for Kubernetes.
 
-* To [forward](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) logs from a remote instance of [Hedgehog Linux](hedgehog.md):
+* To forward logs from a remote instance of [Hedgehog Linux](hedgehog.md):
     - See ["Exposing TCP and UDP services"](https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/) in the Ingress-NGINX documentation.
     - Configure the controller to start up with the `--tcp-services-configmap=ingress-nginx/tcp-services` flag:
         ```
@@ -613,7 +613,7 @@ Deploying Malcolm with Kubernetes is a new (and still somewhat experimental) fea
 
 ## <a name="FutureLiveCap"></a> Live Traffic Analysis
 
-For now, network traffic artifacts for analysis are provided to a Malcolm deployment on Kubernetes via [forwarding](malcolm-hedgehog-e2e-iso-install.md#HedgehogConfigForwarding) from a remote instance of [Hedgehog Linux](hedgehog.md) or via PCAP [upload](upload.md#Upload). [Future work](https://github.com/idaholab/Malcolm/issues/175) is needed to design and implement monitoring of network traffic in the cloud.
+For now, network traffic artifacts for analysis are provided to a Malcolm deployment on Kubernetes via forwarding from a remote instance of [Hedgehog Linux](hedgehog.md) or via PCAP [upload](upload.md#Upload). [Future work](https://github.com/idaholab/Malcolm/issues/175) is needed to design and implement monitoring of network traffic in the cloud.
 
 ## <a name="FutureScaleOut"></a> Horizontal Scaling
 

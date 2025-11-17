@@ -72,7 +72,7 @@ Using these official images as the base of Malcolm's Docker images relies on a t
 
 #### <a name="ISOInstalledEnvironments"></a> ISO-Installed Environments
 
-For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog-installation.md#HedgehogInstallation), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
+For the ISO installers for [Malcolm](malcolm-iso.md#ISOInstallation) and [Hedgehog Linux](hedgehog.md), and the [Hedgehog Linux Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild), Malcolm uses the [Debian Live](https://www.debian.org/devel/debian-live/) framework to build installation images based on Debian stable, which, as described in the [Debian FAQ](https://www.debian.org/doc/manuals/debian-faq/choosing.en.html#s3.1.5), "is rock solid. It does not break and has full security support."
 
 Beyond building on this solid foundation, and as these environments are full-fledged operating systems, the [harbian-audit](https://github.com/hardenedlinux/harbian-audit) benchmarks are used as a basis for additional hardening that targets the following guidelines for establishing a secure configuration posture:
 
@@ -80,7 +80,7 @@ Beyond building on this solid foundation, and as these environments are full-fle
 * [DISA STIG (Security Technical Implementation Guides) for RHEL 7](https://www.stigviewer.com/stig/red_hat_enterprise_linux_7/) v2r5 Ubuntu v1r2 [adapted](https://github.com/hardenedlinux/STIG-OS-mirror/blob/master/redhat-STIG-DOCs/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip) for a Debian operating system
 * Additional recommendations from [cisecurity.org](https://www.cisecurity.org/)
 
-More details on this hardening can be found [here for Malcolm](hedgehog-hardening.md#HedgehogHardening).
+More details on this hardening can be found [here for Malcolm](hardening.md).
 
 ### <a name="SoftwarePackageRepositories"></a> Software Package Repositories
 

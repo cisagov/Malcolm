@@ -6,6 +6,8 @@ The Malcolm and Hedgehog Linux installers as described in these instructions are
 
 In contrast to using the ISO installer, Malcolm can also be installed on any x86-64 (also known as x64, x86_64, AMD64, and Intel 64) or AArch64 (also known as ARM64) platform capable of running Docker or Podman. See the [installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
 
+# TODO: needs a complete overhaul for the Hedgehog stuff
+
 ### <a name="TableOfContents"></a> Table of Contents
 
 * [Obtaining the Installation ISOs](#ISODownload)
