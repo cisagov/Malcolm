@@ -533,6 +533,14 @@ function dregls () {
 ########################################################################
 # malcolm-specific
 ########################################################################
+configure-interfaces() {
+  if groups | grep -q '\bsudo\b'; then
+    sudo /usr/local/bin/configure-interfaces.py
+  else
+    su -l -c /usr/local/bin/configure-interfaces.py
+  fi
+}
+
 function malcolmmonitor () {
   if [[ -d "$HOME"/Malcolm ]]; then
     mkdir -p "$HOME"/Malcolm/.tmp
