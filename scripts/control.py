@@ -17,6 +17,7 @@ import gzip
 import json
 import logging
 import os
+from pathlib import Path
 import platform
 import re
 import secrets
@@ -1271,6 +1272,7 @@ def start():
     global dockerComposeBin
     global orchMode
     global dockerComposeYaml
+    global dotenvImported
 
     if args.service is None:
         touch(os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')))
@@ -1300,15 +1302,17 @@ def start():
             os.path.join(GetMalcolmPath(), os.path.join('nginx', 'htpasswd')),
             os.path.join(GetMalcolmPath(), os.path.join('htadmin', 'metadata')),
         ]:
-            # chmod 644 authFile
-            os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+            if os.path.isfile(authFile):
+                # chmod 644 authFile
+                os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
         for authFile in [
             os.path.join(GetMalcolmPath(), os.path.join('nginx', 'nginx_ldap.conf')),
             os.path.join(GetMalcolmPath(), '.opensearch.primary.curlrc'),
             os.path.join(GetMalcolmPath(), '.opensearch.secondary.curlrc'),
         ]:
-            # chmod 600 authFile
-            os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
+            if os.path.isfile(authFile):
+                # chmod 600 authFile
+                os.chmod(authFile, stat.S_IRUSR | stat.S_IWUSR)
         with pushd(args.configDir):
             for envFile in glob.glob("*.env"):
                 # chmod 600 envFile
@@ -1381,8 +1385,10 @@ def start():
                                     raise
 
         ###################################
-        # if we can control the UFW firewall (e.g., Malcolm ISO), clear it now
+        # steps that are *specific* for a Malcolm ISO install
         if SYSTEM_INFO["malcolm_iso_install"] and dockerComposeYaml:
+
+            # if we can control the UFW firewall clear it now
             ufw_manager_cmd = 'ufw_manager.sh'
             if not which(ufw_manager_cmd):
                 if os.path.isfile(os.path.join('/usr/local/bin/', ufw_manager_cmd)):
@@ -1447,6 +1453,24 @@ def start():
                     dockerComposeYaml, [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_AUX_FW], {}
                 )
             ) and isinstance(aux_fw_settings, dict):
+
+                # we need to know where we're forwarding this data too, it should be the same as LOGSTASH_HOST
+                #   albeit with :5045 instead of :5044
+                filebeatDest = None
+                logstashEnvFile = os.path.join(args.configDir, 'beats-common.env')
+                if os.path.isfile(logstashEnvFile):
+                    logstashDestSuffix = ':5044'
+                    filebeatDestSuffix = ':5045'
+                    logstashEnvs = dotenvImported.dotenv_values(logstashEnvFile)
+                    if (
+                        (logstashDest := logstashEnvs.get('LOGSTASH_HOST', ''))
+                        and (logstashDest != f'logstash{logstashDestSuffix}')
+                        and logstashDest.endswith(logstashDestSuffix)
+                    ):
+                        filebeatDest = logstashDest[: -len(logstashDestSuffix)] + filebeatDestSuffix
+
+                service_base_path = Path.home() / ".config" / "systemd" / "user"
+                service_tcp_output_pattern = re.compile(r"-o\s+tcp://\S+")
                 aux_fw_service_map = {
                     COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: ['aide-malcolm.service'],
                     COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: ['auditlog-malcolm.service'],
@@ -1459,10 +1483,25 @@ def start():
                     COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: ['systemd-malcolm.service'],
                     COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: ['thermal-malcolm.service'],
                 }
+                # if we've got a destination, edit the .service file accordingly and daemon-reload
+                if filebeatDest:
+                    for sysctl_service in (s for services in aux_fw_service_map.values() for s in services):
+                        service_path = service_base_path / sysctl_service
+                        service_text_updated = service_tcp_output_pattern.sub(
+                            f"-o tcp://{filebeatDest}", service_path.read_text()
+                        )
+                        service_path.write_text(service_text_updated)
+                    err, out = run_process(
+                        ['systemctl', '--user', 'daemon-reload'], debug=log_level_is_debug(args.verbose)
+                    )
+                    if err != 0:
+                        logging.error(f"systemctl --user daemon-reload failed: {out}")
+
                 for aux_fw_key, enabled in aux_fw_settings.items():
                     if isinstance(aux_fw_key, str) and isinstance(enabled, bool):
+
+                        # enable and start each forwarder service
                         for sysctl_service in aux_fw_service_map.get(aux_fw_key, []):
-                            # TODO: we need to edit the destination in these service files before starting them!
                             err, out = run_process(
                                 ['systemctl', '--user', 'enable' if enabled else 'disable', '--now', sysctl_service],
                                 debug=log_level_is_debug(args.verbose),
