@@ -16,6 +16,7 @@
 **/.direnv
 **/.opensearch*.curlrc
 .configured
+.os-info
 .trigger_workflow_build
 .tmp
 config.*

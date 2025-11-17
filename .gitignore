@@ -25,6 +25,7 @@
 # runtime
 .tmp
 .configured
+.os-info
 config.*/
 /redis
 /postgres
