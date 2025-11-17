@@ -156,7 +156,7 @@ function FixPermissions() {
     fi
     chmod 644 /etc/cron.allow /etc/at.allow
     if [[ -d /etc/NetworkManager/system-connections ]]; then
-      chmod 700 /etc/NetworkManager/system-connections 2>/dev/null || true
+      chmod 755 /etc/NetworkManager/system-connections 2>/dev/null || true
       find /etc/NetworkManager/system-connections -type f -name "*.nmconnection" -exec chmod 600 "{}" \;
     fi
     loginctl enable-linger "$USER_TO_FIX" 2>/dev/null || true
