@@ -260,13 +260,14 @@ def _validate_live_pcap_capture(malcolm_config, add_issue) -> None:
 
 
 def _validate_old_artifact_cleanup(malcolm_config, add_issue) -> None:
-    delete_old_indexes = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES))
-    index_prune_threshold = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD) or ""
-    if delete_old_indexes and ((not index_prune_threshold) or (str(index_prune_threshold) == "0")):
-        add_issue(
-            KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
-            '"Delete Old Indices" is enabled without specifying a prune threshold',
-        )
+    if (profile := malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE)) and (profile == PROFILE_MALCOLM):
+        delete_old_indexes = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES))
+        index_prune_threshold = malcolm_config.get_value(KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD) or ""
+        if delete_old_indexes and ((not index_prune_threshold) or (str(index_prune_threshold) == "0")):
+            add_issue(
+                KEY_CONFIG_ITEM_INDEX_PRUNE_THRESHOLD,
+                '"Delete Old Indices" is enabled without specifying a prune threshold',
+            )
 
 
 def validate_required(malcolm_config) -> List[ValidationIssue]:
