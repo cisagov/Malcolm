@@ -16,6 +16,9 @@ while getopts rd:i: opts; do
       r) DOCKER_IMAGES_TXZ_RM=1 ;;
    esac
 done
+[[ "$IMAGE_NAME" == "hedgehog" ]] && \
+  LIVE_USER=sensor || \
+  LIVE_USER=analyst
 
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root" 1>&2
@@ -253,6 +256,11 @@ PYCODE
   echo "DOCUMENTATION_URL=\"https://${IMAGE_PUBLISHER}.github.io/Malcolm\""       >> "$MALCOLM_DEST_DIR"/.os-info
   echo "SUPPORT_URL=\"https://github.com/${IMAGE_PUBLISHER}\""                    >> "$MALCOLM_DEST_DIR"/.os-info
   echo "BUG_REPORT_URL=\"https://github.com/cisagov/malcolm/issues\""             >> "$MALCOLM_DEST_DIR"/.os-info
+  sed -i'' \
+      -e "s/=\"Malcolm Live Analyst/=\"${IMAGE_NAME^} Live ${LIVE_USER^}/" \
+      -e "s/=\"malcolm-live/=\"${IMAGE_NAME}-live/" \
+      -e "s/=\"analyst/=\"${LIVE_USER}/" \
+      ./config/includes.chroot/etc/live/config.conf
 
   # environment variables to pass into chroot
   [[ -f "$SCRIPT_PATH/shared/environment.chroot" ]] && \
@@ -304,7 +312,7 @@ PYCODE
     --backports false \
     --binary-images iso-hybrid \
     --bootappend-install "auto=true locales=en_US.UTF-8 keyboard-layouts=us" \
-    --bootappend-live "boot=live components username=analyst nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
+    --bootappend-live "boot=live components username=${LIVE_USER} nosplash random.trust_cpu=on elevator=deadline cgroup_enable=memory swapaccount=1 cgroup.memory=nokmem systemd.unified_cgroup_hierarchy=1" \
     --chroot-filesystem squashfs \
     --debian-installer live \
     --debian-installer-distribution $IMAGE_DISTRIBUTION \
