@@ -7,10 +7,12 @@ PATH_DATA=
 CONFIG_FILE=
 MODULES=
 VERBOSE_FLAG=
+NETBOX_SITE=${NETBOX_SITE:-}
+
 [[ -n "${EXTRA_TAGS}" ]] || EXTRA_TAGS=
 SLEEP_SEC=0
 
-while getopts vh:c:d:f:m:t:s: opts; do
+while getopts vh:c:d:f:m:n:t:s: opts; do
    case ${opts} in
       v)
         VERBOSE_FLAG="-v"
@@ -30,6 +32,9 @@ while getopts vh:c:d:f:m:t:s: opts; do
         ;;
       m)
         MODULES="${OPTARG}"
+        ;;
+      n)
+        NETBOX_SITE="${OPTARG}"
         ;;
       t)
         EXTRA_TAGS="${OPTARG}"
@@ -55,12 +60,17 @@ function cleanup {
 
 trap cleanup EXIT
 
+cp "${CONFIG_FILE}" "${TMP_CONFIG_FILE}"
+
 if [[ -n "${EXTRA_TAGS}" ]]; then
   readarray -td '' EXTRA_TAGS_ARRAY < <(awk '{ gsub(/,/,"\0"); print; }' <<<"${EXTRA_TAGS},"); unset 'EXTRA_TAGS_ARRAY[-1]';
-  yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" "${CONFIG_FILE}" > "${TMP_CONFIG_FILE}"
-else
-  cp "${CONFIG_FILE}" "${TMP_CONFIG_FILE}"
+  yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "${TMP_CONFIG_FILE}"
 fi
+
+if [[ -n "${NETBOX_SITE}" ]]; then
+  yq -P eval ".processors |= (. // []) | .processors += [{\"add_fields\": {\"target\": \"netbox\", \"fields\": {\"site\": \"${NETBOX_SITE}\"}}}]" -i "${TMP_CONFIG_FILE}"
+fi
+
 
 MODULES_ARGS=()
 if [[ -n "${MODULES}" ]]; then

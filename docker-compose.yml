@@ -275,6 +275,7 @@ services:
     - ./config/upload-common.env
     - ./config/nginx.env
     - ./config/beats-common.env
+    - ./config/netbox-common.env
     - ./config/filebeat.env
     ports:
     - 127.0.0.1:5045:5045

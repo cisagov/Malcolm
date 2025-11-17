@@ -188,9 +188,17 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     KEY_CONFIG_ITEM_NETBOX_MODE: DependencySpec(
         visibility=VisibilityRule(
             depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-            condition=lambda profile: profile == PROFILE_MALCOLM,
+            condition=lambda _profile: True,
             is_top_level=True,
-        )
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
+            default_value=lambda profile: (
+                NetboxMode.REMOTE.value if profile == PROFILE_HEDGEHOG else DEFAULT_VALUE_UNCHANGED
+            ),
+            only_if_unmodified=False,
+        ),
     ),
     KEY_CONFIG_ITEM_INDEX_MANAGEMENT_POLICY: DependencySpec(
         visibility=VisibilityRule(
@@ -765,43 +773,45 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
     # -------------------------------------------------------------------------
     KEY_CONFIG_ITEM_NETBOX_URL: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode == NetboxMode.REMOTE.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode == NetboxMode.REMOTE.value)),
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_ENRICH: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value)),
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value)),
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_LOGSTASH_AUTO_CREATE_PREFIX: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode != NetboxMode.DISABLED.value,
-            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
-        )
-    ),
-    KEY_CONFIG_ITEM_NETBOX_SITE_NAME: DependencySpec(
-        visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value)),
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
     KEY_CONFIG_ITEM_NETBOX_AUTO_POPULATE_SUBNET_FILTER: DependencySpec(
         visibility=VisibilityRule(
-            depends_on=KEY_CONFIG_ITEM_NETBOX_MODE,
-            condition=lambda mode: mode != NetboxMode.DISABLED.value,
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value)),
+            ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
+        )
+    ),
+    KEY_CONFIG_ITEM_NETBOX_SITE_NAME: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_NETBOX_MODE],
+            condition=lambda profile, mode: (
+                (profile == PROFILE_HEDGEHOG) or ((profile == PROFILE_MALCOLM) and (mode != NetboxMode.DISABLED.value))
+            ),
             ui_parent=KEY_CONFIG_ITEM_NETBOX_MODE,
         )
     ),
