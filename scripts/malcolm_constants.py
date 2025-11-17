@@ -64,11 +64,6 @@ MALCOLM_DOTFILE_SECRET_KEY = "K8S_SECRET"
 MALCOLM_CONFIGMAP_DIR_REPLACER = "_MALDIR_"
 
 ###################################################################################################
-# Operating system mode constants
-OS_MODE_HEDGEHOG = "hedgehog"
-OS_MODE_MALCOLM = "malcolm"
-
-###################################################################################################
 # Directory path constants
 HEDGEHOG_PCAP_DIR = "pcap"
 HEDGEHOG_ZEEK_DIR = "zeek"

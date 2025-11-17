@@ -121,6 +121,10 @@ PYCODE
   sed -i "s@\(partman-auto/method[[:space:]]*string[[:space:]]*\)lvm@\1crypto@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
   sed -i "s@preseed_base\.cfg@preseed_base_crypto.cfg@g" ./config/includes.binary/install/preseed_multipar_crypto.cfg
 
+  # make sure that when disks are formatted we signal that this is malcolm-hedgehog run profile mode
+  [[ "$IMAGE_NAME" == "hedgehog" ]] && \
+    sed 's/\(os-disk-config.py[[:space:]]*-m[[:space:]]*malcolm\)/\1-hedgehog/g' ./config/hooks/normal/0900-setup-rc-local.hook.chroot
+
   # create hooks for installing Python packages
   HOOK_COUNTER=168
   for SUBDIR in config; do
