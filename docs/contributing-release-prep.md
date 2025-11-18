@@ -16,7 +16,7 @@ Images and artifacts for release should not be built on Romeo's own development 
 
 ## 3. Build Malcolm ISO images using GitHub runners
 
-The [workflow for building the Hedgehog Linux installer ISO]({{ site.github.repository_url }}/tree/{{ site.github.build_revision }}/actions/workflows/hedgehog-iso-build-docker-wrap-push-ghcr.yml) can be run independently of the Malcolm container images; however, the [workflow for building the Malcolm installer ISO]({{ site.github.repository_url }}/actions/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) needs to be run **after** all of the container image "build-and-push" actions have completed successfully, as those images are pulled and archived inside of the ISO itself. Once Romeo is sure that all of the actions for building the container images from the previous step have completed successfully, he initiates a run of the [`malcolm-iso-build-docker-wrap-push-ghcr`]({{ site.github.repository_url }}/actions/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) action.
+The [workflow for building the Malcolm installer ISO]({{ site.github.repository_url }}/actions/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) and [Hedgehog Linux installer ISO]({{ site.github.repository_url }}/actions/workflows/malcolm-hedgehog-profile-iso-build-docker-wrap-push-ghcr.yml) need to be run **after** all of the container image "build-and-push" actions have completed successfully, as those images are pulled and archived inside of the ISO itself. Once Romeo is sure that all of the actions for building the container images from the previous step have completed successfully, he initiates a run of the [`malcolm-iso-build-docker-wrap-push-ghcr`]({{ site.github.repository_url }}/actions/workflows/malcolm-iso-build-docker-wrap-push-ghcr.yml) and [`malcolm-hedgehog-profile-iso-build-docker-wrap-push-ghcr`]({{ site.github.repository_url }}/actions/workflows/malcolm-hedgehog-profile-iso-build-docker-wrap-push-ghcr.yml) actions.
 
 ## 4. Pull the container images from ghcr.io
 
@@ -38,9 +38,9 @@ Romeo knows that verifying live traffic capture is an important part of testing 
 
 In addition to the `.iso` spot checks described above, Romeo uses [`malcolm-test`](contributing-malcolm-test.md#MalcolmTest) to ensure that the release candidate does not introduce any regressions. He also carefully reviews each issue assigned to this milestone on the [GitHub project board](https://github.com/orgs/cisagov/projects/98) and verifies that new [tests](https://github.com/idaholab/Malcolm-Test/tree/main/src/maltest/tests) were [created](https://github.com/idaholab/Malcolm-test?tab=readme-ov-file#TestCreation) to cover new features and bug fixes wherever possible.
 
-## 6. Build Hedgehog Linux Raspberry Pi image
+## 6. Extract Hedgehog Linux Raspberry Pi image
 
-TODO: update documentation for pulling and extracting the arm64 raspberry pi image
+The Hedgehog Linux [Raspberry Pi Image](hedgehog-raspi-build.md#HedgehogRaspiBuild) is also built on GitHub. As that image targets an ARM64 architecture, it can be pulled and extracted on an ARM64-based machine using the [convenience helper script](contributing-github-runners.md#convenience-scripts-for-development) mentioned earlier in step 4.
 
 ## 7. Submit and merge a pull request
 

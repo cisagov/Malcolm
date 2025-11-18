@@ -340,7 +340,7 @@ Due to known compatibility issues between Arkime capture on [Hedgehog Linux](liv
 
 For the WISE service, and if Malcolm is using a local OpenSearch service (typically accessible via port 9200/tcp), [HTTP basic](#AuthBasicAccountManagement) authentication must be enabled for those endpoints — even when Keycloak is selected as Malcolm’s primary authentication method.
 
-When configuring forwarding for [arkime-capture](malcolm-hedgehog-e2e-iso-install.md#TODO) on Hedgehog Linux, use the local Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
+When specifying the remote Malcolm aggregator credentials on Hedgehog Linux (e.g., *Store username/password for OpenSearch/Elasticsearch instance?* in `auth_setup`), use the Malcolm credentials described in the [**Local Account Management**](#AuthBasicAccountManagement) section — *not* Keycloak credentials. In this setup:
 
 * The basic administrator account is used to manage other basic accounts via the **Malcolm User Management** page (https://<malcolm-host>/auth).
 * These basic credentials apply *only* to Malcolm’s OpenSearch API and Arkime WISE endpoints.

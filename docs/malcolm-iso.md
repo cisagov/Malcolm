@@ -30,14 +30,18 @@ The build should work with a variety of [Vagrant providers](https://developer.ha
 
 To perform a clean build of the Malcolm installer ISO, navigate to the local Malcolm working copy and run:
 
-# TODO Malcolm vs. hedgehog flavor
-
 ```
-$ ./malcolm-iso/build_via_vagrant.sh -f
+$ ./malcolm-iso/build_via_vagrant.sh -f -i malcolm
 …
 Starting build machine...
 Bringing machine 'default' up with 'virtualbox' provider...
 …
+```
+
+Similarly, to build the [Hedgehog Linux](hedgehog.md) flavor of the ISO:
+
+```
+$ ./malcolm-iso/build_via_vagrant.sh -f -i hedgehog
 ```
 
 Building the ISO may take 30 minutes or more depending on the system. As the build finishes, users will see the following message indicating success:
@@ -51,7 +55,7 @@ Finished, created "/malcolm-build/malcolm-iso/malcolm-{{ site.malcolm.version }}
 By default, Malcolm's images are not packaged with the installer ISO. Malcolm assumes instead that users will pull the [latest images](https://github.com/orgs/idaholab/packages?repo_name=Malcolm) with a `docker compose --profile malcolm pull` command as described in the [Quick start](quickstart.md#QuickStart) section. To build an ISO with the latest Malcolm images included, follow the directions to create [pre-packaged installation files](development.md#Packager), which include a tarball with a name such as `malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz`. Then, pass that images tarball to the ISO build script with a `-d`, like this:
 
 ```
-$ ./malcolm-iso/build_via_vagrant.sh -f -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz
+$ ./malcolm-iso/build_via_vagrant.sh -f -i malcolm -d malcolm_YYYYMMDD_HHNNSS_xxxxxxx_images.tar.xz
 …
 ```
 
