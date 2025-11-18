@@ -51,7 +51,6 @@ Malcolm can also easily be deployed locally on an ordinary consumer workstation 
         + [Linux host system configuration](host-config-linux.md#HostSystemConfigLinux)
         + [macOS host system configuration](host-config-macos.md#HostSystemConfigMac)
         + [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows)
-    - [Managing disk usage](malcolm-config.md#DiskUsage)
 * [Running Malcolm](running.md#Running)
     - [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance)
         + [Authentication and authorization for remote data store clusters](opensearch-instances.md#OpenSearchAuth)
