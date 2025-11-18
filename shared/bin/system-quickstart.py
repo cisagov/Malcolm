@@ -105,7 +105,7 @@ def main():
 
                     # user input for new hostname
                     while True:
-                        code, new_hostname = d.inputbox("Sensor hostname", init=old_hostname)
+                        code, new_hostname = d.inputbox("System hostname", init=old_hostname)
                         if (code == Dialog.CANCEL) or (code == Dialog.ESC):
                             raise CancelledError
                         elif len(new_hostname) <= 0:
