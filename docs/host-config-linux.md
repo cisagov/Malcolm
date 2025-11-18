@@ -106,7 +106,7 @@ You can test Docker by running `docker info`, or (assuming you have internet acc
 
 Please follow [this link](https://docs.docker.com/compose/install/) on docker.com for instructions on installing the Docker Compose plugin.
 
-## Podman
+## <a name="HostSystemConfigLinuxPodman"></a>Podman
 
 Malcolm can run on [Podman](https://podman.io) as a rootless alternative to Docker. The same Malcolm runtime scripts (e.g., `./scripts/start`, `./scripts/stop`, etc.) are used whether using Docker or Podman. When [running Malcolm](running.md#Running) with Podman, [`podman compose`](https://docs.podman.io/en/latest/markdown/podman-compose.1.html) is used as a wrapper around an external compose provider (such as [`docker-compose`](https://docs.docker.com/compose/)), which in turn uses the Podman back end to run and orchestrate containers. It is recommended to use the `docker-compose` compose provider rather than [`podman-compose`](https://github.com/containers/podman-compose) since it is the original implementation of the Compose specification and is widely used on the supported platforms and because there are known issues with using the `podman-compose` provider to start Malcolm.
 

@@ -472,7 +472,7 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
 * **Expose Malcolm Service Ports**
     - Select **yes** or **no** in order for Malcolm's firewall to allow or block connections for OpenSearch, Logstash, and Filebeat TCP, bypassing the following sub-items in this list. Select **customize** to proceed to enable or disable exposing of the following services individually:
     - **Expose Filebeat TCP**
-        + Select **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md#ThirdPartyLogs)) to TCP port 5045.
+        + Select **Y** in order for Malcolm's firewall to allow connections from a remote log forwarder (such as Hedgehog Linux for resource utilization metrics or other forwarders for other [third-Party logs](third-party-logs.md)) to TCP port 5045.
     - **Use Filebeat TCP Listener Defaults**
         + Select **Y** to use the defaults (recommended) or **N** to specify custom values for the Filebeat TCP listener.
         + **Filebeat TCP Log Format**
@@ -540,7 +540,7 @@ Users will be prompted to do the following:
 * **(Re)generate self-signed certificates for HTTPS access**
     - This generates the self-signed [TLS certificates](authsetup.md#TLSCerts) used for encrypting the connections between users' web browsers and Malcolm.
 * **(Re)generate self-signed certificates for a remote log forwarder**
-    - This generates the self-signed [TLS certificates](authsetup.md#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-party logs](third-party-logs.md#ThirdPartyLogs)).
+    - This generates the self-signed [TLS certificates](authsetup.md#TLSCerts) for communications from a remote log forwarder (such as Hedgehog Linux or forwarders for other [third-party logs](third-party-logs.md)).
 * **Configure Keycloak**
     - Users may answer **Y** to configure [Keycloak](https://www.keycloak.org/) as Malcolm's provider of user authentication. See [**Configure authentication: Keycloak**](authsetup.md#AuthKeycloak) for more information.
 * **Configure Role-Based Access Control**

@@ -12,7 +12,7 @@
     - [Hunt](#ArkimeHunt)
     - [Statistics](#ArkimeStats)
     - [Settings](#ArkimeSettings)
-    - [WISE](#ArkimeWise)
+    - [WISE](#ArkimeWISE)
 
 
 ## <a name="ArkimeZeek"></a>Zeek log integration

@@ -158,4 +158,4 @@ There are other areas of Malcolm that can be modified and customized to fit user
 * [Customizing event severity scoring](severity.md#SeverityConfig)
 * [Zeek Intelligence Framework](zeek-intel.md#ZeekIntel)
 * Populating the NetBox inventory [Manually](asset-interaction-analysis.md#NetBoxPopManual) or through [Preloading](asset-interaction-analysis.md#NetBoxPreload)
-* [Modifying or Contributing to Malcolm](contributing-guide.md#Contributing)
+* [Modifying or Contributing to Malcolm](contributing-guide.md)
