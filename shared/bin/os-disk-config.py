@@ -11,6 +11,7 @@
 # Run the script with --help for options
 ###################################################################################################
 
+import distro
 import os
 import json
 import re
@@ -61,6 +62,9 @@ CRYPT_DEV_PREFIX = 'crypt_dev_prefix'
 OS_MODE_HEDGEHOG = "hedgehog"
 OS_MODE_MALCOLM = "malcolm"
 OS_MODE_MALCOLM_HEDGEHOG = "malcolm-hedgehog"
+
+ETC_INSTALLER_AGGREGATOR = "aggregator"
+ETC_INSTALLER_SENSOR = "sensor"
 
 OS_PARAMS = defaultdict(lambda: None)
 OS_PARAMS[OS_MODE_HEDGEHOG] = defaultdict(lambda: None)
@@ -150,6 +154,35 @@ def CreateMapperDeviceName(device):
 
 
 ###################################################################################################
+def DetermineOSPlatform():
+    os_release_info = {}
+    installer_id = None
+
+    try:
+        os_release_info = distro.os_release_info()
+    except Exception:
+        pass
+
+    if not os_release_info:
+        if os.path.isfile('/etc/os-release'):
+            with open("/etc/os-release", 'r') as f:
+                for line in f:
+                    try:
+                        k, v = line.rstrip().split("=", 1)
+                        os_release_info[k.lower()] = v.strip('"')
+                    except Exception:
+                        pass
+
+    if os.path.isfile('/etc/installer'):
+        with open("/etc/installer", 'r') as f:
+            installer_id = f.readline().strip()
+
+    variant = os_release_info.get('variant_id')
+
+    if (variant == OS_MODE_HEDGEHOG) and (installer_id == ETC_INSTALLER_AGGREGATOR):
+        return OS_MODE_MALCOLM_HEDGEHOG
+    else:
+        return variant
 
 
 ###################################################################################################
@@ -230,10 +263,11 @@ def main():
         '-m',
         '--mode',
         dest='osMode',
-        required=True,
+        required=False,
+        default=None,
         metavar='<string>',
         type=str,
-        help=f'Script mode: {OS_MODE_HEDGEHOG}, {OS_MODE_MALCOLM} or {OS_MODE_MALCOLM_HEDGEHOG},',
+        help=f'Script mode: {OS_MODE_HEDGEHOG}, {OS_MODE_MALCOLM} or {OS_MODE_MALCOLM_HEDGEHOG} (default: autodetect)',
     )
     parser.add_argument(
         '-i',
@@ -293,6 +327,9 @@ def main():
     args.verbose = set_logging(os.getenv("LOGLEVEL", ""), args.verbose, set_traceback_limit=True, logfmt='%(message)s')
     logging.debug(f"Arguments: {sys.argv[1:]}")
     logging.debug(f"Arguments: {args}")
+
+    if not args.osMode:
+        args.osMode = DetermineOSPlatform()
 
     if args.osMode in (OS_MODE_HEDGEHOG, OS_MODE_MALCOLM, OS_MODE_MALCOLM_HEDGEHOG):
         osMode = args.osMode
