@@ -24,8 +24,10 @@ from scripts.installer.configs.constants.constants import (
     LOCAL_LOGSTASH_HOST,
     LOCAL_DASHBOARDS_URL,
     LOCAL_OPENSEARCH_URL,
+    LOCAL_ARKIME_WISE_URL,
 )
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_ARKIME_WISE_URL,
     KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
     KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
     KEY_CONFIG_ITEM_DASHBOARDS_URL,
@@ -81,32 +83,42 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
         lshost = malcolm_config.get_value(KEY_CONFIG_ITEM_LOGSTASH_HOST)
         osurl = malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_URL)
         dashurl = malcolm_config.get_value(KEY_CONFIG_ITEM_DASHBOARDS_URL)
+        wiseurl = malcolm_config.get_value(KEY_CONFIG_ITEM_ARKIME_WISE_URL)
 
-        if _is_non_empty_str(lshost):
-            if profile == PROFILE_HEDGEHOG:
-                if lshost == LOCAL_LOGSTASH_HOST:
+        def _validate_conn_for_profile(
+            conn_value: str,
+            local_conn: str,
+            key_name: str,
+            label: str,
+            profile: str,
+            valid_example: str = '',
+        ):
+            if _is_non_empty_str(conn_value):
+                if profile == PROFILE_HEDGEHOG:
+                    if conn_value == local_conn:
+                        add_issue(
+                            key_name,
+                            f"{profile} run profile requires remote {label} connection ({valid_example})",
+                        )
+                elif conn_value != local_conn:
                     add_issue(
-                        KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                        f"{profile} run profile requires remote Logstash connection (host:port)",
+                        key_name,
+                        f"{profile} run profile requires {local_conn} for its local {label} connection",
                     )
-            elif lshost != LOCAL_LOGSTASH_HOST:
+            else:
                 add_issue(
-                    KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                    f"{profile} run profile requires {LOCAL_LOGSTASH_HOST} for its Logstash connection",
+                    conn_value,
+                    f"{label} connection cannot be blank ({local_conn if profile == PROFILE_MALCOLM else valid_example})",
                 )
-        else:
-            add_issue(
-                KEY_CONFIG_ITEM_LOGSTASH_HOST,
-                f"Logstash connection cannot be blank ({LOCAL_LOGSTASH_HOST if profile == PROFILE_MALCOLM else 'host:port'})",
-            )
 
-        def _validate_url(
+        def _validate_url_for_mode(
             url_value: str,
             local_url: str,
             local_modes: Set[str],
             key_name: str,
             label: str,
             mode: str,
+            valid_example: str = 'https://host:port',
         ):
             if _is_non_empty_str(url_value):
                 if mode not in local_modes:
@@ -123,10 +135,28 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             else:
                 add_issue(
                     key_name,
-                    f"{label} URL cannot be blank ({local_url if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else 'https://host:port'})",
+                    f"{label} URL cannot be blank ({local_url if mode == SearchEngineMode.OPENSEARCH_LOCAL.value else valid_example})",
                 )
 
-        _validate_url(
+        _validate_conn_for_profile(
+            lshost,
+            LOCAL_LOGSTASH_HOST,
+            KEY_CONFIG_ITEM_LOGSTASH_HOST,
+            "Logstash",
+            profile,
+            "host:port",
+        )
+
+        _validate_conn_for_profile(
+            wiseurl,
+            LOCAL_ARKIME_WISE_URL,
+            KEY_CONFIG_ITEM_ARKIME_WISE_URL,
+            "Arkime WISE",
+            profile,
+            "https://host/wise/",
+        )
+
+        _validate_url_for_mode(
             osurl,
             LOCAL_OPENSEARCH_URL,
             {SearchEngineMode.OPENSEARCH_LOCAL.value},
@@ -135,7 +165,7 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             primary_mode,
         )
 
-        _validate_url(
+        _validate_url_for_mode(
             dashurl,
             LOCAL_DASHBOARDS_URL,
             {SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value},

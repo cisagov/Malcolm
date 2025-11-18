@@ -118,6 +118,7 @@ _STRING_VARS = [
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_RETENTION_TIME,
     KEY_ENV_ARKIME_INDEX_MANAGEMENT_SEGMENTS,
     KEY_ENV_ARKIME_LIVE_NODE_HOST,
+    KEY_ENV_ARKIME_WISE_URL,
     KEY_ENV_CONTAINER_RUNTIME_KEY,
     KEY_ENV_FILEBEAT_SYSLOG_TCP_PORT,
     KEY_ENV_FILEBEAT_SYSLOG_UDP_PORT,
@@ -608,6 +609,7 @@ class EnvMapper:
             self.env_var_by_map_key[KEY_ENV_ARKIME_ALLOW_WISE_CONFIG].config_items = [
                 KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG
             ]
+            self.env_var_by_map_key[KEY_ENV_ARKIME_WISE_URL].config_items = [KEY_CONFIG_ITEM_ARKIME_WISE_URL]
 
             # Malcolm
             self.env_var_by_map_key[KEY_ENV_PGID].config_items = [KEY_CONFIG_ITEM_PROCESS_GROUP_ID]

@@ -43,16 +43,22 @@ if [[ -r "$SCRIPT_PATH"/common-init.sh ]]; then
             LOGSTASH_HOST=malcolm.home.arpa:5044
             OPENSEARCH_URL=https://malcolm.home.arpa:9200
             OPENSEARCH_PRIMARY=opensearch-remote
+            ARKIME_WISE_URL=https://malcolm.home.arpa/wise/
+            ARKIME_EXPOSE_WISE=false
           else
             LOGSTASH_HOST=logstash:5044
             OPENSEARCH_URL=https://opensearch:9200
             OPENSEARCH_PRIMARY=opensearch-local
+            ARKIME_WISE_URL=http://arkime:8081
+            ARKIME_EXPOSE_WISE=true
           fi
           JQ_SETTINGS=$(cat <<EOF
 .configuration.malcolmProfile = "$VARIANT_ID" |
 .configuration.opensearchPrimaryMode = "$OPENSEARCH_PRIMARY" |
 .configuration.opensearchPrimaryUrl = "$OPENSEARCH_URL" |
-.configuration.logstashHost = "$LOGSTASH_HOST"
+.configuration.logstashHost = "$LOGSTASH_HOST" |
+.configuration.arkimeWiseUrl = "$ARKIME_WISE_URL" |
+.configuration.arkimeExposeWise = $ARKIME_EXPOSE_WISE
 EOF
 )
           jq "$JQ_SETTINGS" < "${SETTINGS_FILE}" | sponge "${SETTINGS_FILE}"

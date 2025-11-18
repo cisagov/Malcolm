@@ -16,18 +16,19 @@ from scripts.malcolm_utils import get_hostname_without_domain
 
 from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
 from scripts.installer.configs.constants.configuration_item_keys import (
+    KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG,
+    KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE,
+    KEY_CONFIG_ITEM_ARKIME_WISE_URL,
     KEY_CONFIG_ITEM_CAPTURE_STATS,
+    KEY_CONFIG_ITEM_EXTRA_TAGS,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST,
-    KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE,
-    KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
     KEY_CONFIG_ITEM_PCAP_FILTER,
     KEY_CONFIG_ITEM_PCAP_IFACE,
     KEY_CONFIG_ITEM_PCAP_NETSNIFF,
     KEY_CONFIG_ITEM_PCAP_NODE_NAME,
-    KEY_CONFIG_ITEM_EXTRA_TAGS,
     KEY_CONFIG_ITEM_PCAP_TCPDUMP,
     KEY_CONFIG_ITEM_TWEAK_IFACE,
 )
@@ -105,6 +106,15 @@ CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG = ConfigItem(
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Allow Arkime's WISE settings to be modified via the interface?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_ARKIME_WISE_URL = ConfigItem(
+    key=KEY_CONFIG_ITEM_ARKIME_WISE_URL,
+    label="Arkime WISE URL",
+    default_value=None,
+    validator=lambda x: isinstance(x, str),
+    question="Specify the URL for Arkime's WISE plugin",
     widget_type=WidgetType.CHECKBOX,
 )
 

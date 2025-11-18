@@ -22,6 +22,7 @@ from scripts.installer.configs.constants.constants import (
     LOCAL_LOGSTASH_HOST,
     LOCAL_DASHBOARDS_URL,
     LOCAL_OPENSEARCH_URL,
+    LOCAL_ARKIME_WISE_URL,
 )
 
 from scripts.installer.configs.constants.enums import (
@@ -775,8 +776,8 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_AUTO_ARKIME,
         ),
         value=ValueRule(
-            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_AUTO_ARKIME],
-            condition=lambda _profile, _auto_arkime: True,
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
             default_value=lambda profile: profile == PROFILE_MALCOLM,
             only_if_unmodified=False,
         ),
@@ -788,9 +789,24 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_AUTO_ARKIME,
         ),
         value=ValueRule(
-            depends_on=KEY_CONFIG_ITEM_CAPTURE_LIVE_NETWORK_TRAFFIC,
-            condition=lambda _profile, _auto_arkime: True,
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
             default_value=lambda profile: False if (profile != PROFILE_MALCOLM) else DEFAULT_VALUE_UNCHANGED,
+            only_if_unmodified=False,
+        ),
+    ),
+    KEY_CONFIG_ITEM_ARKIME_WISE_URL: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=[KEY_CONFIG_ITEM_MALCOLM_PROFILE, KEY_CONFIG_ITEM_AUTO_ARKIME],
+            condition=lambda profile, _auto_arkime: profile != PROFILE_MALCOLM,
+            ui_parent=KEY_CONFIG_ITEM_AUTO_ARKIME,
+        ),
+        value=ValueRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda _profile: True,
+            default_value=lambda profile: (
+                LOCAL_ARKIME_WISE_URL if (profile == PROFILE_MALCOLM) else DEFAULT_VALUE_UNCHANGED
+            ),
             only_if_unmodified=False,
         ),
     ),

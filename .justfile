@@ -60,6 +60,9 @@ _base_config +CAPTURE_FLAG:
     | .configuration.processGroupId = ${PGID:-$(id -g)}
     | .configuration.arkimeFreeSpaceG = "${DELETE_PCAP_THRESHOLD:-1%}"
     | .configuration.arkimeManagePCAP = ${DELETE_OLD_PCAP:-false}
+    | .configuration.arkimeExposeWise = ${ARKIME_EXPOSE_WISE_GUI:-false}
+    | .configuration.arkimeAllowWiseConfig = ${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}
+    | .configuration.arkimeWiseUrl = "${ARKIME_WISE_SERVICE_URL:-http://arkime:8081}"
     | .configuration.autoArkime = ${AUTO_ARKIME:-true}
     | .configuration.autoFreq = ${AUTO_FREQ:-true}
     | .configuration.autoOui = ${AUTO_OUI:-true}
@@ -161,9 +164,6 @@ _base_config +CAPTURE_FLAG:
     --import-malcolm-config-file "${SETTINGS_FILE}" \
     --extra \
           "arkime-offline.env:ARKIME_AUTO_ANALYZE_PCAP_THREADS=${ARKIME_AUTO_ANALYZE_PCAP_THREADS:-2}" \
-          "arkime.env:ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}" \
-          "arkime.env:ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI:-true}" \
-          "arkime.env:ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}" \
           "arkime.env:ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-daily}" \
           "arkime.env:ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}" \
           "filebeat.env:FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-2}" \
