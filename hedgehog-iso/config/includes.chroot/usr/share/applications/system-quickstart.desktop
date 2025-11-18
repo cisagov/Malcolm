@@ -8,4 +8,3 @@ Type=Application
 Icon=network-wired
 Categories=Network;
 StartupNotify=true
-X-XFCE-Source=file:///usr/share/applications/system-quickstart.desktop

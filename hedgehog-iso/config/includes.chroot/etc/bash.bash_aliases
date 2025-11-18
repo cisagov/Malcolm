@@ -1,7 +1,7 @@
 # some more ls aliases
 
 # sensor
-alias configure-interfaces="su -l -c /usr/local/bin/configure-interfaces.py"
+alias system-quickstart="su -l -c /usr/local/bin/system-quickstart.py"
 alias configure-capture="/usr/local/bin/configure-capture.py"
 
 #safety

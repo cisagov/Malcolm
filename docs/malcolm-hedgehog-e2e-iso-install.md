@@ -171,7 +171,7 @@ Alternatively, to configure a network interface with a static IP address (recomm
 
 ### <a name="MalcolmTimeSync"></a> Configure Hostname and Time Sync
 
-If users wish to change Malcolm's hostname or configure system time synchronization, they can open a terminal (the icon immediately to the right of the **Applications** menu icon at the top of the Malcolm desktop) and run `configure-interfaces` then enter the user (if the user is part of the `sudo` group) or `root` password.
+If users wish to change Malcolm's hostname or configure system time synchronization, they can open a terminal (the icon immediately to the right of the **Applications** menu icon at the top of the Malcolm desktop) and run `system-quickstart` then enter the user (if the user is part of the `sudo` group) or `root` password.
 
 Here users can configure Malcolm to keep its time synchronized with either an NTP server (using the NTP protocol), another [Malcolm]({{ site.github.repository_url }}) aggregator or another HTTP/HTTPS server. On the next dialog, choose the time synchronization method to configure.
 
@@ -614,7 +614,7 @@ The panel bordering the top of the Malcolm desktop is home to a number of useful
 
 ## <a name="HedgehogInterfaces"></a> Configure Hostname, Interfaces and Time Sync
 
-The first step of sensor configuration is to configure the network interfaces and sensor hostname. Clicking the **Configure Interfaces and Hostname** toolbar icon (or running `configure-interfaces` at a command line prompt) will prompt for the root password created during installation, after which the configuration welcome screen is shown. Select **Continue** to proceed.
+The first step of sensor configuration is to configure the network interfaces and sensor hostname. Clicking the **Configure Interfaces and Hostname** toolbar icon (or running `system-quickstart` at a command line prompt) will prompt for the root password created during installation, after which the configuration welcome screen is shown. Select **Continue** to proceed.
 
 Users may next select whether to configure the network interfaces, hostname, or time synchronization.
 

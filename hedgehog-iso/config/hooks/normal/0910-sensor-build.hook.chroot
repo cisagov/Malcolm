@@ -134,7 +134,6 @@ if [[ ! "${ARCH,,}" =~ ^arm ]]; then
 !/root(/|$)
 !/run(/|$)
 !/tmp(/|$)
-!/usr/local/lib/python.*/dist-packages/debinterface(/|$)
 !/var/backups(/|$)
 !/var/cache(/|$)
 !/var/lib/AccountsService(/|$)

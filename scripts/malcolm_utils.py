@@ -26,6 +26,7 @@ import textwrap
 import types
 
 from base64 import b64encode, b64decode, binascii
+from dataclasses import dataclass
 from datetime import datetime
 from multiprocessing import RawValue
 from shutil import move as sh_move, which as sh_which, copyfile as sh_copyfile
@@ -271,6 +272,57 @@ def check_socket(host, port):
             return True
         else:
             return False
+
+
+###################################################################################################
+# determine a list of available (non-virtual) adapters (Iface's)
+@dataclass
+class NetworkInterface:
+    name: str = ''
+    description: str = ''
+
+
+def get_available_adapters():
+    available_adapters = []
+    _, all_iface_list = run_subprocess("find /sys/class/net/ -mindepth 1 -maxdepth 1 -type l -printf '%P %l\\n'")
+    available_iface_list = [x.split(" ", 1)[0] for x in all_iface_list if 'virtual' not in x]
+
+    # for each adapter, determine its MAC address and link speed
+    for adapter in available_iface_list:
+        mac_address = '??:??:??:??:??:??'
+        speed = '?'
+        try:
+            with open(f"/sys/class/net/{adapter}/address", 'r') as f:
+                mac_address = f.readline().strip()
+        except Exception:
+            pass
+        try:
+            with open(f"/sys/class/net/{adapter}/speed", 'r') as f:
+                speed = f.readline().strip()
+        except Exception:
+            pass
+        description = f"{mac_address} ({speed} Mbits/sec)"
+        iface = NetworkInterface(name=adapter, description=description)
+        available_adapters.append(iface)
+
+    return available_adapters
+
+
+###################################################################################################
+# identify the specified adapter using ethtool --identify
+def identify_adapter(adapter, duration=10, background=False):
+    if background:
+        subprocess.Popen(
+            ["/sbin/ethtool", "--identify", adapter, str(duration)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    else:
+        retCode, _ = run_subprocess(
+            f"/sbin/ethtool --identify {adapter} {duration}", stdout=False, stderr=False, timeout=duration * 2
+        )
+        return retCode == 0
 
 
 ###################################################################################################

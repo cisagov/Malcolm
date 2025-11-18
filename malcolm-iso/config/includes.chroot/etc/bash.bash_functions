@@ -533,11 +533,11 @@ function dregls () {
 ########################################################################
 # malcolm-specific
 ########################################################################
-configure-interfaces() {
+system-quickstart() {
   if groups | grep -q '\bsudo\b'; then
-    sudo /usr/local/bin/configure-interfaces.py
+    sudo /usr/local/bin/system-quickstart.py
   else
-    su -l -c /usr/local/bin/configure-interfaces.py
+    su -l -c /usr/local/bin/system-quickstart.py
   fi
 }
 
