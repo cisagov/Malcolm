@@ -26,14 +26,12 @@ LIVE_CAPTURE=${ARKIME_LIVE_CAPTURE:-false}
 VIEWER_PORT=${ARKIME_VIEWER_PORT:-8005}
 NODE_NAME=${PCAP_NODE_NAME:-malcolm}
 ROLE_BASED_ACCESS=${ROLE_BASED_ACCESS:-false}
-ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI-"false"}
-ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG-"false"}
-ARKIME_WISE_CONFIG_PIN_CODE=${ARKIME_WISE_CONFIG_PIN_CODE-"WISE2019"}
+ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI:-"true"}
+ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-"false"}
+ARKIME_WISE_CONFIG_PIN_CODE=${ARKIME_WISE_CONFIG_PIN_CODE:-"WISE2019"}
 ARKIME_WISE_EXAMPLE_FILE="${ARKIME_DIR}"/etc/wise.ini.example
 ARKIME_WISE_CONFIG_FILE="${ARKIME_DIR}"/wiseini/wise.ini
 ARKIME_WISE_SERVICE_SCRIPT=/usr/local/bin/wise_service.sh
-
-
 
 MALCOLM_PROFILE=${MALCOLM_PROFILE:-"malcolm"}
 OPENSEARCH_URL_FINAL=${OPENSEARCH_URL:-"https://opensearch:9200"}
@@ -282,8 +280,8 @@ if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
     sed -i "s|^\(usersElasticsearch=\).*|\1"${OPENSEARCH_URL_FINAL}"|"  ./wise.tmp
     sed -i "s|^\(\s*\$ARKIME_DIR\/bin\/node wiseService.js\).*|\1 --webcode "${ARKIME_WISE_CONFIG_PIN_CODE}" --webconfig --insecure -c \$ARKIME_DIR/wiseini/wise.ini|" "${ARKIME_WISE_SERVICE_SCRIPT}"
   fi
-  truncate --size 0 "${ARKIME_WISE_CONFIG_FILE}"
-  cat ./wise.tmp >> "${ARKIME_WISE_CONFIG_FILE}"
+  truncate --size=0 "${ARKIME_WISE_CONFIG_FILE}" 2>/dev/null || true
+  tee -a "${ARKIME_WISE_CONFIG_FILE}" < ./wise.tmp >/dev/null 2>&1 || true
   rm ./wise.tmp
 fi
 

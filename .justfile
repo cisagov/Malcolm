@@ -162,7 +162,8 @@ _base_config +CAPTURE_FLAG:
     --extra \
           "arkime-offline.env:ARKIME_AUTO_ANALYZE_PCAP_THREADS=${ARKIME_AUTO_ANALYZE_PCAP_THREADS:-2}" \
           "arkime.env:ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}" \
-          "arkime.env:ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI:-false}" \
+          "arkime.env:ARKIME_EXPOSE_WISE_GUI=${ARKIME_EXPOSE_WISE_GUI:-true}" \
+          "arkime.env:ARKIME_ALLOW_WISE_GUI_CONFIG=${ARKIME_ALLOW_WISE_GUI_CONFIG:-false}" \
           "arkime.env:ARKIME_ROTATE_INDEX=${ARKIME_ROTATE_INDEX:-daily}" \
           "arkime.env:ARKIME_SPI_DATA_MAX_INDICES=${ARKIME_SPI_DATA_MAX_INDICES:-7}" \
           "filebeat.env:FILEBEAT_PREPARE_PROCESS_COUNT=${FILEBEAT_PREPARE_PROCESS_COUNT:-2}" \

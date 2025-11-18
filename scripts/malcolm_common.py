@@ -1723,6 +1723,7 @@ LOG_IGNORE_REGEX = re.compile(
   | remov(ed|ing)\s+(old\s+file|dead\s+symlink|empty\s+directory)
   | retry\.go.+(send\s+unwait|done$)
   | running\s+full\s+sweep
+  | running\s+without\s+any\s+HTTP\s+authentication\s+checking
   | saved_objects
   | scheduling\s+job\s*id.+opendistro-ism
   | SSL/TLS\s+verifications\s+disabled

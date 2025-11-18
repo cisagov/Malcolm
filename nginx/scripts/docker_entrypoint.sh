@@ -568,7 +568,7 @@ if [[ -f "${NGINX_LANDING_INDEX_HTML}" ]]; then
   done
 fi
 
-if [[ "${ARKIME_EXPOSE_WISE_GUI}"  == "true" ]]; then
+if [[ "${ARKIME_EXPOSE_WISE_GUI:-true}"  == "true" ]]; then
   ln -sf "$NGINX_ARKIME_WISE_CONF" "$NGINX_ARKIME_WISE_LINK"
 else
   ln -sf "$NGINX_BLANK_CONF" "$NGINX_ARKIME_WISE_LINK"
