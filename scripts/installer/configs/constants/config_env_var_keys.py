@@ -16,6 +16,8 @@ KEY_ENV_ARKIME_FREESPACEG = "ARKIME_FREESPACEG"  # Threshold for Arkime PCAP del
 KEY_ENV_ARKIME_LIVE_CAPTURE = "ARKIME_LIVE_CAPTURE"  # live traffic analysis with Arkime capture (only available with remote opensearch or elasticsearch)
 KEY_ENV_ARKIME_LIVE_NODE_HOST = "ARKIME_LIVE_NODE_HOST"  # capture source "node host" for live Arkime capture
 KEY_ENV_ARKIME_ROTATED_PCAP = "ARKIME_ROTATED_PCAP"  # rotated captured PCAP analysis with Arkime (not live capture)
+KEY_ENV_ARKIME_EXPOSE_WISE = "ARKIME_EXPOSE_WISE_GUI"  # Controls whether the WISE configuration GUI is exposed (both internally and as an endpoint via the nginx proxy)
+KEY_ENV_ARKIME_ALLOW_WISE_CONFIG = "ARKIME_ALLOW_WISE_GUI_CONFIG"  # Controls whether the WISE configuration GUI is read-only (false) or editable (true)
 KEY_ENV_ARKIME_AUTO_ANALYZE_PCAP_FILES = (
     "ARKIME_AUTO_ANALYZE_PCAP_FILES"  # automatic uploaded pcap analysis with Arkime
 )

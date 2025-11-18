@@ -19,6 +19,8 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_CAPTURE_STATS,
     KEY_CONFIG_ITEM_LIVE_ARKIME,
     KEY_CONFIG_ITEM_LIVE_ARKIME_NODE_HOST,
+    KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE,
+    KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG,
     KEY_CONFIG_ITEM_LIVE_SURICATA,
     KEY_CONFIG_ITEM_LIVE_ZEEK,
     KEY_CONFIG_ITEM_PCAP_FILTER,
@@ -86,6 +88,24 @@ CONFIG_ITEM_LIVE_ARKIME_NODE_HOST = ConfigItem(
     validator=lambda x: isinstance(x, str),
     question="Node hostname or IP address to associate with live network traffic observed by Arkime capture",
     widget_type=WidgetType.TEXT,
+)
+
+CONFIG_ITEM_ARKIME_EXPOSE_WISE = ConfigItem(
+    key=KEY_CONFIG_ITEM_ARKIME_EXPOSE_WISE,
+    label="Enable Arkime WISE",
+    default_value=True,
+    validator=lambda x: isinstance(x, bool),
+    question="Enable Arkime's WISE service and interface?",
+    widget_type=WidgetType.CHECKBOX,
+)
+
+CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG = ConfigItem(
+    key=KEY_CONFIG_ITEM_ARKIME_ALLOW_WISE_CONFIG,
+    label="Allow Arkime WISE Configuration",
+    default_value=False,
+    validator=lambda x: isinstance(x, bool),
+    question="Allow Arkime's WISE settings to be modified via the interface?",
+    widget_type=WidgetType.CHECKBOX,
 )
 
 CONFIG_ITEM_PCAP_NETSNIFF = ConfigItem(
