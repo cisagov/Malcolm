@@ -74,7 +74,7 @@ until (( $(curl "${CURL_CONFIG_PARAMS[@]}" -fs -XGET -H'Content-Type: applicatio
     sleep 1
 done
 
-# set WISE URL in config file
+# set (or remove) wiseURL and wise.so in config file
 if [ -z "${ARKIME_WISE_SERVICE_URL+x}" ]; then
     # variable does not exist
     WISE_URL="http://arkime:8081"
@@ -84,8 +84,13 @@ elif [ -z "${ARKIME_WISE_SERVICE_URL}" ]; then
 else
     WISE_URL="${ARKIME_WISE_SERVICE_URL}"
 fi
-if [[ -n "${WISE_URL}" ]]; then
-    WISE_HTTP_STATUS=$(curl -sk --max-time 10 -o /dev/null -w "%{http_code}" "${WISE_URL}")
+
+WISE_PLUGIN_FILE_BASE="wise.so"
+WISE_PLUGIN_FILE_ESCAPED="$(echo "${WISE_PLUGIN_FILE_BASE}" | sed 's@\.@\\\.@g')"
+sed -i "/plugins=.*${WISE_PLUGIN_FILE_ESCAPED}/s/;\?${WISE_PLUGIN_FILE_ESCAPED}//g" "${ARKIME_CONFIG_FILE}"
+
+if [[ -n "${WISE_URL}" ]] && [[ ! "${WISE_URL}" =~ ^https?://(localhost|127\.0\.0\.1) ]]; then
+    WISE_HTTP_STATUS=$(curl -sk --max-time 10 -A "arkime" -o /dev/null -w "%{http_code}" "${WISE_URL}")
     if [[ "${WISE_HTTP_STATUS}" == "401" || "${WISE_HTTP_STATUS}" == "403" ]] && [[ "${WISE_URL}" != "http://arkime:8081" ]] && [[ -r "${OPENSEARCH_CREDS_CONFIG_FILE}" ]]; then
         # we failed auth, so let's grab creds from OPENSEARCH_CREDS_CONFIG_FILE and try that
 
@@ -100,24 +105,42 @@ if [[ -n "${WISE_URL}" ]]; then
         # extract the protocol
         WISE_PROTOCOL=$(echo "${WISE_URL}" | grep "://" | sed -e's,^\(.*://\).*,\1,g')
         # Remove the PROTOCOL
-        WISE_URL_NO_PROTOCOL=$(echo "${WISE_URL/$PROTOCOL/}")
+        WISE_URL_NO_PROTOCOL=$(echo "${WISE_URL/$WISE_PROTOCOL/}")
         # Use tr: Make the PROTOCOL lower-case for easy string compare
         WISE_PROTOCOL=$(echo "${WISE_PROTOCOL}" | tr '[:upper:]' '[:lower:]')
 
         # Extract the old user and password (if any)
         OLD_WISE_USER_PASSWORD=$(echo "${WISE_URL_NO_PROTOCOL}" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
 
-        # Extract the host
-        WISE_HOST_PORT=$(echo "${WISE_URL_NO_PROTOCOL/$OLD_WISE_USER_PASSWORD@/}" | cut -d"/" -f1)
+        # Extract the host:port
+        if [ -n "${OLD_WISE_USER_PASSWORD}" ]; then
+            # URL **had** credentials, strip them out from the host:port
+            WISE_HOST_AND_PORT="${WISE_URL_NO_PROTOCOL/$OLD_WISE_USER_PASSWORD@/}"
+        else
+            # URL had **no** credentials—keep everything
+            WISE_HOST_AND_PORT="$WISE_URL_NO_PROTOCOL"
+        fi
 
         # smoosh them all together for the new URL
-        TEST_WISE_URL="${WISE_PROTOCOL}${WISE_USER}:${WISE_PASSWORD}@${WISE_HOST_PORT}"
+        TEST_WISE_URL="${WISE_PROTOCOL}${WISE_USER}:${WISE_PASSWORD}@${WISE_HOST_AND_PORT}"
 
         # see if that works better, and if so, use it
-        curl -skf --max-time 10 -o /dev/null "${TEST_WISE_URL}" && WISE_URL="${TEST_WISE_URL}"
+        curl -skf --max-time 10 -A "arkime" -o /dev/null "${TEST_WISE_URL}" && WISE_URL="${TEST_WISE_URL}"
     fi
+    # set the wiseURL in the config file
     sed -i "s|^\(wiseURL=\).*|\1""${WISE_URL}""|" "${ARKIME_CONFIG_FILE}"
+    # append wise plugin filename to end of plugins= line in config file and uncomment it if necessary
+    sed -i "s/^#*[[:space:]]*\(plugins=\)/\1${WISE_PLUGIN_FILE_BASE};/" "${ARKIME_CONFIG_FILE}"
+    # squash semicolons
+    sed -i 's/;\{2,\}/;/g' "${ARKIME_CONFIG_FILE}"
+    # remove trailing semicolon from plugins= line if it exists
+    sed -i "s/^\(plugins=.*\)[[:space:]]*;[[:space:]]*$/\1/" "${ARKIME_CONFIG_FILE}"
+
+else
+    # no wiseURL, plugin .so has been removed, comment-out wiseURL
+    sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
 fi
+
 # we haven't dropUser/dropGroup'ed yet, so make sure the regular user owns the files we just touched
 [[ -n ${PUID} ]] && [[ -n ${PGID} ]] && chown -f -R ${PUID}:${PGID} "${ARKIME_DIR}"/etc/ || true
 

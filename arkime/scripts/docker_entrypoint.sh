@@ -59,8 +59,14 @@ PROTOCOL=$(echo "$PROTOCOL" | tr '[:upper:]' '[:lower:]')
 # Extract the old user and password (if any)
 USERPASS=$(echo "$URL_NO_PROTOCOL" | grep "@" | cut -d"/" -f1 | rev | cut -d"@" -f2- | rev)
 
-# Extract the host
-HOSTPORT=$(echo "${URL_NO_PROTOCOL/$USERPASS@/}" | cut -d"/" -f1)
+# Extract the host:port
+if [ -n "${USERPASS}" ]; then
+    # URL **had** credentials, strip them out from the host:port
+    HOSTPORT="${URL_NO_PROTOCOL/$USERPASS@/}"
+else
+    # URL had **no** credentials—keep everything
+    HOSTPORT="$URL_NO_PROTOCOL"
+fi
 
 # smoosh them all together for the new URL
 OPENSEARCH_URL_FINAL="${PROTOCOL}${NEW_USER}:${NEW_PASSWORD}@${HOSTPORT}"
