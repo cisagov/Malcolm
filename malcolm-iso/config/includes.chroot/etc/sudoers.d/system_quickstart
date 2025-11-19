@@ -1,0 +1,2 @@
+# allow unprivileged mgmt of time sync, hostname, and SSH config
+%netdev ALL=(root) NOPASSWD: /usr/local/bin/system-quickstart.py

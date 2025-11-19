@@ -533,14 +533,6 @@ function dregls () {
 ########################################################################
 # malcolm-specific
 ########################################################################
-system-quickstart() {
-  if groups | grep -q '\bsudo\b'; then
-    sudo /usr/local/bin/system-quickstart.py
-  else
-    su -l -c /usr/local/bin/system-quickstart.py
-  fi
-}
-
 function malcolmmonitor () {
   if [[ -d "$HOME"/Malcolm ]]; then
     mkdir -p "$HOME"/Malcolm/.tmp

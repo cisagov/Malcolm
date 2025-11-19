@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if (( $EUID == 0 )); then
+    /usr/local/bin/system-quickstart.py
+elif groups | grep -Pq '\b(sudo|netdev)\b'; then
+    sudo /usr/local/bin/system-quickstart.py
+else
+    su -l -c /usr/local/bin/system-quickstart.py
+fi
