@@ -140,6 +140,8 @@ else
     # no wiseURL, plugin .so has been removed, comment-out wiseURL
     sed -i "s/^\(wiseURL=\)/# \1/" "${ARKIME_CONFIG_FILE}"
 fi
+unset WISE_URL
+unset TEST_WISE_URL
 
 # we haven't dropUser/dropGroup'ed yet, so make sure the regular user owns the files we just touched
 [[ -n ${PUID} ]] && [[ -n ${PGID} ]] && chown -f -R ${PUID}:${PGID} "${ARKIME_DIR}"/etc/ || true

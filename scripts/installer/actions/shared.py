@@ -48,21 +48,6 @@ from scripts.malcolm_common import (
 from scripts.malcolm_utils import deep_get, deep_set, get_main_script_dir, which
 
 from scripts.installer.configs.constants.configuration_item_keys import (
-    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
-    KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
-    KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
-    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
-    KEY_CONFIG_ITEM_EXPOSE_SFTP,
-    KEY_CONFIG_ITEM_IMAGE_ARCH,
-    KEY_CONFIG_ITEM_INDEX_DIR,
-    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
-    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
-    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
-    KEY_CONFIG_ITEM_NGINX_SSL,
-    KEY_CONFIG_ITEM_OPEN_PORTS,
-    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
-    KEY_CONFIG_ITEM_PCAP_DIR,
-    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     KEY_CONFIG_ITEM_AUX_FW_AIDE,
     KEY_CONFIG_ITEM_AUX_FW_AUDITLOG,
     KEY_CONFIG_ITEM_AUX_FW_CPU,
@@ -73,6 +58,24 @@ from scripts.installer.configs.constants.configuration_item_keys import (
     KEY_CONFIG_ITEM_AUX_FW_NETWORK,
     KEY_CONFIG_ITEM_AUX_FW_SYSTEMD,
     KEY_CONFIG_ITEM_AUX_FW_THERMAL,
+    KEY_CONFIG_ITEM_CONTAINER_NETWORK_NAME,
+    KEY_CONFIG_ITEM_EXPOSE_FILEBEAT_TCP,
+    KEY_CONFIG_ITEM_EXPOSE_LOGSTASH,
+    KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH,
+    KEY_CONFIG_ITEM_EXPOSE_SFTP,
+    KEY_CONFIG_ITEM_IMAGE_ARCH,
+    KEY_CONFIG_ITEM_INDEX_DIR,
+    KEY_CONFIG_ITEM_INDEX_SNAPSHOT_DIR,
+    KEY_CONFIG_ITEM_LIVE_ARKIME,
+    KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+    KEY_CONFIG_ITEM_MALCOLM_RESTART_POLICY,
+    KEY_CONFIG_ITEM_NGINX_SSL,
+    KEY_CONFIG_ITEM_OPEN_PORTS,
+    KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
+    KEY_CONFIG_ITEM_PCAP_DIR,
+    KEY_CONFIG_ITEM_PCAP_NETSNIFF,
+    KEY_CONFIG_ITEM_PCAP_TCPDUMP,
+    KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     KEY_CONFIG_ITEM_RUNTIME_BIN,
     KEY_CONFIG_ITEM_SURICATA_LOG_DIR,
     KEY_CONFIG_ITEM_SYSLOG_TCP_PORT,
@@ -118,7 +121,7 @@ from scripts.installer.configs.constants.constants import (
     TRAEFIK_ENABLE,
     USERNS_MODE_KEEP_ID,
 )
-from scripts.installer.configs.constants.enums import InstallerResult
+from scripts.installer.configs.constants.enums import InstallerResult, OpenPortsChoices
 from scripts.installer.utils import InstallerLogger
 
 
@@ -229,9 +232,9 @@ def _get_traefik_config(malcolm_config):
         traefik_os_host = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_OPENSEARCH_HOST) or ""
         traefik_entrypoint = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_ENTRYPOINT) or ""
         traefik_resolver = malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_RESOLVER) or ""
-        expose_opensearch = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS)) and bool(
-            malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH)
-        )
+        expose_opensearch = (
+            malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) != OpenPortsChoices.NO.value
+        ) and bool(malcolm_config.get_value(KEY_CONFIG_ITEM_EXPOSE_OPENSEARCH))
         os_primary_mode = (
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
         )
@@ -291,7 +294,7 @@ def _apply_network_overrides(data: dict, network_name: Optional[str]) -> None:
 def _get_exposed_services_config(malcolm_config):
     try:
         traefik_labels_enabled = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_TRAEFIK_LABELS) or False)
-        open_ports = bool(malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) or False)
+        open_ports = malcolm_config.get_value(KEY_CONFIG_ITEM_OPEN_PORTS) != OpenPortsChoices.NO.value
         profile = malcolm_config.get_value(KEY_CONFIG_ITEM_MALCOLM_PROFILE) or PROFILE_MALCOLM
         os_primary_mode = (
             malcolm_config.get_value(KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE) or DatabaseMode.OpenSearchLocal
@@ -310,6 +313,11 @@ def _get_exposed_services_config(malcolm_config):
             if (profile == PROFILE_HEDGEHOG)
             else []
         )
+        # these aren't directly for exposed ports, but do determine whether arkime or arkime-live
+        #   has the arkime reachback service port exposed
+        pcap_cap_tcpdump = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_TCPDUMP) or False
+        pcap_cap_netsniff = malcolm_config.get_value(KEY_CONFIG_ITEM_PCAP_NETSNIFF) or False
+        pcap_cap_arkime_live = malcolm_config.get_value(KEY_CONFIG_ITEM_LIVE_ARKIME) or False
 
     except Exception as e:
         InstallerLogger.error(f"_get_exposed_services_config: {e}")
@@ -325,6 +333,9 @@ def _get_exposed_services_config(malcolm_config):
         syslog_tcp_port = 0
         syslog_udp_port = 0
         reachback_request_acl = []
+        pcap_cap_tcpdump = False
+        pcap_cap_netsniff = False
+        pcap_cap_arkime_live = False
 
     return (
         traefik_labels_enabled,
@@ -339,6 +350,9 @@ def _get_exposed_services_config(malcolm_config):
         syslog_tcp_port,
         syslog_udp_port,
         reachback_request_acl,
+        pcap_cap_tcpdump,
+        pcap_cap_netsniff,
+        pcap_cap_arkime_live,
     )
 
 
@@ -356,6 +370,9 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
         syslog_tcp_port,
         syslog_udp_port,
         reachback_request_acl,
+        pcap_cap_tcpdump,
+        pcap_cap_netsniff,
+        pcap_cap_arkime_live,
     ) = exposed_services_tuple
 
     ###################################
@@ -392,7 +409,7 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
     # reachback request ACL for hedgehog Linux run profile
 
     # remove previously exposed ports from compose
-    for hh_profile_service in ('file-monitor', 'arkime'):
+    for hh_profile_service in ('file-monitor', 'arkime', 'arkime-live'):
         if hh_profile_service in data['services']:
             data['services'][hh_profile_service].pop('ports', None)
 
@@ -414,10 +431,11 @@ def _apply_exposed_services(data: dict, exposed_services_tuple, platform) -> Non
             ],
             reachback_request_acl,
         )
-        for service, port in {
-            'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES,
-            'arkime': SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER,
-        }.items():
+        aclPorts = {'file-monitor': SERVICE_PORT_HEDGEHOG_PROFILE_EXTRACTED_FILES}
+        if any((pcap_cap_arkime_live, pcap_cap_netsniff, pcap_cap_tcpdump)):
+            # expose 8005 for arkime-live or arkime depending on where Arkime viewer will be running
+            aclPorts['arkime-live' if pcap_cap_arkime_live else 'arkime'] = SERVICE_PORT_HEDGEHOG_PROFILE_ARKIME_VIEWER
+        for service, port in aclPorts.items():
             data['services'][service]['ports'] = [f"{SERVICE_IP_EXPOSED}:{port}:{port}/tcp"]
     ###################################
 
