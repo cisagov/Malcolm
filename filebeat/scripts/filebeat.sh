@@ -10,6 +10,8 @@ VERBOSE_FLAG=
 NETBOX_SITE=${NETBOX_SITE:-}
 
 [[ -n "${EXTRA_TAGS}" ]] || EXTRA_TAGS=
+[[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]] && EXTRA_TAGS="${EXTRA_TAGS:+$EXTRA_TAGS,}_filebeat_zeek_hedgehog_live"
+
 SLEEP_SEC=0
 
 while getopts vh:c:d:f:m:n:t:s: opts; do
