@@ -161,3 +161,13 @@ curl -sSL -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -sSL https
 chmod 755 /usr/local/bin/kubectl
 chown root:root /usr/local/bin/kubectl
 ###
+
+# run kiosk system process information daemon under systemd
+if [ -f /opt/kiosk/kiosk.service ]; then
+  mv /opt/kiosk/kiosk.service /etc/systemd/system/kiosk.service
+  chown root:root /etc/systemd/system/kiosk.service
+  chmod 644 /etc/systemd/system/kiosk.service
+  systemctl daemon-reload
+  # TODO: finish kiosk port
+  # systemctl enable kiosk
+fi

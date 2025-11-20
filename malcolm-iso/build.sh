@@ -273,6 +273,7 @@ PYCODE
   # copy shared scripts and some branding stuff
   mkdir -p ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
+  rsync -a "$SCRIPT_PATH/kiosk/" ./config/includes.chroot/opt/kiosk/
   cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
   cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/

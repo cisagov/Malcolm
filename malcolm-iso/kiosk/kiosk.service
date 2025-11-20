@@ -2,8 +2,8 @@
 Description=Hedgehog Linux Kiosk
 
 [Service]
-WorkingDirectory=/home/sensor/sensor_interface/
-ExecStart=/home/sensor/sensor_interface/init.sh
+WorkingDirectory=/opt/kiosk
+ExecStart=/opt/kiosk/init.sh
 Restart=always
 
 [Install]
