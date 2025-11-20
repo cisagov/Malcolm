@@ -490,7 +490,7 @@ alias dpa="docker ps -a"
 
 # Get images
 alias di="docker images 2>/dev/null | tail -n +2"
-alias dis="docker images 2>/dev/null | tail -n +2 | awk '{print $1}'"
+alias dis="docker images 2>/dev/null | tail -n +2 | awk '{print \$1}'"
 
 # Get container IP
 alias dip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
