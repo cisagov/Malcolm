@@ -218,36 +218,80 @@ Select an item number to configure, or an action:
 │   └── 5. Process User ID (current: 1000)
 ├── 6. Run Profile (current: malcolm)
 │   ├── 7. Dark Mode for Dashboards (current: Yes)
-│   ├── 8. Forward Logs to Remote Secondary Store (current: No)
-│   ├── 9. Local OpenSearch Instance (current: Yes)
-│   ├── 10. Logstash Memory (current: 1g)
-│   ├── 11. Logstash Workers (current: 3)
-│   └── 12. OpenSearch Memory (current: 4g)
-├── 13. Require HTTPS Connections (current: Yes)
-├── 14. IPv4 for nginx Resolver Directive (current: Yes)
-├── 15. IPv6 for nginx Resolver Directive (current: No)
-├── 16. Traefik Labels (current: No)
-├── 17. Use Default Storage Location (current: Yes)
-├── 18. Clean Up Artifacts (current: No)
-├── 19. Enable Arkime Index Management (current: No)
-├── 20. Enable Arkime Analysis (current: Yes)
-├── 21. Enable Suricata Analysis (current: Yes)
-│   └── 22. Enable Suricata Rule Updates (current: No)
-├── 23. Enable Zeek Analysis (current: Yes)
-│   ├── 24. Enable Zeek File Extraction (current: No)
-│   ├── 25. Enable Zeek ICS/OT Analyzers (current: No)
-│   └── 26. Use Threat Feeds for Zeek Intelligence (current: Yes)
-│       ├── 27. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
-│       ├── 28. Intel::item_expiration Timeout (current: -1min)
-│       ├── 29. Pull Threat Intelligence Feeds on Startup (current: Yes)
-│       └── 30. Threat Indicator "Since" Period (current: 24 hours ago)
-├── 31. Enrich with Reverse DNS Lookups (current: No)
-├── 32. Enrich with Manufacturer (OUI) Lookups (current: Yes)
-├── 33. Enrich with Frequency Scoring (current: Yes)
-├── 34. NetBox Mode (current: Disabled)
-├── 35. Expose Malcolm Service Ports (current: No)
-├── 36. Network Traffic Node Name (current: host)
-└── 37. Capture Live Network Traffic (current: No)
+│   ├── 8. Extra Tags (current: [])
+│   ├── 9. Forward AIDE Results (current: No)
+│   ├── 10. Forward Audit Log (current: No)
+│   ├── 11. Forward CPU Utilization (current: No)
+│   ├── 12. Forward Disk Operation Statistics (current: No)
+│   ├── 13. Forward Disk Utilization (current: No)
+│   ├── 14. Forward Kernel Messages (current: No)
+│   ├── 15. Forward Logs to Remote Secondary Store (current: No)
+│   ├── 16. Forward Memory Utilization (current: No)
+│   ├── 17. Forward Network Activity (current: No)
+│   ├── 18. Forward Systemd Journal Logs (current: No)
+│   ├── 19. Forward Thermal Readings (current: No)
+│   ├── 20. Logstash Memory (current: 3g)
+│   ├── 21. Logstash Workers (current: 3)
+│   ├── 22. OpenSearch Memory (current: 24g)
+│   └── 23. Primary Document Store (current: opensearch-local)
+├── 24. Require HTTPS Connections (current: No)
+├── 25. IPv4 for nginx Resolver Directive (current: Yes)
+├── 26. IPv6 for nginx Resolver Directive (current: No)
+├── 27. Traefik Labels (current: No)
+├── 28. Use Default Storage Location (current: Yes)
+├── 29. Clean Up Artifacts (current: Yes)
+│   ├── 30. Delete Old Indices (current: Yes)
+│   │   ├── 31. Index Prune Threshold (current: 1T)
+│   │   └── 32. Prune Indices by Name (current: No)
+│   └── 33. Delete Old PCAP (current: Yes)
+│       └── 34. Delete PCAP Threshold (current: 5%)
+├── 35. Enable Arkime Index Management (current: No)
+├── 36. Enable Arkime Analysis (current: Yes)
+│   ├── 37. Allow Arkime WISE Configuration (current: No)
+│   └── 38. Enable Arkime WISE (current: Yes)
+├── 39. Enable Suricata Analysis (current: Yes)
+│   └── 40. Enable Suricata Rule Updates (current: Yes)
+├── 41. Enable Zeek Analysis (current: Yes)
+│   ├── 42. Enable Zeek File Extraction (current: Yes)
+│   │   └── 43. File Extraction Mode (current: interesting)
+│   │       ├── 44. Extracted File Percent Threshold (current: 0)
+│   │       ├── 45. Extracted File Size Threshold (current: 100G)
+│   │       ├── 46. File Preservation (current: quarantined)
+│   │       ├── 47. Preserved Files HTTP Server (current: Yes)
+│   │       │   ├── 48. Downloaded Preserved File Password (current: ********)
+│   │       │   └── 49. Zip Downloads (current: Yes)
+│   │       ├── 50. Scan with capa (current: Yes)
+│   │       ├── 51. Scan with ClamAV (current: Yes)
+│   │       ├── 52. Scan with YARA (current: Yes)
+│   │       ├── 53. Update Scan Rules (current: Yes)
+│   │       └── 54. VirusTotal API Key (current: empty)
+│   ├── 55. Enable Zeek ICS/OT Analyzers (current: Yes)
+│   │   └── 56. Enable Zeek ICS "Best Guess" (current: Yes)
+│   └── 57. Use Threat Feeds for Zeek Intelligence (current: Yes)
+│       ├── 58. Cron Expression for Threat Feed Updates (current: 0 0 * * *)
+│       ├── 59. Intel::item_expiration Timeout (current: -1min)
+│       ├── 60. Pull Threat Intelligence Feeds on Startup (current: Yes)
+│       └── 61. Threat Indicator "Since" Period (current: 7 days ago)
+├── 62. Enrich with Reverse DNS Lookups (current: Yes)
+├── 63. Enrich with Manufacturer (OUI) Lookups (current: Yes)
+├── 64. Enrich with Frequency Scoring (current: Yes)
+├── 65. NetBox Mode (current: Local)
+│   ├── 66. Auto-Create Subnet Prefixes (current: Yes)
+│   ├── 67. Auto-Populate NetBox Inventory (current: Yes)
+│   ├── 68. NetBox Enrichment (current: Yes)
+│   ├── 69. NetBox IP Autopopulation Filter (current: empty)
+│   └── 70. NetBox Site Name (current: Malcolm)
+├── 71. Expose Malcolm Service Ports (current: Yes)
+├── 72. Network Traffic Node Name (current: host)
+└── 73. Capture Live Network Traffic (current: Yes)
+    ├── 74. Analyze Live Traffic with Suricata (current: Yes)
+    ├── 75. Analyze Live Traffic with Zeek (current: Yes)
+    ├── 76. Capture Filter (current: empty)
+    ├── 77. Capture Interface(s) (current: eth0)
+    ├── 78. Capture Live Traffic with netsniff-ng (current: Yes)
+    ├── 79. Capture Live Traffic with tcpdump (current: No)
+    ├── 80. Gather Traffic Capture Statistics (current: Yes)
+    └── 81. Optimize Interface Settings for Capture (current: Yes)
 
 --- Actions ---
   s. Save and Continue Installation
@@ -359,9 +403,8 @@ Proceed with Malcolm installation using the above configuration? (y / N): y
         + Whether the primary OpenSearch instance is a locally maintained single-node instance or remote cluster, Malcolm can also be configured to forward logs to a secondary remote OpenSearch instance. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about forwarding logs to another OpenSearch instance. If this option is enabled, sub-items will become available to configure the secondary document store type (`opensearch-remote` vs `elasticsearch-remote`) and URL.
     - **Forward …**
         + Malcolm uses [Fluent Bit](https://fluentbit.io/) to gather miscellaneous system resource metrics (CPU, network I/O, disk I/O, memory utilization, temperature, etc.) and the [Beats](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-tcp.html) protocol to forward these metrics to its [Logstash](https://www.elastic.co/products/logstash) service for further enrichment prior to indexing into the [OpenSearch](https://opensearch.org/) database. Metrics categories can be enabled/disabled with the remaining **Forward …** options under the **Run Profile** section.
-    - **Local OpenSearch Instance** and **Primary Document Store**
-        + Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead.
-        + If this setting is set to `N`, the **Primary Document Store** option will appear to allow the user to select `opensearch-remote` or `elasticsearch-remote` as the alternative to the local OpenSearch instance, as well as the corresponding URL for the remote instance.
+    - **Primary Document Store**
+        + Malcolm's default standalone configuration is to use a local [OpenSearch](https://opensearch.org/) instance in a container to index and search network traffic metadata. See [OpenSearch and Elasticsearch instances](opensearch-instances.md#OpenSearchInstance) for more information about using a remote OpenSearch or Elasticsearch cluster instead. The **Primary Document Store** option allows the user to select `opensearch-local` (for Malcolm to maintain its own OpenSearch instance), `opensearch-remote`, or `elasticsearch-remote`. In the case of the `-remote` options, the user can also specify the corresponding URL for the remote instance.
     - **OpenSearch Memory** and **Logstash Memory**
         + Two of Malcolm's main components, OpenSearch and Logstash, require a substantial amount of memory. The configuration script will suggest defaults for these values based on the amount of physical memory the system has. The minimum recommended amount of system memory for Malcolm is 24 GB. Users should not use a value under 10 GB for OpenSearch and 2500 MB for Logstash.
     - **Logstash Workers**
@@ -575,14 +618,18 @@ The first time Hedgehog Linux boots the **Malcolm Configuration** wizard will st
 The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malcolm Configuration Menu Items**](#MalcolmConfigItems) are applicable for Hedgehog Linux, with the following notable exceptions:
 
 * Several configuration items deal with how Hedgehog Linux components communicate with the remote Malcolm aggregator:
-    * **Logstash Host**
-        * The IP address or hostname of the Malcolm aggregator, a colon (`:`), and the Logstash port (5044).
-    * **Malcolm Reachback ACL**
-        * A list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](file-scanning.md#ZeekFileExtraction). Minimally, this list should include the IP address of the Malcolm aggregator.
-    * **Primary Document Store** and **Primary OpenSearch/Elasticsearch URL**
-        * The [document store type](opensearch-instances.md#OpenSearchInstance) (either `opensearch-remote` or `elasticsearch-remote`) of the Malcolm aggregator, and its URL with the OpenSearch/Elasticsearch port (9200).
-    * **Arkime WISE URL**
-        * The URL for the Malcolm aggregator's [Arkime WISE](arkime.md#ArkimeWISE) service.
+    * **Primary Document Store**
+        * The [document store type](opensearch-instances.md#OpenSearchInstance) (either `opensearch-remote` or `elasticsearch-remote`) of the Malcolm aggregator
+    * **Remote Malcolm Hostname or IP**
+        * Specifying the IP address or hostname of the Malcolm aggregator here will automatically populate the following items (or, they can be set or overriden individually):
+            * **Primary OpenSearch/Elasticsearch URL**
+                * The URL of the remote OpenSearch/Elasticsearch instance to be used as the data store (e.g., `https://malcolm.example.org:9200` or `https://service.whatever.org/elasticsearch/`)
+            * **Logstash Host**
+                * The IP address or hostname of the Malcolm aggregator, a colon (`:`), and the Logstash port (5044).
+            * **Arkime WISE URL**
+                * The URL for the Malcolm aggregator's [Arkime WISE](arkime.md#ArkimeWISE) service.
+            * **Malcolm Reachback ACL**
+                * A list of IP addresses used to populate a firewall access control list (ACL) for hosts allowed to connect back to the sensor for retrieving session payloads from its PCAP files (over port `8005/tcp`) for display in Arkime viewer and for downloading files (over port `8006/tcp`) [extracted and preserved by Zeek](file-scanning.md#ZeekFileExtraction). Minimally, this list should include the IP address of the Malcolm aggregator. This is only automatically populated from **Remote Malcolm Hostname or IP** if its value is an IP address.
     * **NetBox Site Name**
         * This site name will be associated with the traffic captured on this sensor and used for NetBox enrichment lookups performed by the Malcolm aggregator.
 * Some examples of these values:

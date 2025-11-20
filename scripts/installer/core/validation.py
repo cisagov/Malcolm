@@ -165,14 +165,15 @@ def _validate_local_vs_remote_urls(malcolm_config, add_issue) -> None:
             primary_mode,
         )
 
-        _validate_url_for_mode(
-            dashurl,
-            LOCAL_DASHBOARDS_URL,
-            {SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value},
-            KEY_CONFIG_ITEM_DASHBOARDS_URL,
-            "Dashboards",
-            primary_mode,
-        )
+        if profile == PROFILE_MALCOLM:
+            _validate_url_for_mode(
+                dashurl,
+                LOCAL_DASHBOARDS_URL,
+                {SearchEngineMode.OPENSEARCH_LOCAL.value, SearchEngineMode.OPENSEARCH_REMOTE.value},
+                KEY_CONFIG_ITEM_DASHBOARDS_URL,
+                "Dashboards",
+                primary_mode,
+            )
 
 
 def _validate_secondary_remote(malcolm_config, add_issue) -> None:

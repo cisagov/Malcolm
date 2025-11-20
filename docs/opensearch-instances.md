@@ -11,14 +11,13 @@ As an alternative to OpenSearch, Malcolm [may now be configured](https://github.
 
 The `OPENSEARCH_…` [environment variables in `opensearch.env`](malcolm-config.md#MalcolmConfigEnvVars) control whether Malcolm uses its own local OpenSearch instance (`opensearch-local`), a remote OpenSearch instance (`opensearch-remote`) or a remote Elasticsearch instance (`elasticsearch-remote`) as its primary data store. The configuration portion of Malcolm install script ([`./scripts/configure`](malcolm-hedgehog-e2e-iso-install.md#MalcolmConfig)) can help users configure these options.
 
-For example, to use the default standalone configuration, select **Yes** for `Local OpenSearch Instance`:
+For example, to use the default standalone configuration, select `opensearch-local` for `Primary Document Store`:
 ```
 …
 ├── 6. Run Profile (current: malcolm)
 …
-│   ├── 9. Local OpenSearch Instance (current: Yes)
-…
-│   └── 12. OpenSearch Memory (current: 31g)
+│   ├── 22. OpenSearch Memory (current: 31g)
+│   └── 23. Primary Document Store (current: opensearch-local)
 …
 ```
 
@@ -28,10 +27,9 @@ To use a remote OpenSearch cluster:
 …
 ├── 6. Run Profile (current: malcolm)
 …
-│   ├── 9. Local OpenSearch Instance (current: No)
-…
-│   └── 12. Primary Document Store (current: opensearch-remote)
-│       └── 13. Primary OpenSearch/Elasticsearch URL (current: https://opensearch.example.org:9200)
+│   └── 22. Primary Document Store (current: opensearch-remote)
+│       ├── 23. Primary OpenSearch/Elasticsearch URL (current: https://malcolm.home.arpa:9200)
+│       └── 24. Verify SSL for Primary Document Store (current: No)
 …
 ```
 
@@ -41,11 +39,9 @@ To use a remote Elasticsearch cluster and Kibana:
 …
 ├── 6. Run Profile (current: malcolm)
 …
-│   ├── 8. Local OpenSearch Instance (current: No)
-…
-│   └── 11. Primary Document Store (current: elasticsearch-remote)
-│       ├── 12. Dashboards/Kibana URL (current: https://kibana.example.org:5601/kibana)
-│       └── 13. Primary OpenSearch/Elasticsearch URL (current: https://elasticsearch.example.org:9200)
+│   └── 22. Primary Document Store (current: elasticsearch-remote)
+│       ├── 23. Primary OpenSearch/Elasticsearch URL (current: https://elasticsearch.home.arpa:9200)
+│       └── 24. Verify SSL for Primary Document Store (current: No)
 …
 ```
 

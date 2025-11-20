@@ -189,6 +189,10 @@ CUSTOM_TRANSFORM_HANDLERS: Dict[str, TransformHook] = {
         forward=custom_transform_netbox_auto_populate_subnet_filter,
         reverse=custom_reverse_transform_netbox_auto_populate_subnet_filter,
     ),
+    KEY_ENV_LOGSTASH_HOST: TransformHook(
+        forward=custom_transform_logstash_host,
+        reverse=custom_reverse_transform_logstash_host,
+    ),
     KEY_ENV_OPENSEARCH_PRIMARY: TransformHook(
         forward=custom_transform_opensearch_primary,
         reverse=custom_reverse_transform_opensearch_primary,
@@ -476,7 +480,11 @@ class EnvMapper:
             ]
 
             # Logstash
-            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [KEY_CONFIG_ITEM_LOGSTASH_HOST]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].config_items = [
+                KEY_CONFIG_ITEM_LOGSTASH_HOST,
+                KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST,
+            ]
+            self.env_var_by_map_key[KEY_ENV_LOGSTASH_HOST].derived_items = [KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_PIPELINE_WORKERS].config_items = [KEY_CONFIG_ITEM_LS_WORKERS]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_REVERSE_DNS].config_items = [KEY_CONFIG_ITEM_REVERSE_DNS]
             self.env_var_by_map_key[KEY_ENV_LOGSTASH_OUI_LOOKUP].config_items = [KEY_CONFIG_ITEM_AUTO_OUI]

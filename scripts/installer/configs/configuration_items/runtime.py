@@ -10,7 +10,6 @@ including container runtime, profiles, and UI preferences.
 """
 
 import os
-import ipaddress
 
 
 from scripts.malcolm_constants import (
@@ -20,6 +19,7 @@ from scripts.malcolm_constants import (
     WidgetType,
 )
 from scripts.malcolm_common import SYSTEM_INFO
+from scripts.malcolm_utils import isipaddress
 
 from scripts.installer.configs.constants.enums import ContainerRuntime
 from scripts.installer.core.config_item import ConfigItem, ListOfStringsConfigItem
@@ -83,21 +83,12 @@ CONFIG_ITEM_IMAGE_ARCH = ConfigItem(
     widget_type=WidgetType.SELECT,
 )
 
-
-def _is_valid_ip(addr: str) -> bool:
-    try:
-        ipaddress.ip_address(addr)
-        return True
-    except ValueError:
-        return False
-
-
 CONFIG_ITEM_REACHBACK_REQUEST_ACL = ListOfStringsConfigItem(
     key=KEY_CONFIG_ITEM_REACHBACK_REQUEST_ACL,
     label="Malcolm Reachback ACL",
     default_value=[],
     accept_blank=True,
-    validator=lambda x: (isinstance(x, list) and all(isinstance(addr, str) and _is_valid_ip(addr) for addr in x)),
+    validator=lambda x: (isinstance(x, list) and all(isinstance(addr, str) and isipaddress(addr) for addr in x)),
     question="Comma-separated list of IP addresses for ACL for artifact reachback from Malcolm",
     widget_type=WidgetType.TEXT,
 )

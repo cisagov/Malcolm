@@ -121,15 +121,15 @@ KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_URL = "opensearchSecondaryUrl"
 KEY_CONFIG_ITEM_OPENSEARCH_SECONDARY_SSL_VERIFY = "opensearchSecondarySslVerify"
 KEY_CONFIG_ITEM_DASHBOARDS_URL = "dashboardsUrl"
 KEY_CONFIG_ITEM_SECONDARY_DOCUMENT_STORE = "secondaryDocumentStore"
-KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH = (
-    "malcolmMaintainOpenSearch"  # Malcolm maintain its own opensearch instance
-)
 
 # Runtime options
 KEY_CONFIG_ITEM_RUNTIME_BIN = "runtimeBin"
 KEY_CONFIG_ITEM_MALCOLM_PROFILE = "malcolmProfile"
 KEY_CONFIG_ITEM_DASHBOARDS_DARK_MODE = "dashboardsDarkMode"
 KEY_CONFIG_ITEM_IMAGE_ARCH = "imageArch"
+# This is used for Hedgehog run profile to provide the host/IP for the remote Malcolm instance.
+#   It doesn't correspond to a single .env value, just convenience to not have to enter it in 4 places.
+KEY_CONFIG_ITEM_REMOTE_MALCOLM_HOST = "remoteMalcolmHost"
 
 # Storage options
 KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS = "cleanUpOldArtifacts"

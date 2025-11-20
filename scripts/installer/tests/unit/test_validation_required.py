@@ -72,12 +72,8 @@ class TestValidationRequired(unittest.TestCase):
     def test_elasticsearch_remote_requires_dashboards_url(self):
         # Set maintain flag first so the primary-mode value rule doesn't clobber our explicit choice
         # Order matters due to dependency observers.
-        from scripts.installer.configs.constants.configuration_item_keys import (
-            KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH,
-        )
 
-        self.cfg.set_value(KEY_CONFIG_ITEM_MALCOLM_MAINTAIN_OPENSEARCH, False)
-        # Now set primary mode to Elasticsearch remote explicitly
+        # Set primary mode to Elasticsearch remote explicitly
         self.cfg.set_value(
             KEY_CONFIG_ITEM_OPENSEARCH_PRIMARY_MODE,
             SearchEngineMode.ELASTICSEARCH_REMOTE.value,
