@@ -271,12 +271,12 @@ PYCODE
   docker rmi -f htpdate-build:latest
 
   # copy shared scripts and some branding stuff
-  mkdir -p ./config/includes.chroot/usr/local/bin/
+  mkdir -p ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/
   rsync -a "$SCRIPT_PATH/../shared/bin/" ./config/includes.chroot/usr/local/bin/
   rsync -a "$SCRIPT_PATH/kiosk/" ./config/includes.chroot/opt/kiosk/
   cp "$SCRIPT_PATH/../scripts/malcolm_utils.py" ./config/includes.chroot/usr/local/bin/
   cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
-  chown -R root:root ./config/includes.chroot/usr/local/bin/
+  chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/
 
   mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/
   mkdir -p ./config/includes.chroot/usr/share/icons/hicolor/{64x64,48x48,32x32,24x24,16x16}
