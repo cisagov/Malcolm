@@ -1,5 +1,5 @@
 [Unit]
-Description=Hedgehog Linux Kiosk
+Description=Malcolm/Hedgehog Linux Kiosk
 
 [Service]
 WorkingDirectory=/opt/kiosk
