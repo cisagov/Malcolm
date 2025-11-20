@@ -70,7 +70,7 @@ if [[ -n "${EXTRA_TAGS}" ]]; then
 fi
 
 # for hedgehog profile, add `_filebeat_zeek_hedgehog` just to the Zeek logs
-if [[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]];
+if [[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]]; then
    yq -P eval '
     (
       .["filebeat.inputs"][]
