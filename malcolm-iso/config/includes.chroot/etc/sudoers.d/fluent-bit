@@ -1,0 +1,2 @@
+# allow unprivileged access for fluent-bit
+%docker ALL=(root) NOPASSWD: /opt/fluent-bit/bin/fluent-bit
