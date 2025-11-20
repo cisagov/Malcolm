@@ -10,7 +10,6 @@ VERBOSE_FLAG=
 NETBOX_SITE=${NETBOX_SITE:-}
 
 [[ -n "${EXTRA_TAGS}" ]] || EXTRA_TAGS=
-[[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]] && EXTRA_TAGS="${EXTRA_TAGS:+$EXTRA_TAGS,}_filebeat_zeek_hedgehog_live"
 
 SLEEP_SEC=0
 
@@ -64,10 +63,25 @@ trap cleanup EXIT
 
 cp "${CONFIG_FILE}" "${TMP_CONFIG_FILE}"
 
+# add the extra tags to all logs
 if [[ -n "${EXTRA_TAGS}" ]]; then
   readarray -td '' EXTRA_TAGS_ARRAY < <(awk '{ gsub(/,/,"\0"); print; }' <<<"${EXTRA_TAGS},"); unset 'EXTRA_TAGS_ARRAY[-1]';
   yq -P eval "(.\"filebeat.inputs\"[] | select(.type == \"log\").tags) += $(jo -a "${EXTRA_TAGS_ARRAY[@]}")" -i "${TMP_CONFIG_FILE}"
 fi
+
+# for hedgehog profile, add `_filebeat_zeek_hedgehog` just to the Zeek logs
+if [[ "${MALCOLM_PROFILE:-malcolm}" == "hedgehog" ]];
+   yq -P eval '
+    (
+      .["filebeat.inputs"][]
+      | select(
+          (.type | test("(?i)log")) and
+          (.tags[] | test("^_filebeat_zeek"))
+        )
+    ).tags += ["_filebeat_zeek_hedgehog"]
+  ' -i "${TMP_CONFIG_FILE}"
+fi
+
 
 if [[ -n "${NETBOX_SITE}" ]]; then
   yq -P eval ".processors |= (. // []) | .processors += [{\"add_fields\": {\"target\": \"netbox\", \"fields\": {\"site\": \"${NETBOX_SITE}\"}}}]" -i "${TMP_CONFIG_FILE}"

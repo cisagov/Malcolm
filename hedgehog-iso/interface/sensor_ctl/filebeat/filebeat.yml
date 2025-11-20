@@ -9,7 +9,7 @@ filebeat.inputs:
     - ${BEAT_STATIC_LOG_PATTERN:/home/sensor/zeek_logs/static/*.log}
   symlinks: true
   fields_under_root: true
-  tags: ["_filebeat_zeek_hedgehog_live"]
+  tags: ["_filebeat_zeek_hedgehog"]
   compression_level: 0
   exclude_lines: ['^\s*#']
   scan_frequency: ${BEAT_SCAN_FREQUENCY:10s}
