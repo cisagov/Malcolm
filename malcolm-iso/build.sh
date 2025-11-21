@@ -275,20 +275,25 @@ PYCODE
   cp "$SCRIPT_PATH/../scripts/malcolm_constants.py" ./config/includes.chroot/usr/local/bin/
   chown -R root:root ./config/includes.chroot/usr/local/bin/ ./config/includes.chroot/opt/
 
-  mkdir -p ./config/includes.chroot/usr/share/images/desktop-base/
+  mkdir -p ./config/includes.chroot/usr/share/images/{hedgehog,malcolm,desktop-base}
   mkdir -p ./config/includes.chroot/usr/share/icons/hicolor/{64x64,48x48,32x32,24x24,16x16}
-  cp "$SCRIPT_PATH"/../docs/images/logo/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
-  cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
+  cp "$SCRIPT_PATH"/../docs/images/logo/*.png ./config/includes.chroot/usr/share/images/malcolm/
+  ln -s -f -r ./config/includes.chroot/usr/share/images/malcolm/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
+  cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/hedgehog-{bw,color}-*.png ./config/includes.chroot/usr/share/images/hedgehog/
+  ln -s -f -r ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon64.png ./config/includes.chroot/usr/share/icons/hicolor/64x64/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon48.png ./config/includes.chroot/usr/share/icons/hicolor/48x48/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon32.png ./config/includes.chroot/usr/share/icons/hicolor/32x32/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon24.png ./config/includes.chroot/usr/share/icons/hicolor/24x24/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon16.png ./config/includes.chroot/usr/share/icons/hicolor/16x16/malcolm.png
-  [[ "$IMAGE_NAME" == "hedgehog" ]] && \
+  if [[ "$IMAGE_NAME" == "hedgehog" ]]; then
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/hedgehog-wallpaper.png \
-                ./config/includes.chroot/usr/share/images/desktop-base/default || \
+                ./config/includes.chroot/usr/share/images/desktop-base/default
+    rm -rf ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-{17,18,20,21,22,23,24}
+  else
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
+  fi
 
   chown -R root:root ./config/includes.chroot/usr/share/images ./config/includes.chroot/usr/share/icons
 
