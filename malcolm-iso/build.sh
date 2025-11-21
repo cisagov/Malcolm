@@ -277,6 +277,7 @@ PYCODE
 
   mkdir -p ./config/includes.chroot/usr/share/images/{hedgehog,malcolm,desktop-base}
   mkdir -p ./config/includes.chroot/usr/share/icons/hicolor/{64x64,48x48,32x32,24x24,16x16}
+  mkdir -p /etc/xdg/autostart
   cp "$SCRIPT_PATH"/../docs/images/logo/*.png ./config/includes.chroot/usr/share/images/malcolm/
   ln -s -f -r ./config/includes.chroot/usr/share/images/malcolm/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/hedgehog-{bw,color}-*.png ./config/includes.chroot/usr/share/images/hedgehog/
@@ -290,12 +291,17 @@ PYCODE
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/hedgehog-wallpaper.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
     rm -rf ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-{17,18,20,21,22,23,24}
+    ln -s -f -r ./config/includes.chroot/usr/share/applications/kiosk-browser.desktop \
+                ./config/includes.chroot/etc/xdg/autostart/kiosk-browser.desktop
   else
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
+    rm -rf ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-30
   fi
 
-  chown -R root:root ./config/includes.chroot/usr/share/images ./config/includes.chroot/usr/share/icons
+  chown -R root:root ./config/includes.chroot/usr/share/images \
+                     ./config/includes.chroot/usr/share/icons \
+                     /etc/xdg/autostart
 
   mkdir -p ./config/includes.installer
   cp -v ./config/includes.binary/install/* ./config/includes.installer/
