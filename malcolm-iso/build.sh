@@ -277,7 +277,7 @@ PYCODE
 
   mkdir -p ./config/includes.chroot/usr/share/images/{hedgehog,malcolm,desktop-base}
   mkdir -p ./config/includes.chroot/usr/share/icons/hicolor/{64x64,48x48,32x32,24x24,16x16}
-  mkdir -p /etc/xdg/autostart
+  mkdir -p ./config/includes.chroot/etc/xdg/autostart
   cp "$SCRIPT_PATH"/../docs/images/logo/*.png ./config/includes.chroot/usr/share/images/malcolm/
   ln -s -f -r ./config/includes.chroot/usr/share/images/malcolm/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/hedgehog-{bw,color}-*.png ./config/includes.chroot/usr/share/images/hedgehog/
