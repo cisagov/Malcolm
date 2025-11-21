@@ -6,8 +6,6 @@ The Malcolm and Hedgehog Linux installers as described in these instructions are
 
 In contrast to using the ISO installer, Malcolm can also be installed on any x86-64 (also known as x64, x86_64, AMD64, and Intel 64) or AArch64 (also known as ARM64) platform capable of running Docker or Podman. See the [installation example using Ubuntu 24.04 LTS](ubuntu-install-example.md#InstallationExample) for that method of installation and configuration, or [Windows host system configuration](host-config-windows.md#HostSystemConfigWindows) and [macOS host system configuration](host-config-macos.md#HostSystemConfigMac) for those platforms.
 
-# TODO: need to verify this complete overhaul for the Hedgehog stuff
-
 ### <a name="TableOfContents"></a> Table of Contents
 
 * [Obtaining the Installation ISOs](#ISODownload)
@@ -602,6 +600,7 @@ Users will be prompted to do the following:
     - This value corresponds to the `passwordSecret` value in Arkime's [config.ini file](https://arkime.com/settings). Arkime uses this value to secure communication (specifically, the connection used when Arkime viewer retrieves a PCAP payload for display in its user interface) between Arkime viewers in instances of Malcolm and Hedgehog Linux. In other words, this value needs to be the same for the Malcolm instance and all of the instances of Hedgehog Linux forwarding Arkime sessions to that Malcolm instance. The corresponding value should be provided when running `auth_setup` on the Hedgehog Linux sensor.
 * **Transfer self-signed client certificates to a remote log forwarder**
     - In order for a sensor running Hedgehog Linux to securely communicate with Malcolm, it needs a copy of the client certificates generated when "(Re)generate self-signed certificates for a remote log forwarder" was selected earlier. Malcolm can facilitate the secure transfer of these certificates. If users will be continuing on to configure a sensor running Hedgehog Linux, they should answer **Y** here. They will be prompted to "Run auth_setup on the sensor and select 'Receive client certificates from Malcolm'". Users should continue on with the instructions for [Hedgehog Linux Installation and Configuration](#HedgehogInstallAndConfig), then return here and press **Enter** once they have chosen the corresponding `auth_setup` operation [below](#HedgehogCommConfig). After that process is complete, users may press **OK** and Malcolm will continue to start up.
+    * ![SSL Certificate Transfer, Malcolm Side - 01](./images/screenshots/ssl-cert-transfer-01.png)
 
 ## <a name="HedgehogInstallAndConfig"></a> Hedgehog Linux Installation and Configuration
 
@@ -673,15 +672,23 @@ The sections above for [**Configuring Malcolm**](#MalcolmConfig) and the [**Malc
 
 The `auth_setup` script on Hedgehog Linux has a **Receive client certifictes from Malcolm** option corresponding to Malcolm's **Transfer self-signed client certificates to a remote log forwarder** option described [above](#MalcolmAuthSetup). In order for a Hedgehog Linux to securely communicate with Malcolm, it needs the client certificates generated when users answered **Y** to **(Re)generate self-signed certificates for a remote log forwarder** during that setup. Malcolm can facilitate the secure transfer of these to a sensor running Hedgehog.
 
-Select **Receive client certificates from Malcolm**, then press **OK** when prompted "Run auth_setup on Malcolm and select 'Transfer self-signed client certificates...'". [Return](#MalcolmAuthSetup) to the Malcolm instance where `auth_setup` is running (or re-run it if needed) and press **OK**. Users will see a message with the title **ssl-client-transmit** that looks like this:
+Select **Receive client certificates from Malcolm**, then press **OK** when prompted "Run auth_setup on Malcolm and select 'Transfer self-signed client certificates...'".
 
-# TODO: new screenshots
+![SSL Certificate Transfer, Hedgehog Side - 01](./images/screenshots/ssl-cert-transfer-03.png)
 
-Note Malcolm's IP address (`192.168.122.5` in the screenshot above) and the single-use code phrase (`8736-janet-kilo-tonight` in the screenshot above) and enter them on the Hedgehog:
+![SSL Certificate Transfer, Hedgehog Side - 02](./images/screenshots/ssl-cert-transfer-04.png)
 
-# TODO: new screenshots
+[Return](#MalcolmAuthSetup) to the Malcolm instance where `auth_setup` is running (or re-run it if needed) and press **OK**. Users will see a message with the title **ssl-client-transmit** that looks like this:
 
-After a few seconds (hopefully) a progress bar will update and show the files have been 100% transfered. They are automatically saved into the `~/Malcolm/filebeat/certs` directory on the sensor.
+![SSL Certificate Transfer, Malcolm Side - 02](./images/screenshots/ssl-cert-transfer-02.png)
+
+Note Malcolm's IP address (`192.168.122.5` in the screenshot above) and the single-use code phrase (`2033-inside-century-simon` in the screenshot above) and enter them on the Hedgehog:
+
+![SSL Certificate Transfer, Hedgehog Side - 03](./images/screenshots/ssl-cert-transfer-05.png)
+
+After a few seconds a progress bar will update and show the files have been 100% transfered. They are automatically saved into the `~/Malcolm/filebeat/certs` directory on the sensor.
+
+![SSL Certificate Transfer, Hedgehog Side - 03](./images/screenshots/ssl-cert-transfer-07.png)
 
 Once the has been completed, users can click the "play" icon (▷) in the panel at the top of the [desktop](#MalcolmDesktop) to start Malcolm under the [Hedgehog run profile](live-analysis.md#Profiles).
 
