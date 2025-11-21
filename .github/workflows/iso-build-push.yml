@@ -86,6 +86,7 @@ jobs:
                software-properties-common \
                squashfs-tools \
                virt-what \
+               xmlstarlet \
                xorriso \
                yq \
                xz-utils

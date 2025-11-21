@@ -290,14 +290,24 @@ PYCODE
   if [[ "$IMAGE_NAME" == "hedgehog" ]]; then
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/hedgehog-wallpaper.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
-    rm -rf ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-{17,18,20,21,22,23,24}
     ln -s -f -r ./config/includes.chroot/usr/share/applications/kiosk-browser.desktop \
                 ./config/includes.chroot/etc/xdg/autostart/kiosk-browser.desktop
+    XFCE_PANEL_REMOVE=(17 18 20 21 22 23 24)
   else
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
-    rm -rf ./config/includes.chroot/etc/skel/.config/xfce4/panel/launcher-30
+    XFCE_PANEL_REMOVE=(30)
   fi
+  XFCE_PANEL_DIR=./config/includes.chroot/etc/skel/.config/xfce4/panel
+  XFCE_PANEL_CONFIG=./config/includes.chroot/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+  for XFCE_PANEL_PLUGIN in "${XFCE_PANEL_REMOVE[@]}"; do
+      # Remove the plugin definition
+      xmlstarlet ed -L -d "/channel/property[@name='plugins']/property[@name='plugin-$XFCE_PANEL_PLUGIN']" "$XFCE_PANEL_CONFIG"
+      # Remove the plugin ID from the panel-1 list
+      xmlstarlet ed -L -d "/channel/property[@name='panels']/property[@name='panel-1']/property[@name='plugin-ids']/value[@value='$XFCE_PANEL_PLUGIN']" "$XFCE_PANEL_CONFIG"
+      # remove the unused panel definition
+      rm -rf "$XFCE_PANEL_DIR/launcher-$XFCE_PANEL_PLUGIN" || true
+  done
 
   chown -R root:root ./config/includes.chroot/usr/share/images \
                      ./config/includes.chroot/usr/share/icons \
