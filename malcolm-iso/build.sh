@@ -294,6 +294,7 @@ PYCODE
                 ./config/includes.chroot/etc/xdg/autostart/kiosk-browser.desktop
     XFCE_PANEL_REMOVE=(17 18 20 21 22 23 24)
   else
+    sed -i '/^[[:space:]]*systemctl enable kiosk[[:space:]]*$/d' ./config/hooks/normal/*.hook.chroot
     ln -s -f -r ./config/includes.chroot/usr/share/images/desktop-base/Malcolm_background.png \
                 ./config/includes.chroot/usr/share/images/desktop-base/default
     XFCE_PANEL_REMOVE=(30)

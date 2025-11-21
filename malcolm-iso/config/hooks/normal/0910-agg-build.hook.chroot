@@ -168,6 +168,5 @@ if [ -f /opt/kiosk/kiosk.service ]; then
   chown root:root /etc/systemd/system/kiosk.service
   chmod 644 /etc/systemd/system/kiosk.service
   systemctl daemon-reload
-  # TODO: finish kiosk port
-  # systemctl enable kiosk
+  systemctl enable kiosk
 fi
