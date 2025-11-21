@@ -280,7 +280,7 @@ PYCODE
   mkdir -p ./config/includes.chroot/etc/xdg/autostart
   cp "$SCRIPT_PATH"/../docs/images/logo/*.png ./config/includes.chroot/usr/share/images/malcolm/
   ln -s -f -r ./config/includes.chroot/usr/share/images/malcolm/Malcolm_background.png ./config/includes.chroot/usr/share/images/desktop-base/
-  cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/hedgehog-{bw,color}-*.png ./config/includes.chroot/usr/share/images/hedgehog/
+  cp "$SCRIPT_PATH"/../docs/images/hedgehog/logo/*.png ./config/includes.chroot/usr/share/images/hedgehog/
   ln -s -f -r ./config/includes.chroot/usr/share/images/hedgehog/*wallpaper*.png ./config/includes.chroot/usr/share/images/desktop-base/
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon64.png ./config/includes.chroot/usr/share/icons/hicolor/64x64/malcolm.png
   cp "$SCRIPT_PATH"/../docs/images/favicon/favicon48.png ./config/includes.chroot/usr/share/icons/hicolor/48x48/malcolm.png
