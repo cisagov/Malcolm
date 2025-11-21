@@ -1,6 +1,6 @@
 elasticsearch==8.19.2
 elasticsearch-dsl==8.18.0
-opensearch-py==3.0.0
+opensearch-py==3.1.0
 python-magic==0.4.27
 pyzmq==27.1.0
 requests==2.32.5
