@@ -9,7 +9,7 @@ function start_all() {
             modal(this.responseText);
         }
     };
-    xhttp.open("POST", "/script_call/start all", true);
+    xhttp.open("POST", "/script_call/start --quiet", true);
     xhttp.send();
 }
 
@@ -23,62 +23,7 @@ function stop_all() {
             modal(this.responseText);
         }
     };
-    xhttp.open("POST", "/script_call/stop all", true);
-    xhttp.send();
-
-}
-
-function start_zeek() {
-    var xhttp = new XMLHttpRequest();
-    loadingBar('on');
-    xhttp.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            loadingBar('off');
-            modal(this.responseText);
-        }
-    };
-    xhttp.open("POST", "/script_call/start zeek:*", true);
-    xhttp.send();
-}
-
-function stop_zeek() {
-    var xhttp = new XMLHttpRequest();
-    loadingBar('on');
-    xhttp.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            loadingBar('off');
-            modal(this.responseText);
-        }
-    };
-    xhttp.open("POST", "/script_call/stop zeek:*", true);
-    xhttp.send();
-
-}
-
-function start_tcp() {
-    var xhttp = new XMLHttpRequest();
-    loadingBar('on');
-    xhttp.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            loadingBar('off');
-            modal(this.responseText);
-        }
-    };
-    xhttp.open("POST", "/script_call/start tcpdump:*", true);
-    xhttp.send();
-
-}
-
-function stop_tcp() {
-    var xhttp = new XMLHttpRequest();
-    loadingBar('on');
-    xhttp.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            loadingBar('off');
-            modal(this.responseText);
-        }
-    };
-    xhttp.open("POST", "/script_call/stop tcpdump:*", true);
+    xhttp.open("POST", "/script_call/stop", true);
     xhttp.send();
 
 }
@@ -92,7 +37,7 @@ function sensor_status() {
             modal(this.responseText);
         }
     };
-    xhttp.open("POST", "/script_call/status all", true);
+    xhttp.open("POST", "/script_call/status", true);
     xhttp.send();
 }
 
@@ -106,7 +51,7 @@ function clean_sensor() {
                 modal(this.responseText);
             }
         };
-        xhttp.open("POST", "/script_call/clean all", true);
+        xhttp.open("POST", "/script_call/wipe", true);
         xhttp.send();
     }
 }

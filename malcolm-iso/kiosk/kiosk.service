@@ -4,6 +4,8 @@ Description=Malcolm/Hedgehog Linux Kiosk
 [Service]
 WorkingDirectory=/opt/kiosk
 ExecStart=/opt/kiosk/init.sh
+User=sensor
+Group=sensor
 Restart=always
 
 [Install]

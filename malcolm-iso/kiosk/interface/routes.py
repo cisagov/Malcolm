@@ -59,7 +59,6 @@ def buttons():
 
 @app.route('/script_call/<string:script>', methods=['POST'])
 def activate_service(script):
-    print(script)
     return sys_s.service(script)
 
 
@@ -120,13 +119,26 @@ def update_stats():
         )
 
     # get capture stats for Zeek, Suricata, PCAP
-    pcap_path = os.getenv('PCAP_PATH', '')
+    pcap_path_base = os.getenv('PCAP_PATH', '')
+    pcap_path = (
+        os.path.join(pcap_path_base, 'upload') if not pcap_path_base.rstrip('/').endswith('upload') else pcap_path_base
+    )
     most_recent_pcap, most_recent_pcap_mtime, most_recent_pcap_size = '', 0, 0
 
-    zeek_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'spool')
+    zeek_log_path_base = os.getenv('ZEEK_LOG_PATH', '')
+    zeek_log_path = (
+        os.path.join(zeek_log_path_base, 'spool')
+        if not zeek_log_path_base.rstrip('/').endswith('spool')
+        else zeek_log_path_base
+    )
     zeek_log_line_counts = defaultdict(lambda: 0)
 
-    suricata_log_path = os.path.join(os.getenv('ZEEK_LOG_PATH', ''), 'suricata')
+    suricata_log_path_base = os.getenv('SURICATA_LOG_PATH', '')
+    suricata_log_path = (
+        os.path.join(suricata_log_path_base, 'live')
+        if not suricata_log_path_base.rstrip('/').endswith('live')
+        else suricata_log_path_base
+    )
     most_recent_suricata_log, most_recent_suricata_mtime, most_recent_suricata_count = '', 0, 0
 
     if os.path.isdir(zeek_log_path):
@@ -159,16 +171,17 @@ def update_stats():
                 zeek_log_line_counts[filename] = zeek_log_line_counts[filename] + zeek_file_count
 
     if os.path.isdir(suricata_log_path):
-        for filename in os.listdir(suricata_log_path):
-            if filename.startswith('eve') and filename.endswith('.json'):
-                suricata_file_path = os.path.join(suricata_log_path, filename)
-                try:
-                    mtime = os.path.getmtime(suricata_file_path)
-                    if mtime > most_recent_suricata_mtime:
-                        most_recent_suricata_log = suricata_file_path
-                        most_recent_suricata_mtime = mtime
-                except Exception as e:
-                    pass
+        for root, _, files in os.walk(suricata_log_path):
+            for filename in files:
+                if filename.startswith("eve") and filename.endswith(".json"):
+                    suricata_file_path = os.path.join(root, filename)
+                    try:
+                        mtime = os.path.getmtime(suricata_file_path)
+                        if mtime > most_recent_suricata_mtime:
+                            most_recent_suricata_log = suricata_file_path
+                            most_recent_suricata_mtime = mtime
+                    except Exception:
+                        pass
 
     if os.path.isfile(most_recent_suricata_log):
         most_recent_suricata_count = malcolm_utils.count_lines_mmap(most_recent_suricata_log)[1]
@@ -190,11 +203,6 @@ def update_stats():
     data['zeek'] = {}
     for k in sorted(zeek_log_line_counts.keys(), key=zeek_log_line_counts.get, reverse=True)[:5]:
         data['zeek'][k[:-4]] = zeek_log_line_counts[k]
-    # data['pcap'] = (
-    #     {most_recent_pcap[:-5]: malcolm_utils.sizeof_fmt(most_recent_pcap_size)}
-    #     if (most_recent_pcap and most_recent_pcap_size)
-    #     else {}
-    # )
     data['pcap'] = most_recent_pcap_size
     data['suricata'] = most_recent_suricata_count
 

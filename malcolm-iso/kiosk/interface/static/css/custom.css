@@ -67,11 +67,24 @@
 }
 
 .modal {
-    display: none;
-    position: absolute;
-    overflow: auto;
-    z-index: 1;
-    margin: auto;
+    display: none;                    /* hide by default */
+    position: fixed !important;       /* fixed relative to viewport */
+    top: 10vh;                        /* start 10% down from top of viewport */
+    left: 50%;                        /* center horizontally */
+    transform: translateX(-50%);      /* perfect horizontal centering */
+    width: 90% !important;            /* take up most of the width */
+    max-width: 1200px;                /* width cap */
+    max-height: 80vh;                 /* limit height to viewport */
+    overflow: auto;                   /* scroll if content too tall */
+    z-index: 1000;                    /* on top */
+}
+
+#response_text {
+    font-family: monospace;        /* fixed-width font */
+    white-space: pre;              /* preserve line breaks and spacing exactly */
+    overflow-x: auto;              /* horizontal scrollbar if content is wider than container */
+    overflow-y: auto;              /* vertical scrollbar if content is taller than container */
+    max-height: 70vh;              /* optional: limit height so modal scrolls if too tall */
 }
 
 #myLoading {
