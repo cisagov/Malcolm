@@ -40,9 +40,15 @@ def service(command):
             out_str = out.decode("utf-8").strip()
             err_str = err.decode("utf-8").strip()
             if retcode == 0:
-                return json.dumps(out_str if out_str else "Success")
+                return {"success": True, "output": out_str if out_str else "Success"}
             else:
-                return json.dumps({"cmd": command, "returncode": retcode, "out": out_str, "err": err_str})
+                return {
+                    "success": False,
+                    "cmd": command,
+                    "returncode": retcode,
+                    "out": out_str,
+                    "err": err_str,
+                }
 
         except Exception as e:
             return json.dumps({"cmd": command, "err": str(e)})

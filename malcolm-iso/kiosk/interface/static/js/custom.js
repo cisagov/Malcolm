@@ -66,7 +66,27 @@ function modal(responseText) {
 
     modal.style.display = "block";
 
-    text.innerHTML = responseText.split("\\n").join("<br>").unquoted();
+    // try to parse JSON
+    let content;
+    try {
+        const data = JSON.parse(responseText);
+
+        if (data.success) {
+            content = data.output;
+        } else {
+            content =
+                `Command: ${data.cmd.join(" ")}\n` +
+                `Return code: ${data.returncode}\n` +
+                `Out:\n${data.out}\n` +
+                `Err:\n${data.err}`;
+        }
+    } catch (e) {
+        // fallback if response isn't JSON
+        content = responseText;
+    }
+
+    // set content with preserved whitespace and line breaks
+    text.textContent = content; // textContent + CSS white-space: pre handles everything
 
     closeBtn.onclick = function () {
         modal.style.display = "none";
