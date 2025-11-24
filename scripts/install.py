@@ -569,7 +569,7 @@ def main():
         InstallerLogger.debug(f"Imported yaml: {yaml_imported}")
         InstallerLogger.debug(f"Imported dotenv: {dotenv_imported}")
         if (not all((requests_imported, yaml_imported, dotenv_imported))) and (pkgLoop != 1):
-            InstallerLogger.error(f"Missing one or more required libraries")
+            InstallerLogger.error("Missing one or more required libraries")
             sys.exit(1)
 
     try:

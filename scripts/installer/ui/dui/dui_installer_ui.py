@@ -119,7 +119,7 @@ class DialogInstallerUI(InstallerUI):
             prompt = (
                 "Proceed with dry-run using the above configuration?"
                 if is_dry_run
-                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation ' }using the above configuration?"
+                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation '}using the above configuration?"
             )
             lines.append(prompt)
             proceed_response = self.ask_yes_no("\n".join(lines), default=False, force_interaction=True)

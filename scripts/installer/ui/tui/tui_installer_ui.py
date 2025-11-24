@@ -179,7 +179,7 @@ class TUIInstallerUI(InstallerUI):
             prompt = (
                 "Proceed with dry-run using the above configuration?"
                 if is_dry_run
-                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation ' }using the above configuration?"
+                else f"Proceed {'' if install_context.config_only else 'with Malcolm installation '}using the above configuration?"
             )
             proceed_response = self.ask_yes_no(prompt, default=False, force_interaction=True)
             if (not proceed_response) and (not is_dry_run):

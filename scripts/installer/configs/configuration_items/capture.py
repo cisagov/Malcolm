@@ -9,8 +9,6 @@ Live traffic capture configuration items for Malcolm installer.
 This module contains all configuration items related to live traffic capture settings,
 including network interface configuration, capture filters, and capture methods.
 """
-from typing import Any, Tuple
-
 from scripts.malcolm_constants import WidgetType
 from scripts.malcolm_utils import get_hostname_without_domain
 

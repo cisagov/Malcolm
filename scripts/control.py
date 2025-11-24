@@ -57,6 +57,9 @@ from malcolm_constants import (
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD,
     COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP,
+    COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS,
 )
 
 from malcolm_common import (
@@ -466,37 +469,8 @@ def malcolm_iso_services_op(start):
     global dockerComposeYaml
     global dotenvImported
 
-    # start/stop auxiliary forwarders (fluent bit)
-    if (
-        SYSTEM_INFO["malcolm_iso_install"]
-        and dockerComposeYaml
-        and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
-        and (
-            aux_fw_settings := deep_get(
-                dockerComposeYaml, [COMPOSE_MALCOLM_EXTENSION, COMPOSE_MALCOLM_EXTENSION_AUX_FW], {}
-            )
-        )
-        and isinstance(aux_fw_settings, dict)
-    ):
-
-        # we need to know where we're forwarding this data too, it should be the same as LOGSTASH_HOST
-        #   albeit with :5045 instead of :5044
-        filebeatDest = None
-        logstashEnvFile = os.path.join(args.configDir, 'beats-common.env')
-        if os.path.isfile(logstashEnvFile):
-            logstashDestSuffix = ':5044'
-            filebeatDestSuffix = ':5045'
-            logstashEnvs = dotenvImported.dotenv_values(logstashEnvFile)
-            if (
-                (logstashDest := logstashEnvs.get('LOGSTASH_HOST', ''))
-                and (logstashDest != f'logstash{logstashDestSuffix}')
-                and logstashDest.endswith(logstashDestSuffix)
-            ):
-                filebeatDest = logstashDest[: -len(logstashDestSuffix)] + filebeatDestSuffix
-
-        service_base_path = Path.home() / ".config" / "systemd" / "user"
-        service_tcp_output_pattern = re.compile(r"-o\s+tcp://\S+")
-        aux_fw_service_map = {
+    ext_service_map = {
+        COMPOSE_MALCOLM_EXTENSION_AUX_FW: {
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_AIDE: ['aide-malcolm.service'],
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_AUDITLOG: ['auditlog-malcolm.service'],
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_CPU: ['cpu-malcolm.service'],
@@ -507,42 +481,75 @@ def malcolm_iso_services_op(start):
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_NETWORK: ['network-malcolm.service'],
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_SYSTEMD: ['systemd-malcolm.service'],
             COMPOSE_MALCOLM_EXTENSION_AUX_FW_THERMAL: ['thermal-malcolm.service'],
-        }
-        # if we've got a destination, edit the .service file accordingly and daemon-reload
-        if start and filebeatDest:
-            for sysctl_service in (s for services in aux_fw_service_map.values() for s in services):
-                service_path = service_base_path / sysctl_service
-                service_text_updated = service_tcp_output_pattern.sub(
-                    f"-o tcp://{filebeatDest}", service_path.read_text()
-                )
-                service_path.write_text(service_text_updated)
-            err, out = run_process(['systemctl', '--user', 'daemon-reload'], debug=log_level_is_debug(args.verbose))
-            if err != 0:
-                logging.error(f"systemctl --user daemon-reload failed: {out}")
+        },
+        COMPOSE_MALCOLM_EXTENSION_PRUNE: {
+            COMPOSE_MALCOLM_EXTENSION_PRUNE_PCAP: ['prune-pcap.service'],
+            COMPOSE_MALCOLM_EXTENSION_PRUNE_LOGS: ['prune-suricata.service', 'prune-zeek.service'],
+        },
+    }
 
-        for aux_fw_key, enabled in aux_fw_settings.items():
-            if isinstance(aux_fw_key, str) and isinstance(enabled, bool):
+    service_base_path = Path.home() / ".config" / "systemd" / "user"
 
-                # enable and start each forwarder service
-                for sysctl_service in aux_fw_service_map.get(aux_fw_key, []):
-                    err, out = run_process(
-                        [
-                            'systemctl',
-                            '--user',
-                            'enable' if (enabled and start) else 'disable',
-                            '--now',
-                            sysctl_service,
-                        ],
-                        debug=log_level_is_debug(args.verbose),
+    # for the auxiliary forwarders, we need to know where we're forwarding this data too,
+    #   it should be the same as LOGSTASH_HOST albeit with :5045 instead of :5044
+    service_tcp_output_pattern = re.compile(r"-o\s+tcp://\S+")
+    filebeatDest = None
+    logstashEnvFile = os.path.join(args.configDir, 'beats-common.env')
+    if os.path.isfile(logstashEnvFile):
+        logstashDestSuffix = ':5044'
+        filebeatDestSuffix = ':5045'
+        logstashEnvs = dotenvImported.dotenv_values(logstashEnvFile)
+        if (
+            (logstashDest := logstashEnvs.get('LOGSTASH_HOST', ''))
+            and (logstashDest != f'logstash{logstashDestSuffix}')
+            and logstashDest.endswith(logstashDestSuffix)
+        ):
+            filebeatDest = logstashDest[: -len(logstashDestSuffix)] + filebeatDestSuffix
+
+    # start/stop services
+    for service_type, service_map in ext_service_map.keys():
+        if (
+            SYSTEM_INFO["malcolm_iso_install"]
+            and dockerComposeYaml
+            and (orchMode is OrchestrationFramework.DOCKER_COMPOSE)
+            and (service_settings := deep_get(dockerComposeYaml, [COMPOSE_MALCOLM_EXTENSION, service_type], {}))
+            and isinstance(service_settings, dict)
+        ):
+            # if this is a forwarder service and  we've got a destination, edit the .service file accordingly and daemon-reload
+            if (service_type == COMPOSE_MALCOLM_EXTENSION_AUX_FW) and start and filebeatDest:
+                for sysctl_service in (s for services in service_map.values() for s in services):
+                    service_path = service_base_path / sysctl_service
+                    service_text_updated = service_tcp_output_pattern.sub(
+                        f"-o tcp://{filebeatDest}", service_path.read_text()
                     )
-                    if err == 0:
-                        logging.info(
-                            f"{'Started and enabled' if (enabled and start) else 'Stopped and disabled'} {sysctl_service}"
+                    service_path.write_text(service_text_updated)
+                err, out = run_process(['systemctl', '--user', 'daemon-reload'], debug=log_level_is_debug(args.verbose))
+                if err != 0:
+                    logging.error(f"systemctl --user daemon-reload failed: {out}")
+
+            for service_key, enabled in service_settings.items():
+                if isinstance(service_key, str) and isinstance(enabled, bool):
+
+                    # enable and start each service
+                    for sysctl_service in service_map.get(service_key, []):
+                        err, out = run_process(
+                            [
+                                'systemctl',
+                                '--user',
+                                'enable' if (enabled and start) else 'disable',
+                                '--now',
+                                sysctl_service,
+                            ],
+                            debug=log_level_is_debug(args.verbose),
                         )
-                    else:
-                        logging.error(
-                            f"{'Starting and enabling' if (enabled and start) else 'Stopping and disabling'} {sysctl_service} failed: {out}"
-                        )
+                        if err == 0:
+                            logging.info(
+                                f"{'Started and enabled' if (enabled and start) else 'Stopped and disabled'} {sysctl_service}"
+                            )
+                        else:
+                            logging.error(
+                                f"{'Starting and enabling' if (enabled and start) else 'Stopping and disabling'} {sysctl_service} failed: {out}"
+                            )
 
 
 ###################################################################################################

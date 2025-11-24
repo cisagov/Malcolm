@@ -1297,6 +1297,20 @@ DEPENDENCY_CONFIG: Dict[str, DependencySpec] = {
             ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_INDICES,
         )
     ),
+    KEY_CONFIG_ITEM_PRUNE_PCAP: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: SYSTEM_INFO["malcolm_iso_install"] and profile == PROFILE_HEDGEHOG,
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        ),
+    ),
+    KEY_CONFIG_ITEM_PRUNE_LOGS: DependencySpec(
+        visibility=VisibilityRule(
+            depends_on=KEY_CONFIG_ITEM_MALCOLM_PROFILE,
+            condition=lambda profile: SYSTEM_INFO["malcolm_iso_install"] and profile == PROFILE_HEDGEHOG,
+            ui_parent=KEY_CONFIG_ITEM_CLEAN_UP_OLD_ARTIFACTS,
+        ),
+    ),
     # -------------------------------------------------------------------------
     # STORAGE LOCATION DEPENDENCIES
     # -------------------------------------------------------------------------
