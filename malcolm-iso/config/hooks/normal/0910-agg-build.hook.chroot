@@ -9,33 +9,32 @@ chmod 600 /var/lib/aide/aide.db
 sed -r -i "s/(Checksums\s*=\s*).*/\1 sha512/" /etc/aide/aide.conf
 cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 /etc/at\.allow$ f Full-n-c-m
-/etc/clamav/.+\.conf$ f VarFile-n-c-m
 /etc/clamav$ d VarDir-n-c-m
-/etc/cron\.allow$ f Full-n-c-m
+/etc/clamav/.+\.conf$ f VarFile-n-c-m
 /etc/cron\.\w+$ d VarDir-n-c-m
+/etc/cron\.allow$ f Full-n-c-m
 /etc/crontab$ f VarFile-n-c-m
-/etc/group-?$ f VarFile-n-c-m
-/etc/gshadow-?$ f VarFile-n-c-m
+/etc/group-?$ f Full-n-i
+/etc/gshadow-?$ f Full-n-i
 /etc/hostname$ f VarFile-n-c-m
 /etc/hosts$ f VarFile-n-c-m
 /etc/installer-?$ f Full-n-c-m
 /etc/ntp\.conf$ f VarFile-n-c-m
-/etc/passwd-?$ f VarFile-n-c-m
-/etc/rc\d*\.d/.+$ l VarInode
+/etc/passwd-?$ f Full-n-i
 /etc/rc\d*\.d$ d VarDir-n-c-m
-/etc/shadow-?$ f VarFile-n-c-m
-/etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
+/etc/rc\d*\.d/.+$ l VarInode
+/etc/shadow-?$ f Full-n-i
 /etc/systemd/system/multi-user\.target\.wants(/|$) d VarDir-n-c-m
-/etc/ufw/.+\.rules$ f VarFile-n-c-m
+/etc/systemd/system/multi-user\.target\.wants/.+$ l VarInode
 /etc/ufw$ d VarDir-n-c-m
-/opt$ d VarDir-n-c-m
+/etc/ufw/.+\.rules$ f VarFile-n-c-m
 /usr/local/bin$ d VarDirTime-n
-/var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m-i
 /var/lib/aide$ d VarDirInode-n-c-m
+/var/lib/aide/aide\.db(\.new)?$ f VarFile-n-c-m-i
 /var/lib/samba$ d VarDir-n-c-m
 /var/lib/xfsprogs$ d VarDir-n-c-m
-
 !/(.+/)?__pycache__(/|$)
+!/capture(/|$)
 !/dev(/|$)
 !/etc/.*\.bak$
 !/etc/aide/.*\.swp$
@@ -46,10 +45,23 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/etc/NetworkManager/system-connections(/|$)
 !/etc/rc\d*\.d/.*ntp$
 !/etc/systemd/system/multi-user\.target\.wants/ntp.service$
-!/home(/|$)
+!/root/\.cache(/|$)
+!/root/\.local/share(/|$)
+!/root/\.config(/|$)
+!/root/tmp(/|$)
+!/home/[^/]+/\.mozilla(/|$)
+!/home/[^/]+/\.thumbnails(/|$)
+!/home/[^/]+/\.cache(/|$)
+!/home/[^/]+/\.config(/|$)
+!/home/[^/]+/\.local/share(/|$)
+!/home/[^/]+/Desktop(/|$)
+!/home/[^/]+/Documents(/|$)
+!/home/[^/]+/Downloads(/|$)
+!/home/[^/]+/Malcolm(/|$)
+!/home/[^/]+/tmp(/|$)
+!/malcolm(/|$)
 !/malcolm_images\.tar\.gz$
 !/opt/harbianaudit(/|$)
-!/root(/|$)
 !/run(/|$)
 !/tmp(/|$)
 !/var/backups(/|$)
@@ -77,7 +89,6 @@ cat << 'EOF' >> /etc/aide/aide.conf.d/00_local_excludes
 !/var/run(/|$)
 !/var/spool(/|$)
 !/var/tmp(/|$)
-
 EOF
 ###
 
