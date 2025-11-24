@@ -1,7 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=terminal-setup
-Comment=First Time Terminal Setup
-Exec=/usr/local/bin/terminal-setup.sh
-Terminal=false
-Type=Application

@@ -1,2 +1,0 @@
-# allow unprivileged mgmt of UFW access for the local Arkime viewer instance
-%netdev ALL=(root) NOPASSWD: /usr/local/bin/ufw_allow_requests.sh
