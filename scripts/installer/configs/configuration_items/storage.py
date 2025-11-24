@@ -92,7 +92,7 @@ CONFIG_ITEM_SURICATA_LOG_DIR = ConfigItem(
 
 CONFIG_ITEM_ARKIME_MANAGE_PCAP = ConfigItem(
     key=KEY_CONFIG_ITEM_ARKIME_MANAGE_PCAP,
-    label="Delete Old PCAP",
+    label="Arkime PCAP Management",
     default_value=False,
     validator=lambda x: isinstance(x, bool),
     question="Should Arkime delete PCAP files based on available storage? (see https://arkime.com/faq#pcap-deletion)",
